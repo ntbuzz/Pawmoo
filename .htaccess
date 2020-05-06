@@ -1,7 +1,7 @@
 DirectoryIndex index.php
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteBase /newfw/
+RewriteBase /biscuit/
 
 # テンプレートリソース(画像ファイル)
 RewriteRule ^.*/css/res/img/(.*)$ Core/Template/cssimg/$1 [END]
@@ -17,7 +17,7 @@ RewriteRule ^([^/]+)/js/(.*)$ $1/webroot/js/$2 [END]
 
 # 実体があるかもしれないファイルは条件判定
 RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-f
-RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-d
+#RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-d
 RewriteRule ^.*$ index.php [END]
 
 </IfModule>

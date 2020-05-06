@@ -52,7 +52,9 @@ list($fwroot,$rootURI,$appname,$controller,$params,$q_str) = getFrameworkParamet
 parse_str($q_str, $query);
 
 $scriptname = $_SERVER['SCRIPT_NAME'];
-
+if($appname == '') {
+    $appname = 'help';
+}
 // アプリケーションのコンフィグを読込む
 require_once("{$appname}/Config/config.php");
 
@@ -79,9 +81,10 @@ $ReqCont = [
 ];
 // コントローラー、アクションのキャメルケース化とURIの再構築
 $requrl = "{$rootURI}".implode('/',$ReqCont);
+$requrl = str_replace('//','/',$requrl);
 // コントローラ名やアクション名が書き換えられてリダイレクトが必要なら終了
 if($redirect) {
-//echo "Location:{$requrl}\n"; exit;
+//    echo "Location:{$requrl}\n"; exit;
     header("Location:{$requrl}");
     exit;
 }
