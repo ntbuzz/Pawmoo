@@ -27,14 +27,6 @@ function getFrameworkParameter($dir) {
     $ret = [$fwroot,$rootURI,$appname,$modname,$args,$q_str];
     return $ret;
 }
-//===============================================================================
-// ミリセカンド取得
-function getUnixTimeMillSecond(){
-    //microtimeを.で分割
-    $arrTime = explode('.',microtime(true));
-    //時＋ミリ秒
-    return date('H:i:s', $arrTime[0]) . '.' .$arrTime[1];
-}
 //================================================
 // コントローラーが存在するかチェックする
 function is_extst_module($appname,$modname,$classname) {
@@ -44,6 +36,14 @@ function is_extst_module($appname,$modname,$classname) {
     $modtop = getcwd() . "/" . "{$appname}/modules/{$modname}"; // self::$AppName."modules/{$modname}";
     $reqfile = "{$modtop}/{$modname}{$classname}.php";
     return file_exists($reqfile);           // ファイルが存在するか
+}
+//===============================================================================
+// ミリセカンド取得
+function getUnixTimeMillSecond(){
+    //microtimeを.で分割
+    $arrTime = explode('.',microtime(true));
+    //時＋ミリ秒
+    return date('H:i:s', $arrTime[0]) . '.' .$arrTime[1];
 }
 //===============================================================================
 // フォルダ内のPHPファイルを探査する
