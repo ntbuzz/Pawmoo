@@ -48,17 +48,22 @@ spl_autoload_register(function ($name) {
 if(!class_exists('DbSupportModel')) $view = 'AppModel';
 */
 //echo setlocale(LC_ALL,0);
+$redirect = false;      // リダイレクトフラグ
+
 list($fwroot,$rootURI,$appname,$controller,$params,$q_str) = getFrameworkParameter(__DIR__);
 parse_str($q_str, $query);
 
 $scriptname = $_SERVER['SCRIPT_NAME'];
-if($appname == '') {
-    $appname = 'help';
-}
+
 // アプリケーションのコンフィグを読込む
+if(!file_exists($appname)) {
+    $appname = 'help';
+    $rootURI = (strpos($rootURI,"/{$fwroot}/") !== FALSE) ? "/{$fwroot}/{$appname}/" : "/{$appname}/";
+//    $rootURI ="/{$fwroot}/{$appname}/";
+    $redirect = true;
+}
 require_once("{$appname}/Config/config.php");
 
-$redirect = false;
 
 $action = array_shift($params);         // パラメータ先頭はメソッドアクション
 if(is_numeric($action) ) {              // アクション名が数値ならパラメータに戻す
@@ -75,35 +80,29 @@ if(!is_extst_module($appname,$controller,'Controller')) {
 }
 // URLを再構成する
 $ReqCont = [
+    'root' => $rootURI,
     'controller' => strtolower($controller),
     'action' => strtolower($action ),
     'query' => implode('/',$params)
 ];
 // コントローラー、アクションのキャメルケース化とURIの再構築
-$requrl = str_replace('//','/',"{$rootURI}".implode('/',$ReqCont));
+$requrl = str_replace('//','/',implode('/',$ReqCont));
 // フレームワーク直接
-/*
-if(strpos($rootURI,"/{$fwroot}/") !== FALSE) {
-    dump_debug("MAIN", [
-        'デバッグ情報' => [
-            "SERVER" => $_SERVER['REQUEST_URI'],
-            "RootURI"=> $rootURI,
-            "fwroot"=> $fwroot,
-            "appname"=> $appname,
-            "Controller"=> $controller,
-            "Action"    => $action,
-            "Param"    => $params,
-        ],
-        "ReqCont" => $ReqCont,
-    ]);
-    exit;
-    $requrl = str_replace('//','/',"/{$appname}/".implode('/',$ReqCont));
-    $redirect = true;
-}
-*/
+dump_debug(0,"MAIN", [
+    'デバッグ情報' => [
+        "SERVER" => $_SERVER['REQUEST_URI'],
+        "RootURI"=> $rootURI,
+        "fwroot"=> $fwroot,
+        "appname"=> $appname,
+        "Controller"=> $controller,
+        "Action"    => $action,
+        "Param"    => $params,
+    ],
+    "ReqCont" => $ReqCont,
+    "Location" => $requrl,
+]);
 // コントローラ名やアクション名が書き換えられてリダイレクトが必要なら終了
 if($redirect) {
-//    echo "Location:{$requrl}\n"; exit;
     header("Location:{$requrl}");
     exit;
 }
@@ -135,8 +134,7 @@ DatabaseHandler::InitConnection();
 
 // モジュールファイルを読み込む
 App::appController($controller);
-/*
-dump_debug("MAIN", [
+dump_debug(0,"MAIN", [
     'デバッグ情報' => [
         "sysRoot"=> $sysRoot,
         "fwroot"=> $fwroot,
@@ -147,8 +145,6 @@ dump_debug("MAIN", [
     ],
     "REQ" => $ReqCont,
 ]);
-exit;
-*/
 // コントローラインスタンス生成
 $controllerInstance = new $className();
 // 指定メソッドが存在するか、無視アクションかをチェック

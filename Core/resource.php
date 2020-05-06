@@ -27,8 +27,7 @@ MySession::InitSession();
 // モジュール名と拡張子を使いテンプレートを決定する
 $AppStyle = new AppStyle($appname,$sysRoot, $modname, $filename, $ext);
 // =================================
-/*
-dump_debug("リソース", [
+dump_debug(0,"リソース", [
     'システム情報' => [
         "SYSROOT"   => $sysRoot,
         "MODULE"    => $modname,
@@ -36,7 +35,6 @@ dump_debug("リソース", [
         "EXT"       => $ext,
     ]
 ]);
-*/
 // =================================
 
 // ヘッダの出力

@@ -13,11 +13,13 @@ function getFrameworkParameter($dir) {
     $param = trim(urldecode($requrl),'/');
     $params = ($param == '') ? array() : explode('/', $param);            // パラメーターを / で分割
     list($fwroot,$appname,$modname) = $params;
+    if($appname=='') $appname ='help';
     if($fwroot === $root)  {
         $rootURI ="/{$fwroot}/{$appname}/";
         $args = array_slice($params,3);
     } else {
         list($appname,$modname) = $params;
+        if($appname=='') $appname ='help';
         $fwroot = $root;
         $rootURI = "/{$appname}/";
         $args = array_slice($params,2);
@@ -211,7 +213,8 @@ function check_cwd($here) {
 }
 //===============================================================================
 // デバッグダンプ
-function dump_debug($msg, $arr){
+function dump_debug($flag, $msg, $arr){
+    if($flag === 0) return;
     echo "<pre>\n***** {$msg} *****\n";
     foreach($arr as $msg => $obj) {
         echo "------- {$msg} -----\n";
@@ -224,6 +227,7 @@ function dump_debug($msg, $arr){
         }
     }
     echo "</pre>\n";
+    if($flag === 2) exit;
 }
 //===============================================================================
 // デバッグダンプ
