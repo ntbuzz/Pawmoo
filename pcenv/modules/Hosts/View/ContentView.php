@@ -21,7 +21,7 @@ var oss = [
 ];
 </script>
 
-<div class='tabmenu fixedsticky' data-class="datalist">
+<div class='tabmenu fixedsticky' data-element=".datalist">
 	<ul class="tab">
 		<li class="select"><?=  $Helper->_('.tabmenu.基本情報') ?></li>
 		<li><?=  $Helper->_('.tabmenu.拡張情報') ?></li>

@@ -3,9 +3,7 @@
 /* タブ表示用 */
 .tabmenu {
     position: sticky;
-    position: -webkit-sticky;
     top:0;
-    left:0;
     z-index: 10;
     font-size:9pt;
     height: 1.8em;

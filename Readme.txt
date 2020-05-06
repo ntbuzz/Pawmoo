@@ -607,6 +607,6 @@
   表示位置がトップに固定されるようにします。
   CSSの"position: sticky" がうまく動作しない時に使用してください。
 
-      <div class='fixedsticky' data-class="contents-view">
-        contens-view のスクロールに合わせて固定表示される
+      <div class='fixedsticky' data-element="selector">
+        selector 要素のスクロールに合わせて固定表示される
       </dev>

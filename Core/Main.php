@@ -82,8 +82,8 @@ $ReqCont = [
 // コントローラー、アクションのキャメルケース化とURIの再構築
 $requrl = str_replace('//','/',"{$rootURI}".implode('/',$ReqCont));
 // フレームワーク直接
-if(strpos($rootURI,"/{$fwroot}/") !== FALSE) {
 /*
+if(strpos($rootURI,"/{$fwroot}/") !== FALSE) {
     dump_debug("MAIN", [
         'デバッグ情報' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
@@ -96,10 +96,11 @@ if(strpos($rootURI,"/{$fwroot}/") !== FALSE) {
         ],
         "ReqCont" => $ReqCont,
     ]);
-*/
+    exit;
     $requrl = str_replace('//','/',"/{$appname}/".implode('/',$ReqCont));
     $redirect = true;
 }
+*/
 // コントローラ名やアクション名が書き換えられてリダイレクトが必要なら終了
 if($redirect) {
 //    echo "Location:{$requrl}\n"; exit;

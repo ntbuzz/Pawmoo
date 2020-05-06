@@ -6,12 +6,11 @@ Stylesheet => [
     '*モジュール固有のテンプレート'
     common => [
         import => [
-            libstyle.css
-            split-pane.css      // 3ペイン分割
-            sitemap.css         // ツリーメニュー
-            table-sort.css
-            tabmenu.css
             toolbar.css
+            sitemap.css         // ツリーメニュー
+            split-pane.css      // 3ペイン分割
+            tabmenu.css
+            table-sort.css
         ]
         section => ^common       // 上位のセクションを呼出す
     ]

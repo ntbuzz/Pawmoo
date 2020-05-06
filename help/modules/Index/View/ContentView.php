@@ -18,7 +18,7 @@ $('.tab li').click(function() {
 
 });
 </script>
-<div class='tabmenu fixedsticky' data-class="contents-view">
+<div class='tabmenu fixedsticky' data-element=".contents-view">
 <ul class="tab">
 	<li class="select"><?=  $Helper->_('.tabmenu.tutorial') ?></li>
 	<li><?=  $Helper->_('.tabmenu.overview') ?></li>

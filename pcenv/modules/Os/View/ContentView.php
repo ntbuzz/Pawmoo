@@ -18,7 +18,7 @@ $('.tab li').click(function() {
 });
 </script>
 
-<div class='tabmenu fixedsticky' data-class="datalist">
+<div class='tabmenu fixedsticky' data-element=".datalist">
 <ul class="tab">
 	<li class="select">OS情報</li>
 	<li>拡張情報</li>

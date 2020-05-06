@@ -1,6 +1,34 @@
-charset "UTF-8";
+@charset "UTF-8";
 /* ヘルプアプリケーション */
 /*	padding: 0px 10px;	/* [上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
+* {
+    position: relative;
+    margin: 0;
+    padding: 0;    
+}
+html, body {
+    height: 100%;
+    min-height: 100%;
+    font-size:10pt;
+}
+.appWindow {
+    position:fixed;
+    width: 100%;
+    min-width: 100%;
+    height: 100%;
+    min-height: 100%;
+    user-select:none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+.icon {
+    margin: 0 2px;
+    cursor:pointer;
+    box-shadow: 1px 1px 2px #000;
+    background: linear-gradient(to bottom, white, silver);
+}
+
 .contents-view {
     height:100%;
     width:100%;

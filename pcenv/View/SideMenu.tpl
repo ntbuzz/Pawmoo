@@ -3,7 +3,7 @@
 //
 div => [
   style => "text-align:center;background-color:lightyellow;"
-  -img#biscuit-help => [ src => "/newfw/res/images/biscuit.png" ]
+  -img#biscuit-help => [ src => "/res/images/biscuit.png" ]
 ]
 .title => [
   span.boldtxt => [ $#Toolbar.フィルタ表示 ]

@@ -9,7 +9,7 @@ $("tr.item").click(function(){
         function(data){
             //リクエストが成功した際に実行する関数
             $('#ContentBody').html(data);
-            $('#view-component').scrollTop(0);
+            $('.fixedsticky').stickyOn('#bottom-component');
         })
         .fail(function() {
             alert( "error:"+url );
@@ -29,7 +29,9 @@ $("tr.item").dblclick(function () {
         function (data) {
             //リクエストが成功した際に実行する関数
             $('#datalist').html(data);
-//				alert("Loaded: " + data);
+            $('.fixedsticky').stickyOn('.contents-view');
+            $('#ContentBody').empty();
+            //				alert("Loaded: " + data);
         })
         .fail(function () {
             alert("error:" + url);

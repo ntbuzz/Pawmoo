@@ -4,7 +4,7 @@
 	PageTitle => $#NAMES		// 引数は変数にセット
 	AdditionHeader => [
 		css/appstyle.css      // app共通スタイル
-		./css/frames.css      // カスタマイズスタイル
+		./css/common.css      // カスタマイズスタイル
       	./js/common.js        // カスタマイズスクリプト
 	]
 ]
@@ -31,7 +31,7 @@
 					]
 				]
 				.split-pane-divider#h-divider => []
-				".split-pane-component view-component#bottom-component" => [
+				".split-pane-component#bottom-component" => [
 					#ContentBody => []
 				]
 			]
@@ -44,7 +44,7 @@
 		value => ""
 	]
 	dl => [ dt => [ "${%0%}のデータ操作" ]	// タイトル定義
-	dd => [							// データ表示領域
+	dd.contents-view => [							// データ表示領域
 		div#datalist => []		// 表示テーブル
 	] ]
 ]

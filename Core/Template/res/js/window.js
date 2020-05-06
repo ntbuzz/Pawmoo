@@ -13,15 +13,17 @@
     };
     // 指定要素 e のスクロールに追従する
     $.fn.stickyOn = function (e) {
-        var self = this;
+        var self = this; // jQueryオブジェクトを変数に代入しておく
         $(e).on("scroll", function () {
             var top = $(e).scrollTop();
+            self.css("position", "relative");
             self.css("top", top + "px");
+//            alert(e+":"+top);
         });
     };
     // 親要素の高さに調整する
     $.fn.adjustHeight = function () {
-        var self = this; // jQueryオブジェクトを変数に代入しておく
+        var self = $(this); // jQueryオブジェクトを変数に代入しておく
         $(window).on("load resize",function () {
             hsize = self.parent().innerHeight();
             htop = self.offset().top;
@@ -65,11 +67,7 @@ $(function () {
     var selector = $(".fixedsticky");
     selector.each(function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
-        var ref = "." + self.attr("data-class");  // 紐付けるID
-        if (ref == ".") {
-            ref = "#" + self.attr("data-id");
-            if (ref == "#") ref = "";
-        }
+        var ref = self.attr("data-element");  // 紐付けるID
         if (ref != "") {
             // 指定要素 e のスクロールに追従する
             $(ref).on("scroll", function () {

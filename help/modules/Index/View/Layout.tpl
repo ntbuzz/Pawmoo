@@ -18,12 +18,6 @@
 .appWindow => [    // タグ名省略は DIVタグセクション
 	".split-pane fixed-left" => [
 		".split-pane-component sitemap#left-component" => [
-/*
-			div => [
-				style => "text-align:center;background-color:lightyellow;"
-				-img#biscuit-help => [ src => "/newfw/res/images/biscuit.png" ]
-			 ]
-*/
 			@SideMenu
 		]
 		.split-pane-divider#v-divider => []
