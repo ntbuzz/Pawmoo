@@ -1,0 +1,57 @@
+// 言語ファイル
+// サブモデルで各種モジュールにリレーションしているので
+// それぞれの言語ファイルを読み込んでおく
+// クロス呼出しが発生したときは、後から読み込んだほうを無視する
+@Name
+@Os
+@Os
+@License
+
+DialogTitle => [
+    .ja => ホスト編集
+    .en => "Host Edit"
+]
+Schema => [
+    .ja => [
+        No => 番号
+        IP => IP番号
+        Status => 状態
+        os => オペレーティング・システム
+    ]
+    .en => [
+        番号 => No
+        IP番号 => IP
+        状態 => Status
+        os => os
+    ]
+]
+tabmenu => [
+    .en => [
+        基本情報  => Basic
+        拡張情報  => Extend
+        アプリケーション  => Application
+		ライセンス  => License
+		インストール  => Install
+    ]
+]
+Schema => [
+    .ja => [
+        os => オペレーティング・システム
+    ]
+    .en => [
+        番号 => No
+        IP番号 => IP
+        状態 => Status
+        os => os
+    ]
+]
+Dialog => [
+   .ja => [
+        ホスト名： => Host:
+        有効 => Enable
+    ]
+    .en => [
+        ホスト名： => Host:
+        有効 => Enable
+    ]
+]

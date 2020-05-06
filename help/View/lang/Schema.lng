@@ -1,0 +1,46 @@
+// 言語ファイル
+// 汎用文字列
+
+// 共通スキーマヘッダ
+.ja => [
+    name =>     名前
+    Host =>     ホスト名
+    product =>  プロダクト名
+    os =>       OS名
+    provider => メーカー
+    license =>  ライセンス
+    version =>  バージョン
+    location => 所在
+    entity =>   実体
+    service =>  サービス
+    subnet =>   SUBNET
+    note =>     備考
+]
+.en => [
+    name =>     Name
+    Host =>     Host
+    product =>  Product
+    os =>       OS
+    provider => Provider
+    license =>  License
+    version =>  Version
+    location => Location
+    entity =>   Entity
+    service =>  Service
+    subnet =>   SUBNET
+    note =>     Note
+]
+.en_US => [
+    名前 =>     Name
+    ホスト名 =>     Host
+    プロダクト名 =>  Product
+    OS名 =>       OS
+    メーカー => Provider
+    ライセンス =>  License
+    バージョン =>  Version
+    所在 => Location
+    実体 =>   Entity
+    サービス =>  Service
+    SUBNET =>   SUBNET
+    備考 =>     Note
+]

@@ -1,0 +1,18 @@
+// Apps モジュールの言語ファイル
+
+Schema => [
+    id      => 番号
+    name    => アプリ名
+    arch    => arch
+    type    => タイプ
+    category => カテゴリ
+    buy_date => 購入日
+// 識別子を日本語にしてる場合
+    .en => [
+        アプリ名 => Name
+        arch => Arch
+        タイプ => Type
+        カテゴリ => Category
+        購入日 => Buy_Date
+    ]
+]

@@ -1,0 +1,157 @@
+/*
+バルーンヘルプ表示CSS
+*/
+.baloon-BK,.popup-BK {
+    z-index:32;
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+	height:100%;/*for old Safari*/
+    height:100vh;
+}
+.baloon-BK:not(:target) {height:100%\9} /* IE9,10 */
+/*    ポップアップ吹き出し */
+.popup-baloon {
+  position:fixed;
+  display:none;
+  z-index:33;
+  margin-top: 16px;
+  padding: 5px 10px 10px 15px;
+  border: 1px solid gray;
+  border-radius:12px;
+  background: lightyellow;
+  font-size:10pt;
+  color:black;
+}
+/* 左フキダシ部分を作成 */
+.baloon-left:before {
+    content: "";
+    position: absolute;
+    border-top: 15px solid transparent;
+    top:-15px;
+    left:8px;
+    border-left: 12px solid gray;
+    width : 0px;
+}
+.baloon-left:after {
+    content: "";
+    position: absolute;
+    border-top: 15px solid transparent;
+    top:-13px;
+    left:9px;
+    border-left: 12px solid lightyellow;
+    width : 0px;
+}
+/* 右フキダシ部分を作成 */
+.baloon-right:before {
+    content: "";
+    position: absolute;
+    top:-15px;
+    right:18px;
+    border-top: 15px solid transparent;
+    border-right: 12px solid gray;
+    width : 0px;
+}
+.baloon-right:after {
+    content: "";
+    position: absolute;
+    top:-13px;
+    right:19px;
+    border-top: 15px solid transparent;
+    border-right: 12px solid lightyellow;
+}
+/* ポップアップボックス */
+.popup-box {
+    position:fixed;
+    display:none;
+    z-index:33;
+    padding:10px;
+    border: 1px outset silver;
+    border-radius:3px;
+    background: whitesmoke;
+    font-size:10pt;
+    color:black;
+    overflow:hidden;
+    min-width:100px;
+    min-height:150px;
+}
+/*	padding: 0px 10px;	/* [上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
+.popup-box span.resize {
+    position:absolute;
+    z-index:35;
+    right:0;
+    bottom:0;
+    width:12px;
+    height:12px;
+    cursor:se-resize;
+    background: url(res/img/resize.png) no-repeat left top;
+}
+.popup-box span.resize_message {
+    border: 1px dashed gray;
+    display:none;
+    width: 120px;
+    height: 1.5em;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    margin: auto;
+    user-select:none;
+    text-align: center;
+    background-color:floralwhite;
+}
+
+/* close button */
+.popup-box span.close {
+    position:absolute;
+    z-index:109;
+    top:0;
+    right: 5px;
+    width:23px;
+    height:23px;
+    cursor:pointer;
+    background: url(res/img/boxclose.png) no-repeat left top;
+}
+.popup-box span.close:hover {
+    background: url(res/img/boxclose.png) no-repeat left -23px;
+}
+.popup-box span.close:active {
+    border-top:1px solid #333;
+    border-left:1px solid #333;
+    border-right:1px solid #eee;
+    padding-left:1px;
+    padding-top:1px;
+}
+.popup-box .contents {
+    position:relative;
+    overflow-y:auto;
+    overflow-x:hidden;
+    width:100%;
+    height:100%;
+}
+.popup-box dl dt {
+    padding-left: 10px;
+    font-weight: bold;
+}
+.popup-box dl dd {
+    padding-left:20px;
+    margin-bottom:5px;
+}
+
+/* ヘルプアイコン */
+span.help_icon {
+    position:absolute;
+    float:top;
+    margin-top:2px;
+    width:24px;
+    height:22px;
+    background: url(res/img/pop_help.png) no-repeat left top;
+}
+/* ヘルプアイコン */
+span.help_icon.mouseover {
+    margin-left:2px;
+    background: url(res/img/pop_help_b.png) no-repeat left top;
+}

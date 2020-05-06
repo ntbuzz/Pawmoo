@@ -1,0 +1,14 @@
+@charset "UTF-8";
+/* ヘルプアプリケーション */
+/*	padding: 0px 10px;	/* [上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
+.contents-view {
+    height:100%;
+    width:100%;
+    background-color: white;
+    overflow-y:scroll;
+    overflow-x:hidden;
+}
+
+#ContentBody {
+    width:100%;
+}

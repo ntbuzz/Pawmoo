@@ -1,0 +1,26 @@
+DirectoryIndex index.php
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /newfw/
+
+# テンプレートリソース(画像ファイル)
+RewriteRule ^.*/css/res/img/(.*)$ Core/Template/cssimg/$1 [END]
+RewriteRule ^res/images/(.*)$ Core/Template/images/$1 [END]
+# common ライブラリがリダイレクトされないように
+RewriteRule ^common/(.*)$ common/$1 [END]
+
+# アプリごとに異なるリダイレクト
+RewriteRule ^([^/]+)/css/img/(.*)$ $1/webroot/cssimg/$2 [END]
+RewriteRule ^([^/]+)/images/(.*)$ $1/webroot/images/$2 [END]
+RewriteRule ^([^/]+)/css/(.*)$ $1/webroot/css/$2 [END]
+RewriteRule ^([^/]+)/js/(.*)$ $1/webroot/js/$2 [END]
+
+# 実体があるかもしれないファイルは条件判定
+RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-f
+RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-d
+RewriteRule ^.*$ index.php [END]
+
+</IfModule>
+
+AddType video/mp4 .mp4
+

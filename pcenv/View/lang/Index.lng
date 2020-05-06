@@ -1,0 +1,32 @@
+// Indexモジュールの言語ファイル
+
+tabmenu => [
+    .en => [
+        基本  => Basic
+        拡張  => Extend
+        アプリ  => Application
+		ライセンス  => License
+		インストール  => Install
+    ]
+]
+Schema => [
+    .ja => [
+        id =>     IP-No
+        active => 状態
+        os => オペレーティング・システム
+    ]
+    .en => [
+        番号 => No
+        IP番号 => IP
+        状態 => Status
+        os => os
+    ]
+]
+Dialog => [
+    .en => [
+        ホスト名 => Host
+        有効 => Enable
+        送信 => SEND
+        更新 => UPDATE
+    ]
+]

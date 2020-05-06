@@ -1,0 +1,95 @@
+
+/*	padding: 0px 10px;	/* [上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
+
+.pager	{
+	border-top: 2px solid #eee;
+	border-right: 1px solid #333;
+	border-bottom: 1px solid #333;
+	border-left: 2px solid #eee;
+	padding:1px 0 2px;
+	margin:1;
+	font-weight: bold;
+	font-size:9pt;
+	white-space: nowrap;
+	text-decoration: none;
+	background: white;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	text-shadow: 0 -1px 1px #FFF, -1px 0 1px #FFF, 1px 0 1px #666;
+	-webkit-box-shadow: 1px 1px 2px #E7E7E7;
+	-moz-box-shadow: 1px 1px 2px #E7E7E7;
+	overflow: hidden;
+}
+.pager .navigate {
+	position:relative;
+	float:left;
+/*	overflow: hidden;*/
+}
+.pager .disable {
+	padding: 2px 8px;
+	cursor:normal;
+	color: #aaa;
+}
+.pager .separator {
+	padding: 2px 8px;
+	color:gray;
+	background: linear-gradient(to bottom, white, silver);
+}
+.pager .move {
+	padding: 2px 8px;
+	cursor: pointer;
+	color: #333;
+	background: linear-gradient(to bottom, white, silver);
+}
+.pager .move:hover {
+	background: linear-gradient(to bottom, silver,gray);
+}
+.pager .jump {
+	padding: 2px 8px;
+	margin:0 2px;
+	cursor: pointer;
+	color: #333;
+	background: linear-gradient(to bottom, white, silver);
+}
+.pager .jump:hover {
+	color:white;
+	background: linear-gradient(to bottom, darkblue, skyblue);
+/*	background: -moz-linear-gradient(top, #fff, #e1e1e1 1%, #e1e1e1 50%, #cfcfcf 99%, #ccc);
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), color-stop(0.01, #e1e1e1), color-stop(0.5, #e1e1e1), color-stop(0.99, #cfcfcf), to(#ccc));
+*/
+}
+.pager .jump:active {
+	background: #aaa;  
+}
+.pager .active	{
+	padding: 2px 8px;
+	margin:0 2px;
+	cursor: text;
+	color: white;
+	background: linear-gradient(to bottom, skyblue, darkblue);
+}
+.pager .border {
+	size: 1px;
+	margin: 6px 0 0 0;
+	padding: 0;
+}
+.pager .rightalign {
+	position: relative;
+	float:right;
+	font-size: 10pt;
+	margin: 0 15px;
+	padding: 0;
+	overflow: hidden;
+}
+.pager .pager_title {
+	font-size: 10pt;
+	cursor: default;
+	padding: 2px 24px 2px 8px;
+	background: #efefef;
+	text-align: right;
+}
+.pager .pager_message {
+	padding: 2px 8px;
+	color: gray;
+	font-size: 9pt;
+}

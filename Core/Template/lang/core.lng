@@ -1,0 +1,18 @@
+// フレームワーク内で使用する言語リソース
+//
+.ja => [
+    // ページャーボタン表示用
+    Page => ページ
+    Total => "＜全 %d 件＞"
+    Display => 表示数
+    NextPage => "次へ＞"
+    PrevPage => "＜前へ"
+]
+.en => [
+    // for Pager Buttons
+    Page => "Page"
+    Total => "&lt;Total %d records&gt;"
+    Display => Count
+    NextPage => "Next&gt;"
+    PrevPage => "&lt;Prev"
+]

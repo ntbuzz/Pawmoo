@@ -1,0 +1,18 @@
+
+.tablesorter {
+    background:white;
+    border-collapse: collapse;
+    border-spacing: 0px;
+    margin:0;           /* ライブラリ内の設定を上書き */
+    padding:0;
+}
+
+.tablesorter tbody tr.selected > td {
+    background-color: #036;
+    color: white;
+}
+.tablesorter tbody tr.selected:hover > td {
+    background-color: orange;
+    color: black;
+}
+

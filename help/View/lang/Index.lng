@@ -1,0 +1,35 @@
+// Indexモジュールの言語ファイル
+
+tabmenu => [
+    .ja => [
+        tutorial  => チュートリアル
+        overview  => 概要
+        detail  => 詳細
+        classes => クラス
+        library => ライブラリ
+    ]
+    .en => [
+        tutorial  => Tutorial
+        overview  => Overview
+        detail  => Detail
+        classes => Classes
+        library => Library
+    ]
+]
+Schema => [
+    .ja => [
+        category =>  カテゴリ,
+        section =>    セクション,
+        node =>       ノード,
+        item =>       アイテム,
+        contents =>   コンテンツ,
+    ]
+]
+Dialog => [
+    .en => [
+        ホスト名 => Host
+        有効 => Enable
+        送信 => SEND
+        更新 => UPDATE
+    ]
+]

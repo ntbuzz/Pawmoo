@@ -1,0 +1,16 @@
+// 言語ファイル
+
+@Toolbar        // ツールバーの言語定義
+@Schema         // 共通スキーマ
+
+.ja => [
+    TITLE => "pseudoMVCヘルプドキュメント"
+]
+.en => [
+    TITLE => "pseudo MVC Documents"
+]
+
+// 共通リストヘッダ
+Headers => [
+
+]

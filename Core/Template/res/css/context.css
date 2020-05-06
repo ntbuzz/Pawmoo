@@ -1,0 +1,27 @@
+/*
+    右クリックのコンテキストメニュー用
+*/
+.context-menu {
+	display: none;
+	position: absolute;
+	margin: 0;
+	padding: 2px;
+	border: 1px solid gray;
+	list-style-type: none;
+	background: #EEE;
+	font-size: 1em;
+	box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
+    -moz-box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
+    -webkit-box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
+}
+.context-menu > li {
+	padding: 5px 20px 5px 10px;
+	cursor: default;
+}
+.context-menu > li:hover {
+	background: #06c;
+	color: white;
+}
+.context-menu > li.disable {
+	color:silver;
+}

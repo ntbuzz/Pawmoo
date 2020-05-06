@@ -1,0 +1,48 @@
+
+/*  split-pane 3ペイン共通スタイル */
+
+/*    padding, margin:
+    [上下左右] [上下][左右} [上][左右][下] [上][右][下][左]
+*/
+.split-pane-component {
+	background: white;
+}
+.split-pane-divider {
+    background: #aaa;
+}
+.split-pane > .split-pane-divider.dragged.touch {
+	background: blue;
+	opacity: 0.25;
+}
+/* 左右分割 */
+#left-component {
+	width: 16em; /* Same as divider left */
+    white-space: nowrap
+}
+#v-divider {
+	left: 16em;
+	width: 3px;
+}
+#right-component {
+	left: 16em; /* Same as divider left */
+	margin-left: 3px; /* Same as divider width */
+/*	background: #333;*/
+}
+/* フル表示 */
+#full-component {
+	height: 100%;
+}
+/* 上下分割 */
+#top-component {
+	height: 40%;
+	min-height: 10em;
+}
+#h-divider {
+	top: 40%;
+	height: 3px;
+}
+#bottom-component {
+	top: 40%;
+	min-height: 10em;
+	margin-top: 3px;
+}
