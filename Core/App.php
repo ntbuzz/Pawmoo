@@ -77,51 +77,52 @@ class App {
     }
 //==================================================================================================
 // アプリケーションフォルダパスを取得
-    private static function AppPath($path) {
-        return self::$AppName."/{$path}";
+    public static function AppPath($path) {
+        $appname = self::$AppName;
+        return "app/{$appname}/{$path}";
     }
 //==================================================================================================
 // appモジュールファイルの読込
-public static function appUses($cat,$modname) {
-    $mod = explode('/',$modname);
-    $tagfile = ($mod[0] == 'modules') ? "modules/{$mod[1]}/{$mod[1]}{$cat}" : "{$modname}/{$cat}";
-    $reqfile = self::AppPath("{$tagfile}.php");    //self::$AppName."/{$tagfile}.php";
-    if(file_exists ($reqfile)) {
-        require_once $reqfile;
-        return 1;
+    public static function appUses($cat,$modname) {
+        $mod = explode('/',$modname);
+        $tagfile = ($mod[0] == 'modules') ? "modules/{$mod[1]}/{$mod[1]}{$cat}" : "{$modname}/{$cat}";
+        $reqfile = self::AppPath("{$tagfile}.php");
+        if(file_exists ($reqfile)) {
+            require_once $reqfile;
+            return 1;
+        }
+        self::DEBUG(92," FAIL:" . getcwd() . '/' . $reqfile);
+        return 0;
     }
-    self::DEBUG(92," FAIL:" . getcwd() . '/' . $reqfile);
-    return 0;
-}
 //==================================================================================================
 // appコントローラと付属モジュールファイルの読込
-public static function appController($controller) {  
-    // モジュールファイルを読み込む
-    $modulefiles = [
-        'Controller',
-        'Model',
-        'View',
-        'Helper'
-    ];
-    $modtop = getcwd() . "/" . self::AppPath("modules/{$controller}"); // self::$AppName."/modules/{$controller}";
-    foreach($modulefiles as $files) {
-        $reqfile = "{$modtop}/{$controller}{$files}.php";
-        if(file_exists($reqfile)) {
-            require_once $reqfile;
+    public static function appController($controller) {  
+        // モジュールファイルを読み込む
+        $modulefiles = [
+            'Controller',
+            'Model',
+            'View',
+            'Helper'
+        ];
+        $modtop = getcwd() . "/" . self::AppPath("modules/{$controller}"); 
+        foreach($modulefiles as $files) {
+            $reqfile = "{$modtop}/{$controller}{$files}.php";
+            if(file_exists($reqfile)) {
+                require_once $reqfile;
+            }
         }
     }
-}
 //==================================================================================================
 // appName/Models モジュールファイルの読込
-public static function appModels($modname) {  
-    $reqfile = self::AppPath("Models/{$modname}Model.php");    // self::$AppName."/Models/{$modname}Model.php";
-    if(file_exists ($reqfile)) {
-        require_once $reqfile;
-        return 1;
+    public static function appModels($modname) {  
+        $reqfile = self::AppPath("Models/{$modname}Model.php");
+        if(file_exists ($reqfile)) {
+            require_once $reqfile;
+            return 1;
+        }
+        self::DEBUG(92," FAIL:" . getcwd() . '/' . $reqfile);
+        return 0;
     }
-    self::DEBUG(92," FAIL:" . getcwd() . '/' . $reqfile);
-    return 0;
-}
 //==================================================================================================
 // webrootファイルのパスに付加パスを付けた文字列
 	public static function getRoot($path) {  

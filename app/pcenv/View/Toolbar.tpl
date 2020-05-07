@@ -41,7 +41,7 @@
 				li => [ %${#Toolbar.管理ページ.トップ} => ":" ]
 				li => [ %${#Toolbar.管理ページ.PHP情報} => ":phpinfo.php" ]
 				li => [ %${#Toolbar.管理ページ.SQLite} => ":SQLiteManager" ]
-				li => [ %${#Toolbar.管理ページ.PostgreSQL} => ":phpPgAdmin" ]
+				li => [ %${#Toolbar.管理ページ.PostgreSQL} => ":phppgadmin" ]
 			]
 		]
 		li => [ %${#Toolbar.ヘルプ} => "#"

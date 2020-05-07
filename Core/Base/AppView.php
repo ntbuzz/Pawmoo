@@ -77,8 +77,8 @@ protected function __InitClass() {
 // テンプレートファイルがビュークラスフォルダに存在しなければ共通のテンプレートを探す
     private function getTemplateName($name) {
         $temlatelist = array(
-            App::$AppName."/modules/{$this->ModuleName}/View/{$name}",   // モジュールのビューレイアウト
-            App::$AppName."/View/{$name}",                               // App共通のレイアウトテンプレートを探す
+            App::AppPath("modules/{$this->ModuleName}/View/{$name}"),   // モジュールのビューレイアウト
+            App::AppPath("View/{$name}"),                               // App共通のレイアウトテンプレートを探す
             "Core/Template/View/{$name}"                               // ライブラリのテンプレートを探す
         );
         foreach($temlatelist as $file) {

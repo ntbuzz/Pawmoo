@@ -4,66 +4,41 @@
  * Biscuitフレームワーク
  *   Main: メイン処理
  */
-require_once('Class/session.php');
-
-require_once('AppDebug.php');
 // デバッグ用のクラス
+require_once('AppDebug.php');
 APPDEBUG::INIT(10);
 
+require_once('App.php');
+require_once('Class/fileclass.php');
+require_once('Class/session.php');
 require_once('Config/appConfig.php');
 require_once('Common/appLibs.php');
-
-require_once('App.php');
-
 require_once('Base/AppObject.php');
 require_once('Base/AppController.php');
 require_once('Base/AppModel.php');
 require_once('Base/AppFilesModel.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
-
 require_once('Base/LangUI.php');           // static class
-
-require_once('Class/fileclass.php');
-
 
 // タイムゾーンの設定
 date_default_timezone_set('Asia/Tokyo');
-
-/*
-autoload のサンプル
-function classnamesplit($name) {
-    $nm = strtoupper($name);
-    for($i=strlen(name) - 1; $i > 0; $i-- ) {
-        if(substr($name,$i,1) == substr($nm,$i,1) ) {
-            return array(substr($name,0,$i), substr($name,$i));
-        }
-    }
-    return array($name);
-}
-spl_autoload_register(function ($name) {
-    $sp = classnamesplit($name);
-    var_dump($sp);
-});
-if(!class_exists('DbSupportModel')) $view = 'AppModel';
-*/
 //echo setlocale(LC_ALL,0);
+
 $redirect = false;      // リダイレクトフラグ
 
 list($fwroot,$rootURI,$appname,$controller,$params,$q_str) = getFrameworkParameter(__DIR__);
 parse_str($q_str, $query);
-
 $scriptname = $_SERVER['SCRIPT_NAME'];
-
 // アプリケーションのコンフィグを読込む
-if(!file_exists($appname)) {
-    $appname = 'help';
+if(!file_exists("app/$appname")) {
+    $applist = GetFoloders("app/");     // アプリケーションフォルダ名を取得
+    $appname = $applist[0];             // 最初に見つかったアプリケーションを指定
     $rootURI = (strpos($rootURI,"/{$fwroot}/") !== FALSE) ? "/{$fwroot}/{$appname}/" : "/{$appname}/";
-//    $rootURI ="/{$fwroot}/{$appname}/";
     $redirect = true;
 }
-require_once("{$appname}/Config/config.php");
-
+// ここでは App クラスの準備ができていないので直接フォルダ指定する
+require_once("app/{$appname}/Config/config.php");
 
 $action = array_shift($params);         // パラメータ先頭はメソッドアクション
 if(is_numeric($action) ) {              // アクション名が数値ならパラメータに戻す
@@ -88,7 +63,7 @@ $ReqCont = [
 // コントローラー、アクションのキャメルケース化とURIの再構築
 $requrl = str_replace('//','/',implode('/',$ReqCont));
 // フレームワーク直接
-dump_debug(0,"MAIN", [
+dump_debug(DEBUG_DUMP_NONE,"MAIN", [
     'デバッグ情報' => [
         "SERVER" => $_SERVER['REQUEST_URI'],
         "RootURI"=> $rootURI,
@@ -114,12 +89,12 @@ $className = "{$controller}Controller";
 $method = "{$action}Action";
 
 // 共通サブルーチンライブラリを読み込む
-$libs = GetPHPFiles("{$appname}/common/");
+$libs = GetPHPFiles(App::AppPath("common/"));
 foreach($libs as $files) {
     require_once $files;
 }
 // コアクラスのアプリ固有の拡張クラス
-$libs = GetPHPFiles("{$appname}/extends/");
+$libs = GetPHPFiles(App::AppPath("extends/"));
 foreach($libs as $files) {
     require_once $files;
 }
@@ -127,24 +102,13 @@ foreach($libs as $files) {
 $lang = (isset($query['lang'])) ? $query['lang'] : $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 
 // コントローラ用の言語ファイルを読み込む
-LangUI::construct($lang,$appname);
+LangUI::construct($lang);
 LangUI::LangFiles(['#common',$controller]);
 // データベースハンドラを初期化する */
 DatabaseHandler::InitConnection();
 
 // モジュールファイルを読み込む
 App::appController($controller);
-dump_debug(0,"MAIN", [
-    'デバッグ情報' => [
-        "sysRoot"=> $sysRoot,
-        "fwroot"=> $fwroot,
-        "appname"=> $appname,
-        "Controller"=> $controller,
-        "Action"    => $action,
-        "Param"    => $params,
-    ],
-    "REQ" => $ReqCont,
-]);
 // コントローラインスタンス生成
 $controllerInstance = new $className();
 // 指定メソッドが存在するか、無視アクションかをチェック

@@ -4,6 +4,10 @@
  *  appLibs: 共通関数群
  *
  */
+define('DEBUG_DUMP_NONE',   0);
+define('DEBUG_DUMP_DOIT',   1);
+define('DEBUG_DUMP_EXIT',   2);
+
 // コア共通ファンクション
 // URI を取得して、フレームワークRoot、アプリ名、コントローラ名、メソッド＋パラメータ、クエリ文字列に分解して返す
 function getFrameworkParameter($dir) {
@@ -35,9 +39,25 @@ function is_extst_module($appname,$modname,$classname) {
     if($modname == NULL) return FALSE;      // そもそも名前が無い
 //    $modname = ucfirst(strtolower($modname));
     // ファイルが存在するかチェック
-    $modtop = getcwd() . "/" . "{$appname}/modules/{$modname}"; // self::$AppName."modules/{$modname}";
+    $modtop = getcwd() . "/" . "app/{$appname}/modules/{$modname}";
     $reqfile = "{$modtop}/{$modname}{$classname}.php";
     return file_exists($reqfile);           // ファイルが存在するか
+}
+//===============================================================================
+// 指定フォルダ内のフォルダ名リストを取得する
+function GetFoloders($dirtop) {
+    $drc=dir($dirtop);
+    $folders = array();
+	while(false !== ($fl=$drc->read())) {
+        if(! in_array($fl,IgnoreFiles,FALSE)) {
+            $path = "{$dirtop}{$fl}";
+            if(is_dir($path)) {
+                $folders[] = $path;
+            }
+        }
+    }
+    $drc->close();
+    return $folders;
 }
 //===============================================================================
 // ミリセカンド取得
@@ -54,7 +74,7 @@ function GetPHPFiles($dirtop) {
     $files = array();
 	while(false !== ($fl=$drc->read())) {
         if(! in_array($fl,IgnoreFiles,FALSE)) {
-            $path = $dirtop . $fl;
+            $path = "{$dirtop}{$fl}";
             $ext = substr($fl,strrpos($fl,'.') + 1);    // 拡張子を確認
             if(!is_dir($path) && ($ext == 'php')) {
                 $files[] = $path;
@@ -213,13 +233,16 @@ function check_cwd($here) {
 }
 //===============================================================================
 // デバッグダンプ
-function dump_debug($flag, $msg, $arr){
+function dump_debug($flag, $msg, $arr = []){
     if($flag === 0) return;
+var_dump($arr);
     echo "<pre>\n***** {$msg} *****\n";
     foreach($arr as $msg => $obj) {
         echo "------- {$msg} -----\n";
         if(empty($obj)) echo "EMPTY\n";
-        else foreach($obj as $key => $val) {
+        else if(is_scalar($obj)) {
+            echo "{$obj}\n";
+        } else foreach($obj as $key => $val) {
             if(is_array($val)) {    // 配列出力
                 dumpobj($val,0);
             } else

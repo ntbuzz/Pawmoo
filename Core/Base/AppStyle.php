@@ -63,8 +63,8 @@ class AppStyle {
         $fldr = $this->Template['folder'];
         $this->Filetype = $fldr;
         $this->Folders = array(
-            'モジュール固有' => "{$appname}/modules/{$this->ModuleName}/res",
-            'アプリ共通' => "{$appname}/View/res",                 // App共通のレイアウトテンプレートを探す
+            'モジュール固有' => "app/{$appname}/modules/{$this->ModuleName}/res",
+            'アプリ共通' => "app/{$appname}/View/res",                 // App共通のレイアウトテンプレートを探す
             'Libs' => "Core/Template/res",                  // ライブラリのテンプレートを探す
         );
         if($this->ModuleName == '') {   // リソースフォルダならモジュール固有を削除
