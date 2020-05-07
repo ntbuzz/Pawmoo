@@ -52,7 +52,7 @@ function GetFoloders($dirtop) {
         if(! in_array($fl,IgnoreFiles,FALSE)) {
             $path = "{$dirtop}{$fl}";
             if(is_dir($path)) {
-                $folders[] = $path;
+                $folders[] = $fl;
             }
         }
     }
