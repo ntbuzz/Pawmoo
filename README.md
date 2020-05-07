@@ -23,7 +23,7 @@
 <p>
 </p>
 <pre>
-# git clone XXXXX
+git clone XXXXX
 or
 dounload zip, and extract files.
 </pre>
