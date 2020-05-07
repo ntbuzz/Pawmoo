@@ -21,15 +21,18 @@
 </p>
 <h3>インストール</h3> 
 <p>
+</p>
 <pre>
 # git clone XXXXX
 or
 dounload zip, and extract files.
 </pre>
-</p>
 <h3>使用方法</h3> 
 <h4>コントローラークラスの定義</h4>
-<p></p>
+<p>
+コントローラクラスは必ず定義します。リクエストURIの対応するアクションメソッドを実行します。<br>
+メソッドが未定義のときは $defaultAction に定義されたアクションを実行します。<br>
+</p>
 <blockquote>
 <pre>
 class IndexController extends AppController {
@@ -44,12 +47,16 @@ class IndexController extends AppController {
 </blockquote>
 <h4>モデルクラスの定義</h4>
 <p>
+モデルクラスは必須ではありませんが、データベースを参照するには必ず必要です。<br>
+$DatabaseSchema 変数によりモデルクラスごとに別々のデータベースを参照することが可能です。<br>
+フレームワークコアにハンドラーを追加すれば、様々なデータベースを参照できるようになります。<br>
 </p>
 <blockquote>
 <pre>
 class IndexModel extends AppModel {
     static $DatabaseSchema = [
         // Database Reference, Relation, PostForm Tag Schema Definition
+        'Handler' => 'SQLite',  // SQLite3, PostgreSQL, ...
         ...
     ];
 
@@ -61,6 +68,8 @@ class IndexModel extends AppModel {
 </blockquote>
 <h4>ビューヘルパーの定義</h4>
 <p>
+ヘルパークラスは必須ではありませんが、固有の整形出力をするには必須です。<br>
+ビューテンプレートから呼び出せます。<br>
 </p>
 <blockquote>
 <pre>
@@ -69,13 +78,17 @@ class IndexHelper extends AppHelper {
 }
 </pre>
 </blockquote>
-<h4>リソースーの定義</h4>
+<h4>リソースの定義</h4>
 <p>
+スタイルシートとJavascriptを小さな「パーツ」に分離して管理できるようにして<br>
+それらを結合したものをブラウザに返すことができます。<br>
+結合の際にコメントだけを削除したり、改行まで含めて削除してサイズをコンパクトにすることができます。<br>
 </p>
 <blockquote>
 <pre>
 // Resource define by import files
 @comment => off
+@compact => off
 Stylesheet => [
     // Style template for module
     common => [
@@ -99,5 +112,22 @@ Javascript => [
         section => ^common       // invoke parent section resource.
     ]
 ]
+</pre>
+</blockquote>
+<p>
+多言語リソースはモジュールごとにファイルを分割します。<br>
+HTTP_ACCEPT_LANGUAGE にもとづき対応するセクションが読み込まれます。<br>
+</p>
+<blockquote>
+<pre>
+// Language Definition
+@Schema         // Import Common schema language
+.ja => [
+    TITLE => "Biscuitヘルプドキュメント"
+]
+.en => [
+    TITLE => "Biscuit Help Documents"
+]
+...
 </pre>
 </blockquote>
