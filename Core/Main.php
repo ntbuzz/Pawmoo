@@ -144,7 +144,6 @@ APPDEBUG::debug_dump(1, [
 ]);
 // セッション変数を初期化
 MySession::InitSession();
-//$controllerInstance->__Startup();       // コントローラーのスタートアップ処理
 APPDEBUG::RUN_START();
 
 $controllerInstance->$method();

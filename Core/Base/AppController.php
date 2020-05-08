@@ -43,26 +43,11 @@ class AppController extends AppObject {
 	function __TerminateApp() {
 		$this->View->__TerminateView();
 	}
-//===============================================================================
-// コントローラーのスタートアップ処理、Main.php からのみ呼び出される
-// construct() 時に設定できない変数などを初期化
-	function __Startup() {
-/*		Appクラスに集約したので不要
-		$cmdparam = App::$argv;
-		$req = (is_numeric(App::$cmd)) ? '' : array_shift($cmdparam);	// サブコマンドが無い時に備える
-		$url = App::getRoot(App::$ActionClass.'/'.App::$ActionMethod.'/'.App::$Filter);
-		// URIをヘルパーにも伝える
-		$this->ViewSet( ['URI' => $url ] );
-*/
+///==================================================================================================
+// 参照先のモデルクラスをダイナミック生成するマジックメソッド
+	public function __get($SubModelName){
+		return parent::loadModels($SubModelName);
 	}
-/*
-	function changeAction($act) {
-		App::$SysVAR['method'] = $act;
-		App::$ActionMethod = $act;
-		$method = ucfirst($act) . 'Action';
-		$this->$method();
-	}
-*/
 //===============================================================================
 // フィルタ指定の有無を判定
 	public function getFilter($default = 'all') {
