@@ -8,11 +8,11 @@ class ParagraphModel extends AppModel {
         'Primary' => 'id',
         'Unique' => 'id',
         'Schema' => [
-            'id' =>         ['.id',2],          // モジュールSchemaの言語ID
-            'section_id'   => ['',0],
+            'id'            => ['.id',2],          // モジュールSchemaの言語ID
+            'section_id'    => ['',0],
             'category_id'   => ['',0],
-            'title' =>      ['.title',2],
-            'contents' =>    ['.contents',2],    // 共通Schemaの言語ID
+            'title'         => ['.title',2],
+            'contents'      => ['.contents',2],    // 共通Schemaの言語ID
         ],
         'Relations' => [
             'section_id' => 'Section.id.title',

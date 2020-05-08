@@ -14,10 +14,10 @@ class IndexModel extends AppModel {
         'Primary' => 'id',
         'Unique' => 'id',
         'Schema' => [
-            'id' =>         ['.id',0],          // モジュールSchemaの言語ID
-            'category_id' =>['.category',0],
-            'title' =>      ['',0],
-            'contents' =>   ['',0],
+            'id'            => ['.id',0],          // モジュールSchemaの言語ID
+            'category_id'   => ['.category',0],
+            'title'         => ['',0],
+            'contents'      => ['',0],
         ],
         'Relations' => [
             'category_id' => 'Category.id.title',

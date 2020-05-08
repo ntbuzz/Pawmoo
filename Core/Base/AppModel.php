@@ -23,7 +23,7 @@ require_once('Core/Handler/DatabaseHandler.php');
 class AppModel extends AppObject {
     static $DatabaseSchema = [];
     protected $dbDriver;        // データベースドライバー
-    protected $TableHead;      // テーブルヘッダ
+    private $TableHead;      // テーブルヘッダ
     protected $fields;            // レコードフィールドの値
 //    protected $OnGetRecord;   // レコード取得時のコールバック関数
     public $pagesize;           // 1ページ当たりのレコード取得件数
@@ -35,7 +35,7 @@ class AppModel extends AppObject {
 //==================================================================================================
 	function __construct($owner) {
 	    parent::__construct($owner);                    // 継承元クラスのコンストラクターを呼ぶ
-        APPDEBUG::MSG(11,$DatabaseSchema);
+        APPDEBUG::MSG(12,$DatabaseSchema);
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
         $this->__InitClass();                             // クラス固有の初期化メソッド
 	}
@@ -61,18 +61,22 @@ class AppModel extends AppObject {
         $this->dbDriver = new $driver($this->DatabaseName,$this->DataTable);        // データベースドライバー
         // ヘッダ表示用のスキーマ
         $this->TableHead = array();
-        APPDEBUG::MSG(11,$this->Schema);
+        APPDEBUG::MSG(12,$this->Schema);
         foreach($this->Schema as $key => $val) {
             list($nm,$mflag) = $val;
-            if($nm == '') $nm = $key;
+            // 参照フィールド設定：*_id でRelations設定されていれば_idなしを参照フィールドにする
+            if((substr($key,-3)==='_id') && array_key_exists($key,$this->Relations)) {
+                $ref = substr($key,0,strlen($key)-3);    // _id を抜いた名称を表示名とする
+            } else $ref = $key;
+            if($nm == '') $nm = $ref;  // alias名が未定義なら参照名と同じにする
             if($nm[0] == '.') {            // 言語ファイルの参照
                 $nm = $this->_(".Schema{$nm}");   //  Schema 構造体を参照する
             }
             $flag = $mflag % 10;
             $align= ($mflag - $flag) / 10;
-            $this->TableHead[$key] = array($nm,$flag,$align);
+            $this->TableHead[$key] = array($nm,$flag,$align,$ref);
         }
-        APPDEBUG::MSG(11, $this->TableHead, "TableHead");
+        APPDEBUG::MSG(12, $this->TableHead, "TableHead");
         // 各種データ初期化
         $this->RecData = NULL;          // レコードデータ(JOINなし)
         $this->Select = NULL;           // リレーション先のラベルと値の連想配列リスト
@@ -94,13 +98,13 @@ class AppModel extends AppObject {
 // 結果：   レコードデータ = RecData
 //          リレーションフィールドは取得しない
     public function getRecordByKey($id) {
-        APPDEBUG::MSG(11,$id);
+        APPDEBUG::MSG(12,$id);
         if(empty($id)) {
             $this->field = array();
             return;
         }
         $this->fields = $this->dbDriver->doQueryBy($this->Primary,$id);
-        APPDEBUG::MSG(19,$this->fields);
+        APPDEBUG::MSG(12,$this->fields);
         return $this;
     }
 //==================================================================================================
@@ -109,16 +113,16 @@ class AppModel extends AppObject {
 // 結果：   レコードデータ = RecData
 //          リレーション先の選択リスト = Select (Relations)
 	public function GetRecord($num) {
-		APPDEBUG::MSG(11, $num);
+		APPDEBUG::MSG(12, $num);
         $this->getRecordByKey($num);                    // レコードデータを読み込む
         $valueLists = array();
         foreach($this->Relations as $key => $val) {     // リレーション先の値リストを取得する
-        list($table,$fn, $ref,$grp) = explode('.', $val);
+            list($table,$fn, $ref,$grp) = explode('.', $val);
             if(!isset($grp)) $grp = 0;
            // $key カラムの一覧を取得する
             $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn);
         }
-        APPDEBUG::MSG(11, $valueLists);
+        APPDEBUG::MSG(12, $valueLists);
         $this->RecData= $this->fields;          // レコードの生データ
         $this->Select= $valueLists;             // JOIN先の値リスト
     }
@@ -126,7 +130,7 @@ class AppModel extends AppObject {
 // フィールドの読み込み (JOIN無し)
 // 結果：   フィールドデータ
     public function getRecordField($key,$field) {
-        APPDEBUG::MSG(11, $key);
+        APPDEBUG::MSG(12, $key);
         $this->getRecordByKey($key);                // レコードデータを読み込む
         return $this->fields[$field];               // フィールド値を返す
     }
@@ -145,21 +149,26 @@ public function SetPage($pagesize,$pagenum) {
     public function RecordFinder($cond,$filter=[]) {
         APPDEBUG::MSG(2, $cond, "cond");
         $data = array();
+        $this->Header = $this->TableHead;       // 作成済みのヘッダリストを使う
         // 複数条件の検索
         $this->dbDriver->findRecord($cond,$this->Relations,$this->Primary);
         while ($this->fetchRecord()) {
-            APPDEBUG::MSG(11, $this->fields, "fields:" . (count($data)+1));
+            APPDEBUG::arraydump(12, [
+                "fields:".(count($data)+1) => $this->fields,
+                "Head:" => $this->Header,
+            ]);
             if(!isset($this->fields[$this->Unique])) continue;
             $record = array();
-            foreach($this->TableHead as $key => $val) {
-                list($nm,$flag,$align) = $val;
+            foreach($this->Header as $key => $val) {
+                list($nm,$flag,$align,$ref) = $val;
                 // フィルタが無指定、またはフィルタにヒット
                 if($filter === [] || in_array($key,$filter)) {
-                    // Alias がかかっていたらオリジナルキーも登録しておく
-                    if($key !== $nm) $record[$key] = trim($this->fields[$key]);
-                    $record[$nm] = trim($this->fields[$key]);
+                    // 参照フィールド名がキー名と違っていればオリジナルを登録する
+                    if($nm !== $ref || $key !== $ref)  $record[$key] = trim($this->fields[$key]);
+                    $record[$nm] = trim($this->fields[$ref]);
                 }
             }
+            APPDEBUG::MSG(12, $record, "RECORD:");
             // プライマリキーは必ず含める
             $record[$this->Primary] = $this->fields[$this->Primary];
             if(! empty($record) ) {
@@ -171,7 +180,6 @@ public function SetPage($pagesize,$pagenum) {
             }
         }
         $this->Records = $data;
-        $this->Header = $this->TableHead;       // 作成済みのヘッダリストを使う
         APPDEBUG::MSG(2, $this->record_max,"record_max");
     }
 //==================================================================================================
@@ -182,7 +190,7 @@ public function SetPage($pagesize,$pagenum) {
 //==================================================================================================
 // レコードの更新
 	public function UpdateRecord($num,$row) {
-		APPDEBUG::MSG(11, $row);
+		APPDEBUG::MSG(12, $row);
         // 更新しないカラムを保護する
 //        $this->getRecordByKey($num);
         // 更新内容で書き換える
@@ -192,7 +200,7 @@ public function SetPage($pagesize,$pagenum) {
             // フィールドキーが存在するものだけ書き換える
             if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
         }
-		APPDEBUG::MSG(6, $this->fields);
+		APPDEBUG::MSG(2, $this->fields);
 		$this->dbDriver->replaceRecord([$this->Primary => $num],$this->fields);
 	}
 

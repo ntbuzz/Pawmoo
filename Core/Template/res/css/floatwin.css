@@ -87,6 +87,22 @@
     cursor:se-resize;
     background: url(res/img/resize.png) no-repeat left top;
 }
+.floatWindow span.resize_message {
+    border: 1px dashed gray;
+    display:none;
+    width: 120px;
+    height: 1.5em;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    margin: auto;
+    user-select:none;
+    text-align: center;
+    background-color:floralwhite;
+}
+
 /* 開くボタンと初期化タグは非表示 */
 .floatWindow span.openButton, data {
     display:none;

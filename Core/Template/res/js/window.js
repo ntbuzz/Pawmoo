@@ -58,7 +58,11 @@
         }
         return widths;
     };
-
+    // フローティングウィンドウを開く
+    $.fn.floatWindow = function (callback) {
+        if(callback != null) callback(this);
+        this.find(".openButton").click();
+    };
 })(jQuery);
 // ***************************************************************************
 // セレクタを使う

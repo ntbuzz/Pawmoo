@@ -8,9 +8,9 @@ class CategoryModel extends AppModel {
         'Primary' => 'id',
         'Unique' => 'id',
         'Schema' => [
-            'id' =>         ['.id',2],          // モジュールSchemaの言語ID
-            'title' =>      ['.title',2],
-            'note' =>    ['.note',2],    // 共通Schemaの言語ID
+            'id'    => ['.id',2],          // モジュールSchemaの言語ID
+            'title' => ['.title',2],
+            'note'  => ['.note',2],    // 共通Schemaの言語ID
         ],
         'Relations' => [
         ],

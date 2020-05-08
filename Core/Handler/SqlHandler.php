@@ -110,8 +110,9 @@ abstract class SQLHandler {	// extends SqlCreator {
 		$jstr = '';
 		foreach($Relations as $key => $val) {
 			list($table,$fn, $ref) = explode('.', $val);
+			$kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
 			$alias= "\"{$key}\"";
-			$sql .= ",{$table}.\"{$ref}\" AS {$alias}";
+			$sql .= ",{$table}.\"{$ref}\" AS \"{$kk}\"";
 			$jstr .= " LEFT JOIN {$table} ON {$this->table}.{$alias} = {$table}.\"{$fn}\"";
 		}
 		return "{$sql}{$frm}{$jstr}";

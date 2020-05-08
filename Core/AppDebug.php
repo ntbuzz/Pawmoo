@@ -44,19 +44,28 @@ class APPDEBUG {
     }
     //==================================================================================================
     // バックトレースから呼び出し元の情報を取得
-    private static function backtraceinfo(){
+    private static function backtraceinfo($stop=FALSE){
         $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,3);    // 呼び出し元のスタックまでの数
+        if($stop) { 
+            echo "TYPE:".get_class($dbinfo[2]['object'])."\n";
+            var_dump($dbinfo[2]['object']);
+            exit;
+        }
         $dbpath = str_replace('\\','/',$dbinfo[1]['file']);             // Windowsパス対策
         list($pp,$fn) = extractFileName($dbpath);
         $fn .= "(".$dbinfo[1]['line'].")";
+        if(isset($dbinfo[2]['object'])) {
+            $pp = get_class($dbinfo[2]['object']);  // 呼出し元のクラス名
+            if(substr($fn,0,strlen($pp)) !== $pp) $fn = "{$pp}::{$fn}";
+        }
         $str = "{$fn}->" . $dbinfo[2]['function'];
         return $str;
     }
     //==================================================================================================
     // デバッグ用のメッセージ出力
-    public static function MSG($lvl,$obj, $msg = ''){
+    public static function MSG($lvl,$obj, $msg = '',$stop=FALSE){
         if(!DEBUGGER) return;
-        $info = self::backtraceinfo();
+        $info = self::backtraceinfo($stop);
         self::db_echo($lvl, "<pre>\n");
         if(is_scalar($obj)) {
             if($msg !== '') $msg .= ": ";
@@ -68,7 +77,7 @@ class APPDEBUG {
             if(empty($obj)) self::db_echo($lvl,EMPTY_MSG);
             else self::dumpobj($obj,0, $lvl);
         }
-        self::db_echo($lvl, "</pre>\n");
+        self::db_echo($lvl, "\n</pre>\n");
     }
     //===============================================================================
     // デバッグダンプ

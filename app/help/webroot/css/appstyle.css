@@ -17,10 +17,12 @@ html, body {
     min-width: 100%;
     height: 100%;
     min-height: 100%;
+/*
     user-select:none;
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+*/
 }
 .icon {
     margin: 0 2px;
@@ -37,6 +39,17 @@ html, body {
     overflow-x:hidden;
 }
 
-#ContentBody {
+.paragraph p {
+    padding-left:20px;
+    margin-bottom:10px;
+}
+
+.dialog-data {
     width:100%;
+    padding:10px;
+}
+.dialog-data .center {
+    width:100%;
+    text-align: center;
+    padding: 5px;
 }

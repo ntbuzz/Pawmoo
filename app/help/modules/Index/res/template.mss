@@ -11,6 +11,7 @@ Stylesheet => [
             split-pane.css      // 3ペイン分割
             tabmenu.css
             table-sort.css
+            dialog-form.css
         ]
         section => ^common       // 上位のセクションを呼出す
     ]

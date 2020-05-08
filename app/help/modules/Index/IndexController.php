@@ -31,10 +31,17 @@ class IndexController extends AppController {
 //===============================================================================
 // コンテンツビュー
 	public function ViewAction() {
+		$Part = App::$Params[0];	// Doc-Part
+		$Chap = App::$Params[1];	// Doc-Chapter
+		// ツリーメニューを構築
 		$this->Model->MakeOutline();
+		// Section データを取得
+		$this->Section->getSectionDoc($Chap);
+		$this->ViewSet(['Section' => $this->Section->Records]);
         APPDEBUG::arraydump(3, [
             'レコード' => $this->Model->Records,
             'アウトライン' => $this->Model->outline,
+            'セクション' => $this->Section->Records,
 		]);
 		$this->View->PutLayout();
 	}

@@ -6,6 +6,7 @@ var selector = $(".floatWindow");
 selector.each(function () {
     var id = "#" + $(this).attr("id");
     var self = $(id);
+    var message_id= id+" .resize_message";
     // 中のブロック高さを調整
     self.resize(function () {
         hsize = self.innerHeight() - 50;
@@ -16,7 +17,7 @@ selector.each(function () {
         span.close => [ alt => 閉じる ]			// 閉じるボタン
         span.resize => []
 */
-    var controlls = ["openButton:", "close:閉じる", "resize:"];
+    var controlls = ["openButton:", "close:閉じる", "resize:", "resize_message:サイズ表示"];
     controlls.forEach(function (value) {
         var cls = value.split(':');
         if (self.find("." + cls[0]).length == 0) {
@@ -84,13 +85,17 @@ selector.each(function () {
     $(id+" .resize").mousedown( function(e) {
         self.data("clickPointX", e.pageX)
             .data("clickPointY", e.pageY);
+        $(message_id).fadeIn('fast');
         self.css('user-select', 'none');    // テキスト選択不可
         $(document).mousemove( function(e) {
             self.css({
                 width: (e.pageX - self.offset().left + 6) + "px",
                 height: (e.pageY - self.offset().top + 6) + "px"
             });
+            var txt = self.width() + " x " + self.height();
+            $(message_id).text(txt);
         }).mouseup(function (e) {
+            $(message_id).fadeOut('fast');
             self.css('user-select', '');    // テキスト選択可能
             $(document).unbind("mousemove");
         });

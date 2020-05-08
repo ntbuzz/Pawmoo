@@ -33,6 +33,50 @@ dump_debug(0,[ "アウトライン" => $this->MyModel->outline]);
     echo "</ul>\n";
 }
 //===============================================================================
+// セクション名をキーにタブ表示する
+public function SectionTab() {
+    echo "<ul class='tab'>\n";
+    if($this->Section !== []) {
+        $first = ' class="select"';
+        foreach($this->Section as $key => $val) {
+            $ttl = ($val['tabset']==='') ? $val['title']:$val['tabset'];
+            echo "<li{$first} id='$val[id]'>$ttl</li>\n";
+            $first = '';
+        }
+    } else {
+        echo "<li class='new-section' id='$val[id]'>セクション追加</li>\n";
+    }
+    echo "</ul>\n";
+}
+//===============================================================================
+// セクションのコンテンツをリスト表示する
+public function SectionContents() {
+    echo "<ul class='content'>\n";
+    $first = '';
+    foreach($this->Section as $key => $sec) {
+        echo "<li{$first} id='{$sec[id]}'>";
+        echo "<div class='section' id='$sec[id]'>";
+        echo "<h2>$sec[title]</h2>\n";
+        if(isset($sec['content'])) {
+            echo "<p>$sec[content]</p>\n";
+        }
+        echo "<hr>\n";
+        foreach($sec['本文'] as $val) {
+            $id = "{$val[section_id]}:{$val[id]}";
+            echo "<div class='paragraph' id='${id}'>";
+            if($val['title']) {
+                echo "<h3>$val[title]</h3>\n";
+            }
+            echo "<p class='data'>".$val[$this->_('.Schema.contents')]."</p>";
+            echo "</div>\n";
+        }
+        echo "</div>\n";
+        echo "</li>\n";
+        $first = ' class="hide"';
+    }
+    echo "</ul>\n";
+}
+//===============================================================================
 // セレクトリストをjavascript配列へ
 public function SelectList($key) {
     foreach($this->MyModel->Select[$key] as $ttl => $id) {

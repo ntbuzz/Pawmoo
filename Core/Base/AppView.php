@@ -145,16 +145,20 @@ private function replaceArrays($vars, $content) {
         $row = $val;
         $tag = array();
         $attr = '';
-        foreach(['data' => '{', 'id' => '#', 'class' => '.'] as $key => $sep) {
+        foreach(['data' => '{', 'name' => '[', 'id' => '#', 'class' => '.'] as $key => $sep) {
             $n = strrpos($val,$sep);
             if( $n !== FALSE) {
                 $str = substr($val,$n + 1);   // 文字列抽出
                 $val = substr($val,0, $n);    // 残りの文字列
-                if($sep[0] == '{') {
+                if($sep[0] == '{') {            // data- 属性
                     $str = trim($str,'{}');
                     $kk = "{$key}-element";
                     $tag[$kk] = $str;
                     $attr = " {$kk}=\"{$str}\"{$attr}";
+                } else if($sep[0] == '[') { // name属性
+                    $str = trim($str,'[]');
+                    $tag[$key] = $str;
+                    $attr = " {$key}=\"{$str}\"{$attr}";
                 } else {
                     $tag[$key] = $str;
                     $attr = " {$key}=\"{$str}\"{$attr}";
