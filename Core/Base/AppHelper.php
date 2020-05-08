@@ -4,17 +4,8 @@
  *  AppHelper: ビューのHTML出力を担当するクラス
  * 
  */
-require_once('../vendor/PHPExcel/PHPExcel.php');
-require_once("../vendor/PHPExcel/PHPExcel/IOFactory.php");
-require_once("../vendor/mpdf50/mpdf.php");
-
 //===============================================================================
 class AppHelper  extends AppObject {
-	// プロパティリスト
-    const MyPropList = [
-		'Excel' => 'PHPExcel',
-		'PDF' => 'mPDF'
-	];
 	const AttrAlign = [
 		'',						// 0
 		' align="left"',		// 1 = left
@@ -27,20 +18,6 @@ class AppHelper  extends AppObject {
 	function __construct($owner) {
 		parent::__construct($owner);
         $this->__InitClass();                       // クラス固有の初期化メソッド
-	}
-//==================================================================================================
-// Excel/PDFの動的クラスプロパティを生成
-// 固有クラスのため AppObject のメソッドは使用しない
-	public function __get($PropName) {
-		APPDEBUG::MSG(10, $PropName . " を動的生成します。");
-		if(isset($this->$PropName)) return $this->$PropName;
-		// Model or View or Helper or Controller を付加する
-		$props = self::MyPropList[$PropName];
-		if(class_exists($props)) {
-			$this->$PropName = new $props();
-			return $this->$PropName;
-		}
-		throw new Exception("Dynamic Subclass Create Error for '{$props}'");
 	}
 //===============================================================================
 // パラメータ指定の有無を判定

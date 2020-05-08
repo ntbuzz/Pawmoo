@@ -81,8 +81,37 @@ class AppObject {
             $this->$PropName = new $props($this);
     	    return $this->$PropName;
         }
+
+        // モデルファイルを探索
+        $modtop = App::AppPath("modules/{$PropName}");
+    $reqfile = "{$modtop}/{$modname}{$classname}.php";
+    return file_exists($reqfile);           // ファイルが存在するか
+
 		throw new Exception("SubClass Create Error for '{$props}'");
     }
+//==================================================================================================
+// モデルクラスの動的ロード
+    protected function loadModels($PropName) {
+        if(isset($this->$PropName)) return $this->$PropName;
+        // Model or View or Helper or Controller を付加する
+        $props = "{$PropName}Model";
+        // ロード済か確認
+        if(class_exists($props)) {
+            $this->$PropName = new $props($this);
+            return $this->$PropName;
+        }
+        // ファイルがあればロードする
+        foreach(["Models","modules/{$PropName}"] as $model) {
+            $modfile = App::AppPath("{$model}/{$props}.php");
+//echo getcwd() . " / CHECK:{$modfile}\n";
+            if(file_exists($modfile)) {
+                require_once($modfile);
+                $this->$PropName = new $props($this);
+                return $this->$PropName;
+            }
+        }
+        throw new Exception("SubClass Create Error for '{$props}'");
+}
 //===============================================================================
 // 言語リソース値を取り出す
 // allow_array が TRUE なら値が配列になるものを許可する
