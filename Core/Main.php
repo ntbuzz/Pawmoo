@@ -123,8 +123,8 @@ if(!method_exists($controllerInstance,$method) ||
 App::$ActionClass = $controller;
 App::$ActionMethod= $action;
 APPDEBUG::debug_dump(1, [
-    'システム変数情報' => [ App::$SysVAR ],
-    'パラメータ情報' => [ App::$Params ],
+    'システム変数情報' => App::$SysVAR,
+    'パラメータ情報' => App::$Params,
 ],1);
 
 // =================================

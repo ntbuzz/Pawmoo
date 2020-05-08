@@ -28,6 +28,7 @@ class SQLiteHandler extends SQLHandler {
 //==================================================================================================
 //	doQuery: 	SQLを発行する
 	public function doQuery($sql) {
+		APPDEBUG::MSG(9,$sql);
 		$this->rows = $this->dbb->query($sql);
 		return $this->rows;
 	}

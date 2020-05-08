@@ -235,7 +235,6 @@ function check_cwd($here) {
 // デバッグダンプ
 function dump_debug($flag, $msg, $arr = []){
     if($flag === 0) return;
-var_dump($arr);
     echo "<pre>\n***** {$msg} *****\n";
     foreach($arr as $msg => $obj) {
         echo "------- {$msg} -----\n";

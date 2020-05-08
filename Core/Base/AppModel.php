@@ -35,7 +35,7 @@ class AppModel extends AppObject {
 //==================================================================================================
 	function __construct($owner) {
 	    parent::__construct($owner);                    // 継承元クラスのコンストラクターを呼ぶ
-        APPDEBUG::MSG(11,$database);
+        APPDEBUG::MSG(11,$DatabaseSchema);
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
         $this->__InitClass();                             // クラス固有の初期化メソッド
 	}
@@ -43,6 +43,12 @@ class AppModel extends AppObject {
 //	デバッグ用に空のレコードを生成
 //==================================================================================================
     function DebugRecord() {
+        dump_debug(DEBUG_DUMP_NONE, "DEBUG-MODEL", [
+            "Type:"     => $this->ClassType,   // オブジェクトの所属クラス(Controller, Model, View. Helper)
+            "Module:"   => $this->ModuleName,  // オブジェクトの名前
+            "Class:"    => $this->ClassName,   // クラス名
+            "Locale:"   => $this->LocalePrefix,    // 言語プレフィクス
+        ]);
         $this->Records = array();          // レコード検索したレコードリスト(JOIN済)
         $this->LogData = array();          // レコードデータ(JOINなし)
         $this->Header = array();           // レコード検索したレコードの列名リスト
@@ -81,7 +87,8 @@ class AppModel extends AppObject {
 //==================================================================================================
 // 参照先のモデルクラスをダイナミック生成するマジックメソッド
     public function __get($SubModelName){
-        return parent::addSubclass($SubModelName);
+        return parent::loadModels($SubModelName);
+//        return parent::addSubclass($SubModelName);
     }
 //==================================================================================================
 // PrimaryKey でレコードを取得
@@ -135,8 +142,8 @@ public function SetPage($pagesize,$pagenum) {
 // レコードリストの読み込み(JOIN済レコード)
 // 結果：   レコードデータのリスト = Records
 //          読み込んだ列名 = Header (Schema)
-//
-    public function RecordFinder($cond) {
+//          $filter[] で指定したオリジナル列名のみを抽出
+    public function RecordFinder($cond,$filter=[]) {
         APPDEBUG::MSG(2, $cond, "cond");
         $data = array();
         // 複数条件の検索
@@ -147,22 +154,19 @@ public function SetPage($pagesize,$pagenum) {
             $record = array();
             foreach($this->TableHead as $key => $val) {
                 list($nm,$flag,$align) = $val;
-                $record[$nm] = trim($this->fields[$key]);
+                // フィルタが無指定、またはフィルタにヒット
+                if($filter === [] || in_array($key,$filter)) {
+                    // Alias がかかっていたらオリジナルキーも登録しておく
+                    if($key !== $nm) $record[$key] = trim($this->fields[$key]);
+                    $record[$nm] = trim($this->fields[$key]);
+                }
             }
             // プライマリキーは必ず含める
             $record[$this->Primary] = $this->fields[$this->Primary];
             if(! empty($record) ) {
                 $data[] = $record;
                 $this->record_max = $this->dbDriver->recordMax;
-                $this->doEvent('OnGetRecord', $record);
-/*
-                if(is_array($this->OnGetRecord)) {      // コールバックイベント
-                    list($Instance,$method) = $this->OnGetRecord;
-                    if(method_exists($Instance,$method)) {
-                        $Instance->$method($record);
-                    }
-                }
-*/
+                $this->doEvent('OnGetRecord', $record);     // イベントコールバック
             } else {
                 APPDEBUG::MSG(2, $this->fields, "fields");
             }
