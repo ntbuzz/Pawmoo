@@ -18,7 +18,7 @@
 .appWindow => [    // タグ名省略は DIVタグセクション
 	".split-pane fixed-left" => [
 		".split-pane-component sitemap#left-component" => [
-			@SideMenu
+			@TreeMenu
 		]
 		.split-pane-divider#v-divider => []
 		.split-pane-component#right-component => [

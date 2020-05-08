@@ -4,10 +4,10 @@
 @Schema         // 共通スキーマ
 
 .ja => [
-    TITLE => "pseudoMVCヘルプドキュメント"
+    TITLE => "Biscuit(MAP) ドキュメント"
 ]
 .en => [
-    TITLE => "pseudo MVC Documents"
+    TITLE => "Biscuit(MAP) Documents"
 ]
 
 // 共通リストヘッダ

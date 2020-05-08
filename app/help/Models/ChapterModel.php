@@ -1,19 +1,21 @@
 <?php
 
-class NodeModel extends AppModel {
+class ChapterModel extends AppModel {
     static $DatabaseSchema = [
         'Handler' => 'SQLite',
         'DatabaseName' => 'mvcman',
-        'DataTable' => 'node',
+        'DataTable' => 'Chapter',
         'Primary' => 'id',
         'Unique' => 'id',
         'Schema' => [
             'id' =>         ['.id',2],          // モジュールSchemaの言語ID
-            'name' =>      ['.name',2],
-            'note' =>    ['.note',2],    // 共通Schemaの言語ID
+            'part_id'   => ['',0],
+            'category_id'   => ['',0],
+            'title' =>      ['.title',2],
+            'contents' =>    ['.contents',2],    // 共通Schemaの言語ID
         ],
         'Relations' => [
-            'section_id' => 'section.id.title',
+            'part_id' => 'Part.id.title',
         ],
         'PostRenames' => [
         ]

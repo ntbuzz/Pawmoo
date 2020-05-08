@@ -18,5 +18,25 @@ class IndexController extends AppController {
 		APPDEBUG::MSG(24,":Test");
 		$this->View->PutLayout();
 	}
+//===============================================================================
+// デフォルトの動作
+	public function ListAction() {
+		$this->Model->MakeOutline();
+        APPDEBUG::arraydump(3, [
+            'レコード' => $this->Model->Records,
+            'アウトライン' => $this->Model->outline,
+		]);
+		$this->View->PutLayout();
+	}
+//===============================================================================
+// コンテンツビュー
+	public function ViewAction() {
+		$this->Model->MakeOutline();
+        APPDEBUG::arraydump(3, [
+            'レコード' => $this->Model->Records,
+            'アウトライン' => $this->Model->outline,
+		]);
+		$this->View->PutLayout();
+	}
 
 }
