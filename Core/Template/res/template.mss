@@ -10,6 +10,7 @@ Stylesheet => [
     common => [
         // ページャー用ジャンプボタン
         import => [
+            libstyle.css
             pagerstyle.css
             floatwin.css
             baloon.css

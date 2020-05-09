@@ -1,8 +1,10 @@
 /*	ツリーメニューの表示用　*/
 /* [上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
 .sitemap {
-    position: relative;
- }
+    text-decoration: none;
+    background-color: silver;
+
+}
 .sitemap .boldtxt a {
     color: white;
     font-weight:bold;
@@ -21,4 +23,15 @@
 	font-size: 10pt;
     text-decoration: none;
     vertical-align: top;
+}
+#sitemenu {
+	user-select:none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+#sitemenu .selected {
+    color:white;
+    background-color: #ffc5a9;
 }

@@ -10,13 +10,8 @@
 ]
 +style => ~
 .fit-win {
-	position:relative;
 	padding-left:50px;
 	height:100%;
-    user-select:text;
-    -moz-user-select: text;
-    -webkit-user-select: text;
-    -ms-user-select: text;
 	background-color:white;
 }
 ~

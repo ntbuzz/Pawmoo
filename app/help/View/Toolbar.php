@@ -1,11 +1,11 @@
 
 <div class="font20" id="toolbar">
 <div class="leftitem">
-<span class="open-popup-link font24" id="popup-left">■</span>
+<span class="font24" id="popup-left">■</span>
 </div>
 <div class="rightitem">
 <input type="text" class="font16" id="c00" size="20" name="cc">
-<span class="open-popup-link font24" id="popup-dialog">≡</span>
+<span class="font24" id="popup-dialog">≡</span>
 </div>
 <ul id="menu">
 	<li><?= $Helper->ALink("/index",'#Toolbar.home') ?></li>

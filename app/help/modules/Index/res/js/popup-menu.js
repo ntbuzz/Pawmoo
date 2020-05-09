@@ -7,20 +7,20 @@ var popup_menu_function = {
         var mytitle = obj.find("h3").text();
         var mytext = obj.find("p").text();
         $("#edit_dialog").floatWindow(function (e) {
-            e.find('#section').text(sectitle);
-            e.find('#title').text(mytitle);
-            e.find('#contents').text(mytext);
+            e.find('.section').text(sectitle);
+            e.find('input[name="title"]').attr("value",mytitle); // inputタグ
+            e.find('.contents').text(mytext);
         });
-        return false;
+//        return false;
     },
     "ctxAdd": function (obj) {
         var sectitle = obj.find("h2").text();
-        $("#edit_dialog").floatWindow(function (e) {
-            e.find('#section').text(sectitle);
-            e.find('#title').text('');
-            e.find('#contents').text('');
+        $("#add_dialog").floatWindow(function (e) {
+            e.find('.section').text(sectitle);
+            e.find('.title').attr("value",''); // inputタグ
+            e.find('.contents').text('');
         });
-        return false;
+//        return false;
     },
     "ctxDel": function (obj) {
         alert(obj.attr("id") + "/" + obj.attr("class")+"\n"+obj.text());

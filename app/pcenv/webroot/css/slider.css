@@ -38,7 +38,6 @@ table.inbox td {
 }
 
 #slideL {
-    z-index: 999;
     float:left;
     position:fixed;
     width: 1.4em;
@@ -51,7 +50,6 @@ table.inbox td {
 }
 #slideL table {
     float:left;
-    position:relative;
     top:0;
     width:100%;
     border-collapse: collapse;

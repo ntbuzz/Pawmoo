@@ -45,108 +45,109 @@ class AppController extends AppObject {
 	}
 ///==================================================================================================
 // 参照先のモデルクラスをダイナミック生成するマジックメソッド
-	public function __get($SubModelName){
+	protected function __get($SubModelName){
 		return parent::loadModels($SubModelName);
 	}
 //===============================================================================
 // フィルタ指定の有無を判定
-	public function getFilter($default = 'all') {
-		return strtolower(empty(App::$Filter) ? $default : App::$Filter);
-	}
+public function getFilter($default = 'all') {
+	return strtolower(empty(App::$Filter) ? $default : App::$Filter);
+}
 //===============================================================================
 // View Helperクラスへの値セット
-	public function ViewSet($arr) {
-		$this->View->Helper->SetData($arr);
-	}
+public function ViewSet($arr) {
+	$this->View->Helper->SetData($arr);
+}
 //===============================================================================
 // View HekperクラスへのPOST変数セット
-	public function ImportSession() {
-		$this->View->Helper->SetData(MySession::$PostEnv);
-	}
+public function ImportSession() {
+	$this->View->Helper->SetData(MySession::$PostEnv);
+}
 //===============================================================================
 // ページネーションのセットアップ
-	public function PageSetup() {
-		$num = App::$Params[0];
-		$size= App::$Params[1];
-		if($size == 0) {
-			$size = (isset(MySession::$PostEnv['PageSize'])) ? MySession::$PostEnv['PageSize'] : 15;
-		} else MySession::$PostEnv['PageSize'] = $size;		// 新しいページサイズに置換える
-		if($num == 0) $num = 1;
-		// 自分とヘルパーのパラメータを書き換える
-		App::$Params[0] =  $num;
-		App::$Params[1] =  $size;
-		$this->Model->SetPage($size,$num);
-		APPDEBUG::arraydump(2, [
-			'ページャーパラメータ' => [
-				"App" 		=> App::$Params,
-			],
-		]);
-	}
+public function PageSetup() {
+	$num = App::$Params[0];
+	$size= App::$Params[1];
+	if($size == 0) {
+		$size = (isset(MySession::$PostEnv['PageSize'])) ? MySession::$PostEnv['PageSize'] : 15;
+	} else MySession::$PostEnv['PageSize'] = $size;		// 新しいページサイズに置換える
+	if($num == 0) $num = 1;
+	// 自分とヘルパーのパラメータを書き換える
+	App::$Params[0] =  $num;
+	App::$Params[1] =  $size;
+	$this->Model->SetPage($size,$num);
+	APPDEBUG::arraydump(2, [
+		'ページャーパラメータ' => [
+			"App" 		=> App::$Params,
+		],
+	]);
+}
 //===============================================================================
 // デフォルトの動作
-	public function ListAction() {
-		APPDEBUG::MSG(14,":List");
-		$this->Model->RecordFinder([]);
-		$this->View->PutLayout();
-	}
+public function ListAction() {
+	APPDEBUG::MSG(14,":List");
+	$this->Model->RecordFinder([]);
+	$this->View->PutLayout();
+}
 //===============================================================================
 // ページング処理
-	public function PageAction() {
-		$this->PageSetup();
-		$this->ListAction();
-	}
+public function PageAction() {
+	$this->PageSetup();
+	$this->ListAction();
+}
 //===============================================================================
 // 検索
 // find/カラム名/検索値
-	public function FindAction() {
-		APPDEBUG::MSG(14,":Find");
-		if(App::$argc > 1 ) {
-			$row = array(App::$Filter => "={App::$Params[0]}");
-		} else {
-			$row = array();
-		}
-		$this->Model->RecordFinder($row);
-		$this->View->PutLayout();
+public function FindAction() {
+	APPDEBUG::MSG(14,":Find");
+	if(App::$argc > 1 ) {
+		$row = array(App::$Filter => "={App::$Params[0]}");
+	} else {
+		$row = array();
 	}
+	$this->Model->RecordFinder($row);
+	$this->View->PutLayout();
+}
 //===============================================================================
 // ビュー
-	public function ViewAction() {
-		APPDEBUG::MSG(14,":View");
-		try {
-			$num = App::$Params[0];
-			$this->Model->GetRecord($num);
-			$this->View->ViewTemplate('ContentView');
-		} catch (Exception $e) {
+public function ViewAction() {
+	APPDEBUG::MSG(14,":View");
+	try {
+		$num = App::$Params[0];
+		$this->Model->GetRecord($num);
+		$this->View->ViewTemplate('ContentView');
+	} catch (Exception $e) {
 
-		}
 	}
+}
 //===============================================================================
 // PDFを作成する
-	public function MakepdfAction() {
-		try {
-			APPDEBUG::MSG(14,$this);
-			$num = App::$Params[0];
-            $this->Model->GetRecord($num);
-			$this->View->ViewTemplate('MakePDF');
-		} catch (Exception $e) {
-		}
+public function MakepdfAction() {
+	try {
+		APPDEBUG::MSG(14,$this);
+		$num = App::$Params[0];
+		$this->Model->GetRecord($num);
+		$this->View->ViewTemplate('MakePDF');
+	} catch (Exception $e) {
 	}
+}
 //===============================================================================
 // 更新
-	public function UpdateAction() {
-		try {
-			$num = App::$Params[0];
-			MySession::Dump();
-            $this->Model->updateRecord($num,MySession::$PostEnv);
-			header('Location:' . App::getRoot(strtolower($this->ModuleName)) . '/list/' . $num );
-		} catch (Exception $e) {
+public function UpdateAction() {
+	try {
+		$num = App::$Params[0];
+		MySession::Dump();
+		$this->Model->updateRecord($num,MySession::$PostEnv);
+		header('Location:' . App::getRoot(strtolower($this->ModuleName)) . '/list/' . $num );
+	} catch (Exception $e) {
 
-		}
 	}
+}
 
 //===============================================================================
 // デバッグダンプ
-	public function DumpAction() {
-		APPDEBUG::MSG(-14,MySession::$PostEnv);
-	}
+public function DumpAction() {
+	APPDEBUG::MSG(-14,MySession::$PostEnv);
+}
+
 }

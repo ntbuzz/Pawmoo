@@ -254,11 +254,12 @@
           list-item,                        スカラー要素：　単純リスト項目
           [ list-section ],           　    配列要素：　セクション項目
           .XXXX#DDDD => [ list-section ]    クラス名(XXXX)、ID名(DDDD)付のリストセクション項目
-  +dl => [ attr => value , items ]        DLタグ専用のリスト出力、スカラー要素をデータ項目として出力できる
-        items :=                          リスト項目は次の要素から構成する
-          list-item,                        スカラー要素：　DTタグが空でDD要素のみの項目
-          [ list-section ],           　    キー名無し配列要素：　DD要素がセクション項目
-          .XXXX#DDDD => [ list-section ]    DTタグがクラス名(XXXX)、ID名(DDDD)付のDDセクション項目
+  +dl => [ attr => value , [ items ]  ]   DLタグ専用のリスト出力、attr => value はDLタグの属性になる
+      items :=                            リスト項目は次の要素から構成する
+          inner-text,                       無名キースカラー要素：　DTタグのインナーテキスト
+          attr => value,                    DTタグの属性
+          [ list-section ],           　    無名キー配列要素：　DD要素のセクション項目
+          .XXXX#DDDD => [ list-section ]    DD属性にクラス名(XXXX)、ID名(DDDD)を付けたセクション項目
   %link => [ link_str => href, ... ]      ハイパーリンク link_str に href のリンクを設定,Helper->ALinkを呼び出す
                                           単独タグの場合は省略形として以下の書式も使用できる
                                           %link_str => href

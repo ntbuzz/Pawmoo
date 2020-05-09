@@ -70,7 +70,6 @@ class AppStyle {
         if($this->ModuleName == '') {   // リソースフォルダならモジュール固有を削除
             unset($this->Folders['モジュール固有']);
         }
-//        var_dump($this->Folders);
         $myVARS = array(
             'appName' => $appname,
             'filename' => $filename,
@@ -109,31 +108,31 @@ class AppStyle {
     }
 //===============================================================================
 //　ヘッダ出力
-    public function ViewHeader() {
-        header("Content-Type: {$this->Template['head']};");
-    }
+public function ViewHeader() {
+    header("Content-Type: {$this->Template['head']};");
+}
 //===============================================================================
 //　レイアウトテンプレート処理
-    public function ViewStyle($filename) {
-        // スタイルシートが存在するフォルダのみをリストアップする
-        $temlatelist = $this->get_exists_files('template.mss');
-        list($filename,$ext) = extractBaseName($filename);
-        $this->do_min = ($ext == 'min');           // コメント削除出力か
-        $this->do_msg = TRUE ;                     // インポートコメント表示設定
-        $this->do_com = TRUE ;                     // コメント表示設定
-        $this->TempSection = $temlatelist;          // セクション探索対象
-        $this->TmpStack = [];                       // スタックリセット
-        if($this->SectionStyleSet($temlatelist, $filename, FALSE)) return;      // セクション処理が完了しているなら終了
-        // テンプレートセクションに指定ファイル名が見つからないときは実ファイルを探索する
-        foreach($this->Folders as $key => $file) {
-            $fn ="{$file}/{$this->Filetype}/{$filename}{$this->Template['extention']}";
-            if(file_exists($fn)) {
-                $content = file_get_contents($fn);
-                if($this->do_msg) echo "/* include({$filename}{$this->Template['extention']}) in {$key} */\n";
-                $this->output_content($content);
-            }
+public function ViewStyle($filename) {
+    // スタイルシートが存在するフォルダのみをリストアップする
+    $temlatelist = $this->get_exists_files('template.mss');
+    list($filename,$ext) = extractBaseName($filename);
+    $this->do_min = ($ext == 'min');           // コメント削除出力か
+    $this->do_msg = TRUE ;                     // インポートコメント表示設定
+    $this->do_com = TRUE ;                     // コメント表示設定
+    $this->TempSection = $temlatelist;          // セクション探索対象
+    $this->TmpStack = [];                       // スタックリセット
+    if($this->SectionStyleSet($temlatelist, $filename, FALSE)) return;      // セクション処理が完了しているなら終了
+    // テンプレートセクションに指定ファイル名が見つからないときは実ファイルを探索する
+    foreach($this->Folders as $key => $file) {
+        $fn ="{$file}/{$this->Filetype}/{$filename}{$this->Template['extention']}";
+        if(file_exists($fn)) {
+            $content = file_get_contents($fn);
+            if($this->do_msg) echo "/* include({$filename}{$this->Template['extention']}) in {$key} */\n";
+            $this->output_content($content);
         }
     }
+}
 //===============================================================================
 //　セクションスタイルテンプレート処理
 //  TRUE: セクション処理済
@@ -208,15 +207,12 @@ class AppStyle {
     }
 //===============================================================================
 // システム変数＋URIパラメータへの置換処理
-private function replaceArrays($vars, $content) {
-    // あらかじめマージしたシステム変数と環境変数をマージし置換配列を生成する
-    $vals = is_array($vars) ? array_merge($this->repVARS,$vars) : $this->repVARS;
-//    $vals = $this->repVARS;
-    $keyset = array_map(function($a) { return (is_numeric($a))?"{%{$a}%}":"{\${$a}\$}";}, array_keys($vals));
-    // デバッグ情報
-//    arraydump(11,["Replace" => array_combine($keyset, $vals)]);
-    return str_replace ( $keyset, $vals , $content );    // 置換配列を使って一気に置換
-}
+    private function replaceArrays($vars, $content) {
+        // あらかじめマージしたシステム変数と環境変数をマージし置換配列を生成する
+        $vals = is_array($vars) ? array_merge($this->repVARS,$vars) : $this->repVARS;
+        $keyset = array_map(function($a) { return (is_numeric($a))?"{%{$a}%}":"{\${$a}\$}";}, array_keys($vals));
+        return str_replace ( $keyset, $vals , $content );    // 置換配列を使って一気に置換
+    }
 //===============================================================================
 //    ファイルの読み込み
     private function import_files($val) {

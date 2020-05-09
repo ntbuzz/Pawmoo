@@ -6,22 +6,27 @@
 .font16 { font-size:16px; }
 /* メインメニュー項目の装飾 */
 #toolbar {
-    position: relative;
+    z-index:1;
     float:top;
     width:100%;
     background-color: #020;
+    color:white;
 }
 #toolbar:after { clear:both; }
 /* ツールバー内の右寄せアイテム */
 #toolbar .rightitem {
-    position: relative;
-    float:right;
+    position: absolute;
+    z-index:1;
+    top:0;
+    right:0;
     padding-right:50px;
 }
 /* ツールバー内の左寄せアイテム */
 #toolbar .leftitem {
-    position: relative;
-    float:left;
+    position: absolute;
+    z-index:1;
+    top:0;
+    left:0;
     padding-left:0px;
 }
 
@@ -32,26 +37,24 @@
     font-size: 10pt;
 }
 #toolbar ul#menu li {
+    float: left;
     width: 80px; /* メニュー項目の横幅 */
     height: 35px; /* メニュー項目の高さ（「メニューバーの高さ」と一致させる） */
-    float: left;
     list-style-type: none;
-    position: relative;
 }
 #toolbar ul#menu a {
+    display: block;
+	width: 100%;
+    height: 100%;
     color: white;              /* メニュー項目の文字色 */
     line-height: 35px;         /* メニュー項目のリンクの高さ（「メニュー項目の高さ」と一致させる） */
     text-align: center;        /* メインメニューの文字列の配置（中央寄せ） */
     text-decoration: none;     /* メニュー項目の装飾（下線を消す） */
-    display: block;
-	width: 100%;
-    height: 100%;
 }
 #toolbar ul#menu a:hover {
-	background-color: #eeeeee; /* メニュー項目にマウスが載ったときの背景色 */
 	color: #00cc00;            /* メニュー項目にマウスが載ったときの文字色 */
+	background-color: #eeeeee; /* メニュー項目にマウスが載ったときの背景色 */
 }
-
 /* メニューバー直後の Clear Hack */
 #toolbar ul#menu { zoom:1; }
 #toolbar ul#menu:after { height: 0; visibility: hidden; content: "."; display: block; clear: both; }
@@ -59,18 +62,17 @@
 /* ---------------------- */
 /* サブメニュー項目の装飾 */
 #toolbar ul#menu ul.sub {
-	background-color: #888888;     /* サブメニュー全体の背景色 */
-	display: none;
 	position: absolute;
-    z-index:3;
+	display: none;
     font-size: 9pt;
     border: 1px solid black;
+	background-color: #888888;     /* サブメニュー全体の背景色 */
 }
 #toolbar ul#menu ul.sub li {
 	width: 120px; /* サブメニュー1項目の横幅 */
 	height: 25px; /* サブメニュー1項目の高さ */
-    border-bottom: 1px dashed #666;
     padding-left: 5px;
+    border-bottom: 1px dashed #666;
 }
 #toolbar ul#menu ul.sub li a {
 	line-height: 25px; /* サブメニュー1項目の行高（「サブメニュー1項目の高さ」と合わせる） */
@@ -78,50 +80,6 @@
 	text-indent: 5px;  /* 文字列前方の余白 */
 }
 #toolbar ul#menu ul.sub li a:hover {
-	background-color: #ffff80; /* サブメニュー項目にマウスが載ったときの背景色 */
 	color: #005500;            /* サブメニュー項目にマウスが載ったときの文字色 */
+	background-color: #ffff80; /* サブメニュー項目にマウスが載ったときの背景色 */
 }
-/*
-*/
-#toolbar .open-popup-link {
-    position: relative;
-      /*float:right;*/
-      cursor:pointer;
-      vertical-align: bottom;
-      color:white;
-      z-index: 2;
-}
-/* =========================================================================== */
-/*    ポップアップ吹き出し */
-#toolbar-popup {
-    position:fixed;
-    display:none;
-    z-index:33;
-    margin: 2px 15px 0 0;
-    padding:10px;
-    border: 1px solid black;
-    border-radius:5px;
-    background:#bbb;
-    font-size:10pt;
-    color:black;
-  }
-  /* フキダシ部分を作成 */
-  #toolbar-popup:before {
-      content: "";
-      position: absolute;
-      top:-15px;
-      right:8px;
-      border-top: 15px solid transparent;
-      border-right: 20px solid #000;
-      width : 0px;
-  }
-  #toolbar-popup:after {
-      content: "";
-      position: absolute;
-      top:-13px;
-      right:9px;
-      border-top: 15px solid transparent;
-      border-right: 20px solid #bbb;
-      width : 0px;
-  }
-  

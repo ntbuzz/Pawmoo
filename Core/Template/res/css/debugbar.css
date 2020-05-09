@@ -1,11 +1,11 @@
 /* デバッグツール用のスタイル */
 .debugBar {
+    z-index:999;
     position:fixed;
     float:right;
     overflow: hidden;
     top:0;
     right:0;
-    z-index:999;
     width: 1.0em;
     background: #aaa;
     color: white;
@@ -19,7 +19,6 @@
 }
 .debugtab ul#debugMenu li {
     list-style:none;
-    position:relative;
     float:left;
     padding:2px 10px;
     cursor:pointer;
@@ -49,8 +48,8 @@
 }
 /* 閉じるための外領域 */
 .debugBK {
+	z-index:1;
 	position: fixed;
-	z-index:998;
 	top: 0;
 	left: 0;
 	height:100%;

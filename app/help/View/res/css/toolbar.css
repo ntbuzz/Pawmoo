@@ -6,23 +6,29 @@
 .font16 { font-size:16px; }
 /* メインメニュー項目の装飾 */
 #toolbar {
+    z-index:1;
     float:top;
     width:100%;
     background-color: #f5a559;
     white-space: nowrap;
     overflow: visible;      /* プルダウンメニュー表示のため */
-    z-index:32;
     border: 2px ridge gray;
 }
 #toolbar:after { clear:both; }
 /* ツールバー内の右寄せアイテム */
 #toolbar .rightitem {
-    float:right;
+    z-index:1;
+    position: absolute;
+    top:0;
+    right:0;
     padding-right:50px;
 }
 /* ツールバー内の左寄せアイテム */
 #toolbar .leftitem {
-    float:left;
+    z-index:1;
+    position: absolute;
+    top:0;
+    left:0;
     padding-left:0px;
 }
 
@@ -79,13 +85,4 @@
 #toolbar ul#menu ul.sub li a:hover {
 	background-color: #ffff80; /* サブメニュー項目にマウスが載ったときの背景色 */
 	color: #005500;            /* サブメニュー項目にマウスが載ったときの文字色 */
-}
-/*
-*/
-#toolbar .open-popup-link {
-    /*float:right;*/
-    cursor:pointer;
-    vertical-align: bottom;
-    color:white;
-    z-index: 2;
 }

@@ -61,32 +61,35 @@
 ]
 //=========================================
 // パラグラフ編集・フロートウィンドウ
-".floatWindow#edit_dialog" => [ size => "550,350,250,200"
-	+dl => [ "データ編集" => [
-		div.dialog-data => [
-			table.form => [
-				tr => [ th => [ 所属セクション: ] td => [ span.boldtxt#section => [] ] ]
-				tr => [ th => [ タイトル: ] td => [ input#title[title] => [ type => text size => 48 ] ] ]
-				tr => [ th => [ 内容: ] td => [ textarea#contents[contents] => [ rows => 10 cols => 50 ] ] ]
+".floatWindow#edit_dialog" => [ size => "550,270,200,150"
+	+dl => [ 	// attr => scalar	dl attr
+		[ "データ編集"	// dt-inner
+		.dialog-view => [	// dd.attr
+			.dialog-panel => [	// div-section
+				table.form => [
+					tr => [ th => [ 所属セクション: ] td => [ "span.boldtxt section" => [] ] ]
+					tr => [ th => [ タイトル: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
+					tr => [ th => [ 内容: ] td => [ textarea.contents[contents] => [ rows => 10 cols => 50 ] ] ]
+				]
+				<hr>
+				.center => [ "span.button closeButton#edit_paragraph" => [ "更新" ] ]
 			]
-			<hr>
-			.center => [ input => [ type => submit value => "更新" ] ]
-		]
-	] ]
+		] ]
+	]
 ]
 //=========================================
 // パラグラフ追加・フロートウィンドウ
-".floatWindow#add_dialog" => [ size => "550,350,250,200"
+".floatWindow#add_dialog" => [ size => "550,270,200,150"
 	dl => [ dt => [ "データ追加" ]	// タイトル定義
-	dd => [							// データ表示領域
-		div.dialog-data => [
+	dd.dialog-view => [							// データ表示領域
+		div.dialog-panel => [
 			table.form => [
-				tr => [ th => [ 所属セクション: ] td => [ span.boldtxt#section => [] ] ]
-				tr => [ th => [ タイトル: ] td => [ input#title[title] => [ type => text size => 48 ] ] ]
-				tr => [ th => [ 内容: ] td => [ textarea#contents[contents] => [ rows => 10 cols => 50 ] ] ]
+				tr => [ th => [ 所属セクション: ] td => [ "span.boldtxt section" => [] ] ]
+				tr => [ th => [ タイトル: ] td => [ -input.title[title] => [ type => text size => 48 ] ] ]
+				tr => [ th => [ 内容: ] td => [ textarea.contents[contents] => [ rows => 10 cols => 50 ] ] ]
 			]
 			<hr>
-			.center => [ input => [ type => submit value => "更新" ] ]
+			.center => [ "span.button closeButton#new_paragraph" => [ "追加" ] ]
 		]
 	] ]
 ]

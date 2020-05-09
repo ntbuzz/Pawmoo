@@ -71,7 +71,6 @@ h1,h2 {
 }
 .css-cancel{
   display: inline-block;
-  position: relative;
   margin: 0 20px 0 7px;
   padding: 0;
   width: 4px;

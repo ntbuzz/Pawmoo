@@ -72,6 +72,7 @@ class AppObject {
     }
 //==================================================================================================
 // 動的クラスプロパティを生成
+// すでにロード済みの場合
     protected function addSubclass($PropName) {
         APPDEBUG::MSG(10, $PropName . " を動的生成します。");
         if(isset($this->$PropName)) return $this->$PropName;
@@ -81,12 +82,6 @@ class AppObject {
             $this->$PropName = new $props($this);
     	    return $this->$PropName;
         }
-
-        // モデルファイルを探索
-        $modtop = App::AppPath("modules/{$PropName}");
-    $reqfile = "{$modtop}/{$modname}{$classname}.php";
-    return file_exists($reqfile);           // ファイルが存在するか
-
 		throw new Exception("SubClass Create Error for '{$props}'");
     }
 //==================================================================================================
@@ -100,43 +95,42 @@ class AppObject {
             $this->$PropName = new $props($this);
             return $this->$PropName;
         }
-        // ファイルがあればロードする
+        // Models, modules フォルダにファイルがあればロードする
         foreach(["Models","modules/{$PropName}"] as $model) {
             $modfile = App::AppPath("{$model}/{$props}.php");
-//echo getcwd() . " / CHECK:{$modfile}\n";
             if(file_exists($modfile)) {
                 require_once($modfile);
                 $this->$PropName = new $props($this);
                 return $this->$PropName;
             }
         }
+        // 見つからなかった
         throw new Exception("SubClass Create Error for '{$props}'");
 }
 //===============================================================================
 // 言語リソース値を取り出す
 // allow_array が TRUE なら値が配列になるものを許可する
-    public function _($defs, $allow_array = FALSE) {
-        return LangUI::get_value($this->LocalePrefix, $defs, $allow_array);
-    }
-    protected function __($defs, $allow_array = FALSE) {
-        return LangUI::get_value('core', $defs, $allow_array);
-    }
+public function _($defs, $allow_array = FALSE) {
+    return LangUI::get_value($this->LocalePrefix, $defs, $allow_array);
+}
+protected function __($defs, $allow_array = FALSE) {
+    return LangUI::get_value('core', $defs, $allow_array);
+}
 //===============================================================================
 // 言語リソース値から連想配列の要素を取り出す
-    public function _in($arr,$defs) {
-        return LangUI::get_array($arr, $this->LocalePrefix, $defs);          // 言語識別子から排列要素を取得する
-    }
-    protected function __in($arr,$defs) {
-        return LangUI::get_array($arr, 'core', $defs);          // 言語識別子から排列要素を取得する
-    }
+public function _in($arr,$defs) {
+    return LangUI::get_array($arr, $this->LocalePrefix, $defs);          // 言語識別子から排列要素を取得する
+}
+protected function __in($arr,$defs) {
+    return LangUI::get_array($arr, 'core', $defs);          // 言語識別子から排列要素を取得する
+}
 //==================================================================================================
 // 実行時間
-    public static function RunTime($func,$arg) {
-    	$start = getUnixTimeMillSecond();
-//        $this->$func($arg);
-		$finish = getUnixTimeMillSecond();
-		$this->RunTime = array($start,$finish);
-    }
+public static function RunTime($func,$arg) {
+    $start = getUnixTimeMillSecond();
+    $finish = getUnixTimeMillSecond();
+    $this->RunTime = array($start,$finish);
+}
 //==================================================================================================
 
 }

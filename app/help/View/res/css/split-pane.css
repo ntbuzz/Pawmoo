@@ -17,7 +17,8 @@
 /* 左右分割 */
 #left-component {
 	width: 16em; /* Same as divider left */
-    white-space: nowrap
+	white-space: nowrap;
+
 }
 #v-divider {
 	left: 16em;

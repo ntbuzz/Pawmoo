@@ -2,7 +2,7 @@
 バルーンヘルプ表示CSS
 */
 .baloon-BK,.popup-BK {
-    z-index:32;
+    z-index:1;
     display:none;
     position:fixed;
     top:0;
@@ -14,16 +14,16 @@
 .baloon-BK:not(:target) {height:100%\9} /* IE9,10 */
 /*    ポップアップ吹き出し */
 .popup-baloon {
-  position:fixed;
-  display:none;
-  z-index:33;
-  margin-top: 16px;
-  padding: 5px 10px 10px 15px;
-  border: 1px solid gray;
-  border-radius:12px;
-  background: lightyellow;
-  font-size:10pt;
-  color:black;
+    z-index:2;
+    position:fixed;
+    display:none;
+    margin-top: 16px;
+    padding: 5px 10px 10px 15px;
+    border: 1px solid gray;
+    border-radius:12px;
+    background: lightyellow;
+    font-size:10pt;
+    color:black;
 }
 /* 左フキダシ部分を作成 */
 .baloon-left:before {
@@ -64,9 +64,9 @@
 }
 /* ポップアップボックス */
 .popup-box {
+    z-index:2;
     position:fixed;
     display:none;
-    z-index:33;
     padding:10px;
     border: 1px outset silver;
     border-radius:3px;
@@ -79,8 +79,8 @@
 }
 /*	padding: 0px 10px;	/* [上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
 .popup-box span.resize {
+    z-index:1;
     position:absolute;
-    z-index:35;
     right:0;
     bottom:0;
     width:12px;
@@ -89,25 +89,26 @@
     background: url(res/img/resize.png) no-repeat left top;
 }
 .popup-box span.resize_message {
-    border: 1px dashed gray;
+    z-index:1;
     display:none;
-    width: 120px;
-    height: 1.5em;
+    position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-    position: absolute;
+    width: 120px;
+    height: 1.5em;
     margin: auto;
     user-select:none;
     text-align: center;
+    border: 1px dashed gray;
     background-color:floralwhite;
 }
 
 /* close button */
 .popup-box span.close {
+    z-index:1;
     position:absolute;
-    z-index:109;
     top:0;
     right: 5px;
     width:23px;
@@ -126,7 +127,6 @@
     padding-top:1px;
 }
 .popup-box .contents {
-    position:relative;
     overflow-y:auto;
     overflow-x:hidden;
     width:100%;

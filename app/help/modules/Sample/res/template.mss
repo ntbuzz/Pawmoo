@@ -6,7 +6,7 @@ Stylesheet => [
     '*モジュール固有のテンプレート'
     common => [
         import => [
-            libstyle.css
+//            libstyle.css
             split-pane.css      // 3ペイン分割
             sitemap.css         // ツリーメニュー
             table-sort.css

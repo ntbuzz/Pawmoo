@@ -31,10 +31,10 @@ selector.each(function () {
             // alert("click=" + click);
         selector.fadeOut("fast");   // 全てのウィンドウを消す
         // クローズイベントを登録
-        $(id + " #close, .close, .cancel").click( function() {
+        $(id + " #close, .close, .cancel, .closeButton").click( function() {
             self.fadeOut("fast");
             $(document).unbind("mousemove");
-            $("body").find(".floatBack").remove();
+//            $("body").find(".floatBack").remove();
         });
         // ドロップ属性があればエレメントを初期化する
         if( self.attr("class").indexOf("drop") !== -1) {
@@ -42,7 +42,11 @@ selector.each(function () {
             var initdata = self.find("#init").attr("value");
             self.find("#datalist").append(initdata);
         };
-        $("body").append("<div class='floatBack'></div>");
+//        $("body").append("<div class='floatBack'></div>");
+//        $(".floatBack").click(function () {
+//            alert("CLICK!");
+//            return false;
+//        });
         // サイズ属性があればウィンドウサイズを指定する
         if (self.is('[size]')) {
             var sz = self.attr("size").split(',');
@@ -65,7 +69,6 @@ selector.each(function () {
             });
         });
         $(window).resize();
-//            self.resize();
         return false;
     });
     // タイトルバーのドラッグ

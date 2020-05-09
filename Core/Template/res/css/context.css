@@ -25,3 +25,6 @@
 .context-menu > li.disable {
 	color:silver;
 }
+.hilight {
+	border: 1px dashed blue;
+}

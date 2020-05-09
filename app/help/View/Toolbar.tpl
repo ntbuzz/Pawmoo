@@ -2,7 +2,7 @@
 .font20#toolbar => [
 	.rightitem => [
 		<input type="text" class="font16" id="c00" size="20" name="cc">
-		"span.open-popup-link font24#popup-dialog" => [ ≡ ]
+		"span.font24#popup-dialog" => [ ≡ ]
 	]
 	+ul#menu => [
 		#li => [ %${#Toolbar.home} => "/index" ]		 //  ハイパーリンク

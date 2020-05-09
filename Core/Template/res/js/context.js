@@ -18,7 +18,9 @@ if (typeof popup_menu_function == "object") {
 //                    console.log(func);
                     $("#"+func).mousedown(function(e){ 
                         self.hide(); 
-                        return popup_menu_function[func]($(ref_id+".selected"));
+                        $(ref_id).removeClass('hilight');  // 全部のクラスを変更
+                        popup_menu_function[func]($(ref_id + ".selected"));
+                        return false;   // 親要素に処理させない
                     });
                 } else {
                     $(this).addClass('disable');
@@ -28,7 +30,11 @@ if (typeof popup_menu_function == "object") {
                 // イベント発生位置(クリック位置)を基準にメニューを表示
                 self.css({'left': e.pageX + 'px','top': e.pageY + 'px'}).show();
                 // 画面クリックでメニュー非表示
-                $(document).mousedown(function() { self.hide(); });
+                $(document).mousedown(function () {
+                    $(ref_id).removeClass('hilight');  // 全部のクラスを変更
+                    self.hide();
+                    return true;   // 親要素に処理させない
+                });
                 // ブラウザのコンテキストメニューを起動しない。
                 return false;
             }).mousedown(function (e) {
@@ -36,7 +42,8 @@ if (typeof popup_menu_function == "object") {
                 // which の値は  1 : 左ボタン、2 : 中央ホイール、3 : 右ボタン
                 if (e.which == 3) {
                     $(ref_id).removeClass('selected');  // 全部のクラスを変更
-                    $(this).addClass('selected');       // クリックされた要素のみ
+                    $(this).addClass('selected hilight');       // クリックされた要素のみ
+                    return false;   // 親要素に処理させない
                 }
             });
 

@@ -21,7 +21,6 @@
 	overflow: hidden;
 }
 .pager .navigate {
-	position:relative;
 	float:left;
 /*	overflow: hidden;*/
 }
@@ -74,7 +73,6 @@
 	padding: 0;
 }
 .pager .rightalign {
-	position: relative;
 	float:right;
 	font-size: 10pt;
 	margin: 0 15px;

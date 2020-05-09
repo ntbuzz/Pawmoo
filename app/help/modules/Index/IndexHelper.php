@@ -22,7 +22,8 @@ dump_debug(0,[ "アウトライン" => $this->MyModel->outline]);
         echo "<li${first}><span class='folder'>{$chapter[title]}</span>\n";
         echo "<ul>\n";
         foreach($chapter['child'] as $kk => $val) {
-            echo "<li><span class='file'>";
+            $cls = ($val['id'] == App::$Params[1]) ? ' selected':'';
+            echo "<li><span class='file{$cls}'>";
             $this->ALink("view/{$key}/{$val[id]}",$val['title']);
             echo "</span></li>\n";
         }

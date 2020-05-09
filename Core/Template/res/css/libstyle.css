@@ -1,4 +1,5 @@
 @charset "UTF-8";
+/* フレームワークの基本スタイル */
 /*	padding: 0px 10px;	/* [上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
 * {
     position: relative;
@@ -16,21 +17,36 @@ html, body {
     min-width: 100%;
     height: 100%;
     min-height: 100%;
-    user-select:none;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
 }
+
 .icon {
     margin: 0 2px;
     cursor:pointer;
     box-shadow: 1px 1px 2px #000;
     background: linear-gradient(to bottom, white, silver);
 }
-/* ---------------- */
-/*
-.list-view {
-    height:100%;
-    background-color: white;
+
+.button	{
+	border-top: 1px solid #ccc;
+	border-right: 1px solid #999;
+	border-bottom: 1px solid #999;
+	border-left: 1px solid #ccc;
+	padding: 2px 8px;
+	font-weight: bold;
+	font-size:9pt;
+	cursor: pointer;
+	color: #666;
+	border-radius: 2px;
+	text-shadow: 0 -1px 1px #FFF, -1px 0 1px #FFF, 1px 0 1px #aaa;
+	box-shadow: 1px 1px 2px #E7E7E7;
+	background: -moz-linear-gradient(top, #fff, #F1F1F1 1%, #F1F1F1 50%, #DFDFDF 99%, #ccc);
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), color-stop(0.01, #F1F1F1), color-stop(0.5, #F1F1F1), color-stop(0.99, #DFDFDF), to(#ccc));
 }
-*/
+.button:hover {
+	background: -moz-linear-gradient(top, #fff, #e1e1e1 1%, #e1e1e1 50%, #cfcfcf 99%, #ccc);
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), color-stop(0.01, #e1e1e1), color-stop(0.5, #e1e1e1), color-stop(0.99, #cfcfcf), to(#ccc));
+}
+.button:active {
+	background: #aaa;  
+	padding: 6px 10px 4px;  
+}

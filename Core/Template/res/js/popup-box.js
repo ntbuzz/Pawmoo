@@ -65,22 +65,8 @@ selector.each(function () {
                     $('.popup-BK').remove();
                 });
             });
-/*
-            // バルーン領域以外をクリックしたらバルーンを消して領域を削除
-            $('.popup-BK').off().click(function (e) {
-                if (!bound.inBound(22, e.pageX, e.pageY)) {
-                    // モーダルコンテンツとオーバーレイをフェードアウト
-                    self.fadeOut('fast');
-                    $('.popup-BK').fadeOut('fast',function(){
-                        // オーバーレイを削除
-                        $('.popup-BK').remove();
-                    });
-                }
-            });
-*/
         });
         // リサイズのドラッグ
-
         $(resize_id).on('mousedown', function(e) {
             self.data("clickPointX", e.pageX)
                 .data("clickPointY", e.pageY);

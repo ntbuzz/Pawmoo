@@ -28,51 +28,51 @@ class AppView extends AppObject {
     }
 //==================================================================================================
 // クラス固有の初期化
-protected function __InitClass() {
-    $this->Layout = 'Layout';
-    $this->rep_array = array_merge(App::$SysVAR, App::$Params);       // システム変数とパラメータをマージしておく
-    parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
-}
+    protected function __InitClass() {
+        $this->Layout = 'Layout';
+        $this->rep_array = array_merge(App::$SysVAR, App::$Params);       // システム変数とパラメータをマージしておく
+        parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
+    }
 //===============================================================================
 // デフォルトレイアウト変更
 //===============================================================================
-    public function SetLayout($layoutfile) {
-        $tmplate = $this->getTemplateName($layoutfile);   // ビューフォルダのテンプレート
-        if(!file_exists($tmplate)) {                // 存在しないなら共通のテンプレートを探す
-            $layoutfile = 'Layout';
-        }
-        $this->Layout = $layoutfile;
+public function SetLayout($layoutfile) {
+    $tmplate = $this->getTemplateName($layoutfile);   // ビューフォルダのテンプレート
+    if(!file_exists($tmplate)) {                // 存在しないなら共通のテンプレートを探す
+        $layoutfile = 'Layout';
     }
+    $this->Layout = $layoutfile;
+}
 //===============================================================================
 // レイアウト出力
 //===============================================================================
-    public function PutLayout() {
-        APPDEBUG::MSG(0, $this->Layout,'$Layout');
-        $this->ViewTemplate($this->Layout);
-        $this->doTrailer = TRUE;
-    }
+public function PutLayout() {
+    APPDEBUG::MSG(0, $this->Layout,'$Layout');
+    $this->ViewTemplate($this->Layout);
+    $this->doTrailer = TRUE;
+}
 //===============================================================================
 // ページ出力完了
-    function __TerminateView() {
-        APPDEBUG::MSG(10, $this);
-		if($this->doTrailer) {
-            $tmplate = $this->getTemplateName('Trailer');   // ビューフォルダのテンプレート
-            $Helper = $this->Helper;
-            if($tmplate !== NULL) require_once ($tmplate);
-            // リクエストURLと処理メソッドが違っていたとき
-            $req = App::$SysVAR['METHOD'];
-            $act = App::$SysVAR['CONTROLLER']."/". App::$SysVAR['method'];
-            if($req !== $act) {
-                APPDEBUG::MSG(1,$act, "URL書換");
-                $url = "{$act}/" . App::$SysVAR['PARAMS'];
-                echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";
-            }
-            if(DEBUGGER) {
-                APPDEBUG::MSG_SORT();                   // メッセージ要素の並べ替え
-                $this->ViewTemplate('debugbar');
-            }
+public function __TerminateView() {
+    APPDEBUG::MSG(10, $this);
+    if($this->doTrailer) {
+        $tmplate = $this->getTemplateName('Trailer');   // ビューフォルダのテンプレート
+        $Helper = $this->Helper;
+        if($tmplate !== NULL) require_once ($tmplate);
+        // リクエストURLと処理メソッドが違っていたとき
+        $req = App::$SysVAR['METHOD'];
+        $act = App::$SysVAR['CONTROLLER']."/". App::$SysVAR['method'];
+        if($req !== $act) {
+            APPDEBUG::MSG(1,$act, "URL書換");
+            $url = "{$act}/" . App::$SysVAR['PARAMS'];
+            echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";
+        }
+        if(DEBUGGER) {
+            APPDEBUG::MSG_SORT();                   // メッセージ要素の並べ替え
+            $this->ViewTemplate('debugbar');
         }
     }
+}
 //===============================================================================
 // テンプレートファイルがビュークラスフォルダに存在しなければ共通のテンプレートを探す
     private function getTemplateName($name) {
@@ -94,50 +94,43 @@ protected function __InitClass() {
     }
 //===============================================================================
 // システム変数＋URIパラメータへの置換処理
-private function replaceArrays($vars, $content) {
-    // あらかじめマージしたシステム変数と環境変数をマージし置換配列を生成する
-    $vals = array_merge($vars,$this->rep_array);
-    $keyset = array_map(function($a) { return (is_numeric($a))?"{%{$a}%}":"{\${$a}\$}";}, array_keys($vals));
-    // デバッグ情報
-    APPDEBUG::arraydump(11,["Replace" => array_combine($keyset, $vals)]);
-    return str_replace ( $keyset, $vals , $content );    // 置換配列を使って一気に置換
-}
+    private function replaceArrays($vars, $content) {
+        // あらかじめマージしたシステム変数と環境変数をマージし置換配列を生成する
+        $vals = array_merge($vars,$this->rep_array);
+        $keyset = array_map(function($a) { return (is_numeric($a))?"{%{$a}%}":"{\${$a}\$}";}, array_keys($vals));
+        // デバッグ情報
+        APPDEBUG::arraydump(11,["Replace" => array_combine($keyset, $vals)]);
+        return str_replace ( $keyset, $vals , $content );    // 置換配列を使って一気に置換
+    }
 //===============================================================================
 //　レイアウトテンプレート処理
-    public function ViewTemplate($name,$vars = []) {
-        $tmplate = $this->getTemplateName($name);   // ビューフォルダのテンプレート
-        if(isset($tmplate)) {
-//            extract($vars);                 // 連想配列要素を変数をローカルスコープで定義
-            $ext = substr($tmplate,strrpos($tmplate,'.') + 1);    // 拡張子を確認
-            $ix = array_search($ext, self::Extensions);
-            switch($ix) {       //   [ .tpl, .php, .inc, .twg ]
-            case 0:     // '.tpl'   div Section
-                $parser = new SectionParser($tmplate);
-                $divSection = $parser->getSectionDef();
-                $this->SectionLayout($divSection,$vars);
-                break;
-            case 1:     // 'php'     // PHP Template
-                extract($vars);             // 変数展開
-//                $Params = App::$argv;       // App::$Params;
-//                $ParamCount = App::$argc;   // count($Params);
-                $Helper = $this->Helper;    // ヘルパークラス
-                $RecData = $this->Model->RecData;    // レコードデータ
-                $Records = $this->Model->Records;    // レコードリスト
-                $Header = $this->Model->Header;    // スキーマヘッダ
-                require_once ($tmplate);
-                break;
-            case 2:     // 'inc':     // HTML template
-                $content = file_get_contents($tmplate);
-                // システム変数＋URIパラメータへの置換処理
-                echo $this->replaceArrays($vars, $content);
-                break;
-//            case 3:     // 'twg':     // TWIG Template
-                // Render our view
-//                echo $this->twig->render('Layout.twg',$vars);
-                break;
-            }
+public function ViewTemplate($name,$vars = []) {
+    $tmplate = $this->getTemplateName($name);   // ビューフォルダのテンプレート
+    if(isset($tmplate)) {
+        $ext = substr($tmplate,strrpos($tmplate,'.') + 1);    // 拡張子を確認
+        $ix = array_search($ext, self::Extensions);
+        switch($ix) {       //   [ .tpl, .php, .inc, .twg ]
+        case 0:     // '.tpl'   div Section
+            $parser = new SectionParser($tmplate);
+            $divSection = $parser->getSectionDef();
+            $this->SectionLayout($divSection,$vars);
+            break;
+        case 1:     // 'php'     // PHP Template
+            extract($vars);             // 変数展開
+            $Helper = $this->Helper;    // ヘルパークラス
+            $RecData = $this->Model->RecData;    // レコードデータ
+            $Records = $this->Model->Records;    // レコードリスト
+            $Header = $this->Model->Header;    // スキーマヘッダ
+            require_once ($tmplate);
+            break;
+        case 2:     // 'inc':     // HTML template
+            $content = file_get_contents($tmplate);
+            // システム変数＋URIパラメータへの置換処理
+            echo $this->replaceArrays($vars, $content);
+            break;
         }
     }
+}
 //===============================================================================
 // タグ文字列の分解
     private function TagInfo($val) {
@@ -190,32 +183,32 @@ private function replaceArrays($vars, $content) {
     }
 //===============================================================================
 //  変数を置換する
-private function expand_walk(&$val, $key, $vars) {
-    if($val[0] === '$') {           // 先頭の一文字が変数文字
-        $var = mb_substr($val,1);
-        $var = trim($var,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
-        switch($var[0]) {
-        case '@': $var = mb_substr($var,1);     // レコードデータの参照指定
-            $val = $this->Model->RecData[$var]; // レコードのフィールド値で置換
-            break;
-        case '#': $var = mb_substr($var,1);     // 言語ファイルの参照
-            $val = $this->_($var);              // 言語ファイルの定義配列から文字列を取り出す
-            break;
-        case '%': $var = mb_substr($var,1);     // URLの引数番号
-            $val = App::$Params[$var];          // Params[] プロパティから取得
-            break;
-        case '$': $var = mb_substr($var,1);     // システム変数値
-            $val = App::$SysVAR[$var];          // SysVAR[] プロパティから取得
-            break;
-        default:
-            if(isset($vars[$var])) {
-                $val = $vars[$var];             // 環境変数で置換
-            } else if(isset($this->$var)) {
-                $val = $this->$var;             // プロパティ変数で置換
+    private function expand_walk(&$val, $key, $vars) {
+        if($val[0] === '$') {           // 先頭の一文字が変数文字
+            $var = mb_substr($val,1);
+            $var = trim($var,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
+            switch($var[0]) {
+            case '@': $var = mb_substr($var,1);     // レコードデータの参照指定
+                $val = $this->Model->RecData[$var]; // レコードのフィールド値で置換
+                break;
+            case '#': $var = mb_substr($var,1);     // 言語ファイルの参照
+                $val = $this->_($var);              // 言語ファイルの定義配列から文字列を取り出す
+                break;
+            case '%': $var = mb_substr($var,1);     // URLの引数番号
+                $val = App::$Params[$var];          // Params[] プロパティから取得
+                break;
+            case '$': $var = mb_substr($var,1);     // システム変数値
+                $val = App::$SysVAR[$var];          // SysVAR[] プロパティから取得
+                break;
+            default:
+                if(isset($vars[$var])) {
+                    $val = $vars[$var];             // 環境変数で置換
+                } else if(isset($this->$var)) {
+                    $val = $this->$var;             // プロパティ変数で置換
+                }
             }
         }
     }
-}
 //===============================================================================
 //  セクション要素内の変数を展開する
     private function expandSectionVar($vv,$vars) {
@@ -246,21 +239,21 @@ private function expand_walk(&$val, $key, $vars) {
 }
 //===============================================================================
 // 配列をマージ
-private function my_array_merge($arr1,$arr2) {
-    foreach($arr2 as $key => $val) {
-        if($key[0] === '+') {
-            $var = substr($key,1);                            // + 記号を取り除いた名前
-            if(isset($arr1[$var])) {
-                $arr1[$var] = array_merge($val,$arr1[$var]);  // 既存配列にマージ
+    private function my_array_merge($arr1,$arr2) {
+        foreach($arr2 as $key => $val) {
+            if($key[0] === '+') {
+                $var = substr($key,1);                            // + 記号を取り除いた名前
+                if(isset($arr1[$var])) {
+                    $arr1[$var] = array_merge($val,$arr1[$var]);  // 既存配列にマージ
+                } else {
+                    $arr1[$var] = $val . $arr1[$var];             // 既存文字列にマージ
+                }
             } else {
-                $arr1[$var] = $val . $arr1[$var];             // 既存文字列にマージ
+                $arr1[$key] = $val;               // 既存配列を置換
             }
-        } else {
-            $arr1[$key] = $val;               // 既存配列を置換
         }
+        return $arr1;
     }
-    return $arr1;
-}
 //===============================================================================
 //  配列要素を持つタグ要素の処理(テンプレート用)
     private function SectionLayout($divSection, $vars = []) {
@@ -331,27 +324,26 @@ private function my_array_merge($arr1,$arr2) {
     }
 //===============================================================================
 // セクションレイアウト出力
-private function directOutput($beg_tag, $end_tag,$sec) {
-    echo "{$beg_tag}\n";
-    if(is_array($sec)) {
-        foreach($sec as $vv) echo "{$vv}\n";
-    } else echo "{$sec}\n";
-    echo "{$end_tag}\n";
-}
+    private function directOutput($beg_tag, $end_tag,$sec) {
+        echo "{$beg_tag}\n";
+        if(is_array($sec)) {
+            foreach($sec as $vv) echo "{$vv}\n";
+        } else echo "{$sec}\n";
+        echo "{$end_tag}\n";
+    }
 //===============================================================================
 // スカラー要素をピックアップして属性値を返す
-private function getAttribute($sec) {
-    $attr = '';  // キー名のある要素かつ配列値でない要素のみ属性値指定として取出す
-    foreach($sec as $kk => $vv) {
-        if( !is_numeric($kk) && !is_array($vv)) $attr .= " {$kk}=\"{$vv}\"";
+    private function getAttribute($sec) {
+        $attr = '';  // キー名のある要素かつ配列値でない要素のみ属性値指定として取出す
+        foreach($sec as $kk => $vv) {
+            if( !is_numeric($kk) && !is_array($vv)) $attr .= " {$kk}=\"{$vv}\"";
+        }
+        return $attr;
     }
-    return $attr;
-}
 //===============================================================================
 // セクションレイアウト出力
     private function SectionItemOutput($key, $sec,$vars) {
         $sec = $this->expandSectionVar($sec,$vars);
-//      APPDEBUG::arraydump(10,["VARS" => $vars,"KEY:{$key}" => $sec]);
         $call = (is_numeric($key)) ? $sec : $key;
         $tag = $this->TagInfo($call);
         $tagname = $tag['tagname'];
@@ -412,15 +404,29 @@ private function getAttribute($sec) {
                     echo "</{$tagname}>\n";
                     break;
                 case 'dl':      // 定義リスト要素
-//vardump($sec);
                     $attr = $this->getAttribute($sec);  // キー名のある要素かつ配列値でない要素のみ属性値指定として取出す
                     echo "<{$htmltag}{$attr}>\n";    // dl タグ
-                    // リスト要素の出力
-                    foreach($sec as $kk => $vv) {
-                        if( is_array($vv) ) {     //  連想配列要素はDTセクション＞DDセクション
-                            $dttag = $this->TagInfo($kk);                   // DTのインナーテキストを取得
-                            echo "<dt$dttag[attr]>$dttag[tagname]</dt>\n";  // タグ名がインナーテキストになる
-                            $this->SectionItemOutput('dd', $vv,$vars);      // DDセクションは通常出力
+                    foreach($sec as $dtkey => $dtsec) {
+                        if( is_array($dtsec) ) {        //  連想配列要素だけを処理する
+                            $dt_text = "";          // DTのインナーテキスト
+                            $dt_attr = "";
+                            foreach($dtsec as $kk => $vv) {
+                                if(!is_array($vv)) {        // スカラー要素＝インナーテキスト or DT Attribute
+                                    if(is_numeric($kk)) $dt_text .= $vv;
+                                    else  $dt_attr .= " {$kk}=\"{$vv}\"";
+                                }
+                            }
+                            if(!is_numeric($dtkey)) {
+                                $dttag = $this->TagInfo($dtkey);    // DTのクラス属性
+                                $$dt_attr .= $dttag[attr];       // タグ名がインナーテキストになる
+                            }
+                            echo "<dt{$dt_attr}>$dt_text</dt>\n";  // タグ名がインナーテキストになる
+                            foreach($dtsec as $kk => $vv) {
+                                if(is_array($vv)) {        // スカラー要素＝インナーテキスト or DT Attribute
+                                    $dd_attr = (is_numeric($kk)) ? '' : $kk;
+                                    $this->SectionItemOutput("dd{$dd_attr}", $vv,$vars);      // DDセクションは通常出力
+                                }
+                            }
                         } else if( is_numeric($kk) ) { // キー名を持たないスカラー要素は単純リスト
                             echo "<dt></dt><dd>{$vv}</dd>\n";
                         }

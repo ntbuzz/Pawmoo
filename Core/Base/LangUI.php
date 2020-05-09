@@ -39,20 +39,20 @@ class LangUI {
     }
 //==================================================================================================
 //  言語ファイルの読み込み
-    public static function LangFiles($files) {
-        if(is_array($files)) {          // 配列引数の時は各要素を言語ファイルとして処理
-            $msg = '';
-            foreach($files as $lang_file) {
-                self::LoadLang($lang_file);
-                $msg .= "[{$lang_file}]";
-            }
-        } else {
-            self::LoadLang($files);        // スカラー引数は単独読み込み
-            $msg = $files;
+public static function LangFiles($files) {
+    if(is_array($files)) {          // 配列引数の時は各要素を言語ファイルとして処理
+        $msg = '';
+        foreach($files as $lang_file) {
+            self::LoadLang($lang_file);
+            $msg .= "[{$lang_file}]";
         }
-        $msg = self::$Locale . " / " . trim($msg,' /');
-        APPDEBUG::MSG(5, self::$STRINGS, "ロケール({$msg})");
+    } else {
+        self::LoadLang($files);        // スカラー引数は単独読み込み
+        $msg = $files;
     }
+    $msg = self::$Locale . " / " . trim($msg,' /');
+    APPDEBUG::MSG(5, self::$STRINGS, "ロケール({$msg})");
+}
 //==================================================================================================
 //  セクション要素から空配列を削除する
     private static function emptyDelete($arr) {
@@ -133,40 +133,40 @@ class LangUI {
 //==================================================================================================
 // ネストされた配列変数を取得する、要素名はピリオドで連結したキー名
 //  ex. Menu.File.OPEN  大文字小文字は区別される
-    public static function get_value($mod, $id, $allow) {
-        //-----------------------------------------
-        // 無名関数を定義して配列内の探索を行う
-        $array_finder = function ($lst, $arr, $allow) {
-                foreach($lst as $val) {
-                    if(array_key_exists($val, $arr)) {
-                        $arr = $arr[$val];
-                    } else return FALSE;        // 見つからなかった時
-                }
-                if(is_array($arr)) {          // 見つけた要素が配列なら
-                    return ($allow) ? $arr :    // 配列を要求されていれば配列で返す
-                        ( (isset($arr[0])) ? $arr[0] :     // 0番目の要素があれば値を返す
-                                            FALSE);         // そうでなければエラー
-                }
-                return $arr;        // スカラー値はそのまま返す
-            };
-        //-----------------------------------------
-        if($id[0] == '.') {        // 相対検索ならモジュール名を使う
-            $lst = explode('.', "{$mod}{$id}");
-            if( ($a=$array_finder($lst,self::$STRINGS,$allow)) !== FALSE) {
-                return $a;
+public static function get_value($mod, $id, $allow) {
+    //-----------------------------------------
+    // 無名関数を定義して配列内の探索を行う
+    $array_finder = function ($lst, $arr, $allow) {
+            foreach($lst as $val) {
+                if(array_key_exists($val, $arr)) {
+                    $arr = $arr[$val];
+                } else return FALSE;        // 見つからなかった時
             }
-            array_shift($lst);      // 先頭のモジュール名要素を消す
-        } else $lst = explode('.', $id);    // 絶対検索
-        if( ($a=$array_finder($lst,self::$STRINGS,$allow)) !== FALSE) {     // 
+            if(is_array($arr)) {          // 見つけた要素が配列なら
+                return ($allow) ? $arr :    // 配列を要求されていれば配列で返す
+                    ( (isset($arr[0])) ? $arr[0] :     // 0番目の要素があれば値を返す
+                                        FALSE);         // そうでなければエラー
+            }
+            return $arr;        // スカラー値はそのまま返す
+        };
+    //-----------------------------------------
+    if($id[0] == '.') {        // 相対検索ならモジュール名を使う
+        $lst = explode('.', "{$mod}{$id}");
+        if( ($a=$array_finder($lst,self::$STRINGS,$allow)) !== FALSE) {
             return $a;
         }
-        return array_pop($lst);     // 見つからなければ識別子の末尾要素を返す
+        array_shift($lst);      // 先頭のモジュール名要素を消す
+    } else $lst = explode('.', $id);    // 絶対検索
+    if( ($a=$array_finder($lst,self::$STRINGS,$allow)) !== FALSE) {     // 
+        return $a;
     }
+    return array_pop($lst);     // 見つからなければ識別子の末尾要素を返す
+}
 //==================================================================================================
 // ネストされた配列変数を取得する、要素名はピリオドで連結したキー名
 //  ex. Menu.File.OPEN  大文字小文字は区別される
-    public static function get_array($arr, $mod, $var) {
-        $element = self::get_value($mod,$var,FALSE);
-        return $arr[$element];
-    }
+public static function get_array($arr, $mod, $var) {
+    $element = self::get_value($mod,$var,FALSE);
+    return $arr[$element];
+}
 }

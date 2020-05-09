@@ -1,11 +1,11 @@
 // ツールバー
 .font20#toolbar => [
 	.leftitem => [
-		"span.open-popup-link font24#popup-left" => [ ■ ] span.help_icon#popup-left-help => []
+		"span.font24#popup-left" => [ ■ ] span.help_icon#popup-left-help => []
 	]
 	.rightitem => [
 		<input type="text" class="font16" id="c00" size="20" name="cc">
-		"span.open-popup-link font24#popup-dialog" => [ ≡ ]
+		"span.font24#popup-dialog" => [ ≡ ]
 	]
 	+ul#menu => [
 		#li => [ %${#Toolbar.home} => "/index" ]		 //  ハイパーリンク
@@ -51,4 +51,5 @@
 			]
 		]
 	]
+
 ]

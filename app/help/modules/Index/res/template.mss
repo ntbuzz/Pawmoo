@@ -24,6 +24,7 @@ Javascript => [
             site-menu.js
             split-pane.js      // 3ペイン分割
             table-sort.js?theme=green    // テーマは blue
+            dialog.js
         ]
         import => popup-menu.js
         section => ^common       // 上位のセクションを呼出す
