@@ -39,7 +39,6 @@
 +ul.context-menu#popup_menu{.paragraph} => [
 	#ctxEdit => [ 段落編集(ent) ]
 	#ctxIns  => [ 段落挿入(Ins) ]
-	#ctxUndo => [ 段落取消(esc) ]
 	[ <hr> ]
 	#ctxDel => [ 段落削除(del) ]
 ]

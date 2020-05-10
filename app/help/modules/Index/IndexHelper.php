@@ -52,8 +52,8 @@ public function SectionContents() {
         echo "<li{$sel}>";
         echo "<div class='section' id='$sec[id]' data-disp='$sec[disp_id]' data-parent='$sec[chapter_id]'>";
         echo "<h2 class='title'>$sec[title]</h2>\n";
-        if(isset($sec['content'])) {
-            echo "<div class='description'>$sec[content]</div>\n";
+        if(isset($sec['contents'])) {
+            echo "<div class='description'>$sec[contents]</div>\n";
         }
         echo "<hr>\n";
         foreach($sec['本文'] as $val) {

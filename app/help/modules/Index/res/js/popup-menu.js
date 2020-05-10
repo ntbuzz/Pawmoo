@@ -19,6 +19,20 @@ var popup_menu_function = {
         });
 //        return false;
     },
+    "ctxIns": function (obj) {
+        var sectitle = obj.parents('.section').find(".title").text();
+        var mydisp = obj.attr("data-disp")
+        var secid = obj.attr("data-parent")
+//        alert(secid);
+        $("#add_dialog").floatWindow(function (e) {
+            e.find('.dialog-form').attr("data-parent", secid);
+            e.find('.section').text(sectitle);
+            e.find('input[name="dispno"]').attr("value",mydisp-1); // inputタグ
+            e.find('input[name="title"]').attr("value",''); // inputタグ
+            e.find('.contents').text('');
+        });
+//        return false;
+    },
     "ctxAdd": function (obj) {
         var sectitle = obj.find(".title").text();
         var secid = obj.attr("id");
