@@ -28,7 +28,7 @@
     height:calc(100% - 36px);   /* タイトル:25px＋ リサイズアイコン:11px */
     margin-bottom:11px;
     overflow-x:hidden;
-    overflow-y:text;
+    overflow-y:auto;
 }
 /* フロートウィンドウのタイトル */
 .floatWindow dl dt {

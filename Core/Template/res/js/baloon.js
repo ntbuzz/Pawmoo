@@ -10,7 +10,7 @@ selector.each(function () {
     if (act == "@") ref = ref.slice(1);
     var ev = (act == '@') ? "mouseover" : "click";
     if (ref != "") {
-        var tag = ref.slice(0, 1);            // 先頭が＠ならmouseover
+        var tag = ref.slice(0, 1);
         if (tag == "!") ref = ref.slice(1); // 先頭が！ならアイコン追加しない
         var icon = (tag == "!") ? ref : ref + "-help";
         if ($('#' + icon).length == 0) {
