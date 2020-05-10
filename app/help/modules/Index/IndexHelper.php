@@ -38,8 +38,8 @@ public function SectionTab() {
             $first = '';
         }
     } else {
-        echo "<li class='add-section'>セクション追加</li>\n";
     }
+    echo "<li class='add-section' id='add_baloon'>＋</li>\n";
     echo "</ul>\n";
 }
 //===============================================================================

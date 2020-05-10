@@ -13,24 +13,10 @@
 				li => [ %${#Toolbar.ファイル.終了} => "#" ]
 			]
 		]
-		li => [ %${#Toolbar.編集} => "#"
+		li => [ %${#Toolbar.ドキュメント} => "#"
 			ul.sub => [
-				li => [ %${#Toolbar.編集.コピー} => "#" ]
-				li => [ %${#Toolbar.編集.貼付け} => "#" ]
-				li => [ %${#Toolbar.編集.削除} => "#" ]
-				li => [ %${#Toolbar.編集.取消} => "#" ]
-				li => [ %${#Toolbar.編集.検索} => "#" ]
-			]
-		]
-		li => [ %${#Toolbar.表示} => "#"
-			ul.sub => [
-				li => [ %${#Toolbar.home} => "/index/page/" ]
-				li => [ %${#Toolbar.表示.ホスト} => "/hosts/page/" ]
-				li => [ %${#Toolbar.表示.名前} => "/names/page/" ]
-				li => [ %${#Toolbar.表示.OSリスト} => "/os/page/" ]
-				li => [ %${#Toolbar.表示.ライセンス} => "/licenses/page/" ]
-				li => [ %${#Toolbar.表示.アプリ} => "/apps/page/" ]
-				li => [ %${#Toolbar.表示.BIND} => "/index/bindlist/100/50" ]
+				li => [ %${#Toolbar.ドキュメント.パート追加} => "#" ]
+				li => [ %${#Toolbar.ドキュメント.チャプター追加} => "#" ]
 			]
 		]
 		li => [ %${#Toolbar.管理ページ} => "#"
@@ -43,7 +29,7 @@
 		]
 		li => [ %${#Toolbar.ヘルプ} => "#"
 			"ul.sub" => [
-				li => [ %${#Toolbar.ヘルプ.よくある質問} => "#" ]
+				li => [ %${#Toolbar.ヘルプ.バージョン} => "#" ]
 				li => [ %${#Toolbar.ヘルプ.問合わせ} => "#" ]
 			]
 		]

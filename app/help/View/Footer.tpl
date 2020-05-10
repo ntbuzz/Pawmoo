@@ -1,11 +1,12 @@
 
 // #popup-dialog のマウスオーバーバルーンヘルプ
 .popup-baloon{@!biscuit-help} => [
-~
+pre => [ ~
 PHP簡易フレームワーク<br>
 Biscuit(MAP)のドキュメントです
-~
+~ ]
 ]
+
 .popup-baloon{@popup-dialog} => [
 pre => [ ~
         さまざまなプロパティ
