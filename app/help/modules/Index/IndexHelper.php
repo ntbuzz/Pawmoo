@@ -28,7 +28,7 @@ dump_debug(0,[ "アウトライン" => $this->MyModel->outline]);
 //===============================================================================
 // セクション名をキーにタブ表示する
 public function SectionTab() {
-    echo "<ul class='tab'>\n";
+    echo "<ul class='tab' data-parent='{$this->Chapter}'>\n";
     if($this->Section !== []) {
         $n = 0;
         foreach($this->Section as $key => $val) {
@@ -38,7 +38,7 @@ public function SectionTab() {
             $first = '';
         }
     } else {
-        echo "<li class='new-section' id='$val[id]'>セクション追加</li>\n";
+        echo "<li class='add-section'>セクション追加</li>\n";
     }
     echo "</ul>\n";
 }
@@ -49,16 +49,15 @@ public function SectionContents() {
     $n = 0;
     foreach($this->Section as $key => $sec) {
         $sel = ($this->Tabmenu == $n++) ? '' : ' class="hide"';
-        echo "<li{$sel} id='{$sec[id]}'>";
-        echo "<div class='section' id='$sec[id]'>";
+        echo "<li{$sel}>";
+        echo "<div class='section' id='$sec[id]' data-disp='$sec[disp_id]' data-parent='$sec[chapter_id]'>";
         echo "<h2 class='title'>$sec[title]</h2>\n";
         if(isset($sec['content'])) {
-            echo "<div class='description'>$sec[content]</p>\n";
+            echo "<div class='description'>$sec[content]</div>\n";
         }
         echo "<hr>\n";
         foreach($sec['本文'] as $val) {
-            $id = "{$val[section_id]}-{$val[id]}-{$val[disp_id]}";
-            echo "<div class='paragraph' id='${id}'>";
+            echo "<div class='paragraph' id='$val[id]' data-disp='$val[disp_id]' data-parent='$val[section_id]'>";
             if($val['title']) {
                 echo "<h3 class='caption'>$val[title]</h3>\n";
             }

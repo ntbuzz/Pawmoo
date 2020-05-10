@@ -41,7 +41,7 @@ class IndexController extends AppController {
 		$this->Model->MakeOutline();
 		// Section データを取得
 		$this->Section->getSectionDoc($Chap);
-		$this->ViewSet(['Section' => $this->Section->Records, 'Tabmenu' => $Tabs]);
+		$this->ViewSet(['Chapter' => $Chap, 'Section' => $this->Section->Records, 'Tabmenu' => $Tabs]);
         APPDEBUG::arraydump(3, [
 			'パラメータ' => App::$Params,
             'レコード' => $this->Model->Records,

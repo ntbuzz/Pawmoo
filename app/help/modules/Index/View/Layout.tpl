@@ -54,7 +54,6 @@
 //=========================================
 // セクションタブ・コンテキストメニュー
 "+ul.context-menu#popup_tab{.tab li}" => [
-	#ctxSecEdit => [ セクション編集(ent) ]
 	#ctxSecAdd  => [ セクション追加(f11) ]
 	[ <hr> ]
 	#ctxSecDel => [ セクション削除(del) ]
@@ -69,55 +68,67 @@
 		tr => [ th => [ 内容: ] td => [ textarea.contents[contents] => [ rows => 10 cols => 50 ] ] ]
 	]
 ]
++inline.Sec_data => [
+	table => [
+		tr => [ th => [ 表示位置: ] td => [ -input[dispno] => [ type => text size => 8 ] ] ]
+		tr => [ th => [ タイトル: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
+		tr => [ th => [ タブ表示: ] td => [ -input[short_title] => [ type => text size => 48 ] ] ]
+		tr => [ th => [ セクション説明: ] td => [ textarea.contents[contents] => [ rows => 10 cols => 50 ] ] ]
+	]
+]
 //=========================================
 
 //=========================================
 // パラグラフ編集・フロートウィンドウ
 ".floatWindow#edit_dialog" => [ size => "550,300,200,150"
-	+dl => [ 	// attr => scalar	dl attr
-		[ "データ編集"	// dt-inner
+	+dl => [ [ "データ編集"	// dt-inner
 		.dialog-view => [	// dd.attr
 			.dialog-form => [	// div-section
 				@.Para_data		// インラインセクションの展開
-				-input[id-key] => [ type => hidden ]
 				<hr>
 				.center => [ "span.button closeButton#update_paragraph" => [ "更新" ] ]
 			]
-		] ]
-	]
+		]
+	] ]
 ]
 //=========================================
 // パラグラフ追加・フロートウィンドウ
 ".floatWindow#add_dialog" => [ size => "550,300,200,150"
-	dl => [ dt => [ "データ追加" ]	// タイトル定義
-	dd.dialog-view => [							// データ表示領域
-		div.dialog-form => [
-			@.Para_data		// インラインセクションの展開
-			<hr>
-			.center => [ "span.button closeButton#new_paragraph" => [ "追加" ] ]
+	+dl => [ [ "データ追加"	// dt-inner
+		.dialog-view => [	// dd.attr
+			.dialog-form => [	// div-section
+				@.Para_data		// インラインセクションの展開
+				<hr>
+				.center => [ "span.button closeButton#new_paragraph" => [ "追加" ] ]
+			]
 		]
 	] ]
 ]
 //=========================================
 // セクション編集・フロートウィンドウ
-".floatWindow#edit_section_dialog" => [ size => "500,250,300,150"
-	dl => [ dt => [ "セクション編集" ]	// タイトル定義
-	dd => [							// データ表示領域
-		div.dialog-data => [
-			Section:  input => [ type => text size => 50 ]
-		]		// 表示テーブル
+".floatWindow#edit_section_dialog" => [ size => "550,300,200,150"
+	+dl => [ [ "セクション編集"	// dt-inner
+		.dialog-view => [		// dd.attr
+			.dialog-form => [	// div-section
+				@.Sec_data		// インラインセクションの展開
+				<hr>
+				.center => [ "span.button closeButton#update_section" => [ "更新" ] ]
+			]
+		]
 	] ]
 ]
 //=========================================
 // セクション追加・フロートウィンドウ
-".floatWindow#add_section_dialog" => [ size => "500,250,300,150"
-	dl => [ dt => [ "セクション追加" ]	// タイトル定義
-	dd => [							// データ表示領域
-		div.dialog-data => [
-			Section:  input => [ type => text size => 50 ]
-		]		// 表示テーブル
+".floatWindow#add_section_dialog" => [ size => "550,300,200,150"
+	+dl => [ [ "セクション追加"	// dt-inner
+		.dialog-view => [		// dd-attr
+			.dialog-form => [	// div-section
+				@.Sec_data		// インラインセクションの展開
+				<hr>
+				.center => [ "span.button closeButton#new_section" => [ "追加" ] ]
+			]
+		]
 	] ]
 ]
-
 
 @Footer

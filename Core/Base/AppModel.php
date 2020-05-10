@@ -208,6 +208,13 @@ public function DeleteRecord($num) {
     $this->dbDriver->deleteRecord([$this->Primary => $num]);
 }
 //==================================================================================================
+// レコードの削除
+// 検索条件がインプット
+public function MultiDeleteRecord($cond) {
+    APPDEBUG::MSG(12, $cond);
+    $this->dbDriver->deleteRecord($cond);
+}
+//==================================================================================================
 // レコードの更新
 public function UpdateRecord($num,$row) {
     APPDEBUG::MSG(12, $row);

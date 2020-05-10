@@ -6,26 +6,26 @@ var popup_menu_function = {
         var sectitle = obj.parents('.section').find(".title").text();
         var mytitle = obj.find(".caption").text();
         var mytext = obj.find(".data").html();
-        var idset = obj.attr("id").split('-');
-        var myid = idset[1];
-        var mydisp = idset[2];
-        var secid = idset[0];
+        var myid = obj.attr("id");
+        var mydisp = obj.attr("data-disp")
+        var secid = obj.attr("data-parent")
         $("#edit_dialog").floatWindow(function (e) {
+            e.find('.dialog-form').attr("id", myid);
+            e.find('.dialog-form').attr("data-parent", secid);
             e.find('.section').text(sectitle);
-            e.find('.section').attr("id",secid);
             e.find('input[name="dispno"]').attr("value",mydisp); // inputタグ
             e.find('input[name="title"]').attr("value",mytitle); // inputタグ
             e.find('.contents').html(mytext);
-            e.find('input[name="id-key"]').attr("value",myid); // inputタグ
         });
 //        return false;
     },
     "ctxAdd": function (obj) {
-        var sectitle = obj.parents('.section').find(".title").text();
-        var secid = obj.parents('li').attr("id");
+        var sectitle = obj.find(".title").text();
+        var secid = obj.attr("id");
+//        alert(secid);
         $("#add_dialog").floatWindow(function (e) {
+            e.find('.dialog-form').attr("data-parent", secid);
             e.find('.section').text(sectitle);
-            e.find('.section').attr("id",secid);
             e.find('input[name="dispno"]').attr("value",''); // inputタグ
             e.find('input[name="title"]').attr("value",''); // inputタグ
             e.find('.contents').text('');
@@ -33,8 +33,7 @@ var popup_menu_function = {
 //        return false;
     },
     "ctxDel": function (obj) {
-        var idset = obj.attr("id").split('-');
-        var myid = idset[1];
+        var myid = obj.attr("id");
         var url = location.pathname.controller_path("paragraph/delete/" + myid);
         $.post(url,
             function(data){
@@ -44,22 +43,50 @@ var popup_menu_function = {
         .fail(function() {
             alert( "error:"+url );
         });
-        return false;
+//        return false;
     },
 // セクション編集メニュー
     "ctxSecEdit": function (obj) {
-        alert(obj.attr("id") + "/" + obj.attr("class")+"\n"+obj.text());
-        alert('りんご');
-        return false;
+        var mytitle = obj.find(".title").text();
+        var mytext = obj.find(".description").html();
+        var myid = obj.attr("id");
+        var mydisp = obj.attr("data-disp")
+        var pid = $('.tabmenu .tab').attr('data-parent');   // チャプターID
+        var short_title = $('.tabmenu .tab li.selected').text();   // タブ表示名
+        $("#edit_section_dialog").floatWindow(function (e) {
+            e.find('.dialog-form').attr("id", myid);
+            e.find('.dialog-form').attr("data-parent", pid);
+            e.find('input[name="dispno"]').attr("value",mydisp); // 表示順
+            e.find('input[name="title"]').attr("value",mytitle); // セクションタイトル
+            e.find('input[name="short_title"]').attr("value",short_title); // タブ名
+            e.find('.contents').html(mytext);                   // セクション概要
+        });
+//        return false;
     },
     "ctxSecAdd": function (obj) {
-        alert(obj.attr("class")+"\n"+obj.text());
-        alert('いちご');
+/*
+        var pid = $('.tabmenu .tab').attr('data-parent');   // チャプターID
+        $("#add_section_dialog").floatWindow(function (e) {
+            e.find('.dialog-form').attr("id", pid);
+            e.find('input[name="dispno"]').attr("value",''); // 表示順
+            e.find('input[name="title"]').attr("value",''); // セクションタイトル
+            e.find('input[name="short_title"]').attr("value",''); // タブ名
+            e.find('.contents').text('');                   // セクション概要
+        });
+*/      $(".add-section").click();
         return false;
     },
     "ctxSecDel": function (obj) {
-        alert(obj.attr("id") + "/" + obj.attr("class")+"\n"+obj.text());
-        alert('すいか');
+        var myid = obj.attr("id");
+        var url = location.pathname.controller_path("section/delete/" + myid);
+        $.post(url,
+            function(data){
+            //リクエストが成功した際に実行する関数
+                location.href = data ;
+            })
+        .fail(function() {
+            alert( "error:"+url );
+        });
         return false;
     },
 };
