@@ -78,6 +78,7 @@ dump_debug(DEBUG_DUMP_NONE,"MAIN", [
 ]);
 // コントローラ名やアクション名が書き換えられてリダイレクトが必要なら終了
 if($redirect) {
+//    echo "Redirect:{$requrl}\n";
     header("Location:{$requrl}");
     exit;
 }

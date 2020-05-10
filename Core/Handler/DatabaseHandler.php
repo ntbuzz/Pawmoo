@@ -1,6 +1,6 @@
 <?php
 /* -------------------------------------------------------------
- * Biscuitフレームワーク
+ * PHPフレームワーク
  *  DatabaseHandler: データベースの接続情報
  */
 require_once('Core/Handler/SqlHandler.php');

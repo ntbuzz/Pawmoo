@@ -14,12 +14,10 @@
     border:2px solid #113366;
     border-radius: 5px 5px 0 0;     /* CSS3 */
     background-color:white;
-
     user-select:none;
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
-
 }
 .floatWindow dl {
     width:100%;
@@ -30,7 +28,7 @@
     height:calc(100% - 36px);   /* タイトル:25px＋ リサイズアイコン:11px */
     margin-bottom:11px;
     overflow-x:hidden;
-    overflow-y:auto;
+    overflow-y:text;
 }
 /* フロートウィンドウのタイトル */
 .floatWindow dl dt {
@@ -103,7 +101,6 @@
     display:none;
 }
 /* floatWindow の背景領域 */
-/*
 .floatBack {
     position:fixed;
     top:0;
@@ -114,4 +111,3 @@
     opacity:0.4;
     filter:alpha(opacity=40);
 }
-*/

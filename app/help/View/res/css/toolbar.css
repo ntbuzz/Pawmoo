@@ -6,7 +6,7 @@
 .font16 { font-size:16px; }
 /* メインメニュー項目の装飾 */
 #toolbar {
-    z-index:1;
+    z-index:2;
     float:top;
     width:100%;
     background-color: #f5a559;

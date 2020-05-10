@@ -34,7 +34,7 @@ selector.each(function () {
         $(id + " #close, .close, .cancel, .closeButton").click( function() {
             self.fadeOut("fast");
             $(document).unbind("mousemove");
-//            $("body").find(".floatBack").remove();
+            $("body").find(".floatBack").remove();
         });
         // ドロップ属性があればエレメントを初期化する
         if( self.attr("class").indexOf("drop") !== -1) {
@@ -42,7 +42,7 @@ selector.each(function () {
             var initdata = self.find("#init").attr("value");
             self.find("#datalist").append(initdata);
         };
-//        $("body").append("<div class='floatBack'></div>");
+        $("body").append("<div class='floatBack'></div>");
 //        $(".floatBack").click(function () {
 //            alert("CLICK!");
 //            return false;

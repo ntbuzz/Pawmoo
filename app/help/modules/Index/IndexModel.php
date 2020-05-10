@@ -1,11 +1,5 @@
 <?php
-/*
-    Database Table Relations
-        section
-            items
-                pages
-        category
-*/
+
 class IndexModel extends AppModel {
     static $DatabaseSchema = [
         'Handler' => 'SQLite',

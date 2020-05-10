@@ -28,7 +28,6 @@
 			".split-pane-component contents-view" => [
 				// コンテンツを表示する領域
 				#ContentBody => [
-//					@ContentView
 					@DocView
 				]
 			]

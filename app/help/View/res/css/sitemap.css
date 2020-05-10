@@ -3,7 +3,6 @@
 .sitemap {
     text-decoration: none;
     background-color: silver;
-
 }
 .sitemap .boldtxt a {
     color: white;
@@ -25,10 +24,7 @@
     vertical-align: top;
 }
 #sitemenu {
-	user-select:none;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
+    background-color: whitesmoke;
 }
 
 #sitemenu .selected {

@@ -6,12 +6,12 @@ Stylesheet => [
     '*モジュール固有のテンプレート'
     common => [
         import => [
-//            libstyle.css
-            split-pane.css      // 3ペイン分割
-            sitemap.css         // ツリーメニュー
-            table-sort.css
             toolbar.css
+            sitemap.css         // ツリーメニュー
+            split-pane.css      // 3ペイン分割
             tabmenu.css
+            table-sort.css
+            dialog-form.css
         ]
         section => ^common       // 上位のセクションを呼出す
     ]
@@ -24,7 +24,7 @@ Javascript => [
             site-menu.js
             split-pane.js      // 3ペイン分割
             table-sort.js?theme=green    // テーマは blue
-            myscript.js         // クリックイベント処理を組込む
+            dialog.js
         ]
         import => popup-menu.js
         section => ^common       // 上位のセクションを呼出す
