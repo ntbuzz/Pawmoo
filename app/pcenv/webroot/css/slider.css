@@ -72,7 +72,7 @@ table.inbox td {
 #slideL table.tab td:hover {
     background-color: gray;
 }
-#slideL table.tab td.select {
+#slideL table.tab td.selected {
     color:white;
     background-color: black;
 }

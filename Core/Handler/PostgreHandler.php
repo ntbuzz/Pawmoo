@@ -86,5 +86,37 @@ class PostgreHandler extends SQLHandler {
 	//echo "SQL:{$sql}\n";
 		$res = $this->doQuery($sql);
 	}
+//==================================================================================================
+//	INSERT
+// INSERT INTO test_table (id, name) VALUES (val_id, val_name)
+// ON CONFLICT (id) DO UPDATE SET name = val_name；
+// pg_update($this->dbb,$this->table,$row,$wh);
+//==================================================================================================
+public function insertRecord($row) {
+	APPDEBUG::MSG(11, $row );
+	// \ をエスケープする
+	foreach($row as $key => $val) {
+		$row[$key] = str_replace('\\', '\\\\', $val);
+	}
+	// PostgreSQLのデータ型に変換
+	$aa = pg_convert($this->dbb,$this->table,$row);
+	if($aa === FALSE) {
+		$res1 = pg_get_result($this->dbb);
+		echo "ERROR:" . pg_result_error($res1) . "<br>\n";
+		die('Postgres CONVERT失敗' . pg_last_error());
+	}
+	$primary = '"' . key($wh) . '"';		// プライマリキー名を取得
+	$kstr = implode(',', array_keys($aa));	// フィールド名リストを作成
+	$vstr = implode(',', $aa);				// VALUES リストを作成
+	$set = " SET"; $sep = " ";				// UPDATE する時の代入文
+	foreach($aa as $key => $val) {
+		$set .= "{$sep}{$key}={$val}";
+		$sep = ",";
+	}
+	// UPSERT 文を生成
+	$sql = "INSERT INTO \"{$this->table}\" ({$kstr}) VALUES ({$vstr});";
+//echo "SQL:{$sql}\n";
+	$res = $this->doQuery($sql);
+}
 
 }

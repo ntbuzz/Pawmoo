@@ -34,7 +34,7 @@
     background:gray;
     color:white;
 }
-.tabmenu ul.tab li.select {
+.tabmenu ul.tab li.selected {
     font-style: bold;
     background-color:navy;
     color:white;

@@ -9,11 +9,11 @@
 	]
 ]
 
--body.class#id =>  [ bgcolor => "white" ]       // HTMLタグ出力
+-body =>  [ bgcolor => "white" ]       // HTMLタグ出力
 +jquery => ~
 	// ウィンドウリサイズで高さ調整するエレメント
 	$(".contents-view").adjustHeight();
-	$("#ContentBody").adjustHeight();
+//	$("#ContentBody").adjustHeight();
 ~
 .appWindow => [    // タグ名省略は DIVタグセクション
 	".split-pane fixed-left" => [
@@ -46,6 +46,7 @@
 //=========================================
 // パラグラフ・コンテキストメニュー
 "+ul.context-menu#popup_menu{.section}" => [
+	#ctxSecEdit => [ セクション編集(ent) ]
 	#ctxAdd  => [ 段落追加(f11) ]
 	[ <hr> ]
 	#ctxClear => [ 段落クリア(clr) ]
@@ -59,34 +60,39 @@
 	#ctxSecDel => [ セクション削除(del) ]
 ]
 //=========================================
+// インラインレイアウトセクションの定義
++inline.Para_data => [
+	table => [
+		tr => [ th => [ 所属セクション: ] td => [ "span.boldtxt section" => [] ] ]
+		tr => [ th => [ 表示位置: ] td => [ -input[dispno] => [ type => text size => 8 ] ] ]
+		tr => [ th => [ タイトル: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
+		tr => [ th => [ 内容: ] td => [ textarea.contents[contents] => [ rows => 10 cols => 50 ] ] ]
+	]
+]
+//=========================================
+
+//=========================================
 // パラグラフ編集・フロートウィンドウ
-".floatWindow#edit_dialog" => [ size => "550,270,200,150"
+".floatWindow#edit_dialog" => [ size => "550,300,200,150"
 	+dl => [ 	// attr => scalar	dl attr
 		[ "データ編集"	// dt-inner
 		.dialog-view => [	// dd.attr
-			.dialog-panel => [	// div-section
-				table.form => [
-					tr => [ th => [ 所属セクション: ] td => [ "span.boldtxt section" => [] ] ]
-					tr => [ th => [ タイトル: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
-					tr => [ th => [ 内容: ] td => [ textarea.contents[contents] => [ rows => 10 cols => 50 ] ] ]
-				]
+			.dialog-form => [	// div-section
+				@.Para_data		// インラインセクションの展開
+				-input[id-key] => [ type => hidden ]
 				<hr>
-				.center => [ "span.button closeButton#edit_paragraph" => [ "更新" ] ]
+				.center => [ "span.button closeButton#update_paragraph" => [ "更新" ] ]
 			]
 		] ]
 	]
 ]
 //=========================================
 // パラグラフ追加・フロートウィンドウ
-".floatWindow#add_dialog" => [ size => "550,270,200,150"
+".floatWindow#add_dialog" => [ size => "550,300,200,150"
 	dl => [ dt => [ "データ追加" ]	// タイトル定義
 	dd.dialog-view => [							// データ表示領域
-		div.dialog-panel => [
-			table.form => [
-				tr => [ th => [ 所属セクション: ] td => [ "span.boldtxt section" => [] ] ]
-				tr => [ th => [ タイトル: ] td => [ -input.title[title] => [ type => text size => 48 ] ] ]
-				tr => [ th => [ 内容: ] td => [ textarea.contents[contents] => [ rows => 10 cols => 50 ] ] ]
-			]
+		div.dialog-form => [
+			@.Para_data		// インラインセクションの展開
 			<hr>
 			.center => [ "span.button closeButton#new_paragraph" => [ "追加" ] ]
 		]

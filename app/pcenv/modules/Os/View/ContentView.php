@@ -10,9 +10,9 @@ $('.tab li').click(function() {
 	//クリックされたタブと同じ順番のコンテンツを表示します。
 	$('.content li').eq(index).css('display','block');
 	//一度タブについているクラスselectを消し、
-	$('.tab li').removeClass('select');
+	$('.tab li').removeClass('selected');
 	//クリックされたタブのみにクラスselectをつけます。
-    $(this).addClass('select');
+    $(this).addClass('selected');
     $(".datalist").scrollTop(0);
 });
 });
@@ -20,7 +20,7 @@ $('.tab li').click(function() {
 
 <div class='tabmenu fixedsticky' data-element=".datalist">
 <ul class="tab">
-	<li class="select">OS情報</li>
+	<li class="selected">OS情報</li>
 	<li>拡張情報</li>
 	<li>ライセンス情報</li>
 	<li>インストール情報</li>

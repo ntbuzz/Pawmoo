@@ -40,13 +40,30 @@ class SQLiteHandler extends SQLHandler {
 //==================================================================================================
 //	getLastError: 	レコードを取得してカラム配列を返す
 	public function getLastError() {
-		return sqlite_last_error($this->rows);
+//		return sqlite_last_error($this->rows);
 	}
+//==================================================================================================
+//	レコードの追加 
+//==================================================================================================
+public function insertRecord($row) {
+	APPDEBUG::MSG(19, $row );
+	// UPDATE OR INSERT => REPLACE SQL生成
+	$kstr = '"' . implode('","', array_keys($row)) . '"';
+	$vstr = "'" . implode("','", $row) . "'";
+
+	$sql = "INSERT INTO {$this->table} ({$kstr}) VALUES ({$vstr});";
+	error_reporting(E_ERROR);
+	APPDEBUG::MSG(19, $sql );
+	$rows = $this->doQuery($sql);
+	if(!$rows) {
+		echo 'ERROR:'.$this->getLastError()."\n";
+	}
+}
 //==================================================================================================
 //	レコードの更新 $row[key] value
 //==================================================================================================
 public function replaceRecord($wh,$row) {
-	APPDEBUG::MSG(11, $row );
+	APPDEBUG::MSG(19, $row );
 	$row = array_merge($wh,$row);				// 配列をマージ
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
@@ -54,6 +71,7 @@ public function replaceRecord($wh,$row) {
 
 	$sql = "REPLACE INTO {$this->table} ({$kstr}) VALUES ({$vstr});";
 	error_reporting(E_ERROR);
+	APPDEBUG::MSG(19, $sql );
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
 		echo 'ERROR:'.$this->getLastError()."\n";

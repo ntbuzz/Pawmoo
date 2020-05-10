@@ -10,6 +10,7 @@ class IndexModel extends AppModel {
         'Schema' => [
             'id'            => ['.id',0],          // モジュールSchemaの言語ID
             'category_id'   => ['.category',0],
+            'disp_id'      => ['',0],
             'title'         => ['',0],
             'contents'      => ['',0],
         ],
@@ -34,14 +35,14 @@ class IndexModel extends AppModel {
     function MakeOutline() {
         $outline = array();
         // Part レコードを取得
-        $this->RecordFinder([]);
+        $this->RecordFinder([],[],'disp_id');
         foreach($this->Records as $columns) {
             $outline[$columns['id']] = $columns['title'];
         };
         // Chapter リストを取得する
         $this->outline = array();
         foreach($outline as $key => $columns) {
-            $this->Chapter->RecordFinder(['part_id' => $key],['id','title']);
+            $this->Chapter->RecordFinder(['part_id' => $key],['id','title'],'disp_id');
             $this->outline[$key] = ['title' => $columns, 'child' => $this->Chapter->Records];
         }
     }

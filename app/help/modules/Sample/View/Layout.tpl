@@ -10,11 +10,10 @@
 	]
 ]
 
--body.class#id =>  [ bgcolor => "white" ]       // HTMLタグ出力
+-body =>  [ bgcolor => "white" ]       // HTMLタグ出力
 +jquery => ~
 	// ウィンドウリサイズで高さ調整するエレメント
 	$(".list-view").adjustHeight();
-//	$("#ContentBody").adjustHeight();
 ~
 .appWindow => [    // タグ名省略は DIVタグセクション
 	".split-pane fixed-left" => [
@@ -26,7 +25,7 @@
 		// 最上部に固定する
 			@Toolbar
 			".split-pane-component list-view#list-component" => [
-				&makeListTable =>  [ category => 'content2' ]
+				&makeListTable =>  [ category => 'content2' tableId => myTable ]
 			],
 			".split-pane-component contents-view" => [
 				// コンテンツを表示する領域

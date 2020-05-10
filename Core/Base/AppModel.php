@@ -145,12 +145,13 @@ public function SetPage($pagesize,$pagenum) {
 // 結果：   レコードデータのリスト = Records
 //          読み込んだ列名 = Header (Schema)
 //          $filter[] で指定したオリジナル列名のみを抽出
-public function RecordFinder($cond,$filter=[]) {
+public function RecordFinder($cond,$filter=[],$sort='') {
     APPDEBUG::MSG(2, $cond, "cond");
     $data = array();
     $this->Header = $this->TableHead;       // 作成済みのヘッダリストを使う
+    if($sort === '') $sort = $this->Primary;
     // 複数条件の検索
-    $this->dbDriver->findRecord($cond,$this->Relations,$this->Primary);
+    $this->dbDriver->findRecord($cond,$this->Relations,$sort);
     while ($this->fetchRecord()) {
         APPDEBUG::arraydump(12, [
             "fields:".(count($data)+1) => $this->fields,
@@ -187,6 +188,26 @@ public function fetchRecord() {
     return ($this->fields = $this->dbDriver->fetchDB());
 }
 //==================================================================================================
+// レコードの追加
+public function AddRecord($row) {
+    APPDEBUG::MSG(12, $row);
+    $this->fields = array();
+    foreach($row as $key => $val) {
+        $xkey = (isset($this->PostRenames[$key])) ? $xkey = $this->PostRenames[$key] : $key;
+        // フィールドキーが存在するものだけ書き換える
+        if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
+    }
+    unset($this->fields[$this->Primary]);
+    APPDEBUG::MSG(12, $row);
+    $this->dbDriver->insertRecord($this->fields);
+}
+//==================================================================================================
+// レコードの削除
+public function DeleteRecord($num) {
+    APPDEBUG::MSG(12, $row);
+    $this->dbDriver->deleteRecord([$this->Primary => $num]);
+}
+//==================================================================================================
 // レコードの更新
 public function UpdateRecord($num,$row) {
     APPDEBUG::MSG(12, $row);
@@ -199,6 +220,7 @@ public function UpdateRecord($num,$row) {
         // フィールドキーが存在するものだけ書き換える
         if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
     }
+    $this->fields[$this->Primary] = $num;
     APPDEBUG::MSG(2, $this->fields);
     $this->dbDriver->replaceRecord([$this->Primary => $num],$this->fields);
 }

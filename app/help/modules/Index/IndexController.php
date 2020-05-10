@@ -33,15 +33,21 @@ class IndexController extends AppController {
 	public function ViewAction() {
 		$Part = App::$Params[0];	// Doc-Part
 		$Chap = App::$Params[1];	// Doc-Chapter
+		$Tabs = App::$Params[2];	// Doc-Chapter
+		$Tabs = MySession::$PostEnv['TabSelect'];
+		if(!empty(App::$Params[2])) $Tabs = App::$Params[2];
+		MySession::$PostEnv['TabSelect']= 0;
 		// ツリーメニューを構築
 		$this->Model->MakeOutline();
 		// Section データを取得
 		$this->Section->getSectionDoc($Chap);
-		$this->ViewSet(['Section' => $this->Section->Records]);
+		$this->ViewSet(['Section' => $this->Section->Records, 'Tabmenu' => $Tabs]);
         APPDEBUG::arraydump(3, [
+			'パラメータ' => App::$Params,
             'レコード' => $this->Model->Records,
             'アウトライン' => $this->Model->outline,
             'セクション' => $this->Section->Records,
+            'タブ' => $Tabs,
 		]);
 		$this->View->PutLayout();
 	}

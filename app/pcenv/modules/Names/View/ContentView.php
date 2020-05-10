@@ -10,9 +10,9 @@ $(function() {
 		//クリックされたタブと同じ順番のコンテンツを表示します。
 		$('.content li').eq(index).css('display','block');
 		//一度タブについているクラスselectを消し、
-		$('.tab li').removeClass('select');
+		$('.tab li').removeClass('selected');
 		//クリックされたタブのみにクラスselectをつけます。
-		$(this).addClass('select');
+		$(this).addClass('selected');
 		$(".contents-view").scrollTop(0);
 	});
 });
@@ -20,7 +20,7 @@ $(function() {
 
 <div class='tabmenu fixedsticky'>
 <ul class="tab">
-	<li class="select"><?=  $Helper->_('.tabmenu.basic') ?></li>
+	<li class="selected"><?=  $Helper->_('.tabmenu.basic') ?></li>
 	<li><?=  $Helper->_('.tabmenu.detail') ?></li>
 	<li><?=  $Helper->_('.tabmenu.install') ?></li>
 </ul>

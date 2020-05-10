@@ -11,6 +11,7 @@ class ParagraphModel extends AppModel {
             'id'            => ['.id',2],          // モジュールSchemaの言語ID
             'section_id'    => ['',0],
             'category_id'   => ['',0],
+            'disp_id'      => ['',0],
             'title'         => ['.title',2],
             'contents'      => ['.contents',2],    // 共通Schemaの言語ID
         ],
@@ -18,6 +19,11 @@ class ParagraphModel extends AppModel {
             'section_id' => 'Section.id.title',
         ],
         'PostRenames' => [
+/*
+            "disp_id"   => 'disp_id',
+            "title"     => 'title',
+            "contents"  => 'contents',
+*/
         ]
     ];
 //===============================================================================

@@ -35,32 +35,32 @@ abstract class SQLHandler {	// extends SqlCreator {
 	}
 //==================================================================================================
 //	getValueLists: 抽出カラム名, 値カラム名
-	function getValueLists($table,$ref,$id) {
-		$sql = $this->sql_QueryValues($table,$ref,$id);
-		$this->doQuery($sql);
-		$values = array();
-		while ($row = $this->fetchDB()) {
-			$values[$row[$ref]] = $row[$id];
-		}
-		ksort($values,SORT_STRING | SORT_FLAG_CASE);
-		return $values;
+public function getValueLists($table,$ref,$id) {
+	$sql = $this->sql_QueryValues($table,$ref,$id);
+	$this->doQuery($sql);
+	$values = array();
+	while ($row = $this->fetchDB()) {
+		$values[$row[$ref]] = $row[$id];
 	}
+	ksort($values,SORT_STRING | SORT_FLAG_CASE);
+	return $values;
+}
 //==================================================================================================
 //	doQueryBy: キー列名と値で検索しフィールド配列を返す
-	public function doQueryBy($key,$val) {
-		$sql = $this->sql_GetRecordByKey($key,$val);
-		$this->doQuery($sql);
-		return $this->fetchDB();
-	}
+public function doQueryBy($key,$val) {
+	$sql = $this->sql_GetRecordByKey($key,$val);
+	$this->doQuery($sql);
+	return $this->fetchDB();
+}
 //===============================================================================
 // ページングでレコードを読み込むためのパラメータ
 // pagenum は１以上になることを呼び出し側で保証する
-	public function SetPaging($pagesize, $pagenum) {
-		$this->startrec = $pagesize * ($pagenum - 1);		// 開始レコード番号
-		if($this->startrec < 0) $this->startrec = 0;
-		$this->limitrec = $pagesize;		// 取得レコード数
-		APPDEBUG::arraydump(9,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
-	}
+public function SetPaging($pagesize, $pagenum) {
+	$this->startrec = $pagesize * ($pagenum - 1);		// 開始レコード番号
+	if($this->startrec < 0) $this->startrec = 0;
+	$this->limitrec = $pagesize;		// 取得レコード数
+	APPDEBUG::arraydump(9,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
+}
 //==================================================================================================
 //	findRecord(row): 
 //	row 配列を条件にレコード検索する
@@ -68,27 +68,36 @@ abstract class SQLHandler {	// extends SqlCreator {
 // pgSQL: SELECT *, count('No') over() as full_count FROM public.mydb offset 10 limit 50;
 // SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
 //==================================================================================================
-	public function findRecord($row,$relations,$sort = '') {
-		// 検索条件
-		$where = $this->sql_makeWHERE($row);
-		// 全体件数を取得する
-		$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
-		$this->doQuery("{$sql}{$where}");
-		$field = $this->fetchDB();
-		$this->recordMax = ($field) ? $field["total"] : 0;
-		// 実際のレコード検索
-		$sql = $this->sql_JoinTable($relations);
-		if(isset($sort)) $where .=  " ORDER BY {$this->table}.\"{$sort}\"";
-		if($this->limitrec > 0) {		// 取得レコード数
-			if($this->handler == 'SQLite') {
-				$where .= " limit {$this->startrec},{$this->limitrec}";		// 取得レコード数
-			} else {
-				$where .= " offset {$this->startrec} limit {$this->limitrec}";		// 取得レコード数
-			}
+public function findRecord($row,$relations,$sort = '') {
+	// 検索条件
+	$where = $this->sql_makeWHERE($row);
+	// 全体件数を取得する
+	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
+	$this->doQuery("{$sql}{$where}");
+	$field = $this->fetchDB();
+	$this->recordMax = ($field) ? $field["total"] : 0;
+	// 実際のレコード検索
+	$sql = $this->sql_JoinTable($relations);
+	if(isset($sort)) $where .=  " ORDER BY {$this->table}.\"{$sort}\"";
+	if($this->limitrec > 0) {		// 取得レコード数
+		if($this->handler == 'SQLite') {
+			$where .= " limit {$this->startrec},{$this->limitrec}";		// 取得レコード数
+		} else {
+			$where .= " offset {$this->startrec} limit {$this->limitrec}";		// 取得レコード数
 		}
-		$sql .= "{$where};";
-		$this->doQuery($sql);
 	}
+	$sql .= "{$where};";
+	$this->doQuery($sql);
+}
+//==================================================================================================
+//	fdeleteRecord(wh): 
+//	wh 配列を条件にレコードを1件だけ削除する
+public function deleteRecord($wh) {
+	$where = $this->sql_makeWHERE($wh);
+//	$where .= ($this->handler==='SQLite') ? "":" offset 0 limit 1";		// 取得レコード数
+	$sql = "DELETE FROM {$this->table}{$where};";
+	$this->doQuery($sql);
+}
 //-------------------------------------------------------------------------------
 // 汎用SQL(SELECT 〜 WHERE 〜)コマンドの発行
 // SQlite3, PostgreSQL, mariaDB 固有のSQLコマンド(update, insert, replace)は継承クラスで実装する

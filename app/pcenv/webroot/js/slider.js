@@ -29,8 +29,8 @@ $(function() {
         var index = $('.tab td').index(this);               // index()関数を使いクリックされたタブが何番目かを取得する
         $('.content li').css('display','none');             // コンテンツを一旦すべて非表示にする
         $('.content li').eq(index).css('display','block');  // クリックされたタブのコンテンツだけを表示
-        $('.tab td').removeClass('select');                 // select状態を解除
-        $(this).addClass('select');                         // クリックされたタブをselectする
+        $('.tab td').removeClass('selected');                 // select状態を解除
+        $(this).addClass('selected');                         // クリックされたタブをselectする
         $('#slideLB').text("["+txt.substr(0,1)+"]");        // ラベルを書き換える
     });
 });

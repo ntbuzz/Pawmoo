@@ -10,9 +10,9 @@ $('.tabmenu li').click(function() {
 	//クリックされたタブと同じ順番のコンテンツを表示します。
 	$('.content li').eq(index).css('display','block');
 	//一度タブについているクラスselectを消し、
-	$('.tabmenu li').removeClass('select');
+	$('.tabmenu li').removeClass('selected');
 	//クリックされたタブのみにクラスselectをつけます。
-	$(this).addClass('select');
+	$(this).addClass('selected');
 	$(".datalist").scrollTop(0);
 });
 });
@@ -23,7 +23,7 @@ var oss = [
 
 <div class='tabmenu fixedsticky' data-element=".datalist">
 	<ul class="tab">
-		<li class="select"><?=  $Helper->_('.tabmenu.基本情報') ?></li>
+		<li class="selected"><?=  $Helper->_('.tabmenu.基本情報') ?></li>
 		<li><?=  $Helper->_('.tabmenu.拡張情報') ?></li>
 		<li><?=  $Helper->_('.tabmenu.アプリケーション') ?></li>
 		<li><?=  $Helper->_('.tabmenu.ライセンス') ?></li>

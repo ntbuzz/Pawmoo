@@ -203,7 +203,7 @@ public function Tabset($name,$menu,$sel) {
 	echo "<ul class='{$name}'>\n";
 	$tab = $sel;	// $this->getFilter($sel);
 	foreach($menu as $key => $val) {
-		echo '<li'.(($tab == $val)?' class="select">':'>') . "{$key}</li>\n";
+		echo '<li'.(($tab == $val)?' class="selected">':'>') . "{$key}</li>\n";
 	}
 	echo "</ul>\n";
 }

@@ -24,7 +24,7 @@
     cursor:pointer;
     font-size:9pt;
 }
-.debugtab ul#debugMenu li.select {
+.debugtab ul#debugMenu li.selected {
     background: #333;
 }
 /* メッセージ表示パネル */

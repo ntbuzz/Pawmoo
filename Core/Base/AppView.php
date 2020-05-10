@@ -14,6 +14,8 @@ class AppView extends AppObject {
     const Extensions = array("tpl","php","inc","twg");                // テンプレート拡張子
     const SectionCMD = '@&*+<%-.#';       // セクション処理コマンド文字
     private $rep_array;
+    private $env_vars;
+    private $inlineSection;        // インラインのセクション
 //===============================================================================
 // コンストラクタで他のデータベースに接続
 //===============================================================================
@@ -31,8 +33,15 @@ class AppView extends AppObject {
     protected function __InitClass() {
         $this->Layout = 'Layout';
         $this->rep_array = array_merge(App::$SysVAR, App::$Params);       // システム変数とパラメータをマージしておく
+        $env_vars =[];
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
     }
+//===============================================================================
+// デフォルトレイアウト変更
+//===============================================================================
+public function SetEnv($key,$val) {
+    $this->env_vars[$key] = $val;
+}
 //===============================================================================
 // デフォルトレイアウト変更
 //===============================================================================
@@ -96,7 +105,7 @@ public function __TerminateView() {
 // システム変数＋URIパラメータへの置換処理
     private function replaceArrays($vars, $content) {
         // あらかじめマージしたシステム変数と環境変数をマージし置換配列を生成する
-        $vals = array_merge($vars,$this->rep_array);
+        $vals = array_merge($vars,$this->rep_array,$this->env_vars);
         $keyset = array_map(function($a) { return (is_numeric($a))?"{%{$a}%}":"{\${$a}\$}";}, array_keys($vals));
         // デバッグ情報
         APPDEBUG::arraydump(11,["Replace" => array_combine($keyset, $vals)]);
@@ -113,6 +122,7 @@ public function ViewTemplate($name,$vars = []) {
         case 0:     // '.tpl'   div Section
             $parser = new SectionParser($tmplate);
             $divSection = $parser->getSectionDef();
+            $this->inlineSection = [];         // インラインセクション定義をクリア
             $this->SectionLayout($divSection,$vars);
             break;
         case 1:     // 'php'     // PHP Template
@@ -354,7 +364,10 @@ public function ViewTemplate($name,$vars = []) {
                 break;
         case '@':       // 別のテンプレート呼び出し、配列が指定されていれば環境変数とマージしておく
                 $mergevars = (is_array($sec)) ? array_merge($vars, $sec) : $vars;
-                $this->ViewTemplate($tagname,$mergevars);
+                $target = $tag['class'];
+                if(isset($target) && array_key_exists($target,$this->inlineSection)) {
+                    $this->SectionLayout($this->inlineSection[$target],$mergevars);
+                } else $this->ViewTemplate($tagname,$mergevars);
                 break;
         case '&':  // ヘルパーに指定メソッドが存在するかチェック
                 if(method_exists($this->Helper,$tagname)) {
@@ -432,6 +445,9 @@ public function ViewTemplate($name,$vars = []) {
                         }
                     }
                     echo "</{$tagname}>\n";
+                    break;
+                case 'inline':
+                    $this->inlineSection[$tag['class']] = $sec;
                     break;
                 default: echo "tag '{$tagname}' not for feature.\n";
                 }

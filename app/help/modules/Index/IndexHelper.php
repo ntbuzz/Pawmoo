@@ -5,14 +5,6 @@ class IndexHelper extends AppHelper {
 // モジュールクラスではコンストラクタを定義しない
 //  必要なら ClassInit() メソッドで初期化する
 //===============================================================================
-//===============================================================================
-public function echo_dump($record) {
-    echo "<pre>\n";
-    echo "********************* HELPER DUMP ********************************\n";
-    var_dump($record);
-    echo "</pre>\n";
-}
-//===============================================================================
 // ヘッダー付きのテーブルリスト表示
 public function makeOutlineTree() {
 dump_debug(0,[ "アウトライン" => $this->MyModel->outline]);
@@ -38,10 +30,11 @@ dump_debug(0,[ "アウトライン" => $this->MyModel->outline]);
 public function SectionTab() {
     echo "<ul class='tab'>\n";
     if($this->Section !== []) {
-        $first = ' class="select"';
+        $n = 0;
         foreach($this->Section as $key => $val) {
+            $sel = ($this->Tabmenu == $n++) ? ' class="selected"' : '';
             $ttl = ($val['tabset']==='') ? $val['title']:$val['tabset'];
-            echo "<li{$first} id='$val[id]'>$ttl</li>\n";
+            echo "<li{$sel} id='$val[id]'>$ttl</li>\n";
             $first = '';
         }
     } else {
@@ -53,27 +46,27 @@ public function SectionTab() {
 // セクションのコンテンツをリスト表示する
 public function SectionContents() {
     echo "<ul class='content'>\n";
-    $first = '';
+    $n = 0;
     foreach($this->Section as $key => $sec) {
-        echo "<li{$first} id='{$sec[id]}'>";
+        $sel = ($this->Tabmenu == $n++) ? '' : ' class="hide"';
+        echo "<li{$sel} id='{$sec[id]}'>";
         echo "<div class='section' id='$sec[id]'>";
-        echo "<h2>$sec[title]</h2>\n";
+        echo "<h2 class='title'>$sec[title]</h2>\n";
         if(isset($sec['content'])) {
-            echo "<p>$sec[content]</p>\n";
+            echo "<div class='description'>$sec[content]</p>\n";
         }
         echo "<hr>\n";
         foreach($sec['本文'] as $val) {
-            $id = "{$val[section_id]}:{$val[id]}";
+            $id = "{$val[section_id]}-{$val[id]}-{$val[disp_id]}";
             echo "<div class='paragraph' id='${id}'>";
             if($val['title']) {
-                echo "<h3>$val[title]</h3>\n";
+                echo "<h3 class='caption'>$val[title]</h3>\n";
             }
-            echo "<p class='data'>".$val[$this->_('.Schema.contents')]."</p>";
+            echo "<div class='data'>".$val[$this->_('.Schema.contents')]."</div>";
             echo "</div>\n";
         }
         echo "</div>\n";
         echo "</li>\n";
-        $first = ' class="hide"';
     }
     echo "</ul>\n";
 }
