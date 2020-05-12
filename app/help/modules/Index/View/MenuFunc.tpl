@@ -40,32 +40,35 @@
 		tr => [ th => [ タイトル: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
 		tr => [ th => [ 内容: ] td => [ textarea[contents] => [ rows => 20 cols => 50 ] ] ]
 	]
+	<hr>
 ]
 +inline.Sec_data => [
-	-input[chapter_id] => [ type => hidden ]
 	table => [
-		tr => [ th => [ 所属チャプター: ] td => [ "span.boldtxt[chapter]" => [] ] ]
+		tr => [ th => [ 所属チャプター: ] td => [ &ChapterSelector ] ]
 		tr => [ th => [ 表示位置: ] td => [ -input[disp_id] => [ type => text size => 8 ] ] ]
 		tr => [ th => [ タイトル: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
 		tr => [ th => [ タブ表示: ] td => [ -input[short_title] => [ type => text size => 48 ] ] ]
 		tr => [ th => [ セクション説明: ] td => [ textarea[contents] => [ rows => 10 cols => 50 ] ] ]
 	]
+	<hr>
 ]
 +inline.Chap_data => [
 	-input[part_id] => [ type => hidden ]
 	table => [
-		tr => [ th => [ 所属パート: ] td => [ "span.boldtxt[part]" => [] ] ]
+		tr => [ th => [ 所属パート: ] td => [ &PartSelector ] ]
 		tr => [ th => [ 表示位置: ] td => [ -input[disp_id] => [ type => text size => 8 ] ] ]
 		tr => [ th => [ タイトル: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
-		tr => [ th => [ セクション説明: ] td => [ textarea[contents] => [ rows => 10 cols => 50 ] ] ]
+		tr => [ th => [ チャプタ説明: ] td => [ textarea[contents] => [ rows => 10 cols => 50 ] ] ]
 	]
+	<hr>
 ]
 +inline.Part_data => [
 	table => [
 		tr => [ th => [ 表示位置: ] td => [ -input[disp_id] => [ type => text size => 8 ] ] ]
 		tr => [ th => [ タイトル: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
-		tr => [ th => [ セクション説明: ] td => [ textarea[contents] => [ rows => 10 cols => 50 ] ] ]
+		tr => [ th => [ パート説明: ] td => [ textarea[contents] => [ rows => 10 cols => 50 ] ] ]
 	]
+	<hr>
 ]
 //=========================================
 
@@ -77,7 +80,6 @@
 			.dialog-form => [	// div-section
 				-input[id] => [ type => hidden ]
 				@.Para_data		// インラインセクションの展開
-				<hr>
 				.center => [ "span.execButton" => [ "更新" ] ]
 			]
 		]
@@ -90,7 +92,6 @@
 		.dialog-view => [	// dd.attr
 			.dialog-form => [	// div-section
 				@.Para_data		// インラインセクションの展開
-				<hr>
 				.center => [ "span.execButton" => [ "追加" ] ]
 			]
 		]
@@ -104,7 +105,6 @@
 			.dialog-form => [	// div-section
 				-input[id] => [ type => hidden ]
 				@.Sec_data		// インラインセクションの展開
-				<hr>
 				.center => [ "span.execButton" => [ "更新" ] ]
 			]
 		]
@@ -117,7 +117,6 @@
 		.dialog-view => [		// dd-attr
 			.dialog-form => [	// div-section
 				@.Sec_data		// インラインセクションの展開
-				<hr>
 				.center => [ "span.execButton" => [ "追加" ] ]
 			]
 		]
@@ -125,18 +124,12 @@
 ]
 //=========================================
 // チャプター編集・フロートウィンドウ
-".floatWindow#edit_chapter_dialog" => [ size => "480,230,200,150"
+".floatWindow#edit_chapter_dialog" => [ size => "500,315,200,150"
 	+dl => [ [ "チャプター編集"	// dt-inner
 		.dialog-view => [		// dd-attr
 			.dialog-form => [	// div-section
 				-input[id] => [ type => hidden ]
-				table => [
-					tr => [ th => [ 所属パート: ] td => [ &ChapterSelector ] ]
-					tr => [ th => [ 表示位置: ] td => [ -input[dispno] => [ type => text size => 8 ] ] ]
-					tr => [ th => [ タイトル: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
-					tr => [ th => [ 内容: ] td => [ textarea.contents[contents] => [ rows => 5 cols => 50 ] ] ]
-				]
-				<hr>
+				@.Chap_data
 				.center => [ "span.execButton" => [ "更新" ] ]
 			]
 		]
@@ -144,17 +137,11 @@
 ]
 //=========================================
 // チャプター追加・フロートウィンドウ
-".floatWindow#add_chapter_dialog" => [ size => "480,230,200,150"
+".floatWindow#add_chapter_dialog" => [ size => "500,315,200,150"
 	+dl => [ [ "チャプター追加"	// dt-inner
 		.dialog-view => [		// dd-attr
 			.dialog-form => [	// div-section
-				table => [
-					tr => [ th => [ 所属パート: ] td => [ &ChapterSelector ] ]
-					tr => [ th => [ 表示位置: ] td => [ -input[dispno] => [ type => text size => 8 ] ] ]
-					tr => [ th => [ タイトル: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
-					tr => [ th => [ 内容: ] td => [ textarea.contents[contents] => [ rows => 5 cols => 50 ] ] ]
-				]
-				<hr>
+				@.Chap_data
 				.center => [ "span.execButton" => [ "追加" ] ]
 			]
 		]
@@ -162,16 +149,11 @@
 ]
 //=========================================
 // パート追加・フロートウィンドウ
-".floatWindow#add_part_dialog" => [ size => "450,200,200,150"
+".floatWindow#add_part_dialog" => [ size => "480,2850,200,150"
 	+dl => [ [ "パート追加"	// dt-inner
 		.dialog-view => [		// dd-attr
 			.dialog-form => [	// div-section
-				table => [
-					tr => [ th => [ 表示位置: ] td => [ -input[disp_id] => [ type => text size => 8 ] ] ]
-					tr => [ th => [ タイトル: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
-					tr => [ th => [ 内容: ] td => [ textarea.contents[contents] => [ rows => 5 cols => 50 ] ] ]
-				]
-				<hr>
+				@.Part_data
 				.center => [ "span.execButton" => [ "追加" ] ]
 			]
 		]
@@ -179,17 +161,12 @@
 ]
 //=========================================
 // パート編集・フロートウィンドウ
-".floatWindow#edit_part_dialog" => [ size => "450,200,200,150"
+".floatWindow#edit_part_dialog" => [ size => "480,2850,200,150"
 	+dl => [ [ "パート編集"	// dt-inner
 		.dialog-view => [		// dd-attr
 			.dialog-form => [	// div-section
 				-input[id] => [ type => hidden ]
-				table => [
-					tr => [ th => [ 表示位置: ] td => [ -input[disp_id] => [ type => text size => 8 ] ] ]
-					tr => [ th => [ タイトル: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
-					tr => [ th => [ 内容: ] td => [ textarea[contents] => [ rows => 5 cols => 50 ] ] ]
-				]
-				<hr>
+				@.Part_data
 				.center => [ "span.execButton" => [ "更新" ] ]
 			]
 		]

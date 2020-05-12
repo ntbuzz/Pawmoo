@@ -55,18 +55,5 @@ class IndexController extends AppController {
 		]);
 		$this->View->PutLayout();
 	}
-//===============================================================================
-// パートレレコードに追加
-public function PartAction() {
-	$this->Part->AddRecord(MySession::$PostEnv);
-	echo App::$Referer;
-}
-//===============================================================================
-// パートレレコードに追加
-public function ChapterAction() {
-	$this->Chapter->AddRecord(MySession::$PostEnv);
-	echo App::$Referer;
-}
-
 
 }

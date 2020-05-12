@@ -5,6 +5,7 @@ $(".add-section").click(function (e) {
     var obj = $('.tabmenu .tab');
     var sec_obj = {
         chapter_id: obj.attr('data-parent'),   // チャプターID
+        chapter:    ChapterData.title,
         disp_id:    0,
         title:      '',
         short_title:'',

@@ -93,7 +93,7 @@ var popup_menu_function = {
     "ctxSecEdit": function (obj) {
         var sec_obj = {
             id:         obj.attr("id"),
-            chapter_id: obj.attr('data-parent'),   // チャプターID
+            chapter_id: ChapterData.id,
             disp_id:    obj.attr("data-disp"),
             title:      obj.find(".title").text(),
             short_title:obj.attr("value"),

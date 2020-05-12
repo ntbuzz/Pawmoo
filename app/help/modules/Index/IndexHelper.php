@@ -108,7 +108,20 @@ public function SelectList($key) {
 }
 //===============================================================================
 // セクションのコンテンツをリスト表示する
-public function ChapterSelector($key) {
+public function ChapterSelector() {
+	echo "<SELECT name='chapter_id'>";
+    // Chapter レコードを取得
+    $this->MyModel->Chapter->RecordFinder(['part_id' => $this->PartData['id']], ['id','title'], 'disp_id');
+    foreach($this->MyModel->Chapter->Records as $columns) {
+        $id = $columns['id'];
+        $title = $columns['title'];
+		echo "<OPTION value='{$id}'>{$title}</option>\n";
+    };
+	echo "</SELECT>\n";
+}
+//===============================================================================
+// セクションのコンテンツをリスト表示する
+public function PartSelector() {
 	echo "<SELECT name='part_id'>";
     foreach($this->MyModel->PartSelect as $val) {
         list($id,$text) = $val;
