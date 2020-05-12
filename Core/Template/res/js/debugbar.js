@@ -16,7 +16,7 @@
             $('.dbcontent li').css('display', 'none');            // コンテンツを非表示にする
             $(this).removeClass('selected');                      // select状態を解除
         } else {
-            var hh = $(window).height()*0.8;                    // ウィンドウの高さから計算
+            var hh = $(window).height()*0.9;                    // ウィンドウの高さから計算
             $('.debug_srcollbox').css('height',hh+'px');        // メッセージ表示ボックスの高さを指定
             var index = $('#debugMenu li').index(this);         // index()関数を使いクリックされたタブが何番目かを取得する
             $('.dbcontent li')

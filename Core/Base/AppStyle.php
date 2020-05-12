@@ -244,7 +244,7 @@ public function ViewStyle($filename) {
         array_push($this->TmpStack,$this->TempSection,$this->Section,$this->IncludePath);         // 探索パスとセクション要素を退避
         $sec = (is_array($secArray)) ? $secArray : array($secArray);
         foreach($sec as $Akey => $val) {
-            $key =　TagBodyName($Akey);
+            $key = tag_body_name($Akey);
             if($key == 'section') {                        // 別のセクションをインクルード
                 $secval = (is_array($val)) ? $val : array($val);    // 配列要素に統一
                 foreach($secval as $vsec) {

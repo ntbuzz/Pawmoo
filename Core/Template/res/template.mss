@@ -30,6 +30,7 @@ Javascript => [
             pagerscript.js        // ページャー用スクリプト
             floatwin.js             // フロートウィンドウ操作
             baloon.js               // バルーンヘルプ
+            info-box.js             // 移動・リサイズ不可のポップアップBOX
             popup-box.js            // ポップアップBOX(移動不可)
             context.js
         ]

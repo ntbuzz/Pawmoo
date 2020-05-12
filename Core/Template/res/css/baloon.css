@@ -1,4 +1,5 @@
 /*
+===============================================================================
 バルーンヘルプ表示CSS
 */
 .baloon-BK,.popup-BK {
@@ -62,7 +63,9 @@
     border-top: 15px solid transparent;
     border-right: 12px solid lightyellow;
 }
-/* ポップアップボックス */
+/*==============================================================================
+    ポップアップボックス
+*/
 .popup-box {
     z-index:2;
     position:fixed;
@@ -154,4 +157,23 @@ span.help_icon {
 span.help_icon.mouseover {
     margin-left:2px;
     background: url(res/img/pop_help_b.png) no-repeat left top;
+}
+/*==============================================================================
+    インフォボックス
+*/
+.info-box {
+    z-index:0;
+    position:fixed;
+    display:none;
+    padding:10px;
+    border: 1px outset silver;
+    border-radius:3px;
+    background: whitesmoke;
+    font-size:10pt;
+    color:black;
+    overflow:hidden;
+    min-width:100px;
+    min-height:150px;
+    border-radius:8px;
+    box-shadow: 5px 5px silver;
 }

@@ -91,13 +91,12 @@ function pathcomplete($path) {
     return $path;
 }
 //===============================================================================
+// 重複文字列の除去
+//===============================================================================
 // タグ文字列の分解
-function 　TagBodyName($val) {
-    $n = strrpos($val,':');
-    if($n !== FALSE) {
-        $val = substr($val,0,$n);
-    }
-    return $val;
+function tag_body_name($key) {
+    $n = strrpos($key,':');
+    return ($n !== FALSE) ? substr($key,0,$n) : $key;
 }
 //===============================================================================
 // ファイルパスを分解する
@@ -233,19 +232,59 @@ function check_cwd($here) {
 }
 //===============================================================================
 // デバッグダンプ
+function debug_dump($flag, $arr = []) {
+    if($flag === 0) return;
+
+    // バックトレースから呼び出し元の情報を取得
+    $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,2);    // 呼び出し元のスタックまでの数
+//var_dump($dbinfo);exit;
+    $dbpath = str_replace('\\','/',$dbinfo[0]['file']);             // Windowsパス対策
+    list($pp,$fn) = extractFileName($dbpath);
+    $fn .= "(".$dbinfo[0]['line'].")";
+    if(isset($dbinfo[1]['object'])) {
+        $pp = get_class($dbinfo[1]['object']);  // 呼出し元のクラス名
+        if(substr($fn,0,strlen($pp)) !== $pp) $fn = "{$pp}::{$fn}";
+    }
+    $str = "{$fn}->" . $dbinfo[1]['function'];
+    // 変数出力
+    if(is_scalar($arr)) {
+        echo "{$arr}\n";
+    } else {
+        echo "<pre>\n{$str}\n";
+        foreach($arr as $msg => $obj) {
+            if(empty($obj)) echo "{$msg}:EMPTY\n";
+            else if(is_scalar($obj)) {
+                echo "{$msg}:{$obj}\n";
+            } else {
+                echo "------- {$msg} -----\n";
+                dumpobj($obj,0);
+            }
+        }
+        echo "</pre>\n";
+    }
+    if($flag === 2) { 
+        echo "TYPE:".get_class($dbinfo[2]['object'])."\n";
+        var_dump($dbinfo[2]['object']);
+        exit;
+    }
+}
+//===============================================================================
+// デバッグダンプ
 function dump_debug($flag, $msg, $arr = []){
     if($flag === 0) return;
     echo "<pre>\n***** {$msg} *****\n";
     foreach($arr as $msg => $obj) {
-        echo "------- {$msg} -----\n";
-        if(empty($obj)) echo "EMPTY\n";
+        if(empty($obj)) echo "{$msg}:EMPTY\n";
         else if(is_scalar($obj)) {
-            echo "{$obj}\n";
-        } else foreach($obj as $key => $val) {
-            if(is_array($val)) {    // 配列出力
-                dumpobj($val,0);
-            } else
-            echo (is_numeric($key))? "{$val}\n": "{$key} = {$val}\n";
+            echo "{$msg}:{$obj}\n";
+        } else {
+            echo "------- {$msg} -----\n";
+            foreach($obj as $key => $val) {
+                if(is_array($val)) {    // 配列出力
+                    dumpobj($val,0);
+                } else
+                    echo (is_numeric($key))? "{$val}\n": "{$key} = {$val}\n";
+            }
         }
     }
     echo "</pre>\n";
