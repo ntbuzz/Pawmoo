@@ -377,7 +377,8 @@ debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"
                 ? App::$key()
                 : App::$key($sec);
         } else {
-            die("Helper Method:{$key} not found.");
+            echo "Helper Method:'{$key}' not found. Please Create this method.\n";
+//            die("Helper Method:{$key} not found.");
         }
     }
     //--------------------------------------------------------------------------

@@ -27,11 +27,11 @@ selector.each(function () {
         }
     });
     // クリックイベント登録
-    self.find(".openButton").click( function() {
+    self.find(".openButton").click(function () {
             // alert("click=" + click);
         selector.fadeOut("fast");   // 全てのウィンドウを消す
         // クローズイベントを登録
-        $(id + " #close, .close, .cancel, .closeButton").click( function() {
+        $(id + " #close, .close, .cancel, .closeButton, .execButton").click( function() {
             self.fadeOut("fast");
             $(document).unbind("mousemove");
             $("body").find(".floatBack").remove();

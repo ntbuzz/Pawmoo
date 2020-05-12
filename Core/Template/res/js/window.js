@@ -59,8 +59,47 @@
         return widths;
     };
     // フローティングウィンドウを開く
-    $.fn.floatWindow = function (callback) {
-        if(callback != null) callback(this);
+    $.fn.floatWindow = function (obj, callback) {
+        var self = this;
+        for (var item in obj) {
+            var target = self.find('[name="' + item + '"]');
+            if (target.prop("tagName") == "INPUT") target.attr("value", obj[item]);   // 自ID
+            else target.text(obj[item]);   // 自ID
+        }
+        self.find(".execButton").click(function () {
+            var setobj = {};
+            self.find("*").each(function () {
+                var nm = $(this).attr('name');
+                if (nm) {
+                    setobj[nm] = $(this).val();
+                }
+            });
+            callback(setobj);
+        });
+        this.find(".openButton").click();
+    };
+    // 子要素の取得
+    // フローティングウィンドウを開く
+    $.fn.hasNameTagList = function (callback) {
+        var self = this;
+        var obj = {};
+        self.find("*").each(function () {
+//            alert($(this).prop("tagName"));
+            var nm = $(this).attr('name');
+            if (nm) {
+                obj[nm] = $(this).val();
+            }
+        });
+        if(callback != null) callback(obj);
+    };
+    // フローティングウィンドウを開く
+    $.fn.floatWindowExec = function (setup_obj, callback) {
+        for (var item in setup_obj) {
+            var target = $(this).find('[name="' + item + '"]');
+//                alert(target.prop("tagName"));
+            if (target.prop("tagName") == "INPUT") target.attr("value", obj[item]);   // 自ID
+            else target.text(obj[item]);   // 自ID
+        };
         this.find(".openButton").click();
     };
 })(jQuery);
@@ -72,6 +111,7 @@ $(function () {
     selector.each(function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
         var ref = self.attr("data-element");  // 紐付けるID
+
         if (ref != "") {
             // 指定要素 e のスクロールに追従する
             $(ref).on("scroll", function () {

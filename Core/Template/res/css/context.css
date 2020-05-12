@@ -28,3 +28,8 @@
 .hilight {
 	border: 1px dashed blue;
 }
+.context-menu li.separate {
+	color:silver;
+	margin:0;
+	padding:0;
+}

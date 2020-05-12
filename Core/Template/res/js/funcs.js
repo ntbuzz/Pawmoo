@@ -20,6 +20,13 @@ String.prototype.controller_path = function(e) {
     return '/'+path.slice(0,n).join('/')+'/'+e+'/';                   // 0 〜 n までの要素を / で結合し、指定パスを付加
 };
 //====================================================
+// メソッド名以下を書き換える
+String.prototype.method_path = function(e) {
+    var path = this.replace(/^[\/]+|[\/]+$/g, '').split('/');
+    var n = (path[0] == "{$appName$}") ? 2 : 3;
+    return '/'+path.slice(0,n).join('/')+'/'+e+'/';                   // 0 〜 n までの要素を / で結合し、指定パスを付加
+};
+//====================================================
 // URLの末尾にある数字パラメータを除外して、指定パスを付加する
 String.prototype.exclude_num_path = function(e) {
     var path = this.replace(/^[\/]+|[\/]+$/g, '').split('/');
@@ -32,3 +39,24 @@ Array.prototype.inBound = function (e, x, y) {
         && (y >= (this[1] - e)) && (y <= (this[1] + this[3]));
 };
 
+var objDump = function(obj, rIndent) {
+    if (!obj) return '';
+     var result = '', indent = '\t', br = '\n';
+     if (rIndent) indent += rIndent;
+     if (typeof obj === 'object' && !obj.tagName) {
+        result += '[ Object ] ->' + br;
+        for (var key in obj) {
+            result += indent + key + ' = ';
+            if (typeof obj[key] === 'object') {
+                result += objDump(obj[key], indent);
+            } else {
+                result += obj[key];
+            }
+            result += br;
+        }
+    } else {
+        result = obj;
+    }
+     result = String(result);
+     return result;
+};

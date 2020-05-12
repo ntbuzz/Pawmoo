@@ -13,13 +13,20 @@ if (typeof popup_menu_function == "object") {
             self.find('li').each(function (index) {
                 //クリックされたタブのみにクラスselectをつけます。
                 var func = $(this).attr('id');
+                var func_id = "#" + func;
                 // メニュー関数が定義されているものだけ
-                if (func && (typeof popup_menu_function[func] == "function")) {
-//                    console.log(func);
-                    $("#"+func).mousedown(function(e){ 
-                        self.hide(); 
+                if (func) {
+                    var func_type = (typeof popup_menu_function[func]);
+                    var func_elem = popup_menu_function[func];
+                    $(func_id).mousedown(function (e) {
+                        self.hide();
                         $(ref_id).removeClass('hilight');  // 全部のクラスを変更
-                        popup_menu_function[func]($(ref_id + ".selected"));
+                        if (func_type == "function") {
+                            func_elem($(ref_id + ".selected"));
+                        } else {
+//                            alert(func_elem+" click-action");
+                            $(func_elem).click();
+                        }
                         return false;   // 親要素に処理させない
                     });
                 } else {

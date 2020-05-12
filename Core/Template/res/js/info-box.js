@@ -29,8 +29,8 @@ selector.each(function () {
             $('body').append('<div class="popup-BK"></div>');
             $('.popup-BK').fadeIn('fast');
             // バルーンコンテンツの表示位置をリンク先から取得して設定
-            var x = ($(window).innerWidth() - self.width())/2;
-            var y = ($(window).innerHeight() - self.height())/2;
+            var x = ($(window).innerWidth() - self.width())/2;  // 中央
+            var y = ($(window).innerHeight() - self.height())/4;    // 上部25%の位置
             if (x < 0) {
                 x = 5;
                 self.width($(window).innerWidth() - 20);
