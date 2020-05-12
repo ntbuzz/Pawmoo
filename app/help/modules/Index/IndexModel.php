@@ -21,6 +21,7 @@ class IndexModel extends AppModel {
         ]
     ];
     public $outlone;            // アウトライン配列 $outlien[SECTION-ID][ITEM-ID][PAGE-ID] = CATEGORY-ID
+    public $PartSelect;
 //===============================================================================
 // モジュールクラスではコンストラクタを定義しない
 //===============================================================================
@@ -34,10 +35,12 @@ class IndexModel extends AppModel {
 //===============================================================================
     function MakeOutline() {
         $outline = array();
+        $this->PartSelect = [];
         // Part レコードを取得
         $this->RecordFinder([],[],'disp_id');
         foreach($this->Records as $columns) {
             $outline[$columns['id']] = $columns['title'];
+            $this->PartSelect[] = array($columns['id'],$columns['title']);
         };
         // Chapter リストを取得する
         $this->outline = array();
@@ -46,4 +49,5 @@ class IndexModel extends AppModel {
             $this->outline[$key] = ['title' => $columns, 'child' => $this->Chapter->Records];
         }
     }
+
 }

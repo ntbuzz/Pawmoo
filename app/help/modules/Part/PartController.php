@@ -1,10 +1,9 @@
 <?php
 
-class SectionController extends cutomController {
+class PartController extends cutomController {
 
 //	データの更新のみのコントローラクラスは全て共通なので
 //	全てのメソッドはカスタムコントローラーに実装する
-//
 //===============================================================================
 // 削除アクション以外はカスタムコントローラに置く
 public function DeleteAction() {

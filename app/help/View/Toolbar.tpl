@@ -3,14 +3,16 @@
 	.rightitem => [
 		<input type="text" class="font16" id="c00" size="20" name="cc">
 		"span.font24#popup-dialog" => [ ≡ ]
-[name] => [ aaaaa ]
 	]
 	+ul#menu => [
 		[ %${#Toolbar.home} => "/index" ]		 //  ハイパーリンク
 		.menuitem => [ ${#Toolbar.ドキュメント}
 			+ul.sub => [
-				[ %${#Toolbar.ドキュメント.パート追加} => "#" ]
-				[ %${#Toolbar.ドキュメント.チャプター追加} => "#" ]
+				.subitem#part_edit => [ ${#Toolbar.ドキュメント.パート編集} ]
+				.subitem#part_add => [ ${#Toolbar.ドキュメント.パート追加} ]
+				.subitem#chap_edit => [ ${#Toolbar.ドキュメント.チャプター編集} ]
+				.subitem#chap_add => [ ${#Toolbar.ドキュメント.チャプター追加} ]
+				.subitem#chap_del => [ ${#Toolbar.ドキュメント.チャプター削除} ]
 			]
 		]
 		.menuitem => [ ${#Toolbar.管理ページ}
@@ -23,7 +25,7 @@
 		]
 		.menuitem => [ ${#Toolbar.ヘルプ}
 			"+ul.sub" => [
-				.menuitem#about_info => [ ${#Toolbar.ヘルプ.バージョン} ]
+				.subitem#about_info => [ ${#Toolbar.ヘルプ.バージョン} ]
 				[ %${#Toolbar.ヘルプ.問合わせ} => "#" ]
 			]
 		]

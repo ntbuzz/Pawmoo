@@ -40,9 +40,13 @@ class IndexController extends AppController {
 		// ツリーメニューを構築
 		$this->Model->MakeOutline();
 		// Section データを取得
+		$this->Part->getRecordByKey($Part);
+		$this->Chapter->getRecordByKey($Chap);
+		$this->ViewSet(['PartData' => $this->Part->fields,'ChapterData' => $this->Chapter->fields]);
+
 		$this->Section->getSectionDoc($Chap);
-		$this->ViewSet(['Chapter' => $Chap, 'Section' => $this->Section->Records, 'Tabmenu' => $Tabs]);
-        APPDEBUG::arraydump(3, [
+		$this->ViewSet(['Part' => $Part,'Chapter' => $Chap,'Section' => $this->Section->Records, 'Tabmenu' => $Tabs]);
+        APPDEBUG::arraydump(13, [
 			'パラメータ' => App::$Params,
             'レコード' => $this->Model->Records,
             'アウトライン' => $this->Model->outline,
@@ -51,5 +55,18 @@ class IndexController extends AppController {
 		]);
 		$this->View->PutLayout();
 	}
+//===============================================================================
+// パートレレコードに追加
+public function PartAction() {
+	$this->Part->AddRecord(MySession::$PostEnv);
+	echo App::$Referer;
+}
+//===============================================================================
+// パートレレコードに追加
+public function ChapterAction() {
+	$this->Chapter->AddRecord(MySession::$PostEnv);
+	echo App::$Referer;
+}
+
 
 }

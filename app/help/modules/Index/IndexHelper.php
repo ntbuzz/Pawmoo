@@ -27,8 +27,34 @@ dump_debug(0,[ "アウトライン" => $this->MyModel->outline]);
 }
 //===============================================================================
 // セクション名をキーにタブ表示する
+public function Part_Chapter_Data() {
+    APPDEBUG::arraydump(3, [
+        'パート' => $this->PartData,
+        'チャプタ' => $this->ChapterData,
+        'セクション' => $this->Section,
+    ]);    
+    echo "var PartData = {\n";
+    foreach($this->PartData as $key => $val) {
+        $vv = str_replace("\r\n", "\\n", $val);
+        echo "\t{$key}: \"{$vv}\",\n";
+    }
+    echo "};\n";
+    echo "var ChapterData = {\n";
+    foreach($this->ChapterData as $key => $val) {
+        $vv = str_replace("\r\n", "\\n", $val);
+        echo "\t{$key}: \"{$vv}\",\n";
+    }
+    echo "};\n";
+}
+//===============================================================================
+// セクション名をキーにタブ表示する
 public function SectionTab() {
-    echo "<ul class='tab' data-parent='{$this->Chapter}'>\n";
+    APPDEBUG::arraydump(3, [
+        'パート' => $this->PartData,
+        'チャプタ' => $this->ChapterData,
+        'セクション' => $this->Section,
+    ]);    
+    echo "<ul class='tab' id='{$this->Chapter}' data-parent='{$this->Part}'>\n";
     if(!empty($this->Section)) {
         $n = 0;
         foreach($this->Section as $key => $val) {
@@ -37,9 +63,11 @@ public function SectionTab() {
             echo "<li{$sel} id='$val[id]'>$ttl</li>\n";
             $first = '';
         }
-    } else {
     }
-    echo "<li class='add-section' id='add_baloon'>＋</li>\n";
+    // チャプターが選択されているときだけ
+    if(!empty($this->Chapter)) {
+        echo "<li class='add-section' id='add_baloon'>＋</li>\n";
+    }
     echo "</ul>\n";
 }
 //===============================================================================
@@ -51,7 +79,7 @@ public function SectionContents() {
         foreach($this->Section as $key => $sec) {
             $sel = ($this->Tabmenu == $n++) ? '' : ' class="hide"';
             echo "<li{$sel}>";
-            echo "<div class='section' id='$sec[id]' data-disp='$sec[disp_id]' data-parent='$sec[chapter_id]'>";
+            echo "<div class='section' id='$sec[id]' data-disp='$sec[disp_id]' data-parent='$sec[chapter_id]' value='$sec[short_title]'>";
             echo "<h2 class='title'>$sec[title]</h2>\n";
             if(isset($sec['contents'])) {
                 echo "<div class='description'>$sec[contents]</div>\n";
@@ -77,6 +105,16 @@ public function SelectList($key) {
     foreach($this->MyModel->Select[$key] as $ttl => $id) {
         echo "[{$id},\"{$ttl}\"],";
     }
+}
+//===============================================================================
+// セクションのコンテンツをリスト表示する
+public function ChapterSelector($key) {
+	echo "<SELECT name='part_id'>";
+    foreach($this->MyModel->PartSelect as $val) {
+        list($id,$text) = $val;
+		echo "<OPTION value='{$id}'>{$text}</option>\n";
+    }
+	echo "</SELECT>\n";
 }
 
 }

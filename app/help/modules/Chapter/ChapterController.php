@@ -1,12 +1,12 @@
 <?php
 
-class SectionController extends cutomController {
+class ChapterController extends cutomController {
 
 //	データの更新のみのコントローラクラスは全て共通なので
 //	全てのメソッドはカスタムコントローラーに実装する
 //
 //===============================================================================
-// 削除アクション以外はカスタムコントローラに置く
+// データを更新してREFERERに戻す
 public function DeleteAction() {
 	$num = App::$Params[0];
 	dump_debug(DEBUG_DUMP_NONE, "Update", [

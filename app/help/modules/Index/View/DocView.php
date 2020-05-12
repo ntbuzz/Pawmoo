@@ -19,6 +19,7 @@ $(function() {
 		$("#add_section_dialog").floatWindow();
 	});
 });
+<?php $Helper->Part_Chapter_Data(); ?>
 
 </script>
 <div class='tabmenu fixedsticky' data-element=".contents-view">

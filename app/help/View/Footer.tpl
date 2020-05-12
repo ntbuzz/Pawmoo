@@ -1,12 +1,16 @@
 
+"*フッターのインクルード"
 
-.info-box{about_info} => [
+.info-box#disp_about{about_info} => [ size => "450,220,200,150"
+h3 => [ Biscuit(MAP) ]
+blockquote => [ ~
+Biscuit(MAP) is PHP wild-framwork. :-)
+~ ]
 pre => [ ~
- Biscuit(MAP)
   
  @copyright  Copyright (c) 2017 - 2020 by nTak
  @license    MIT
- @version 0.9.0, 2020-05-05
+ @version 0.10.0, 2020-05-12
  System Require: PHP 5.6 or Higher
  
 ~ ]

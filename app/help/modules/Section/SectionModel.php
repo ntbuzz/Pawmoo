@@ -37,7 +37,8 @@ public function getSectionDoc($Chap) {
 //===============================================================================
 // レコード削除、関連するテーブルのレコードも削除
 public function deleteRecordset($num) {
-	// パラグラフを削除する
+    // セクションを参照しているパラグラフを削除する
+    // パラブラフ移行のリレーションテーブルは無いので基本メソッドで消せる
 	$this->Paragraph->MultiDeleteRecord(['section_id' => $num]);
 	// セクションを削除する
 	$this->DeleteRecord($num);

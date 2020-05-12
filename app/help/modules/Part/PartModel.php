@@ -24,6 +24,18 @@ class PartModel extends AppModel {
 // モジュールクラスではコンストラクタを定義しない
 //  必要なら ClassInit() メソッドで初期化する
 //===============================================================================
+//===============================================================================
+// レコード削除、関連するテーブルのレコードも削除
+public function deleteRecordset($num) {
+    // パートを参照しているチャプターを削除する
+    $this->Chapter->RecordFinder(['part_id' => $num],['id']);
+    $id_list = $this->Chapter->Records;
+    foreach($id_list as $rec) {
+        $this->Chapter->deleteRecordset($rec['id']);
+    }
+	// チャプタを削除する
+	$this->DeleteRecord($num);
+}
 
 
 }

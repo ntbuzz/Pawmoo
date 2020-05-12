@@ -44,7 +44,7 @@
     float: left;
     list-style-type: none;
 }
-#toolbar ul#menu a, .menuitem {
+#toolbar ul#menu a,#toolbar .menuitem {
     color: black;              /* メニュー項目の文字色 */
     line-height: 35px;         /* メニュー項目のリンクの高さ（「メニュー項目の高さ」と一致させる） */
     text-align: center;        /* メインメニューの文字列の配置（中央寄せ） */
@@ -53,7 +53,7 @@
 	width: 100%;
     height: 100%;
 }
-#toolbar ul#menu a:hover, .menuitem:hover {
+#toolbar ul#menu a:hover,#toolbar .menuitem:hover {
 	background-color: #eeeeee; /* メニュー項目にマウスが載ったときの背景色 */
 	color: #00cc00;            /* メニュー項目にマウスが載ったときの文字色 */
 }
@@ -66,7 +66,8 @@
 /* サブメニュー項目の装飾 */
 #toolbar ul#menu ul.sub {
 	background-color: #ffc5a9;     /* サブメニュー全体の背景色 */
-	display: none;
+    display: none;
+    color:black;
 	position: absolute;
     font-size: 9pt;
     border: 1px solid black;
@@ -77,12 +78,18 @@
     border-bottom: 1px dashed #666;
     padding-left: 5px;
 }
-#toolbar ul#menu ul.sub li a {
+#toolbar ul#menu ul.sub li.subitem {
+    margin-left: 5px;
+    padding-left: 0px;
+}
+#toolbar ul#menu ul.sub li a,
+#toolbar ul#menu ul.sub li.subitem {
 	line-height: 25px; /* サブメニュー1項目の行高（「サブメニュー1項目の高さ」と合わせる） */
 	text-align: left;  /* 文字列の配置（左寄せ） */
 	text-indent: 5px;  /* 文字列前方の余白 */
 }
-#toolbar ul#menu ul.sub li a:hover {
+#toolbar ul#menu ul.sub li a:hover,
+#toolbar ul#menu ul.sub li.subitem:hover {
 	background-color: #ffff80; /* サブメニュー項目にマウスが載ったときの背景色 */
 	color: #005500;            /* サブメニュー項目にマウスが載ったときの文字色 */
 }
