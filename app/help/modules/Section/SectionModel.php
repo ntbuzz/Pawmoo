@@ -27,12 +27,20 @@ class SectionModel extends AppModel {
 // モジュールクラスではコンストラクタを定義しない
 //  必要なら ClassInit() メソッドで初期化する
 //===============================================================================
-    public function getSectionDoc($Chap) {
-        $this->RecordFinder(['chapter_id' => $Chap],[],'disp_id');
-        foreach($this->Records as $key => $sec) {
-            $this->Paragraph->RecordFinder(['section_id' => $sec['id'] ],[],'disp_id');
-            $this->Records[$key]['本文'] = $this->Paragraph->Records;
-        }
+public function getSectionDoc($Chap) {
+    $this->RecordFinder(['chapter_id' => $Chap],[],'disp_id');
+    foreach($this->Records as $key => $sec) {
+        $this->Paragraph->RecordFinder(['section_id' => $sec['id'] ],[],'disp_id');
+        $this->Records[$key]['本文'] = $this->Paragraph->Records;
     }
+}
+//===============================================================================
+// レコード削除、関連するテーブルのレコードも削除
+public function deleteRecordset($num) {
+	// パラグラフを削除する
+	$this->Paragraph->MultiDeleteRecord(['section_id' => $num]);
+	// セクションを削除する
+	$this->DeleteRecord($num);
+}
 
 }

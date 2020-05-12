@@ -29,7 +29,7 @@ dump_debug(0,[ "アウトライン" => $this->MyModel->outline]);
 // セクション名をキーにタブ表示する
 public function SectionTab() {
     echo "<ul class='tab' data-parent='{$this->Chapter}'>\n";
-    if($this->Section !== []) {
+    if(!empty($this->Section)) {
         $n = 0;
         foreach($this->Section as $key => $val) {
             $sel = ($this->Tabmenu == $n++) ? ' class="selected"' : '';
@@ -46,26 +46,28 @@ public function SectionTab() {
 // セクションのコンテンツをリスト表示する
 public function SectionContents() {
     echo "<ul class='content'>\n";
-    $n = 0;
-    foreach($this->Section as $key => $sec) {
-        $sel = ($this->Tabmenu == $n++) ? '' : ' class="hide"';
-        echo "<li{$sel}>";
-        echo "<div class='section' id='$sec[id]' data-disp='$sec[disp_id]' data-parent='$sec[chapter_id]'>";
-        echo "<h2 class='title'>$sec[title]</h2>\n";
-        if(isset($sec['contents'])) {
-            echo "<div class='description'>$sec[contents]</div>\n";
-        }
-        echo "<hr>\n";
-        foreach($sec['本文'] as $val) {
-            echo "<div class='paragraph' id='$val[id]' data-disp='$val[disp_id]' data-parent='$val[section_id]'>";
-            if($val['title']) {
-                echo "<h3 class='caption'>$val[title]</h3>\n";
+    if(!empty($this->Section)) {
+        $n = 0;
+        foreach($this->Section as $key => $sec) {
+            $sel = ($this->Tabmenu == $n++) ? '' : ' class="hide"';
+            echo "<li{$sel}>";
+            echo "<div class='section' id='$sec[id]' data-disp='$sec[disp_id]' data-parent='$sec[chapter_id]'>";
+            echo "<h2 class='title'>$sec[title]</h2>\n";
+            if(isset($sec['contents'])) {
+                echo "<div class='description'>$sec[contents]</div>\n";
             }
-            echo "<div class='data'>".$val[$this->_('.Schema.contents')]."</div>";
+            echo "<hr>\n";
+            foreach($sec['本文'] as $val) {
+                echo "<div class='paragraph' id='$val[id]' data-disp='$val[disp_id]' data-parent='$val[section_id]'>";
+                if($val['title']) {
+                    echo "<h3 class='caption'>$val[title]</h3>\n";
+                }
+                echo "<div class='data'>".$val[$this->_('.Schema.contents')]."</div>";
+                echo "</div>\n";
+            }
             echo "</div>\n";
+            echo "</li>\n";
         }
-        echo "</div>\n";
-        echo "</li>\n";
     }
     echo "</ul>\n";
 }

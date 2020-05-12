@@ -3,34 +3,28 @@
 	.rightitem => [
 		<input type="text" class="font16" id="c00" size="20" name="cc">
 		"span.font24#popup-dialog" => [ ≡ ]
+[name] => [ aaaaa ]
 	]
 	+ul#menu => [
-		#li => [ %${#Toolbar.home} => "/index" ]		 //  ハイパーリンク
-		.li => [ %${#Toolbar.ファイル} => "#"
+		[ %${#Toolbar.home} => "/index" ]		 //  ハイパーリンク
+		.menuitem => [ ${#Toolbar.ドキュメント}
 			+ul.sub => [
-				li => [ %${#Toolbar.ファイル.新規} => "#" ]
-				li => [ %${#Toolbar.ファイル.開く} => "#" ]
-				li => [ %${#Toolbar.ファイル.終了} => "#" ]
+				[ %${#Toolbar.ドキュメント.パート追加} => "#" ]
+				[ %${#Toolbar.ドキュメント.チャプター追加} => "#" ]
 			]
 		]
-		li => [ %${#Toolbar.ドキュメント} => "#"
-			ul.sub => [
-				li => [ %${#Toolbar.ドキュメント.パート追加} => "#" ]
-				li => [ %${#Toolbar.ドキュメント.チャプター追加} => "#" ]
+		.menuitem => [ ${#Toolbar.管理ページ}
+			"+ul.sub global" => [
+				[ %${#Toolbar.管理ページ.トップ} => ":" ]
+				[ %${#Toolbar.管理ページ.PHP情報} => ":phpinfo.php" ]
+				[ %${#Toolbar.管理ページ.SQLite} => ":SQLiteManager" ]
+				[ %${#Toolbar.管理ページ.PostgreSQL} => ":phpPgAdmin" ]
 			]
 		]
-		li => [ %${#Toolbar.管理ページ} => "#"
-			"ul.sub global" => [
-				li => [ %${#Toolbar.管理ページ.トップ} => ":" ]
-				li => [ %${#Toolbar.管理ページ.PHP情報} => ":phpinfo.php" ]
-				li => [ %${#Toolbar.管理ページ.SQLite} => ":SQLiteManager" ]
-				li => [ %${#Toolbar.管理ページ.PostgreSQL} => ":phpPgAdmin" ]
-			]
-		]
-		li => [ %${#Toolbar.ヘルプ} => "#"
-			"ul.sub" => [
-				li => [ %${#Toolbar.ヘルプ.バージョン} => "#" ]
-				li => [ %${#Toolbar.ヘルプ.問合わせ} => "#" ]
+		.menuitem => [ ${#Toolbar.ヘルプ}
+			"+ul.sub" => [
+				.menuitem#about_info => [ ${#Toolbar.ヘルプ.バージョン} ]
+				[ %${#Toolbar.ヘルプ.問合わせ} => "#" ]
 			]
 		]
 	]

@@ -25,7 +25,7 @@ public function AddAction() {
 // データを更新してREFERERに戻す
 public function UpdateAction() {
 	$num = App::$Params[0];
-	dump_debug(DEBUG_DUMP_EXIT, "Update", [
+	dump_debug(DEBUG_DUMP_NONE, "Update", [
 		'番号' => $num,
 		'POST' => $_REQUEST,
 		'データ' => MySession::$PostEnv,
@@ -35,13 +35,10 @@ public function UpdateAction() {
 	echo App::$Referer;
 }
 //===============================================================================
-// データを更新してREFERERに戻す
+// レコードを削除して、REFERERに戻す
 public function DeleteAction() {
 	$num = App::$Params[0];
-	// パラグラフを削除する
-	$this->Paragraph->MultiDeleteRecord(['section_id' => $num]);
-	// セクションを削除する
-	$this->Model->DeleteRecord($num);
+	$this->Model->deleteRecordset($num);
 	echo App::$Referer;
 }
 

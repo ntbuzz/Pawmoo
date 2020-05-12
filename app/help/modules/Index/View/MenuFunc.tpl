@@ -96,3 +96,29 @@
 		]
 	] ]
 ]
+//=========================================
+// チャプター追加・フロートウィンドウ
+".floatWindow#add_chapter_dialog" => [ size => "550,320,200,150"
+	+dl => [ [ "チャプター追加"	// dt-inner
+		.dialog-view => [		// dd-attr
+			.dialog-form => [	// div-section
+				@.Sec_data		// インラインセクションの展開
+				<hr>
+				.center => [ "span.button closeButton#new_section" => [ "追加" ] ]
+			]
+		]
+	] ]
+]
+//=========================================
+// パート追加・フロートウィンドウ
+".floatWindow#add_part_dialog" => [ size => "550,320,200,150"
+	+dl => [ [ "パート追加"	// dt-inner
+		.dialog-view => [		// dd-attr
+			.dialog-form => [	// div-section
+				@.Sec_data		// インラインセクションの展開
+				<hr>
+				.center => [ "span.button closeButton#new_section" => [ "追加" ] ]
+			]
+		]
+	] ]
+]

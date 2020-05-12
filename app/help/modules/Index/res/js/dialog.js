@@ -67,8 +67,8 @@ $("#update_section").click(function () {
     var short_title = form.find('input[name="short_title"]').val(); // タブ表示名
     var contents = form.find('.contents').val();        // textarea
     var index = $('.tabmenu .tab li.selected').index();
-    var url = location.pathname.controller_path("section/update/" + myid);
-//    alert(secid+"\n"+url);
+    var url = location.pathname.controller_path("section/update/" )+ myid;
+//    alert(pid+"\n"+url);
     $.post(url, {
         "id"        : Number(myid),
         "disp_id"   : Number(disp),
