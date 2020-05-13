@@ -61,13 +61,14 @@
     // フローティングウィンドウを開く、execButtonがクリックされたらコールバックする
     $.fn.floatWindow = function (obj, callback) {
         var self = this;
-        for (var item in obj) {
-            var target = self.find('[name="' + item + '"]');
+        $.each(obj, function(key, value) {
+            var target = self.find('[name="' + key + '"]');
             if (target.length) {
-                if (target.prop("tagName") == "INPUT" || target.prop("tagName") == "SELECT") target.val(obj[item]);   // 自ID
-                else target.text(obj[item]);   // 自ID
+                if (target.prop("tagName") == "INPUT" || target.prop("tagName") == "SELECT") target.val(value);   // 自ID
+                else target.text(value);   // 自ID
             }
-        }
+ 
+        })
         self.find(".execButton").click(function () {
             var setobj = {};
             self.find("*").each(function () {

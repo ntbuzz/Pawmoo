@@ -216,6 +216,11 @@ function trim_delsp($a) {
     return trim(preg_replace('/\s+/', ' ', str_replace('　',' ',$a)));
 }
 //===============================================================================
+function replace_newline($a) {
+    $vv = str_replace(["\r\n", "\r", "\n"],"\\n", $a);
+    return str_replace("\"", "\\\"", $vv);
+}
+//===============================================================================
 // テキストを分割した配列
 function Text2Array($del,$txt) {
     $array = explode($del, $txt); // とりあえず行に分割
