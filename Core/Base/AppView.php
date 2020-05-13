@@ -498,28 +498,6 @@ debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"
     private function tag_attr_sec($tag,$sec) {
         $innerText = '';
         $secList = [];
-/*
-        $attrList = [];
-        // $tag に含まれる属性を取り出す
-        foreach(['data' => '{', 'name' => '[', 'id' => '#', 'class' => '.'] as $key => $sep) {
-            $n = strrpos($tag,$sep);
-            if( $n !== FALSE) {
-                $str = substr($tag,$n + 1);   // 文字列抽出
-                $tag = substr($tag,0, $n);    // 残りの文字列
-                if($sep[0] == '{') {            // data- 属性
-                    $str = trim($str,'{}');
-                    $kk = "{$key}-element";
-                    $attrList[$kk] = $str;
-                } else if($sep[0] == '[') { // name属性
-                    $str = trim($str,'[]');
-                    $attrList[$key] = $str;
-                } else {
-                    $attrList[$key] = $str;
-                }
-            }
-        }
-        if(empty($tag)) $tag = 'div';
-*/
         list($tag,$attrList) = $this->tag_separate($tag);
         // $sec の中から innerText と attr を取り出す
         if(is_array($sec)) {
