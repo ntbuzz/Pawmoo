@@ -230,6 +230,21 @@ function Text2Array($del,$txt) {
     return $array;
 }
 //===============================================================================
+// 自動ハイパーリンク生成
+// XXXXXX.{URL} 形式の文字列をハイパーリンクに変換する
+function auto_hyperlink($atext) {
+	$ln = explode("\n", $atext);	// とりあえず行に分割
+	$ln = array_map('trim', $ln);	// 各要素をtrim()にかける
+	$ln = array_values($ln);		// これはキーを連番に振りなおしてるだけ
+	$ret = array();
+	foreach($ln as $ll) {
+//    	$ll = preg_replace("/([^\.\s]+)\.{((https?|ftp)(:\/\/[-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+))}/i",'<a target="_blanl" href="\\2">\\1</a>', $ll);
+    	$ll = preg_replace("/([^\.\s]+)\.{([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)}/i",'<a target="_blanl" href="\\2">\\1</a>', $ll);
+		$ret[] = $ll;
+	}
+	return implode("\n",$ret);
+}
+//===============================================================================
 // デバッグダンプ
 function check_cwd($here) {
     $cwd = getcwd();
