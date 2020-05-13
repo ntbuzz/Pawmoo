@@ -15,7 +15,7 @@ public function DeleteAction() {
 		'データ' => MySession::$PostEnv,
 		'タブセット' => MySession::$PostEnv['TabSelect'],
 	]);
-	$this->Model->DeleteRecord($num);
+	$this->Model->deleteRecordset($num);
 	echo App::$Referer;
 }
 

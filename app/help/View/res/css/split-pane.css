@@ -16,16 +16,15 @@
 }
 /* 左右分割 */
 #left-component {
-	width: 16em; /* Same as divider left */
+	width: 19em; /* Same as divider left */
 	white-space: nowrap;
-
 }
 #v-divider {
-	left: 16em;
+	left: 19em;
 	width: 3px;
 }
 #right-component {
-	left: 16em; /* Same as divider left */
+	left: 19em; /* Same as divider left */
 	margin-left: 3px; /* Same as divider width */
 /*	background: #333;*/
 	overflow:hidden;

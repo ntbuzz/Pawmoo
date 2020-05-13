@@ -10,6 +10,7 @@
 			+ul.sub => [
 				.subitem#part_edit => [ ${#Toolbar.ドキュメント.パート編集} ]
 				.subitem#part_add => [ ${#Toolbar.ドキュメント.パート追加} ]
+				.subitem#part_del => [ ${#Toolbar.ドキュメント.パート削除} ]
 				.subitem#chap_edit => [ ${#Toolbar.ドキュメント.チャプター編集} ]
 				.subitem#chap_add => [ ${#Toolbar.ドキュメント.チャプター追加} ]
 				.subitem#chap_del => [ ${#Toolbar.ドキュメント.チャプター削除} ]

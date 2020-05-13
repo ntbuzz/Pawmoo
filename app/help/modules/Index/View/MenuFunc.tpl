@@ -149,7 +149,7 @@
 ]
 //=========================================
 // パート追加・フロートウィンドウ
-".floatWindow#add_part_dialog" => [ size => "480,2850,200,150"
+".floatWindow#add_part_dialog" => [ size => "480,285,200,150"
 	+dl => [ [ "パート追加"	// dt-inner
 		.dialog-view => [		// dd-attr
 			.dialog-form => [	// div-section
@@ -161,7 +161,7 @@
 ]
 //=========================================
 // パート編集・フロートウィンドウ
-".floatWindow#edit_part_dialog" => [ size => "480,2850,200,150"
+".floatWindow#edit_part_dialog" => [ size => "480,285,200,150"
 	+dl => [ [ "パート編集"	// dt-inner
 		.dialog-view => [		// dd-attr
 			.dialog-form => [	// div-section

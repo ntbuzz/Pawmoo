@@ -36,12 +36,16 @@ public function Part_Chapter_Data() {
     echo "var PartData = {\n";
     foreach($this->PartData as $key => $val) {
         $vv = str_replace("\r\n", "\\n", $val);
+        $vv = str_replace("\r", "\\n", $vv);
+        $vv = str_replace("\n", "\\n", $vv);
         echo "\t{$key}: \"{$vv}\",\n";
     }
     echo "};\n";
     echo "var ChapterData = {\n";
     foreach($this->ChapterData as $key => $val) {
         $vv = str_replace("\r\n", "\\n", $val);
+        $vv = str_replace("\r", "\\n", $vv);
+        $vv = str_replace("\n", "\\n", $vv);
         echo "\t{$key}: \"{$vv}\",\n";
     }
     echo "};\n";

@@ -14,11 +14,10 @@ var popup_menu_function = {
             disp_id:    obj.attr("data-disp"),
             title:      obj.find(".caption").text(),
             contents:   obj.find(".data").html(),
+            TabSelect:  $('.tabmenu .tab li.selected').index(),
         };
         // フォームにパラメータをセットし、完了時の処理関数を登録する
         $("#edit_dialog").floatWindow(para_obj, function (e) {
-            var index = $('.tabmenu .tab li.selected').index();
-            e["TabSelect"] = Number(index);
             var url = location.pathname.controller_path("paragraph/update/")+e["id"];
             $.post(url, e,
                 function(data){ //リクエストが成功した際に実行する関数
@@ -38,10 +37,9 @@ var popup_menu_function = {
             disp_id:    obj.attr("data-disp") - 1,
             title:      '',
             contents:   '',
+            TabSelect:  $('.tabmenu .tab li.selected').index(),
         };
         $("#add_dialog").floatWindow(para_obj, function (e) {
-            var index = $('.tabmenu .tab li.selected').index();
-            e["TabSelect"] = Number(index);
             var url = location.pathname.controller_path("paragraph/add/");
             $.post(url, e,
                 function(data){ //リクエストが成功した際に実行する関数
@@ -53,18 +51,17 @@ var popup_menu_function = {
             return false;
         });
     },
-    "ctxAdd": function (obj) {
+    "ctxAdd": function (obj) {  // セクションブロックから呼び出される
         // フォームのデータを生成
         var para_obj = {
-            section_id: obj.attr('data-parent'),   // チャプターID
-            section:    obj.parents('.section').find(".title").text(),
+            section_id: obj.attr('id'),   // チャプターID
+            section:    obj.find(".title").text(),
             disp_id:    0,
             title:      '',
             contents:   '',
+            TabSelect:  $('.tabmenu .tab li.selected').index(),
         };
         $("#add_dialog").floatWindow(para_obj, function (e) {
-            var index = $('.tabmenu .tab li.selected').index();
-            e["TabSelect"] = Number(index);
             var url = location.pathname.controller_path("paragraph/add/");
             $.post(url, e,
                 function(data){ //リクエストが成功した際に実行する関数
@@ -98,10 +95,9 @@ var popup_menu_function = {
             title:      obj.find(".title").text(),
             short_title:obj.attr("value"),
             contents:   obj.find(".description").text(),
+            TabSelect:  $('.tabmenu .tab li.selected').index(),
         };
         $("#edit_section_dialog").floatWindow(sec_obj, function (e) {
-            var index = $('.tabmenu .tab li.selected').index();
-            e["TabSelect"] = Number(index);
             var url = location.pathname.controller_path("section/update/") + e["id"];
             $.post(url, e,
                 function(data){ //リクエストが成功した際に実行する関数
