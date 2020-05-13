@@ -63,8 +63,10 @@
         var self = this;
         for (var item in obj) {
             var target = self.find('[name="' + item + '"]');
-            if (target.prop("tagName") == "INPUT" || target.prop("tagName") == "SELECT") target.val(obj[item]);   // 自ID
-            else target.text(obj[item]);   // 自ID
+            if (target.length) {
+                if (target.prop("tagName") == "INPUT" || target.prop("tagName") == "SELECT") target.val(obj[item]);   // 自ID
+                else target.text(obj[item]);   // 自ID
+            }
         }
         self.find(".execButton").click(function () {
             var setobj = {};
