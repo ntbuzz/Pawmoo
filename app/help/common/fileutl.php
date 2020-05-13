@@ -13,7 +13,6 @@ function GetFileName($fn) {
     if($ext !== '') $fn = str_replace('.'.$ext,'',$fn);
     return $fn;
 }
-
 //===============================================================================
 // URLの特殊文字エスケープ
 function CHREncode($str) {

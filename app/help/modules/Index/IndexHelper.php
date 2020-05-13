@@ -35,17 +35,13 @@ public function Part_Chapter_Data() {
     ]);    
     echo "var PartData = {\n";
     foreach($this->PartData as $key => $val) {
-        $vv = str_replace("\r\n", "\\n", $val);
-        $vv = str_replace("\r", "\\n", $vv);
-        $vv = str_replace("\n", "\\n", $vv);
+        $vv = replace_newline($val);
         echo "\t{$key}: \"{$vv}\",\n";
     }
     echo "};\n";
     echo "var ChapterData = {\n";
     foreach($this->ChapterData as $key => $val) {
-        $vv = str_replace("\r\n", "\\n", $val);
-        $vv = str_replace("\r", "\\n", $vv);
-        $vv = str_replace("\n", "\\n", $vv);
+        $vv = replace_newline($val);
         echo "\t{$key}: \"{$vv}\",\n";
     }
     echo "};\n";
@@ -86,7 +82,8 @@ public function SectionContents() {
             echo "<div class='section' id='$sec[id]' data-disp='$sec[disp_id]' data-parent='$sec[chapter_id]' value='$sec[short_title]'>";
             echo "<h2 class='title'>$sec[title]</h2>\n";
             if(isset($sec['contents'])) {
-                echo "<div class='description'>$sec[contents]</div>\n";
+                $contents = auto_hyperlink($sec[contents]);
+                echo "<div class='description'>$contents</div>\n";
             }
             echo "<hr>\n";
             foreach($sec['本文'] as $val) {
@@ -94,7 +91,8 @@ public function SectionContents() {
                 if($val['title']) {
                     echo "<h3 class='caption'>$val[title]</h3>\n";
                 }
-                echo "<div class='data'>".$val[$this->_('.Schema.contents')]."</div>";
+                $contents = auto_hyperlink($val[$this->_('.Schema.contents')]);
+                echo "<div class='data'>$contents</div>";
                 echo "</div>\n";
             }
             echo "</div>\n";

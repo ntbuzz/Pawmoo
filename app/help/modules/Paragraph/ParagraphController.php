@@ -16,4 +16,5 @@ public function DeleteAction() {
 	echo App::$Referer;
 }
 
+
 }

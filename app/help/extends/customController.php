@@ -34,5 +34,19 @@ public function UpdateAction() {
 	$this->Model->UpdateRecord($num,MySession::$PostEnv);
 	echo App::$Referer;
 }
+//===============================================================================
+// 削除アクション以外はカスタムコントローラに置く
+public function JsonAction() {
+	$num = App::$Params[0];
+	$this->Model->getRecordByKey($num);
+	$json ="{";
+	foreach($this->Model->fields as $key => $val) {
+		$vv = replace_newline($val);
+		$json .= "\"{$key}\": \"{$vv}\",";
+	}
+//	echo "}\n";
+	$json = trim($json,',');
+	echo "{$json}}\n";
+}
 
 }

@@ -14,10 +14,10 @@ $(".add-section").click(function (e) {
         title:      '',
         short_title:'',
         contents:   '',
-        TabSelect:  obj.find('li.selected').index(),
     };
     $("#edit_section_dialog").floatWindow(sec_obj, function (e) {
-        var url = location.pathname.controller_path("section/add/");
+        e["TabSelect"] = $('.tabmenu .tab li.selected').index();
+        var url = location.pathname.controller_path("section/add");
         $.post(url, e,
             function (data) { //リクエストが成功した際に実行する関数
                 location.href = data;
@@ -38,9 +38,8 @@ $("#part_edit").click(function () {
         return false;
     }
     $("#edit_part_dialog").floatWindow(PartData, function (e) {
-        var index = $('.tabmenu .tab li.selected').index();
-        e["TabSelect"] = Number(index);
-        var url = location.pathname.controller_path("part/update/") + e["id"];
+        e["TabSelect"] = $('.tabmenu .tab li.selected').index();
+        var url = location.pathname.controller_path("part/update") + e["id"];
         $.post(url, e,
             function (data) { //リクエストが成功した際に実行する関数
                 location.href = data;
@@ -58,10 +57,10 @@ $("#part_add").click(function () {
         disp_id:    0,
         title:      '',
         contents:   '',
-        TabSelect:  $('.tabmenu .tab li.selected').index(),
     };
     $("#add_part_dialog").floatWindow(part_obj, function (e) {
-        var url = location.pathname.controller_path("part/add/");
+        e["TabSelect"] = $('.tabmenu .tab li.selected').index();
+        var url = location.pathname.controller_path("part/add");
         $.post(url, e,
             function (data) { //リクエストが成功した際に実行する関数
                 location.href = data;
@@ -81,7 +80,7 @@ $("#part_del").click(function () {
     }
     if (confirm(PartData.title + ' を削除しますか？')) {
         var id = PartData.id;
-        var url = location.pathname.controller_path("part/delete/") + id;
+        var url = location.pathname.controller_path("part/delete") + id;
         $.post(url, function (data) { //リクエストが成功した際に実行する関数
             location.href = data;
         })
@@ -99,9 +98,8 @@ $("#chap_edit").click(function () {
         return false;
     }
     $("#edit_chapter_dialog").floatWindow(ChapterData, function (e) {
-        var index = $('.tabmenu .tab li.selected').index();
-        e["TabSelect"] = Number(index);
-        var url = location.pathname.controller_path("chapter/update/") + e["id"];
+        e["TabSelect"] = $('.tabmenu .tab li.selected').index();
+        var url = location.pathname.controller_path("chapter/update") + e["id"];
         $.post(url, e,
             function (data) { //リクエストが成功した際に実行する関数
                 location.href = data;
@@ -124,10 +122,10 @@ $("#chap_add").click(function () {
         disp_id:    0,
         title:      '',
         contents:   '',
-        TabSelect:  $('.tabmenu .tab li.selected').index(),
     };
     $("#add_chapter_dialog").floatWindow(chap_obj, function (e) {
-        var url = location.pathname.controller_path("chapter/add/");
+        e["TabSelect"] = $('.tabmenu .tab li.selected').index();
+        var url = location.pathname.controller_path("chapter/add");
         $.post(url, e,
             function (data) { //リクエストが成功した際に実行する関数
                 location.href = data;
@@ -149,7 +147,7 @@ $("#chap_del").click(function () {
     if(confirm(ChapterData.title+' を削除しますか？')){
         /*　OKの時の処理 */
         var id = ChapterData.id;
-        var url = location.pathname.controller_path("chapter/delete/")+id;
+        var url = location.pathname.controller_path("chapter/delete")+id;
         $.post(url, function (data) { //リクエストが成功した際に実行する関数
             alert(data);
             location.href = data;

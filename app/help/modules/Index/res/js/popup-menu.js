@@ -6,27 +6,26 @@
 */
 var popup_menu_function = {
     "ctxEdit": function (obj) {
-        // フォームのデータを生成
-        var para_obj = {
-            id:         obj.attr("id"),
-            section_id: obj.attr('data-parent'),   // チャプターID
-            section:    obj.parents('.section').find(".title").text(),
-            disp_id:    obj.attr("data-disp"),
-            title:      obj.find(".caption").text(),
-            contents:   obj.find(".data").html(),
-            TabSelect:  $('.tabmenu .tab li.selected').index(),
-        };
-        // フォームにパラメータをセットし、完了時の処理関数を登録する
-        $("#edit_dialog").floatWindow(para_obj, function (e) {
-            var url = location.pathname.controller_path("paragraph/update/")+e["id"];
-            $.post(url, e,
-                function(data){ //リクエストが成功した際に実行する関数
-                    location.href = data ;
-                })
-                .fail(function() {
-                    alert( "error:"+url );
-                });
-            return false;
+        // JSONメソッドを使ってレコードデータを入手する
+        var url = location.origin + location.pathname.controller_path("paragraph/json") + obj.attr("id");
+        $.getJSON(url, function (para_obj) {
+            // フォームにパラメータをセットし、完了時の処理関数を登録する
+            $("#edit_dialog").floatWindow(para_obj, function (e) {
+                e["TabSelect"] = $('.tabmenu .tab li.selected').index();
+                var url = location.pathname.controller_path("paragraph/update")+e["id"];
+                $.post(url, e,
+                    function(data){ //リクエストが成功した際に実行する関数
+                        location.href = data ;
+                    })
+                    .fail(function() {
+                        alert( "error:"+url );
+                    });
+                return false;
+            });
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+//            console.log("jqXHR:"+jqXHR.status);
+//            console.log("status:"+textStatus);
+//            console.log("error:"+errorThrown);
         });
     },
     "ctxIns": function (obj) {
@@ -37,10 +36,10 @@ var popup_menu_function = {
             disp_id:    obj.attr("data-disp") - 1,
             title:      '',
             contents:   '',
-            TabSelect:  $('.tabmenu .tab li.selected').index(),
         };
         $("#add_dialog").floatWindow(para_obj, function (e) {
-            var url = location.pathname.controller_path("paragraph/add/");
+            e["TabSelect"] = $('.tabmenu .tab li.selected').index();
+            var url = location.pathname.controller_path("paragraph/add");
             $.post(url, e,
                 function(data){ //リクエストが成功した際に実行する関数
                     location.href = data ;
@@ -59,10 +58,10 @@ var popup_menu_function = {
             disp_id:    0,
             title:      '',
             contents:   '',
-            TabSelect:  $('.tabmenu .tab li.selected').index(),
         };
         $("#add_dialog").floatWindow(para_obj, function (e) {
-            var url = location.pathname.controller_path("paragraph/add/");
+            e["TabSelect"] = $('.tabmenu .tab li.selected').index();
+            var url = location.pathname.controller_path("paragraph/add");
             $.post(url, e,
                 function(data){ //リクエストが成功した際に実行する関数
                     location.href = data ;
@@ -75,7 +74,7 @@ var popup_menu_function = {
     },
     "ctxDel": function (obj) {
         var myid = obj.attr("id");
-        var url = location.pathname.controller_path("paragraph/delete/" + myid);
+        var url = location.pathname.controller_path("paragraph/delete") + myid;
         $.post(url,
             function(data){
             //リクエストが成功した際に実行する関数
@@ -88,31 +87,32 @@ var popup_menu_function = {
     },
 // セクション編集メニュー
     "ctxSecEdit": function (obj) {
-        var sec_obj = {
-            id:         obj.attr("id"),
-            chapter_id: ChapterData.id,
-            disp_id:    obj.attr("data-disp"),
-            title:      obj.find(".title").text(),
-            short_title:obj.attr("value"),
-            contents:   obj.find(".description").text(),
-            TabSelect:  $('.tabmenu .tab li.selected').index(),
-        };
-        $("#edit_section_dialog").floatWindow(sec_obj, function (e) {
-            var url = location.pathname.controller_path("section/update/") + e["id"];
-            $.post(url, e,
-                function(data){ //リクエストが成功した際に実行する関数
-                    location.href = data ;
-                })
-                .fail(function() {
-                    alert( "error:"+url );
-                });
-            return false;
+        // JSONメソッドを使ってレコードデータを入手する
+        var url = location.origin + location.pathname.controller_path("section/json") + obj.attr("id");
+        $.getJSON(url, function (sec_obj) {
+            // フォームにパラメータをセットし、完了時の処理関数を登録する
+            $("#edit_section_dialog").floatWindow(sec_obj, function (e) {
+                e["TabSelect"] = $('.tabmenu .tab li.selected').index();
+                var url = location.pathname.controller_path("section/update") + e["id"];
+                $.post(url, e,
+                    function(data){ //リクエストが成功した際に実行する関数
+                        location.href = data ;
+                    })
+                    .fail(function() {
+                        alert( "error:"+url );
+                    });
+                return false;
+            });
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+//            console.log("jqXHR:"+jqXHR.status);
+//            console.log("status:"+textStatus);
+//            console.log("error:"+errorThrown);
         });
     },
     "ctxSecAdd": ".add-section",
     "ctxSecDel": function (obj) {
         var myid = obj.attr("id");
-        var url = location.pathname.controller_path("section/delete/" + myid);
+        var url = location.pathname.controller_path("section/delete") + myid;
         $.post(url,
             function (data) {
                 //リクエストが成功した際に実行する関数
