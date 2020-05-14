@@ -1,7 +1,7 @@
 // スタイルシートとJavascriptのテンプレート
 @comment => off
 @compact => on
-@message => no     // デバッグ用コメント出力
+//@message => no     // デバッグ用コメント出力
 Stylesheet => [
     // モジュールスタイルのテンプレート
     '@charset' => UTF-8 // この コメント が出たらNG

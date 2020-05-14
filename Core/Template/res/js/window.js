@@ -40,35 +40,34 @@
         });
     };
     $.fn.paddingWidth = function() {
-        var widths = {
-            top    : 0,
-            bottom : 0,
-            left   : 0,
+        var widths = {
+            top    : 0,
+            bottom : 0,
+            left   : 0,
             right: 0,
-        };
-        if ($(this).length > 0) {
-            $.each($(this), function() {
-                widths = {
-                    top    : parseInt($(this).css('padding-top'), 10),
-                    bottom : parseInt($(this).css('padding-bottom'), 10),
-                    left   : parseInt($(this).css('padding-left'), 10),
-                    right  : parseInt($(this).css('padding-right'), 10)
-                };
-            });
-        }
-        return widths;
+        };
+        if ($(this).length > 0) {
+            $.each($(this), function() {
+                widths = {
+                    top    : parseInt($(this).css('padding-top'), 10),
+                    bottom : parseInt($(this).css('padding-bottom'), 10),
+                    left   : parseInt($(this).css('padding-left'), 10),
+                    right  : parseInt($(this).css('padding-right'), 10)
+                };
+            });
+        }
+        return widths;
     };
     // フローティングウィンドウを開く、execButtonがクリックされたらコールバックする
     $.fn.floatWindow = function (obj, callback) {
         var self = this;
-        $.each(obj, function(key, value) {
+        $.each(obj, function (key, value) {
             var target = self.find('[name="' + key + '"]');
             if (target.length) {
                 if (target.prop("tagName") == "INPUT" || target.prop("tagName") == "SELECT") target.val(value);   // 自ID
                 else target.text(value);   // 自ID
             }
- 
-        })
+        });
         self.find(".execButton").click(function () {
             var setobj = {};
             self.find("*").each(function () {
@@ -86,7 +85,7 @@
 // セレクタを使う
 $(function () {
     // スティッキー動作設定
-    var selector = $(".fixedsticky");
+    var selector = $(".fixedsticky .dummy");
     selector.each(function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
         var ref = self.attr("data-element");  // 紐付けるID

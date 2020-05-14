@@ -190,16 +190,13 @@ public function ViewStyle($filename) {
 //===============================================================================
 //    ファイルをコンパクト化して出力
     private function output_content($content) {
-        // イメージ指定の属性(url())のアドレス書換えが必要になる
         if($this->do_min) {         // コメント・改行を削除して最小化して出力する
-            $content = 
-                str_replace([': ', '\ ', ') .'],[':', ' ' , ').'],   // 無駄な空白を削除
-                    preg_replace('/\s+/', ' ',                                      //　連続したスペースを削除
-                        preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content)       // コメント行を削除
-                    )
-                );
+            $pat = '[:(){}\[\]<>+\-\=\?;,]';    // 前後の空白を削除する文字
+            $content = preg_replace("/\\s*({$pat})\\s+|\\s+({$pat})\\s*|(\\s)+/", '$1$2$3',
+                    preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content));       // コメント行を削除
+            $content =trim($content);
         } else if(!$this->do_com) {         // コメントだけを削除して出力する
-            $content = preg_replace('/\ {3,}|\t/','  ',                          // 3個以上の空白またはタブを2個のスペースに圧縮
+            $content = preg_replace('/\s{2,}|\t/',' ',                          // 2個以上の空白またはタブを1個のスペースに圧縮
                     preg_replace('/[\r\n]+/', "\n",                             // 空行を削除
                     preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content)));   // コメント行を削除
         }
@@ -274,7 +271,7 @@ public function ViewStyle($filename) {
                 $val = strtolower($val);                        // 設定値を取vり出す
                 $this->$var = self::BoolConst[$val];            // 指定プロパティ変数にセット
             } else if($key == 'jquery' && $this->Filetype == 'js') {                 // JQuery関数をインクルード
-                echo "$(function() {\n";
+                echo "$(function() { ";
                 $this->import_files($val);
                 echo "});\n";
             } else if($key == 'import') {                  // ファイルを読み込んでそのまま出力

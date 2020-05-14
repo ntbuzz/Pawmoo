@@ -1,6 +1,4 @@
 // アプリ共通
-@compact => off        // コンパクト出力
-@comment => off
 Stylesheet => [
     @charset => UTF-8 // この コメント が出たらNG
     common => [
