@@ -68,6 +68,23 @@ public function SetPaging($pagesize, $pagenum) {
 // pgSQL: SELECT *, count('No') over() as full_count FROM public.mydb offset 10 limit 50;
 // SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
 //==================================================================================================
+public function getRecordValue($row,$relations) {
+	// 検索条件
+	$where = $this->sql_makeWHERE($row);
+	// 実際のレコード検索
+	$sql = $this->sql_JoinTable($relations);
+	$where .= ($this->handler == 'SQLite') ? " limit 0,1" : " offset 0 limit 1";		// 取得レコード数
+	$sql .= "{$where};";
+	$this->doQuery($sql);
+	return $this->fetchDB();
+}
+//==================================================================================================
+//	findRecord(row): 
+//	row 配列を条件にレコード検索する
+//      [ AND条件... ] OR条件 [ AND条件... ]
+// pgSQL: SELECT *, count('No') over() as full_count FROM public.mydb offset 10 limit 50;
+// SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
+//==================================================================================================
 public function findRecord($row,$relations,$sort = '') {
 	// 検索条件
 	$where = $this->sql_makeWHERE($row);

@@ -30,24 +30,24 @@ class FMDBHandler extends FileMaker {
 	private $onetime;		// デバッグ用：メッセージを1回に
 //===============================================================================
 // コンストラクタでデータベースに接続
-function __construct($dbname,$table) {
-	parent::__construct(); // 継承元クラスのコンストラクターを呼ぶ
-	// クラスユニークなパラメータ
-	$this->setProperty('database', $dbname);
-	$this->LayoutName = $table;
-	$this->Database = $dbname;
-	// FileMakerへのアクセスに共通
-	foreach( DatabaseParameter['Filemaker'] as $key => $val ){
-		$this->setProperty($key, $val);
+	function __construct($dbname,$table) {
+		parent::__construct(); // 継承元クラスのコンストラクターを呼ぶ
+		// クラスユニークなパラメータ
+		$this->setProperty('database', $dbname);
+		$this->LayoutName = $table;
+		$this->Database = $dbname;
+		// FileMakerへのアクセスに共通
+		foreach( DatabaseParameter['Filemaker'] as $key => $val ){
+			$this->setProperty($key, $val);
+		}
+		$this->startrec = 0;		// 開始レコード番号
+		$this->limitrec = 0;		// 取得レコード数
+		$this->fetchCount = 20;
+		$this->Finds = array();
+		$this->Connect($this->LayoutName);
+		self::$FMHandle = DatabaseHandler::getDataSource('FMDB');
+		APPDEBUG::MSG(19, DatabaseParameter['Filemaker']);
 	}
-	$this->startrec = 0;		// 開始レコード番号
-	$this->limitrec = 0;		// 取得レコード数
-	$this->fetchCount = 20;
-	$this->Finds = array();
-	$this->Connect($this->LayoutName);
-	self::$FMHandle = DatabaseHandler::getDataSource('FMDB');
-	APPDEBUG::MSG(19, DatabaseParameter['Filemaker']);
-}
 //==================================================================================================
 //	Connect: テーブル名
 //	fields[] 連想配列にフィールド名をセットする
@@ -88,26 +88,26 @@ public function isTableExist() {
 }
 //===============================================================================
 // 日付変換
-private function SetDateTimeField($record) {
-	foreach($this->columns as $key => $val ) {
-		$this->fields[$key] = $record->getField($key);
-	}
-	foreach($this->fmtconv as $key => $val) {
-		switch($val) {
-		case 'date':
-			$dt = explode('/',$this->fields[$key]);
-			$dt = (count($dt)==3) ? $dt[2].'/'.$dt[0].'/'.$dt[1] : '';
-			$this->fields[$key] = $dt;
-			break;
-		case 'timestamp':
-			$vv = explode(' ',$this->fields[$key]);
-			$dt = explode('/',$vv[0]);
-			$vv[0] = (count($dt)==3) ? $dt[2].'/'.$dt[0].'/'.$dt[1] : '';
-			$this->fields[$key] = implode(' ',$vv);
-			break;
+	private function SetDateTimeField($record) {
+		foreach($this->columns as $key => $val ) {
+			$this->fields[$key] = $record->getField($key);
+		}
+		foreach($this->fmtconv as $key => $val) {
+			switch($val) {
+			case 'date':
+				$dt = explode('/',$this->fields[$key]);
+				$dt = (count($dt)==3) ? $dt[2].'/'.$dt[0].'/'.$dt[1] : '';
+				$this->fields[$key] = $dt;
+				break;
+			case 'timestamp':
+				$vv = explode(' ',$this->fields[$key]);
+				$dt = explode('/',$vv[0]);
+				$vv[0] = (count($dt)==3) ? $dt[2].'/'.$dt[0].'/'.$dt[1] : '';
+				$this->fields[$key] = implode(' ',$vv);
+				break;
+			}
 		}
 	}
-}
 //===============================================================================
 // 指定の番号を持つレコードひとつだけを読み込む
 public function doQueryBy($fn,$recno) {
@@ -273,5 +273,15 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 			}
 		}
 	}
+//==================================================================================================
+//	未定義ファンクション
+//==================================================================================================
+/*
+public function insertRecord($row)
+public function deleteRecord($wh)
+public function getRecordValue($row,$relations)
+public function getValueLists($table,$ref,$id) 
+public function getLastError() 
+*/
 
 }

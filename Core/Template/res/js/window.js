@@ -59,8 +59,9 @@
         return widths;
     };
     // フローティングウィンドウを開く、execButtonがクリックされたらコールバックする
-    $.fn.floatWindow = function (obj, callback) {
+    $.fn.floatWindow = function (ttl, obj, callback) {
         var self = this;
+        self.find('dt').text(ttl);
         $.each(obj, function (key, value) {
             var target = self.find('[name="' + key + '"]');
             if (target.length) {

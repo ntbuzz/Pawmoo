@@ -21,11 +21,13 @@ if (typeof popup_menu_function == "object") {
                     $(func_id).mousedown(function (e) {
                         self.hide();
                         $(ref_id).removeClass('hilight');  // 全部のクラスを変更
-                        if (func_type == "function") {
+                        if (func_type == "function") {      // 関数なら
                             func_elem($(ref_id + ".selected"));
-                        } else {
-//                            alert(func_elem+" click-action");
+                        } else if(func_type == "string") {              // 参照なら
+                            alert(func_elem+" click-action");
                             $(func_elem).click();
+                        } else {        // IDそのものをクリック
+                            $(func_id).click();
                         }
                         return false;   // 親要素に処理させない
                     });

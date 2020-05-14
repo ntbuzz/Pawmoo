@@ -93,6 +93,13 @@ class AppModel extends AppObject {
         return parent::loadModels($SubModelName);
     }
 //==================================================================================================
+// ページング設定
+public function SetPage($pagesize,$pagenum) {
+    $this->pagesize = $pagesize;            // 1ページ当たりのレコード取得件数、0 = 制限なし
+    $this->page_num = ($pagenum <= 0) ? 1 : $pagenum;            // 現在のページ番号 1から始まる
+    $this->dbDriver->SetPaging($this->pagesize,$this->page_num);
+}
+//==================================================================================================
 // PrimaryKey でレコードを取得
 // 結果：   レコードデータ = RecData
 //          リレーションフィールドは取得しない
@@ -134,11 +141,13 @@ public function getRecordField($key,$field) {
     return $this->fields[$field];               // フィールド値を返す
 }
 //==================================================================================================
-// ページング設定
-public function SetPage($pagesize,$pagenum) {
-    $this->pagesize = $pagesize;            // 1ページ当たりのレコード取得件数、0 = 制限なし
-    $this->page_num = ($pagenum <= 0) ? 1 : $pagenum;            // 現在のページ番号 1から始まる
-    $this->dbDriver->SetPaging($this->pagesize,$this->page_num);
+// レコードデータの読み込み(JOIN済レコード)
+public function getRecordValue($num) {
+    if(empty($num)) {
+        $this->field = array();
+        return;
+    }
+    $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],$this->Relations);
 }
 //==================================================================================================
 // レコードリストの読み込み(JOIN済レコード)

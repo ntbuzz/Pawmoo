@@ -14,34 +14,34 @@ class SQLiteHandler extends SQLHandler {
 	}
 //==================================================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
-	protected function Connect() {
-		APPDEBUG::MSG(11,$this->table);
-		// テーブル属性を取得
-		$sql = "PRAGMA table_info({$this->table});";
-		$rows = $this->dbb->query($sql);
-		$this->columns = array();
-		while ($row = $rows->fetchArray(SQLITE3_ASSOC)) {
-			$this->columns[$row['name']] = $row['name'];
-		}
-		APPDEBUG::MSG(11,$this->columns);
+protected function Connect() {
+	APPDEBUG::MSG(11,$this->table);
+	// テーブル属性を取得
+	$sql = "PRAGMA table_info({$this->table});";
+	$rows = $this->dbb->query($sql);
+	$this->columns = array();
+	while ($row = $rows->fetchArray(SQLITE3_ASSOC)) {
+		$this->columns[$row['name']] = $row['name'];
 	}
+	APPDEBUG::MSG(11,$this->columns);
+}
 //==================================================================================================
 //	doQuery: 	SQLを発行する
-	public function doQuery($sql) {
-		APPDEBUG::MSG(9,$sql);
-		$this->rows = $this->dbb->query($sql);
-		return $this->rows;
-	}
+public function doQuery($sql) {
+	APPDEBUG::MSG(9,$sql);
+	$this->rows = $this->dbb->query($sql);
+	return $this->rows;
+}
 //==================================================================================================
 //	fetchDB: 	レコードを取得してカラム配列を返す
-	public function fetchDB() {
-		return $this->rows->fetchArray(SQLITE3_ASSOC); //またはSQLITE3_NUM
-	}
+public function fetchDB() {
+	return $this->rows->fetchArray(SQLITE3_ASSOC); //またはSQLITE3_NUM
+}
 //==================================================================================================
 //	getLastError: 	レコードを取得してカラム配列を返す
-	public function getLastError() {
+public function getLastError() {
 //		return sqlite_last_error($this->rows);
-	}
+}
 //==================================================================================================
 //	レコードの追加 
 //==================================================================================================
@@ -77,27 +77,5 @@ public function replaceRecord($wh,$row) {
 		echo 'ERROR:'.$this->getLastError()."\n";
 	}
 }
-//==================================================================================================
-//	レコードの更新 $row[key] value
-//==================================================================================================
-/*
-	public function updateRecord($wh,$row) {
-		APPDEBUG::MSG(11, $row );
-		// SQL生成
-		$sep = '';
-		$upd = '';
-		foreach($row as $key => $val) {
-			if(!isset($wh[$key])) {
-				$upd .= $sep . $key . "='" . $val . "'";
-				$sep = ', ';
-			}
-		}
-		$sep = '';
-		$where = $this->sql_makeWHERE($wh);
-		$sql = "UPDATE {$this->table} SET {$upd}{$where};";
-		APPDEBUG::MSG(11, "SQL QUERY:" . $sql );
-		$this->doQuery($sql);
-	}
-*/
 
 }
