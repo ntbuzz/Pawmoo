@@ -191,14 +191,14 @@ public function ViewStyle($filename) {
 //    ファイルをコンパクト化して出力
     private function output_content($content) {
         if($this->do_min) {         // コメント・改行を削除して最小化して出力する
-            $pat = '[:(){}\[\]<>+\-\=\?;,]';    // 前後の空白を削除する文字
+            $pat = '[:()}\[\]<>\=\?;,]';    // 前後の空白を削除する文字
             $content = preg_replace("/\\s*({$pat})\\s+|\\s+({$pat})\\s*|(\\s)+/", '$1$2$3',
                     preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content));       // コメント行を削除
             $content =trim($content);
         } else if(!$this->do_com) {         // コメントだけを削除して出力する
-            $content = preg_replace('/\s{2,}|\t/',' ',                          // 2個以上の空白またはタブを1個のスペースに圧縮
-                    preg_replace('/[\r\n]+/', "\n",                             // 空行を削除
-                    preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content)));   // コメント行を削除
+            $content = preg_replace('/( )+|([\r\n])+/','$1$2',                  // 2個以上の空白または改行を1個に圧縮
+                    preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content));  // コメント行を削除
+            $content =trim($content);
         }
         echo "{$content}\n";
     }
