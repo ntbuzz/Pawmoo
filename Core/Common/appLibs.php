@@ -217,16 +217,17 @@ function trim_delsp($a) {
 }
 //===============================================================================
 function replace_newline($a) {
-    $vv = str_replace(["\r\n", "\r", "\n"],"\\n", $a);
-    return str_replace("\"", "\\\"", $vv);
+    $vv = str_replace(["\r\n", "\r", "\n","\""],["\\n","\\n","\\n","\\\""], $a);
+    return $vv;
 }
 //===============================================================================
 // テキストを分割した配列
-function Text2Array($del,$txt) {
-    $array = explode($del, $txt); // とりあえず行に分割
-    $array = array_map('trim_delsp', $array); // 各行にtrim()をかける
-    $array = array_filter($array, 'strlen'); // 文字数が0の行を取り除く
-    $array = array_values($array); // これはキーを連番に振りなおしてるだけ
+function text_line_split($del,$txt) {
+    $array = array_values(              // これはキーを連番に振りなおしてるだけ
+        array_filter(                   // 文字数が0の行を取り除く
+            array_map('trim_delsp',     // 各行にtrim()をかける
+            explode($del, $txt)         // とりあえず行に分割
+            ), 'strlen'));  // array_filter
     return $array;
 }
 //===============================================================================
@@ -234,12 +235,9 @@ function Text2Array($del,$txt) {
 // XXXXXX.{URL} 形式の文字列をハイパーリンクに変換する
 function auto_hyperlink($atext) {
 	$ln = explode("\n", $atext);	// とりあえず行に分割
-	$ln = array_map('trim', $ln);	// 各要素をtrim()にかける
-	$ln = array_values($ln);		// これはキーを連番に振りなおしてるだけ
 	$ret = array();
 	foreach($ln as $ll) {
-//    	$ll = preg_replace("/([^\.\s]+)\.{((https?|ftp)(:\/\/[-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+))}/i",'<a target="_blanl" href="\\2">\\1</a>', $ll);
-    	$ll = preg_replace("/([^\.\s]+)\.{([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)}/i",'<a target="_blanl" href="\\2">\\1</a>', $ll);
+    	$ll = preg_replace("/([^\.\s]+)\.{([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)}/i",'<a target="_blank" href="\\2">\\1</a>', $ll);
 		$ret[] = $ll;
 	}
 	return implode("\n",$ret);

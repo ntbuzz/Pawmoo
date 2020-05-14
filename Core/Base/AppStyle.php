@@ -39,8 +39,8 @@ class AppStyle {
     const BoolConst = [ 'yes' => TRUE, 'no' => FALSE, 'true' => TRUE, 'false' => FALSE, 'on' => TRUE, 'off' => FALSE ];
     const ExtendCommand = [
         '@compact' => 'do_min',         // コンパクト設定
-        '@message' => 'do_msg',         // デバッグメッセージ設定
         '@comment' => 'do_com',         // コメント除去
+        '@message' => 'do_msg',         // デバッグメッセージ設定
     ];
     private $ModuleName;        // モジュール名 or Res
     private $Template;          // ContentList のテンプレート
@@ -64,7 +64,7 @@ class AppStyle {
         $this->Filetype = $fldr;
         $this->Folders = array(
             'モジュール固有' => "app/{$appname}/modules/{$this->ModuleName}/res",
-            'アプリ共通' => "app/{$appname}/View/res",                 // App共通のレイアウトテンプレートを探す
+            'アプリ共通' => "app/{$appname}/View/res",      // App共通のレイアウトテンプレートを探す
             'Libs' => "Core/Template/res",                  // ライブラリのテンプレートを探す
         );
         if($this->ModuleName == '') {   // リソースフォルダならモジュール固有を削除
@@ -79,7 +79,7 @@ class AppStyle {
             $sess = MySession::$PostEnv['sysVAR'];              // セッションに記憶してあるシステム変数
             $this->repVARS = array_merge($sess, $myVARS);       // システム変数とパラメータをマージしておく
         } else {
-            $this->repVARS = $myVARS;       // システム変数とパラメータをマージしておく
+            $this->repVARS = $myVARS;       // パラメータのみセット
         }
     }
 //===============================================================================
@@ -193,11 +193,11 @@ public function ViewStyle($filename) {
         // イメージ指定の属性(url())のアドレス書換えが必要になる
         if($this->do_min) {         // コメント・改行を削除して最小化して出力する
             $content = 
-                str_replace(': ',':',str_replace('\ ',' ',str_replace(') .',').',   // 無駄な空白を削除
+                str_replace([': ', '\ ', ') .'],[':', ' ' , ').'],   // 無駄な空白を削除
                     preg_replace('/\s+/', ' ',                                      //　連続したスペースを削除
                         preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content)       // コメント行を削除
                     )
-                )));
+                );
         } else if(!$this->do_com) {         // コメントだけを削除して出力する
             $content = preg_replace('/\ {3,}|\t/','  ',                          // 3個以上の空白またはタブを2個のスペースに圧縮
                     preg_replace('/[\r\n]+/', "\n",                             // 空行を削除

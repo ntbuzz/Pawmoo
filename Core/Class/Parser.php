@@ -45,7 +45,7 @@ EOS;
             else if( !$incomm && strlen($token)) {          // ブロック・コメント内でなく、トークンが空でなければ処理
                 $wrapstr = $token[0] . mb_substr($token,-1);     // 先頭文字と最終文字を取り出す
                 if ( in_array($wrapstr, self::WORDSTRING)) {
-                    $token = implode( "\n" , Text2Array("\n",trim( $token, $wrapstr )) );    // 改行を含むので各行の前後の空白を除去
+                    $token = implode( "\n" , text_line_split("\n",trim( $token, $wrapstr )) );    // 改行を含むので各行の前後の空白を除去
                 }
                 // 改行文字\nを置換する
                 $this->wordlist[] = ($wrapstr == '""') ? str_replace('\n', "\n", $token) : $token;
@@ -66,7 +66,6 @@ EOS;
     private function getToken($i) {
         $token = ($i < $this->wend) ? $this->wordlist[$i] : '';     // インデクスが範囲内なら単語を取出す
         return $token;
-//        return str_replace("'",'',str_replace('"','',$token));      // クオート文字 ” と ’ を除去する
     }
 //==================================================================================================
 //  単語リストからセクション配列を作成し、配列要素を返す
