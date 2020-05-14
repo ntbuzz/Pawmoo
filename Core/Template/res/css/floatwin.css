@@ -27,6 +27,7 @@
     width:100%;
     height:calc(100% - 36px);   /* タイトル:25px＋ リサイズアイコン:11px */
     margin-bottom:11px;
+    padding:4px 10px;
     overflow-x:hidden;
     overflow-y:auto;
 }
@@ -34,7 +35,7 @@
 .floatWindow dl dt {
     height:25px;
     line-height:25px;
-    text-indent:1em;
+    text-indent:0.5em;
     font-weight:bold;
     cursor:move;
     padding-top:2px;

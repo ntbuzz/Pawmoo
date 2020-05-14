@@ -24,7 +24,6 @@ if (typeof popup_menu_function == "object") {
                         if (func_type == "function") {      // 関数なら
                             func_elem($(ref_id + ".selected"));
                         } else if(func_type == "string") {              // 参照なら
-                            alert(func_elem+" click-action");
                             $(func_elem).click();
                         } else {        // IDそのものをクリック
                             $(func_id).click();
