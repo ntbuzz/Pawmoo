@@ -1,59 +1,40 @@
 // 言語ファイル
-
-フィルタ表示 => [
-    .ja => フィルタ表示
-    .en => FILTER
-]
-
 home => [
     .ja => ホーム
     .en => HOME
 ]
-
-ファイル => [
+ヘルプトピックス => [
+    .ja => ヘルプトピックス
+    .en => "HELP Topics"
+]
+ 
+ドキュメント => [
     .en => [
-        FILE
-        新規 => New
-        開く => Open
-        終了 => Exit
+        Documents
+        パート編集 => Edit-Part
+        パート追加 => Add-Part
+        パート削除 => Del-Part
+        チャプター編集 => Edit-Chapter
+        チャプター追加 => Add-Chapter
+        チャプター削除 => Del-Chapter
     ]
 ]
 
-編集 => [
-    .en => [
-        Edit
-        コピー => Copy
-        貼付け => Paste
-        削除 => Delete
-        取消 => Undo
-        検索 => Find
-    ]
-]
-
-表示 => [
-    .en => [
-        View
-        ホスト => Hosts
-        名前 => Names
-        OSリスト => OS
-        ライセンス => Licenses
-        アプリ => Apps
-    ]
-]
 管理ページ => [
     .en => [
-        Manage
-        トップ => TopPage
-        PHP情報 => PHPInfo
-        PostgreSQL => PostgreSQL
-        SQLite => SQLite
+        Management
+        トップ => Top
+        PHP情報 => "PHP Info"
+        SQLite => SQLiteManager
+        PostgreSQL => phpPgAdmin
     ]
 ]
+
 ヘルプ => [
     .en => [
         HELP
-        よくある質問 => FAQ
-        問合わせ => QUERY
+        バージョン => About
+        問合わせ => Contact
 
     ]
 ]

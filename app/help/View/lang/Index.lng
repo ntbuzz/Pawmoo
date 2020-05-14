@@ -1,21 +1,5 @@
 // Indexモジュールの言語ファイル
 
-tabmenu => [
-    .ja => [
-        tutorial  => チュートリアル
-        overview  => 概要
-        detail  => 詳細
-        classes => クラス
-        library => ライブラリ
-    ]
-    .en => [
-        tutorial  => Tutorial
-        overview  => Overview
-        detail  => Detail
-        classes => Classes
-        library => Library
-    ]
-]
 Schema => [
     .ja => [
         category =>  カテゴリ,
@@ -25,11 +9,77 @@ Schema => [
         contents =>   コンテンツ,
     ]
 ]
-Dialog => [
-    .en => [
-        ホスト名 => Host
-        有効 => Enable
-        送信 => SEND
-        更新 => UPDATE
+Popup => [
+    .ja => [
+	    Para-Edit => 段落編集
+	    Para-Ins  => 段落挿入
+	    Para-Add  => 段落追加
+	    Para-Delete => 段落削除
+        Para-Clear => 段落クリア
+        //
+        Sec-Edit => セクション編集
+        Sec-Add  => セクション追加
+        Sec-Delete => セクション削除
+        //
+	    Copy => コピー
     ]
+    .en => [
+	    Para-Edit => "Edit Paragraph"
+	    Para-Ins  => "Insert Paragraph"
+	    Para-Add  => "Add Paragraph"
+	    Para-Delete => "Delete Paragraph"
+        Para-Clear => "Clear Paragraph"
+        //
+        Sec-Edit => "Edit Section"
+        Sec-Add  => "Add Section"
+        Sec-Delete => "Delete  Section"
+        //
+	    Copy => Copy
+    ]
+]
+Button => [
+    .ja => [
+        Update => 更新
+        Cancel => キャンセル
+    ]
+    .en => [
+        Update => Update
+        Cancel => Cancel
+    ]
+]
+
+Dialog => [
+    .ja => [
+        Edit-Paragraph => 段落を編集
+        Edit-Section => セクションを編集
+        Edit-Chapter => チャプターを編集
+        Edit-part => パートを編集
+        Belong-Sec => 所属セクション
+        Belong-Chap => 所属チャプター
+        Belong-Part => 所属パート
+        DispAt => 表示位置
+        Title => タイトル
+        Desc-Para => 内容
+        Desc-Sec => セクション説明
+        Tab-Sec => タブ表示
+        Desc-Chap => チャプタ説明
+        Desc-Part => パート
+    ]
+    .en => [
+        Edit-Paragraph => "Edit Paragraph"
+        Edit-Section => "Edit Section"
+        Edit-Chapter => "Edit Chapter"
+        Edit-part => "Edit Part"
+        Belong-Sec => "Parent Section"
+        Belong-Chap => "Parent Chapter"
+        Belong-Part => "Parent Part"
+        DispAt => "Display At"
+        Title => "Title"
+        Desc-Para => "Contents"
+        Desc-Sec => "Description"
+        Tab-Sec => "Tab Display"
+        Desc-Chap => "Description"
+        Desc-Part => "Description"
+    ]
+
 ]

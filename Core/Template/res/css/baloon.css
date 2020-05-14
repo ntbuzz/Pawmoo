@@ -194,6 +194,7 @@ span.help_icon.mouseover {
     border-radius:4px;
     box-shadow: 5px 5px silver;
     overflow:hidden;
+    user-select:none;
 }
 .dialog-box dl {
     width:100%;

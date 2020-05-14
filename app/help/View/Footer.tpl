@@ -6,7 +6,7 @@ h3 => [ Biscuit(MAP) ]
 p => [ ~ Biscuit(MAP) is PHP wild-framwork. :-) ~ ]
   <hr><br>
   pre => [ ~
-    @copyright  Copyright (c) 2017 - 2020 by nTak
+  @copyright  Copyright (c) 2017 - 2020 by nTak
   @license    MIT
   @version 0.10.0, 2020-05-15
   System Require: PHP 5.6 or Higher
@@ -15,22 +15,12 @@ p => [ ~ Biscuit(MAP) is PHP wild-framwork. :-) ~ ]
 
 // #popup-dialog のマウスオーバーバルーンヘルプ
 .popup-baloon{@!biscuit-help} => [
-pre => [ ~
-PHP簡易フレームワーク<br>
-Biscuit(MAP)のドキュメントです
-~ ]
+  pre => [ ${#.ABOUT} ]
 ]
 
 .popup-baloon{@popup-dialog} => [
-pre => [ ~
-        さまざまなプロパティ
-        動作パラメータの変更
-        インフォメーション
-        ・・・
-        などを表示する
-~
-]
-]
+pre => [ ${#.SETUP} ]
+
 .popup-box#property-dialog{popup-dialog} => [ size => "400,300,200,150"
   .setup => [ 
       +dl => [

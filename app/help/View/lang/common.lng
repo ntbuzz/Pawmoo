@@ -1,16 +1,32 @@
 // 言語ファイル
-
-@Toolbar        // ツールバーの言語定義
-@Schema         // 共通スキーマ
+@Toolbar
+@Schema
 
 .ja => [
     TITLE => "Biscuit(MAP) ドキュメント"
+    ABOUT => ~
+        PHP簡易フレームワーク<br>
+        Biscuit(MAP)のドキュメントです
+        ~
+    SETUP => ~
+        さまざまなプロパティ
+        動作パラメータの変更
+        インフォメーション
+        ・・・
+        などを表示する
+        ~
 ]
 .en => [
     TITLE => "Biscuit(MAP) Documents"
-]
-
-// 共通リストヘッダ
-Headers => [
-
+    ABOUT => ~
+        PHP Simple Web Framework<br>
+        The Documents of Biscuit(MAP).
+        ~
+    SETUP => ~
+        Property...
+        Parameters...
+        Information...
+        ...
+        Miscellaneous Data Setup
+        ~
 ]

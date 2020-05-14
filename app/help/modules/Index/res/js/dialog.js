@@ -52,7 +52,7 @@ $("#edit-section").click(function () {
     var url = location.origin + location.pathname.controller_path("section/json") + id;
     $.getJSON(url, function (sec_obj) {
         // フォームにパラメータをセットし、完了時の処理関数を登録する
-        $("#section_dialog").floatWindow("セクションを編集",sec_obj, function (e) {
+        $("#section_dialog").floatWindow("",sec_obj, function (e) {
             e["TabSelect"] = $('.tabmenu .tab li.selected').index();
             var url = location.pathname.controller_path("section/update") + e["id"];
             $.post(url, e,function(data){ //リクエストが成功した際に実行する関数
@@ -70,7 +70,7 @@ $("#delete-section").click(function () {
     // データを取得
     var url = location.origin + location.pathname.controller_path("section/json") + id;
     $.getJSON(url, function (sec_obj) {
-        $.dialogBox("セクションの削除",sec_obj.title + ' を削除しますか？' ,function (result) {
+        $.dialogBox("セクションの削除","["+sec_obj.title + '] を削除しますか？' ,function (result) {
             if (result) { // OK のときに削除
                 var url = location.pathname.controller_path("section/delete") + id;
                 $.post(url,function (data) {  //リクエストが成功した際に実行する関数
@@ -129,15 +129,17 @@ $("#part_del").click(function () {
         alert("パートが選択されていません！");
         return false;
     }
-    if (confirm(PartData.title + ' を削除しますか？')) {
-        var id = PartData.id;
-        var url = location.pathname.controller_path("part/delete") + id;
-        $.post(url, function (data) { //リクエストが成功した際に実行する関数
-            location.href = data;
-        }).fail(function () {
-            alert("error:" + url);
-        });
-    }
+    $.dialogBox("パートの削除","["+PartData.title + '] を削除しますか？' ,function (result) {
+        if (result) { // OK のときに削除
+            var id = PartData.id;
+            var url = location.pathname.controller_path("part/delete") + id;
+            $.post(url, function (data) { //リクエストが成功した際に実行する関数
+                location.href = data;
+            }).fail(function () {
+                alert("error:" + url);
+            });
+        }
+    });
     return false;
 });
 //==============================================================================
