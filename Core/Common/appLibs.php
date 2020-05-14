@@ -239,7 +239,8 @@ function auto_hyperlink($atext) {
 	foreach($ln as $ll) {
     	$ll = preg_replace("/([^\.\s]+)\.{([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)}/i",'<a target="_blank" href="\\2">\\1</a>', $ll);
 		$ret[] = $ll;
-	}
+    }
+//    return implode("<br />\n",$ret);
 	return implode("\n",$ret);
 }
 //===============================================================================

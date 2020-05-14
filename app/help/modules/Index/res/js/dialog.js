@@ -33,7 +33,7 @@ $(".add-section").click(function (e) {
 //==============================================================================
 //   パートレコード編集ダイアログ表示＆書き込み処理
 $("#part_edit").click(function () {
-    if (PartData.length == 0) {
+    if (!("id" in PartData)) {
         alert("パートが選択されていません！");
         return false;
     }
@@ -74,7 +74,7 @@ $("#part_add").click(function () {
 //==============================================================================
 //   パートレコードを削除
 $("#part_del").click(function () {
-    if (PartData.length == 0) {
+    if (!("id" in PartData)) {
         alert("パートが選択されていません！");
         return false;
     }
@@ -93,7 +93,7 @@ $("#part_del").click(function () {
 //==============================================================================
 //   セクションを追加するダイアログ表示＆書き込み処理
 $("#chap_edit").click(function () {
-    if (ChapterData.length == 0) {
+    if (!("id" in ChapterData)) {
         alert("チャプターが選択されていません！");
         return false;
     }
@@ -113,7 +113,7 @@ $("#chap_edit").click(function () {
 //==============================================================================
 //   チャプターレコードを追加するダイアログ表示＆書き込み処理
 $("#chap_add").click(function () {
-    if (PartData.length == 0) {
+    if (!("id" in PartData)) {
         alert("追加するパートが選択されていません！");
         return false;
     }
@@ -140,7 +140,7 @@ $("#chap_add").click(function () {
 //==============================================================================
 //   チャプターレコードを削除
 $("#chap_del").click(function () {
-    if (ChapterData.length == 0) {
+    if (!("id" in ChapterData)) {
         alert("チャプターが選択されていません！");
         return false;
     }

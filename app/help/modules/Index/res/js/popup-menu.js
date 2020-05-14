@@ -103,10 +103,6 @@ var popup_menu_function = {
                     });
                 return false;
             });
-        }).fail(function (jqXHR, textStatus, errorThrown) {
-//            console.log("jqXHR:"+jqXHR.status);
-//            console.log("status:"+textStatus);
-//            console.log("error:"+errorThrown);
         });
     },
     "ctxSecAdd": ".add-section",
