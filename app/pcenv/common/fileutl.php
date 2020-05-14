@@ -13,16 +13,12 @@ function GetFileName($fn) {
     if($ext !== '') $fn = str_replace('.'.$ext,'',$fn);
     return $fn;
 }
-
 //===============================================================================
 // URLの特殊文字エスケープ
 function CHREncode($str) {
-    $str = str_replace('#','%23',$str);
-    $str = str_replace("'",'%27',$str);
-    $str = str_replace("&",'%26',$str);
-    $str = str_replace("&",'%26',$str);
-    $str = str_replace("?",'%3f',$str);
-    $str = str_replace(" ",'%20',$str);
+    $charset = [ '#' , "'" , "&" , "?" , " "];
+    $safeset = ['%23','%27','%26','%3f','%20'];
+    $str = str_replace($charset,$safeset,$str);
     return $str;
 }
 //===============================================================================
