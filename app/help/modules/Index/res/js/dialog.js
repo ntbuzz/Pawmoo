@@ -70,15 +70,16 @@ $("#delete-section").click(function () {
     // データを取得
     var url = location.origin + location.pathname.controller_path("section/json") + id;
     $.getJSON(url, function (sec_obj) {
-        if (confirm(sec_obj.title + ' を削除しますか？')) {
-            // OK のときに削除
-            var url = location.pathname.controller_path("section/delete") + id;
-            $.post(url,function (data) {  //リクエストが成功した際に実行する関数
-                location.href = data;
-            }).fail(function () {  //リクエストが失敗
-                alert("error:" + url);
-            });
-        }
+        $('body').dialogBox("セクションの削除",sec_obj.title + ' を削除しますか？' ,function (result) {
+            if (result) { // OK のときに削除
+                var url = location.pathname.controller_path("section/delete") + id;
+                $.post(url,function (data) {  //リクエストが成功した際に実行する関数
+                    location.href = data;
+                }).fail(function () {  //リクエストが失敗
+                    alert("error:" + url);
+                });
+            } else alert("取り消しました");
+        });
     });
     return false;
 });

@@ -81,6 +81,47 @@
         });
         this.find(".openButton").click();
     };
+    // Yes/No ダイアログボックスを開く
+    $.fn.dialogBox = function (title,msg, callback) {
+        var dialog_box = '<div class="dialog-box"><dl class="title"><dt>'+title+'</dt><dd><span class="dialog-msg">'+msg+'</span></dd></dl><div class="buttonList">';
+        var controlls = ["okButton:はい", "cancelButton:いいえ"];
+        controlls.forEach(function (value) {
+            var cls = value.split(':');
+            dialog_box = dialog_box + '<span class="'+cls[0]+'">'+cls[1]+'</span>';
+        });
+        dialog_box = dialog_box + "</div></div>";
+        $('body').append(dialog_box);
+        // バルーンを消すための領域を定義
+        $('body').append('<div class="popup-BK"></div>');
+        $('.popup-BK').fadeIn('fast');
+        var dialog = $('.dialog-box');
+        // バルーンコンテンツの表示位置をリンク先から取得して設定
+        var x = ($(window).innerWidth() - dialog.width())/2;  // 中央
+        var y = ($(window).innerHeight() - dialog.height())/4;    // 上部25%の位置
+        if (x < 0) {
+            x = 5;
+            dialog.width($(window).innerWidth() - 20);
+        }
+        if (y < 0) {
+            y = 5;
+            dialog.width($(window).innerHeight() - 20 );
+        }
+        dialog.css({'left': x + 'px','top': y + 'px'});
+        dialog.fadeIn('fast');
+        // クローズイベントを登録
+        dialog.find(".okButton").click(function () {
+            dialog.fadeOut('fast');
+            $('.popup-BK').remove();
+            $(".dialog-box").remove();
+            callback(true);
+        });
+        dialog.find(".cancelButton").click(function () {
+            dialog.fadeOut('fast');
+            $('.popup-BK').remove();
+            $(".dialog-box").remove();
+            callback(false);
+        });
+    };
 })(jQuery);
 // ***************************************************************************
 // セレクタを使う

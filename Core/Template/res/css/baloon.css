@@ -177,3 +177,78 @@ span.help_icon.mouseover {
     box-shadow: 5px 5px silver;
     overflow:hidden;
 }
+/*==============================================================================
+    ダイアログボックス
+*/
+.dialog-box {
+    z-index:2;
+    position:fixed;
+    display:none;
+    min-width:200px;
+    min-height:150px;
+    font-size:10pt;
+    color:black;
+    border: 1px solid black;
+    border-radius:3px;
+    background: white;
+    border-radius:4px;
+    box-shadow: 5px 5px silver;
+    overflow:hidden;
+}
+.dialog-box dl {
+    width:100%;
+}
+.dialog-box dl dd {
+    width:100%;
+    padding:4px 10px;
+}
+/* ダイアログボックスのタイトル */
+.dialog-box dl dt {
+    height:25px;
+    line-height:25px;
+    text-indent:0.5em;
+    font-weight:bold;
+    padding:0 8px 4px 22px;
+    color:black;
+    background: url(res/img/confirm.png) no-repeat left top;
+}
+.dialog-box .dialog-msg {
+    position:relative;
+    width:100%;
+    height:auto;
+    padding:10px 20px;
+}
+.dialog-box .buttonList {
+    position:absolute;
+    width:100%;
+    height:1.2em;
+    bottom:0;
+    text-align: left;
+    padding: 15px 5px;
+    margin:auto;
+    background-color: #f1f1f1;
+}
+/* 実行ボタン */
+.dialog-box .buttonList .okButton,
+.dialog-box .buttonList .cancelButton
+{
+    margin: 0 15px;
+	border: 1px solid #333;
+	padding: 2px 12px;
+	font-weight: bold;
+	font-size:9pt;
+	cursor: pointer;
+	color: #666;
+	border-radius: 4px;
+}
+.dialog-box .buttonList .okButton:hover,
+.dialog-box .buttonList .cancelButton:hover
+ {
+    background: linear-gradient(#ccc,#fff, #ccc);
+}
+.dialog-box .buttonList .okButton:active,
+.dialog-box .buttonList .cancelButton:active
+{
+	background: #aaa;  
+	padding: 6px 10px 4px;  
+}
