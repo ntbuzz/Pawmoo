@@ -5,13 +5,10 @@
 var selector = $(".floatWindow");
 selector.each(function () {
     var id = "#" + $(this).attr("id");
+    var val = $(this).attr("value");
+    var buttons = (val) ? val.split(",") : Array();
     var self = $(id);
     var message_id= id+" .resize_message";
-    // 中のブロック高さを調整
-    self.resize(function () {
-        hsize = self.innerHeight() - 50;
-        $(id + ' dd').css("height", hsize + "px");
-    });
 /*  パーツを追加
         span.openButton => []					// ウィンドウを開く隠しボタン
         span.close => [ alt => 閉じる ]			// 閉じるボタン
@@ -26,7 +23,26 @@ selector.each(function () {
             self.append(tag);
         }
     });
-    // クリックイベント登録
+/*  ボタンパーツを追加
+        span.execButton => [ val[0] ]    実行ボタン
+        span.closeButton => [ val[1] ]	 閉じるボタン
+*/
+    if(buttons.length) {
+        var buttontag = "<div class='center'><hr>";
+        var buttonClass = [ "execButton", "closeButton"];
+        $.each(buttons,function(index,val) {
+            var action = buttonClass[index];
+            buttontag = buttontag+'<span class="'+action+'">'+val+'</span>';
+        });
+        buttontag = buttontag+"</div>";
+        self.find('dd').append(buttontag);
+    }
+    // 中のブロック高さを調整
+    self.resize(function () {
+        hsize = self.innerHeight() - 50;
+        $(id + ' dd').css("height", hsize + "px");
+    });
+// クリックイベント登録
     self.find(".openButton").click(function () {
             // alert("click=" + click);
         selector.fadeOut("fast");   // 全てのウィンドウを消す

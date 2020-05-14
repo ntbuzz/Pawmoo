@@ -165,15 +165,15 @@ span.help_icon.mouseover {
     z-index:0;
     position:fixed;
     display:none;
-    padding:10px;
-    border: 1px outset silver;
-    border-radius:3px;
-    background: whitesmoke;
-    font-size:10pt;
-    color:black;
-    overflow:hidden;
     min-width:100px;
     min-height:150px;
+    font-size:10pt;
+    color:black;
+    padding:10px 20px;
+    border: 1px solid gray;
+    border-radius:3px;
+    background: whitesmoke;
     border-radius:8px;
     box-shadow: 5px 5px silver;
+    overflow:hidden;
 }
