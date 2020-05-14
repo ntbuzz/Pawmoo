@@ -15,9 +15,6 @@ $(function() {
 		$(this).addClass('selected');
 		$(".contents-view").scrollTop(0);
 	});
-	$('.new-section').click(function() {
-		$("#add_section_dialog").floatWindow();
-	});
 });
 <?php $Helper->Part_Chapter_Data(); ?>
 

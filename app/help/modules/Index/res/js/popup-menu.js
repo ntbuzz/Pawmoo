@@ -10,16 +10,14 @@ var popup_menu_function = {
         var url = location.origin + location.pathname.controller_path("paragraph/json") + obj.attr("id");
         $.getJSON(url, function (para_obj) {
             // フォームにパラメータをセットし、完了時の処理関数を登録する
-            $("#edit_dialog").floatWindow(para_obj, function (e) {
+            $("#paragraph_dialog").floatWindow("段落を編集",para_obj, function (e) {
                 e["TabSelect"] = $('.tabmenu .tab li.selected').index();
                 var url = location.pathname.controller_path("paragraph/update")+e["id"];
-                $.post(url, e,
-                    function(data){ //リクエストが成功した際に実行する関数
-                        location.href = data ;
-                    })
-                    .fail(function() {
-                        alert( "error:"+url );
-                    });
+                $.post(url, e, function(data){ //リクエストが成功した際に実行する関数
+                    location.href = data ;
+                }).fail(function() {
+                    alert( "error:"+url );
+                });
                 return false;
             });
         }).fail(function (jqXHR, textStatus, errorThrown) {
@@ -29,96 +27,52 @@ var popup_menu_function = {
         });
     },
     "ctxIns": function (obj) {
-        // フォームのデータを生成
-        var para_obj = {
+        var para_obj = {        // フォームのデータを生成
             section_id: obj.attr('data-parent'),   // チャプターID
             section:    obj.parents('.section').find(".title").text(),
             disp_id:    obj.attr("data-disp") - 1,
             title:      '',
             contents:   '',
         };
-        $("#add_dialog").floatWindow(para_obj, function (e) {
+        $("#paragraph_dialog").floatWindow("段落を挿入",para_obj, function (e) {
             e["TabSelect"] = $('.tabmenu .tab li.selected').index();
             var url = location.pathname.controller_path("paragraph/add");
-            $.post(url, e,
-                function(data){ //リクエストが成功した際に実行する関数
-                    location.href = data ;
-                })
-                .fail(function() {
-                    alert( "error:"+url );
-                });
+            $.post(url, e,function(data){ //リクエストが成功した際に実行する関数
+                location.href = data ;
+            }).fail(function() {
+                alert( "error:"+url );
+            });
             return false;
         });
     },
-    "ctxAdd": function (obj) {  // セクションブロックから呼び出される
-        // フォームのデータを生成
-        var para_obj = {
-            section_id: obj.attr('id'),   // チャプターID
-            section:    obj.find(".title").text(),
-            disp_id:    0,
-            title:      '',
-            contents:   '',
-        };
-        $("#add_dialog").floatWindow(para_obj, function (e) {
-            e["TabSelect"] = $('.tabmenu .tab li.selected').index();
-            var url = location.pathname.controller_path("paragraph/add");
-            $.post(url, e,
-                function(data){ //リクエストが成功した際に実行する関数
-                    location.href = data ;
-                })
-                .fail(function() {
-                    alert( "error:"+url );
-                });
-            return false;
-        });
-    },
+    "ctxAdd":"#add-paragraph",
     "ctxDel": function (obj) {
         var myid = obj.attr("id");
         var url = location.pathname.controller_path("paragraph/delete") + myid;
-        $.post(url,
-            function(data){
-            //リクエストが成功した際に実行する関数
-                location.href = data ;
-            })
-        .fail(function() {
+        var e = { TabSelect: $('.tabmenu .tab li.selected').index() };  // タブ選択用
+        $.post(url, e, function (data) {           //リクエストが成功した際に実行する関数
+            location.href = data ;
+        }).fail(function() {
             alert( "error:"+url );
         });
-//        return false;
+    },
+    "ctxClear": function (obj) {
+        var sec_id = obj.attr("id");
+        var sec_ttl = obj.attr("value");
+        if (confirm(sec_ttl + ' の段落をクリアしますか？')) {
+            var url = location.pathname.controller_path("paragraph/clear") + sec_id;
+            var e = { TabSelect: $('.tabmenu .tab li.selected').index() };  // タブ選択用
+            $.post(url, e, function (data) {           //リクエストが成功した際に実行する関数
+                location.href = data ;
+            }).fail(function() {
+                alert( "error:"+url );
+            });
+        }
     },
 // セクション編集メニュー
-    "ctxSecEdit": function (obj) {
-        // JSONメソッドを使ってレコードデータを入手する
-        var url = location.origin + location.pathname.controller_path("section/json") + obj.attr("id");
-        $.getJSON(url, function (sec_obj) {
-            // フォームにパラメータをセットし、完了時の処理関数を登録する
-            $("#edit_section_dialog").floatWindow(sec_obj, function (e) {
-                e["TabSelect"] = $('.tabmenu .tab li.selected').index();
-                var url = location.pathname.controller_path("section/update") + e["id"];
-                $.post(url, e,
-                    function(data){ //リクエストが成功した際に実行する関数
-                        location.href = data ;
-                    })
-                    .fail(function() {
-                        alert( "error:"+url );
-                    });
-                return false;
-            });
-        });
-    },
-    "ctxSecAdd": ".add-section",
-    "ctxSecDel": function (obj) {
-        var myid = obj.attr("id");
-        var url = location.pathname.controller_path("section/delete") + myid;
-        $.post(url,
-            function (data) {
-                //リクエストが成功した際に実行する関数
-                location.href = data;
-            })
-        .fail(function() {
-            alert( "error:"+url );
-        });
-        return false;
-    },
+    "ctxSecEdit":"#edit-section",
+    "ctxSecAdd": "#add-section",
+    "ctxSecDel": "#delete-section",
     "ctxCopy1": "#ctxCopy", // クリックオブジェクトの指定
     "ctxCopy2": "#ctxCopy", // クリックオブジェクトの指定
 };

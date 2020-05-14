@@ -38,7 +38,7 @@ public function UpdateAction() {
 // 削除アクション以外はカスタムコントローラに置く
 public function JsonAction() {
 	$num = App::$Params[0];
-	$this->Model->getRecordByKey($num);
+	$this->Model->getRecordValue($num);	// リレーションIDを解決したデータ
 	$json ="{";
 	foreach($this->Model->fields as $key => $val) {
 		$vv = replace_newline($val);
