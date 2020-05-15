@@ -14,7 +14,7 @@ selector.each(function () {
         span.close => [ alt => 閉じる ]			// 閉じるボタン
         span.resize => []
 */
-    var controlls = ["openButton:", "close:閉じる", "resize:", "resize_message:サイズ表示"];
+    var controlls = ["openButton:", "close:${#core.Close}", "resize:${#core.Resize}", "resize_message:${#core.SizeDisplay}"];
     controlls.forEach(function (value) {
         var cls = value.split(':');
         if (self.find("." + cls[0]).length == 0) {

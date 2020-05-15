@@ -124,7 +124,6 @@ public function ViewAction() {
 // PDFを作成する
 public function MakepdfAction() {
 	try {
-		APPDEBUG::MSG(14,$this);
 		$num = App::$Params[0];
 		$this->Model->GetRecord($num);
 		$this->View->ViewTemplate('MakePDF');

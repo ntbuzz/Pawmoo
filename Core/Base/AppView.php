@@ -82,7 +82,6 @@ public function PutLayout() {
 //==============================================================================
 // ページ出力完了
 public function __TerminateView() {
-    APPDEBUG::MSG(10, $this);
     if($this->doTrailer) {
         $tmplate = $this->getTemplateName('Trailer');   // ビューフォルダのテンプレート
         $Helper = $this->Helper;
@@ -187,8 +186,6 @@ public function ViewTemplate($name,$vars = []) {
 //  文字列の変数置換を行う
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
     private function expandStrings($str,$vars) {
-    $debugged = 0;
-    debug_dump($debugged,["expand" => $str]);
             $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
             preg_match_all($p, $str, $m);
             $varList = $m[0];
@@ -198,7 +195,6 @@ public function ViewTemplate($name,$vars = []) {
     debug_dump(0,["REPLACE" => [ 'VAR' => $varList, 'VALUE' => $values]]);
             // 配列が返ることもある
             $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
-    debug_dump($debugged,["result" => $exvar]);
             return $exvar;
     }
 //==============================================================================

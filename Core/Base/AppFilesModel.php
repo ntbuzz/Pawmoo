@@ -29,7 +29,6 @@ class AppFilesModel extends AppObject {
         $this->ActiveHome = $home;
         $this->TopFolder = $this->Home[$home] . $this->SubFolder;
 //        if(!file_exists($this->TopFolder)) mkdir($this->TopFolder);
-        APPDEBUG::MSG(13,$this);
     }
 //===============================================================================
 // 指定フォルダの一覧
@@ -39,14 +38,12 @@ class AppFilesModel extends AppObject {
             // フォルダが無ければ作成する
 //            mkdir($this->TopFolder);
         }
-        APPDEBUG::MSG(13,$this);
     }
 //===============================================================================
 // 指定フォルダの存在確認
     public function CheckFolder($home) {
         $this->TopFolder = $this->Home[$home] . $this->SubFolder;
 //        if(!file_exists($this->TopFolder)) mkdir($this->TopFolder);
-        APPDEBUG::MSG(13,$this);
     }
 //===============================================================================
 // 指定ファイルのフルパス
@@ -89,13 +86,11 @@ class AppFilesModel extends AppObject {
 // 指定フォルダのファイル一括削除
     public function DeleteAllFiles($home) {
         $this->GetSubFolder($home);			// 一覧を取得
-        APPDEBUG::MSG(13,$this);
         foreach($this->Files as $fval) {
             $srcname = LocalCharset($fval['fullname']);	// 対象ファイルパス
             if(file_exists($srcname)) unlink($srcname);         // 移動先に同名ファイルがあれば削除
 //			echo $srcname;
         }
-        APPDEBUG::MSG(13,$this);
     }
 //===============================================================================
 // フォルダ内を探査する

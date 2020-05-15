@@ -222,7 +222,6 @@ public function TabContents($sel,$default='') {
 // 'id' => identifir
 //
 public function Form($act, $attr) {
-	APPDEBUG::MSG(12, $this);
 	if ($act[0] !== '/') $act = App::getRoot($act);
 	$arg = '';
 	foreach($attr as $key => $val) {
@@ -250,7 +249,6 @@ public function Select($key,$name) {
 //<input type="text" id="datepicker1" name="begDate"> ～ <input type="text" id="datepicker2" name="endDate">
 //
 public function Input($type,$name,$attr) {
-	APPDEBUG::MSG(12, $this);
 	$tag = "<input type='{$type}' name='{$name}' ";
 	foreach($attr as $key => $val) {
 			$tag .= $key .'="' . $val . '" ';

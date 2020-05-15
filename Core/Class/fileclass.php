@@ -188,13 +188,11 @@ public function GetFiles($dirtop,$lvl) {
 // 指定フォルダのファイル一括削除
 	public function DeleteAllFiles($home) {
 		$this->GetSubFolder($home);			// 一覧を取得
-		APPDEBUG::MSG(13,$this);
 		foreach($this->Files as $fval) {
 			$srcname = LocalCharset($fval['fullname']);	// 対象ファイルパス
 			if(file_exists($srcname)) unlink($srcname);         // 移動先に同名ファイルがあれば削除
 //			echo $srcname;
 		}
-		APPDEBUG::MSG(13,$this);
 	}
 //===============================================================================
 // ZIPファイルの作成
