@@ -90,7 +90,9 @@ class APPDEBUG {
     }
     //===============================================================================
     // メッセージ登録
-    private static function db_echo($lvl,$msg) {
+    private static function db_echo($lvl,$msg,$is_safe = FALSE) {
+        if(empty($msg)) return;
+        if($is_safe) $msg = htmlspecialchars($msg);
         if($lvl < 0) {
             echo $msg;
         } else if($lvl < self::$MsgLevel) {
@@ -110,7 +112,7 @@ class APPDEBUG {
                 if(is_array($val)) {    // 配列出力
                     self::dumpobj($val,0,$mlvl);
                 } else
-                self::db_echo($mlvl,(is_numeric($key))? "{$val}\n": "{$key} = {$val}\n");
+                self::db_echo($mlvl,(is_numeric($key))? "{$val}\n": "{$key} = {$val}\n",TRUE);
             }
         }
         self::db_echo($mlvl,"</pre>\n");
@@ -133,7 +135,7 @@ class APPDEBUG {
                 self::db_echo($lvl,"\n");
             }
         } else
-            self::db_echo($lvl, $arr);              // スカラー要素の出力
+            self::db_echo($lvl, $arr,TRUE);              // スカラー要素の出力
         self::db_echo($lvl, "</pre>\n");
     }
     //===============================================================================
@@ -145,17 +147,16 @@ class APPDEBUG {
             if($val == NULL) {
                 self::db_echo($level, "NULL\n");
             } else if(is_scalar($val)) {
-                $val = htmlspecialchars($val);
-                self::db_echo($level, "'{$val}'\n");
+                self::db_echo($level, "'{$val}'\n",TRUE);
             } else if(is_array($val)) {
                 self::db_echo($level, "array(" . count($val) . ")\n");
                 self::dumpobj($val,$indent+1,$level);
             } else {
-                self::db_echo($level, gettype($val) . "\n");
+                self::db_echo($level, gettype($val) . "\n",TRUE);
             }
             }
         } else {    // スカラー出力
-            self::db_echo($level, $obj);
+            self::db_echo($level, $obj,TRUE);
         }
     }
 }

@@ -20,6 +20,7 @@ p => [ ~ Biscuit(MAP) is PHP wild-framwork. :-) ~ ]
 
 .popup-baloon{@popup-dialog} => [
 pre => [ ${#.SETUP} ]
+]
 
 .popup-box#property-dialog{popup-dialog} => [ size => "400,300,200,150"
   .setup => [ 

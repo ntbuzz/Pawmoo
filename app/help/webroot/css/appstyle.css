@@ -45,22 +45,7 @@
 /*
 フロートウィンドウのパネル
 */
-/*
-.dialog-view {
-    height:100%;
-    width:100%;
-    background-color: white;
-    overflow-y:auto;
-    overflow-x:hidden;
+.dialog-form {
+    whidth:100%;
+    padding:4px 10px;
 }
-.dialog-view .dialog-form {
-    top:0;
-    width:100%;
-    height:100%;
-}
-.dialog-view .dialog-form .center {
-    width:100%;
-    text-align: center;
-    margin:10px;
-}
-*/

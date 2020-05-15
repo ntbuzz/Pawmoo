@@ -103,7 +103,7 @@ foreach($libs as $files) {
 $lang = (isset($query['lang'])) ? $query['lang'] : $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 
 // コントローラ用の言語ファイルを読み込む
-LangUI::construct($lang);
+LangUI::construct($lang,App::AppPath("View/lang/"));
 LangUI::LangFiles(['#common',$controller]);
 // データベースハンドラを初期化する */
 DatabaseHandler::InitConnection();

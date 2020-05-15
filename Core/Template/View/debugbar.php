@@ -3,8 +3,9 @@
         <ul id="debugMenu">
         <li><?= $this->Helper->ALink('/index/list','【HOME】'); ?></li>
 <?php
+        $level_msg = $this->_("core.Debug.Level");
         foreach(APPDEBUG::$LevelMsg as $key => $msg) {
-            echo "<li>レベル:{$key}</li>\n";
+            echo "<li>{$level_msg}:{$key}</li>\n";
         }
 ?>
     	</ul>

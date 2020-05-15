@@ -1,11 +1,11 @@
 //  セクション・レイアウト定義
 @Header => [
-    PageTitle => $#TITLE
+    PageTitle => ${#TITLE}
     AdditionHeader => [
         res/css/common.min.css      // 結合出力
         res/js/common.min.js        // 結合出力
     ]
-	Test => $varname
+	Test => ${varname}
 ]
 <body>
 .appWindow => [    // タグ名省略は DIVタグセクション

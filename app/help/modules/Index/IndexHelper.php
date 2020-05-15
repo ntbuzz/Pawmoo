@@ -91,7 +91,7 @@ public function SectionContents() {
                 if($val['title']) {
                     echo "<h3 class='caption'>$val[title]</h3>\n";
                 }
-                $contents = auto_hyperlink($val[$this->_('.Schema.contents')]);
+                $contents = auto_hyperlink($val[$this->_('Paragraph.Schema.contents')]);
                 echo "<div class='data'>$contents</div>";
                 echo "</div>\n";
             }

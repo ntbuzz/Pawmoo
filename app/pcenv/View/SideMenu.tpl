@@ -6,7 +6,7 @@ div => [
   -img#biscuit-help => [ src => "/res/images/biscuit.png" ]
 ]
 .title => [
-  span.boldtxt => [ $#Toolbar.フィルタ表示 ]
+  span.boldtxt => [ ${#Toolbar.フィルタ表示} ]
 ]
 "+ul.filetree#sitemenu" => [
   .open => [

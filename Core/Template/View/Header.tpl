@@ -21,5 +21,5 @@ head => [
         /js/jquery-ui-1.12.1/jquery-ui.min.css
         ${AdditionHeader}
     ]
-    {$OptionHeader}
+    ${OptionHeader}
 ]

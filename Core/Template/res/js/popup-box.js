@@ -26,7 +26,7 @@ selector.each(function () {
                 });
             };
         };
-        var controlls = ["resize_message:サイズ表示", "close:閉じる", "resize:サイズ変更"];
+        var controlls = ["resize_message:${#core.SizeDisplay}", "close:${#core.Close}", "resize:${#core.Resize}"];
         controlls.forEach(function (value) {
             var cls = value.split(':');
             if (self.find("." + cls[0]).length == 0) {

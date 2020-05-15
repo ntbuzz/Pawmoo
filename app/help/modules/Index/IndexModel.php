@@ -8,9 +8,9 @@ class IndexModel extends AppModel {
         'Primary' => 'id',
         'Unique' => 'id',
         'Schema' => [
-            'id'            => ['.id',0],          // モジュールSchemaの言語ID
-            'category_id'   => ['.category',0],
-            'disp_id'      => ['',0],
+            'id'            => ['',0],          // モジュールSchemaの言語ID
+            'category_id'   => ['',0],
+            'disp_id'       => ['',0],
             'title'         => ['',0],
             'contents'      => ['',0],
         ],

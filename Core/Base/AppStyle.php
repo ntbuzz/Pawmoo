@@ -195,21 +195,52 @@ public function ViewStyle($filename) {
             $content = preg_replace("/\\s*({$pat})\\s+|\\s+({$pat})\\s*|(\\s)+/", '$1$2$3',
                     preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content));       // コメント行を削除
             $content =trim($content);
-        } else if(!$this->do_com) {         // コメントだけを削除して出力する
-            $content = preg_replace('/( )+|([\r\n])+/','$1$2',                  // 2個以上の空白または改行を1個に圧縮
-                    preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content));  // コメント行を削除
+        } else if(!$this->do_com) {         // コメントと不要な改行を削除して出力する
+//            $content = preg_replace('/( )+|([\r\n])+/','$1$2',                  // 2個以上の空白または改行を1個に圧縮
+            $content = preg_replace('/([\r\n])+/s',"\n",                  // コメント削除でできた空行を削除
+                    preg_replace('/\/\*[\s\S]*?\*\/|\s*\/\/.*/','',$content));  // コメント行を削除
             $content =trim($content);
         }
         echo "{$content}\n";
     }
-//===============================================================================
-// システム変数＋URIパラメータへの置換処理
-    private function replaceArrays($vars, $content) {
-        // あらかじめマージしたシステム変数と環境変数をマージし置換配列を生成する
-        $vals = is_array($vars) ? array_merge($this->repVARS,$vars) : $this->repVARS;
-        $keyset = array_map(function($a) { return (is_numeric($a))?"{%{$a}%}":"{\${$a}\$}";}, array_keys($vals));
-        return str_replace ( $keyset, $vals , $content );    // 置換配列を使って一気に置換
+//==============================================================================
+//  変数を置換する
+    private function expand_walk(&$val, $key, $vars) {
+        if($val[0] === '$') {           // 先頭の一文字が変数文字
+            $var = mb_substr($val,1);
+            $var = trim($var,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
+            if($var[0] == '#') {
+                $var = mb_substr($var,1);     // 言語ファイルの参照
+                $val = LangUI::get_value('core', $var, $allow_array);
+            } else if(isset($vars[$var])) {
+                $val = $vars[$var];             // 環境変数で置換
+            }
+        } else if($val[0] === '{') {           // 先頭の一文字が変数文字
+            $var = trim($val,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
+            if($var[0] == '$') {
+                $var = trim($var,'$');        // システム変数値
+                if(isset($vars[$var])) $val = $vars[$var];             // 環境変数で置換
+            }
+        }
     }
+//==============================================================================
+//  文字列の変数置換を行う
+// $[@#%$]varname | ${[@#%$]varname} | {$SysVar$} | {%Params%}
+    private function expandStrings($str,$vars) {
+$debugged = 0;
+debug_dump($debugged,["expand" => $str]);
+        $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
+        preg_match_all($p, $str, $m);
+        $varList = $m[0];
+        if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
+        $values = $varList = array_unique($varList);
+        array_walk($values, array($this, 'expand_walk'), $vars);
+debug_dump(0,["REPLACE" => [ 'VAR' => $varList, 'VALUE' => $values]]);
+        // 配列が返ることもある
+        $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
+debug_dump($debugged,["result" => $exvar]);
+        return $exvar;
+}
 //===============================================================================
 //    ファイルの読み込み
     private function import_files($val) {
@@ -217,6 +248,7 @@ public function ViewStyle($filename) {
         foreach($files as $vv) {
             list($filename,$v_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];  // クエリ文字列を変数セットとして扱う
             parse_str($v_str, $vars);
+            $vars = is_array($vars) ? array_merge($this->repVARS,$vars) : $this->repVARS;
             $imported = FALSE;
             if(!$this->check_commentout($filename)) {
                 foreach($this->IncludePath as $key => $file) {
@@ -224,7 +256,7 @@ public function ViewStyle($filename) {
                     if(file_exists($fn)) {
                         // @charset を削除して読み込む
                         $content = preg_replace('/(@charset.*;)/','/* $1 */',trim(file_get_contents($fn)) );
-                        $content = $this->replaceArrays($vars, $content);
+                        $content = $this->expandStrings($content,$vars);
                         if($this->do_msg) echo "/* import({$filename}) in {$key} */\n";
                         $this->output_content($content);
                         $imported = TRUE;

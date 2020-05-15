@@ -1,7 +1,7 @@
 // アプリ共通のサイドメニュー
 <hr>
 .title => [
-  span.boldtxt => [ $#Core.システムメニュー ]
+  span.boldtxt => [ ${#Core.システムメニュー} ]
 ]
 "+ul.filetree#sysmenu" => [
 .closed => [

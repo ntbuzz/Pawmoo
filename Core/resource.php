@@ -13,6 +13,7 @@ APPDEBUG::INIT(0);
 
 require_once('Common/appLibs.php');
 require_once('Base/AppStyle.php');
+require_once('Base/LangUI.php');           // static class
 
 date_default_timezone_set('Asia/Tokyo');
 
@@ -23,6 +24,10 @@ $sysRoot = $rootURI;
 list($category,$filename) = $params;
 list($filename,$ext) = extractBaseName($filename);
 
+// 言語ファイルの対応
+$lang = (isset($query['lang'])) ? $query['lang'] : $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+// コア用の言語ファイルを読み込む
+LangUI::construct($lang,'');
 MySession::InitSession();
 // モジュール名と拡張子を使いテンプレートを決定する
 $AppStyle = new AppStyle($appname,$sysRoot, $modname, $filename, $ext);

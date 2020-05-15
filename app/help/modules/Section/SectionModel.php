@@ -8,13 +8,13 @@ class SectionModel extends AppModel {
         'Primary' => 'id',
         'Unique' => 'id',
         'Schema' => [
-            'id'            => ['.id',2],          // モジュールSchemaの言語ID
+            'id'            => ['',2],          // モジュールSchemaの言語ID
             'chapter_id'    => ['',0],
             'category_id'   => ['',0],
-            'disp_id'      => ['',0],
-            'title'         => ['.title',2],
+            'disp_id'       => ['',0],
+            'title'         => ['',2],
             'short_title'   => ['.tabset',2],
-            'contents'      => ['.content',2],    // 共通Schemaの言語ID
+            'contents'      => ['',2],    // 共通Schemaの言語ID
         ],
         'Relations' => [
             'chapter_id' => 'Chapter.id.title',

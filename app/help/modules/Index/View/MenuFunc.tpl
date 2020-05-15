@@ -5,43 +5,42 @@
 //=========================================
 // パラグラフ・コンテキストメニュー
 +ul.context-menu#popup_menu{.paragraph} => [
-	#ctxEdit => [  $#.Popup.Para-Edit ]
-	#ctxIns  => [ $#.Popup.Para-Ins ]
-	#ctxAdd  => [ $#.Popup.Para-Add ]
+	#ctxEdit => [ ${#.Popup.Para-Edit} ]
+	#ctxIns  => [ ${#.Popup.Para-Ins} ]
+	#ctxAdd  => [ ${#.Popup.Para-Add} ]
 	.separate => [ <hr> ]
-	#ctxCopy1 => [ $#.Popup.Copy ]
+	#ctxCopy1 => [ ${#.Popup.Copy} ]
 	[ <hr> ]
-	#ctxDel => [ $#.Popup.Para-Delete ]
+	#ctxDel => [ ${#.Popup.Para-Delete} ]
 ]
 //=========================================
 // パラグラフ・コンテキストメニュー
 "+ul.context-menu#popup_menu{.section}" => [
-	#ctxSecEdit => [ $#.Popup.Sec-Edit ]
-	#ctxSecAdd  => [ $#.Popup.Sec-Add ]
+	#ctxSecEdit => [ ${#.Popup.Sec-Edit} ]
+	#ctxSecAdd  => [ ${#.Popup.Sec-Add} ]
 	.separate => [ <hr> ]
-	#ctxSecDel => [ $#.Popup.Sec-Delete ]
+	#ctxSecDel => [ ${#.Popup.Sec-Delete} ]
 	.separate => [ <hr> ]
-	#add-paragraph  => [ $#.Popup.Para-Add ]
+	#add-paragraph  => [ ${#.Popup.Para-Add} ]
 	.separate => [ <hr> ]
-	#ctxClear => [ $#.Popup.Para-Clear ]
+	#ctxClear => [ ${#.Popup.Para-Clear} ]
 	.separate => [ <hr> ]
-	#ctxCopy2 => [ $#.Popup.Copy ]
+	#ctxCopy2 => [ ${#.Popup.Copy} ]
 ]
 //=========================================
 // セクションタブ・コンテキストメニュー
 "+ul.context-menu#popup_tab{.tab li}" => [
-	#edit-section => [ $#.Popup.Sec-Edit ]
-	#add-section  => [ $#.Popup.Sec-Add ]
+	#edit-section => [ ${#.Popup.Sec-Edit} ]
+	#add-section  => [ ${#.Popup.Sec-Add} ]
 	.separate => [ <hr> ]
-	#delete-section => [ $#.Popup.Sec-Delete ]
+	#delete-section => [ ${#.Popup.Sec-Delete} ]
 ]
 //------------------------------------------------------------------------------
 // パラグラフ操作・フロートウィンドウ
 ".floatWindow#paragraph_dialog" => [ size => "550,450,200,150"
 	value => "${#.Button.Update},${#.Button.Cancel}"
 	+dl => [ [ ${#.Dialog.Edit-Paragraph}		// ウィンドウタイトルは呼出時に決める
-		.dialog-view => [	// dd.attr
-			.dialog-form => [	// div-section
+		[	.dialog-form => [	// div-section
 				-input[id] => [ type => hidden ]
 				-input[section_id] => [ type => hidden ]
 				table => [
@@ -59,8 +58,7 @@
 ".floatWindow#section_dialog" => [ size => "550,320,200,150"
 	value => "${#.Button.Update},${#.Button.Cancel}"
 	+dl => [ [ ${#.Dialog.Edit-Section}	// dt-inner
-		.dialog-view => [		// dd.attr
-			.dialog-form => [	// div-section
+		[	.dialog-form => [	// div-section
 				-input[id] => [ type => hidden ]
 				table => [
 					tr => [ th => [ ${#.Dialog.Belong-Chap}: ] td => [ &ChapterSelector ] ]
@@ -78,8 +76,7 @@
 ".floatWindow#chapter_dialog" => [ size => "500,315,200,150"
 	value => "${#.Button.Update},${#.Button.Cancel}"
 	+dl => [ [ ${#.Dialog.Edit-Chapter}	// dt-inner
-		.dialog-view => [		// dd-attr
-			.dialog-form => [	// div-section
+		[	.dialog-form => [	// div-section
 				-input[id] => [ type => hidden ]
 				-input[part_id] => [ type => hidden ]
 				table => [
@@ -97,8 +94,7 @@
 ".floatWindow#part_dialog" => [ size => "480,285,200,150"
 	value => "${#.Button.Update},${#.Button.Cancel}"
 	+dl => [ [ ${#.Dialog.Edit-Part}	// dt-inner
-		.dialog-view => [		// dd-attr
-			.dialog-form => [	// div-section
+		[	.dialog-form => [	// div-section
 				-input[id] => [ type => hidden ]
 				table => [
 					tr => [ th => [ ${#.Dialog.DispAt}: ] td => [ -input[disp_id] => [ type => text size => 8 ] ] ]

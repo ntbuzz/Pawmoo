@@ -127,7 +127,7 @@ public function ViewTemplate($name,$vars = []) {
         case 2:     // 'inc':     // HTML template
             $content = file_get_contents($tmplate);
             // システム変数＋URIパラメータへの置換処理
-            echo $this->replaceArrays($vars, $content);
+            echo $this->expandStrings($content, $vars);
             break;
         }
     }
@@ -152,16 +152,6 @@ public function ViewTemplate($name,$vars = []) {
         return NULL;
     }
 //==============================================================================
-// システム変数＋URIパラメータへの置換処理
-    private function replaceArrays($vars, $content) {
-        // あらかじめマージしたシステム変数と環境変数をマージし置換配列を生成する
-        $vals = array_merge($vars,$this->rep_array,$this->env_vars);
-        $keyset = array_map(function($a) { return (is_numeric($a))?"{%{$a}%}":"{\${$a}\$}";}, array_keys($vals));
-        // デバッグ情報
-        APPDEBUG::arraydump(11,["Replace" => array_combine($keyset, $vals)]);
-        return str_replace ( $keyset, $vals , $content );    // 置換配列を使って一気に置換
-    }
-//==============================================================================
 //  変数を置換する
     private function expand_walk(&$val, $key, $vars) {
         if($val[0] === '$') {           // 先頭の一文字が変数文字
@@ -174,12 +164,6 @@ public function ViewTemplate($name,$vars = []) {
             case '#': $var = mb_substr($var,1);     // 言語ファイルの参照
                 $val = $this->_($var);              // 言語ファイルの定義配列から文字列を取り出す
                 break;
-            case '%': $var = mb_substr($var,1);     // URLの引数番号
-                $val = App::$Params[$var];          // Params[] プロパティから取得
-                break;
-            case '$': $var = mb_substr($var,1);     // システム変数値
-                $val = App::$SysVAR[$var];          // SysVAR[] プロパティから取得
-                break;
             default:
                 if(isset($vars[$var])) {
                     $val = $vars[$var];             // 環境変数で置換
@@ -187,18 +171,55 @@ public function ViewTemplate($name,$vars = []) {
                     $val = $this->$var;             // プロパティ変数で置換
                 }
             }
+        } else if($val[0] === '{') {           // 先頭の一文字が変数文字
+            $var = trim($var,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
+            switch($var[0]) {
+            case '%': $var = trim($var,'%');        // URLの引数番号
+                $val = App::$Params[$var];          // Params[] プロパティから取得
+                break;
+            case '$': $var = trim($var,'$');        // システム変数値
+                $val = App::$SysVAR[$var];          // SysVAR[] プロパティから取得
+                break;
+            }
         }
+    }
+//==============================================================================
+//  文字列の変数置換を行う
+// $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
+    private function expandStrings($str,$vars) {
+    $debugged = 0;
+    debug_dump($debugged,["expand" => $str]);
+            $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
+            preg_match_all($p, $str, $m);
+            $varList = $m[0];
+            if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
+            $values = $varList = array_unique($varList);
+            array_walk($values, array($this, 'expand_walk'), $vars);
+    debug_dump(0,["REPLACE" => [ 'VAR' => $varList, 'VALUE' => $values]]);
+            // 配列が返ることもある
+            $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
+    debug_dump($debugged,["result" => $exvar]);
+            return $exvar;
     }
 //==============================================================================
 //  セクション要素内の変数を展開する
     private function expandSectionVar($vv,$vars) {
         if(!is_array($vv)) {        // スカラー要素の場合
-            return $this->replaceArrays($vars, $vv);   // 変数置換を行う
+            return $this->expandStrings($vv,$vars);   // 変数置換を行う
         }
         foreach($vv as $kk => $nm) {
             if(is_array($nm)) {
                 $vv[$kk] = $this->expandSectionVar($nm,$vars);
             } else {
+                $exvar = $this->expandStrings($nm,$vars);   // 変数置換を行う
+                if(is_array($exvar)) {
+                    $vv[$kk] =$exvar;     // 配列に置換する
+                } else if(isset($exvar)) {
+                     $vv[$kk] = $exvar;     // 変数値は引数 vars[] 配列内に変数名をキー名として格納されている
+                }  else {
+                    unset($vv[$kk]);            // 見つからなければ変数を削除
+                }
+/*
                 $p = '/(?:[^\$]+)|(?:\${[^}]+})|(?:\$[^\$]+)/';     // 複数の配列名を含む場合に備える
                 preg_match_all($p, $nm, $m);
                 $exvar = $m[0];
@@ -213,6 +234,7 @@ public function ViewTemplate($name,$vars = []) {
                         unset($vv[$kk]);            // 見つからなければ変数を削除
                     }
                 }
+*/
             }
         }
         return $vv;

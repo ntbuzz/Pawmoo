@@ -6,7 +6,7 @@ div => [
   -img#biscuit-help => [ src => "/res/images/biscuit.png" ]
 ]
 .title => [
-  span.boldtxt => [ $#Toolbar.トピックス ]
+  span.boldtxt => [ ${#Toolbar.トピックス} ]
 ]
 "+ul.filetree#sitemenu" => [
   .open => [

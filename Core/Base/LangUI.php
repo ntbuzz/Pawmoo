@@ -13,7 +13,7 @@ class LangUI {
 
 //==================================================================================================
 // HTTP_ACCEPT_LANGUAGE を元にデフォルトの言語を決定する
-    public static function construct($lang) {
+    public static function construct($lang,$default) {
         APPDEBUG::MSG(5,$lang, "言語リスト");
         $_ = 'constant';                                    // 定数を取り出す関数
         $langs = array_shift(               // 先頭の要素を取り出す
@@ -34,7 +34,7 @@ class LangUI {
         self::$LangDir = 'Core/Template/lang/';
         self::LoadLang('core');
         // アプリケーションの言語リソースパス
-        self::$LangDir = App::AppPath("View/lang/");
+        self::$LangDir = $default;      // App::AppPath("View/lang/");
 //        APPDEBUG::MSG(5,self::$Locale, "ロケール");
     }
 //==================================================================================================

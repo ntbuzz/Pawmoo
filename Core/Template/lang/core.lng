@@ -7,6 +7,12 @@
     Display => 表示数
     NextPage => "次へ＞"
     PrevPage => "＜前へ"
+    // ダイアログ用
+    Yes => はい
+    Cancel => キャンセル
+    SizeDisplay => サイズ表示
+    Close => 閉じる
+    Resize => サイズ変更
 ]
 .en => [
     // for Pager Buttons
@@ -15,4 +21,19 @@
     Display => Count
     NextPage => "Next&gt;"
     PrevPage => "&lt;Prev"
+    // for Dialog
+    Yes => Yes
+    Cancel => Cancel
+    SizeDisplay => "Display Size"
+    Close => "Close"
+    Resize => "Resize"
+]
+Debug => [
+    .ja => [
+        Level => レベル
+    ]
+    .en => [
+        Level => Level
+    ]
+
 ]

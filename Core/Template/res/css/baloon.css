@@ -162,7 +162,7 @@ span.help_icon.mouseover {
     インフォボックス
 */
 .info-box {
-    z-index:0;
+    z-index:2;
     position:fixed;
     display:none;
     min-width:100px;

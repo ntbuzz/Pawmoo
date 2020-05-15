@@ -70,18 +70,18 @@
 ]
 // #popup-left のクリックバルーンヘルプ
 .popup-baloon{popup-left} => [
-	$#BALOON_HELP
+	${#BALOON_HELP}
 ]
 // #popup-dialog のマウスオーバーバルーンヘルプ
 .popup-baloon{@popup-dialog} => [
-	$#SETTING_HELP
+	${#SETTING_HELP}
 ]
 // ページャーナビゲータのバルーンヘルプ
 .popup-baloon{pager_help} => [
-	$#HELP2
+	${#HELP2}
 ]
 .popup-baloon{@size_selector} => [
-	$#HELP3
+	${#HELP3}
 ]
 
 // コンテキストメニュー

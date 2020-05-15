@@ -6,13 +6,13 @@
     ]
 ]
 @Header => [
-    PageTitle => $#.TITLE
+    PageTitle => ${#.TITLE}
     AdditionHeader => [
         css/style.css      // 
         res/css/common.min.css      // 結合出力
         res/js/common.min.js        // 結合出力
     ]
-	Test => $varname
+	Test => ${varname}
 ]
 <body>
 .appWindow => [    // タグ名省略は DIVタグセクション

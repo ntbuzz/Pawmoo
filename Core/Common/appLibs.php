@@ -212,6 +212,11 @@ function Text2HTML($atext) {
     return nl2br(htmlspecialchars($atext));
 }
 //===============================================================================
+// HTMLタグの出力
+function echo_safe($atext,$is_safe = TRUE) {
+    echo ($is_safe) ? htmlspecialchars($atext) : $atext;
+}
+//===============================================================================
 function trim_delsp($a) {
     return trim(preg_replace('/\s+/', ' ', str_replace('　',' ',$a)));
 }
@@ -253,7 +258,7 @@ function check_cwd($here) {
 // デバッグダンプ
 function debug_dump($flag, $arr = []) {
     if($flag === 0) return;
-
+    $danger = ($flag < 4);
     // バックトレースから呼び出し元の情報を取得
     $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,2);    // 呼び出し元のスタックまでの数
 //var_dump($dbinfo);exit;
@@ -267,19 +272,20 @@ function debug_dump($flag, $arr = []) {
     $str = "{$fn}->" . $dbinfo[1]['function'];
     // 変数出力
     if(is_scalar($arr)) {
-        echo "{$arr}\n";
+        echo_safe("{$arr}\n",$danger);
     } else {
-        echo "<pre>\n{$str}\n";
+        if($flag < 3) echo "<pre>\n{$str}\n";
         foreach($arr as $msg => $obj) {
             if(empty($obj)) echo "{$msg}:EMPTY\n";
             else if(is_scalar($obj)) {
-                echo "{$msg}:{$obj}\n";
+                echo "------- {$msg} -----\n";
+                echo_safe("{$obj}\n",$danger);
             } else {
                 echo "------- {$msg} -----\n";
                 dumpobj($obj,0);
             }
         }
-        echo "</pre>\n";
+        if($flag < 3) echo "</pre>\n";
     }
     if($flag === 2) { 
         echo "TYPE:".get_class($dbinfo[2]['object'])."\n";
@@ -295,14 +301,14 @@ function dump_debug($flag, $msg, $arr = []){
     foreach($arr as $msg => $obj) {
         if(empty($obj)) echo "{$msg}:EMPTY\n";
         else if(is_scalar($obj)) {
-            echo "{$msg}:{$obj}\n";
+            echo_safe("{$msg}:{$obj}\n");
         } else {
             echo "------- {$msg} -----\n";
             foreach($obj as $key => $val) {
                 if(is_array($val)) {    // 配列出力
                     dumpobj($val,0);
                 } else
-                    echo (is_numeric($key))? "{$val}\n": "{$key} = {$val}\n";
+                    echo_safe((is_numeric($key))? "{$val}\n": "{$key} = {$val}\n");
             }
         }
     }
@@ -317,6 +323,6 @@ function dumpobj($obj,$indent){
         if(is_array($val)) {
             echo "array(" . count($val) . ")\n";
             dumpobj($val,$indent+1);
-        } else echo "'{$val}'\n";
+        } else echo_safe("'{$val}'\n");
     }
 }

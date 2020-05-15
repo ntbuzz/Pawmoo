@@ -1,7 +1,7 @@
 //  セクション・レイアウト定義
 
 @Header => [	          // @ ViewTemplate() 呼び出し
-	PageTitle => $#TITLE		// 引数は変数にセット
+	PageTitle => ${#TITLE}		// 引数は変数にセット
 	AdditionHeader => [
 		css/appstyle.css      // app共通スタイル
 		./css/common.css      // カスタマイズスタイル

@@ -1,7 +1,7 @@
 //  セクション・レイアウト定義
 
 @Header => [	          // @ ViewTemplate() 呼び出し
-	PageTitle => $#NAMES		// 引数は変数にセット
+	PageTitle => ${#NAMES}		// 引数は変数にセット
 	AdditionHeader => [
 		css/appstyle.css      // app共通スタイル
 		./css/common.css      // カスタマイズスタイル
@@ -34,10 +34,10 @@
 ]
 
 .popup-baloon{@opup-dialog} => [
-	$#.HELP1
+	${#.HELP1}
 ]
 .popup-baloon{pager_help} => [
-	$#HELP2
+	${#HELP2}
 ]
 // フロートウィンドウのセクション定義方法
 ".floatWindow#dialog1" => [ size => "850,450,500,250"

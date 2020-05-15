@@ -84,7 +84,7 @@
     // Yes/No ダイアログボックスを開く
     $.dialogBox = function (title,msg, callback) {
         var dialog_box = '<div class="dialog-box"><dl class="title"><dt>'+title+'</dt><dd><span class="dialog-msg">'+msg+'</span></dd></dl><div class="buttonList">';
-        var controlls = ["okButton:はい", "cancelButton:いいえ"];
+        var controlls = ["okButton:${#core.Yes}", "cancelButton:${#core.Cancel}"];
         controlls.forEach(function (value) {
             var cls = value.split(':');
             dialog_box = dialog_box + '<span class="'+cls[0]+'">'+cls[1]+'</span>';
