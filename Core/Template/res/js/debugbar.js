@@ -27,7 +27,7 @@
         };
     });
     // ツールバーの外側をクリック
-    $('.debugBK').click(function(){
+    $('.debugBK, .closeButton').click(function(){
         $('#debugMenu li').removeClass('selected');           // select状態を解除
         $('.dbcontent li').css('display','none');           // コンテンツを一旦すべて非表示にする
         $('.debugBar').animate({'width':'1.0em'},180);

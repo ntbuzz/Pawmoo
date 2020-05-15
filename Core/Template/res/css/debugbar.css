@@ -14,8 +14,10 @@
 }
 /* メニュー表示 */
 .debugtab ul#debugMenu {
+    padding-left:28px;
     overflow: hidden;
     min-width: 800px;
+    user-select: none;
 }
 .debugtab ul#debugMenu li {
     list-style:none;
@@ -27,6 +29,21 @@
 .debugtab ul#debugMenu li.selected {
     background: #333;
 }
+/* close button */
+.debugtab span.closeButton {
+    z-index: 1;
+    position: absolute;
+    top:0;
+    left:5;
+    width:23px;
+    height:23px;
+    cursor:pointer;
+    background: url(res/img/boxclose.png) no-repeat left top;
+}
+.debugtab span.closeButton:hover {
+    background: url(res/img/boxclose.png) no-repeat left -23px;
+}
+
 /* メッセージ表示パネル */
 .debug-panel ul.dbcontent {
 }

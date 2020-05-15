@@ -1,7 +1,7 @@
 <div class="debugBar">
     <div class='debugtab'>
+        <span class="closeButton"></span>
         <ul id="debugMenu">
-        <li><?= $this->Helper->ALink('/index/list','【HOME】'); ?></li>
 <?php
         $level_msg = $this->_("core.Debug.Level");
         foreach(APPDEBUG::$LevelMsg as $key => $msg) {
