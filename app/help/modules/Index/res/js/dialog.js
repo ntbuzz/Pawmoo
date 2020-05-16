@@ -21,7 +21,7 @@ $("#add-paragraph").click(function () {  // セクションブロックから呼
 });
 //==============================================================================
 //   セクションを追加するダイアログ表示＆書き込み処理
-$("#add-section").click(function () {
+$(".add-section").click(function () {
     if (ChapterData.length == 0) {
         alert("チャプターが選択されていません！");
         return false;

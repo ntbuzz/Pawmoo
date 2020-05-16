@@ -38,10 +38,7 @@
 
 ]
 // フロートウィンドウのセクション定義
-".floatWindow#dialog1" => [ size => "650,350,500,250"
-	span.openButton => []					// ウィンドウを開く隠しボタン
-	span.close => [ alt => 閉じる ]			// 閉じるボタン
-	span.resize => []
+".floatWindow#dialog1" => [ size => "650,380,500,250"
 	data#init => [		// 初期データの定義
 		value => ""
 	]

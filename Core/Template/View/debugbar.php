@@ -12,7 +12,6 @@
     </div>
     <div class='debug-panel'>
     	<ul class="dbcontent">
-        <li></li>
 <?php
         foreach(APPDEBUG::$LevelMsg as $key => $msg) {
             echo "<li><div class=\"debug_srcollbox\">\n";

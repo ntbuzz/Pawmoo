@@ -71,7 +71,7 @@ var popup_menu_function = {
     },
 // セクション編集メニュー
     "ctxSecEdit":"#edit-section",
-    "ctxSecAdd": "#add-section",
+    "ctxSecAdd": ".add-section",
     "ctxSecDel": "#delete-section",
     "ctxCopy1": "#ctxCopy", // クリックオブジェクトの指定
     "ctxCopy2": "#ctxCopy", // クリックオブジェクトの指定
