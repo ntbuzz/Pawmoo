@@ -7,7 +7,7 @@ class IndexHelper extends AppHelper {
 //===============================================================================
 // ヘッダー付きのテーブルリスト表示
 public function makeOutlineTree() {
-dump_debug(0,[ "アウトライン" => $this->MyModel->outline]);
+    debug_dump(0,[ "アウトライン" => $this->MyModel->outline]);
     echo "<ul class='filetree' id='sitemenu'>\n";
     $first=' class="open"';
     foreach($this->MyModel->outline as $key => $chapter) {
@@ -130,6 +130,25 @@ public function PartSelector() {
 		echo "<OPTION value='{$id}'>{$text}</option>\n";
     }
 	echo "</SELECT>\n";
+}
+//===============================================================================
+// アウトラインテキストの生成
+public function makeOutlineText($outline,$indent) {
+    debug_dump(0,[ "アウトライン" => $outline]);
+    $body = '';
+    $spc = mb_substr("■●□○",$indent,1);
+    foreach($outline as $val) {
+        $data = str_replace(['<br>','<pre>','</pre>'],'',$val['contents']);
+        $data = str_replace("\n","\n  ",$data);
+        if(!empty($val[title])) {
+            $data = "${spc}{$val[title]}\n{$data}";
+        }
+        $body .= "{$data}\n\n";
+        if(array_key_exists('child',$val)) {
+            $body .= "\n" . $this->makeOutlineText($val['child'],$indent+1);
+        }
+    }
+    return $body;
 }
 
 }

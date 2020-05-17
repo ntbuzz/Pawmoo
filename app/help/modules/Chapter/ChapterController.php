@@ -9,7 +9,7 @@ class ChapterController extends cutomController {
 // データを更新してREFERERに戻す
 public function DeleteAction() {
 	$num = App::$Params[0];
-	dump_debug(DEBUG_DUMP_NONE, "Update", [
+	debug_dump(DEBUG_DUMP_NONE, [
 		'番号' => $num,
 		'POST' => $_REQUEST,
 		'データ' => MySession::$PostEnv,

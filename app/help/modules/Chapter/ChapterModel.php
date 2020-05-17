@@ -37,6 +37,20 @@ public function deleteRecordset($num) {
 	// チャプタを削除する
 	$this->DeleteRecord($num);
 }
+//===============================================================================
+// レコードのリレーションからアウトライン配列を作成し、各々のレコードを取得
+//===============================================================================
+function ReadOutline($id,$filters) {
+    $outline = array();
+    // Part レコードを取得
+    $this->RecordFinder(['part_id' => $id],$filters,'disp_id');
+    foreach($this->Records as $key => $columns) {
+        $chap_id = $columns['id'];
+        $outline[$key] = $columns;
+        $outline[$key]['child'] = $this->Section->ReadOutline($chap_id,$filters);
+    };
+    return $outline;
+}
 
 
 }

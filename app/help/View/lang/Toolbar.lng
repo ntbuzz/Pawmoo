@@ -17,6 +17,7 @@ home => [
         チャプター編集 => Edit-Chapter
         チャプター追加 => Add-Chapter
         チャプター削除 => Del-Chapter
+        テキストDL => TextDownload
     ]
 ]
 

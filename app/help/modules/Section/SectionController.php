@@ -9,7 +9,7 @@ class SectionController extends cutomController {
 // 削除アクション以外はカスタムコントローラに置く
 public function DeleteAction() {
 	$num = App::$Params[0];
-	dump_debug(DEBUG_DUMP_NONE, "Update", [
+	debug_dump(DEBUG_DUMP_NONE, [
 		'番号' => $num,
 		'POST' => $_REQUEST,
 		'データ' => MySession::$PostEnv,

@@ -55,7 +55,7 @@
 ]
 //------------------------------------------------------------------------------
 // セクション操作・フロートウィンドウ
-".floatWindow#section_dialog" => [ size => "550,333,200,150"
+".floatWindow#section_dialog" => [ size => "520,333,200,150"
 	value => "${#.Button.Update},${#.Button.Cancel}"
 	+dl => [ [ ${#.Dialog.Edit-Section}	// dt-inner
 		[	.dialog-form => [	// div-section

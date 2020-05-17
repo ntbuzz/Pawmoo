@@ -43,7 +43,7 @@ class AppModel extends AppObject {
 //	デバッグ用に空のレコードを生成
 //==================================================================================================
     function DebugRecord() {
-        dump_debug(DEBUG_DUMP_NONE, "DEBUG-MODEL", [
+        debug_dump(DEBUG_DUMP_NONE, [
             "Type:"     => $this->ClassType,   // オブジェクトの所属クラス(Controller, Model, View. Helper)
             "Module:"   => $this->ModuleName,  // オブジェクトの名前
             "Class:"    => $this->ClassName,   // クラス名

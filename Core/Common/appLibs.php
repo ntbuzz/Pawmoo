@@ -288,32 +288,10 @@ function debug_dump($flag, $arr = []) {
         if($flag < 3) echo "</pre>\n";
     }
     if($flag === 2) { 
-        echo "TYPE:".get_class($dbinfo[2]['object'])."\n";
-        var_dump($dbinfo[2]['object']);
+        echo "TYPE:".get_class($dbinfo[1]['object'])."\n";
+        var_dump($dbinfo[1]['object']);
         exit;
     }
-}
-//===============================================================================
-// デバッグダンプ
-function dump_debug($flag, $msg, $arr = []){
-    if($flag === 0) return;
-    echo "<pre>\n***** {$msg} *****\n";
-    foreach($arr as $msg => $obj) {
-        if(empty($obj)) echo "{$msg}:EMPTY\n";
-        else if(is_scalar($obj)) {
-            echo_safe("{$msg}:{$obj}\n");
-        } else {
-            echo "------- {$msg} -----\n";
-            foreach($obj as $key => $val) {
-                if(is_array($val)) {    // 配列出力
-                    dumpobj($val,0);
-                } else
-                    echo_safe((is_numeric($key))? "{$val}\n": "{$key} = {$val}\n");
-            }
-        }
-    }
-    echo "</pre>\n";
-    if($flag === 2) exit;
 }
 //===============================================================================
 // デバッグダンプ

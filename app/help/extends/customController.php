@@ -25,7 +25,7 @@ public function AddAction() {
 // データを更新してREFERERに戻す
 public function UpdateAction() {
 	$num = App::$Params[0];
-	dump_debug(DEBUG_DUMP_NONE, "Update", [
+	debug_dump(DEBUG_DUMP_NONE, [
 		'番号' => $num,
 		'POST' => $_REQUEST,
 		'データ' => MySession::$PostEnv,

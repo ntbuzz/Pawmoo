@@ -30,6 +30,18 @@ class ParagraphModel extends AppModel {
 // モジュールクラスではコンストラクタを定義しない
 //  必要なら ClassInit() メソッドで初期化する
 //===============================================================================
+//===============================================================================
+// レコードのリレーションからアウトライン配列を作成し、各々のレコードを取得
+//===============================================================================
+function ReadOutline($id,$filters) {
+    $outline = array();
+    // Part レコードを取得
+    $this->RecordFinder(['section_id' => $id],$filters,'disp_id');
+    foreach($this->Records as $key => $columns) {
+        $outline[$key] = $columns;
+    };
+    return $outline;
+}
 
 
 }

@@ -14,6 +14,7 @@
 				.subitem#chap_edit => [ ${#Toolbar.ドキュメント.チャプター編集} ]
 				.subitem#chap_add => [ ${#Toolbar.ドキュメント.チャプター追加} ]
 				.subitem#chap_del => [ ${#Toolbar.ドキュメント.チャプター削除} ]
+				.subitem#text_downld => [ ${#Toolbar.ドキュメント.テキスト変換} ]
 			]
 		]
 		.menuitem => [ ${#Toolbar.管理ページ}

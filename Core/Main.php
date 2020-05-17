@@ -63,7 +63,7 @@ $ReqCont = [
 // コントローラー、アクションのキャメルケース化とURIの再構築
 $requrl = str_replace('//','/',implode('/',$ReqCont));
 // フレームワーク直接
-dump_debug(DEBUG_DUMP_NONE,"MAIN", [
+debug_dump(DEBUG_DUMP_NONE, [
     'デバッグ情報' => [
         "SERVER" => $_SERVER['REQUEST_URI'],
         "RootURI"=> $rootURI,
