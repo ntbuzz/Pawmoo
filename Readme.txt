@@ -245,11 +245,13 @@
   &FUNCS => [ key => value ]              Helperメソッド呼び出し、連想配列にすると引数として渡すが、スカラー定義の場合は引数なしの呼び出し
   *Comment                                コメントタグの出力
   <HTML-TAG>                              HTMLタグとしてそのまま出力する
+  +setvar => [ varname => value , ...]    セクション変数を定義します。varname に + 記号を付加すると既存の変数とマージする
   +include => [ value, ... ]              JS ファイル, CSS ファイルのインクルード
   +echo => [ value, ... ]                 value のリストをそのまま出力、キー名を指定しても無視する
   +style => [ value, ... ]                value のリストをスタイルシートとして出力する
   +jquery => [ value, ... ]               value のリストをJQuery関数として出力する
-  +setvar => [ varname => value , ...]    セクション変数を定義します。varname に + 記号を付加すると既存の変数とマージする
+  +img => [ attr => value, src ]          imageタグの簡易出力書式, class,id以外の属性を指定しない場合はスカラー値で定義できる
+                                          +img => src
   +ul/ol => [ attr => value , items ]     UL/OLタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
         items :=                          リスト項目は次の要素から構成する
           list-item,                        スカラー要素：　単純リスト項目
