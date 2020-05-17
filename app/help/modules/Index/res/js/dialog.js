@@ -11,7 +11,9 @@ $("#add-paragraph").click(function () {  // セクションブロックから呼
     $("#paragraph_dialog").floatWindow("段落を追加",para_obj, function (e) {
         e["TabSelect"] = $('.tabmenu .tab li.selected').index();
         var url = location.pathname.controller_path("paragraph/add");
-        $.post(url, e,function(data){ //リクエストが成功した際に実行する関数
+//        alert("段落追加\n"+url+"\n"+objDump(e));
+        $.post(url, e, function (data) { //リクエストが成功した際に実行する関数
+//            alert(data);
             location.href = data ;
         }).fail(function() {
             alert( "error:"+url );
@@ -34,7 +36,7 @@ $(".add-section").click(function () {
         short_title:'',
         contents:   '',
     };
-    $("#section_dialog").floatWindow("セクションを追加",sec_obj, function (e) {
+    $("#section_dialog").floatWindow("セクションを追加", sec_obj, function (e) {
         e["TabSelect"] = $('.tabmenu .tab li.selected').index();
         var url = location.pathname.controller_path("section/add");
         $.post(url, e,function (data) { //リクエストが成功した際に実行する関数
@@ -52,10 +54,12 @@ $("#edit-section").click(function () {
     var url = location.origin + location.pathname.controller_path("section/json") + id;
     $.getJSON(url, function (sec_obj) {
         // フォームにパラメータをセットし、完了時の処理関数を登録する
-        $("#section_dialog").floatWindow("",sec_obj, function (e) {
+        $("#section_dialog").floatWindow("", sec_obj, function (e) {
             e["TabSelect"] = $('.tabmenu .tab li.selected').index();
             var url = location.pathname.controller_path("section/update") + e["id"];
-            $.post(url, e,function(data){ //リクエストが成功した際に実行する関数
+//            alert("セクション編集\n"+url+"\n"+objDump(e));
+            $.post(url, e, function (data) { //リクエストが成功した際に実行する関数
+//                alert(data);
                 location.href = data ;
             }).fail(function() {
                 alert( "error:"+url );

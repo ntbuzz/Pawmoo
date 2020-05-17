@@ -1,5 +1,10 @@
 
 "*フッターのインクルード"
+// #popup-dialog のマウスオーバーバルーンヘルプ
+.popup-baloon{@find_word} => [
+  pre => [ 検索 ]
+]
+
 
 .info-box#disp_about{about_info} => [ size => "450,220,200,150"
 h3 => [ Biscuit(MAP) ]

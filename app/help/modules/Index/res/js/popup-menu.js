@@ -12,8 +12,10 @@ var popup_menu_function = {
             // フォームにパラメータをセットし、完了時の処理関数を登録する
             $("#paragraph_dialog").floatWindow("段落を編集",para_obj, function (e) {
                 e["TabSelect"] = $('.tabmenu .tab li.selected').index();
-                var url = location.pathname.controller_path("paragraph/update")+e["id"];
-                $.post(url, e, function(data){ //リクエストが成功した際に実行する関数
+                var url = location.pathname.controller_path("paragraph/update") + e["id"];
+                alert("段落編集\n"+url+"\n"+objDump(e));
+                $.post(url, e, function (data) { //リクエストが成功した際に実行する関数
+                    alert(data);
                     location.href = data ;
                 }).fail(function() {
                     alert( "error:"+url );
@@ -72,6 +74,7 @@ var popup_menu_function = {
 // セクション編集メニュー
     "ctxSecEdit":"#edit-section",
     "ctxSecAdd": ".add-section",
+    "add_section":".add-section",
     "ctxSecDel": "#delete-section",
     "ctxCopy1": "#ctxCopy", // クリックオブジェクトの指定
     "ctxCopy2": "#ctxCopy", // クリックオブジェクトの指定

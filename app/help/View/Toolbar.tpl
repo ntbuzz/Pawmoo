@@ -1,7 +1,10 @@
 // ツールバー
 .font20#toolbar => [
 	.rightitem => [
-		<input type="text" class="font16" id="c00" size="20" name="cc">
+		.finder => [
+			<input type="text" class="font16" id="c00" size="20" name="cc">
+			"span.font24#find_word" => [ +img => [ attr => value  "/images/find_icon.png" ] ]
+		]
 		"span.font24#popup-dialog" => [ ≡ ]
 	]
 	+ul#menu => [
