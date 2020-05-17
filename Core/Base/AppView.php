@@ -22,6 +22,7 @@ class AppView extends AppObject {
         '+'    => [
             'include'   => 'cmd_include',
             'style'     => 'cmd_style',
+            'img'       => 'cmd_image',
             'echo'      => 'cmd_echo',
             'jquery'    => 'cmd_jquery',
             'script'    => 'cmd_script',
@@ -162,7 +163,7 @@ public function ViewTemplate($name,$vars = []) {
                 break;
             case '#': $var = mb_substr($var,1);     // 言語ファイルの参照
                 $val = $this->_($var);              // 言語ファイルの定義配列から文字列を取り出す
-                break;
+            break;
             default:
                 if(isset($vars[$var])) {
                     $val = $vars[$var];             // 環境変数で置換
@@ -215,22 +216,6 @@ public function ViewTemplate($name,$vars = []) {
                 }  else {
                     unset($vv[$kk]);            // 見つからなければ変数を削除
                 }
-/*
-                $p = '/(?:[^\$]+)|(?:\${[^}]+})|(?:\$[^\$]+)/';     // 複数の配列名を含む場合に備える
-                preg_match_all($p, $nm, $m);
-                $exvar = $m[0];
-                array_walk($exvar, array($this, 'expand_walk'), $vars);
-                if(is_array($exvar[0])) {
-                    $vv[$kk] =$exvar[0];     // 配列に置換する
-                } else {
-                    $vvar = implode($exvar,'');   // 展開した変数値を結合する
-                    if(isset($vvar)) {
-                        $vv[$kk] = $vvar;     // 変数値は引数 vars[] 配列内に変数名をキー名として格納されている
-                    }  else {
-                        unset($vv[$kk]);            // 見つからなければ変数を削除
-                    }
-                }
-*/
             }
         }
         return $vv;
@@ -424,6 +409,22 @@ debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"
         $this->directOutput('<style type="text/css">', "</style>",$sec);
     }
     //--------------------------------------------------------------------------
+    //  イメージタグの出力
+    private function cmd_image($tag,$attrs,$sec,$vars) {
+        if(is_array($sec)) { // 連想キーが無いスカラー値のみ抽出
+            foreach($sec as $key => $val) {
+                if(is_numeric($key) && is_scalar($val)) $src = $val;
+            }
+        } else $src = $sec;
+        $attr = $this->gen_attrs($attrs);
+        if($src[0]===':') {     // トップリンク
+            $src[0] = '/';
+        } else {    // / で始めればアプリトップ、他はモジュールトップ
+            $src = App::getRoot(($src[0] == '/') ? $src : strtolower($this->ModuleName) . '/' . $src);
+        }
+        echo "<img src='{$src}'{$attr} />";
+    }
+    //--------------------------------------------------------------------------
     //  単純エコー出力
     private function cmd_echo($tag,$attrs,$sec,$vars) {
         $this->directOutput('', '',$sec);
@@ -515,6 +516,11 @@ debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"
     }
     //==========================================================================
     // タグ文字列の分解
+    private function is_section_tag($tag) {
+        return (strpos(self::SectionCMD,$tag[0]) !== FALSE);
+    }
+    //==========================================================================
+    // タグ文字列の分解
     private function tag_attr_sec($tag,$sec) {
         $innerText = '';
         $secList = [];
@@ -524,17 +530,15 @@ debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"
             foreach($sec as $key => $val) {
                 if(is_numeric($key)) {  // 連想キーが無い場合
                     // 値が配列かセクション用コマンドならセクションデータ扱い
-                    if(is_array($val)||(strpos(self::SectionCMD,$val[0]) !== FALSE)) {
-                        debug_dump(0,["SEC:"=>$val]);
+                    if(is_array($val)||$this->is_section_tag($val)) {
                         $secList[] = $val;    // 配列かコマンド名ならセクション
                     } else {
-                        debug_dump(0,"TXT:{$val}");
                         $innerText .= $val;    // スカラー値ならテキスト
                     }
                 } else {
                     list($vv,$attrs) = $this->tag_separate($key);   // タグ分解
-                    // $val が配列か、$key が属性付きならセクション扱い
-                    if(is_array($val) || !empty($attrs)) $secList[$key] = $val;
+                    // $val が配列かセクションコマンド、$key が属性付きならセクション扱い
+                    if(is_array($val) || !empty($attrs) || $this->is_section_tag($key)) $secList[$key] = $val;
                     else $attrList[$key] = $val;    // それ以外は属性指定
                 }
             }

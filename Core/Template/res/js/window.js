@@ -66,18 +66,24 @@
             var target = self.find('[name="' + key + '"]');
             if (target.length) {
                 if (target.prop("tagName") == "INPUT" || target.prop("tagName") == "SELECT") target.val(value);   // 自ID
-                else target.text(value);   // 自ID
+                else {
+                    if (target.prop("tagName") == "TEXTAREA") {     // 初期表示サイズを固定する
+                        var w = target.attr("cols");
+                        var h = target.attr("rows");
+                        target.css({"width": w+"em","height": h+"em"});
+                    }
+                    target.text(value);   // 自ID
+                }
             }
         });
         self.find(".execButton").click(function () {
             var setobj = {};
             self.find("*").each(function () {
                 var nm = $(this).attr('name');
-                if (nm) {
-                    setobj[nm] = $(this).val();
-                }
+                if (nm) setobj[nm] = $(this).val();
             });
             callback(setobj);
+            return false;
         });
         this.find(".openButton").click();
     };
