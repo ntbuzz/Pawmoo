@@ -107,8 +107,11 @@ class APPDEBUG {
         self::db_echo($mlvl, "<pre>\n");
         foreach($arr as $msg => $obj) {
             self::db_echo($mlvl,"------- {$msg} -----\n");
+//echo "DUMP:{$lvl}\n";var_dump($obj);
             if(empty($obj)) self::db_echo($mlvl,EMPTY_MSG);
-            else foreach($obj as $key => $val) {
+            else if(is_scalar($obj)) {
+                self::db_echo($mlvl,$obj);
+            } else foreach($obj as $key => $val) {
                 if(is_array($val)) {    // 配列出力
                     self::dumpobj($val,0,$mlvl);
                 } else

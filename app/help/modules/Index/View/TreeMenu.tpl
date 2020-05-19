@@ -3,7 +3,7 @@
 //
 div => [
   style => "text-align:center;background-color:lightyellow;"
-  -img#biscuit-help => [ src => "/res/images/biscuit.png" ]
+  +img#biscuit-help => [ "/res/images/biscuit.png" ]
 ]
 .title => [
   span.boldtxt => [ ${#Toolbar.ヘルプトピックス} ]

@@ -3,9 +3,9 @@
  *  customHelper: コアクラスにベンダーライブラリを加える
  * 
  */
-require_once('../vendor/PHPExcel/PHPExcel.php');
-require_once("../vendor/PHPExcel/PHPExcel/IOFactory.php");
-require_once("../vendor/mpdf50/mpdf.php");
+require_once('vendor/PHPExcel/PHPExcel.php');
+require_once("vendor/PHPExcel/PHPExcel/IOFactory.php");
+require_once("vendor/mpdf50/mpdf.php");
 
 //===============================================================================
 class customHelper  extends AppHelper {

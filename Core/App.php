@@ -7,6 +7,7 @@
 class App {
     public static $SysVAR;        // URIROOT, WEBROOT, URI, QUERY 変数
     public static $AppName;         // アプリケーション名
+    private static $appRoot;        // フレームワークのルートパス
     private static $sysRoot;        // フレームワークのルートパス
     public static $DocRoot;         // DOCUMENT_ROOT 変数
     public static $Referer;         // HTTP_REFERER 変数
@@ -20,11 +21,12 @@ class App {
     public static $RunTime;         // コントローラを呼び出した時間
 //===============================================================================
 // 静的クラスでのシステム変数初期化
-	public static function __Init($rootURI,$appname, $uri,$params,$q_str) {
-        self::$sysRoot = $rootURI;
+	public static function __Init($fwroot,$rootURI,$appname, $uri,$params,$q_str) {
+        self::$sysRoot = $fwroot;
+        self::$appRoot = $rootURI;
         self::$AppName = $appname;
-        self::$DocRoot = $_SERVER['DOCUMENT_ROOT'];
-        self::$Referer = $_SERVER['HTTP_REFERER'];
+        self::$DocRoot = (empty($_SERVER['DOCUMENT_ROOT'])) ? '' : $_SERVER['DOCUMENT_ROOT'];
+        self::$Referer = (empty($_SERVER['HTTP_REFERER'])) ? '' : $_SERVER['HTTP_REFERER'];
         parse_str($q_str, $query);
 
         $uri_array = explode('/',$uri);     // decode パス補正は上位で処理済み
@@ -42,9 +44,10 @@ class App {
         $k = count(self::$Params);
 		self::$Params += array_fill($k, 10 - $k, '');
         self::$SysVAR = array(
+            'SYSROOT' => self::$sysRoot,
             'APPNAME' => self::$AppName,
-            'URIROOT' => self::$sysRoot,
-            'WEBROOT' => self::$sysRoot . 'webroot/',
+            'URIROOT' => self::$appRoot,
+            'WEBROOT' => self::$appRoot . 'webroot/',
             'URI' => $uri,
             'QUERY' => $q_str,
             'REFERER' => self::$Referer,
@@ -125,10 +128,16 @@ class App {
     }
 //==================================================================================================
 // webrootファイルのパスに付加パスを付けた文字列
-	public static function getRoot($path) {  
-        if($path[0] == '/') $path = mb_substr($path,1);
-        return self::$sysRoot . strtolower($path);
-    }
+public static function getSysRoot($path) {  
+//    if($path[0] == '/') $path = mb_substr($path,1);
+    return self::$sysRoot . strtolower($path);
+}
+//==================================================================================================
+// webrootファイルのパスに付加パスを付けた文字列
+public static function getAppRoot($path) {  
+    if($path[0] == '/') $path = mb_substr($path,1);
+    return self::$appRoot . strtolower($path);
+}
 //==================================================================================================
 // webrootファイルの読込タグ出力（単独）
     private static function IncludeTag($tagfile) {
@@ -138,6 +147,17 @@ class App {
         }
         list($file,$q_str) = explode('?',$tagfile);     // クエリ文字列が付加されている時に備える
         $ext = substr($file,strrpos($file,'.') + 1);    // 拡張子を確認
+        $path = make_hyperlink($file,self::$ActionClass);
+debug_dump(0,[
+    "Include" => [
+        "TAGFILE" => $tagfile,
+        "FILE" => $file,
+        "EXT" => $ext,
+        "PATH" => $path,
+        "Class" => self::$ActionClass,
+    ]
+]);
+/*
         if(substr($file,0,7) == 'http://' || substr($file,0,8) == 'https://') {                 // ROOTパスかを確認
             $path = $file;                             // 外部サイト
         } else if($file[0] == '/') {         // ROOTパスかを確認
@@ -145,8 +165,9 @@ class App {
         } else {
             // カレントフォルダの指定ならモジュール名で置換
             if(substr($file,0,2) == './') $file = substr_replace($file, strtolower(self::$ActionClass), 0, 1);
-            $path = self::$sysRoot . $file;             // 固有フォルダパス
+            $path = self::$appRoot . $file;             // 固有フォルダパス
         }
+*/
         switch($ext) {
     	case 'js':
             echo "<script src='{$path}' charset='UTF-8'></script>\n";
@@ -170,7 +191,7 @@ class App {
 //==================================================================================================
 // imagesのインクルードタグ出力
     public static function ImageSRC($name, $attr) {
-        $root = self::$sysRoot;
+        $root = self::$appRoot;
         return "<img src=\"{$root}images/{$name}\" {$attr} />";
     }
 

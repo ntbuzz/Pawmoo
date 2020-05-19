@@ -68,16 +68,19 @@ public function ALink($lnk,$txt,$under=false) {
 		$txt = mb_substr($txt,1);
 		$txt = $this->_($txt);
 	}
+	$href = make_hyperlink($lnk,$this->ModuleName);
 	if(in_array(mb_substr($lnk,0,6),$http)) {
-		echo "<a href='{$lnk}' target=_blank>{$txt}</a>\n";
+		echo "<a href='{$href}' target=_blank>{$txt}</a>\n";
 	} else {
+/*
 		if($lnk[0] == ':') {							// LocaleIDの参照
 			$lnk[0] = '/';
 			$href = $lnk;
 		} else {
 			$href = ($lnk[0] == '/') ? $lnk : strtolower($this->ModuleName) . '/' . $lnk;
-			$href = App::getRoot($href);
+			$href = App::getAppRoot($href);
 		}
+*/
 		$uline = ($under) ? '' : ' class="nounder"';
 		echo "<a{$uline} href='{$href}'>{$txt}</a>\n";
 	}
@@ -135,7 +138,7 @@ public function makePageLinks() {
 	echo "</div>\n";
 	// ページサイズの変更
 	$param = (App::$Filter==='') ? "1/" : "{App::$Filter}/1/";
-	$href = App::getRoot($this->ModuleName)."/page/{$param}";
+	$href = App::getAppRoot($this->ModuleName)."/page/{$param}";
 //		echo "<div class='rightalign'>表示数:<SELECT id='pagesize' onchange='location.href=\"{$href}\"+this.value;'>";
 	$dsp = "<span id='size_selector'>".$this->__(".Display", FALSE)."</span>";
 	echo "<div class='rightalign'>{$dsp}:<SELECT id='pagesize'>";
@@ -222,7 +225,7 @@ public function TabContents($sel,$default='') {
 // 'id' => identifir
 //
 public function Form($act, $attr) {
-	if ($act[0] !== '/') $act = App::getRoot($act);
+	if ($act[0] !== '/') $act = App::getAppRoot($act);
 	$arg = '';
 	foreach($attr as $key => $val) {
 			$arg .= $key .'="' . $val . '"';

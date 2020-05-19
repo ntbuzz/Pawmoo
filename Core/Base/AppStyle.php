@@ -34,6 +34,12 @@ class AppStyle {
             'extention' => '.js',
             'section' => 'javascript',
         ],
+        0 => [
+            'folder' => '',
+            'head' => '',
+            'extention' => '',
+            'section' => '',
+        ],
 
     ];
     const BoolConst = [ 'yes' => TRUE, 'no' => FALSE, 'true' => TRUE, 'false' => FALSE, 'on' => TRUE, 'off' => FALSE ];
@@ -211,7 +217,7 @@ public function ViewStyle($filename) {
             $var = trim($var,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
             if($var[0] == '#') {
                 $var = mb_substr($var,1);     // 言語ファイルの参照
-                $val = LangUI::get_value('core', $var, $allow_array);
+                $val = LangUI::get_value('core', $var, FALSE);
             } else if(isset($vars[$var])) {
                 $val = $vars[$var];             // 環境変数で置換
             }

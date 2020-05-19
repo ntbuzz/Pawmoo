@@ -137,7 +137,7 @@ public function UpdateAction() {
 		$num = App::$Params[0];
 		MySession::Dump();
 		$this->Model->UpdateRecord($num,MySession::$PostEnv);
-		header('Location:' . App::getRoot(strtolower($this->ModuleName)) . '/list/' . $num );
+		header('Location:' . App::geApptRoot(strtolower($this->ModuleName)) . '/list/' . $num );
 	} catch (Exception $e) {
 
 	}

@@ -63,8 +63,8 @@ $ReqCont = [
 // コントローラー、アクションのキャメルケース化とURIの再構築
 $requrl = str_replace('//','/',implode('/',$ReqCont));
 // フレームワーク直接
-debug_dump(DEBUG_DUMP_NONE, [
-    'デバッグ情報' => [
+debug_dump(0, [
+    '解析情報' => [
         "SERVER" => $_SERVER['REQUEST_URI'],
         "RootURI"=> $rootURI,
         "fwroot"=> $fwroot,
@@ -78,12 +78,12 @@ debug_dump(DEBUG_DUMP_NONE, [
 ]);
 // コントローラ名やアクション名が書き換えられてリダイレクトが必要なら終了
 if($redirect) {
-//    echo "Redirect:{$requrl}\n";
+//    echo "Redirect:{$requrl}\n";exit;
     header("Location:{$requrl}");
     exit;
 }
 // アプリケーション変数を初期化する
-App::__Init($rootURI, $appname, $requrl, $params, $q_str);
+App::__Init($fwroot,$rootURI, $appname, $requrl, $params, $q_str);
 
 // コントローラ名/アクションをクラス名/メソッドに変換
 $className = "{$controller}Controller";
@@ -142,6 +142,18 @@ APPDEBUG::debug_dump(1, [
     ],
     "QUERY" => App::$Query,
     "SESSION" => MySession::$PostEnv,
+    'パス情報' => [
+        "SERVER" => $_SERVER['REQUEST_URI'],
+        "RootURI"=> $rootURI,
+        "fwroot"=> $fwroot,
+        "appname"=> $appname,
+        "Controller"=> $controller,
+        "Action"    => $action,
+        "Param"    => $params,
+    ],
+    "ReqCont" => $ReqCont,
+    "Location" => $requrl,
+
 ]);
 // セッション変数を初期化
 MySession::InitSession();

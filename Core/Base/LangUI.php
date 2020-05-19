@@ -16,18 +16,18 @@ class LangUI {
     public static function construct($lang,$default) {
         APPDEBUG::MSG(5,$lang, "言語リスト");
         $_ = 'constant';                                    // 定数を取り出す関数
-        $langs = array_shift(               // 先頭の要素を取り出す
-                  array_unique(             // 重複行を取り除く
-                    array_filter(           // strlen を使って空行を取り除く
-                        array_map(          // 各要素に有効識別子の取り出し関数を適用
-                            function($a) {
-                                if(($n=strpos($a,'-')) !== FALSE)       return substr($a,0,$n);     // en-US => en
-                                else if(($n=strpos($a,';')) !== FALSE)  return substr($a,0,$n);     // en;q=0.9 => en
-                                else return $a;
-                            },
-                            explode(',', $lang)  // 言語受け入れリスト
-                        ),
-                        'strlen')));
+        $arr = array_unique(             // 重複行を取り除く
+                array_filter(           // strlen を使って空行を取り除く
+                    array_map(          // 各要素に有効識別子の取り出し関数を適用
+                        function($a) {
+                            if(($n=strpos($a,'-')) !== FALSE)       return substr($a,0,$n);     // en-US => en
+                            else if(($n=strpos($a,';')) !== FALSE)  return substr($a,0,$n);     // en;q=0.9 => en
+                            else return $a;
+                        },
+                        explode(',', $lang)  // 言語受け入れリスト
+                    ),
+                    'strlen'));
+        $langs = array_shift($arr);             // strict回避
         self::$Locale = ".{$langs}";            // 言語識別文字を付加
         self::$STRINGS = [];
         // フレームワークの言語リソースを読込む

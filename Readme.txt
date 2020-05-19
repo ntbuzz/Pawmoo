@@ -390,7 +390,7 @@
   App::appUses(カテゴリ,モジュール名)     // appモジュールファイルの読込 (動的読込みがあるので原則使用しない)
   App::appController(コントローラ名)      // appコントローラと付属モジュールファイルの読込
   App::appModels(モジュール名)            // app/Models モジュールファイルの読込
-  App::getRoot(付加パス)                  // webrootファイルのパスに付加パスを付けた文字列
+  App::getAppRoot(付加パス)               // アプリケーションのルートに付加パスを付けた文字列
   App::WebInclude(読込み配列)             // webrootファイルの読込タグ出力
   App::ImageSRC(ファイル名, 属性)         // imagesのインクルードタグ出力
 

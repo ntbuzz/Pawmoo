@@ -16,18 +16,29 @@ function getFrameworkParameter($dir) {
     list($requrl,$q_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
     $param = trim(urldecode($requrl),'/');
     $params = ($param == '') ? array() : explode('/', $param);            // パラメーターを / で分割
-    list($fwroot,$appname,$modname) = $params;
-    if($appname=='') $appname ='help';
-    if($fwroot === $root)  {
-        $rootURI ="/{$fwroot}/{$appname}/";
+    // フレームワークルートから始まるURIか?
+    if(count($params) < 3) array_push($params,'','');
+    if($params[0] === $root) {
+        list($fwroot,$appname,$modname) = $params;
         $args = array_slice($params,3);
+        $rootURI ="/{$fwroot}/{$appname}/";
     } else {
         list($appname,$modname) = $params;
-        if($appname=='') $appname ='help';
-        $fwroot = $root;
-        $rootURI = "/{$appname}/";
         $args = array_slice($params,2);
+        $rootURI ="/{$appname}/";
     }
+    $fwroot = '';
+    debug_dump(0, [
+        'フレームワーク情報' => [
+            "SERVER" => $_SERVER['REQUEST_URI'],
+            "fwroot"=> $fwroot,
+            "RootURI"=> $rootURI,
+            "appname"=> $appname,
+            "modname"=> $modname,
+            "query"=> $q_str,
+            "args"=> $args,
+        ],
+    ]);
     // モジュール名はキャメルケースに変換
     $modname = ucfirst(strtolower($modname));
     $ret = [$fwroot,$rootURI,$appname,$modname,$args,$q_str];
@@ -92,8 +103,6 @@ function pathcomplete($path) {
 }
 //===============================================================================
 // 重複文字列の除去
-//===============================================================================
-// タグ文字列の分解
 function tag_body_name($key) {
     $n = strrpos($key,':');
     return ($n !== FALSE) ? substr($key,0,$n) : $key;
@@ -247,6 +256,29 @@ function auto_hyperlink($atext) {
     }
 //    return implode("<br />\n",$ret);
 	return implode("\n",$ret);
+}
+//===============================================================================
+// ハイパーリンク生成
+//  http〜  直接指定
+// :...    appRoot/...
+// ./       appRoot/modname
+// /..     sysRoot/...
+function make_hyperlink($lnk,$modname) {
+    $http = array('http:/','https:');
+	if(!in_array(mb_substr($lnk,0,6),$http)) {
+		if($lnk[0] === ':') {
+            $lnk[0] = '/';
+            $lnk= "http://localhost{$lnk}";
+        } else if($lnk[0] === '/') {
+			$lnk = App::getSysRoot("/common{$lnk}");
+        } else if(mb_substr($lnk,0,2) === './') {
+            $lnk = substr_replace($lnk, strtolower($modname), 0, 1);
+            $lnk = App::getAppRoot($lnk);
+        } else {
+            $lnk = App::getAppRoot($lnk);
+		}
+    }
+    return $lnk;
 }
 //===============================================================================
 // デバッグダンプ

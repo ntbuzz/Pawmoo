@@ -26,6 +26,7 @@ public function ListAction() {
 		'レコード' => $this->Model->Records,
 		'アウトライン' => $this->Model->outline,
 	]);
+	$this->ViewSet(['PartData' => [],'ChapterData' => []]);
 	$this->View->PutLayout();
 }
 //===============================================================================
