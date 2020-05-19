@@ -7,10 +7,10 @@
 .closed => [
     span.folder => [ ${#Core.WEB開発} ]
     +ul => [
-        [ span.file => [ %${#Core.SW開発.BiscuitHelp} => "http://localhost:8080/help/" ] ]
-        [ span.file => [ %FW版help => "http://localhost/biscuit/help/" ] ]
-        [ span.file => [ %${#ToCoreolbar.SW開発.PC管理} => "http://localhost:8080/pcenv/" ] ]
-        [ span.file => [ %FW版PC管理 => "http://localhost/biscuit/pcenv/" ] ]
+        [ span.file => [ %${#Core.SW開発.BiscuitHelp} => ":help/" ] ]
+        [ span.file => [ %FW版help => ":biscuit/help/" ] ]
+        [ span.file => [ %${#ToCoreolbar.SW開発.PC管理} => ":pcenv/" ] ]
+        [ span.file => [ %FW版PC管理 => ":biscuit/pcenv/" ] ]
         [ span.file => [ %${#Core.SW開発.Video管理} => ":mediamgr/" ] ]
       ]
 ]

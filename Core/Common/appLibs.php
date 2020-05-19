@@ -261,7 +261,7 @@ function auto_hyperlink($atext) {
 //===============================================================================
 // ハイパーリンク生成
 //  http〜  直接指定
-// :...     http://localhost/...
+// :...     /...
 // /..     sysRoot/...
 // ./...    appRoot/modname/...
 // ...      appRoot/...
@@ -270,8 +270,8 @@ function make_hyperlink($lnk,$modname) {
 	if(!in_array(mb_substr($lnk,0,6),$http)) {
 		if($lnk[0] === ':') {
             $lnk[0] = '/';
-            $host = getHostName();
-            $lnk= "http://{$host}{$lnk}";
+//            $host = getHostName();
+//            $lnk= "http://{$host}{$lnk}";
         } else if($lnk[0] === '/') {
 //			$lnk = App::getSysRoot("/common{$lnk}");
 			$lnk = App::getSysRoot("{$lnk}");
