@@ -3,18 +3,18 @@ DirectoryIndex index.php
 RewriteEngine On
 RewriteBase /biscuit/
 
-# テンプレートリソース(画像ファイル)
+# 外部ライブラリ
+RewriteRule ^(css|js)/(.*)$       common/$1/$2 [END]
+
+# テンプレートリソース(CSS/画像ファイル)
 RewriteRule ^.*/css/res/img/(.*)$ Core/Template/cssimg/$1 [END]
-RewriteRule ^res/images/(.*)$ Core/Template/images/$1 [END]
-# common ライブラリがリダイレクトされないように
-RewriteRule ^common/(.*)$ common/$1 [END]
+RewriteRule ^res/images/(.*)$     Core/Template/images/$1 [END]
 
 # アプリごとに異なるリダイレクト
-RewriteRule ^([^/]+)/js/(.*)$ app/$1/webroot/js/$2 [END]
-RewriteRule ^([^/]+)/css/img/(.*)$ app/$1/webroot/cssimg/$2 [END]
-RewriteRule ^([^/]+)/css/(.*)$ app/$1/webroot/css/$2 [END]
-RewriteRule ^([^/]+)/js/(.*)$ app/$1/webroot/js/$2 [END]
-RewriteRule ^([^/]+)/images/(.*)$ app/$1/webroot/images/$2 [END]
+RewriteRule ^([^/]+)/.*/css/img/(.*)$ app/$1/webroot/cssimg/$2 [END]
+RewriteRule ^([^/]+)/(css|js)/(.*)$   app/$1/webroot/$2/$3 [END]
+RewriteRule ^([^/]+)/images/(.*)$     app/$1/webroot/images/$2 [END]
+RewriteRule ^([^/]+)/.*/images/(.*)$  app/$1/webroot/images/$2 [END]
 
 # 実体があるかもしれないファイルは条件判定
 RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-f
