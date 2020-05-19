@@ -12,11 +12,11 @@ div => [
   .open => [
     span.folder => [ ${#Toolbar.テーブル表示} ]
     +ul => [
-      .host_help => [ span.file => [ %${#Toolbar.表示.ホスト} => '/hosts/page/1' ] ]
-      [ span.file => [ %${#Toolbar.表示.名前} => '/names/page/1' ] ]
-      [ span.file => [ %${#Toolbar.表示.OSリスト} => '/os/page/1' ] ]
-      [ span.file => [ %${#Toolbar.表示.ライセンス} => '/licenses/page/1' ] ]
-      [ span.file => [ %${#Toolbar.表示.アプリ} => '/apps/page/1' ] ]
+      .host_help => [ span.file => [ %${#Toolbar.表示.ホスト} => 'hosts/page/1' ] ]
+      [ span.file => [ %${#Toolbar.表示.名前} => 'names/page/1' ] ]
+      [ span.file => [ %${#Toolbar.表示.OSリスト} => 'os/page/1' ] ]
+      [ span.file => [ %${#Toolbar.表示.ライセンス} => 'licenses/page/1' ] ]
+      [ span.file => [ %${#Toolbar.表示.アプリ} => 'apps/page/1' ] ]
     ]
   ]
 ]

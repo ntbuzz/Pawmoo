@@ -8,7 +8,7 @@
 		"span.font24#popup-dialog" => [ ≡ ]
 	]
 	+ul#menu => [
-		#li => [ %${#Toolbar.home} => "/index" ]		 //  ハイパーリンク
+		#li => [ %${#Toolbar.home} => "index" ]		 //  ハイパーリンク
 		.li => [ %${#Toolbar.ファイル} => "#"
 			+ul.sub => [
 				li => [ %${#Toolbar.ファイル.新規} => "#" ]
@@ -27,13 +27,13 @@
 		]
 		li => [ %${#Toolbar.表示} => "#"
 			ul.sub => [
-				li => [ %${#Toolbar.home} => "/index/page/" ]
-				li => [ %${#Toolbar.表示.ホスト} => "/hosts/page/" ]
-				li => [ %${#Toolbar.表示.名前} => "/names/page/" ]
-				li => [ %${#Toolbar.表示.OSリスト} => "/os/page/" ]
-				li => [ %${#Toolbar.表示.ライセンス} => "/licenses/page/" ]
-				li => [ %${#Toolbar.表示.アプリ} => "/apps/page/" ]
-				li => [ %${#Toolbar.表示.BIND} => "/index/bindlist/100/50" ]
+				li => [ %${#Toolbar.home} => "index/page/" ]
+				li => [ %${#Toolbar.表示.ホスト} => "hosts/page/" ]
+				li => [ %${#Toolbar.表示.名前} => "names/page/" ]
+				li => [ %${#Toolbar.表示.OSリスト} => "os/page/" ]
+				li => [ %${#Toolbar.表示.ライセンス} => "licenses/page/" ]
+				li => [ %${#Toolbar.表示.アプリ} => "apps/page/" ]
+				li => [ %${#Toolbar.表示.BIND} => "index/bindlist/100/50" ]
 			]
 		]
 		li => [ %${#Toolbar.管理ページ} => "#"
