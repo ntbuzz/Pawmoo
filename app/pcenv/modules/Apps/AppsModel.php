@@ -2,7 +2,7 @@
 
 class AppsModel extends AppModel {
   static $DatabaseSchema = [
-        'Handler' => 'Postgre',
+        'Handler' => 'SQLite',
         'DatabaseName' => 'pcenv',
         'DataTable' => 'app_lists',
         'Primary' => 'id',
