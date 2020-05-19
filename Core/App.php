@@ -157,17 +157,6 @@ debug_dump(0,[
         "Class" => self::$ActionClass,
     ]
 ]);
-/*
-        if(substr($file,0,7) == 'http://' || substr($file,0,8) == 'https://') {                 // ROOTパスかを確認
-            $path = $file;                             // 外部サイト
-        } else if($file[0] == '/') {         // ROOTパスかを確認
-            $path = '/common' . $file;                 // 共通フォルダパス
-        } else {
-            // カレントフォルダの指定ならモジュール名で置換
-            if(substr($file,0,2) == './') $file = substr_replace($file, strtolower(self::$ActionClass), 0, 1);
-            $path = self::$appRoot . $file;             // 固有フォルダパス
-        }
-*/
         switch($ext) {
     	case 'js':
             echo "<script src='{$path}' charset='UTF-8'></script>\n";
