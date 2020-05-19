@@ -2,7 +2,7 @@
 
 class LicensesModel extends AppModel {
   static $DatabaseSchema = [
-        'Handler' => 'SQLite',
+        'Handler' => 'Postgre',
         'DatabaseName' => 'pcenv',
         'DataTable' => 'licenses',
         'Primary' => 'id',

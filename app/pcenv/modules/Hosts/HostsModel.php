@@ -2,7 +2,7 @@
 //===============================================================================
 class HostsModel extends AppModel {
   static $DatabaseSchema = [
-        'Handler' => 'SQLite',
+        'Handler' => 'Postgre',
         'DatabaseName' => 'pcenv',
         'DataTable' => 'host_lists',
         'Primary' => 'id',
