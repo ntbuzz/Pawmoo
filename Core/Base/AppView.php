@@ -520,6 +520,7 @@ debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"
     //==========================================================================
     // タグ文字列の分解
     private function is_section_tag($tag) {
+        if(empty($tag)) return FALSE;
         return (strpos(self::SectionCMD,$tag[0]) !== FALSE);
     }
     //==========================================================================

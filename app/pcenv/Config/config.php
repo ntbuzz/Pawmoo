@@ -1,8 +1,10 @@
 <?php
 
-define('HOST_SPEC','http://172.27.132.242:80/');
+define('HOST_SPEC','http://172.27.132.244:80/');
 define('SQLITE_DB',__DIR__ . '/pcenv.db');
-define('POSTGRE_DB',__DIR__ . 'pcmanager');
+define('PG_HOST','spider');
+define('PG_PORT',  '5532');
+define('PG_DB',  'pcmanager');
 
 define("VIEWFILE",0);
 define("POSTFILE",1);
@@ -14,11 +16,11 @@ define('DEFAULT_LANG', 'ja');				// 言語ファイル
 const DatabaseParameter  = [
 	'Postgre' =>  array(
 		'persistent' => false,
-		'host' => 'localhost',
+		'host' => PG_HOST,
 		'login' => 'postgres',
-		'port' => '5532',
+		'port' => PG_PORT,
 		'password' => 'postgres',
-		'database' => 'pcmanager',
+		'database' => PG_DB,
 		'prefix' => '',
 		'encoding' => 'utf8'
 	),
