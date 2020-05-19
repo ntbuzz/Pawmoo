@@ -68,19 +68,10 @@ public function ALink($lnk,$txt,$under=false) {
 		$txt = mb_substr($txt,1);
 		$txt = $this->_($txt);
 	}
-	$href = make_hyperlink($lnk,$this->ModuleName);
 	if(in_array(mb_substr($lnk,0,6),$http)) {
 		echo "<a href='{$href}' target=_blank>{$txt}</a>\n";
 	} else {
-/*
-		if($lnk[0] == ':') {							// LocaleIDの参照
-			$lnk[0] = '/';
-			$href = $lnk;
-		} else {
-			$href = ($lnk[0] == '/') ? $lnk : strtolower($this->ModuleName) . '/' . $lnk;
-			$href = App::getAppRoot($href);
-		}
-*/
+		$href = make_hyperlink($lnk,$this->ModuleName);
 		$uline = ($under) ? '' : ' class="nounder"';
 		echo "<a{$uline} href='{$href}'>{$txt}</a>\n";
 	}
