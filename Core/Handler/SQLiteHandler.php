@@ -46,6 +46,7 @@ public function getLastError() {
 //	レコードの追加 
 //==================================================================================================
 public function insertRecord($row) {
+	$this->sql_safequote($row);
 	APPDEBUG::MSG(19, $row );
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
@@ -56,13 +57,14 @@ public function insertRecord($row) {
 	APPDEBUG::MSG(19, $sql );
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
-		echo 'ERROR:'.$this->getLastError()."\n";
+		echo 'ERROR:'.$this->getLastError()."\n".$sql;
 	}
 }
 //==================================================================================================
 //	レコードの更新 $row[key] value
 //==================================================================================================
 public function replaceRecord($wh,$row) {
+	$this->sql_safequote($row);
 	APPDEBUG::MSG(19, $row );
 	$row = array_merge($wh,$row);				// 配列をマージ
 	// UPDATE OR INSERT => REPLACE SQL生成
@@ -74,7 +76,7 @@ public function replaceRecord($wh,$row) {
 	APPDEBUG::MSG(19, $sql );
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
-		echo 'ERROR:'.$this->getLastError()."\n";
+		echo 'ERROR:'.$this->getLastError()."\n".$sql;
 	}
 }
 

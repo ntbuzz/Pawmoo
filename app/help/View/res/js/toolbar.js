@@ -20,3 +20,8 @@ $("#ctxUndo").mousedown(function (e) {
     alert("コンテキスト:"+$(this).attr("id"));
 });
 */
+// テキスト検索
+$("#find_word").click(function () {
+    alert($('input[name=cc]').val());
+//    alert($('#cc00').val());
+});

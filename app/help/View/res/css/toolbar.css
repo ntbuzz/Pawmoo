@@ -93,3 +93,14 @@
 	background-color: #ffff80; /* サブメニュー項目にマウスが載ったときの背景色 */
 	color: #005500;            /* サブメニュー項目にマウスが載ったときの文字色 */
 }
+
+#toolbar .finder {
+    float:left;
+    bottom: 0;
+/*
+    background: url(/{$appName$}/css/img/find_icon.png) no-repeat left -23px;
+*/
+}
+#toolbar  #find_word {
+    cursor:pointer;
+}

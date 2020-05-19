@@ -38,10 +38,12 @@ selector.each(function () {
         self.find('dd').append(buttontag);
     }
     // 中のブロック高さを調整
+/*
     self.resize(function () {
         hsize = self.innerHeight() - 50;
         $(id + ' dd').css("height", hsize + "px");
     });
+*/
 // クリックイベント登録
     self.find(".openButton").click(function () {
             // alert("click=" + click);

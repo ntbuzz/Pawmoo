@@ -31,13 +31,13 @@
 // セクションタブ・コンテキストメニュー
 "+ul.context-menu#popup_tab{.tab li}" => [
 	#edit-section => [ ${#.Popup.Sec-Edit} ]
-	#add-section  => [ ${#.Popup.Sec-Add} ]
+	#add_section  => [ ${#.Popup.Sec-Add} ]
 	.separate => [ <hr> ]
 	#delete-section => [ ${#.Popup.Sec-Delete} ]
 ]
 //------------------------------------------------------------------------------
 // パラグラフ操作・フロートウィンドウ
-".floatWindow#paragraph_dialog" => [ size => "550,450,200,150"
+".floatWindow#paragraph_dialog" => [ size => "560,450,200,150"
 	value => "${#.Button.Update},${#.Button.Cancel}"
 	+dl => [ [ ${#.Dialog.Edit-Paragraph}		// ウィンドウタイトルは呼出時に決める
 		[	.dialog-form => [	// div-section
@@ -47,7 +47,7 @@
 					tr => [ th => [ ${#.Dialog.Belong-Sec}: ] td => [ "span.boldtxt[section]" => [] ] ]
 					tr => [ th => [ ${#.Dialog.DispAt}: ] td => [ -input[disp_id] => [ type => text size => 8 ] ] ]
 					tr => [ th => [ ${#.Dialog.Title}: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
-					tr => [ th => [ ${#.Dialog.Desc-Para}: ] td => [ textarea[contents] => [ rows => 20 cols => 50 ] ] ]
+					tr => [ th => [ ${#.Dialog.Desc-Para}: ] td => [ textarea[contents] => [ rows => 20 cols => 30 ] ] ]
 				]
 			]
 		]
@@ -55,7 +55,7 @@
 ]
 //------------------------------------------------------------------------------
 // セクション操作・フロートウィンドウ
-".floatWindow#section_dialog" => [ size => "520,333,200,150"
+".floatWindow#section_dialog" => [ size => "530,350,200,150"
 	value => "${#.Button.Update},${#.Button.Cancel}"
 	+dl => [ [ ${#.Dialog.Edit-Section}	// dt-inner
 		[	.dialog-form => [	// div-section
@@ -65,7 +65,7 @@
 					tr => [ th => [ ${#.Dialog.DispAt}: ] td => [ -input[disp_id] => [ type => text size => 8 ] ] ]
 					tr => [ th => [ ${#.Dialog.Title}: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
 					tr => [ th => [ タブ表示: ] td => [ -input[short_title] => [ type => text size => 48 ] ] ]
-					tr => [ th => [ ${#.Dialog.Desc-Sec}: ] td => [ textarea[contents] => [ rows => 10 cols => 50 ] ] ]
+					tr => [ th => [ ${#.Dialog.Desc-Sec}: ] td => [ textarea[contents] => [ rows => 10 cols => 30 ] ] ]
 				]
 			]
 		]
@@ -73,7 +73,7 @@
 ]
 //------------------------------------------------------------------------------
 // チャプター操作・フロートウィンドウ
-".floatWindow#chapter_dialog" => [ size => "500,315,200,150"
+".floatWindow#chapter_dialog" => [ size => "520,290,200,150"
 	value => "${#.Button.Update},${#.Button.Cancel}"
 	+dl => [ [ ${#.Dialog.Edit-Chapter}	// dt-inner
 		[	.dialog-form => [	// div-section
@@ -83,7 +83,7 @@
 					tr => [ th => [ ${#.Dialog.Belong-Part}: ] td => [ &PartSelector ] ]
 					tr => [ th => [ ${#.Dialog.DispAt}: ] td => [ -input[disp_id] => [ type => text size => 8 ] ] ]
 					tr => [ th => [ ${#.Dialog.Title}: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
-					tr => [ th => [ ${#.Dialog.Desc-Chap}: ] td => [ textarea[contents] => [ rows => 10 cols => 50 ] ] ]
+					tr => [ th => [ ${#.Dialog.Desc-Chap}: ] td => [ textarea[contents] => [ rows => 8 cols => 28 ] ] ]
 				]
 			]
 		]
@@ -91,7 +91,7 @@
 ]
 //------------------------------------------------------------------------------
 // パート操作・フロートウィンドウ
-".floatWindow#part_dialog" => [ size => "480,285,200,150"
+".floatWindow#part_dialog" => [ size => "520,220,200,150"
 	value => "${#.Button.Update},${#.Button.Cancel}"
 	+dl => [ [ ${#.Dialog.Edit-Part}	// dt-inner
 		[	.dialog-form => [	// div-section
@@ -99,7 +99,7 @@
 				table => [
 					tr => [ th => [ ${#.Dialog.DispAt}: ] td => [ -input[disp_id] => [ type => text size => 8 ] ] ]
 					tr => [ th => [ ${#.Dialog.Title}: ] td => [ -input[title] => [ type => text size => 48 ] ] ]
-					tr => [ th => [ ${#.Dialog.Desc-Part}: ] td => [ textarea[contents] => [ rows => 10 cols => 50 ] ] ]
+					tr => [ th => [ ${#.Dialog.Desc-Part}: ] td => [ textarea[contents] => [ rows => 5 cols => 28 ] ] ]
 				]
 			]
 		]

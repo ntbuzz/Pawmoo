@@ -60,7 +60,8 @@ public function getLastError() {
 // pg_update($this->dbb,$this->table,$row,$wh);
 //==================================================================================================
 public function replaceRecord($wh,$row) {
-	APPDEBUG::MSG(11, $row );
+	$this->sql_safequote($row);
+	APPDEBUG::MSG(19, $row );
 	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ
 	// \ をエスケープする
 	foreach($row as $key => $val) {
@@ -93,7 +94,8 @@ public function replaceRecord($wh,$row) {
 // pg_update($this->dbb,$this->table,$row,$wh);
 //==================================================================================================
 public function insertRecord($row) {
-	APPDEBUG::MSG(11, $row );
+	$this->sql_safequote($row);
+	APPDEBUG::MSG(19, $row );
 	// \ をエスケープする
 	foreach($row as $key => $val) {
 		$row[$key] = str_replace('\\', '\\\\', $val);

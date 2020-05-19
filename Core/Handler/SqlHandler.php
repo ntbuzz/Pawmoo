@@ -129,6 +129,13 @@ public function deleteRecord($wh) {
 		return "SELECT * FROM {$this->table} WHERE \"{$key}\"='{$val}';";
 	}
 //===============================================================================
+// シングルクオートをエスケープする
+protected function sql_safequote(&$value) {
+	foreach($value as $key => $val) {
+		$value[$key] = str_replace("'","''",$val);
+	}
+}
+//===============================================================================
 // テーブルをジョインしてSELECT
 	private function sql_JoinTable($Relations) {
 		$sql = "SELECT {$this->table}.*";

@@ -10,10 +10,11 @@ RewriteRule ^res/images/(.*)$ Core/Template/images/$1 [END]
 RewriteRule ^common/(.*)$ common/$1 [END]
 
 # アプリごとに異なるリダイレクト
+RewriteRule ^([^/]+)/js/(.*)$ app/$1/webroot/js/$2 [END]
 RewriteRule ^([^/]+)/css/img/(.*)$ app/$1/webroot/cssimg/$2 [END]
-RewriteRule ^([^/]+)/images/(.*)$ app/$1/webroot/images/$2 [END]
 RewriteRule ^([^/]+)/css/(.*)$ app/$1/webroot/css/$2 [END]
 RewriteRule ^([^/]+)/js/(.*)$ app/$1/webroot/js/$2 [END]
+RewriteRule ^([^/]+)/images/(.*)$ app/$1/webroot/images/$2 [END]
 
 # 実体があるかもしれないファイルは条件判定
 RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-f
