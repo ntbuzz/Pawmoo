@@ -20,6 +20,7 @@ function getFrameworkParameter($dir) {
     if(count($params) < 3) array_push($params,'','');   // list() 用に数を補填
     if($params[0] === $root) {
         list($fwroot,$appname,$modname) = $params;
+        if(empty($appname)) $appname = 'error';
         $args = array_slice($params,3);
         $rootURI ="/{$fwroot}/{$appname}/";
         $fwroot = "/{$fwroot}/";
