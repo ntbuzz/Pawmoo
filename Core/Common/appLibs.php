@@ -17,17 +17,18 @@ function getFrameworkParameter($dir) {
     $param = trim(urldecode($requrl),'/');
     $params = ($param == '') ? array() : explode('/', $param);            // パラメーターを / で分割
     // フレームワークルートから始まるURIか?
-    if(count($params) < 3) array_push($params,'','');
+    if(count($params) < 3) array_push($params,'','');   // list() 用に数を補填
     if($params[0] === $root) {
         list($fwroot,$appname,$modname) = $params;
         $args = array_slice($params,3);
         $rootURI ="/{$fwroot}/{$appname}/";
+        $fwroot = "/{$fwroot}/";
     } else {
         list($appname,$modname) = $params;
         $args = array_slice($params,2);
         $rootURI ="/{$appname}/";
+        $fwroot = '/';
     }
-    $fwroot = '';
     debug_dump(0, [
         'フレームワーク情報' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
@@ -270,7 +271,8 @@ function make_hyperlink($lnk,$modname) {
             $lnk[0] = '/';
             $lnk= "http://localhost{$lnk}";
         } else if($lnk[0] === '/') {
-			$lnk = App::getSysRoot("/common{$lnk}");
+//			$lnk = App::getSysRoot("/common{$lnk}");
+			$lnk = App::getSysRoot("{$lnk}");
         } else if(mb_substr($lnk,0,2) === './') {
             $lnk = substr_replace($lnk, strtolower($modname), 0, 1);
             $lnk = App::getAppRoot($lnk);
@@ -320,8 +322,8 @@ function debug_dump($flag, $arr = []) {
         if($flag < 3) echo "</pre>\n";
     }
     if($flag === 2) { 
-        echo "TYPE:".get_class($dbinfo[1]['object'])."\n";
-        var_dump($dbinfo[1]['object']);
+//        echo "TYPE:".get_class($dbinfo[1]['object'])."\n";
+//        var_dump($dbinfo[0]['object']);
         exit;
     }
 }

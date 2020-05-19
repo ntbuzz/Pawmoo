@@ -63,22 +63,21 @@ $ReqCont = [
 // コントローラー、アクションのキャメルケース化とURIの再構築
 $requrl = str_replace('//','/',implode('/',$ReqCont));
 // フレームワーク直接
-debug_dump(0, [
-    '解析情報' => [
-        "SERVER" => $_SERVER['REQUEST_URI'],
-        "RootURI"=> $rootURI,
-        "fwroot"=> $fwroot,
-        "appname"=> $appname,
-        "Controller"=> $controller,
-        "Action"    => $action,
-        "Param"    => $params,
-    ],
-    "ReqCont" => $ReqCont,
-    "Location" => $requrl,
-]);
 // コントローラ名やアクション名が書き換えられてリダイレクトが必要なら終了
 if($redirect) {
-//    echo "Redirect:{$requrl}\n";exit;
+    debug_dump(0, [
+        '解析情報' => [
+            "SERVER" => $_SERVER['REQUEST_URI'],
+            "RootURI"=> $rootURI,
+            "fwroot"=> $fwroot,
+            "appname"=> $appname,
+            "Controller"=> $controller,
+            "Action"    => $action,
+            "Param"    => $params,
+        ],
+        "ReqCont" => $ReqCont,
+        "Location" => $requrl,
+    ]);
     header("Location:{$requrl}");
     exit;
 }

@@ -417,11 +417,14 @@ debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"
             }
         } else $src = $sec;
         $attr = $this->gen_attrs($attrs);
+        $src = make_hyperlink($src,$this->ModuleName);
+/*
         if($src[0]===':') {     // トップリンク
             $src[0] = '/';
         } else {    // / で始めればアプリトップ、他はモジュールトップ
-            $src = App::getRoot(($src[0] == '/') ? $src : strtolower($this->ModuleName) . '/' . $src);
+            $src = App::getAppRoot(($src[0] == '/') ? $src : strtolower($this->ModuleName) . '/' . $src);
         }
+*/
         echo "<img src='{$src}'{$attr} />";
     }
     //--------------------------------------------------------------------------

@@ -16,7 +16,7 @@ public function makeOutlineTree() {
         foreach($chapter['child'] as $kk => $val) {
             $cls = ($val['id'] == App::$Params[1]) ? ' selected':'';
             echo "<li><span class='file{$cls}'>";
-            $this->ALink("view/{$key}/{$val[id]}",$val['title']);
+            $this->ALink("index/view/{$key}/{$val[id]}",$val['title']);
             echo "</span></li>\n";
         }
         echo "</ul>\n";
