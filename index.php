@@ -5,7 +5,7 @@
  */
  define('DEBUGGER', TRUE);
 
- $scheme = $_SERVER['REQUEST_SCHEME'];
+ $on_server = $_SERVER["SERVER_PORT"];
 
 // mod_rewrite の設定をシンプルにするため
 if(preg_match('/\/(?:css|js)\/.*/', $_SERVER['REQUEST_URI'])) {

@@ -4,8 +4,6 @@
  *  resource:    CSS/JSファイルのリクエストを受付け、定義ファイルの情報に従いファイル結合したものを応答する
  * 
  */
-global $scheme;
-
 require_once('Class/session.php');
 
 // デバッグ用のクラス
