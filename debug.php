@@ -6,7 +6,7 @@
 	$_SERVER['LOCAL_ADDR'] = $_SERVER['SERVER_NAME'];
 	$_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'ja;en';		// 言語受け入れリスト
 	$_SERVER['HTTP_REFERER'] = "localhost";
-	$_SERVER['REQUEST_SCHEME'] = "cmdline";
+	$_SERVER['SERVER_PORT'] = '';
 //	print_r($_SERVER);
 
 	print_r($argv);

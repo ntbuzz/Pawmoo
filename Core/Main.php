@@ -4,7 +4,7 @@
  * Biscuit(MAP)ミニフレームワーク
  *   Main: メイン処理
  */
-global $scheme;
+global $on_server;
 // デバッグ用のクラス
 require_once('AppDebug.php');
 APPDEBUG::INIT(10);
@@ -79,7 +79,7 @@ if($redirect) {
         "ReqCont" => $ReqCont,
         "Location" => $requrl,
     ]);
-    if($scheme === 'http') {
+    if($on_server) {
         header("Location:{$requrl}");
     } else {
         echo "Location:{$requrl}\n";

@@ -110,8 +110,8 @@ class AppStyle {
 //===============================================================================
 //　ヘッダ出力
 public function ViewHeader() {
-    global $scheme; 
-	if($scheme !== 'http' ) return;
+    global $on_server; 
+	if($on_server === '' ) return;
     header("Content-Type: {$this->Template['head']};");
 }
 //===============================================================================
