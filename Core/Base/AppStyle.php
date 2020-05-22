@@ -149,21 +149,18 @@ public function ViewStyle($file_name) {
             if(array_key_exists($secType,$SecTemplate)) {   // stylesheet or javascript
                 $secData = $SecTemplate[$secType];      // css/jsテンプレートセクションを取得
                 $secParam = array($secname,$secData,$tmplist);
-                foreach($SecTemplate as $key => $val) {     // テンプレート外のコマンドを処理
+                // テンプレート外のコマンドを処理
+                foreach($SecTemplate as $key => $val) { 
                     $this->function_dispath($secParam, $key, $val); // 戻り値は無視してOK
                 }
-                foreach($secData as $key => $val) {     // セクション外のコマンドを処理
+                // セクション外のコマンドを処理
+                foreach($secData as $key => $val) {
                     $this->function_dispath($secParam, $key, $val); // 戻り値は無視してOK
                 }
                 if(array_key_exists($secname,$secData)) {   // filename セクションがあるか
-    debug_dump(0,[
-    "EXECUTE" => $secname,
-    "MY-SEC" => $secData,
-    "SEC" => $secData[$secname],
-]);
                     $this->section_dispath($secParam,$secData[$secname]);
+                    return TRUE;
                 }
-                return TRUE;
             }
         }
         return FALSE;
@@ -235,7 +232,7 @@ public function ViewStyle($file_name) {
         echo "@charset \"{$sec}\"\n";
     }
 //------------------------------------------------------------------------------
-// compact コマンド
+// compact/comment/message コマンド
 // パラメータはプロパティ変数名
     private function cmd_modeset($secParam, $param,$sec) {
         $val = strtolower($sec);                        // 設定値を取り出す
@@ -276,13 +273,12 @@ public function ViewStyle($file_name) {
             $secmsg = (($vsec == $secname) || $force_parent) ? "parent::{$vsec}" : $vsec;
             if($this->do_msg) echo "/* subsection: {$secmsg} in {$secname} */\n";
             if($force_parent) {         // Libsテンプレート指定
-                foreach($tmplist as $key => $val) {
-                    if($key !== 'Libs') unset($tmplist[$key]);     // Libs以外を削除
-                }
+                // Libs フォルダだけを指定する
+                $tmplist = array( 'Libs' => $tmplist['Libs']);
                 $this->section_styles($tmplist, $vsec);     // Libsセクションを処理する
             } else if($vsec === $secname || !array_key_exists($vsec, $secData) ) {
                 // 現セクションと同名か自セクションに要素がなければ親を呼び出す
-                array_shift($tmplist);      // 取得したテンプレートは除外する
+                array_shift($tmplist);      // 先頭は自身のテンプレートがあるフォルダ
                 $this->section_styles($tmplist, $vsec);     // 親のセクションを処理する
             } else {    // 自セクションに指定のセクションがある
                 $this->section_dispath($secParam,$secData[$vsec]);
@@ -320,8 +316,8 @@ public function ViewStyle($file_name) {
 //    ファイルをコンパクト化して出力
     private function output_content($content) {
         if($this->do_min) {         // コメント・改行を削除して最小化して出力する
-            $pat = '[:()}\[\]<>\=\?;,]';    // 前後の空白を削除する文字
-            $content = preg_replace("/\\s*({$pat})\\s+|\\s+({$pat})\\s*|(\\s)+/", '$1$2$3',
+            $pat = '[:(){}\[\]<>\=\?;,]';    // 前後の空白を削除する文字
+            $content = preg_replace("/\\s*({$pat})\\s+|\\s+({$pat})\\s*|(\\s)+/sm", '$1$2$3',
                     preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content));       // コメント行を削除
             $content =trim($content);
         } else if(!$this->do_com) {         // コメントと不要な改行を削除して出力する

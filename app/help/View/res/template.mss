@@ -1,4 +1,6 @@
 // アプリ共通
+@compact => on
+
 Stylesheet => [
     @charset => UTF-8 // この コメント が出たらNG
     common => [

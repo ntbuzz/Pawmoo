@@ -1,6 +1,6 @@
 // スタイルシートとJavascriptのテンプレート
 @comment => off
-//@compact => on
+@compact => on
 Stylesheet => [
     // モジュールスタイルのテンプレート
     '@charset' => UTF-8 // この コメント が出たらNG
