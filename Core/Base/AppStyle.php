@@ -6,9 +6,9 @@
  * テンプレート書式：
  * Section = {                              'Section' が拡張子を除いたファイル名
  *  *Comment            		    		* コメントタグ
- *  import => [ value, ... ]                CSS/JS ファイルのインクルード、スカラー値でも可
- *  jquery => [ value, ... ]                JSファイルの時のみ、JQuery関数 ファイルのインクルード
- *  section => subsection                   別のセクション定義を読み込む、自ファイルに存在しなければ上位ファイルで探索する
+ *  +import => [ value, ... ]                CSS/JS ファイルのインクルード、スカラー値でも可
+ *  +jquery => [ value, ... ]                JSファイルの時のみ、JQuery関数 ファイルのインクルード
+ *  +section => subsection                   別のセクション定義を読み込む、自ファイルに存在しなければ上位ファイルで探索する
  *  tag => value                            タグの出力 => tag "value";
  *  tag => [ attr , ... ]                   属性リストの出力 => tag { attr; ... }
  * }
@@ -43,35 +43,27 @@ class AppStyle {
 
     ];
     const BoolConst = [ 'yes' => TRUE, 'no' => FALSE, 'true' => TRUE, 'false' => FALSE, 'on' => TRUE, 'off' => FALSE ];
-    const ExtendCommand = [
-        '@compact' => 'do_min',         // コンパクト設定
-        '@comment' => 'do_com',         // コメント除去
-        '@message' => 'do_msg',         // デバッグメッセージ設定
-    ];
     const FunctionList = array(
         '@'    => [
-            'compact'   => 'cmd_cmpact',
-            'comment'   => 'cmd_comment',
-            'message'   => 'cmd_message',
+            'compact'   => [ 'cmd_modeset','do_min' ],
+            'comment'   => [ 'cmd_modeset','do_com' ],
+            'message'   => [ 'cmd_modeset','do_msg' ],
+            'charset'   => 'cmd_charset',
         ],
         '+'    => [
             'import'        => 'cmd_import',
             'section'       => 'cmd_section',
             'jquery'        => 'cmd_jquery',
         ],
-        '*'             => 'cmd_comment',
+        '*'  => 'do_comment',
     );
     private $ModuleName;        // モジュール名 or Res
     private $Template;          // ContentList のテンプレート
     private $Folders;           // ファイル探索フォルダ
-    private $TempSection;       // 探索結果のフォルダリスト、再帰利用でスタックする
-    private $Section;           // テンプレートセクション配列
-    private $IncludePath;       // インクルードパス
     private $Filetype;          // サブフォルダ css/js
     private $do_min;            // コンパクト出力するかどうかのフラグ
     private $do_msg;            // インポートメッセージ出力のフラグ
     private $do_com;            // コメントの除去
-    private $TmpStack;          // テンプレートスタック
     private $repVARS;           // 置換文字列
 //===============================================================================
 // コンストラクタ
@@ -116,33 +108,23 @@ class AppStyle {
         return $arr;
     }
 //===============================================================================
-// テンプレートフォルダの位置からファイル探索フォルダのリストを作成する
-    private function get_search_folders($category) {
-        $arr = $this->Folders;
-        reset($arr);        // 配列ポインタを先頭に
-        while ($category !== key($arr)) {   // 先頭のキーを判別
-            array_shift($arr);              // 先頭を削除
-            if(empty($arr)) break;          // 配列が空っぽになった
-        }
-        return $arr;
-    }
-//===============================================================================
 //　ヘッダ出力
 public function ViewHeader() {
+    global $scheme; 
+	if($scheme !== 'http' ) return;
     header("Content-Type: {$this->Template['head']};");
 }
 //===============================================================================
 //　レイアウトテンプレート処理
-public function ViewStyle($filename) {
+public function ViewStyle($file_name) {
     // スタイルシートが存在するフォルダのみをリストアップする
     $temlatelist = $this->get_exists_files('template.mss');
-    list($filename,$ext) = extractBaseName($filename);
+    list($filename,$ext) = extractBaseName($file_name);
     $this->do_min = ($ext == 'min');           // コメント削除出力か
     $this->do_msg = TRUE ;                     // インポートコメント表示設定
     $this->do_com = TRUE ;                     // コメント表示設定
-    $this->TempSection = $temlatelist;          // セクション探索対象
-    $this->TmpStack = [];                       // スタックリセット
-    if($this->SectionStyleSet($temlatelist, $filename, FALSE)) return;      // セクション処理が完了しているなら終了
+    // テンプレートセクション処理
+    if($this->section_styles($temlatelist, $filename) === FALSE) {
     // テンプレートセクションに指定ファイル名が見つからないときは実ファイルを探索する
     foreach($this->Folders as $key => $file) {
         $fn ="{$file}/{$this->Filetype}/{$filename}{$this->Template['extention']}";
@@ -153,112 +135,190 @@ public function ViewStyle($filename) {
         }
     }
 }
+}
 //===============================================================================
 //　セクションスタイルテンプレート処理
-//  TRUE: セクション処理済
-//  FALSE: セクションNOT FOUND
-    private function SectionStyleSet($tmplist, $secname, $dotag) {
-        foreach($tmplist as $category => $file) {      // テンプレートファイルの残りから探索する
+//  $templist   テンプレートフォルダのリスト
+//  $secname    セクション名
+    private function section_styles($tmplist, $secname) {
+        $secType = $this->Template['section'];        // stylesheet/javascript
+        foreach($tmplist as $category => $file) {     // テンプレートリストから探索する
             $parser = new SectionParser($file);
-            // js/css 統合バージョン
             $SecTemplate = array_change_key_case( $parser->getSectionDef(), CASE_LOWER);
-            $secType = $this->Template['section'];              // section タイプ
-            $this->Section = (array_key_exists($secType,$SecTemplate)) ? $SecTemplate[$secType] : [];
-            foreach(self::ExtendCommand as $cmd => $var) {
-                if(array_key_exists($cmd,$SecTemplate)) {           // セクション外にコマンドがある時に備える
-                    $val = strtolower($SecTemplate[$cmd]);          // 設定値を取り出す
-                    $this->$var = self::BoolConst[$val];            // 指定プロパティ変数にセット
+            unset($parser);         // 解放
+            if(array_key_exists($secType,$SecTemplate)) {   // stylesheet or javascript
+                $secData = $SecTemplate[$secType];      // css/jsテンプレートセクションを取得
+                $secParam = array($secname,$secData,$tmplist);
+                // テンプレート外のコマンドを処理
+                foreach($SecTemplate as $key => $val) { 
+                    $this->function_dispath($secParam, $key, $val); // 戻り値は無視してOK
+                }
+                // セクション外のコマンドを処理
+                foreach($secData as $key => $val) {
+                    $this->function_dispath($secParam, $key, $val); // 戻り値は無視してOK
+                }
+                if(array_key_exists($secname,$secData)) {   // filename セクションがあるか
+                    $this->section_dispath($secParam,$secData[$secname]);
+                    return TRUE;
+            }
+        }
+        }
+        return FALSE;
+    }
+//==============================================================================
+// section セクション内をコマンド処理する
+// コマンド以外はCSSフォーマットで直接出力する
+    private function section_dispath($secParam,$section) {
+        foreach($section as $key => $sec) {     // セクション外のコマンドを処理
+            if($this->function_dispath($secParam, $key, $sec)===FALSE) {
+                // 内部コマンドではない
+                if($this->Filetype == 'css') {       // CSS直接出力
+                    if(is_array($sec)) {
+                        echo "{$key} {\n";
+                        foreach($sec as $kk => $vv) {
+                            if(!is_numeric($kk)) echo "{$kk}:";  // 属性指定がある
+                            echo "{$vv};\n";
+                        }
+                        echo "}\n";
+                    } else {        // スカラー出力
+                        echo "{$key} \"{$sec}\"\n";
+                    }
                 }
             }
-            unset($this->TempSection[$category]);                 // 調べ終わったファイルは削除
-            if(array_key_exists($secname,$this->Section)) {
-                if($this->do_msg) echo "/* {$category}テンプレート: {$secname} */\n";
-                $this->IncludePath = $this->get_search_folders($category);  // テンプレートの位置からインクルードパスを生成
-                // セクション呼び出しは直接要素を渡す
-                $secTag = ($dotag) ? $this->Section[$secname] : $this->Section;  // タグ処理をするならサブセクションだけを渡す
-                $this->SectionItemOutput($secTag, $secname, $dotag);
-                return TRUE;      // 見つかったらテンプレート処理を終了
-            }
-            unset($parser);         // 解放
-            unset($this->Section);
         }
-        return FALSE;      // セクションが見つからなかったら実ファイルを探索する
     }
 //==============================================================================
 // key 文字列を元に処理関数へディスパッチする
 // key => sec (vars)
-    private function section_dispath($key,$sec,$vars) {
-        $sec = $this->expandSectionVar($sec,$vars);
-        $num_key = is_numeric($key);
-        if($num_key) {
-            if(is_array($sec)) {
-                $this->section_analyze($sec,$vars);
-                return;
-            }
+    private function function_dispath($secParam, $key,$sec) {
+        if(is_numeric($key)) {
+            if(!is_scalar($sec)) return FALSE;    // 単純配列は認めない
             $key = $sec;
-            $sec = [];
-        }
-        // 重複回避用の文字を削除
-        $key = tag_body_name($key);
+        } else $key = tag_body_name($key);         // 重複回避用の文字を削除
 
         $top_char = $key[0];
         if(array_key_exists($top_char,self::FunctionList)) {
-            $kkey = mb_substr($key,1);      // 先頭文字を削除
+            $tag = mb_substr($key,1);      // 先頭文字を削除
             $func = self::FunctionList[$top_char];
-            // + コマンドには属性が付いている
-            list($tag,$text,$attrs,$subsec) = $this->tag_attr_sec($kkey,$sec);
-            if(is_array($func)) {       // サブコマンドテーブル
-                $cmd = $func[$tag];
-                if(array_key_exists($tag,$func) && (method_exists($this, $cmd))) {
-                    $this->$cmd($tag,$attrs,$sec,$vars);
-                } else echo "***NOT FOUND({$cmd}): {$cmd}({$tag},\$attrs,\$sec,\$vars)\n";
+            if(is_array($func)) {       // サブコマンドテーブルがある
+                if(array_key_exists($tag,$func)) {
+                    $def_func = $func[$tag];
+                    // 配列ならパラメータ要素を取出す
+                    list($cmd,$param) = (is_array($def_func)) ? $def_func:[$def_func,'']; 
+                    if((method_exists($this, $cmd))) {
+                        $this->$cmd($secParam,$param,$sec);
+                    } else echo "+++ Method Not Found({$cmd})\n";
+                } else echo "*** '{$tag}' is Feature Command...\n";
             } else if(method_exists($this, $func)) {
-                $this->$func($kkey,$sec,$vars);
-            } else echo "CALL: {$func}({$kkey},{$sec},vars)\n";
-        } else {
-    debug_dump(0,"ANALYZ:'{$key}'");
-            list($tag,$text,$attrs,$subsec) = $this->tag_attr_sec($key,$sec);
-            $attr = $this->gen_attrs($attrs);
-    debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"sec" => $subsec]);
-            if(is_array($sec)) {
-                echo "<{$tag}{$attr}>{$text}\n";
-                $this->section_analyze($subsec,$vars);
-                echo "</{$tag}>\n";
+                $this->$func($sec);        // ダイレクトコマンド
+            } else echo "CALL: {$func}({$tag},{$sec},vars)\n";  // 未定義のコマンド
+            return TRUE;    // コマンド処理を実行
             } else {
-                echo "<{$tag}{$attr}>{$text}</tag>\n";
+            return FALSE;   // コマンド処理ではない
+        }
+    }
+//==========================================================================
+// * comment コマンド
+    private function do_comment($sec) {
+        $vv = $this->expandStrings($sec,$this->repVARS);
+            $vv = trim(substr($vv,1));
+            echo "/* {$vv} */\n";
+        }
+//------------------------------------------------------------------------------
+// cmd_XXXXX メソッドにはパラメータが渡ってくる
+// cmd_XXXX($tag, $param, $sec)
+//==========================================================================
+// * charset コマンド
+    private function cmd_charset($secParam, $param,$sec) {
+        echo "@charset \"{$sec}\"\n";
+    }
+//------------------------------------------------------------------------------
+// compact/comment/message コマンド
+// パラメータはプロパティ変数名
+    private function cmd_modeset($secParam, $param,$sec) {
+        $val = strtolower($sec);                        // 設定値を取り出す
+        $this->$param = self::BoolConst[$val];            // 指定プロパティ変数にセット
+    }
+//------------------------------------------------------------------------------
+// jquery コマンド
+// +jquery => [ files , ... ] or jquery => scalar
+    private function cmd_jquery($secParam, $param,$sec) {
+        if($this->Filetype == 'js') {
+            list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
+            echo "$(function() { ";
+                $this->files_import($tmplist,$sec);
+            echo "});\n";
+    }
+    }
+//------------------------------------------------------------------------------
+// import コマンド
+// +import => [ files , ... ] or import => scalar
+    private function cmd_import($secParam, $param,$sec) {
+        list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
+        $this->files_import($tmplist,$sec);
+    }
+//------------------------------------------------------------------------------
+// section コマンド
+// +section => [ files , ... ] or section => scalar
+    private function cmd_section($secParam, $param,$sec) {
+        $secval = (is_array($sec)) ? $sec : array($sec);    // 配列要素に統一
+        list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
+        foreach($secval as $vsec) {
+            if($vsec[0] == '@') {
+                if(!DEBUGGER) continue;   // デバッグモードでなければスキップ
+                $vsec = substr($vsec,1);
+            }
+            $force_parent = $vsec[0] == '^';
+            if($force_parent) $vsec = substr($vsec,1);
+            // 処理中のセクション名と同じか強制親セクション
+            $secmsg = (($vsec == $secname) || $force_parent) ? "parent::{$vsec}" : $vsec;
+            if($this->do_msg) echo "/* subsection: {$secmsg} in {$secname} */\n";
+            if($force_parent) {         // Libsテンプレート指定
+                // Libs フォルダだけを指定する
+                $tmplist = array( 'Libs' => $tmplist['Libs']);
+                $this->section_styles($tmplist, $vsec);     // Libsセクションを処理する
+            } else if($vsec === $secname || !array_key_exists($vsec, $secData) ) {
+                // 現セクションと同名か自セクションに要素がなければ親を呼び出す
+                array_shift($tmplist);      // 先頭は自身のテンプレートがあるフォルダ
+                $this->section_styles($tmplist, $vsec);     // 親のセクションを処理する
+            } else {    // 自セクションに指定のセクションがある
+                $this->section_dispath($secParam,$secData[$vsec]);
             }
         }
     }
-//===============================================================================
-//    コメント出力かチェック
-//      TRUE: コメント出力した
-//      FALSE: 未出力
-    private function check_commentout($vv) {
-        if($vv[0] == '*') {
-            $vv = $this->expandStrings($vv,$this->repVARS);
-            $vv = trim(substr($vv,1));
-            echo "/* {$vv} */\n";
-            return TRUE;
-        }
-        return FALSE;
-    }
-//===============================================================================
-//    タグ出力
-    private function dump_tag($key, $vv) {
-        if(is_array($vv)) {
-            echo "{$key} {\n";
-            $this->SectionItemOutput($vv,$key,FALSE);
-            echo "}\n";
-        } else {
-            echo "{$key} \"{$val}\";\n";
+//------------------------------------------------------------------------------
+// ファイルのインポート処理
+    private function files_import($tmplist, $sec) {
+        $files = (is_array($sec)) ? $sec : array($sec);
+        foreach($files as $vv) {
+            list($filename,$v_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];  // クエリ文字列を変数セットとして扱う
+            parse_str($v_str, $vars);
+            $vars = is_array($vars) ? array_merge($this->repVARS,$vars) : $this->repVARS;
+            $imported = FALSE;
+            foreach($tmplist as $key => $file) {
+                list($path,$tmp) = extractFileName($file);
+                $fn ="{$path}{$this->Filetype}/{$filename}";
+                if(file_exists($fn)) {
+                    // @charset を削除して読み込む
+                    $content = preg_replace('/(@charset.*;)/','/* $1 */',trim(file_get_contents($fn)) );
+                    $content = $this->expandStrings($content,$vars);
+                    if($this->do_msg) echo "/* import({$filename}) in {$key} */\n";
+                    $this->output_content($content);
+                    $imported = TRUE;
+                    break;
+                }
+            }
+            if(!$imported) {
+                echo "/* NOT FOUND:= {$filename} */\n";
+            }
         }
     }
 //===============================================================================
 //    ファイルをコンパクト化して出力
     private function output_content($content) {
         if($this->do_min) {         // コメント・改行を削除して最小化して出力する
-            $pat = '[:()}\[\]<>\=\?;,]';    // 前後の空白を削除する文字
-            $content = preg_replace("/\\s*({$pat})\\s+|\\s+({$pat})\\s*|(\\s)+/", '$1$2$3',
+            $pat = '[:(){}\[\]<>\=\?;,]';    // 前後の空白を削除する文字
+            $content = preg_replace("/\\s*({$pat})\\s+|\\s+({$pat})\\s*|(\\s)+/sm", '$1$2$3',
                     preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content));       // コメント行を削除
             $content =trim($content);
         } else if(!$this->do_com) {         // コメントと不要な改行を削除して出力する
@@ -307,89 +367,6 @@ debug_dump(0,["REPLACE" => [ 'VAR' => $varList, 'VALUE' => $values]]);
 debug_dump($debugged,["result" => $exvar]);
         return $exvar;
 }
-//===============================================================================
-//    ファイルの読み込み
-    private function import_files($val) {
-        $files = (is_array($val)) ? $val : array($val);
-        foreach($files as $vv) {
-            list($filename,$v_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];  // クエリ文字列を変数セットとして扱う
-            parse_str($v_str, $vars);
-            $vars = is_array($vars) ? array_merge($this->repVARS,$vars) : $this->repVARS;
-            $imported = FALSE;
-            if(!$this->check_commentout($filename)) {
-                foreach($this->IncludePath as $key => $file) {
-                    $fn ="{$file}/{$this->Filetype}/{$filename}";
-                    if(file_exists($fn)) {
-                        // @charset を削除して読み込む
-                        $content = preg_replace('/(@charset.*;)/','/* $1 */',trim(file_get_contents($fn)) );
-                        $content = $this->expandStrings($content,$vars);
-                        if($this->do_msg) echo "/* import({$filename}) in {$key} */\n";
-                        $this->output_content($content);
-                        $imported = TRUE;
-                        break;
-                    }
-                }
-                if(!$imported) echo "/* NOT FOUND: {$filename} */\n";
-            }
-        }
-    }
-//===============================================================================
-//    セクションレイアウト出力
-    private function SectionItemOutput($secArray,$secname,$doit) {
-        array_push($this->TmpStack,$this->TempSection,$this->Section,$this->IncludePath);         // 探索パスとセクション要素を退避
-        $sec = (is_array($secArray)) ? $secArray : array($secArray);
-        foreach($sec as $Akey => $val) {
-            $key = tag_body_name($Akey);
-            if($key == 'section') {                        // 別のセクションをインクルード
-                $secval = (is_array($val)) ? $val : array($val);    // 配列要素に統一
-                foreach($secval as $vsec) {
-                    if($vsec[0] == '@') {
-                        if(!DEBUGGER) continue;   // デバッグモードでなければスキップ
-                        $vsec = substr($vsec,1);
-                    }
-                    $force_parent = $vsec[0] == '^';
-                    if($force_parent) $vsec = substr($vsec,1);
-                    if(!$this->check_commentout($vsec)) {                           // コメント出力を許す
-                        $secmsg = (($vsec == $secname) || $force_parent) ? "parent::{$vsec}" : $vsec;
-                        if($this->do_msg) echo "/* subsection: {$secmsg} in {$secname} */\n";
-                        if((!$force_parent) && ($secname !== $vsec) && array_key_exists($vsec, $this->Section)) {  // 同じセクション名は上位を探索
-                            $this->SectionItemOutput($this->Section[$vsec],$vsec,TRUE);    // 同一テンプレート内の別のセクションを処理
-                        } else {
-                            if($force_parent) {     // ライブラリテンプレートにジャンプ
-                                foreach($this->TempSection as $key => $val) {
-                                    if($key !== 'Libs') unset($this->TempSection[$key]);     // Libs以外を削除
-                                }
-                            }
-                            $this->SectionStyleSet($this->TempSection, $vsec, TRUE);     // 上位テンプレートからセクション名を探索する
-                        }
-                    }
-                }
-            } else if(array_key_exists($key,self::ExtendCommand)) {     // 拡張コマンドに一致するか
-                $var = self::ExtendCommand[$key];               // プロパティ変数名の取得
-                $val = strtolower($val);                        // 設定値を取vり出す
-                $this->$var = self::BoolConst[$val];            // 指定プロパティ変数にセット
-            } else if($key == 'jquery' && $this->Filetype == 'js') {                 // JQuery関数をインクルード
-                echo "$(function() { ";
-                $this->import_files($val);
-                echo "});\n";
-            } else if($key == 'import') {                  // ファイルを読み込んでそのまま出力
-                $this->import_files($val);
-            } else if(is_numeric($key)) {          // 直接出力
-                if(!$this->check_commentout($val)) echo "{$val};\n";
-            } else if(is_array($val)) {
-                if(($key == $secname)) {
-                    if($this->do_msg) echo "/* section: {$secname} */\n";
-                    $this->SectionItemOutput($val,$secname,TRUE);
-                } else if($doit) {      // タグとして出力
-                    $this->dump_tag($key,$val);
-                }
-            } else {
-                echo "{$key} \"{$val}\";\n";
-            }
-        }
-        $this->IncludePath = array_pop($this->TmpStack);         // インクルードパスを回復
-        $this->Section = array_pop($this->TmpStack);         // セクション情報を回復
-        $this->TempSection = array_pop($this->TmpStack);         // 探索パスを回復
-    }
+
 
 }

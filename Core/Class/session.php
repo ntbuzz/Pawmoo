@@ -3,8 +3,9 @@
  * PHPフレームワーク
  * 	MySession:	セッション変数の管理
  */
-
+if($scheme === 'http' ) {
 session_start();
+}
 
 class MySession {
 
@@ -14,6 +15,8 @@ class MySession {
 //===============================================================================
 // static クラスにおける初期化処理
 static function InitSession() {
+	global $scheme; 
+	if($scheme !== 'http' ) return;
 	$ignoreId = array("PHPXSESSID","_minimvc_session");
 	self::$PostEnv = array();		// 配列を初期化
 	// セッションに保存した値を戻す
@@ -34,6 +37,8 @@ static function InitSession() {
 //===============================================================================
 // セッションに保存する
 static function CloseSession() {
+	global $scheme; 
+	if($scheme !== 'http' ) return;
 	foreach(self::$PostEnv as $key => $val) {
 		$_SESSION[$key] = $val;
 	}

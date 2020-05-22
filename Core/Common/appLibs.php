@@ -30,6 +30,9 @@ function getFrameworkParameter($dir) {
         $rootURI ="/{$appname}/";
         $fwroot = '/';
     }
+    // モジュール名はキャメルケースに変換
+    $modname = ucfirst(strtolower($modname));
+    $ret = [$fwroot,$rootURI,$appname,$modname,$args,$q_str];
     debug_dump(0, [
         'フレームワーク情報' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
@@ -40,10 +43,8 @@ function getFrameworkParameter($dir) {
             "query"=> $q_str,
             "args"=> $args,
         ],
+        "RET" => $ret,
     ]);
-    // モジュール名はキャメルケースに変換
-    $modname = ucfirst(strtolower($modname));
-    $ret = [$fwroot,$rootURI,$appname,$modname,$args,$q_str];
     return $ret;
 }
 //================================================
@@ -110,6 +111,13 @@ function tag_body_name($key) {
     return ($n !== FALSE) ? substr($key,0,$n) : $key;
 }
 //===============================================================================
+// 拡張子をとりだす
+// 返り値は .拡張子
+function extractExtension($fn) {
+    $nn = strrpos($fn,'.');                     // ファイル名の拡張子を確認
+    return ($nn === FALSE) ? '' :               // 拡張子が無いときに備える
+            substr($fn,$nn+1);  // 拡張子を分離
+}//===============================================================================
 // ファイルパスを分解する
 // 返り値は array(ファイル名,拡張子)
 function extractBaseName($fn) {
