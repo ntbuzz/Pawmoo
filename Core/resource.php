@@ -4,6 +4,7 @@
  *  resource:    CSS/JSファイルのリクエストを受付け、定義ファイルの情報に従いファイル結合したものを応答する
  * 
  */
+global $scheme;
 
 require_once('Class/session.php');
 
@@ -20,6 +21,10 @@ date_default_timezone_set('Asia/Tokyo');
 list($fwroot,$rootURI,$appname,$modname,$params,$q_str) = getFrameworkParameter(__DIR__);
 
 $appRoot = $rootURI;
+if(count($params) === 1) {  // アプリ直下のcss|js
+    array_unshift($params, strtolower($modname));
+    $modname = 'Res';
+}
 
 list($category,$filename) = $params;
 list($filename,$ext) = extractBaseName($filename);

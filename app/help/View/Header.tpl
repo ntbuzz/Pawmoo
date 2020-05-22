@@ -11,7 +11,7 @@ head => [
         [ http-equiv => "Content-Type",     content => "text/html; charset=UTF-8"  ]
     ]
     +include => [
-        images/favicon.ico
+        images/biscuit.ico
         /js/jquery-3.2.1.min.js
         /js/jquery-ui-1.12.1/jquery-ui.min.js
         /js/jquery-ui-1.12.1/jquery-ui.min.css
