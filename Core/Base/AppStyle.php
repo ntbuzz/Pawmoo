@@ -48,6 +48,19 @@ class AppStyle {
         '@comment' => 'do_com',         // コメント除去
         '@message' => 'do_msg',         // デバッグメッセージ設定
     ];
+    const FunctionList = array(
+        '@'    => [
+            'compact'   => 'cmd_cmpact',
+            'comment'   => 'cmd_comment',
+            'message'   => 'cmd_message',
+        ],
+        '+'    => [
+            'import'        => 'cmd_import',
+            'section'       => 'cmd_section',
+            'jquery'        => 'cmd_jquery',
+        ],
+        '*'             => 'cmd_comment',
+    );
     private $ModuleName;        // モジュール名 or Res
     private $Template;          // ContentList のテンプレート
     private $Folders;           // ファイル探索フォルダ
@@ -78,6 +91,7 @@ class AppStyle {
         }
         $myVARS = array(
             'appName' => $appname,
+            'moduleName' => $this->ModuleName,
             'filename' => $filename,
             'extension' => $ext,
         );
@@ -170,12 +184,58 @@ public function ViewStyle($filename) {
         }
         return FALSE;      // セクションが見つからなかったら実ファイルを探索する
     }
+//==============================================================================
+// key 文字列を元に処理関数へディスパッチする
+// key => sec (vars)
+    private function section_dispath($key,$sec,$vars) {
+        $sec = $this->expandSectionVar($sec,$vars);
+        $num_key = is_numeric($key);
+        if($num_key) {
+            if(is_array($sec)) {
+                $this->section_analyze($sec,$vars);
+                return;
+            }
+            $key = $sec;
+            $sec = [];
+        }
+        // 重複回避用の文字を削除
+        $key = tag_body_name($key);
+
+        $top_char = $key[0];
+        if(array_key_exists($top_char,self::FunctionList)) {
+            $kkey = mb_substr($key,1);      // 先頭文字を削除
+            $func = self::FunctionList[$top_char];
+            // + コマンドには属性が付いている
+            list($tag,$text,$attrs,$subsec) = $this->tag_attr_sec($kkey,$sec);
+            if(is_array($func)) {       // サブコマンドテーブル
+                $cmd = $func[$tag];
+                if(array_key_exists($tag,$func) && (method_exists($this, $cmd))) {
+                    $this->$cmd($tag,$attrs,$sec,$vars);
+                } else echo "***NOT FOUND({$cmd}): {$cmd}({$tag},\$attrs,\$sec,\$vars)\n";
+            } else if(method_exists($this, $func)) {
+                $this->$func($kkey,$sec,$vars);
+            } else echo "CALL: {$func}({$kkey},{$sec},vars)\n";
+        } else {
+    debug_dump(0,"ANALYZ:'{$key}'");
+            list($tag,$text,$attrs,$subsec) = $this->tag_attr_sec($key,$sec);
+            $attr = $this->gen_attrs($attrs);
+    debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"sec" => $subsec]);
+            if(is_array($sec)) {
+                echo "<{$tag}{$attr}>{$text}\n";
+                $this->section_analyze($subsec,$vars);
+                echo "</{$tag}>\n";
+            } else {
+                echo "<{$tag}{$attr}>{$text}</tag>\n";
+            }
+        }
+    }
 //===============================================================================
 //    コメント出力かチェック
 //      TRUE: コメント出力した
 //      FALSE: 未出力
     private function check_commentout($vv) {
         if($vv[0] == '*') {
+            $vv = $this->expandStrings($vv,$this->repVARS);
             $vv = trim(substr($vv,1));
             echo "/* {$vv} */\n";
             return TRUE;
