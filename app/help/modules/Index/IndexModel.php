@@ -39,14 +39,14 @@ function MakeOutline() {
     // Part レコードを取得
     $this->RecordFinder([],[],'disp_id');
     foreach($this->Records as $columns) {
-        $outline[$columns['id']] = $columns['title'];
+        $outline[$columns['id']] = [ $columns['title'],$columns['contents']];
         $this->PartSelect[] = array($columns['id'],$columns['title']);
     };
     // Chapter リストを取得する
     $this->outline = array();
     foreach($outline as $key => $columns) {
-        $this->Chapter->RecordFinder(['part_id' => $key],['id','title'],'disp_id');
-        $this->outline[$key] = ['title' => $columns, 'child' => $this->Chapter->Records];
+        $this->Chapter->RecordFinder(['part_id' => $key],['id','title','contents'],'disp_id');
+        $this->outline[$key] = ['title' => $columns[0], 'contents' => $columns[1],'child' => $this->Chapter->Records];
     }
 }
 //===============================================================================
