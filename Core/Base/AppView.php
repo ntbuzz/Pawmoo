@@ -130,6 +130,8 @@ public function ViewTemplate($name,$vars = []) {
             echo $this->expandStrings($content, $vars);
             break;
         }
+    } else {
+        exit;
     }
 }
 //==============================================================================
@@ -193,9 +195,10 @@ public function ViewTemplate($name,$vars = []) {
             if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
             $values = $varList = array_unique($varList);
             array_walk($values, array($this, 'expand_walk'), $vars);
-    debug_dump(0,["REPLACE" => [ 'VAR' => $varList, 'VALUE' => $values]]);
+debug_dump(0,["REPLACE" => [ 'VAR' => $varList, 'VALUE' => $values]]);
             // 配列が返ることもある
             $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
+debug_dump(0,["STR" => [ 'STR' => $str, 'expands' => $exvar]]);
             return $exvar;
     }
 //==============================================================================
@@ -266,20 +269,21 @@ public function ViewTemplate($name,$vars = []) {
     private function section_dispath($key,$sec,$vars) {
         $sec = $this->expandSectionVar($sec,$vars);
         $num_key = is_numeric($key);
-        if($num_key) {
+        if($num_key) {  // 連想キーでなければ値を解析する
             if(is_array($sec)) {
                 $this->section_analyze($sec,$vars);
                 return;
             }
-            $key = $sec;
-            $sec = [];
+            $key = $sec; $sec = [];
+        } else { // キー名重複回避用の文字を削除
+            $key = tag_body_name($key);
         }
-        // 重複回避用の文字を削除
-        $key = tag_body_name($key);
-
         $top_char = $key[0];
         if(array_key_exists($top_char,self::FunctionList)) {
             $kkey = mb_substr($key,1);      // 先頭文字を削除
+            if($top_char === $kkey[0]) {    // コマンド文字が2個続いたら文字列出力
+                echo $kkey; return;
+            }
             $func = self::FunctionList[$top_char];
             // + コマンドには属性が付いている
             list($tag,$text,$attrs,$subsec) = $this->tag_attr_sec($kkey,$sec);
@@ -292,7 +296,6 @@ public function ViewTemplate($name,$vars = []) {
                 $this->$func($kkey,$sec,$vars);
             } else echo "CALL: {$func}({$kkey},{$sec},vars)\n";
         } else {
-debug_dump(0,"ANALYZ:'{$key}'");
             list($tag,$text,$attrs,$subsec) = $this->tag_attr_sec($key,$sec);
             $attr = $this->gen_attrs($attrs);
 debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"sec" => $subsec]);
@@ -301,7 +304,7 @@ debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"
                 $this->section_analyze($subsec,$vars);
                 echo "</{$tag}>\n";
             } else {
-                echo "<{$tag}{$attr}>{$text}</tag>\n";
+                echo "<{$tag}{$attr}>{$text}</{$tag}>\n";
             }
         }
     }

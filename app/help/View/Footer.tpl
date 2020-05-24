@@ -11,11 +11,13 @@ h3 => [ Biscuit(MAP) ]
 p => [ ~ Biscuit(MAP) is PHP wild-framwork. :-) ~ ]
   <hr><br>
   pre => [ ~
-  @copyright  Copyright (c) 2017 - 2020 by nTak
-  @license    MIT
-  @version 0.10.0, 2020-05-15
-  System Require: PHP 5.6 or Higher
-  ~ ]
+@@Copyright (c) 2017 - 2020 by nTak
+@license    MIT
+@version 0.11.0, 2020-05-255
+@System Require: PHP 5.6 or Higher
+importと間違えないように先頭の＠は二個つける
+出力するときには先頭の1個は削除される
+ ~  ]
 ]
 
 // #popup-dialog のマウスオーバーバルーンヘルプ
