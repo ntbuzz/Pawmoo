@@ -41,7 +41,9 @@ $text = <<<'EOS'
 .context-menu li.separate {
 	color:silver;
 	margin:0;
-	padding:0;
+    padding:0;
+    height:3px;
+    border-top: 1px solid gray;
 }
 ==============================-
     javascript

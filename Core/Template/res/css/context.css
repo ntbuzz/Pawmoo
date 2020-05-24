@@ -32,4 +32,6 @@
 	color:silver;
 	margin:0;
 	padding:0;
+	height:1px;
+    border-top: 1px solid gray;
 }

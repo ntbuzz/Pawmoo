@@ -8,9 +8,9 @@
 	#ctxEdit => [ ${#.Popup.Para-Edit} ]
 	#ctxIns  => [ ${#.Popup.Para-Ins} ]
 	#ctxAdd  => [ ${#.Popup.Para-Add} ]
-	.separate => [ <hr> ]
+	.separate => [ ]
 	#ctxCopy1 => [ ${#.Popup.Copy} ]
-	[ <hr> ]
+	.separate => [ ]
 	#ctxDel => [ ${#.Popup.Para-Delete} ]
 ]
 //=========================================
