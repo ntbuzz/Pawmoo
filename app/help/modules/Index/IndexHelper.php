@@ -81,7 +81,8 @@ public function SectionContents() {
             echo "<div class='section' id='$sec[id]' data-disp='$sec[disp_id]' data-parent='$sec[chapter_id]' value='$sec[short_title]'>";
             echo "<h2 class='title'>$sec[title]</h2>\n";
             if(isset($sec['contents'])) {
-                $contents = nl2br(auto_hyperlink($sec[contents]));
+                $contents = auto_hyperlink($sec[contents]);
+                if(mb_strpos($contents,'<pre>')===FALSE) $contents = nl2br($contents);
                 echo "<div class='description'>$contents</div>\n";
             }
             echo "<hr>\n";
@@ -91,7 +92,7 @@ public function SectionContents() {
                     echo "<h3 class='caption'>$val[title]</h3>\n";
                 }
                 $contents = auto_hyperlink($val[$this->_('Paragraph.Schema.contents')]);
-                if(mb_substr($contents,0,5) !== '<pre>') $contents = nl2br($contents);
+                if(mb_strpos($contents,'<pre>')===FALSE) $contents = nl2br($contents);
                 echo "<div class='data'>$contents</div>";
                 echo "</div>\n";
             }

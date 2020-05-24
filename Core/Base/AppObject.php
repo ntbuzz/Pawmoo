@@ -74,7 +74,7 @@ class AppObject {
 //==================================================================================================
 // クラスの動的クラスプロパティを生成
 public function __get($PropName) {
-    if($autoload === FALSE) return;
+    if($autoload === FALSE) return NULL;
     $fldr = array(
         'Controller'=> [],
         'Helper'    => ["modules/{$PropName}"],
