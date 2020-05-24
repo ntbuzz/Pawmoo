@@ -550,6 +550,7 @@
     SetData($data)                      // ヘルパープロパティ変数のセット
     Resource ($res)             // リソースの出力
     ALink ($lnk,$txt)           // ハイパーリンクの生成, 言語IDを参照するには$txtを＃文字で始める
+                                // $lnk を / で始めるとフレームワークのTOP、:で始めるとサイトのTOPへリンクする
     makePageLinks()             // ページング用のリンクボタンを生成する
     makeListTable ($deftab)     // ヘッダー付きのテーブルリスト表示、$deftabにはパラメータ
                                 // $deftab['category'] = テーブルクラス
