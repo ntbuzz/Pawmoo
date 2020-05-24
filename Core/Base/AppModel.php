@@ -38,6 +38,7 @@ class AppModel extends AppObject {
         APPDEBUG::MSG(12,$DatabaseSchema);
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
         $this->__InitClass();                             // クラス固有の初期化メソッド
+        $this->autoload = TRUE;
 	}
 //==================================================================================================
 //	デバッグ用に空のレコードを生成
@@ -89,9 +90,9 @@ class AppModel extends AppObject {
     }
 //==================================================================================================
 // 参照先のモデルクラスをダイナミック生成するマジックメソッド
-    function __get($SubModelName){
-        return parent::loadModels($SubModelName);
-    }
+//    function __get($SubModelName){
+//        return parent::loadModels($SubModelName);
+//    }
 //==================================================================================================
 // ページング設定
 public function SetPage($pagesize,$pagenum) {

@@ -15,6 +15,7 @@ $(function() {
 		$(this).addClass('selected');
 		$(".contents-view").scrollTop(0);
 	});
+	$('.fixedsticky').stickyOn('.contents-view');
 });
 <?php $Helper->Part_Chapter_Data(); ?>
 

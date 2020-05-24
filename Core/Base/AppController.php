@@ -45,9 +45,9 @@ class AppController extends AppObject {
 	}
 ///==================================================================================================
 // 参照先のモデルクラスをダイナミック生成するマジックメソッド
-	function __get($SubModelName){
-		return parent::loadModels($SubModelName);
-	}
+//	function __get($SubModelName){
+//		return parent::loadModels($SubModelName);
+//	}
 //===============================================================================
 // フィルタ指定の有無を判定
 public function getFilter($default = 'all') {

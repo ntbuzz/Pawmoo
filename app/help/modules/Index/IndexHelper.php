@@ -31,7 +31,6 @@ public function Part_Chapter_Data() {
     APPDEBUG::arraydump(3, [
         'パート' => $this->PartData,
         'チャプタ' => $this->ChapterData,
-        'セクション' => $this->Section,
     ]);    
     echo "var PartData = {\n";
     foreach($this->PartData as $key => $val) {
@@ -73,8 +72,8 @@ public function SectionTab() {
 //===============================================================================
 // セクションのコンテンツをリスト表示する
 public function SectionContents() {
-    echo "<ul class='content'>\n";
-    if(!empty($this->Section)) {
+    if($this->PartData !== []) {
+        echo "<ul class='content'>\n";
         $n = 0;
         foreach($this->Section as $key => $sec) {
             $sel = ($this->Tabmenu == $n++) ? '' : ' class="hide"';
@@ -83,6 +82,7 @@ public function SectionContents() {
             echo "<h2 class='title'>$sec[title]</h2>\n";
             if(isset($sec['contents'])) {
                 $contents = auto_hyperlink($sec[contents]);
+                if(mb_strpos($contents,'<pre>')===FALSE) $contents = nl2br($contents);
                 echo "<div class='description'>$contents</div>\n";
             }
             echo "<hr>\n";
@@ -92,14 +92,15 @@ public function SectionContents() {
                     echo "<h3 class='caption'>$val[title]</h3>\n";
                 }
                 $contents = auto_hyperlink($val[$this->_('Paragraph.Schema.contents')]);
+                if(mb_strpos($contents,'<pre>')===FALSE) $contents = nl2br($contents);
                 echo "<div class='data'>$contents</div>";
                 echo "</div>\n";
             }
             echo "</div>\n";
             echo "</li>\n";
         }
-    }
-    echo "</ul>\n";
+        echo "</ul>\n";
+    } else $this->DocIndex();
 }
 //===============================================================================
 // セレクトリストをjavascript配列へ
@@ -141,7 +142,7 @@ public function makeOutlineText($outline,$indent) {
         $data = str_replace(['<br>','<pre>','</pre>'],'',$val['contents']);
         $data = str_replace("\n","\n  ",$data);
         if(!empty($val[title])) {
-            $data = "${spc}{$val[title]}\n{$data}";
+            $data = "${spc} {$val[title]}\n{$data}";
         }
         $body .= "{$data}\n\n";
         if(array_key_exists('child',$val)) {
@@ -149,6 +150,28 @@ public function makeOutlineText($outline,$indent) {
         }
     }
     return $body;
+}
+//===============================================================================
+// ヘッダー付きのテーブルリスト表示
+public function DocIndex() {
+    debug_dump(0,[ "アウトライン" => $this->MyModel->outline]);
+    echo "<h1>■　目次</h1>\n<hr>\n";
+    echo "<DL class='index'>\n";
+    foreach($this->MyModel->outline as $key => $chapter) {
+        echo "<DT>■ {$chapter[title]}</DT>\n";
+        $contents = nl2br($chapter['contents']);
+        echo "<DD>{$contents}\n";
+        echo "<ol>\n";
+        foreach($chapter['child'] as $kk => $val) {
+            echo "<li>";
+            $this->ALink("index/view/{$key}/{$val[id]}",$val['title']);
+            $contents = nl2br($val['contents']);
+            echo "<p>{$contents}</p>\n";
+            echo "</li>";
+        }
+        echo "</ol></DD>\n";
+    }
+    echo "</DL>\n";
 }
 
 }

@@ -26,6 +26,6 @@ class customHelper  extends AppHelper {
 			$this->$PropName = new $props();
 			return $this->$PropName;
 		}
-		throw new Exception("Dynamic Subclass Create Error for '{$props}'");
+		parent::__get($PropName);
     }
 }

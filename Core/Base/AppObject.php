@@ -11,6 +11,7 @@ class AppObject {
     protected $ModuleName;  // オブジェクトの名前
     protected $ClassName;   // クラス名
     protected $LocalePrefix;    // 言語プレフィクス
+    protected $autoload = FALSE;
 
 //==================================================================================================
 //	コンストラクタ：　テーブル名
@@ -71,21 +72,51 @@ class AppObject {
         }
     }
 //==================================================================================================
-// 動的クラスプロパティを生成
-// すでにロード済みの場合
-    protected function addSubclass($PropName) {
-        APPDEBUG::MSG(10, $PropName . " を動的生成します。");
-        if(isset($this->$PropName)) return $this->$PropName;
-        // Model or View or Helper or Controller を付加する
-        $props = $PropName . $this->ClassType;
+// クラスの動的クラスプロパティを生成
+public function __get($PropName) {
+    if($autoload === FALSE) return NULL;
+    $fldr = array(
+        'Controller'=> [],
+        'Helper'    => ["modules/{$PropName}"],
+        'Model'     => ["Models","modules/{$PropName}"],
+    );
+    APPDEBUG::MSG(10, $PropName . " を動的生成します。");
+    if(isset($this->$PropName)) return $this->$PropName;
+    // Model or View or Helper or Controller を付加する
+    preg_match('/[A-Z][a-z]+?$/', $PropName, $matches);
+    $class = $matches[0];
+    if(!array_key_exists($class,$fldr)) $class = 'Model';
+    $props = "{$PropName}{$class}";
+    // ロード済か確認
+    if(class_exists($props)) {
+        $this->$PropName = new $props($this);
+        return $this->$PropName;
+    }
+    if($class === 'Controller') {
+        // Controllerの場合はセットでロードする
+        App::appController($PropName);
+        // ロードできたか確かめる
         if(class_exists($props)) {
             $this->$PropName = new $props($this);
-    	    return $this->$PropName;
+            return $this->$PropName;
         }
-		throw new Exception("SubClass Create Error for '{$props}'");
+    } else {
+        // Models, modules フォルダにファイルがあればロードする
+        foreach($fldr[$class] as $model) {
+            $modfile = App::AppPath("{$model}/{$props}.php");
+            if(file_exists($modfile)) {
+                require_once($modfile);
+                $this->$PropName = new $props($this);
+                return $this->$PropName;
+            }
+        }
     }
+    // 見つからなかった
+    throw new Exception("SubClass Create Error for '{$props}'");
+}
 //==================================================================================================
 // モデルクラスの動的ロード
+/*
     protected function loadModels($PropName) {
         if(isset($this->$PropName)) return $this->$PropName;
         // Model or View or Helper or Controller を付加する
@@ -107,6 +138,7 @@ class AppObject {
         // 見つからなかった
         throw new Exception("SubClass Create Error for '{$props}'");
 }
+*/
 //===============================================================================
 // 言語リソース値を取り出す
 // allow_array が TRUE なら値が配列になるものを許可する

@@ -92,7 +92,8 @@ class APPDEBUG {
     // メッセージ登録
     private static function db_echo($lvl,$msg,$is_safe = FALSE) {
         if(empty($msg)) return;
-        if($is_safe) $msg = htmlspecialchars($msg);
+//echo "MSG = '{$msg}'\n";
+        if($is_safe && $msg !== '') $msg = htmlspecialchars($msg);
         if($lvl < 0) {
             echo $msg;
         } else if($lvl < self::$MsgLevel) {
@@ -158,8 +159,10 @@ class APPDEBUG {
                 self::db_echo($level, gettype($val) . "\n",TRUE);
             }
             }
-        } else {    // スカラー出力
+        } else if(is_scalar($obj)) {    // スカラー出力
             self::db_echo($level, $obj,TRUE);
+        } else {
+            self::db_echo($level, 'UNKNOW $obj',TRUE);
         }
     }
 }

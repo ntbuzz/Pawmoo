@@ -13,6 +13,7 @@ Stylesheet => [
             tabmenu.css
             table-sort.css
             dialog-form.css
+            mystyle.css
         ]
         +section => ^common       // 上位のセクションを呼出す
     ]

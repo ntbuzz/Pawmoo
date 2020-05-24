@@ -1,0 +1,18 @@
+.index {
+    padding-left:1em;
+    margin-bottom:50px;
+}
+.index a {
+    font-weight:bold;
+    text-decoration: underline;
+}
+.index DT {
+    font-weight:bold;
+    padding-left:2em;    
+}
+.index DD {
+    padding-left:3.5em;
+}
+.index DD OL {
+    padding-left:0.8em;   
+}

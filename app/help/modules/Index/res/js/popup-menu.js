@@ -13,9 +13,9 @@ var popup_menu_function = {
             $("#paragraph_dialog").floatWindow("段落を編集",para_obj, function (e) {
                 e["TabSelect"] = $('.tabmenu .tab li.selected').index();
                 var url = location.pathname.controller_path("paragraph/update") + e["id"];
-                alert("段落編集\n"+url+"\n"+objDump(e));
+//                alert("段落編集\n"+url+"\n"+objDump(e));
                 $.post(url, e, function (data) { //リクエストが成功した際に実行する関数
-                    alert(data);
+//                    alert(data);
                     location.href = data ;
                 }).fail(function() {
                     alert( "error:"+url );
