@@ -35,13 +35,13 @@ public function Part_Chapter_Data() {
     ]);    
     echo "var PartData = {\n";
     foreach($this->PartData as $key => $val) {
-        $vv = replace_newline($val);
+        $vv = json_escape($val);
         echo "\t{$key}: \"{$vv}\",\n";
     }
     echo "};\n";
     echo "var ChapterData = {\n";
     foreach($this->ChapterData as $key => $val) {
-        $vv = replace_newline($val);
+        $vv = json_escape($val);
         echo "\t{$key}: \"{$vv}\",\n";
     }
     echo "};\n";

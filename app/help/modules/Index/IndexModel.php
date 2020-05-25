@@ -20,7 +20,7 @@ class IndexModel extends AppModel {
         'PostRenames' => [
         ]
     ];
-    public $outlone;            // アウトライン配列 $outlien[SECTION-ID][ITEM-ID][PAGE-ID] = CATEGORY-ID
+    public $outline;            // アウトライン配列 $outlien[SECTION-ID][ITEM-ID][PAGE-ID] = CATEGORY-ID
     public $PartSelect;
 //===============================================================================
 // モジュールクラスではコンストラクタを定義しない

@@ -8,6 +8,7 @@ var popup_menu_function = {
     "ctxEdit": function (obj) {
         // JSONメソッドを使ってレコードデータを入手する
         var url = location.origin + location.pathname.controller_path("paragraph/json") + obj.attr("id");
+//        alert(url);
         $.getJSON(url, function (para_obj) {
             // フォームにパラメータをセットし、完了時の処理関数を登録する
             $("#paragraph_dialog").floatWindow("段落を編集",para_obj, function (e) {
@@ -23,9 +24,9 @@ var popup_menu_function = {
                 return false;
             });
         }).fail(function (jqXHR, textStatus, errorThrown) {
-//            console.log("jqXHR:"+jqXHR.status);
-//            console.log("status:"+textStatus);
-//            console.log("error:"+errorThrown);
+            console.log("jqXHR:"+jqXHR.status);
+            console.log("status:"+textStatus);
+            console.log("error:"+errorThrown);
         });
     },
     "ctxIns": function (obj) {

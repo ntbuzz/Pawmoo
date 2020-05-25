@@ -90,7 +90,8 @@ public function __TerminateView() {
         // リクエストURLと処理メソッドが違っていたとき
         $req = App::$SysVAR['METHOD'];
         $act = App::$SysVAR['CONTROLLER']."/". App::$SysVAR['method'];
-        if($req !== $act) {
+        // リクエストURIと処理URIが違っている場合、かつコントローラーがアプリ名に一致しない
+        if($req !== $act && (strcasecmp(App::$AppName,App::$ActionClass) !== 0)) {
             APPDEBUG::MSG(1,$act, "URL書換");
             $url = "{$act}/" . App::$SysVAR['PARAMS'];
             echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";

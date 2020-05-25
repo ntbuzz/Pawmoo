@@ -1,0 +1,27 @@
+.index {
+    padding-left:1em;
+    margin-bottom:50px;
+}
+.index a {
+    font-weight:bold;
+    text-decoration: underline;
+}
+.index DT {
+    font-weight:bold;
+    padding-left:2em;    
+}
+.index DD {
+    padding-left:3.5em;
+}
+.index DD OL {
+    padding-left:0.8em;   
+}
+/* プルダウンメニューを無効表示 */
+.subitem#part_edit,
+.subitem#part_add,
+.subitem#part_del,
+.subitem#chap_edit,
+.subitem#chap_add,
+.subitem#chap_del {
+    color:silver;
+}

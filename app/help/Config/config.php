@@ -10,7 +10,7 @@ define("VIEWFILE",0);
 define("POSTFILE",1);
 define("DRAGFILE",2);
 
-define('DEFAULT_CONTROLLER', 'index');
+define('DEFAULT_CONTROLLER', 'help');
 define('DEFAULT_LANG', 'ja');				// 言語ファイル
 
 const DatabaseParameter  = [
