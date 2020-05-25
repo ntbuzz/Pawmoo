@@ -41,7 +41,7 @@ public function JsonAction() {
 	$this->Model->getRecordValue($num);	// リレーションIDを解決したデータ
 	$json ="{";
 	foreach($this->Model->fields as $key => $val) {
-		$vv = replace_newline($val);
+		$vv = json_escape($val);
 		$json .= "\"{$key}\": \"{$vv}\",";
 	}
 //	echo "}\n";

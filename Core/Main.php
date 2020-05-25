@@ -41,6 +41,14 @@ if(!file_exists("app/$appname")) {
 // ここでは App クラスの準備ができていないので直接フォルダ指定する
 require_once("app/{$appname}/Config/config.php");
 
+// コントローラーが指定なければアプリ名を代用する
+if($controller === '') $controller = ucfirst(strtolower($appname));
+// コントローラーファイルが存在するか確認する
+if(!is_extst_module($appname,$controller,'Controller')) {
+    $controller = ucfirst(strtolower(DEFAULT_CONTROLLER));     // 指定がなければ 
+    $redirect = true;
+}
+
 $action = array_shift($params);         // パラメータ先頭はメソッドアクション
 if(is_numeric($action) ) {              // アクション名が数値ならパラメータに戻す
     array_unshift($params, $action);
@@ -49,11 +57,6 @@ if(is_numeric($action) ) {              // アクション名が数値ならパ�
 }
 // アクションのキャメルケース化とURIの再構築
 $action = ucfirst(strtolower($action));
-// コントローラーファイルが存在するか確認する
-if(!is_extst_module($appname,$controller,'Controller')) {
-    $controller = ucfirst(strtolower(DEFAULT_CONTROLLER));     // 指定がなければ 
-    $redirect = true;
-}
 // URLを再構成する
 $ReqCont = [
     'root' => $rootURI,
@@ -61,9 +64,8 @@ $ReqCont = [
     'action' => strtolower($action ),
     'query' => implode('/',$params)
 ];
-// コントローラー、アクションのキャメルケース化とURIの再構築
-$requrl = str_replace('//','/',implode('/',$ReqCont));
-// フレームワーク直接
+// コントローラがアプリ名ならコントローラー以降を省略、それ以外はURIを再構築
+$requrl = (strcasecmp($appname,$controller) === 0) ? "/{$appname}/" : str_replace('//','/',implode('/',$ReqCont));
 // コントローラ名やアクション名が書き換えられてリダイレクトが必要なら終了
 if($redirect) {
     debug_dump(0, [

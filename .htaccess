@@ -4,7 +4,7 @@ RewriteEngine On
 RewriteBase /biscuit/
 
 # 外部ライブラリ
-RewriteRule ^(css|js)/(.*)$       common/$1/$2 [END]
+RewriteRule ^(css|js)/(.*)$       vendor/webroot/$1/$2 [END]
 
 # テンプレートリソース(CSS/画像ファイル)
 RewriteRule ^.*/css/res/img/(.*)$ Core/Template/cssimg/$1 [END]

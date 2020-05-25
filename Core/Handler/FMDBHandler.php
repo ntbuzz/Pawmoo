@@ -2,7 +2,7 @@
 //require_once('app/Config/config.php');
 
 // FileMaker.phpの読み込み
-require_once('vendor/FileMaker.php');
+require_once('vendor/vendor/FileMaker.php');
 
 class FMDBHandler extends FileMaker {
 	private static $FMHandle;			// FileMaker API ハンドル
