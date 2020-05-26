@@ -208,7 +208,7 @@ public function AddRecord($row) {
         if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
     }
     unset($this->fields[$this->Primary]);
-    APPDEBUG::MSG(12, $row);
+    APPDEBUG::MSG(12, $this->fields);
     $this->dbDriver->insertRecord($this->fields);
 }
 //==================================================================================================
