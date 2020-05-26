@@ -8,7 +8,7 @@ if($on_server) {
 }
 
 class MySession {
-
+	const SESSION_NAME = "_minimvc_biscuit";	// セッションに保存するキー
 //	public $Post;
 	public static $PostEnv;
 
@@ -17,9 +17,8 @@ class MySession {
 static function InitSession() {
 	global $on_server; 
 	if($on_server === '' ) return;
-	$ignoreId = array("PHPXSESSID","_minimvc_session");
 	self::$PostEnv = array();		// 配列を初期化
-	$my_session_data = $_SESSION["_minimvc_biscuit"];
+	$my_session_data = $_SESSION[self::SESSION_NAME];
 	// セッションに保存した値を戻す
 	if(isset($my_session_data)) {
 		foreach($my_session_data as $key => $val) {
@@ -29,13 +28,6 @@ static function InitSession() {
 		}
 	
 	}
-/*
-	foreach($_SESSION as $key => $val) {
-		if(! in_array($key,$ignoreId)) {
-			self::$PostEnv[$key] = $val;
-		}
-	}
-*/
 	// POST/GET されてきた変数を取り出しセットする(SESSION値は上書き)
 	foreach($_REQUEST as $key => $val) {
 		if($val == "on") $val = 1; elseif($val==="off") $val = 0;
@@ -50,12 +42,7 @@ static function InitSession() {
 static function CloseSession() {
 	global $on_server; 
 	if($on_server === '' ) return;
-	$_SESSION["_minimvc_biscuit"] = self::$PostEnv;
-/*
-	foreach(self::$PostEnv as $key => $val) {
-		$_SESSION[$key] = $val;
-	}
-*/
+	$_SESSION[self::SESSION_NAME] = self::$PostEnv;
 }
 //===============================================================================
 // POST変数を取り出す
@@ -77,6 +64,7 @@ static function SetVars($nm,$val) {
 	self::$PostEnv[$nm] = $val;
 }
 //===============================================================================
+// デバッグ用ダンプ
 static function Dump() {
 	print "<pre>\n";
 	print "SESSION\n";
@@ -85,69 +73,5 @@ static function Dump() {
 	print_r(self::$PostEnv);
 	print "</pre>\n";
 }
-/*
-//===============================================================================
-// コンストラクタでセッション接続
-// 日付変換 gmdate('Y-m-d',($this->EntDate - 25569) * 60 * 60 *24);
-	function __construct(){
-		$ignoreId = array("PHPXSESSID","_minimvc_session");
-		foreach($_REQUEST as $key => $val) {
-			if($val == "on") $val = 1; elseif($val==="off") $val = 0;
-			$this->$key = $val;
-			if(! in_array($key,$ignoreId)) {
-				$_SESSION[$key] = $val;
-			}
-		}
-		unset($this->Post);
-		foreach($_POST as $key => $val) {
-			$this->Post[$key] = $val;
-		}
-		if(!isset($this->Post['cc'])) $this->Post['cc'] = '';		// 一時的
-		// 共通環境
-		if(!isset($this->Env['LAYOUT'])) $this->Setup['LAYOUT'] = 'Layout.tpl';
-	}
-//===============================================================================
-// デストラクタでセッション切断
-	function __destruct() {
-	//	$_SESSION['DEBUGGING'] = App::$DebugMessage;
-	//	$this->Dump();
-	}
-//===============================================================================
-	function setPostValue($key,$val='') {
-		if(isset($this->Post[$key]) && ($this->Post[$key] !== '')) return;
-		$this->Post[$key] = $val;
-		// セッション変数にポスト変数のキーがあれば書き換える
-		if(isset($_SESSION[$key])) $this->Post[$key] = $_SESSION[$key];
-	}
-//===============================================================================
-	function getValue($nm) {
-		return $_SESSION["db_".$nm];
-	}
-//===============================================================================
-	function unsetValue($nm) {
-		unset($_SESSION["db_".$nm]);
-	}
-//===============================================================================
-	function ClearSession() {
-		session_unset();
-	}
-//===============================================================================
-	function EndSession() {
-		$_SESSION = array();
-		session_unset();
-		session_destroy();
-	}
-//===============================================================================
-// セッション変数のチェック
-	function IsChecked($env,$nm) {
-		$str = explode(",", $_SESSION["db_".$env]);
-		foreach($str as $val) {
-			if($val == $nm ) {
-				return " checked";
-			}
-		}
-		return "";
-	}
-*/
 
 }

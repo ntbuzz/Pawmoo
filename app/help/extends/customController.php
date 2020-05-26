@@ -2,7 +2,7 @@
 
 class cutomController extends AppController {
 	public $defaultAction = 'List';		//  デフォルトのアクション
-	public $disableAction = [ 'Page', 'Find' ];	// 無視するアクション
+	public $disableAction = [ 'Page', 'Find','Makepdf','Dump' ];	// 無視するアクション
 
 //===============================================================================
 // モジュールクラスではコンストラクタを定義しない
