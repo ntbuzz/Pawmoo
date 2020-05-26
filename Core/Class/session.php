@@ -22,9 +22,7 @@ static function InitSession() {
 	// セッションに保存した値を戻す
 	if(isset($my_session_data)) {
 		foreach($my_session_data as $key => $val) {
-			if(! in_array($key,$ignoreId)) {
-				self::$PostEnv[$key] = $val;
-			}
+			self::$PostEnv[$key] = $val;
 		}
 	
 	}
