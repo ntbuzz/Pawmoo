@@ -163,6 +163,9 @@ APPDEBUG::debug_dump(1, [
 ]);
 // セッション変数を初期化
 MySession::InitSession();
+APPDEBUG::arraydump(1, [
+    "Initセッション" => MySession::$PostEnv,
+]);
 APPDEBUG::RUN_START();
 
 $controllerInstance->$method();
@@ -171,7 +174,7 @@ APPDEBUG::RUN_FINISH(0);
 // リクエスト情報を記憶
 MySession::SetVars('sysVAR',App::$SysVAR);
 APPDEBUG::arraydump(1, [
-    "クローズセッション" => MySession::$PostEnv,
+    "Closeセッション" => MySession::$PostEnv,
 ]);
 // クローズメソッドを呼び出して終了
 $controllerInstance->__TerminateApp();
