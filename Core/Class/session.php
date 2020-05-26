@@ -19,12 +19,23 @@ static function InitSession() {
 	if($on_server === '' ) return;
 	$ignoreId = array("PHPXSESSID","_minimvc_session");
 	self::$PostEnv = array();		// 配列を初期化
+	$my_session_data = $_SESSION["_minimvc_biscuit"];
 	// セッションに保存した値を戻す
+	if(isset($my_session_data)) {
+		foreach($my_session_data as $key => $val) {
+			if(! in_array($key,$ignoreId)) {
+				self::$PostEnv[$key] = $val;
+			}
+		}
+	
+	}
+/*
 	foreach($_SESSION as $key => $val) {
 		if(! in_array($key,$ignoreId)) {
 			self::$PostEnv[$key] = $val;
 		}
 	}
+*/
 	// POST/GET されてきた変数を取り出しセットする(SESSION値は上書き)
 	foreach($_REQUEST as $key => $val) {
 		if($val == "on") $val = 1; elseif($val==="off") $val = 0;
@@ -39,9 +50,12 @@ static function InitSession() {
 static function CloseSession() {
 	global $on_server; 
 	if($on_server === '' ) return;
+	$_SESSION["_minimvc_biscuit"] = self::$PostEnv;
+/*
 	foreach(self::$PostEnv as $key => $val) {
 		$_SESSION[$key] = $val;
 	}
+*/
 }
 //===============================================================================
 // POST変数を取り出す
