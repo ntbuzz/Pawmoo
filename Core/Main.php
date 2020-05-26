@@ -65,7 +65,7 @@ $ReqCont = [
     'query' => implode('/',$params)
 ];
 // コントローラがアプリ名ならコントローラー以降を省略、それ以外はURIを再構築
-$requrl = (strcasecmp($appname,$controller) === 0) ? "/{$appname}/" : str_replace('//','/',implode('/',$ReqCont));
+$requrl = (strcasecmp($appname,$controller) === 0) ? "/{$appname}/" : array_to_URI($ReqCont);
 // コントローラ名やアクション名が書き換えられてリダイレクトが必要なら終了
 if($redirect) {
     debug_dump(0, [
