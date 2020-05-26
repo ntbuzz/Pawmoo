@@ -30,7 +30,10 @@ class App {
         parse_str($q_str, $query);
 
         $uri_array = explode('/',$uri);     // decode パス補正は上位で処理済み
-        $uri_array += ['','',''];           // コントローラー以降が省略された場合に備える
+        // $uri_array: 0 = '' , 1 = アプリ名, 2 = コントローラ名, 3 = メソッド名, 4... パラメータ
+        if(empty($uri_array[2])) { // コントローラが省略
+            $uri_array[3] = '';     // メソッドを補填
+        }
         // 先頭と最後に '/ ' があるので空要素がある前提
         if(!empty($uri_array[4])) {
             $n = is_numeric($uri_array[4]) ? 3 : 4;         // 4番目の要素(フィルタ)が数値ならフィルタ指定なし
@@ -48,14 +51,13 @@ class App {
             'SYSROOT' => self::$sysRoot,
             'APPNAME' => self::$AppName,
             'URIROOT' => self::$appRoot,
-            'WEBROOT' => self::$appRoot . 'webroot/',
             'URI' => $uri,
             'QUERY' => $q_str,
             'REFERER' => self::$Referer,
-            'CONTROLLER' => implode('/',array_slice($uri_array,0,3)),
-            'METHOD' => implode('/',array_slice($uri_array,0,4)),
-            'FILTER' => implode('/',array_slice($uri_array,0,$n+1)),
-            'PARAMS' => implode('/',array_slice($uri_array,$n+1,9)),
+            'CONTROLLER' => array_to_URI(array_slice($uri_array,0,3)),
+            'METHOD' => array_to_URI(array_slice($uri_array,0,4)),
+            'FILTER' => array_to_URI(array_slice($uri_array,0,$n+1)),
+            'PARAMS' => array_to_URI(array_slice($uri_array,$n+1,9)),
             'controller' => $uri_array[2],  //ucfirst($uri_array[2]),
             'method' => $uri_array[3],  //ucfirst($uri_array[3]),
             'filter' => self::$Filter,  // ucfirst(self::$Filter),

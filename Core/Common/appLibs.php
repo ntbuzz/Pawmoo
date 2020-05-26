@@ -98,6 +98,12 @@ function GetPHPFiles($dirtop) {
     $drc->close();
     return $files;
 }
+//==================================================================================================
+// 配列からURIを生成する
+function array_to_URI($arr) { 
+    $ret = implode('/',$arr);
+    return str_replace('//','/',$ret);
+}
 //===============================================================================
 // ファイルパスを / で終わるようにする
 function pathcomplete($path) {
