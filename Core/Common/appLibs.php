@@ -267,7 +267,7 @@ function auto_hyperlink($atext) {
 	$ln = explode("\n", $atext);	// とりあえず行に分割
 	$ret = array();
 	foreach($ln as $ll) {
-    	$ll = preg_replace("/([^\.\s]+)\.{([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)}/i",'<a target="_blank" href="\\2">\\1</a>', $ll);
+    	$ll = preg_replace("/(?:\"([^\"]+)\"|([^\.\s]+))\.{([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)}/i",'<a target="_blank" href="\\3">\\1\\2</a>', $ll);
 		$ret[] = $ll;
     }
 //    return implode("<br />\n",$ret);
