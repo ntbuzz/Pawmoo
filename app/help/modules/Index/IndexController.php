@@ -1,8 +1,8 @@
 <?php
 
 class IndexController extends AppController {
-	public $defaultAction = 'List';		//  デフォルトのアクション
-	public $disableAction = [ 'Page', 'Find' ];	// 無視するアクション
+	public $defaultAction = 'Redirect';		//  デフォルトのアクション
+	public $disableAction = [ 'List','Page','Find','Makepdf','Update','Dump' ];	// 無視するアクション
 
 //===============================================================================
 // モジュールクラスではコンストラクタを定義しない
@@ -20,7 +20,7 @@ public function DisplayAction() {
 }
 //===============================================================================
 // デフォルトの動作
-public function ListAction() {
+public function RedirectAction() {
 	$url = App::getAppRoot();
 	header("Location:{$url}");
 }
