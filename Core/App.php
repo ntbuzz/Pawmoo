@@ -140,13 +140,13 @@ public static function appController($controller) {
 }
 //==================================================================================================
 // webrootファイルのパスに付加パスを付けた文字列
-public static function getSysRoot($path) {  
+public static function getSysRoot($path = '') {  
     if($path[0] == '/') $path = mb_substr($path,1);
     return self::$sysRoot . strtolower($path);
 }
 //==================================================================================================
 // webrootファイルのパスに付加パスを付けた文字列
-public static function getAppRoot($path) {  
+public static function getAppRoot($path = '') {  
     if($path[0] !== '/') $path = "/{$path}";
     return self::$appRoot . strtolower($path);
 }

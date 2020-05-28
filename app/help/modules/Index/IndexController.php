@@ -21,14 +21,8 @@ public function DisplayAction() {
 //===============================================================================
 // デフォルトの動作
 public function ListAction() {
-	$this->Model->MakeOutline();
-	APPDEBUG::arraydump(3, [
-		'レコード' => $this->Model->Records,
-		'アウトライン' => $this->Model->outline,
-	]);
-	$this->ViewSet(['PartData' => [],'ChapterData' => []]);
-	$this->ViewSet(['Part' => 0,'Chapter' => 0,'Section' => [], 'Tabmenu' => 0]);
-	$this->View->PutLayout();
+	$url = App::getAppRoot();
+	header("Location:{$url}");
 }
 //===============================================================================
 // コンテンツビュー
