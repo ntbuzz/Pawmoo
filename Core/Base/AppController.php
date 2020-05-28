@@ -100,7 +100,7 @@ public function PageAction() {
 // find/カラム名/検索値
 public function FindAction() {
 	APPDEBUG::MSG(14,":Find");
-	if(App::$argc > 1 ) {
+	if(App::$ParamCount > 1 ) {
 		$row = array(App::$Filter => "={App::$Params[0]}");
 	} else {
 		$row = array();

@@ -1,47 +1,63 @@
 <?php
 /* -------------------------------------------------------------
  * PHPフレームワーク
- *  appLibs: 共通関数群
- *
+ *  appLibs: コアクラス内で呼び出す共通関数群
  */
 define('DEBUG_DUMP_NONE',   0);
 define('DEBUG_DUMP_DOIT',   1);
 define('DEBUG_DUMP_EXIT',   2);
 
-// コア共通ファンクション
-// URI を取得して、フレームワークRoot、アプリ名、コントローラ名、メソッド＋パラメータ、クエリ文字列に分解して返す
-function getFrameworkParameter($dir) {
-    $root = basename(dirname($dir));
+//==============================================================================
+// REQUEST_URI を分解しルーティングに必要なアプリ名、コントローラー名を抽出する
+function getRoutingParams($dir) {
+    $root = basename(dirname($dir));        // FWフォルダ名
     $vv = $_SERVER['REQUEST_URI'];
     list($requrl,$q_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
-    $param = trim(urldecode($requrl),'/');
-    $params = ($param == '') ? array() : explode('/', $param);            // パラメーターを / で分割
-    // フレームワークルートから始まるURIか?
-    if(count($params) < 3) array_push($params,'','');   // list() 用に数を補填
-    if($params[0] === $root) {
-        list($fwroot,$appname,$modname) = $params;
-        if(empty($appname)) $appname = 'error';
-        $args = array_slice($params,3);
-        $rootURI ="/{$fwroot}/{$appname}/";
-        $fwroot = "/{$fwroot}/";
+    $param = trim(urldecode($requrl),'/');  // 先頭と末尾の / を除去
+    $args = ($param == '') ? array() : explode('/', $param);
+    $appname = array_shift($args);          // 先頭の要素を取り出す
+    if($appname === $root) {                // URIがFWフォルダ名から始まる
+        $appname = array_shift($args);      // アプリ名を取り直す
+        $fwroot = "/{$root}/";              // FWから始まるURI
     } else {
-        list($appname,$modname) = $params;
-        $args = array_slice($params,2);
-        $rootURI ="/{$appname}/";
-        $fwroot = '/';
+        $fwroot = "/";                      // アプリ名から始まるURI
     }
-    // モジュール名はキャメルケースに変換
-    $modname = ucfirst(strtolower($modname));
-    $ret = [$fwroot,$rootURI,$appname,$modname,$args,$q_str];
+    if(is_numeric($appname)) {              // アプリ名が数字でないことを確認
+        array_unshift($args,$appname);      // 数字はアプリ名でないので配列に戻す
+        $appname = '';
+    }
+    $app_uri = [ $fwroot, "{$fwroot}{$appname}" ];      // URIセットを生成
+    debug_dump(0, [
+        'URI' => $_SERVER['REQUEST_URI'],
+        "app_uri"=> $app_uri,
+        "args"=> $args,
+    ]);
+    // コントローラー名以降のパラメータを分解する
+    $params = array();
+    for($n=0;$n < count($args);$n++) {
+        if(is_numeric($args[$n]) || $n >= 3) {
+            $params = array_slice($args,$n);    // パラメータを取り出す
+            array_splice($args,$n);             // 取り出したパラメータを削除
+            break;
+        }
+    }
+    $args += array_fill(count($args),3,NULL);     // filter要素までを補填
+    list($controller,$method,$filter) = $args;
+    if(!isset($controller)) $controller = $appname; // コントローラが空ならアプリ名と同じにする
+    $module = array(
+        ucfirst(strtolower($controller)),    // コントローラー名キャメルケースに変換
+        ucfirst(strtolower($method)),        // メソッドもキャメルケースに変換
+        $filter,                             // フィルター
+        $params                              // パラメータ
+    );
+    $ret = [$appname, $app_uri,$module,$q_str];
     debug_dump(0, [
         'フレームワーク情報' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
-            "fwroot"=> $fwroot,
-            "RootURI"=> $rootURI,
+            "app_uri"=> $app_uri,
             "appname"=> $appname,
-            "modname"=> $modname,
+            "Module"=> $module,
             "query"=> $q_str,
-            "args"=> $args,
         ],
         "RET" => $ret,
     ]);
@@ -99,9 +115,16 @@ function GetPHPFiles($dirtop) {
     return $files;
 }
 //==================================================================================================
-// 配列からURIを生成する
+// 配列からURIを生成する、要素内に配列があるときにも対応する
 function array_to_URI($arr) { 
-    $ret = implode('/',$arr);
+    $ret = '';
+    foreach($arr as $val) {
+        if(is_array($val)) $ret .= array_to_URI($val);
+        else {
+            $vv = strtolower($val);
+            $ret .= "/{$vv}";
+        }
+    }
     return str_replace('//','/',$ret);
 }
 //===============================================================================
@@ -352,6 +375,9 @@ function dumpobj($obj,$indent){
         if(is_array($val)) {
             echo "array(" . count($val) . ")\n";
             dumpobj($val,$indent+1);
-        } else echo_safe("'{$val}'\n");
+        } else {
+            echo_safe("'{$val}'");
+            echo "\n";
+        }
     }
 }

@@ -28,55 +28,46 @@ date_default_timezone_set('Asia/Tokyo');
 
 $redirect = false;      // リダイレクトフラグ
 
-list($fwroot,$rootURI,$appname,$controller,$params,$q_str) = getFrameworkParameter(__DIR__);
+// REQUEST_URIを分解
+list($appname,$app_uri,$module,$q_str) = getRoutingParams(__DIR__);
+list($fwroot,$approot) = $app_uri;
+list($controller,$method,$filter,$params) = $module;
 parse_str($q_str, $query);
-$scriptname = $_SERVER['SCRIPT_NAME'];
-// アプリケーションのコンフィグを読込む
-if(!file_exists("app/$appname")) {
+if(isset($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
+
+// アプリ名が有効かどうか確認する
+if($appname === '' || !file_exists("app/$appname")) {
     $applist = GetFoloders("app/");     // アプリケーションフォルダ名を取得
     $appname = $applist[0];             // 最初に見つかったアプリケーションを指定
-    $rootURI = (strpos($rootURI,"/{$fwroot}/") !== FALSE) ? "/{$fwroot}/{$appname}/" : "/{$appname}/";
+    $approot = "{$fwroot}{$appname}";   // アプリURIを生成
+    $controller = $appname;
     $redirect = true;
 }
 // ここでは App クラスの準備ができていないので直接フォルダ指定する
 require_once("app/{$appname}/Config/config.php");
-
-// コントローラーが指定なければアプリ名を代用する
-if($controller === '') $controller = ucfirst(strtolower($appname));
 // コントローラーファイルが存在するか確認する
 if(!is_extst_module($appname,$controller,'Controller')) {
-    $controller = ucfirst(strtolower(DEFAULT_CONTROLLER));     // 指定がなければ 
+    $controller = ucfirst(strtolower(DEFAULT_CONTROLLER)); // 指定がなければ 
     $redirect = true;
 }
-
-$action = array_shift($params);         // パラメータ先頭はメソッドアクション
-if(is_numeric($action) ) {              // アクション名が数値ならパラメータに戻す
-    array_unshift($params, $action);
-    $action = 'list';      // 指定がなければ list
-    $redirect = true;
-}
-// アクションのキャメルケース化とURIの再構築
-$action = ucfirst(strtolower($action));
+// リダイレクトする時はコントローラーが書換わっているので調整する
+if($redirect) $module[0] = $controller;
 // URLを再構成する
 $ReqCont = [
-    'root' => $rootURI,
-    'controller' => strtolower($controller),
-    'action' => strtolower($action ),
-    'query' => implode('/',$params)
+    'root' => $approot,
+    'module' => $module,
+    'query' => $q_str,
 ];
-// コントローラがアプリ名ならコントローラー以降を省略、それ以外はURIを再構築
-$requrl = (strcasecmp($appname,$controller) === 0) ? "/{$appname}/" : array_to_URI($ReqCont);
+$requrl = array_to_URI($ReqCont);
 // コントローラ名やアクション名が書き換えられてリダイレクトが必要なら終了
 if($redirect) {
     debug_dump(0, [
-        '解析情報' => [
+        'リダイレクト情報' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
-            "RootURI"=> $rootURI,
-            "fwroot"=> $fwroot,
+            "AppROOT"=> $approot,
             "appname"=> $appname,
-            "Controller"=> $controller,
-            "Action"    => $action,
-            "Param"    => $params,
+            "Module" => $module,
+            "Query"    => $q_str,
         ],
         "ReqCont" => $ReqCont,
         "Location" => $requrl,
@@ -89,11 +80,7 @@ if($redirect) {
     exit;
 }
 // アプリケーション変数を初期化する
-App::__Init($fwroot,$rootURI, $appname, $requrl, $params, $q_str);
-
-// コントローラ名/アクションをクラス名/メソッドに変換
-$className = "{$controller}Controller";
-$method = "{$action}Action";
+App::__Init($appname,$app_uri,$module,$query,$requrl);
 
 // 共通サブルーチンライブラリを読み込む
 $libs = GetPHPFiles(App::AppPath("common/"));
@@ -116,45 +103,41 @@ DatabaseHandler::InitConnection();
 
 // モジュールファイルを読み込む
 App::appController($controller);
-// コントローラインスタンス生成
-$controllerInstance = new $className();
-// 指定メソッドが存在するか、無視アクションかをチェック
-if(!method_exists($controllerInstance,$method) || 
-    in_array($action,$controllerInstance->disableAction) ) {
-    // クラスのデフォルトメソッド
-    $action = $controllerInstance->defaultAction;
-    $method = "{$action}Action";
-    App::$SysVAR['method'] = strtolower($action);
-}
-// 残りの引数を与え メソッド実行
-App::$ActionClass = $controller;
-App::$ActionMethod= $action;
-APPDEBUG::debug_dump(1, [
-    'システム変数情報' => App::$SysVAR,
-    'パラメータ情報' => App::$Params,
-],1);
 
+// コントローラ/メソッドをクラス名/アクションメソッドに変換
+$ContClass = "{$controller}Controller";
+$ContAction= "{$method}Action";
+// コントローラインスタンス生成
+$controllerInstance = new $ContClass();
+// 指定メソッドが存在するか、無視アクションかをチェック
+if(!method_exists($controllerInstance,$ContAction) || 
+   in_array($method,$controllerInstance->disableAction) ) {
+    // クラスのデフォルトメソッド
+    $method = $controllerInstance->defaultAction;
+    $ContAction = "{$method}Action";
+    App::ChangeMTHOD($method);     // メソッドの書換えはリダイレクトしない
+}
+App::$Controller  = $controller;    // コントローラー名
+App::$ActionMethod= $ContAction;    // アクションメソッド名
 // =================================
 APPDEBUG::debug_dump(1, [
     'デバッグ情報' => [
         "Controller"=> $controller,
-        "Class"     => $className,
+        "Class"     => $ContClass,
         "Method"    => $method,
         "URI"       => $requrl,
-        "SCRIPT"    => $scriptname,
         "QUERY"     => $q_str,
-        "Module"    => App::$ActionClass,
+        "Controller"=> App::$Controller,
         "Action"    => App::$ActionMethod,
     ],
     "QUERY" => App::$Query,
     "SESSION" => MySession::$PostEnv,
     'パス情報' => [
         "SERVER" => $_SERVER['REQUEST_URI'],
-        "RootURI"=> $rootURI,
-        "fwroot"=> $fwroot,
+        "RootURI"=> $approot,
         "appname"=> $appname,
         "Controller"=> $controller,
-        "Action"    => $action,
+        "Action"    => $ContAction,
         "Param"    => $params,
     ],
     "ReqCont" => $ReqCont,
@@ -163,17 +146,17 @@ APPDEBUG::debug_dump(1, [
 ]);
 // セッション変数を初期化
 MySession::InitSession();
-APPDEBUG::arraydump(1, [
+APPDEBUG::arraydump(0, [
     "Initセッション" => MySession::$PostEnv,
 ]);
 APPDEBUG::RUN_START();
 
-$controllerInstance->$method();
+$controllerInstance->$ContAction();
 
 APPDEBUG::RUN_FINISH(0);
 // リクエスト情報を記憶
 MySession::SetVars('sysVAR',App::$SysVAR);
-APPDEBUG::arraydump(1, [
+APPDEBUG::arraydump(0, [
     "Closeセッション" => MySession::$PostEnv,
 ]);
 // クローズメソッドを呼び出して終了

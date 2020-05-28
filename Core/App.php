@@ -7,65 +7,69 @@
 class App {
     public static $SysVAR;        // URIROOT, WEBROOT, URI, QUERY 変数
     public static $AppName;         // アプリケーション名
-    private static $appRoot;        // フレームワークのルートパス
-    private static $sysRoot;        // フレームワークのルートパス
+    private static $appRoot;        // アプリケーションのルートパス
+    private static $sysRoot;        // フレームワークのルートパス、／で終る
     public static $DocRoot;         // DOCUMENT_ROOT 変数
     public static $Referer;         // HTTP_REFERER 変数
     public static $Query;           // urlのクエリー文字列の連想配列
     public static $Filter;          // メソッドのフィルタ指示
     public static $Params;          // メソッドの数値パラメータ配列
-    public static $argv;            // メソッド以下のURIを/で分割した文字列
-    public static $argc;            // 引数の数
-    public static $ActionClass;     // 実行コントローラ名
+    public static $ParamCount;      // 引数の数
+    public static $Controller;      // 実行コントローラ名
     public static $ActionMethod;    // 呼出しメソッド名
     public static $RunTime;         // コントローラを呼び出した時間
+    private static $ReLocate;        // URLの書き換え
+    private static $execURI;
 //===============================================================================
 // 静的クラスでのシステム変数初期化
-	public static function __Init($fwroot,$rootURI,$appname, $uri,$params,$q_str) {
-        self::$sysRoot = $fwroot;
-        self::$appRoot = $rootURI;
+	public static function __Init($appname,$app_uri,$module,$query,$uri) {
         self::$AppName = $appname;
+        list(self::$sysRoot,self::$appRoot) = $app_uri;
+        list($controller,$method,$filter,$params) = $module;
+
         self::$DocRoot = (empty($_SERVER['DOCUMENT_ROOT'])) ? '' : $_SERVER['DOCUMENT_ROOT'];
         self::$Referer = (empty($_SERVER['HTTP_REFERER'])) ? '' : $_SERVER['HTTP_REFERER'];
-        parse_str($q_str, $query);
 
-        $uri_array = explode('/',$uri);     // decode パス補正は上位で処理済み
-        // $uri_array: 0 = '' , 1 = アプリ名, 2 = コントローラ名, 3 = メソッド名, 4... パラメータ
-        if(empty($uri_array[2])) { // コントローラが省略
-            $uri_array[3] = '';     // メソッドを補填
-        }
-        // 先頭と最後に '/ ' があるので空要素がある前提
-        if(!empty($uri_array[4])) {
-            $n = is_numeric($uri_array[4]) ? 3 : 4;         // 4番目の要素(フィルタ)が数値ならフィルタ指定なし
-            self::$Filter = ($n > 3) ? $uri_array[4]:'';    // メソッドとパラメータの間に指定がある
-            self::$Params = array_slice($uri_array,$n+1,9); // 数値パラメータ配列
-        } else {
-            self::$Filter = '';
-            self::$Params = [];
-            $n = 3;
-        }
+        self::$Filter = $filter;
+        self::$Params = $params;
    		// 0 〜 9 の不足する要素を補填する
-        $k = count(self::$Params);
+        $k = count($params);
+        self::$ParamCount = $k;
 		self::$Params += array_fill($k, 10 - $k, '');
         self::$SysVAR = array(
             'SYSROOT' => self::$sysRoot,
             'APPNAME' => self::$AppName,
             'URIROOT' => self::$appRoot,
             'URI' => $uri,
-            'QUERY' => $q_str,
             'REFERER' => self::$Referer,
-            'CONTROLLER' => array_to_URI(array_slice($uri_array,0,3)),
-            'METHOD' => array_to_URI(array_slice($uri_array,0,4)),
-            'FILTER' => array_to_URI(array_slice($uri_array,0,$n+1)),
-            'PARAMS' => array_to_URI(array_slice($uri_array,$n+1,9)),
-            'controller' => $uri_array[2],  //ucfirst($uri_array[2]),
-            'method' => $uri_array[3],  //ucfirst($uri_array[3]),
-            'filter' => self::$Filter,  // ucfirst(self::$Filter),
+            'controller' => $controller,  //ucfirst($uri_array[2]),
+            'method' => $method,  //ucfirst($uri_array[3]),
+            'filter' => $filter,  // ucfirst(self::$Filter),
         );
-        self::$argv = $params;
-        self::$argc = count($params);
         self::$Query = $query;
-	}
+        // メソッドの書き換えによるアドレスバー操作用
+        self::$ReLocate = FALSE;        // URLの書き換え
+        self::$execURI = array(
+            'root' => self::$appRoot,
+            'controller' => $controller,
+            'method' => $method,
+            'filter' => $filter,
+            'query' => "?".http_build_query($query),
+            );
+    }
+//==================================================================================================
+// メソッドの置換
+public static function ChangeMTHOD($method) { 
+    self::$execURI['method'] = $method;
+    self::$ReLocate = TRUE;        // URLの書き換え
+}
+//==================================================================================================
+// メソッドの置換
+public static function getRelocateURL() { 
+    if(self::$ReLocate === FALSE) return NULL;
+    $url = array_to_URI(self::$execURI);
+    return $url;
+}
 //==================================================================================================
 // デバッグメッセージ
     private static function DEBUG($lvl,$msg) { 
@@ -138,7 +142,7 @@ public static function getSysRoot($path) {
 //==================================================================================================
 // webrootファイルのパスに付加パスを付けた文字列
 public static function getAppRoot($path) {  
-    if($path[0] == '/') $path = mb_substr($path,1);
+    if($path[0] !== '/') $path = "/{$path}";
     return self::$appRoot . strtolower($path);
 }
 //==================================================================================================
@@ -150,16 +154,7 @@ public static function getAppRoot($path) {
         }
         list($file,$q_str) = explode('?',$tagfile);     // クエリ文字列が付加されている時に備える
         $ext = substr($file,strrpos($file,'.') + 1);    // 拡張子を確認
-        $path = make_hyperlink($file,self::$ActionClass);
-debug_dump(0,[
-    "Include" => [
-        "TAGFILE" => $tagfile,
-        "FILE" => $file,
-        "EXT" => $ext,
-        "PATH" => $path,
-        "Class" => self::$ActionClass,
-    ]
-]);
+        $path = make_hyperlink($file,self::$Controller);
         switch($ext) {
     	case 'js':
             echo "<script src='{$path}' charset='UTF-8'></script>\n";
@@ -184,7 +179,7 @@ debug_dump(0,[
 // imagesのインクルードタグ出力
     public static function ImageSRC($name, $attr) {
         $root = self::$appRoot;
-        return "<img src=\"{$root}images/{$name}\" {$attr} />";
+        return "<img src=\"{$root}/images/{$name}\" {$attr} />";
     }
 
 }

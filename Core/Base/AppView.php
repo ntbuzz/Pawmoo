@@ -87,13 +87,10 @@ public function __TerminateView() {
         $tmplate = $this->getTemplateName('Trailer');   // ビューフォルダのテンプレート
         $Helper = $this->Helper;
         if($tmplate !== NULL) require_once ($tmplate);
-        // リクエストURLと処理メソッドが違っていたとき
-        $req = App::$SysVAR['METHOD'];
-        $act = App::$SysVAR['CONTROLLER']."/". App::$SysVAR['method'];
-        // リクエストURIと処理URIが違っている場合、かつコントローラーがアプリ名に一致しない
-        if($req !== $act && (strcasecmp(App::$AppName,App::$ActionClass) !== 0)) {
-            APPDEBUG::MSG(1,$act, "URL書換");
-            $url = "{$act}/" . App::$SysVAR['PARAMS'];
+        // リクエストURLと処理メソッドが違っていたときはRelocateフラグが立つ
+        $url = App::getRelocateURL();
+        if(isset($url)) {
+            APPDEBUG::MSG(1,$url, "URL書換");
             echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";
         }
         if(DEBUGGER) {
