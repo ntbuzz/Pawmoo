@@ -1,5 +1,5 @@
  * -------------------------------------------------------------
- * Biscuit(MAP)
+ * Biscuits(MAP)
  * 
  * @copyright  Copyright (c) 2017 - 2020 by nTak
  * @license    MIT
@@ -7,7 +7,7 @@
  * System Require: PHP 5.6 or Higher
  *
 0. 概要
-  Biscuit(MAP)は Controller-View-Model のようなWEBアプリケーションを作成するための
+  Biscuits(MAP)は Controller-View-Model のようなWEBアプリケーションを作成するための
   ミニ・フレームワークです。
   M-V-Cに相当する各ファイルを「モジュール」というフォルダ単位で管理できるので
   ファイル間の見通しが良く、機能追加や修正の際にも修正漏れやバグ発生を抑えられます。

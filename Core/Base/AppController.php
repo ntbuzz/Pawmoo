@@ -43,11 +43,6 @@ class AppController extends AppObject {
 	function __TerminateApp() {
 		$this->View->__TerminateView();
 	}
-///==================================================================================================
-// 参照先のモデルクラスをダイナミック生成するマジックメソッド
-//	function __get($SubModelName){
-//		return parent::loadModels($SubModelName);
-//	}
 //===============================================================================
 // フィルタ指定の有無を判定
 public function getFilter($default = 'all') {
@@ -100,7 +95,7 @@ public function PageAction() {
 // find/カラム名/検索値
 public function FindAction() {
 	APPDEBUG::MSG(14,":Find");
-	if(App::$argc > 1 ) {
+	if(App::$ParamCount > 1 ) {
 		$row = array(App::$Filter => "={App::$Params[0]}");
 	} else {
 		$row = array();

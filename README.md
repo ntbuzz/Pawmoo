@@ -1,5 +1,5 @@
-<h2> Biscuit(MAP)フレームワーク </h2>
-<p>Biscuit(MAP)はCakePHPにインスパイアされて作成したMVCもどきのミニフレームワークです。
+<h2> Biscuits(MAP)フレームワーク </h2>
+<p>Biscuits(MAP)はCakePHPにインスパイアされて作成したMVCもどきのミニフレームワークです。
 </p>
 <pre>
  @copyright  Copyright (c) 2018 - 2020 by nTak

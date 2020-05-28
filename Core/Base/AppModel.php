@@ -2,18 +2,6 @@
 /* -------------------------------------------------------------
  * PHPフレームワーク
  *  AppModel:    データベース操作用の基底クラス
- * 
- *    クラス・プロパティ変数(static $DatabaseSchema で連想配列として定義する)
- *    static $DatabaseSchema = [
- *        'Handler' => データベース
- *        'DatabaseName' => FMDB以外は未使用,
- *        'DataTable' => テーブル名
- *        'Primary' => プライマリキー名
- *        'Unique' => ユニークキー名
- *        'Schema' => リスト表示するときのヘッダスキーマ
- *        'Relations' => リレーション定義
- *        'PostRenames' => POST変数の読み替え
- *    ];
  */
 
 // データベースの接続情報クラス
@@ -88,11 +76,6 @@ class AppModel extends AppObject {
         $this->record_max = 0;          // 総レコード数
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
     }
-//==================================================================================================
-// 参照先のモデルクラスをダイナミック生成するマジックメソッド
-//    function __get($SubModelName){
-//        return parent::loadModels($SubModelName);
-//    }
 //==================================================================================================
 // ページング設定
 public function SetPage($pagesize,$pagenum) {

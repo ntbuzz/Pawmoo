@@ -2,21 +2,6 @@
 /* -------------------------------------------------------------
  * PHPフレームワーク
  *  AppStyle:   css, js ファイルの結合出力を可能にする
- *              テンプレートのサンプルは *.cpl を参照
- * テンプレート書式：
- * Section = {                              'Section' が拡張子を除いたファイル名
- *  *Comment            		    		* コメントタグ
- *  +import => [ value, ... ]                CSS/JS ファイルのインクルード、スカラー値でも可
- *  +jquery => [ value, ... ]                JSファイルの時のみ、JQuery関数 ファイルのインクルード
- *  +section => subsection                   別のセクション定義を読み込む、自ファイルに存在しなければ上位ファイルで探索する
- *  tag => value                            タグの出力 => tag "value";
- *  tag => [ attr , ... ]                   属性リストの出力 => tag { attr; ... }
- * }
- * 
- * セクション外にあるコマンドはセクション指定にかかわらず処理される
- * テンプレートファイル( stylesheet.cpl or javascript.cpl) の探索は以下の順で行う
- * モジュールフォルダ → アプリ共通フォルダ → wwwroot フォルダ → Libテンプレートフォルダ
- * 
  */
 require_once('Core/Class/Parser.php');
 

@@ -29,9 +29,7 @@ static function InitSession() {
 	// POST/GET されてきた変数を取り出しセットする(SESSION値は上書き)
 	foreach($_REQUEST as $key => $val) {
 		if($val == "on") $val = 1; elseif($val==="off") $val = 0;
-		if(! in_array($key,$ignoreId)) {
-			self::$PostEnv[$key] = $val;
-		}
+		self::$PostEnv[$key] = $val;
 	}
 	if(!isset(self::$PostEnv['cc'])) self::$PostEnv['cc'] = '';		// 一時的
 }

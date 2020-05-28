@@ -114,7 +114,7 @@ public function doQueryBy($fn,$recno) {
 	$findCommand = $this->newFindCommand($this->LayoutName);
     $findCommand->addFindCriterion($fn, '==' . $recno);
 	$findCommand->setRange(0,1);
-	APPDEBUG::MSG(19, $findCommand, "検索コマンド");
+	debug_dump(0,["検索コマンド" => ['キー' => $fn,'値' => $recno]]);
 	$result = $findCommand->execute();
 	// 10. FileMaker::isErrorでエラー判定
 	if (FileMaker::isError($result)) {	// エラー処理..

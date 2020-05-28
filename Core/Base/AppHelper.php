@@ -57,8 +57,8 @@ public function Resource($res) {
 }
 //===============================================================================
 // リクエストコントローラ
-public function IsRequestClass($comp) {
-	$hit = (is_scalar($comp)) ? $comp == App::$ActionClass : in_array(App::$ActionClass,$comp);
+public function IsRequestController($comp) {
+	$hit = (is_scalar($comp)) ? $comp === App::$Controller : in_array(App::$Controller,$comp);
 	echo ($hit) ? '' : ' class="closed"';
 }
 //===============================================================================
