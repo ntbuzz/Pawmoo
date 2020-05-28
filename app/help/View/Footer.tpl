@@ -7,8 +7,8 @@
 
 
 .info-box#disp_about{about_info} => [ size => "450,220,200,150"
-h3 => [ Biscuit(MAP) ]
-p => [ ~ Biscuit(MAP) is PHP wild-framwork. :-) ~ ]
+h3 => [ Biscuits(MAP) ]
+p => [ ~ Biscuits(MAP) is PHP wild-framwork. :-) ~ ]
   <hr><br>
   pre => [ ~
 @@Copyright (c) 2017 - 2020 by nTak

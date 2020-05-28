@@ -1,7 +1,7 @@
-***  Biscuit(MAP) 使い方説明書
+***  Biscuits(MAP) 使い方説明書
 
  1. はじめに
-  Biscuit(MAP)は Controller-View-Model のようなWEBアプリケーションを作成するための
+  Biscuits(MAP)は Controller-View-Model のようなWEBアプリケーションを作成するための
   ミニ・フレームワークです。
   (MAP)というのは「(M)マルチ(A)アプリケーション(P)プラットフォーム」という
   意味で命名しました。これはフレームワーク内に、複数のWEBアプリケーションを

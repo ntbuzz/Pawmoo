@@ -3,10 +3,10 @@
 @Schema
 
 .ja => [
-    TITLE => "Biscuit(MAP) ドキュメント"
+    TITLE => "Biscuits(MAP) ドキュメント"
     ABOUT => ~
         PHP簡易フレームワーク<br>
-        Biscuit(MAP)のドキュメントです
+        Biscuits(MAP)のドキュメントです
         ~
     SETUP => ~
         さまざまなプロパティ
@@ -17,10 +17,10 @@
         ~
 ]
 .en => [
-    TITLE => "Biscuit(MAP) Documents"
+    TITLE => "Biscuits(MAP) Documents"
     ABOUT => ~
         PHP Simple Web Framework<br>
-        The Documents of Biscuit(MAP).
+        The Documents of Biscuits(MAP).
         ~
     SETUP => ~
         Property...
