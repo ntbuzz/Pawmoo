@@ -32,7 +32,7 @@ list($fwroot,$rootURI,$appname,$controller,$params,$q_str) = getFrameworkParamet
 parse_str($q_str, $query);
 $scriptname = $_SERVER['SCRIPT_NAME'];
 // アプリケーションのコンフィグを読込む
-if(!file_exists("app/$appname")) {
+if($appname==='' || !file_exists("app/$appname")) {
     $applist = GetFoloders("app/");     // アプリケーションフォルダ名を取得
     $appname = $applist[0];             // 最初に見つかったアプリケーションを指定
     $rootURI = (strpos($rootURI,"/{$fwroot}/") !== FALSE) ? "/{$fwroot}/{$appname}/" : "/{$appname}/";
