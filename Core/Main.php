@@ -122,7 +122,11 @@ if(!method_exists($controllerInstance,$ContAction) ||
     // クラスのデフォルトメソッド
     $method = $controllerInstance->defaultAction;
     $ContAction = "{$method}Action";
-    App::ChangeMTHOD($method,strcasecmp($appname,$controller) !== 0);     // メソッドの書換えはリダイレクトしない
+    if(strcasecmp($appname,$controller) === 0) {
+        App::ChangeMTHOD('','');     // メソッドの書換えはリダイレクトしない
+    } else {
+        App::ChangeMTHOD($controller,$method);     // メソッドの書換えはリダイレクトしない
+    }
 }
 App::$Controller  = $controller;    // コントローラー名
 App::$ActionMethod= $ContAction;    // アクションメソッド名

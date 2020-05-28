@@ -116,16 +116,18 @@ function GetPHPFiles($dirtop) {
 }
 //==================================================================================================
 // 配列からURIを生成する、要素内に配列があるときにも対応する
-function array_to_URI($arr) { 
-    $ret = '';
-    foreach($arr as $val) {
-        if(is_array($val)) $ret .= array_to_URI($val);
-        else {
-            $vv = strtolower($val);
-            $ret .= "/{$vv}";
+function array_to_URI($arr) {
+    // 無名関数を定義して配列内の探索を行う
+    $array_builder = function ($lst) {
+        $ret = [];
+        foreach($lst as $val) {
+            $uri = (is_array($val)) ? array_to_URI($val) : $val;
+            if(!empty($uri)) $ret[] = $uri;
         }
-    }
-    return str_replace('//','/',$ret);
+        return $ret;
+    };
+    $ret = $array_builder($arr);
+    return implode('/',$ret);
 }
 //===============================================================================
 // ファイルパスを / で終わるようにする

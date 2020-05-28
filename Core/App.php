@@ -59,9 +59,10 @@ class App {
     }
 //==================================================================================================
 // メソッドの置換
-public static function ChangeMTHOD($method,$relocate = TRUE) { 
+public static function ChangeMTHOD($module,$method,$relocate = TRUE) { 
+    self::$execURI['controller'] = $module;
     self::$execURI['method'] = $method;
-    if($relocate) echo "RELOCATE!!!!\n";
+//    if($relocate) echo "RELOCATE!!!!\n".array_to_URI(self::$execURI);
     self::$ReLocate = $relocate;        // URLの書き換え
 }
 //==================================================================================================
