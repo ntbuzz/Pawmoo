@@ -54,14 +54,15 @@ class App {
             'controller' => $controller,
             'method' => $method,
             'filter' => $filter,
-            'query' => "?".http_build_query($query),
+//            'query' => http_build_query($query),
             );
     }
 //==================================================================================================
 // メソッドの置換
-public static function ChangeMTHOD($method) { 
+public static function ChangeMTHOD($method,$relocate = TRUE) { 
     self::$execURI['method'] = $method;
-    self::$ReLocate = TRUE;        // URLの書き換え
+    if($relocate) echo "RELOCATE!!!!\n";
+    self::$ReLocate = $relocate;        // URLの書き換え
 }
 //==================================================================================================
 // メソッドの置換
@@ -87,52 +88,55 @@ public static function getRelocateURL() {
     }
 //==================================================================================================
 // アプリケーションフォルダパスを取得
-    public static function AppPath($path) {
-        $appname = self::$AppName;
-        return "app/{$appname}/{$path}";
-    }
+public static function AppPath($path) {
+    $appname = self::$AppName;
+    return "app/{$appname}/{$path}";
+}
+/*
+    使用しない
 //==================================================================================================
 // appモジュールファイルの読込
-    public static function appUses($cat,$modname) {
-        $mod = explode('/',$modname);
-        $tagfile = ($mod[0] == 'modules') ? "modules/{$mod[1]}/{$mod[1]}{$cat}" : "{$modname}/{$cat}";
-        $reqfile = self::AppPath("{$tagfile}.php");
-        if(file_exists ($reqfile)) {
-            require_once $reqfile;
-            return 1;
-        }
-        self::DEBUG(92," FAIL:" . getcwd() . '/' . $reqfile);
-        return 0;
+public static function appUses($cat,$modname) {
+    $mod = explode('/',$modname);
+    $tagfile = ($mod[0] == 'modules') ? "modules/{$mod[1]}/{$mod[1]}{$cat}" : "{$modname}/{$cat}";
+    $reqfile = self::AppPath("{$tagfile}.php");
+    if(file_exists ($reqfile)) {
+        require_once $reqfile;
+        return 1;
     }
-//==================================================================================================
-// appコントローラと付属モジュールファイルの読込
-    public static function appController($controller) {  
-        // モジュールファイルを読み込む
-        $modulefiles = [
-            'Controller',
-            'Model',
-            'View',
-            'Helper'
-        ];
-        $modtop = getcwd() . "/" . self::AppPath("modules/{$controller}"); 
-        foreach($modulefiles as $files) {
-            $reqfile = "{$modtop}/{$controller}{$files}.php";
-            if(file_exists($reqfile)) {
-                require_once $reqfile;
-            }
-        }
-    }
+    self::DEBUG(92," FAIL:" . getcwd() . '/' . $reqfile);
+    return 0;
+}
 //==================================================================================================
 // appName/Models モジュールファイルの読込
-    public static function appModels($modname) {  
-        $reqfile = self::AppPath("Models/{$modname}Model.php");
-        if(file_exists ($reqfile)) {
-            require_once $reqfile;
-            return 1;
-        }
-        self::DEBUG(92," FAIL:" . getcwd() . '/' . $reqfile);
-        return 0;
+public static function appModels($modname) {  
+    $reqfile = self::AppPath("Models/{$modname}Model.php");
+    if(file_exists ($reqfile)) {
+        require_once $reqfile;
+        return 1;
     }
+    self::DEBUG(92," FAIL:" . getcwd() . '/' . $reqfile);
+    return 0;
+}
+*/
+//==================================================================================================
+// appコントローラと付属モジュールファイルの読込
+public static function appController($controller) {  
+    // モジュールファイルを読み込む
+    $modulefiles = [
+        'Controller',
+        'Model',
+        'View',
+        'Helper'
+    ];
+    $modtop = getcwd() . "/" . self::AppPath("modules/{$controller}"); 
+    foreach($modulefiles as $files) {
+        $reqfile = "{$modtop}/{$controller}{$files}.php";
+        if(file_exists($reqfile)) {
+            require_once $reqfile;
+        }
+    }
+}
 //==================================================================================================
 // webrootファイルのパスに付加パスを付けた文字列
 public static function getSysRoot($path) {  

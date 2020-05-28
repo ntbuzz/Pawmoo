@@ -43,14 +43,14 @@ function getRoutingParams($dir) {
     }
     $args += array_fill(count($args),3,NULL);     // filter要素までを補填
     list($controller,$method,$filter) = $args;
-    if(!isset($controller)) $controller = $appname; // コントローラが空ならアプリ名と同じにする
+    if(empty($controller)) $controller = $appname; // コントローラが空ならアプリ名と同じにする
     $module = array(
         ucfirst(strtolower($controller)),    // コントローラー名キャメルケースに変換
         ucfirst(strtolower($method)),        // メソッドもキャメルケースに変換
         $filter,                             // フィルター
         $params                              // パラメータ
     );
-    $ret = [$appname, $app_uri,$module,$q_str];
+    $ret = [$appname,$app_uri,$module,$q_str];
     debug_dump(0, [
         'フレームワーク情報' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
@@ -308,10 +308,7 @@ function make_hyperlink($lnk,$modname) {
 	if(!in_array(mb_substr($lnk,0,6),$http)) {
 		if($lnk[0] === ':') {
             $lnk[0] = '/';
-//            $host = getHostName();
-//            $lnk= "http://{$host}{$lnk}";
         } else if($lnk[0] === '/') {
-//			$lnk = App::getSysRoot("/common{$lnk}");
 			$lnk = App::getSysRoot("{$lnk}");
         } else if(mb_substr($lnk,0,2) === './') {
             $lnk = substr_replace($lnk, strtolower($modname), 0, 1);

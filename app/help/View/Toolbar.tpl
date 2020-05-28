@@ -8,7 +8,7 @@
 		"span.font24#popup-dialog" => [ ≡ ]
 	]
 	+ul#menu => [
-		[ %${#Toolbar.home} => "/index" ]		 //  ハイパーリンク
+		[ %${#Toolbar.home} => "#" ]		 //  ハイパーリンク
 		.menuitem => [ ${#Toolbar.ドキュメント}
 			+ul.sub => [
 				.subitem#part_edit => [ ${#Toolbar.ドキュメント.パート編集} ]

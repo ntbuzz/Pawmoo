@@ -33,21 +33,28 @@ list($appname,$app_uri,$module,$q_str) = getRoutingParams(__DIR__);
 list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filter,$params) = $module;
 parse_str($q_str, $query);
-if(isset($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
+if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
 
 // アプリ名が有効かどうか確認する
-if($appname === '' || !file_exists("app/$appname")) {
+if(empty($appname) || !file_exists("app/$appname")) {
     $applist = GetFoloders("app/");     // アプリケーションフォルダ名を取得
     $appname = $applist[0];             // 最初に見つかったアプリケーションを指定
     $approot = "{$fwroot}{$appname}";   // アプリURIを生成
-    $controller = $appname;
+    $controller = ucfirst(strtolower($appname)); // 指定がなければ 
     $redirect = true;
 }
 // ここでは App クラスの準備ができていないので直接フォルダ指定する
 require_once("app/{$appname}/Config/config.php");
 // コントローラーファイルが存在するか確認する
 if(!is_extst_module($appname,$controller,'Controller')) {
+    debug_dump(0, [
+        'モジュールチェック' => [
+            "appname"=> $appname,
+            "Controller" => $controller,
+        ],
+    ]);
     $controller = ucfirst(strtolower(DEFAULT_CONTROLLER)); // 指定がなければ 
+//    $module[0] = $controller;
     $redirect = true;
 }
 // リダイレクトする時はコントローラーが書換わっているので調整する
@@ -115,13 +122,14 @@ if(!method_exists($controllerInstance,$ContAction) ||
     // クラスのデフォルトメソッド
     $method = $controllerInstance->defaultAction;
     $ContAction = "{$method}Action";
-    App::ChangeMTHOD($method);     // メソッドの書換えはリダイレクトしない
+    App::ChangeMTHOD($method,strcasecmp($appname,$controller) !== 0);     // メソッドの書換えはリダイレクトしない
 }
 App::$Controller  = $controller;    // コントローラー名
 App::$ActionMethod= $ContAction;    // アクションメソッド名
 // =================================
-APPDEBUG::debug_dump(1, [
+debug_dump(0, [
     'デバッグ情報' => [
+        "Application"=> $appname,
         "Controller"=> $controller,
         "Class"     => $ContClass,
         "Method"    => $method,
@@ -141,7 +149,7 @@ APPDEBUG::debug_dump(1, [
         "Param"    => $params,
     ],
     "ReqCont" => $ReqCont,
-    "Location" => $requrl,
+    "Location" => App::getRelocateURL(),
 
 ]);
 // セッション変数を初期化
