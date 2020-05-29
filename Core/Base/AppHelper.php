@@ -64,15 +64,14 @@ public function IsRequestController($comp) {
 //===============================================================================
 // ハイパーリンクの生成
 public function ALink($lnk,$txt,$under=false) {
-	$http = array('http:/','https:');
 	if($txt[0] == '#') {							// LocaleIDの参照
 		$txt = mb_substr($txt,1);
 		$txt = $this->_($txt);
 	}
-	if(in_array(mb_substr($lnk,0,6),$http)) {
+	$href = make_hyperlink($lnk,$this->ModuleName);
+	if(get_protocol($href) !== NULL) {
 		echo "<a href='{$href}' target=_blank>{$txt}</a>\n";
 	} else {
-		$href = make_hyperlink($lnk,$this->ModuleName);
 		$uline = ($under) ? '' : ' class="nounder"';
 		echo "<a{$uline} href='{$href}'>{$txt}</a>\n";
 	}

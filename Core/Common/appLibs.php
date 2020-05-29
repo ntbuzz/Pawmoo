@@ -299,6 +299,12 @@ function auto_hyperlink($atext) {
 	return implode("\n",$ret);
 }
 //===============================================================================
+function get_protocol($href) {
+    $n = strpos($href,':');
+    if($n === FALSE) return NULL;
+    return ($n > 3) ? mb_substr($href,0,$n) : NULL;
+}
+//===============================================================================
 // ハイパーリンク生成
 //  http〜  直接指定
 // :...     /...
@@ -306,8 +312,7 @@ function auto_hyperlink($atext) {
 // ./...    appRoot/modname/...
 // ...      appRoot/...
 function make_hyperlink($lnk,$modname) {
-    $http = array('http:/','https:');
-	if(!in_array(mb_substr($lnk,0,6),$http)) {
+    if(get_protocol($lnk) === NULL) {
 		if($lnk[0] === ':') {
             $lnk[0] = '/';
         } else if($lnk[0] === '/') {
