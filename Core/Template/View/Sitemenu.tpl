@@ -7,11 +7,23 @@
 .closed => [
     span.folder => [ ${#Core.WEB開発} ]
     +ul => [
-        [ span.file => [ %${#Core.SW開発.BiscuitHelp} => ":help/" ] ]
-        [ span.file => [ %FW版help => ":biscuit/help/" ] ]
-        [ span.file => [ %${#ToCoreolbar.SW開発.PC管理} => ":pcenv/" ] ]
-        [ span.file => [ %FW版PC管理 => ":biscuit/pcenv/" ] ]
-        [ span.file => [ %${#Core.SW開発.Video管理} => ":mediamgr/" ] ]
+        .closed => [  span.folder => [ ${#Core.SPIDER-MASTER} ]
+          +ul => [
+              [ span.file => [ %${#Core.SW開発.BiscuitHelp} => "http://spider.starship.net/help/" ] ]
+              [ span.file => [ %FW版help => "http://spider.starship.net/biscuit/help/" ] ]
+              [ span.file => [ %${#ToCoreolbar.SW開発.PC管理} => "http://spider.starship.net/pcenv/" ] ]
+              [ span.file => [ %FW版PC管理 => "http://spider.starship.net/biscuit/pcenv/" ] ]
+            ]
+        ]
+        .closed => [  span.folder => [ ${#Core.VIRGO-BRANCH} ]
+          +ul => [
+              [ span.file => [ %${#Core.SW開発.BiscuitHelp} => "http://virgo.starship.net/help/" ] ]
+              [ span.file => [ %FW版help => "http://virgo.starship.net/biscuit/help/" ] ]
+              [ span.file => [ %${#ToCoreolbar.SW開発.PC管理} => "http://virgo.starship.net/pcenv/" ] ]
+              [ span.file => [ %FW版PC管理 => "http://virgo.starship.net/biscuit/pcenv/" ] ]
+            ]
+        ]
+        [ span.file => [ %${#Core.SW開発.Video管理} => "http://spider.starship.net/mediamgr/" ] ]
       ]
 ]
 .closed => [
