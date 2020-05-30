@@ -333,7 +333,7 @@ function mark_active_words($atext,$word,$class) {
 	$ln = array_values(array_map('trim', explode("\n", $atext)));
 	$ret = array();
 	foreach($ln as $ll) {
-    	$ll = preg_replace("/${word}/i","<span class='{$class}'>{$word}</span>", $ll);
+    	$ll = preg_replace("/(${word})/i","<span class='{$class}'>\\1</span>", $ll);
 		$ret[] = $ll;
 	}
 	return implode("\n",$ret);

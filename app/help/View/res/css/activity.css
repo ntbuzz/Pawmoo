@@ -18,6 +18,9 @@
 .find_result {
     padding-left: 20px;
 }
+.find_result a {
+    font-weight: bold;
+}
 .find_result h2 {
     width:80%;
     border-bottom: 1px solid black;
