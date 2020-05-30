@@ -1,10 +1,5 @@
 
 "*フッターのインクルード"
-// #popup-dialog のマウスオーバーバルーンヘルプ
-.popup-baloon{@find_word} => [
-  pre => [ 検索 ]
-]
-
 
 .info-box#disp_about{about_info} => [ size => "450,220,200,150"
 h3 => [ Biscuits(MAP) ]
@@ -13,7 +8,7 @@ p => [ ~ Biscuits(MAP) is PHP wild-framwork. :-) ~ ]
   pre => [ ~
 @@Copyright (c) 2017 - 2020 by nTak
 @license    MIT
-@version 0.11.0, 2020-05-255
+@version 0.13.0, 2020-05-31
 @System Require: PHP 5.6 or Higher
 importと間違えないように先頭の＠は二個つける
 出力するときには先頭の1個は削除される
@@ -21,10 +16,6 @@ importと間違えないように先頭の＠は二個つける
 ]
 
 // #popup-dialog のマウスオーバーバルーンヘルプ
-.popup-baloon{@!biscuit-help} => [
-  pre => [ ${#.ABOUT} ]
-]
-
 .popup-baloon{@popup-dialog} => [
 pre => [ ${#.SETUP} ]
 ]
