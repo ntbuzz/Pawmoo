@@ -36,7 +36,7 @@ class ParagraphModel extends customModel {
 function ReadOutline($id,$filters) {
     $outline = array();
     // Part レコードを取得
-    $this->RecordFinder(['section_id' => $id],$filters,'disp_id');
+    $this->RecordFinder(['section_id=' => $id],$filters,'disp_id');
     foreach($this->Records as $key => $columns) {
         $outline[$key] = $columns;
     };

@@ -28,7 +28,7 @@ foreach($MyModel->outline as $key => $part) {
 		echo "<DL>\n";
 		foreach($chap['section'] as $kkk => $sec) {
 			list($title,$contents) = MarkContents($sec['title'],$sec['contents'],$Helper->QUERY);
-			$tab = $sec['disp_id'];
+			$tab = $sec['disp_id'] - 1;
 			if(empty($tab)) $tab = 1;
 			echo "<DT>"; $Helper->ALink("index/view/{$lnk}{$tab}","・{$title}");echo "</DT>\n";
 			echo "<DD>{$contents}\n";

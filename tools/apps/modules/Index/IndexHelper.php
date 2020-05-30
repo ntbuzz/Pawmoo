@@ -113,7 +113,7 @@ public function SelectList($key) {
 public function ChapterSelector() {
 	echo "<SELECT name='chapter_id'>";
     // Chapter レコードを取得
-    $this->MyModel->Chapter->RecordFinder(['part_id' => $this->PartData['id']], ['id','title'], 'disp_id');
+    $this->MyModel->Chapter->RecordFinder(['part_id=' => $this->PartData['id']], ['id','title'], 'disp_id');
     foreach($this->MyModel->Chapter->Records as $columns) {
         $id = $columns['id'];
         $title = $columns['title'];

@@ -45,7 +45,7 @@ function MakeOutline() {
     // Chapter リストを取得する
     $this->outline = array();
     foreach($outline as $key => $columns) {
-        $this->Chapter->RecordFinder(['part_id' => $key],['id','title'],'disp_id');
+        $this->Chapter->RecordFinder(['part_id=' => $key],['id','title'],'disp_id');
         $this->outline[$key] = ['title' => $columns, 'child' => $this->Chapter->Records];
     }
 }

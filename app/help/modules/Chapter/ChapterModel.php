@@ -29,7 +29,7 @@ class ChapterModel extends customModel {
 // レコード削除、関連するテーブルのレコードも削除
 public function deleteRecordset($num) {
     // チャプターを参照しているセクションを削除する
-    $this->Section->RecordFinder(['chapter_id' => $num],['id']);
+    $this->Section->RecordFinder(['chapter_id=' => $num],['id']);
     $id_list = $this->Section->Records;
     foreach($id_list as $rec) {
         $this->Section->deleteRecordset($rec['id']);
@@ -43,7 +43,7 @@ public function deleteRecordset($num) {
 function ReadOutline($id,$filters) {
     $outline = array();
     // Part レコードを取得
-    $this->RecordFinder(['part_id' => $id],$filters,'disp_id');
+    $this->RecordFinder(['part_id=' => $id],$filters,'disp_id');
     foreach($this->Records as $key => $columns) {
         $chap_id = $columns['id'];
         $outline[$key] = $columns;

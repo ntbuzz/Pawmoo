@@ -58,7 +58,7 @@ public function SectionTab() {
     if(!empty($this->Section)) {
         $n = 0;
         foreach($this->Section as $key => $val) {
-            $sel = ($this->Tabmenu == ++$n) ? ' class="selected"' : '';
+            $sel = ($this->Tabmenu == $n++) ? ' class="selected"' : '';
             $ttl = ($val['tabset']==='') ? $val['title']:$val['tabset'];
             echo "<li{$sel} id='$val[id]'>$ttl</li>\n";
             $first = '';
@@ -77,7 +77,7 @@ public function SectionContents() {
         echo "<ul class='content'>\n";
         $n = 0;
         foreach($this->Section as $key => $sec) {
-            $sel = ($this->Tabmenu == ++$n) ? '' : ' class="hide"';
+            $sel = ($this->Tabmenu == $n++) ? '' : ' class="hide"';
             echo "<li{$sel}>";
             echo "<div class='section' id='$sec[id]' data-disp='$sec[disp_id]' data-parent='$sec[chapter_id]' value='$sec[short_title]'>";
             echo "<h2 class='title'>$sec[title]</h2>\n";
@@ -115,7 +115,7 @@ public function SelectList($key) {
 public function ChapterSelector() {
 	echo "<SELECT name='chapter_id'>";
     // Chapter レコードを取得
-    $this->MyModel->Chapter->RecordFinder(['part_id' => $this->PartData['id']], ['id','title'], 'disp_id');
+    $this->MyModel->Chapter->RecordFinder(['part_id=' => $this->PartData['id']], ['id','title'], 'disp_id');
     foreach($this->MyModel->Chapter->Records as $columns) {
         $id = $columns['id'];
         $title = $columns['title'];

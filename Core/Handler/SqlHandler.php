@@ -181,11 +181,9 @@ protected function sql_safequote(&$value) {
 				$sub_sql = $this->makeOPR($OP_REV[$opr],$val);
 				$sql .= "{$opcode}({$sub_sql})";
 			} else {
-				for($n=0;strpos('=<>',$val[$n]) !== false;++$n);
-				if($n > 0) {
-					$op = mb_substr($val,0,$n);
-					$val = mb_substr($val,$n);
-				} else {
+				// キー名の最後に関係演算子
+				list($key,$op) = keystr_opr($key);
+				if(empty($op)) {
 					$op = (gettype($val) === 'string') ? ' LIKE ' : '=';
 				}
 				if($val[0] == '-') {
