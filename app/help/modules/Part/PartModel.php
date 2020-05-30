@@ -28,7 +28,7 @@ class PartModel extends AppModel {
 // レコード削除、関連するテーブルのレコードも削除
 public function deleteRecordset($num) {
     // パートを参照しているチャプターを削除する
-    $this->Chapter->RecordFinder(['part_id' => $num],['id']);
+    $this->Chapter->RecordFinder(['part_id=' => $num],['id']);
     $id_list = $this->Chapter->Records;
     foreach($id_list as $rec) {
         $this->Chapter->deleteRecordset($rec['id']);

@@ -28,9 +28,9 @@ class SectionModel extends customModel {
 //  必要なら ClassInit() メソッドで初期化する
 //===============================================================================
 public function getSectionDoc($Chap) {
-    $this->RecordFinder(['chapter_id' => $Chap],[],'disp_id');
+    $this->RecordFinder(['chapter_id=' => $Chap],[],'disp_id');
     foreach($this->Records as $key => $sec) {
-        $this->Paragraph->RecordFinder(['section_id' => $sec['id'] ],[],'disp_id');
+        $this->Paragraph->RecordFinder(['section_id=' => $sec['id'] ],[],'disp_id');
         $this->Records[$key]['本文'] = $this->Paragraph->Records;
     }
 }
@@ -49,7 +49,7 @@ public function deleteRecordset($num) {
 function ReadOutline($id,$filters) {
     $outline = array();
     // Part レコードを取得
-    $this->RecordFinder(['chapter_id' => $id],$filters,'disp_id');
+    $this->RecordFinder(['chapter_id=' => $id],$filters,'disp_id');
     foreach($this->Records as $key => $columns) {
         $sec_id = $columns['id'];
         $outline[$key] = $columns;

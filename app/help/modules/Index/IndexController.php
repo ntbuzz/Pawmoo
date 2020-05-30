@@ -29,12 +29,11 @@ public function RedirectAction() {
 public function ViewAction() {
 	$Part = App::$Params[0];	// Doc-Part
 	$Chap = App::$Params[1];	// Doc-Chapter
-	$Tabs = MySession::$PostEnv['TabSelect'];
+	$Tabs = MySession::$PostEnv['TabSelect'];	// POSTされた変数
 	// URLに指定があればそちらを優先
-	if(!empty(App::$Params[2])) {
-		$Tabs = App::$Params[2];
-		MySession::$PostEnv['TabSelect']= $Tabs;
-	}
+	if(!empty(App::$Params[2])) $Tabs = App::$Params[2];
+	if(empty($Tabs)) $Tabs = 0;
+	unset(MySession::$PostEnv['TabSelect']);
 	// ツリーメニューを構築
 	$this->Model->MakeOutline();
 	// Section データを取得

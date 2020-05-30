@@ -233,6 +233,16 @@ function LocalCharset($str) {
             mb_convert_encoding($str,"sjis-win","UTF-8") : $str;
 }
 //===============================================================================
+// キー文字列＋比較演算子の分離
+function keystr_opr($str) {
+    // キー名の最後に関係演算子
+    $n = strlen($str);
+    while(strpos('=<>',$str[$n-1]) !== false) --$n;
+    $key = mb_substr($str,0,$n);
+    $opr = mb_substr($str,$n);
+    return array($key,$opr);
+}
+//===============================================================================
 // 配列内の文字列チェック
 function instr_array($str,$hayz) {
     foreach($hays as $val) {

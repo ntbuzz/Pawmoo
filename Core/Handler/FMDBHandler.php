@@ -186,7 +186,8 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 		foreach($this->Finds as $opr => $andval ) {
 			$findInst = $this->newFindRequest($this->LayoutName);
     		foreach($andval as $key => $val) {
-				$findInst->addFindCriterion($key, $val);
+				list($key,$op) = keystr_opr($key);	// キー名の最後に関係演算子
+				$findInst->addFindCriterion($key, "{$op}{$val}");	// FMDBは比較文字列に演算子を付加する
 	    	}
 			$findInst->setOmit((substr($opr,0,3) == 'NOT'));
 			$compoundFind->add($n++,$findInst);
