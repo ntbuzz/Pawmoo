@@ -1,6 +1,6 @@
 <?php
 
-class ChapterModel extends AppModel {
+class ChapterModel extends customModel {
     static $DatabaseSchema = [
         'Handler' => 'SQLite',
         'DatabaseName' => 'mvcman',

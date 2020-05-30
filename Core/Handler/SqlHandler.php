@@ -154,6 +154,8 @@ protected function sql_safequote(&$value) {
 // 配列要素からのWHERE句を作成
 	private function sql_makeWHERE($row) {
 		APPDEBUG::MSG(11, $row );
+		$sql = $this->makeOPR('AND', $row);
+/*
 		$n = array_depth($row);
 		if($n == 1) {
 			$sql = $this->SingleSQL('AND', $row);
@@ -164,7 +166,37 @@ protected function sql_safequote(&$value) {
 				$or_op = ' OR ';
 			}
 		}
+*/
 		if($sql !== '') $sql = ' WHERE '.$sql;
+		return $sql;
+	}
+//===============================================================================
+// 配列要素からのSQL生成
+	private function makeOPR($opr,$row) {
+		$OP_REV = [ 'AND' => 'OR', 'OR' => 'AND'];
+		$sql = '';
+		$opcode = '';
+		foreach($row as $key => $val) {
+			if(is_array($val)) {
+				$sub_sql = $this->makeOPR($OP_REV[$opr],$val);
+				$sql .= "{$opcode}({$sub_sql})";
+			} else {
+				for($n=0;strpos('=<>',$val[$n]) !== false;++$n);
+				if($n > 0) {
+					$op = mb_substr($val,0,$n);
+					$val = mb_substr($val,$n);
+				} else {
+					$op = (gettype($val) === 'string') ? ' LIKE ' : '=';
+				}
+				if($val[0] == '-') {
+					$val = mb_substr($val,1);
+					$op = ' NOT LIKE ';
+				}
+				if(strpos($op,'LIKE') !== false) $val = "%{$val}%";
+				$sql .= "{$opcode}({$this->table}.\"{$key}\"{$op}'{$val}')";
+			}
+			$opcode = " {$opr} ";
+		}
 		return $sql;
 	}
 //===============================================================================
@@ -189,7 +221,7 @@ protected function sql_safequote(&$value) {
 				$vopr = '=';
 			}
 			if($vval[0] == '%') {
-				$and_sql .= "({$this->table}.\"{$key}\"{$LIKE_str}{$vval})";
+				$and_sql .= "({$this->table}.\"{$key}\"{$LIKE_str}'{$vval}')";
 			} else if(strpos('<>=',$vval[0]) !== FALSE) {
 				$and_sql .= "({$this->table}.\"{$key}\"{$vval})";
 			} else {

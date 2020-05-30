@@ -52,12 +52,13 @@ public function SectionTab() {
         'パート' => $this->PartData,
         'チャプタ' => $this->ChapterData,
         'セクション' => $this->Section,
+        'タブ' => $this->Tabmenu,
     ]);    
     echo "<ul class='tab' id='{$this->Chapter}' data-parent='{$this->Part}'>\n";
     if(!empty($this->Section)) {
         $n = 0;
         foreach($this->Section as $key => $val) {
-            $sel = ($this->Tabmenu == $n++) ? ' class="selected"' : '';
+            $sel = ($this->Tabmenu == ++$n) ? ' class="selected"' : '';
             $ttl = ($val['tabset']==='') ? $val['title']:$val['tabset'];
             echo "<li{$sel} id='$val[id]'>$ttl</li>\n";
             $first = '';
@@ -76,7 +77,7 @@ public function SectionContents() {
         echo "<ul class='content'>\n";
         $n = 0;
         foreach($this->Section as $key => $sec) {
-            $sel = ($this->Tabmenu == $n++) ? '' : ' class="hide"';
+            $sel = ($this->Tabmenu == ++$n) ? '' : ' class="hide"';
             echo "<li{$sel}>";
             echo "<div class='section' id='$sec[id]' data-disp='$sec[disp_id]' data-parent='$sec[chapter_id]' value='$sec[short_title]'>";
             echo "<h2 class='title'>$sec[title]</h2>\n";

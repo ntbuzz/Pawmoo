@@ -15,6 +15,7 @@ function getRoutingParams($dir) {
     list($requrl,$q_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
     $param = trim(urldecode($requrl),'/');  // 先頭と末尾の / を除去
     $args = ($param == '') ? array() : explode('/', $param);
+    $args = array_values(array_filter($args, 'strlen'));  // 文字数が0の行を取り除く
     $appname = array_shift($args);          // 先頭の要素を取り出す
     if($appname === $root) {                // URIがFWフォルダ名から始まる
         $appname = array_shift($args);      // アプリ名を取り直す
@@ -328,6 +329,17 @@ function make_hyperlink($lnk,$modname) {
 }
 //===============================================================================
 // デバッグダンプ
+function mark_active_words($atext,$word,$class) {
+	$ln = array_values(array_map('trim', explode("\n", $atext)));
+	$ret = array();
+	foreach($ln as $ll) {
+    	$ll = preg_replace("/(${word})/i","<span class='{$class}'>\\1</span>", $ll);
+		$ret[] = $ll;
+	}
+	return implode("\n",$ret);
+}
+//===============================================================================
+// デバッグダンプ
 function check_cwd($here) {
     $cwd = getcwd();
     echo "{$here} CWD:{$cwd}\n";
@@ -348,6 +360,13 @@ function debug_dump($flag, $arr = []) {
         if(substr($fn,0,strlen($pp)) !== $pp) $fn = "{$pp}::{$fn}";
     }
     $str = "{$fn}->" . $dbinfo[1]['function'];
+    $sep = 	str_repeat("-", 30);
+    if($flag === 3) {
+        echo "<pre>\n{$str}\n{$sep} {$msg} {$sep}\n";
+        var_dump($arr);
+        echo "</pre>\n";
+        return;
+    }
     // 変数出力
     if(is_scalar($arr)) {
         echo_safe("{$arr}\n",$danger);
@@ -356,20 +375,16 @@ function debug_dump($flag, $arr = []) {
         foreach($arr as $msg => $obj) {
             if(empty($obj)) echo "{$msg}:EMPTY\n";
             else if(is_scalar($obj)) {
-                echo "------- {$msg} -----\n";
+                echo "{$sep} {$msg} {$sep}\n";
                 echo_safe("{$obj}\n",$danger);
             } else {
-                echo "------- {$msg} -----\n";
+                echo "{$sep} {$msg} {$sep}\n";
                 dumpobj($obj,0);
             }
         }
         if($flag < 3) echo "</pre>\n";
     }
-    if($flag === 2) { 
-//        echo "TYPE:".get_class($dbinfo[1]['object'])."\n";
-//        var_dump($dbinfo[0]['object']);
-        exit;
-    }
+    if($flag === 2) exit;
 }
 //===============================================================================
 // デバッグダンプ

@@ -1,12 +1,13 @@
 // スタイルシートとJavascriptのテンプレート
-@comment => off
-@compact => on
+//@comment => off
+//@compact => on
 Stylesheet => [
     // モジュールスタイルのテンプレート
     '@charset' => UTF-8 // この コメント が出たらNG
     '*モジュール固有のテンプレート'
     common => [
         +import => [
+            activity.css
             toolbar.css
             sitemap.css         // ツリーメニュー
             split-pane.css      // 3ペイン分割

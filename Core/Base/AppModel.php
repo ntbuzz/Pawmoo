@@ -27,6 +27,7 @@ class AppModel extends AppObject {
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
         $this->__InitClass();                             // クラス固有の初期化メソッド
         $this->autoload = TRUE;
+        $this->fields = [];
 	}
 //==================================================================================================
 //	デバッグ用に空のレコードを生成

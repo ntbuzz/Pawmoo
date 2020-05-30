@@ -1,6 +1,6 @@
 <?php
 
-class ParagraphModel extends AppModel {
+class ParagraphModel extends customModel {
     static $DatabaseSchema = [
         'Handler' => 'SQLite',
         'DatabaseName' => 'mvcman',
@@ -42,6 +42,5 @@ function ReadOutline($id,$filters) {
     };
     return $outline;
 }
-
 
 }

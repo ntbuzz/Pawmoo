@@ -8,7 +8,13 @@
 	$_SERVER['HTTP_REFERER'] = "localhost";
 	$_SERVER['SERVER_PORT'] = '';
 //	print_r($_SERVER);
+	$uri = $_SERVER['REQUEST_URI'];
+	list($url,$q_str) = (strpos($uri,'?')!==FALSE)?explode('?',$uri):[$uri,''];
+	parse_str($q_str, $query);
+	$_REQUEST =  $query;
 
 	print_r($argv);
-	print "========================================== START HERE ======================================\n";
+	print_r($_REQUEST);
+	$ln = str_repeat("=", 50);
+	print "{$ln} START HERE ${ln}\n";
 	require_once('index.php');		// リソース呼出しとの振分けも行う

@@ -1,6 +1,6 @@
 <?php
 
-class SectionModel extends AppModel {
+class SectionModel extends customModel {
     static $DatabaseSchema = [
         'Handler' => 'SQLite',
         'DatabaseName' => 'mvcman',

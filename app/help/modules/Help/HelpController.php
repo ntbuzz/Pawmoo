@@ -5,7 +5,7 @@
 */
 class HelpController extends AppController {
 	public $defaultAction = 'List';		//  デフォルトのアクション
-	public $disableAction = [ 'List','Page','Find','View','Makepdf','Update','Dump' ];	// 無視するアクション
+	public $disableAction = [ 'Page','View','Makepdf','Update','Dump' ];	// 無視するアクション
 //===============================================================================
 // モジュールクラスではコンストラクタを定義しない
 //  必要なら ClassInit() メソッドで初期化する
@@ -25,6 +25,20 @@ public function ListAction() {
 	$this->ViewSet(['PartData' => [],'ChapterData' => []]);
 	$this->ViewSet(['Part' => 0,'Chapter' => 0,'Section' => [], 'Tabmenu' => 0]);
 	$this->View->PutLayout();
+}
+//===============================================================================
+// キーワード検索
+// PostData
+//	q=クエリ文字列
+public function FindAction() {
+	$qstr = MySession::$PostEnv['q'];
+	if(empty($qstr)) {
+		echo $this->_('.NoKeyword');
+		return;
+	}
+	$this->ViewSet(['QUERY' => $qstr]);
+	$this->Model->SearchOutline($qstr);
+	$this->View->ViewTemplate('FindResult');
 }
 
 

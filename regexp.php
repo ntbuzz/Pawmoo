@@ -118,7 +118,7 @@ $p = <<<'EOS'
 {%[^%]+?%}
 )/x
 EOS;
-
+/*
 //$p = '/((?={%).+?\%})|((?={\$).+?\$})|((?=\${).+?})|((?=\$)[^,\s]+?})/s';
 $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/';
 $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
@@ -137,4 +137,53 @@ foreach($lines as $line) {
     echo "LINE:{$line}\n";
     preg_match_all($p,$line,$m);               // 全ての要素をトークン分離する
     debug_dump(4,["preg_match" => $m]);
+}
+*/
+$row = ['id' => 1,
+       'title' => 'a',
+        'contents' => '-BBB',
+];
+
+$sql = new SQLTest();
+
+echo $sql->sql_makeWHERE($row)."\n";
+
+class SQLTest {
+    private $table = 'SQL';
+//===============================================================================
+// 配列要素からのWHERE句を作成
+function sql_makeWHERE($row) {
+    $sql = $this->makeOPR('AND', $row);
+    if($sql !== '') $sql = ' WHERE '.$sql;
+    return $sql;
+}
+//===============================================================================
+// 配列要素からのSQL生成
+private function makeOPR($opr,$row) {
+    $OP_REV = [ 'AND' => 'OR', 'OR' => 'AND'];
+    $sql = '';
+    $opcode = '';
+    foreach($row as $key => $val) {
+        if(is_array($val)) {
+            $sub_sql = $this->makeOPR($OP_REV[$opr],$val);
+            $sql .= "{$opcode}({$sub_sql})";
+        } else {
+            for($n=0;strpos('=<>',$val[$n]) !== false;++$n);
+            if($n > 0) {
+                $op = mb_substr($val,0,$n);
+                $val = mb_substr($val,$n);
+            } else {
+                $op = (gettype($val) === 'string') ? ' LIKE ' : '=';
+            }
+            if($val[0] == '-') {
+                $val = mb_substr($val,1);
+                $op = ' NOT LIKE ';
+            }
+            if(strpos($op,'LIKE') !== false) $val = "%{$val}%";
+            $sql .= "{$opcode}({$this->table}.\"{$key}\"{$op}'{$val}')";
+        }
+        $opcode = " {$opr} ";
+    }
+    return $sql;
+}
 }
