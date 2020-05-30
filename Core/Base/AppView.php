@@ -117,6 +117,7 @@ public function ViewTemplate($name,$vars = []) {
         case 1:     // 'php'     // PHP Template
             extract($vars);             // 変数展開
             $Helper = $this->Helper;    // ヘルパークラス
+            $MyModel = $this->Model;      // モデルクラス
             $RecData = $this->Model->RecData;    // レコードデータ
             $Records = $this->Model->Records;    // レコードリスト
             $Header = $this->Model->Header;    // スキーマヘッダ

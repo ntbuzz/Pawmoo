@@ -22,6 +22,15 @@ $("#ctxUndo").mousedown(function (e) {
 */
 // テキスト検索
 $("#find_word").click(function () {
-    alert($('input[name=cc]').val());
-//    alert($('#cc00').val());
+    var key = $('input[name=q]').val();
+    var e = {q: key};   // オブジェクトで送信
+    var url = location.pathname.controller_path("help/find");
+//    alert(url);
+    $.post(url, e, function (data) { //リクエストが成功した際に実行する関数
+//        alert(data);
+        $("#ContentBody").html(data);
+    }).fail(function() {
+        alert( "error:"+url );
+    });
+    return false;
 });

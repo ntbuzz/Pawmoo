@@ -16,7 +16,7 @@ class MySession {
 // static クラスにおける初期化処理
 static function InitSession() {
 	global $on_server; 
-	if($on_server === '' ) return;
+//	if($on_server === '' ) return;
 	self::$PostEnv = array();		// 配列を初期化
 	$my_session_data = $_SESSION[self::SESSION_NAME];
 	// セッションに保存した値を戻す

@@ -1,5 +1,5 @@
 // アプリ共通
-@compact => on
+//@compact => on
 
 Stylesheet => [
     @charset => UTF-8 // この コメント が出たらNG
@@ -7,6 +7,7 @@ Stylesheet => [
         '*アプリ共通のスタイルテンプレート'
         '* commonスタイル'
         +import => [
+            activity.css
             split-pane.css      // 3ペイン分割
             sitemap.css         // ツリーメニュー
             table-sort.css

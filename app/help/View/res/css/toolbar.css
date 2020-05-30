@@ -101,6 +101,9 @@
     background: url(/{$appName$}/css/img/find_icon.png) no-repeat left -23px;
 */
 }
-#toolbar  #find_word {
+#toolbar #find_word {
     cursor:pointer;
+}
+#toolbar #find_word img {
+    vertical-align: middle;
 }

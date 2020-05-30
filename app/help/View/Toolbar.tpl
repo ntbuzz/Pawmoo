@@ -2,7 +2,7 @@
 .font20#toolbar => [
 	.rightitem => [
 		.finder => [
-			<input type="text" class="font16" id="c00" size="20" name="cc">
+			<input type="text" class="font16" id="keyword" size="20" name="q">
 			"span.font24#find_word" => [ +img => [ attr => value  "images/find_icon.png" ] ]
 		]
 		"span.font24#popup-dialog" => [ ≡ ]

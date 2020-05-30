@@ -13,3 +13,27 @@
     background-color: #64a;
     margin-bottom: 1em;
 }
+
+
+.find_result {
+    padding-left: 20px;
+}
+.find_result h2 {
+    width:80%;
+    border-bottom: 1px solid black;
+    margin-top:20px;
+}
+.find_result dt,
+.find_result dd {
+    padding-left: 10px;
+}
+.find_result dd dl,
+.find_result dd dl dt,
+.find_result dd dl dd {
+    margin-top:5px;
+}
+.find_result .hit_word {
+    color:white;
+    font-weight: bold;
+    background-color: slateblue;
+}

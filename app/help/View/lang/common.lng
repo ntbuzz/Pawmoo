@@ -15,6 +15,7 @@
         ・・・
         などを表示する
         ~
+    NoKeyword => 検索ワードが指定されていません
 ]
 .en => [
     TITLE => "Biscuits(MAP) Documents"
@@ -29,4 +30,5 @@
         ...
         Miscellaneous Data Setup
         ~
+    NoKeyword => "Keyword not prepared."
 ]
