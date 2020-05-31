@@ -122,7 +122,7 @@ function array_to_URI($arr) {
     $array_builder = function ($lst) {
         $ret = [];
         foreach($lst as $val) {
-            $uri = (is_array($val)) ? array_to_URI($val) : $val;
+            $uri = (is_array($val)) ? array_to_URI($val) : strtolower($val);
             if(!empty($uri)) $ret[] = $uri;
         }
         return $ret;
