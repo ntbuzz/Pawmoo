@@ -44,6 +44,11 @@ class AppController extends AppObject {
 		$this->View->__TerminateView();
 	}
 //===============================================================================
+// ログイン要求が必要ならTRUEを返す
+public function Login() {
+	return FALSE;
+}
+//===============================================================================
 // フィルタ指定の有無を判定
 public function getFilter($default = 'all') {
 	return strtolower(empty(App::$Filter) ? $default : App::$Filter);

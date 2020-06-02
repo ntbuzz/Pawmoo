@@ -4,6 +4,8 @@
  * 	MySession:	セッション変数の管理
  */
 if($on_server) {
+	//セッションの有効期限を5分に設定
+	session_set_cookie_params(60 * 5);
 	session_start();
 }
 
@@ -71,3 +73,10 @@ static function Dump() {
 }
 
 }
+// セッション変数を初期化
+MySession::InitSession();
+/*
+APPDEBUG::arraydump(0, [
+    "Initセッション" => MySession::$PostEnv,
+]);
+*/

@@ -7,13 +7,12 @@
 global $on_server;
 // デバッグ用のクラス
 require_once('AppDebug.php');
-APPDEBUG::INIT(10);
+require_once('Common/appLibs.php');
+require_once('Config/appConfig.php');
 
 require_once('App.php');
 require_once('Class/fileclass.php');
 require_once('Class/session.php');
-require_once('Config/appConfig.php');
-require_once('Common/appLibs.php');
 require_once('Base/AppObject.php');
 require_once('Base/AppController.php');
 require_once('Base/AppModel.php');
@@ -22,6 +21,7 @@ require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
 require_once('Base/LangUI.php');           // static class
 
+APPDEBUG::INIT(10);
 // タイムゾーンの設定
 date_default_timezone_set('Asia/Tokyo');
 //echo setlocale(LC_ALL,0);
@@ -88,6 +88,7 @@ if($redirect) {
 }
 // アプリケーション変数を初期化する
 App::__Init($appname,$app_uri,$module,$query,$requrl);
+App::$Controller  = $controller;    // コントローラー名
 
 // 共通サブルーチンライブラリを読み込む
 $libs = GetPHPFiles(App::AppPath("common/"));
@@ -116,6 +117,19 @@ $ContClass = "{$controller}Controller";
 $ContAction= "{$method}Action";
 // コントローラインスタンス生成
 $controllerInstance = new $ContClass();
+// ログイン要求を処理するか
+if(method_exists($controllerInstance,'Login')) {
+    // ログイン処理が必要ならTRUE
+    if($controllerInstance->Login()) {
+        // 終了処理をしてExit
+        MySession::SetVars('sysVAR',App::$SysVAR);
+        $controllerInstance->__TerminateApp();
+        MySession::CloseSession();
+        DatabaseHandler::CloseConnection();
+        exit;
+    }
+}
+
 // 指定メソッドが存在するか、無視アクションかをチェック
 if(!method_exists($controllerInstance,$ContAction) || 
    in_array($method,$controllerInstance->disableAction) ) {
@@ -128,7 +142,6 @@ if(!method_exists($controllerInstance,$ContAction) ||
         App::ChangeMTHOD($controller,$method);     // メソッドの書換えはリダイレクトしない
     }
 }
-App::$Controller  = $controller;    // コントローラー名
 App::$ActionMethod= $ContAction;    // アクションメソッド名
 // =================================
 debug_dump(0, [
@@ -156,11 +169,7 @@ debug_dump(0, [
     "Location" => App::getRelocateURL(),
 
 ]);
-// セッション変数を初期化
-MySession::InitSession();
-APPDEBUG::arraydump(0, [
-    "Initセッション" => MySession::$PostEnv,
-]);
+
 APPDEBUG::RUN_START();
 
 $controllerInstance->$ContAction();
@@ -168,11 +177,14 @@ $controllerInstance->$ContAction();
 APPDEBUG::RUN_FINISH(0);
 // リクエスト情報を記憶
 MySession::SetVars('sysVAR',App::$SysVAR);
-APPDEBUG::arraydump(0, [
-    "Closeセッション" => MySession::$PostEnv,
+MySession::CloseSession();
+APPDEBUG::arraydump(1, [
+    "セッションクローズ" => [
+        "SESSION" => $_SESSION,
+        "POSTENV" => MySession::$PostEnv,
+    ]
 ]);
 // クローズメソッドを呼び出して終了
 $controllerInstance->__TerminateApp();
 
-MySession::CloseSession();
 DatabaseHandler::CloseConnection();

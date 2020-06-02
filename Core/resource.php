@@ -9,15 +9,15 @@
  *      method => css|js
  *      filter => xxxx.css|.js
  */
-require_once('Class/session.php');
 
 // デバッグ用のクラス
 require_once('AppDebug.php');
-APPDEBUG::INIT(0);
-
 require_once('Common/appLibs.php');
+require_once('Class/session.php');
 require_once('Base/AppStyle.php');
 require_once('Base/LangUI.php');           // static class
+
+APPDEBUG::INIT(0);
 
 date_default_timezone_set('Asia/Tokyo');
 
