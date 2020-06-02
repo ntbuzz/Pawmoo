@@ -7,6 +7,8 @@ if($on_server) {
 	//セッションの有効期限を5分に設定
 	session_set_cookie_params(60 * 5);
 	session_start();
+//	$_SESSION = array();
+//	session_destroy();
 }
 
 class MySession {
