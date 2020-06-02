@@ -13,15 +13,20 @@ class IndexController extends AppController {
 public function Login() {
 // ログイン情報がセッションに記録されているか確認
 	if(empty($_SESSION['Login'])) {
-	// ログイン情報がなくてログインPOSTされてきたなら
+		// ログイン情報がなくてログインPOSTされてきたなら
 		if(!empty(MySession::$PostEnv['Login'])) {
-			$LoginUser = array(
-				'UserName' => MySession::$PostEnv['user'],
-				'Password' => MySession::$PostEnv['password'],
-				'Mail' => MySession::$PostEnv['email'],
-			);
+			$LoginUser = array();
+			foreach(['user','password','email'] as $val) {
+				$LoginUser[$val] = MySession::$PostEnv[$val];
+				unset(MySession::$PostEnv[$val]);
+			}
+			unset(MySession::$PostEnv['Login']);
 			// isValidUser($Login)
-			if(!empty($LoginUser['UserName'])) {
+			if(!empty($LoginUser['user'])) {
+				// パスワードは暗号化して保存
+				$LoginUser['password'] = openssl_encrypt($LoginUser['password'], 'AES-128-CBC', '_minimvc_biscuit');
+				// 復号化は
+				//$LoginUser['password'] = openssl_decrypt($LoginUser['password'], 'AES-128-CBC', '_minimvc_biscuit');
 				$_SESSION['Login'] = $LoginUser;
 				debug_dump(0, ["セットセッション" => $_SESSION]);
 				return FALSE;
@@ -29,7 +34,7 @@ public function Login() {
 		}
 	} else {
 		$LoginUser = $_SESSION['Login'];
-		if(empty($LoginUser['UserName'])) {
+		if(empty($LoginUser['user'])) {
 			unset($_SESSION['Login']);
 		} else return FALSE;
 	}
