@@ -13,6 +13,7 @@
 			+ul.sub => [
 				li => [ %${#Toolbar.ファイル.新規} => "#" ]
 				li => [ %${#Toolbar.ファイル.開く} => "#" ]
+				li => [ %${#Toolbar.ファイル.ログアウト} => "login/logout" ]
 				li => [ %${#Toolbar.ファイル.終了} => "#" ]
 			]
 		]

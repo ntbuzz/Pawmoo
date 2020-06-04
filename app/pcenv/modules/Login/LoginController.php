@@ -19,7 +19,8 @@ public function LoginAction() {
 			'再ログイン' => $newlogin,
 		]);
 		MySession::SetLogin($newlogin);
-		$url = App::getAppRoot();
+//		$url = App::getAppRoot();
+		$url = App::$SysVAR['URI'];
 		header("Location:{$url}");
 	}
     if(!empty($login)) {     // ログイン状態ではない
