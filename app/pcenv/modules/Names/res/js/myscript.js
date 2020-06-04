@@ -4,7 +4,8 @@
 // ワンクリックでコンテンツビューに表示する
 $("tr.item").click(function(){
     var num =$(this).attr("id");
-    var url = location.pathname.module_path("view")+num;
+    var url = location.pathname.module_path("view") + num;
+//    alert(url);
     $.post(url,
         function(data){
             //リクエストが成功した際に実行する関数

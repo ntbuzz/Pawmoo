@@ -45,7 +45,7 @@ selector.each(function () {
     });
 */
 // クリックイベント登録
-    self.find(".openButton").click(function () {
+    self.find(".openButton").off().click(function () {
             // alert("click=" + click);
         selector.fadeOut("fast");   // 全てのウィンドウを消す
         // クローズイベントを登録
@@ -61,7 +61,7 @@ selector.each(function () {
             self.find("#datalist").append(initdata);
         };
         $("body").append("<div class='floatBack'></div>");
-//        $(".floatBack").click(function () {
+//        $(".floatBack").off().click(function () {
 //            alert("CLICK!");
 //            return false;
 //        });

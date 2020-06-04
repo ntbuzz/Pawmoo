@@ -10,6 +10,8 @@ define("VIEWFILE",0);
 define("POSTFILE",1);
 define("DRAGFILE",2);
 
+define("LOGIN_NEED",TRUE);		// ログインを要求する
+
 define('DEFAULT_CONTROLLER', 'index');
 define('DEFAULT_LANG', 'ja');				// 言語ファイル
 

@@ -15,7 +15,7 @@ class SQLiteHandler extends SQLHandler {
 //==================================================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
 protected function Connect() {
-	APPDEBUG::MSG(11,$this->table);
+	APPDEBUG::MSG(13,$this->table);
 	// テーブル属性を取得
 	$sql = "PRAGMA table_info({$this->table});";
 	$rows = $this->dbb->query($sql);
@@ -23,12 +23,12 @@ protected function Connect() {
 	while ($row = $rows->fetchArray(SQLITE3_ASSOC)) {
 		$this->columns[$row['name']] = $row['name'];
 	}
-	APPDEBUG::MSG(11,$this->columns);
+	APPDEBUG::MSG(13,$this->columns);
 }
 //==================================================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
-	APPDEBUG::MSG(9,$sql);
+	APPDEBUG::MSG(3,$sql);
 	$this->rows = $this->dbb->query($sql);
 	return $this->rows;
 }
@@ -47,14 +47,14 @@ public function getLastError() {
 //==================================================================================================
 public function insertRecord($row) {
 	$this->sql_safequote($row);
-	APPDEBUG::MSG(19, $row );
+	APPDEBUG::MSG(13, $row );
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
 	$vstr = "'" . implode("','", $row) . "'";
 
 	$sql = "INSERT INTO {$this->table} ({$kstr}) VALUES ({$vstr});";
 	error_reporting(E_ERROR);
-	APPDEBUG::MSG(19, $sql );
+	APPDEBUG::MSG(13, $sql );
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
 		echo 'ERROR:'.$this->getLastError()."\n".$sql;
@@ -65,7 +65,7 @@ public function insertRecord($row) {
 //==================================================================================================
 public function replaceRecord($wh,$row) {
 	$this->sql_safequote($row);
-	APPDEBUG::MSG(19, $row );
+	APPDEBUG::MSG(13, $row );
 	$row = array_merge($wh,$row);				// 配列をマージ
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
@@ -73,7 +73,7 @@ public function replaceRecord($wh,$row) {
 
 	$sql = "REPLACE INTO {$this->table} ({$kstr}) VALUES ({$vstr});";
 	error_reporting(E_ERROR);
-	APPDEBUG::MSG(19, $sql );
+	APPDEBUG::MSG(13, $sql );
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
 		echo 'ERROR:'.$this->getLastError()."\n".$sql;

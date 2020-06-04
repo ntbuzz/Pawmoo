@@ -56,6 +56,8 @@ class App {
             'filter' => $filter,
 //            'query' => http_build_query($query),
             );
+            // リクエスト情報を記憶
+            MySession::SetEnvVar('sysVAR',self::$SysVAR);
     }
 //==================================================================================================
 // メソッドの置換

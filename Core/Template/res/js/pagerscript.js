@@ -2,7 +2,7 @@
 ページャーボタンとページサイズセレクターの処理
     jquery => コマンドでインクルードすること
 */
-    $(".pager .jump,.move").click(function () {
+    $(".pager .jump,.move").off().click(function () {
         var pg = $(this).attr("value"); // ページサイズ
         var url = location.pathname.exclude_num_path(pg);
 //        alert("JUMP!" + url);
