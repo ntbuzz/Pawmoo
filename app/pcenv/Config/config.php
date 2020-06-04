@@ -2,7 +2,7 @@
 
 define('HOST_SPEC','http://172.27.132.244:80/');
 define('SQLITE_DB',__DIR__ . '/pcenv.db');
-define('PG_HOST','spider');
+define('PG_HOST','localhost');
 define('PG_PORT',  '5532');
 define('PG_DB',  'pcmanager');
 
