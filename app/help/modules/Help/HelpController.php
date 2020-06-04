@@ -18,7 +18,7 @@ class HelpController extends AppController {
 // デフォルトの動作
 public function ListAction() {
 	$this->Model->MakeOutline();
-	APPDEBUG::arraydump(3, [
+	APPDEBUG::arraydump(5, [
 		'レコード' => $this->Model->Records,
 		'アウトライン' => $this->Model->outline,
 	]);
@@ -28,7 +28,7 @@ public function ListAction() {
 }
 //===============================================================================
 // キーワード検索
-// PostData
+// PostEnv
 //	q=クエリ文字列
 public function FindAction() {
 	$qstr = MySession::$PostEnv['q'];

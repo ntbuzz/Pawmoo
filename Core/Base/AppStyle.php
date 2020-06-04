@@ -72,8 +72,8 @@ class AppStyle {
             'filename' => $filename,
             'extension' => $ext,
         );
-        if(isset(MySession::$PostEnv['sysVAR'])) {
-            $sess = MySession::$PostEnv['sysVAR'];              // セッションに記憶してあるシステム変数
+        if(isset(MySession::$EnvData['sysVAR'])) {
+            $sess = MySession::$EnvData['sysVAR'];              // セッションに記憶してあるシステム変数
             $this->repVARS = array_merge($sess, $myVARS);       // システム変数とパラメータをマージしておく
         } else {
             $this->repVARS = $myVARS;       // パラメータのみセット

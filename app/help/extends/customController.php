@@ -10,6 +10,7 @@ class cutomController extends AppController {
 //===============================================================================
 //	クラス初期化処理
 	protected function ClassInit() {
+		MySession::PostToEnv(['TabSelect']);
 	}
 //===============================================================================
 // 必要なメソッドアクションをオーバーライド定義する
@@ -25,12 +26,6 @@ public function AddAction() {
 // データを更新してREFERERに戻す
 public function UpdateAction() {
 	$num = App::$Params[0];
-	debug_dump(DEBUG_DUMP_NONE, [
-		'番号' => $num,
-		'POST' => $_REQUEST,
-		'データ' => MySession::$PostEnv,
-		'タブセット' => MySession::$PostEnv['TabSelect'],
-	]);
 	$this->Model->UpdateRecord($num,MySession::$PostEnv);
 	echo App::$Referer;
 }

@@ -15,14 +15,14 @@ class IndexController extends AppController {
 //===============================================================================
 // デフォルトの動作
 public function DisplayAction() {
-	APPDEBUG::MSG(24,":Test");
+	APPDEBUG::MSG(15,":Test");
 	$this->View->PutLayout();
 }
 //===============================================================================
 // デフォルトの動作
 public function ListAction() {
 	$this->Model->MakeOutline();
-	APPDEBUG::arraydump(3, [
+	APPDEBUG::arraydump(5, [
 		'レコード' => $this->Model->Records,
 		'アウトライン' => $this->Model->outline,
 	]);
@@ -37,7 +37,7 @@ public function ViewAction() {
 	$Tabs = App::$Params[2];	// Doc-Chapter
 	$Tabs = MySession::$PostEnv['TabSelect'];
 	if(!empty(App::$Params[2])) $Tabs = App::$Params[2];
-	MySession::$PostEnv['TabSelect']= 0;
+//	MySession::$PostEnv['TabSelect']= 0;
 	// ツリーメニューを構築
 	$this->Model->MakeOutline();
 	// Section データを取得
@@ -47,7 +47,7 @@ public function ViewAction() {
 
 	$this->Section->getSectionDoc($Chap);
 	$this->ViewSet(['Part' => $Part,'Chapter' => $Chap,'Section' => $this->Section->Records, 'Tabmenu' => $Tabs]);
-	APPDEBUG::arraydump(13, [
+	APPDEBUG::arraydump(15, [
 		'パラメータ' => App::$Params,
 		'レコード' => $this->Model->Records,
 		'アウトライン' => $this->Model->outline,

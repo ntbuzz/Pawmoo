@@ -1,7 +1,7 @@
 <script>
 $(function() {
 	//タブクリックしたときのファンクションをまとめて指定
-	$('.tab li').click(function() {
+	$('.tab li').off().click(function() {
 		//.index()を使いクリックされたタブが何番目かを調べ、
 		//indexという変数に代入します。
 		var index = $('.tab li').index(this);

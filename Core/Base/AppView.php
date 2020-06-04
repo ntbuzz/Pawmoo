@@ -76,7 +76,7 @@ public function SetLayout($layoutfile) {
 // レイアウト出力
 //==============================================================================
 public function PutLayout() {
-    APPDEBUG::MSG(0, $this->Layout,'$Layout');
+    APPDEBUG::MSG(1, $this->Layout,'$Layout');
     $this->ViewTemplate($this->Layout);
     $this->doTrailer = TRUE;
 }
@@ -111,7 +111,7 @@ public function ViewTemplate($name,$vars = []) {
             $parser = new SectionParser($tmplate);
             $divSection = $parser->getSectionDef();
             $this->inlineSection = [];         // インラインセクション定義をクリア
-            APPDEBUG::arraydump(0,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
+            APPDEBUG::arraydump(1,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
             $this->section_analyze($divSection,$vars);
             break;
         case 1:     // 'php'     // PHP Template

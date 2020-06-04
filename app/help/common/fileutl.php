@@ -46,6 +46,6 @@ function get_beginning_week_date($pday) {
     $pday *= 60*60*24;
     
     $beginning_week_date = date('m/d/Y',$monday-$pday) . '...' . date('m/d/Y',$friday-$pday);
-    APPDEBUG::MSG(23,":WEEKBEG >> " . $beginning_week_date);
+    APPDEBUG::MSG(18,":WEEKBEG >> " . $beginning_week_date);
     return $beginning_week_date;
 }

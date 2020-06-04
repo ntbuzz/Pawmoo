@@ -29,11 +29,11 @@ class DatabaseHandler {
 //==========================================================================================
 // コンストラクタ
 public static function InitConnection() {
-    APPDEBUG::MSG(12, self::DatabaseSpec);
+    APPDEBUG::MSG(13, self::DatabaseSpec);
     foreach(self::DatabaseSpec as $dbName => $defs) {
         $func = $defs['callback'];      // 呼び出し関数
         self::$dbHandle[$dbName] = self::$func(DatabaseParameter[$dbName],'open');
-        APPDEBUG::MSG(12, self::$dbHandle);
+        APPDEBUG::MSG(13, self::$dbHandle);
     }
 }
 //==========================================================================================
@@ -54,7 +54,7 @@ public function getCallbackFunc($dbName) {
 //==========================================================================================
 // クローズ処理
 private static function closeDb() {
-    APPDEBUG::MSG(12, self::$dbHandle);
+    APPDEBUG::MSG(13, self::$dbHandle);
     foreach(self::$dbHandle as $key => $handle) {
         $func = self::DatabaseSpec[$key]['callback'];      // 呼び出し関数
         self::$func($handle,'close');

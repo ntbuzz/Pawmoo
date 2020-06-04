@@ -21,7 +21,7 @@ $("#ctxUndo").mousedown(function (e) {
 });
 */
 // テキスト検索
-$("#find_word").click(function () {
+$("#find_word").off().click(function () {
     var key = $('input[name=q]').val();
     var e = {q: key};   // オブジェクトで送信
     var url = location.pathname.controller_path("help/find");

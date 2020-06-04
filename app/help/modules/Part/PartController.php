@@ -8,12 +8,6 @@ class PartController extends cutomController {
 // 削除アクション以外はカスタムコントローラに置く
 public function DeleteAction() {
 	$num = App::$Params[0];
-	debug_dump(DEBUG_DUMP_NONE, [
-		'番号' => $num,
-		'POST' => $_REQUEST,
-		'データ' => MySession::$PostEnv,
-		'タブセット' => MySession::$PostEnv['TabSelect'],
-	]);
 	$this->Model->deleteRecordset($num);
 	echo App::$Referer;
 }

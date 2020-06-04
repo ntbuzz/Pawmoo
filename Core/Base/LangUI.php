@@ -14,7 +14,7 @@ class LangUI {
 //==================================================================================================
 // HTTP_ACCEPT_LANGUAGE を元にデフォルトの言語を決定する
     public static function construct($lang,$default) {
-        APPDEBUG::MSG(5,$lang, "言語リスト");
+        APPDEBUG::MSG(4,$lang, "言語リスト");
         $_ = 'constant';                                    // 定数を取り出す関数
         $arr = array_unique(             // 重複行を取り除く
                 array_filter(           // strlen を使って空行を取り除く
@@ -35,7 +35,6 @@ class LangUI {
         self::LoadLang('core');
         // アプリケーションの言語リソースパス
         self::$LangDir = $default;      // App::AppPath("View/lang/");
-//        APPDEBUG::MSG(5,self::$Locale, "ロケール");
     }
 //==================================================================================================
 //  言語ファイルの読み込み
@@ -51,7 +50,7 @@ public static function LangFiles($files) {
         $msg = $files;
     }
     $msg = self::$Locale . " / " . trim($msg,' /');
-    APPDEBUG::MSG(5, self::$STRINGS, "ロケール({$msg})");
+    APPDEBUG::MSG(4, self::$STRINGS, "ロケール({$msg})");
 }
 //==================================================================================================
 //  セクション要素から空配列を削除する

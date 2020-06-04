@@ -19,7 +19,7 @@ $("#myTable").tablesorter({
         stickyHeaders_attachTo: '.list-view' // or $('.wrapper')
     }
 });
-$("#myTable tr.item").click(function () {
+$("#myTable tr.item").off().click(function () {
     // 全ての項目から Selected を削除
     $("#myTable tr.item").removeClass("selected");
     // クリックされたアイテムだけに Selected を付加

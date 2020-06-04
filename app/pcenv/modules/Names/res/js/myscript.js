@@ -2,7 +2,7 @@
 // jquery コマンドでインクルードすること
 
 // ワンクリックでコンテンツビューに表示する
-$("tr.item").click(function(){
+$("tr.item").off().click(function(){
     var num =$(this).attr("id");
     var url = location.pathname.module_path("view")+num;
     $.post(url,

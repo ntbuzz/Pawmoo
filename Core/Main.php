@@ -8,11 +8,11 @@ global $on_server;
 // デバッグ用のクラス
 require_once('AppDebug.php');
 require_once('Common/appLibs.php');
+require_once('Class/session.php');
 require_once('Config/appConfig.php');
 
 require_once('App.php');
 require_once('Class/fileclass.php');
-require_once('Class/session.php');
 require_once('Base/AppObject.php');
 require_once('Base/AppController.php');
 require_once('Base/AppModel.php');
@@ -109,6 +109,19 @@ LangUI::LangFiles(['#common',$controller]);
 // データベースハンドラを初期化する */
 DatabaseHandler::InitConnection();
 
+if(defined('LOGIN_NEED')) {
+    $login = MySession::getLoginInfo();
+    if(empty($login)) {     // ログイン状態ではない
+        $controller = 'Login';      // ログインコントローラーに制御を渡す
+        $method = 'Login';
+    }
+    debug_dump(0, [
+        "controller" => $controller,
+        "method" => $method,
+        "ENV" => MySession::$EnvData,
+        "POST" => MySession::$PostEnv,
+    ]);
+}
 // モジュールファイルを読み込む
 App::appController($controller);
 
@@ -117,19 +130,6 @@ $ContClass = "{$controller}Controller";
 $ContAction= "{$method}Action";
 // コントローラインスタンス生成
 $controllerInstance = new $ContClass();
-// ログイン要求を処理するか
-if(method_exists($controllerInstance,'Login')) {
-    // ログイン処理が必要ならTRUE
-    if($controllerInstance->Login()) {
-        // 終了処理をしてExit
-        MySession::SetVars('sysVAR',App::$SysVAR);
-        $controllerInstance->__TerminateApp();
-        MySession::CloseSession();
-        DatabaseHandler::CloseConnection();
-        exit;
-    }
-}
-
 // 指定メソッドが存在するか、無視アクションかをチェック
 if(!method_exists($controllerInstance,$ContAction) || 
    in_array($method,$controllerInstance->disableAction) ) {
@@ -156,7 +156,10 @@ debug_dump(0, [
         "Action"    => App::$ActionMethod,
     ],
     "QUERY" => App::$Query,
-    "SESSION" => MySession::$PostEnv,
+    "SESSION" => [
+        "POST" => MySession::$PostEnv,
+        "ENV" => MySession::$PostEnv,
+    ],
     'パス情報' => [
         "SERVER" => $_SERVER['REQUEST_URI'],
         "RootURI"=> $approot,
@@ -175,12 +178,11 @@ APPDEBUG::RUN_START();
 $controllerInstance->$ContAction();
 
 APPDEBUG::RUN_FINISH(0);
-// リクエスト情報を記憶
-MySession::SetVars('sysVAR',App::$SysVAR);
 MySession::CloseSession();
-APPDEBUG::arraydump(1, [
+APPDEBUG::arraydump(0, [
     "セッションクローズ" => [
-        "SESSION" => $_SESSION,
+//        "SESSION" => $_SESSION,
+        "ENVDATA" => MySession::$EnvData,
         "POSTENV" => MySession::$PostEnv,
     ]
 ]);

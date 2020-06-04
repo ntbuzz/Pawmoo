@@ -10,7 +10,7 @@
         };
     });
     // クリックしたときのファンクション
-    $('#debugMenu li').click(function() {
+    $('#debugMenu li').off().click(function() {
         var sel = $(this).attr('class');
         if(sel == 'selected') {
             $('.dbcontent li').css('display', 'none');            // コンテンツを非表示にする
@@ -27,7 +27,7 @@
         };
     });
     // ツールバーの外側をクリック
-    $('.debugBK, .closeButton').click(function(){
+    $('.debugBK, .closeButton').off().click(function(){
         $('#debugMenu li').removeClass('selected');           // select状態を解除
         $('.dbcontent li').css('display','none');           // コンテンツを一旦すべて非表示にする
         $('.debugBar').animate({'width':'1.0em'},180);

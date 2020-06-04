@@ -29,6 +29,7 @@
             htop = self.offset().top;
             self.css("height", hsize - htop + "px");
         });
+        $(window).resize();
     };
     // 親要素の幅に調整する
     $.fn.adjustWidth = function () {
@@ -38,6 +39,7 @@
             wleft = self.parent().offset().left;
             self.css("width", wsize - wleft + "px");
         });
+        $(window).resize();
     };
     $.fn.paddingWidth = function() {
         var widths = {
@@ -76,16 +78,19 @@
                 }
             }
         });
-        self.find(".execButton").click(function () {
+        self.find(".execButton").off().click(function () {
+//            alert($(this).attr('class'));
             var setobj = {};
             self.find("*").each(function () {
                 var nm = $(this).attr('name');
                 if (nm) setobj[nm] = $(this).val();
             });
+//            alert("call" + callback);
             callback(setobj);
             return false;
         });
         this.find(".openButton").click();
+        return false;
     };
     // Yes/No ダイアログボックスを開く
     $.dialogBox = function (title,msg, callback) {
@@ -115,13 +120,13 @@
         dialog.css({'left': x + 'px','top': y + 'px'});
         dialog.fadeIn('fast');
         // クローズイベントを登録
-        dialog.find(".okButton").click(function () {
+        dialog.find(".okButton").off().click(function () {
             dialog.fadeOut('fast');
             $('.popup-BK').remove();
             $(".dialog-box").remove();
             callback(true);
         });
-        dialog.find(".cancelButton").click(function () {
+        dialog.find(".cancelButton").off().click(function () {
             dialog.fadeOut('fast');
             $('.popup-BK').remove();
             $(".dialog-box").remove();

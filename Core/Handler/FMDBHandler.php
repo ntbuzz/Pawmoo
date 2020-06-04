@@ -46,14 +46,14 @@ class FMDBHandler extends FileMaker {
 		$this->Finds = array();
 		$this->Connect($this->LayoutName);
 		self::$FMHandle = DatabaseHandler::getDataSource('FMDB');
-		APPDEBUG::MSG(19, DatabaseParameter['Filemaker']);
+		APPDEBUG::MSG(13, DatabaseParameter['Filemaker']);
 	}
 //==================================================================================================
 //	Connect: テーブル名
 //	fields[] 連想配列にフィールド名をセットする
 //==================================================================================================
 function Connect($layout) {
-	APPDEBUG::MSG(19, $this->LayoutName, 'レイアウト');
+	APPDEBUG::MSG(13, $this->LayoutName, 'レイアウト');
 	$this->fields = array();
     // 先頭のレコードをひとつダミーで読み込む
     $findCommand = $this->newFindAllCommand($this->LayoutName);
@@ -62,14 +62,14 @@ function Connect($layout) {
 	if (FileMaker::isError($result)) {	// エラー処理..
 		$this->errCode = $result->getCode();
 		$this->errMessage= $result->getMessage();
-		APPDEBUG::MSG(19, $result, 'エラー結果');
+		APPDEBUG::MSG(13, $result, 'エラー結果');
 		throw new Exception('ExecError');
 	}
     $fmfields = $result->getFields();
 	foreach($fmfields as $key) {
 		$this->columns[$key] = $key;
 	}
-	APPDEBUG::MSG(9, $this->columns, "Columns @ {$this->Database}({$this->LayoutName})");
+	APPDEBUG::MSG(13, $this->columns, "Columns @ {$this->Database}({$this->LayoutName})");
 	// フィールド型を記憶する
 	$this->fmtconv = array();
     $layoutObj = $result->getLayout();
@@ -160,7 +160,7 @@ public function findRecord($row, $relations = NULL,$sort = NULL) {
     $this->recordMax = 0;
 	$this->r_pos = 0;
 	$this->r_fetched = 0;		// 取り出したレコード数
-	APPDEBUG::MSG(9, $this->Finds, "検索設定");
+	APPDEBUG::MSG(13, $this->Finds, "検索設定");
 	$this->onetime = 1;
 }
 //===============================================================================
@@ -177,7 +177,7 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
     	    	"limitrec" => $this->limitrec,
     		],
     		"検索設定" => $this->Finds
-		],9);
+		],3);
 		//複合検索クラスのインスタンスを作成
 		$compoundFind = $this->newCompoundFindCommand($this->LayoutName);
 		//検索条件クラスのインスタンスを作成する
@@ -192,7 +192,7 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 			$findInst->setOmit((substr($opr,0,3) == 'NOT'));
 			$compoundFind->add($n++,$findInst);
 		}
-		if($this->skip_rec == 0) APPDEBUG::MSG(19, $compoundFind, "先頭から取得");
+		if($this->skip_rec == 0) APPDEBUG::MSG(13, $compoundFind, "先頭から取得");
 		//ソート順の設定
 		$kn = 1;
 		foreach($sortby as $akey) {
@@ -207,7 +207,7 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 			$this->errCode = $result->getCode();
 			$this->errMessage= $result->getMessage();
             if ($this->errCode !== '401') {
-				APPDEBUG::MSG(9, $this->errMessage, "エラー");
+				APPDEBUG::MSG(3, $this->errMessage, "エラー");
 				throw new Exception('ExecError');
             }
 		    $this->recordMax = 0;
@@ -222,7 +222,7 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 		    $this->FetchRecords = $result->getRecords();
 			$this->r_pos = 0;
 		}
-		APPDEBUG::MSG(19, $this->r_fetched, "Fetch: ");
+		APPDEBUG::MSG(13, $this->r_fetched, "Fetch: ");
 	}
 	APPDEBUG::debug_dump($this->onetime, [
 		'fetched' => [
@@ -230,7 +230,7 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 			"r_fetched" => $this->r_fetched,
 			"r_pos" => $this->r_pos ,
 		],
-	],9);
+	],3);
 	if($this->r_fetched == 0) {
 		return;				// 検索結果がゼロ
 	}
@@ -252,7 +252,7 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 // レコードIDをプライマリキーに設定するバージョン
 //==================================================================================================
 	public function replaceRecord($wh,$row) {
-		APPDEBUG::MSG(9, $row );
+		APPDEBUG::MSG(13, $row );
 		$recordId = reset($wh);			// 先頭の値がPrimaryKey = recordId
 		if(empty($recordId)) {					// ID指定が無いときは空レコード生成
 			// 空のレコードを生成

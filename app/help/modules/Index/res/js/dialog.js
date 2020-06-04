@@ -1,5 +1,5 @@
 //
-$("#add-paragraph").click(function () {  // セクションブロックから呼び出される
+$("#add-paragraph").off().click(function () {  // セクションブロックから呼び出される
     var obj = $('.tabmenu .tab li.selected');   // コンテンツエリアは選択されていない場合がある
     var para_obj = {    // フォームのデータを生成
         section_id: obj.attr("id"),
@@ -20,10 +20,11 @@ $("#add-paragraph").click(function () {  // セクションブロックから呼
         });
         return false;
     });
+    return false;
 });
 //==============================================================================
 //   セクションを追加するダイアログ表示＆書き込み処理
-$(".add-section").click(function () {
+$(".add-section").off().click(function () {
     if (ChapterData.length == 0) {
         alert("チャプターが選択されていません！");
         return false;
@@ -46,9 +47,10 @@ $(".add-section").click(function () {
         });
         return false;
     });
+    return false;
 });
 // セクション編集メニュー
-$("#edit-section").click(function () {
+$("#edit-section").off().click(function () {
     var id = $('.tabmenu .tab li.selected').attr("id");
     // JSONメソッドを使ってレコードデータを入手する
     var url = location.origin + location.pathname.controller_path("section/json") + id;
@@ -67,9 +69,10 @@ $("#edit-section").click(function () {
             return false;
         });
     });
+    return false;
 });
 // セクション削除メニュー
-$("#delete-section").click(function () {
+$("#delete-section").off().click(function () {
     var id = $('.tabmenu .tab li.selected').attr("id");
     // データを取得
     var url = location.origin + location.pathname.controller_path("section/json") + id;
@@ -91,7 +94,7 @@ $("#delete-section").click(function () {
 //  ツールバーメニューのクリックアクション
 //==============================================================================
 //   パートレコード編集ダイアログ表示＆書き込み処理
-$("#part_edit").click(function () {
+$("#part_edit").off().click(function () {
     if (!("id" in PartData)) {
         alert("パートが選択されていません！");
         return false;
@@ -106,10 +109,11 @@ $("#part_edit").click(function () {
         });
         return false;
     });
+    return false;
 });
 //==============================================================================
 //   パートレコードを追加するダイアログ表示＆書き込み処理
-$("#part_add").click(function () {
+$("#part_add").off().click(function () {
     var part_obj = {
         disp_id:    0,
         title:      '',
@@ -125,10 +129,11 @@ $("#part_add").click(function () {
         });
         return false;
     });
+    return false;
 });
 //==============================================================================
 //   パートレコードを削除
-$("#part_del").click(function () {
+$("#part_del").off().click(function () {
     if (!("id" in PartData)) {
         alert("パートが選択されていません！");
         return false;
@@ -148,7 +153,7 @@ $("#part_del").click(function () {
 });
 //==============================================================================
 //   セクションを追加するダイアログ表示＆書き込み処理
-$("#chap_edit").click(function () {
+$("#chap_edit").off().click(function () {
     if (!("id" in ChapterData)) {
         alert("チャプターが選択されていません！");
         return false;
@@ -163,10 +168,11 @@ $("#chap_edit").click(function () {
         });
         return false;
     });
+    return false;
 });
 //==============================================================================
 //   チャプターレコードを追加するダイアログ表示＆書き込み処理
-$("#chap_add").click(function () {
+$("#chap_add").off().click(function () {
     if (!("id" in PartData)) {
         alert("追加するパートが選択されていません！");
         return false;
@@ -191,7 +197,7 @@ $("#chap_add").click(function () {
 });
 //==============================================================================
 //   チャプターレコードを削除
-$("#chap_del").click(function () {
+$("#chap_del").off().click(function () {
     if (!("id" in ChapterData)) {
         alert("チャプターが選択されていません！");
         return false;
@@ -211,14 +217,14 @@ $("#chap_del").click(function () {
 });
 //==============================================================================
 //   テキストをクリップボードへコピー
-$("#ctxCopy").click(function () {
+$("#ctxCopy").off().click(function () {
 //    alert('COPY');
     document.execCommand('copy');
     return false;
 });
 //==============================================================================
 //   テキスト形式に変換
-$('#text_downld').click(function () {
+$('#text_downld').off().click(function () {
     var url = location.pathname.controller_path("index/download");
     location.href = url;
 /*

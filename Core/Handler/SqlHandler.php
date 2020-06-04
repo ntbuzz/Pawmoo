@@ -30,7 +30,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 		$this->table = $table;
 		$this->dbb = DatabaseHandler::getDataSource($handler);
 		$this->Connect();
-		APPDEBUG::MSG(9,$this->columns,"フィールド名リスト");
+		APPDEBUG::MSG(13,$this->columns,"フィールド名リスト");
 		$this->handler = $handler;
 	}
 //==================================================================================================
@@ -59,7 +59,7 @@ public function SetPaging($pagesize, $pagenum) {
 	$this->startrec = $pagesize * ($pagenum - 1);		// 開始レコード番号
 	if($this->startrec < 0) $this->startrec = 0;
 	$this->limitrec = $pagesize;		// 取得レコード数
-	APPDEBUG::arraydump(9,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
+	APPDEBUG::arraydump(13,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
 }
 //==================================================================================================
 //	findRecord(row): 
@@ -153,7 +153,7 @@ protected function sql_safequote(&$value) {
 //===============================================================================
 // 配列要素からのWHERE句を作成
 	private function sql_makeWHERE($row) {
-		APPDEBUG::MSG(11, $row );
+		APPDEBUG::MSG(13, $row );
 		$sql = $this->makeOPR('AND', $row);
 /*
 		$n = array_depth($row);
@@ -204,7 +204,7 @@ protected function sql_safequote(&$value) {
 // OR => [ フィールド名 => 検索条件, フィールド名 => 検索条件, ... ] どれかが一致する
 // NOR => [ フィールド名 => 検索条件, フィールド名 => 検索条件, ... ] どれかが一致するものを除外 NOT OR
 	private function SingleSQL($opr, $row) {
-		APPDEBUG::MSG(11, $row );
+		APPDEBUG::MSG(13, $row );
 		$and_sql = ''; $and_op = '';
 		$opr_str = ($opr==='OR' || $opr==='NOR') ? ' OR ' : ' AND ';
 		foreach($row as $key => $val) {

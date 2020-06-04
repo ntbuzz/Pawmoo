@@ -1,14 +1,14 @@
 //
 //==============================================================================
 //   テキストをクリップボードへコピー
-$("#ctxCopy").click(function () {
+$("#ctxCopy").off().click(function () {
 //    alert('COPY');
     document.execCommand('copy');
     return false;
 });
 //==============================================================================
 //   テキスト形式に変換
-$('#text_downld').click(function () {
+$('#text_downld').off().click(function () {
     var url = location.pathname.controller_path("index/download");
     location.href = url;
 /*

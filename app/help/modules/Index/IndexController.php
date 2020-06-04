@@ -10,12 +10,13 @@ class IndexController extends AppController {
 //===============================================================================
 //	クラス初期化処理
 	protected function ClassInit() {
+//		MySession::PostToEnv(['TabSelect']);
 //		$this->SetEvent('Model.OnGetRecord',$this->View->Helper,"echo_dump");
 	}
 //===============================================================================
 // デフォルトの動作
 public function DisplayAction() {
-	APPDEBUG::MSG(24,":Test");
+	APPDEBUG::MSG(15,":Test");
 	$this->View->PutLayout();
 }
 //===============================================================================
@@ -29,11 +30,11 @@ public function RedirectAction() {
 public function ViewAction() {
 	$Part = App::$Params[0];	// Doc-Part
 	$Chap = App::$Params[1];	// Doc-Chapter
-	$Tabs = MySession::$PostEnv['TabSelect'];	// POSTされた変数
+	$Tabs = MySession::$PostEnv['TabSelect'];	// POSTまたはENV変数から
+	unset(MySession::$EnvData['TabSelect']);	// ENV変数は消去
 	// URLに指定があればそちらを優先
 	if(!empty(App::$Params[2])) $Tabs = App::$Params[2];
 	if(empty($Tabs)) $Tabs = 0;
-	unset(MySession::$PostEnv['TabSelect']);
 	// ツリーメニューを構築
 	$this->Model->MakeOutline();
 	// Section データを取得
@@ -43,7 +44,7 @@ public function ViewAction() {
 
 	$this->Section->getSectionDoc($Chap);
 	$this->ViewSet(['Part' => $Part,'Chapter' => $Chap,'Section' => $this->Section->Records, 'Tabmenu' => $Tabs]);
-	APPDEBUG::arraydump(13, [
+	APPDEBUG::arraydump(5, [
 		'パラメータ' => App::$Params,
 		'レコード' => $this->Model->Records,
 		'アウトライン' => $this->Model->outline,

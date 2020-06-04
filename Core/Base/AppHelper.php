@@ -33,13 +33,13 @@ public function getFilter($alt = '') {
 //===============================================================================
 // 親のビューテンプレートを呼び出す
 public function ViewTemplate($layout) {
-	APPDEBUG::MSG(12, $layout,"HelperView");
+	APPDEBUG::MSG(11, $layout,"HelperView");
 	$this->AOwner->ViewTemplate($layout);
 }
 //===============================================================================
 // プロパティ変数のセット
 public function SetData($data) {
-	APPDEBUG::MSG(12, $data);
+	APPDEBUG::MSG(11, $data);
 	foreach($data as $key => $val) {
 		$this->$key = $val;
 	}
@@ -47,7 +47,7 @@ public function SetData($data) {
 //===============================================================================
 // リソースの出力
 public function Resource($res) {
-	APPDEBUG::MSG(12, $res);
+	APPDEBUG::MSG(11, $res);
 	list($filename,$ext) = extractBaseName($res);
 	// モジュール名と拡張子を使いテンプレートを決定する
 	$AppStyle = new AppStyle($this->ModuleName, $ext);
@@ -169,7 +169,7 @@ public function makePageLinks() {
 // ヘッダー付きのテーブルリスト表示
 public function makeListTable($deftab) {
 	// デバッグ情報
-	APPDEBUG::arraydump(2,[
+	APPDEBUG::arraydump(1,[
 		'deftab' => $deftab,
 		'Page' => $this->MyModel->page_num,
 		'Size' => $this->MyModel->pagesize,
@@ -204,7 +204,7 @@ public function Tabset($name,$menu,$sel) {
 //===============================================================================
 // タブリストの生成 (UL版)
 public function TabContents($sel,$default='') {
-	APPDEBUG::MSG(12, $sel);
+	APPDEBUG::MSG(11, $sel);
 	$tab = $default; 	// $this->getParams(0,$default);
 	return '<li' . (($tab == $sel) ? '' : ' class="hide"') . ">\n";
 }
@@ -228,7 +228,7 @@ public function Form($act, $attr) {
 //	$this->Select ($key,$name)
 //
 public function Select($key,$name) {
-	APPDEBUG::MSG(2, $this->MyModel->Select);
+	APPDEBUG::MSG(1, $this->MyModel->Select);
 	$dat = $this->MyModel->RecData[$key];
 	echo "<SELECT name='{$name}'>";
 	foreach($this->MyModel->Select[$key] as $ttl => $id) {

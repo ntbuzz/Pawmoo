@@ -433,14 +433,15 @@
 
 ◆ MySession クラス
 ・静的変数
-  MySession::$PostEnv;                  // REQUEST されてきた変数(POST/GET)
+  MySession::$EnvData;                  // セッションに記憶する環境変数
+  MySession::$PostEnv;                  // 環境変数とREQUEST されてきた変数(POST/GET)
 
 ・静的メソッド
   MySession::InitSession()              // セッション変数を初期化する(Main.phpのみで使用)
   MySession::CloseSession()             // セッション変数を書き戻す(Main.phpのみで使用)
   MySession::PostVars(...$arr)          // POST変数を取り出す、引数は連想配列のキー名
   MySession::SetDefault($nm,$val)       // POST変数に値が無ければ、$val値をセット
-  MySession::SetVars($nm,$val)          // POST変数に値をセット
+  MySession::SetEnvVar($nm,$val)          // POST変数に値をセット
 
 ◆ SendMail クラス
 ・静的変数

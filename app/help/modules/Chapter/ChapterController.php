@@ -9,12 +9,6 @@ class ChapterController extends cutomController {
 // データを更新してREFERERに戻す
 public function DeleteAction() {
 	$num = App::$Params[0];
-	debug_dump(DEBUG_DUMP_NONE, [
-		'番号' => $num,
-		'POST' => $_REQUEST,
-		'データ' => MySession::$PostEnv,
-		'タブセット' => MySession::$PostEnv['TabSelect'],
-	]);
 	$this->Model->deleteRecordset($num);
 	echo App::$Referer;
 }

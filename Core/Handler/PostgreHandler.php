@@ -15,7 +15,7 @@ class PostgreHandler extends SQLHandler {
 //==================================================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
 protected function Connect() {
-	APPDEBUG::MSG(19,$this->table);
+	APPDEBUG::MSG(13,$this->table);
 	// テーブル属性を取得
 	$sql = "SELECT * FROM information_schema.columns WHERE table_name = '{$this->table}' ORDER BY ordinal_position;";
 	$result = pg_query($this->dbb, $sql);
@@ -29,12 +29,12 @@ protected function Connect() {
 		}
 		$this->columns[$row['column_name']] = $row['column_name'];
 	}
-	APPDEBUG::MSG(19,$this->columns);
+	APPDEBUG::MSG(13,$this->columns);
 }
 //==================================================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
-	APPDEBUG::MSG(9,$sql);
+	APPDEBUG::MSG(3,$sql);
 	$this->rows = pg_query($this->dbb, $sql);
 	if(!$this->rows) {
 		$res1 = pg_get_result($this->dbb);
@@ -61,7 +61,7 @@ public function getLastError() {
 //==================================================================================================
 public function replaceRecord($wh,$row) {
 	$this->sql_safequote($row);
-	APPDEBUG::MSG(19, $row );
+	APPDEBUG::MSG(13, $row );
 	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ
 	// \ をエスケープする
 	foreach($row as $key => $val) {
@@ -95,7 +95,7 @@ public function replaceRecord($wh,$row) {
 //==================================================================================================
 public function insertRecord($row) {
 	$this->sql_safequote($row);
-	APPDEBUG::MSG(19, $row );
+	APPDEBUG::MSG(13, $row );
 	// \ をエスケープする
 	foreach($row as $key => $val) {
 		$row[$key] = str_replace('\\', '\\\\', $val);

@@ -44,11 +44,6 @@ class AppController extends AppObject {
 		$this->View->__TerminateView();
 	}
 //===============================================================================
-// ログイン要求が必要ならTRUEを返す
-public function Login() {
-	return FALSE;
-}
-//===============================================================================
 // フィルタ指定の有無を判定
 public function getFilter($default = 'all') {
 	return strtolower(empty(App::$Filter) ? $default : App::$Filter);
@@ -70,7 +65,7 @@ public function PageSetup() {
 	$size= App::$Params[1];
 	if($size == 0) {
 		$size = (isset(MySession::$PostEnv['PageSize'])) ? MySession::$PostEnv['PageSize'] : 15;
-	} else MySession::$PostEnv['PageSize'] = $size;		// 新しいページサイズに置換える
+	} else MySession::$EnvData['PageSize'] = $size;		// 新しいページサイズに置換える
 	if($num == 0) $num = 1;
 	// 自分とヘルパーのパラメータを書き換える
 	App::$Params[0] =  $num;
@@ -85,7 +80,7 @@ public function PageSetup() {
 //===============================================================================
 // デフォルトの動作
 public function ListAction() {
-	APPDEBUG::MSG(14,":List");
+	APPDEBUG::MSG(12,":List");
 	$this->Model->RecordFinder([]);
 	$this->View->PutLayout();
 }
@@ -99,7 +94,7 @@ public function PageAction() {
 // 検索
 // find/カラム名/検索値
 public function FindAction() {
-	APPDEBUG::MSG(14,":Find");
+	APPDEBUG::MSG(12,":Find");
 	if(App::$ParamCount > 1 ) {
 		$row = array(App::$Filter => "={App::$Params[0]}");
 	} else {
@@ -111,7 +106,7 @@ public function FindAction() {
 //===============================================================================
 // ビュー
 public function ViewAction() {
-	APPDEBUG::MSG(14,":View");
+	APPDEBUG::MSG(12,":View");
 	try {
 		$num = App::$Params[0];
 		$this->Model->GetRecord($num);
@@ -146,7 +141,7 @@ public function UpdateAction() {
 //===============================================================================
 // デバッグダンプ
 public function DumpAction() {
-	APPDEBUG::MSG(-14,MySession::$PostEnv);
+	APPDEBUG::MSG(12,MySession::$PostEnv);
 }
 
 }

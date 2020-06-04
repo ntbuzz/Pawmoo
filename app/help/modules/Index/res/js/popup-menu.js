@@ -23,11 +23,13 @@ var popup_menu_function = {
                 });
                 return false;
             });
+            return false;
         }).fail(function (jqXHR, textStatus, errorThrown) {
             console.log("jqXHR:"+jqXHR.status);
             console.log("status:"+textStatus);
             console.log("error:"+errorThrown);
         });
+        return false;
     },
     "ctxIns": function (obj) {
         var para_obj = {        // フォームのデータを生成
@@ -47,6 +49,7 @@ var popup_menu_function = {
             });
             return false;
         });
+        return false;
     },
     "ctxAdd":"#add-paragraph",
     "ctxDel": function (obj) {
@@ -58,6 +61,7 @@ var popup_menu_function = {
         }).fail(function() {
             alert( "error:"+url );
         });
+        return false;
     },
     "ctxClear": function (obj) {
         var sec_id = obj.attr("id");
@@ -71,6 +75,7 @@ var popup_menu_function = {
                 alert( "error:"+url );
             });
         }
+        return false;
     },
 // セクション編集メニュー
     "ctxSecEdit":"#edit-section",
