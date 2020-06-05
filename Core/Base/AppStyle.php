@@ -36,9 +36,9 @@ class AppStyle {
             'charset'   => 'cmd_charset',
         ],
         '+'    => [
-            'import'        => 'cmd_import',
-            'section'       => 'cmd_section',
-            'jquery'        => 'cmd_jquery',
+            'import'    => 'cmd_import',
+            'section'   => 'cmd_section',
+            'jquery'    => 'cmd_jquery',
         ],
         '*'  => 'do_comment',
     );
@@ -50,7 +50,7 @@ class AppStyle {
     private $do_msg;            // インポートメッセージ出力のフラグ
     private $do_com;            // コメントの除去
     private $repVARS;           // 置換文字列
-//===============================================================================
+//==============================================================================
 // コンストラクタ
     function __construct($appname, $sysRoot, $modname, $filename, $ext) {
         // モジュール名(res)は共通URIモジュールとして扱う
@@ -79,7 +79,7 @@ class AppStyle {
             $this->repVARS = $myVARS;       // パラメータのみセット
         }
     }
-//===============================================================================
+//==============================================================================
 // テンプレートファイルがビュークラスフォルダに存在しなければ共通のテンプレートを探す
 // appname/modules/{module}/Layout/{name}
     private function get_exists_files($name) {
@@ -92,14 +92,14 @@ class AppStyle {
         }
         return $arr;
     }
-//===============================================================================
+//==============================================================================
 //　ヘッダ出力
 public function ViewHeader() {
     global $on_server; 
 	if($on_server === '' ) return;
     header("Content-Type: {$this->Template['head']};");
 }
-//===============================================================================
+//==============================================================================
 //　レイアウトテンプレート処理
 public function ViewStyle($file_name) {
     // スタイルシートが存在するフォルダのみをリストアップする
@@ -110,18 +110,18 @@ public function ViewStyle($file_name) {
     $this->do_com = TRUE ;                     // コメント表示設定
     // テンプレートセクション処理
     if($this->section_styles($temlatelist, $filename) === FALSE) {
-    // テンプレートセクションに指定ファイル名が見つからないときは実ファイルを探索する
-    foreach($this->Folders as $key => $file) {
-        $fn ="{$file}/{$this->Filetype}/{$filename}{$this->Template['extention']}";
-        if(file_exists($fn)) {
-            $content = file_get_contents($fn);
-            if($this->do_msg) echo "/* include({$filename}{$this->Template['extention']}) in {$key} */\n";
-            $this->output_content($content);
+        // テンプレートセクションに指定ファイル名が見つからないときは実ファイルを探索する
+        foreach($this->Folders as $key => $file) {
+            $fn ="{$file}/{$this->Filetype}/{$filename}{$this->Template['extention']}";
+            if(file_exists($fn)) {
+                $content = file_get_contents($fn);
+                if($this->do_msg) echo "/* include({$filename}{$this->Template['extention']}) in {$key} */\n";
+                $this->output_content($content);
+            }
         }
     }
 }
-}
-//===============================================================================
+//==============================================================================
 //　セクションスタイルテンプレート処理
 //  $templist   テンプレートフォルダのリスト
 //  $secname    セクション名
@@ -145,8 +145,8 @@ public function ViewStyle($file_name) {
                 if(array_key_exists($secname,$secData)) {   // filename セクションがあるか
                     $this->section_dispath($secParam,$secData[$secname]);
                     return TRUE;
+                }
             }
-        }
         }
         return FALSE;
     }
@@ -180,7 +180,6 @@ public function ViewStyle($file_name) {
             if(!is_scalar($sec)) return FALSE;    // 単純配列は認めない
             $key = $sec;
         } else $key = tag_body_name($key);         // 重複回避用の文字を削除
-
         $top_char = $key[0];
         if(array_key_exists($top_char,self::FunctionList)) {
             $tag = mb_substr($key,1);      // 先頭文字を削除
@@ -198,21 +197,21 @@ public function ViewStyle($file_name) {
                 $this->$func($sec);        // ダイレクトコマンド
             } else echo "CALL: {$func}({$tag},{$sec},vars)\n";  // 未定義のコマンド
             return TRUE;    // コマンド処理を実行
-            } else {
+        } else {
             return FALSE;   // コマンド処理ではない
         }
     }
-//==========================================================================
+//------------------------------------------------------------------------------
 // * comment コマンド
     private function do_comment($sec) {
         $vv = $this->expandStrings($sec,$this->repVARS);
-            $vv = trim(substr($vv,1));
-            echo "/* {$vv} */\n";
-        }
+        $vv = trim(substr($vv,1));
+        echo "/* {$vv} */\n";
+    }
 //------------------------------------------------------------------------------
 // cmd_XXXXX メソッドにはパラメータが渡ってくる
 // cmd_XXXX($tag, $param, $sec)
-//==========================================================================
+//------------------------------------------------------------------------------
 // * charset コマンド
     private function cmd_charset($secParam, $param,$sec) {
         echo "@charset \"{$sec}\"\n";
@@ -233,7 +232,7 @@ public function ViewStyle($file_name) {
             echo "$(function() { ";
                 $this->files_import($tmplist,$sec);
             echo "});\n";
-    }
+        }
     }
 //------------------------------------------------------------------------------
 // import コマンド
@@ -298,7 +297,7 @@ public function ViewStyle($file_name) {
             }
         }
     }
-//===============================================================================
+//==============================================================================
 //    ファイルをコンパクト化して出力
     private function output_content($content) {
         if($this->do_min) {         // コメント・改行を削除して最小化して出力する

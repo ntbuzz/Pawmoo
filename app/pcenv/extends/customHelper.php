@@ -7,14 +7,14 @@ require_once('vendor/vendor/PHPExcel/PHPExcel.php');
 require_once("vendor/vendor/PHPExcel/PHPExcel/IOFactory.php");
 require_once("vendor/vendor/mpdf50/mpdf.php");
 
-//===============================================================================
+//==============================================================================
 class customHelper  extends AppHelper {
 	// プロパティリスト
     const MyPropList = [
 		'Excel' => 'PHPExcel',
 		'PDF' => 'mPDF'
 	];
-//==================================================================================================
+//==============================================================================
 // Excel/PDFの動的クラスプロパティを生成
 // 固有クラスのため AppObject のメソッドは使用しない
 	public function __get($PropName) {

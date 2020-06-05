@@ -9,7 +9,7 @@ require_once('Core/Handler/SQLiteHandler.php');
 require_once('Core/Handler/PostgreHandler.php');
 require_once('Core/Handler/FMDBHandler.php');
 
-//==========================================================================================
+//==============================================================================
 // データベースの接続情報を保持するクラス
 // 全体で１度だけ呼び出す
 class DatabaseHandler {
@@ -26,7 +26,7 @@ class DatabaseHandler {
         ],
     ];
     private static $dbHandle = [];
-//==========================================================================================
+//==============================================================================
 // コンストラクタ
 public static function InitConnection() {
     APPDEBUG::MSG(13, self::DatabaseSpec);
@@ -36,22 +36,22 @@ public static function InitConnection() {
         APPDEBUG::MSG(13, self::$dbHandle);
     }
 }
-//==========================================================================================
+//==============================================================================
 // デストラクタ
 public static function CloseConnection() {
     self::closeDb();
 }
-//==========================================================================================
+//==============================================================================
 // ハンドルの取得
 public static function getDataSource($dbName) {
     return self::$dbHandle[$dbName];
 }
-//==========================================================================================
+//==============================================================================
 // ハンドルの取得
 public function getCallbackFunc($dbName) {
     return self::DatabaseSpec[$dbName]['callback'];      // 呼び出し関数
 }
-//==========================================================================================
+//==============================================================================
 // クローズ処理
 private static function closeDb() {
     APPDEBUG::MSG(13, self::$dbHandle);
@@ -61,7 +61,7 @@ private static function closeDb() {
     }
     self:$dbHandle = [];
 }
-//==========================================================================================
+//==============================================================================
 // PostgreSQL データベース
 private static function PgDatabase($dbdef,$action) {
     switch($action) {       //   [ .ptl, .tpl, .inc, .twg ]
@@ -81,7 +81,7 @@ private static function PgDatabase($dbdef,$action) {
         break;
     }
 }
-//==========================================================================================
+//==============================================================================
 // SQlite3 データベース
 private static function SQLiteDatabase($dbdef,$action) {
     switch($action) {       //   [ .ptl, .tpl, .inc, .twg ]
@@ -98,7 +98,7 @@ private static function SQLiteDatabase($dbdef,$action) {
         break;
     }
 }
-//==========================================================================================
+//==============================================================================
 // 動作確認用(FMDB)
 static function Connect($dbName,$layout) {
     $dbb = self::$dbHandle[$dbName];

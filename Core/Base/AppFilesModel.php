@@ -9,7 +9,7 @@ class AppFilesModel extends AppObject {
     public $TopFolder;		// フォルダトップ
     public $SubFolder;		// 付加文字列
     private $Folders;       // フォルダ操作クラス
-//===============================================================================
+//==============================================================================
 // コンストラクタでフォルダ内を探索
     function __construct($owner) {
         // 継承元クラスのコンストラクターを呼ぶ
@@ -17,20 +17,20 @@ class AppFilesModel extends AppObject {
         $this->setProperty(static::$DatabaseSchema);
         $this->__InitClass();                       // クラス固有の初期化メソッド
     }
-//===============================================================================
+//==============================================================================
 // クラス変数の初期化(override)
     protected function __InitClass() {
         $this->Folders = new FlatFolder();
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
     }
-//===============================================================================
+//==============================================================================
 // 指定フォルダの一覧
     public function SelectFolder($home) {
         $this->ActiveHome = $home;
         $this->TopFolder = $this->Home[$home] . $this->SubFolder;
 //        if(!file_exists($this->TopFolder)) mkdir($this->TopFolder);
     }
-//===============================================================================
+//==============================================================================
 // 指定フォルダの一覧
     public function GetSubFolder($home) {
         $this->TopFolder = $this->Home[$home] . $this->SubFolder;
@@ -39,13 +39,13 @@ class AppFilesModel extends AppObject {
 //            mkdir($this->TopFolder);
         }
     }
-//===============================================================================
+//==============================================================================
 // 指定フォルダの存在確認
     public function CheckFolder($home) {
         $this->TopFolder = $this->Home[$home] . $this->SubFolder;
 //        if(!file_exists($this->TopFolder)) mkdir($this->TopFolder);
     }
-//===============================================================================
+//==============================================================================
 // 指定ファイルのフルパス
     public function getFullpath($home,$fname, $mkdir = FALSE) {
         $tagdir = $this->Home[$home] . "{$this->SubFolder}";
@@ -54,7 +54,7 @@ class AppFilesModel extends AppObject {
         }
         return "{$tagdir}/{$fname}";
     }
-//===============================================================================
+//==============================================================================
 // ファイル移動
     public function MoveFile($fcat,$fname,$tocat) {
         $frname = $this->getFullpath($fcat,$fname);
@@ -64,7 +64,7 @@ class AppFilesModel extends AppObject {
         file_move($srcname, $tagname);			// ファイル移動、移動先のフォルダがなければ作成
         echo $fname . ' を移動しました';
     }
-//===============================================================================
+//==============================================================================
 // フォルダ内の全ファイル移動
     public function MoveAllFiles($frcat,$tocat) {
         $this->GetSubFolder($frcat);			// 移動もとのファイル一覧を取得
@@ -75,14 +75,14 @@ class AppFilesModel extends AppObject {
 //			echo $srcname . "=>" . $tagname ."\n";
         }
     }
-//===============================================================================
+//==============================================================================
 // ファイル削除
     public function DeleteFile($fcat,$fname) {
         $srcname = LocalCharset($this->getFullpath($fcat,$fname));
         if(file_exists($srcname)) unlink($srcname);         // 移動先に同名ファイルがあれば削除
         echo $fname . ' を削除しました';
     }
-//===============================================================================
+//==============================================================================
 // 指定フォルダのファイル一括削除
     public function DeleteAllFiles($home) {
         $this->GetSubFolder($home);			// 一覧を取得
@@ -92,7 +92,7 @@ class AppFilesModel extends AppObject {
 //			echo $srcname;
         }
     }
-//===============================================================================
+//==============================================================================
 // フォルダ内を探査する
     private function GetList($dirs) {
 //    echo "GET::{$dirs}\n";
@@ -128,7 +128,7 @@ class AppFilesModel extends AppObject {
 		APPDEBUG::MSG(13,$this->Files);
         return true;
     }
-//===============================================================================
+//==============================================================================
 // ZIPファイルの作成
     public function MakeZipFile($filepath,$zipname) {
 	    // Zipクラスロード

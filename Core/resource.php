@@ -33,17 +33,6 @@ LangUI::construct($lang,'');
 MySession::InitSession();
 // モジュール名と拡張子を使いテンプレートを決定する
 $AppStyle = new AppStyle($appname,$appRoot, $controller, $filename, $ext);
-// =================================
-debug_dump(DEBUG_DUMP_NONE, [
-    'システム情報' => [
-        "APPROOT"   => $appRoot,
-        "MODULE"    => $controller,
-        "FILE"      => $filename,
-        "EXT"       => $ext,
-    ]
-]);
-// =================================
-
 // ヘッダの出力
 $AppStyle->ViewHeader();
 // 結合ファイルの出力

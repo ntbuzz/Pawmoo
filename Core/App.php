@@ -3,7 +3,7 @@
  * PHPフレームワーク
  *  App:  システム変数その他を保持するグローバルクラス
  */
- //==================================================================================================
+//==============================================================================
 class App {
     public static $SysVAR;        // URIROOT, WEBROOT, URI, QUERY 変数
     public static $AppName;         // アプリケーション名
@@ -20,7 +20,7 @@ class App {
     public static $RunTime;         // コントローラを呼び出した時間
     private static $ReLocate;        // URLの書き換え
     private static $execURI;
-//===============================================================================
+//==============================================================================
 // 静的クラスでのシステム変数初期化
 	public static function __Init($appname,$app_uri,$module,$query,$uri) {
         self::$AppName = $appname;
@@ -54,27 +54,25 @@ class App {
             'controller' => $controller,
             'method' => $method,
             'filter' => $filter,
-//            'query' => http_build_query($query),
             );
             // リクエスト情報を記憶
-            MySession::SetEnvVar('sysVAR',self::$SysVAR);
+        MySession::SetEnvVar('sysVAR',self::$SysVAR);
     }
-//==================================================================================================
+//==============================================================================
 // メソッドの置換
 public static function ChangeMTHOD($module,$method,$relocate = TRUE) { 
     self::$execURI['controller'] = $module;
     self::$execURI['method'] = $method;
-//    if($relocate) echo "RELOCATE!!!!\n".array_to_URI(self::$execURI);
     self::$ReLocate = $relocate;        // URLの書き換え
 }
-//==================================================================================================
+//==============================================================================
 // メソッドの置換
 public static function getRelocateURL() { 
     if(self::$ReLocate === FALSE) return NULL;
     $url = array_to_URI(self::$execURI);
     return $url;
 }
-//==================================================================================================
+//==============================================================================
 // デバッグメッセージ
     private static function DEBUG($lvl,$msg) { 
         if(DEBUG || ($lvl >= DEBUG_LEVEL)) {
@@ -83,46 +81,19 @@ public static function getRelocateURL() {
                 echo "{$msg}\n";
             } else {
                 echo "msg obj dump\n";
-                echo "=======================================================\n";
+                echo str_repeat("=", 50)."\n";
                 print_r($msg);
             }
             echo "</pre>\n";
         }
     }
-//==================================================================================================
+//==============================================================================
 // アプリケーションフォルダパスを取得
 public static function AppPath($path) {
     $appname = self::$AppName;
     return "app/{$appname}/{$path}";
 }
-/*
-    使用しない
-//==================================================================================================
-// appモジュールファイルの読込
-public static function appUses($cat,$modname) {
-    $mod = explode('/',$modname);
-    $tagfile = ($mod[0] == 'modules') ? "modules/{$mod[1]}/{$mod[1]}{$cat}" : "{$modname}/{$cat}";
-    $reqfile = self::AppPath("{$tagfile}.php");
-    if(file_exists ($reqfile)) {
-        require_once $reqfile;
-        return 1;
-    }
-    self::DEBUG(92," FAIL:" . getcwd() . '/' . $reqfile);
-    return 0;
-}
-//==================================================================================================
-// appName/Models モジュールファイルの読込
-public static function appModels($modname) {  
-    $reqfile = self::AppPath("Models/{$modname}Model.php");
-    if(file_exists ($reqfile)) {
-        require_once $reqfile;
-        return 1;
-    }
-    self::DEBUG(92," FAIL:" . getcwd() . '/' . $reqfile);
-    return 0;
-}
-*/
-//==================================================================================================
+//==============================================================================
 // appコントローラと付属モジュールファイルの読込
 public static function appController($controller) {  
     // モジュールファイルを読み込む
@@ -140,19 +111,19 @@ public static function appController($controller) {
         }
     }
 }
-//==================================================================================================
+//==============================================================================
 // webrootファイルのパスに付加パスを付けた文字列
 public static function getSysRoot($path = '') {  
     if($path[0] == '/') $path = mb_substr($path,1);
     return self::$sysRoot . strtolower($path);
 }
-//==================================================================================================
+//==============================================================================
 // webrootファイルのパスに付加パスを付けた文字列
 public static function getAppRoot($path = '') {  
     if($path[0] !== '/') $path = "/{$path}";
     return self::$appRoot . strtolower($path);
 }
-//==================================================================================================
+//==============================================================================
 // webrootファイルの読込タグ出力（単独）
     private static function IncludeTag($tagfile) {
         if(is_array($tagfile)) {
@@ -175,14 +146,14 @@ public static function getAppRoot($path = '') {
     	default:
 	    }
     }
-//==================================================================================================
+//==============================================================================
 //  webrootファイルの読込タグ出力（単独・配列）
     public static function WebInclude($files) {
         if(is_array($files)) {
             foreach($files as $nm) self::IncludeTag($nm);
         } else self::IncludeTag($files);
     }
-//==================================================================================================
+//==============================================================================
 // imagesのインクルードタグ出力
     public static function ImageSRC($name, $attr) {
         $root = self::$appRoot;

@@ -1,17 +1,22 @@
 <?php
 
-define('HOST_SPEC','http://192.168.1.1/');
-define('SQLITE_DB',__DIR__ . '/sqlite3.db');
-define('PG_HOST','localhost');
-define('PG_PORT',  '5432');
-define('PG_DB',  'pg_database');
-
-define("VIEWFILE",0);
-define("POSTFILE",1);
-define("DRAGFILE",2);
+define("LOGIN_NEED",TRUE);		// ログインを要求する
 
 define('DEFAULT_CONTROLLER', 'index');
 define('DEFAULT_LANG', 'ja');				// 言語ファイル
+
+// それぞれのデータベース接続パラメータ定義
+//--------------------------------------------
+// SQLite3データベース
+define('SQLITE_DB',__DIR__ . '/sqlite3.db');
+//--------------------------------------------
+// PostgreSQLのサーバー定義
+define('PG_HOST','localhost');
+define('PG_PORT',  '5432');
+define('PG_DB',  'pg_database');
+//--------------------------------------------
+// FileMakerのサーバー定義
+define('HOST_SPEC','http://192.168.1.1/');
 
 const DatabaseParameter  = [
 	'Postgre' =>  array(
