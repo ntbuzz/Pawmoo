@@ -6,20 +6,10 @@ class LoginController extends AppController {
 //==============================================================================
 // ログイン要求を処理する
 public function LoginAction() {
-	debug_dump(0, [
-		"SESSION" => $_SESSION,
-		"ENVDATA" => MySession::$EnvData,
-		"POSTENV" => MySession::$PostEnv,
-	]);
 	$login = MySession::getLoginInfo();
 	$newlogin = $this->Model->SetLoginInfo(MySession::$PostEnv);
 	if(!empty($newlogin)) {
-		debug_dump(1, [
-			'ログイン中' => $login,
-			'再ログイン' => $newlogin,
-		]);
 		MySession::SetLogin($newlogin);
-//		$url = App::getAppRoot();
 		$url = App::$SysVAR['URI'];
 		header("Location:{$url}");
 	}
@@ -33,7 +23,7 @@ public function LoginAction() {
 //==============================================================================
 // ログアウト処理
 public function LogoutAction() {
-	MySession::ClearLogin();
+	MySession::ClearLogin();		// ログイン情報を接セッションから消去
 	$url = App::getAppRoot();
 	header("Location:{$url}");
 }

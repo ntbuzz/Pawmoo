@@ -16,18 +16,18 @@ class APPDEBUG {
     private static $RunTime;           // 測定開始時刻
     public static $LevelMsg;           // レベルメッセージの配列
 
-    //===============================================================================
+    //==========================================================================
     // メッセージ出力レベルの設定
     public static function INIT($lvl){
         self::$MsgLevel = $lvl;
         self::$LevelMsg = array('');
     }
-    //==================================================================================================
+    //==========================================================================
     // 実行時間測定開始
     public static function RUN_START() {
         self::$RunTime = microtime(TRUE);
     }
-    //==================================================================================================
+    //==========================================================================
     // 実行時間表示
     public static function RUN_FINISH($lvl) {
         $tm = round((microtime(TRUE) - self::$RunTime), 2);     // 少数2位まで
@@ -37,12 +37,12 @@ class APPDEBUG {
             "メモリ消費" => "最大: {$maxmem} MB",
         ]);
     }
-    //==================================================================================================
+    //==========================================================================
     // メッセージ要素の並替え
     public static function MSG_SORT() {
         ksort( self::$LevelMsg );
     }
-    //==================================================================================================
+    //==========================================================================
     // バックトレースから呼び出し元の情報を取得
     private static function backtraceinfo($stop=FALSE){
         $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,3);    // 呼び出し元のスタックまでの数
@@ -61,7 +61,7 @@ class APPDEBUG {
         $str = "{$fn}->" . $dbinfo[2]['function'];
         return $str;
     }
-    //==================================================================================================
+    //==========================================================================
     // デバッグ用のメッセージ出力
     public static function MSG($lvl,$obj, $msg = '',$stop=FALSE){
         if(!DEBUGGER) return;
@@ -79,20 +79,19 @@ class APPDEBUG {
         }
         self::db_echo($lvl, "\n</pre>\n");
     }
-    //===============================================================================
+    //==========================================================================
     // デバッグダンプ
     public static function DumpMessage(){
         echo 'RunTime：' . (time() - self::$RunTime) . '秒';
-        echo "================================================\n";
+        echo str_repeat("=", 30)."\n";
         foreach(self::$LevelMsg as $key => $msg) {
             echo "メッセージ{$key}\n{$msg}";
         }
     }
-    //===============================================================================
+    //==========================================================================
     // メッセージ登録
     private static function db_echo($lvl,$msg,$is_safe = FALSE) {
         if(empty($msg)) return;
-//echo "MSG = '{$msg}'\n";
         if($is_safe && $msg !== '') $msg = htmlspecialchars($msg);
         if($lvl < 0) {
             echo $msg;
@@ -101,14 +100,13 @@ class APPDEBUG {
             else self::$LevelMsg[$lvl] = $msg;
         }
     }
-    //===============================================================================
+    //==========================================================================
     // デバッグ情報ダンプ
     public static function debug_dump($lvl,$arr = [] ,$mlvl = 0){
         if(!DEBUGGER || ($lvl <= 0)) return;
         self::db_echo($mlvl, "<pre>\n");
         foreach($arr as $msg => $obj) {
             self::db_echo($mlvl,"------- {$msg} -----\n");
-//echo "DUMP:{$lvl}\n";var_dump($obj);
             if(empty($obj)) self::db_echo($mlvl,EMPTY_MSG);
             else if(is_scalar($obj)) {
                 self::db_echo($mlvl,$obj);
@@ -121,7 +119,7 @@ class APPDEBUG {
         }
         self::db_echo($mlvl,"</pre>\n");
     }
-    //===============================================================================
+    //==========================================================================
     // デバッグ配列のダンプ
     public static function arraydump($lvl,$arr=[]) {
         if(!DEBUGGER) return;
@@ -142,7 +140,7 @@ class APPDEBUG {
             self::db_echo($lvl, $arr,TRUE);              // スカラー要素の出力
         self::db_echo($lvl, "</pre>\n");
     }
-    //===============================================================================
+    //==========================================================================
     // 配列のダンプ
     private static function dumpobj($obj,$indent,$level){
         if(is_array($obj)) {    // 配列出力
@@ -166,6 +164,3 @@ class APPDEBUG {
         }
     }
 }
-// デバッグクラス
-//global $DBGbgMSG;
-//$DbgMSG = new APPDEBUG();

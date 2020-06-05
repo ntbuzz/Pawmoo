@@ -1,5 +1,4 @@
 <?php
-
 /* -------------------------------------------------------------
  * Biscuits(MAP)ミニフレームワーク
  *   Main: メイン処理
@@ -24,7 +23,6 @@ require_once('Base/LangUI.php');           // static class
 APPDEBUG::INIT(10);
 // タイムゾーンの設定
 date_default_timezone_set('Asia/Tokyo');
-//echo setlocale(LC_ALL,0);
 
 $redirect = false;      // リダイレクトフラグ
 
@@ -47,14 +45,7 @@ if(empty($appname) || !file_exists("app/$appname")) {
 require_once("app/{$appname}/Config/config.php");
 // コントローラーファイルが存在するか確認する
 if(!is_extst_module($appname,$controller,'Controller')) {
-    debug_dump(0, [
-        'モジュールチェック' => [
-            "appname"=> $appname,
-            "Controller" => $controller,
-        ],
-    ]);
     $controller = ucfirst(strtolower(DEFAULT_CONTROLLER)); // 指定がなければ 
-//    $module[0] = $controller;
     $redirect = true;
 }
 // リダイレクトする時はコントローラーが書換わっているので調整する
@@ -68,17 +59,6 @@ $ReqCont = [
 $requrl = array_to_URI($ReqCont);
 // コントローラ名やアクション名が書き換えられてリダイレクトが必要なら終了
 if($redirect) {
-    debug_dump(0, [
-        'リダイレクト情報' => [
-            "SERVER" => $_SERVER['REQUEST_URI'],
-            "AppROOT"=> $approot,
-            "appname"=> $appname,
-            "Module" => $module,
-            "Query"    => $q_str,
-        ],
-        "ReqCont" => $ReqCont,
-        "Location" => $requrl,
-    ]);
     if($on_server) {
         header("Location:{$requrl}");
     } else {
@@ -108,19 +88,13 @@ LangUI::construct($lang,App::AppPath("View/lang/"));
 LangUI::LangFiles(['#common',$controller]);
 // データベースハンドラを初期化する */
 DatabaseHandler::InitConnection();
-
+// アプリにログイン要求が必要で、未ログイン状態ならコントローラーを切替える
 if(defined('LOGIN_NEED')) {
     $login = MySession::getLoginInfo();
     if(empty($login)) {     // ログイン状態ではない
         $controller = 'Login';      // ログインコントローラーに制御を渡す
         $method = 'Login';
     }
-    debug_dump(0, [
-        "controller" => $controller,
-        "method" => $method,
-        "ENV" => MySession::$EnvData,
-        "POST" => MySession::$PostEnv,
-    ]);
 }
 // モジュールファイルを読み込む
 App::appController($controller);
@@ -143,7 +117,8 @@ if(!method_exists($controllerInstance,$ContAction) ||
     }
 }
 App::$ActionMethod= $ContAction;    // アクションメソッド名
-// =================================
+//=================================
+// デバッグ用の情報ダンプ
 debug_dump(0, [
     'デバッグ情報' => [
         "Application"=> $appname,
@@ -174,14 +149,13 @@ debug_dump(0, [
 ]);
 
 APPDEBUG::RUN_START();
-
+// コントローラーの実行
 $controllerInstance->$ContAction();
 
 APPDEBUG::RUN_FINISH(0);
 MySession::CloseSession();
 APPDEBUG::arraydump(0, [
     "セッションクローズ" => [
-//        "SESSION" => $_SESSION,
         "ENVDATA" => MySession::$EnvData,
         "POSTENV" => MySession::$PostEnv,
     ]

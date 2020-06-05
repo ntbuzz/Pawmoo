@@ -24,10 +24,6 @@ class LoginModel extends AppModel {
         ]
     ];
 //==============================================================================
-//	クラス初期化処理
-protected function ClassInit() {
-}
-//==============================================================================
 // ログイン情報を割り当てる
 public function SetLoginInfo($values) {
     $this->LoginData = array();
@@ -39,15 +35,13 @@ public function SetLoginInfo($values) {
             // 暗号化が必要化確認する
             $vv = $this->Schema[$xkey];
             $dval = ($vv[1]===1) ? openssl_encrypt($val, 'AES-128-CBC', '_minimvc_biscuit') : $val;
-            // 復号化は
+            // 復号化するときは
             // 'password' = openssl_decrypt('password', 'AES-128-CBC', '_minimvc_biscuit');
             if($val !== '') $this->LoginData[$xkey] = $dval;    // 値があるものだけ
         }
     }
-	debug_dump(0, [
-		"引数" => $values,
-		"ログイン" => $this->LoginData,
-    ]);
+    // ログイン情報のvalidateを処理する
+    // セッションに記憶するログイン情報を返す
     return $this->LoginData;
 }
 

@@ -20,49 +20,10 @@ class IndexModel extends AppModel {
         'PostRenames' => [
         ]
     ];
-    public $outlone;            // アウトライン配列 $outlien[SECTION-ID][ITEM-ID][PAGE-ID] = CATEGORY-ID
-    public $PartSelect;
-//===============================================================================
+//==============================================================================
 // モジュールクラスではコンストラクタを定義しない
-//===============================================================================
-//	クラス初期化処理
-//  必要ならサブクラスでオーバーライドする
+//  必要なら ClassInit() メソッドで初期化する
     protected function ClassInit() {
     }
-//===============================================================================
-// レコードのリレーションからアウトライン配列を作成する
-//   outline
-//===============================================================================
-function MakeOutline() {
-    $outline = array();
-    $this->PartSelect = [];
-    // Part レコードを取得
-    $this->RecordFinder([],[],'disp_id');
-    foreach($this->Records as $columns) {
-        $outline[$columns['id']] = $columns['title'];
-        $this->PartSelect[] = array($columns['id'],$columns['title']);
-    };
-    // Chapter リストを取得する
-    $this->outline = array();
-    foreach($outline as $key => $columns) {
-        $this->Chapter->RecordFinder(['part_id=' => $key],['id','title'],'disp_id');
-        $this->outline[$key] = ['title' => $columns, 'child' => $this->Chapter->Records];
-    }
-}
-//===============================================================================
-// レコードのリレーションからアウトライン配列を作成し、各々のレコードを取得
-//===============================================================================
-function ReadOutline() {
-    $filters = array('id','title','contents');
-    $outline = array();
-    // Part レコードを取得
-    $this->RecordFinder([],$filters,'disp_id');
-    foreach($this->Records as $key => $columns) {
-        $part_id = $columns['id'];
-        $outline[$key] = $columns;
-        $outline[$key]['child'] = $this->Chapter->ReadOutline($part_id,$filters);
-    };
-    return $outline;
-}
 
 }
