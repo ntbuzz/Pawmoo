@@ -30,7 +30,6 @@ class AppView extends AppObject {
             'ol'        => 'cmd_list',
             'dl'        => 'cmd_dl',
             'inline'    => 'cmd_inline',
-//            'setvar'    => 'cmd_setvar',
         ],
         '*'    => 'sec_comment',
         '%'    => 'sec_link',
@@ -194,10 +193,8 @@ public function ViewTemplate($name,$vars = []) {
             if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
             $values = $varList = array_unique($varList);
             array_walk($values, array($this, 'expand_walk'), $vars);
-debug_dump(0,["REPLACE" => [ 'VAR' => $varList, 'VALUE' => $values]]);
             // 配列が返ることもある
             $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
-debug_dump(0,["STR" => [ 'STR' => $str, 'expands' => $exvar]]);
             return $exvar;
     }
 //==============================================================================
@@ -296,7 +293,6 @@ debug_dump(0,["STR" => [ 'STR' => $str, 'expands' => $exvar]]);
         } else {
             list($tag,$text,$attrs,$subsec) = $this->tag_attr_sec($key,$sec);
             $attr = $this->gen_attrs($attrs);
-debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"sec" => $subsec]);
             if(is_array($sec)) {
                 echo "<{$tag}{$attr}>{$text}\n";
                 $this->section_analyze($subsec,$vars);
@@ -383,7 +379,6 @@ debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"
                 : App::$key($sec);
         } else {
             echo "Helper Method:'{$key}' not found. Please Create this method.\n";
-//            die("Helper Method:{$key} not found.");
         }
     }
     //--------------------------------------------------------------------------
@@ -461,7 +456,6 @@ debug_dump(0, ["tag" => $tag,"attrs" => $attrs,"attr" => $attr,"text" => $text,"
     //    [ DT-Text 
     //      { DD-ATTR => } [ SECTION ]
     //    ]
-    //      ...
     // ]
     private function cmd_dl($tag,$attrs,$sec,$vars) {
         $attr = $this->gen_attrs($attrs);

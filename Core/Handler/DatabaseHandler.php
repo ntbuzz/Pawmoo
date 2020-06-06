@@ -102,7 +102,6 @@ private static function SQLiteDatabase($dbdef,$action) {
 // 動作確認用(FMDB)
 static function Connect($dbName,$layout) {
     $dbb = self::$dbHandle[$dbName];
-    // 先頭レコードを読み込む
 }
 
 }

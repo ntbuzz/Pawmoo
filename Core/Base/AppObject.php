@@ -23,7 +23,6 @@ class AppObject {
         // 基底クラスでクリエイトされてきたら親のモジュール名を流用する
         if($this->ClassName == "App{$this->ClassType}") $this->ModuleName = $owner->ModuleName;
         $this->LocalePrefix = ($owner===NULL) ? $this->ModuleName : $owner->LocalePrefix;	// オーナーの言語プレフィクスを引継ぐ
-//        print_r($this);
 	}
 //==============================================================================
 //	デストラクタ
@@ -44,7 +43,6 @@ class AppObject {
 //==============================================================================
     protected function SetEvent($event,$Instance,$method) {
         list($class,$ev) = explode('.',$event);         // モジュール指定があればモジュールインスタンスにセットする
-//        echo "CLASS:{$class}\nEV:{$ev}\n";
         if(empty($ev)) {
             $this->$event = array($Instance,$method);
         } else {
@@ -58,7 +56,6 @@ class AppObject {
         if(is_array($this->$event)) {      // コールバックイベント
             list($Instance,$method) = $this->$event;
             if(method_exists($Instance,$method)) {
-                echo "Event Fire!!!!!\n";
                 $Instance->$method($args);
             }
         }
@@ -131,13 +128,5 @@ public function _in($arr,$defs) {
 protected function __in($arr,$defs) {
     return LangUI::get_array($arr, 'core', $defs);          // 言語識別子から排列要素を取得する
 }
-//==============================================================================
-// 実行時間
-public static function RunTime($func,$arg) {
-    $start = getUnixTimeMillSecond();
-    $finish = getUnixTimeMillSecond();
-    $this->RunTime = array($start,$finish);
-}
-//==============================================================================
 
 }

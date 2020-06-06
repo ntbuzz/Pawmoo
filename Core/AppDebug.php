@@ -4,8 +4,6 @@
  *  AppDebug:    デバッグ用のメッセージ出力クラス
  */
 
-define('DEBUG', false);
-define('DEBUG_LEVEL', 10);
 const EMPTY_MSG = " EMPTY\n";
 
 /*

@@ -2,21 +2,6 @@
 /* -------------------------------------------------------------
  * PHPフレームワーク
  * 	AppController: コントローラー処理のコアクラス
- * 
- *	クラス相関図
- *	Controller --+--- Model <-------+
- *	             |      ↑          |
- *				 +---- View -----> Helper ---> PHPExcel/mPDF
- *
- *		AppController					URLリクエストの処理
- *			AppModel						データベース検索、データセット
- *				AppModel						リレーション参照用のサブモデル(動的生成)
- *			AppView							レイアウト制御
- *				AppModel						AppControllerのModelリファレンス
- *				AppHelper						HTML整形
- *					AppModel						AppControllerのModelリファレンス
- *					PHPExcel						PHPExcel処理用の動的クラス
- *					mPDF							PDF 処理用の動的クラス
  */
 
 class AppController extends AppObject {

@@ -26,7 +26,6 @@ abstract class SQLHandler {	// extends SqlCreator {
 //	コンストラクタ：　テーブル名
 //==============================================================================
 function __construct($database,$table,$handler) {
-//		parent::__construct($table);
 		$this->table = $table;
 		$this->dbb = DatabaseHandler::getDataSource($handler);
 		$this->Connect();
@@ -111,7 +110,6 @@ public function findRecord($row,$relations,$sort = '') {
 //	wh 配列を条件にレコードを1件だけ削除する
 public function deleteRecord($wh) {
 	$where = $this->sql_makeWHERE($wh);
-//	$where .= ($this->handler==='SQLite') ? "":" offset 0 limit 1";		// 取得レコード数
 	$sql = "DELETE FROM {$this->table}{$where};";
 	$this->doQuery($sql);
 }

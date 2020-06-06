@@ -94,7 +94,6 @@ EOS;
                     $arr[$wkey] = $this->getSectionDef();   // 再帰呼び出しでセクション要素を連想配列に代入
                     $wd = $this->getToken($this->wpos);     // トークンの先読み
                     if($wd == ']') {                       // 終了トークンなら
-//                      $wd = $this->nextToken(3);
                         $this->wpos++;                      // 次の単語に移動し、配列を返す
                         return $arr;
                     }

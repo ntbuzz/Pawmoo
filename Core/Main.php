@@ -20,9 +20,9 @@ require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
 require_once('Base/LangUI.php');           // static class
 
-APPDEBUG::INIT(10);
+APPDEBUG::INIT(DEBUG_LEVEL);
 // タイムゾーンの設定
-date_default_timezone_set('Asia/Tokyo');
+date_default_timezone_set(TIME_ZONE);
 
 $redirect = false;      // リダイレクトフラグ
 

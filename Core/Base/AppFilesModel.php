@@ -2,6 +2,7 @@
 /* -------------------------------------------------------------
  * PHPフレームワーク
  *  AppFilesModel: ファイル構造をデータベース代わりにアクセスするモデル
+ *  これは暫定実装で、最終的には fileclass をベースにする
  */
 
 class AppFilesModel extends AppObject {
@@ -24,7 +25,7 @@ class AppFilesModel extends AppObject {
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
     }
 //==============================================================================
-// 指定フォルダの一覧
+// 指定フォルダを変更する
     public function SelectFolder($home) {
         $this->ActiveHome = $home;
         $this->TopFolder = $this->Home[$home] . $this->SubFolder;

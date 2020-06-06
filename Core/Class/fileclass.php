@@ -23,7 +23,6 @@ class FlatFolder {
 //==============================================================================
 // デストラクタ
 	function __destruct() {
-//		var_dump($this);
 	}
 //==============================================================================
 // トップフォルダの設定
@@ -50,7 +49,6 @@ public function getFolderName($dirtop) {
 	$path = explode('/',$dirtop);
 	$path = array_map('trim', $path);	// 各要素をtrim()にかける
 	$path = array_filter($path, 'strlen'); // 文字数が0のやつを取り除く
-//vardump($path);
 	return array_pop($path);
 }
 //==============================================================================
@@ -59,7 +57,6 @@ public function getParentPath($dirtop) {
 	$path = explode('/',$dirtop);
 	$path = array_map('trim', $path);	// 各要素をtrim()にかける
 	$path = array_filter($path, 'strlen'); // 文字数が0のやつを取り除く
-//vardump($path);
 	array_pop($path);
 	return "/" . implode('/',$path);
 }
@@ -110,14 +107,11 @@ public function GetFiles($dirtop,$lvl) {
 	$top = LocalCharset(pathcomplete($dirtop));		// Windows対策
 	$drc = dir($top);
 	$files = array('FILE' => array(), 'DIR' => array() );
-//	echo "OSDEP:" . OSDEP ."\n";
-//echo "DIRTOP:{$dirtop}";
 	while(false !== ($fl=$drc->read())) {
 		$sysfl = SysCharset($fl);			// Windows 対策
 		if(! in_array($sysfl,IgnoreFiles,FALSE)) {
 			$lfl = "{$top}{$fl}";				// Windows(SJIS)対策
 			$syslfl = SysCharset($lfl);		// Windows対策
-//			echo "FILE:{$lfl}\n";
 			$ext = substr($sysfl,strrpos($sysfl,'.') + 1);    // 拡張子を確認
 			if(is_dir($lfl)) {
 				if($lvl < 2) {
@@ -174,7 +168,6 @@ public function GetFiles($dirtop,$lvl) {
 			$srcname = LocalCharset($fval['fullname']);	// 対象ファイルパス
 			$tagname = LocalCharset($this->getFullpath($tocat,$fval['filename']));
 			file_move($srcname, $tagname);			// ファイル移動、移動先のフォルダがなければ作成
-//			echo $srcname . "=>" . $tagname ."\n";
 		}
 	}
 //==============================================================================
@@ -191,7 +184,6 @@ public function GetFiles($dirtop,$lvl) {
 		foreach($this->Files as $fval) {
 			$srcname = LocalCharset($fval['fullname']);	// 対象ファイルパス
 			if(file_exists($srcname)) unlink($srcname);         // 移動先に同名ファイルがあれば削除
-//			echo $srcname;
 		}
 	}
 //==============================================================================
