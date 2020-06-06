@@ -17,7 +17,6 @@ class App {
     public static $ParamCount;      // 引数の数
     public static $Controller;      // 実行コントローラ名
     public static $ActionMethod;    // 呼出しメソッド名
-    public static $RunTime;         // コントローラを呼び出した時間
     private static $ReLocate;        // URLの書き換え
     private static $execURI;
 //==============================================================================
@@ -112,19 +111,19 @@ public static function appController($controller) {
     }
 }
 //==============================================================================
-// webrootファイルのパスに付加パスを付けた文字列
+// フレームワークのトップパスに付加パスを付けた文字列
 public static function getSysRoot($path = '') {  
     if($path[0] == '/') $path = mb_substr($path,1);
     return self::$sysRoot . strtolower($path);
 }
 //==============================================================================
-// webrootファイルのパスに付加パスを付けた文字列
+// アプリケーションのトップパスに付加パスを付けた文字列
 public static function getAppRoot($path = '') {  
     if($path[0] !== '/') $path = "/{$path}";
     return self::$appRoot . strtolower($path);
 }
 //==============================================================================
-// webrootファイルの読込タグ出力（単独）
+// cdd/js/icoファイルの読込タグ出力（単独）
     private static function IncludeTag($tagfile) {
         if(is_array($tagfile)) {
             foreach($tagfile as $nm) self::IncludeTag($nm);

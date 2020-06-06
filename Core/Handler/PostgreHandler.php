@@ -84,7 +84,6 @@ public function replaceRecord($wh,$row) {
 	}
 	// UPSERT 文を生成
 	$sql = "INSERT INTO \"{$this->table}\" ({$kstr}) VALUES ({$vstr}) ON CONFLICT ({$primary}) DO UPDATE {$set};";
-//echo "SQL:{$sql}\n";
 	$res = $this->doQuery($sql);
 }
 //==============================================================================
@@ -117,7 +116,6 @@ public function insertRecord($row) {
 	}
 	// UPSERT 文を生成
 	$sql = "INSERT INTO \"{$this->table}\" ({$kstr}) VALUES ({$vstr});";
-//echo "SQL:{$sql}\n";
 	$res = $this->doQuery($sql);
 }
 

@@ -2,7 +2,6 @@
 /* -------------------------------------------------------------
  * PHPフレームワーク
  *  LangUI:  言語ファイルを操作するstaticクラス
- * 
  */
 //==============================================================================
 // 言語ファイルの操作クラス
@@ -126,7 +125,6 @@ public static function LangFiles($files) {
             unset($section);
             return TRUE;
         }
-//        echo "LoadLocale not Found {$fullpath}\n";
         return FALSE;
     }
 //==============================================================================
@@ -168,4 +166,5 @@ public static function get_array($arr, $mod, $var) {
     $element = self::get_value($mod,$var,FALSE);
     return $arr[$element];
 }
+
 }

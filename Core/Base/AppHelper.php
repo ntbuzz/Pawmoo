@@ -76,11 +76,6 @@ public function ALink($lnk,$txt,$under=false) {
 	}
 }
 //==============================================================================
-// リレーションによる読替え
-    protected function getRealValue($key,$val) {
-		return $val;
-    }
-//==============================================================================
 // ページリンクのURL生成
 	private function echo_pagelink($n, $anchor, $npage) {
 		$anchor = substr("00{$anchor}", -2);

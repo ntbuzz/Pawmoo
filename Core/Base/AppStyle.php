@@ -306,7 +306,6 @@ public function ViewStyle($file_name) {
                     preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content));       // コメント行を削除
             $content =trim($content);
         } else if(!$this->do_com) {         // コメントと不要な改行を削除して出力する
-//            $content = preg_replace('/( )+|([\r\n])+/','$1$2',                  // 2個以上の空白または改行を1個に圧縮
             $content = preg_replace('/([\r\n])+/s',"\n",                  // コメント削除でできた空行を削除
                     preg_replace('/\/\*[\s\S]*?\*\/|\s*\/\/.*/','',$content));  // コメント行を削除
             $content =trim($content);
@@ -337,18 +336,14 @@ public function ViewStyle($file_name) {
 //  文字列の変数置換を行う
 // $[@#%$]varname | ${[@#%$]varname} | {$SysVar$} | {%Params%}
     private function expandStrings($str,$vars) {
-$debugged = 0;
-debug_dump($debugged,["expand" => $str]);
         $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
         preg_match_all($p, $str, $m);
         $varList = $m[0];
         if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
         $values = $varList = array_unique($varList);
         array_walk($values, array($this, 'expand_walk'), $vars);
-debug_dump(0,["REPLACE" => [ 'VAR' => $varList, 'VALUE' => $values]]);
         // 配列が返ることもある
         $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
-debug_dump($debugged,["result" => $exvar]);
         return $exvar;
 }
 

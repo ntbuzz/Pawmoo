@@ -161,7 +161,7 @@ public function findRecord($row, $relations = NULL,$sort = NULL) {
 	$this->r_pos = 0;
 	$this->r_fetched = 0;		// 取り出したレコード数
 	APPDEBUG::MSG(13, $this->Finds, "検索設定");
-	$this->onetime = 1;
+	$this->onetime = 3;
 }
 //==============================================================================
 // 複数条件を指定してレコードを読み込む
@@ -169,15 +169,15 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 	if($this->r_fetched == 0) {
 		if($this->recordMax > 0 && $this->skip_rec >= $this->recordMax) return 0;
 		if($this->limitrec > 0 && $this->skip_rec >= ($this->startrec + $this->limitrec)) return 0;
-
-		APPDEBUG::debug_dump($this->onetime, [
+		
+		APPDEBUG::arraydump($this->onetime,[
 		    'Param' => [
         		"skip_rec" => $this->skip_rec,
 	        	"startrec" => $this->startrec,
     	    	"limitrec" => $this->limitrec,
     		],
     		"検索設定" => $this->Finds
-		],3);
+		]);
 		//複合検索クラスのインスタンスを作成
 		$compoundFind = $this->newCompoundFindCommand($this->LayoutName);
 		//検索条件クラスのインスタンスを作成する
@@ -224,13 +224,13 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 		}
 		APPDEBUG::MSG(13, $this->r_fetched, "Fetch: ");
 	}
-	APPDEBUG::debug_dump($this->onetime, [
+	APPDEBUG::arraydump($this->onetime,[
 		'fetched' => [
 			"recordMax" => $this->recordMax,
 			"r_fetched" => $this->r_fetched,
 			"r_pos" => $this->r_pos ,
 		],
-	],3);
+	]);
 	if($this->r_fetched == 0) {
 		return;				// 検索結果がゼロ
 	}
@@ -243,7 +243,7 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 	}
 	$this->fields['recordId'] = $this->recordId;
 	$this->SetDateTimeField($record);			// 日付フィールドの変換 YYYY/MM/DD
-	$this->onetime--;
+	$this->onetime = 13;
 	return $this->fields;
 }
 

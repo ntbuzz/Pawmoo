@@ -68,7 +68,6 @@ function getRoutingParams($dir) {
 // コントローラーが存在するかチェックする
 function is_extst_module($appname,$modname,$classname) {
     if($modname == NULL) return FALSE;      // そもそも名前が無い
-//    $modname = ucfirst(strtolower($modname));
     // ファイルが存在するかチェック
     $modtop = getcwd() . "/" . "app/{$appname}/modules/{$modname}";
     $reqfile = "{$modtop}/{$modname}{$classname}.php";
@@ -176,7 +175,6 @@ function extractFileName($path) {
         $path = substr($path,0,strlen($path)-1);     // 末尾の /  は削除
     }
     $nn = strrpos($path,'/');    // ファイル名を確認
-//echo "FILE:{$path}\n";
     if($nn === FALSE) {
         $fn = $path;
         $path = '';
@@ -305,7 +303,6 @@ function auto_hyperlink($atext) {
     	$ll = preg_replace("/(?:\"([^\"]+)\"|([^\.\s]+))\.{([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)}/i",'<a target="_blank" href="\\3">\\1\\2</a>', $ll);
 		$ret[] = $ll;
     }
-//    return implode("<br />\n",$ret);
 	return implode("\n",$ret);
 }
 //==============================================================================
@@ -360,7 +357,6 @@ function debug_dump($flag, $arr = []) {
     $danger = ($flag < 4);
     // バックトレースから呼び出し元の情報を取得
     $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,2);    // 呼び出し元のスタックまでの数
-//var_dump($dbinfo);exit;
     $dbpath = str_replace('\\','/',$dbinfo[0]['file']);             // Windowsパス対策
     list($pp,$fn) = extractFileName($dbpath);
     $fn .= "(".$dbinfo[0]['line'].")";

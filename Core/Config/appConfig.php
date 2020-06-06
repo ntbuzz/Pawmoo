@@ -3,6 +3,9 @@
  * PHPフレームワーク
  *  appConfig: フレームワークのコンフィグレーション
  */
+dfine('TIME_ZONE','Asia/Tokyo');	// デフォルトのタイムゾーン
+define('DEBUG_LEVEL', 10);			// メッセージ出力許可レベル
+
 // OSタイプ
 if (PHP_OS == "Linux") {
 	define("OSDEP","UNIX");

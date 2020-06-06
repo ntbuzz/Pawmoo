@@ -114,9 +114,3 @@ static function ClearLogin() {
 }
 // セッション変数を初期化
 MySession::InitSession();
-
-debug_dump(0,[
-	"REQUEST" => $_REQUEST,
-	"POST" => $_POST,
-	"GET" => $_GET,
-	]);
