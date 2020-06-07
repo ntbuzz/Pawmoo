@@ -86,8 +86,6 @@ $lang = (isset($query['lang'])) ? $query['lang'] : $_SERVER['HTTP_ACCEPT_LANGUAG
 // コントローラ用の言語ファイルを読み込む
 LangUI::construct($lang,App::AppPath("View/lang/"));
 LangUI::LangFiles(['#common',$controller]);
-// データベースハンドラを初期化する */
-DatabaseHandler::InitConnection();
 // アプリにログイン要求が必要で、未ログイン状態ならコントローラーを切替える
 if(defined('LOGIN_NEED')) {
     $login = MySession::getLoginInfo();

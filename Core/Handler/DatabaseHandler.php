@@ -27,24 +27,17 @@ class DatabaseHandler {
     ];
     private static $dbHandle = [];
 //==============================================================================
-// コンストラクタ
-public static function InitConnection() {
-    APPDEBUG::MSG(13, self::DatabaseSpec);
-    foreach(self::DatabaseSpec as $dbName => $defs) {
-        $func = $defs['callback'];      // 呼び出し関数
-        self::$dbHandle[$dbName] = self::$func(DatabaseParameter[$dbName],'open');
-        APPDEBUG::MSG(13, self::$dbHandle);
-    }
+// データベースへ接続してハンドルを返す
+public static function getDataSource($dbName) {
+    $defs = self::DatabaseSpec[$dbName];
+    $func = $defs['callback'];      // 呼び出し関数
+    self::$dbHandle[$dbName] = self::$func(DatabaseParameter[$dbName],'open');
+    return self::$dbHandle[$dbName];
 }
 //==============================================================================
 // デストラクタ
 public static function CloseConnection() {
     self::closeDb();
-}
-//==============================================================================
-// ハンドルの取得
-public static function getDataSource($dbName) {
-    return self::$dbHandle[$dbName];
 }
 //==============================================================================
 // ハンドルの取得
