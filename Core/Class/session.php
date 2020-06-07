@@ -26,7 +26,8 @@ static function InitSession() {
 		"POST" => $_POST,
 		"GET" => $_GET,
 		]);
-	self::$EnvData = $_SESSION[self::SESSION_NAME];
+	// セッションキーがあれば読み込む
+	self::$EnvData = (array_key_exists(self::SESSION_NAME,$_SESSION)) ? $_SESSION[self::SESSION_NAME]:array();
 	// セッションに保存した値を戻す
 	if(isset(self::$EnvData)) {
 		foreach(self::$EnvData as $key => $val) {
