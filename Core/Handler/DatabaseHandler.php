@@ -29,10 +29,13 @@ class DatabaseHandler {
 //==============================================================================
 // データベースへ接続してハンドルを返す
 public static function getDataSource($dbName) {
-    $defs = self::DatabaseSpec[$dbName];
-    $func = $defs['callback'];      // 呼び出し関数
-    self::$dbHandle[$dbName] = self::$func(DatabaseParameter[$dbName],'open');
-    return self::$dbHandle[$dbName];
+    if(array_key_exists($dbName,self::DatabaseSpec)) {
+        $defs = self::DatabaseSpec[$dbName];
+        $func = $defs['callback'];      // 呼び出し関数
+        self::$dbHandle[$dbName] = self::$func(DatabaseParameter[$dbName],'open');
+        return self::$dbHandle[$dbName];
+    }
+    return NULL;
 }
 //==============================================================================
 // デストラクタ
