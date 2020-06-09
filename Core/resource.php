@@ -2,8 +2,17 @@
 /* -------------------------------------------------------------
  * PHPフレームワーク
  *  resource:    CSS/JSファイルのリクエストを受付け、定義ファイルの情報に従いファイル結合したものを応答する
- *  app/(css|js)/xxxx.css|.js 
- *      => .htaccess で webroot にリライトされるので考慮しない
+ * RewriteRule ^(css|js|images)/(.*)$       vendor/webroot/$1/$2 [END]
+ *
+ * テンプレートリソース(CSS/画像ファイル)
+ *  (appname)/css/res/img/(.*)$     Core/Template/cssimg/$1 [END]
+ *   /res/images/(.*)$              Core/Template/images/$1 [END]
+ * アプリごとに異なるリダイレクト
+ *  (appname)/(module)/css/img/(.*)$    app/$1/webroot/cssimg/$2 [END]
+ *  (appname)/(css|js)/(.*)$            app/$1/webroot/$2/$3 [END]
+ *  (appname)/images/(.*)$              app/$1/webroot/images/$2 [END]
+ *  (appname)/(module)/images/(.*)$     app/$1/webroot/images/$2 [END]
+ *      => .htaccess でリライトされるので考慮しない
  *  app/module/(css|js)/xxxx.css|.js
  *      module => module oe res
  *      method => css|js
