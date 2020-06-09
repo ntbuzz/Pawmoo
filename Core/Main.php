@@ -92,6 +92,10 @@ if(defined('LOGIN_NEED')) {
     if(empty($login)) {     // ログイン状態ではない
         $controller = 'Login';      // ログインコントローラーに制御を渡す
         $method = 'Login';
+    } else if($controller === 'Login' && $method !== 'Logout') {
+        // Logoutメソッドでなければログインの繰返しを回避する
+        $url = App::getAppRoot(DEFAULT_CONTROLLER);
+        header("Location:{$url}");
     }
 }
 // モジュールファイルを読み込む
