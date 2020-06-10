@@ -138,7 +138,7 @@
 // セレクタを使う
 $(function () {
     // スティッキー動作設定
-    var selector = $(".fixedsticky .dummy");
+    var selector = $(".fixedsticky");
     selector.each(function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
         var ref = self.attr("data-element");  // 紐付けるID

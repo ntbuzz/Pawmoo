@@ -141,7 +141,7 @@ class AppFilesModel extends AppObject {
     	// Zipファイルオープン
    		$result = $zip->open($zipFilePath, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE);
    		if ($result !== true) {
-    		print "Download ERROR!!!";
+    		echo "Download ERROR!!!";
    			exit(-1);
     	    // 失敗した時の処理
    		}

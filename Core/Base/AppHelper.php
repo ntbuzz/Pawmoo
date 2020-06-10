@@ -138,26 +138,35 @@ public function makePageLinks() {
 //==============================================================================
 // テーブルヘッダを出力
 	protected function putTableHeader() {
-		print '<tr>';
+		// デバッグ情報
+		APPDEBUG::arraydump(11,[
+			'Header' => $this->MyModel->Header,
+		]);
+		echo '<tr>';
 		foreach($this->MyModel->Header as $key => $val) {
 			list($nm,$flag,$align) = $val;
 			if($flag > 0) {
 				$tsort = ($flag==2) ? '' : ' class="sorter-false"';
-				print "<th${tsort}>{$nm}</th>";
+				echo "<th${tsort}>{$nm}</th>";
 			}
 		}
-		print "</tr>\n";
+		echo "</tr>\n";
 	}
 //==============================================================================
 // レコードカラムを出力
 	protected function putColumnData($lno,$columns) {
-		print "<tr class='item' id='".$columns[$this->MyModel->Primary]."'>";
+		// デバッグ情報
+		APPDEBUG::arraydump(11,[
+			'lno' => $lno,
+			'columns' => $columns,
+		]);
+		echo "<tr class='item' id='".$columns[$this->MyModel->Primary]."'>";
 		foreach($this->MyModel->Header as $key => $val) {
 			list($nm,$flag,$align) = $val;
 			$pos = self::AttrAlign[$align];
-			if($flag > 0) print "<td nowrap{$pos}>". $columns[$nm]."</td>";
+			if($flag > 0) echo "<td nowrap{$pos}>". $columns[$nm]."</td>";
 		}
-		print "</tr>\n";
+		echo "</tr>\n";
 	}
 //==============================================================================
 // ヘッダー付きのテーブルリスト表示
@@ -176,14 +185,14 @@ public function makeListTable($deftab) {
 		$tab = $deftab;
 		$tbl = '_TableList';
 	}
-	print "<table id='{$tbl}' class='tablesorter {$tab}'>\n<thead>";
+	echo "<table id='{$tbl}' class='tablesorter {$tab}'>\n<thead>";
 	$this->putTableHeader($tab);
-	print "</thead>\n<tbody>\n";
+	echo "</thead>\n<tbody>\n";
 	$lno = ($this->MyModel->page_num-1)*$this->MyModel->pagesize + 1;
 	foreach($this->MyModel->Records as $columns) {
 		$this->putColumnData($lno++, $columns);
 	}
-	print "</tbody></table>";
+	echo "</tbody></table>";
 }
 //==============================================================================
 // タブセットの生成 (UL版)

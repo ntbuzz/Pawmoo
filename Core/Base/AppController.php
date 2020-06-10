@@ -39,7 +39,7 @@ public function ViewSet($arr) {
 	$this->View->Helper->SetData($arr);
 }
 //==============================================================================
-// View HekperクラスへのPOST変数セット
+// View HelperクラスへのPOST変数セット
 public function ImportSession() {
 	$this->View->Helper->SetData(MySession::$PostEnv);
 }

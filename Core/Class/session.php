@@ -10,6 +10,9 @@
 //	$_SESSION = array();
 //	session_destroy();
 //}
+if(DEBUGGER && !$on_server) {
+	$_SESSION['_minimvc_biscuit']['Login'] = ['user' => 'dummy'];
+}
 
 class MySession {
 	const SESSION_NAME = "_minimvc_biscuit";	// セッションに保存するキー
@@ -89,16 +92,26 @@ static function SetEnvVar($nm,$val) {
 	self::$PostEnv[$nm] = $val;
 }
 //==============================================================================
+// POST変数に値をセット
+static function SetPostVars($arr) {
+	foreach($arr as $key => $val) self::$PostEnv[$key] = $val;
+}
+//==============================================================================
+// ENV変数をクリア
+static function UnsetEnvData($arr) {
+	foreach($arr as $key) unset(self::$PostEnv[$key]);
+}
+//==============================================================================
 // デバッグ用ダンプ
 static function Dump() {
-	print "<pre>\n";
-	print "SESSION\n";
+	echo "<pre>\n";
+	echo "SESSION\n";
 	print_r($_SESSION);
-	print "ENV\n";
+	echo "ENV\n";
 	print_r(self::$EnvData);
-	print "POST\n";
+	echo "POST\n";
 	print_r(self::$PostEnv);
-	print "</pre>\n";
+	echo "</pre>\n";
 }
 //==============================================================================
 // ログイン情報を保持
