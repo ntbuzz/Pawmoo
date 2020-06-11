@@ -26,7 +26,7 @@
         	.split-pane-component#right-component => [
             	".split-pane horizontal-percent" => [
                 	".split-pane-component list-view#list-component" => [
-						&makeListTable => [ category => 'content2' ]
+						&MakeListTable => [ category => 'content2' ]
 	                ],
     	            .split-pane-divider#bottom-divider" => []
 	        	]

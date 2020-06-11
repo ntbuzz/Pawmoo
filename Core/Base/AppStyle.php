@@ -104,7 +104,7 @@ public function ViewHeader() {
 public function ViewStyle($file_name) {
     // スタイルシートが存在するフォルダのみをリストアップする
     $temlatelist = $this->get_exists_files('template.mss');
-    list($filename,$ext) = extractBaseName($file_name);
+    list($filename,$ext) = extract_base_name($file_name);
     $this->do_min = ($ext == 'min');           // コメント削除出力か
     $this->do_msg = TRUE ;                     // インポートコメント表示設定
     $this->do_com = TRUE ;                     // コメント表示設定
@@ -116,7 +116,7 @@ public function ViewStyle($file_name) {
             if(file_exists($fn)) {
                 $content = file_get_contents($fn);
                 if($this->do_msg) echo "/* include({$filename}{$this->Template['extention']}) in {$key} */\n";
-                $this->output_content($content);
+                $this->outputContents($content);
             }
         }
     }
@@ -136,14 +136,14 @@ public function ViewStyle($file_name) {
                 $secParam = array($secname,$secData,$tmplist);
                 // テンプレート外のコマンドを処理
                 foreach($SecTemplate as $key => $val) { 
-                    $this->function_dispath($secParam, $key, $val); // 戻り値は無視してOK
+                    $this->function_Dispath($secParam, $key, $val); // 戻り値は無視してOK
                 }
                 // セクション外のコマンドを処理
                 foreach($secData as $key => $val) {
-                    $this->function_dispath($secParam, $key, $val); // 戻り値は無視してOK
+                    $this->function_Dispath($secParam, $key, $val); // 戻り値は無視してOK
                 }
                 if(array_key_exists($secname,$secData)) {   // filename セクションがあるか
-                    $this->section_dispath($secParam,$secData[$secname]);
+                    $this->sectionDispath($secParam,$secData[$secname]);
                     return TRUE;
                 }
             }
@@ -153,9 +153,9 @@ public function ViewStyle($file_name) {
 //==============================================================================
 // section セクション内をコマンド処理する
 // コマンド以外はCSSフォーマットで直接出力する
-    private function section_dispath($secParam,$section) {
+    private function sectionDispath($secParam,$section) {
         foreach($section as $key => $sec) {     // セクション外のコマンドを処理
-            if($this->function_dispath($secParam, $key, $sec)===FALSE) {
+            if($this->function_Dispath($secParam, $key, $sec)===FALSE) {
                 // 内部コマンドではない
                 if($this->Filetype == 'css') {       // CSS直接出力
                     if(is_array($sec)) {
@@ -175,7 +175,7 @@ public function ViewStyle($file_name) {
 //==============================================================================
 // key 文字列を元に処理関数へディスパッチする
 // key => sec (vars)
-    private function function_dispath($secParam, $key,$sec) {
+    private function function_Dispath($secParam, $key,$sec) {
         if(is_numeric($key)) {
             if(!is_scalar($sec)) return FALSE;    // 単純配列は認めない
             $key = $sec;
@@ -204,7 +204,7 @@ public function ViewStyle($file_name) {
 //------------------------------------------------------------------------------
 // * comment コマンド
     private function do_comment($sec) {
-        $vv = $this->expandStrings($sec,$this->repVARS);
+        $vv = $this->expand_Strings($sec,$this->repVARS);
         $vv = trim(substr($vv,1));
         echo "/* {$vv} */\n";
     }
@@ -230,7 +230,7 @@ public function ViewStyle($file_name) {
         if($this->Filetype == 'js') {
             list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
             echo "$(function() { ";
-                $this->files_import($tmplist,$sec);
+                $this->filesImport($tmplist,$sec);
             echo "});\n";
         }
     }
@@ -239,7 +239,7 @@ public function ViewStyle($file_name) {
 // +import => [ files , ... ] or import => scalar
     private function cmd_import($secParam, $param,$sec) {
         list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
-        $this->files_import($tmplist,$sec);
+        $this->filesImport($tmplist,$sec);
     }
 //------------------------------------------------------------------------------
 // section コマンド
@@ -266,13 +266,13 @@ public function ViewStyle($file_name) {
                 array_shift($tmplist);      // 先頭は自身のテンプレートがあるフォルダ
                 $this->section_styles($tmplist, $vsec);     // 親のセクションを処理する
             } else {    // 自セクションに指定のセクションがある
-                $this->section_dispath($secParam,$secData[$vsec]);
+                $this->sectionDispath($secParam,$secData[$vsec]);
             }
         }
     }
 //------------------------------------------------------------------------------
 // ファイルのインポート処理
-    private function files_import($tmplist, $sec) {
+    private function filesImport($tmplist, $sec) {
         $files = (is_array($sec)) ? $sec : array($sec);
         foreach($files as $vv) {
             list($filename,$v_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];  // クエリ文字列を変数セットとして扱う
@@ -280,14 +280,14 @@ public function ViewStyle($file_name) {
             $vars = is_array($vars) ? array_merge($this->repVARS,$vars) : $this->repVARS;
             $imported = FALSE;
             foreach($tmplist as $key => $file) {
-                list($path,$tmp) = extractFileName($file);
+                list($path,$tmp) = extract_path_filename($file);
                 $fn ="{$path}{$this->Filetype}/{$filename}";
                 if(file_exists($fn)) {
                     // @charset を削除して読み込む
                     $content = preg_replace('/(@charset.*;)/','/* $1 */',trim(file_get_contents($fn)) );
-                    $content = $this->expandStrings($content,$vars);
+                    $content = $this->expand_Strings($content,$vars);
                     if($this->do_msg) echo "/* import({$filename}) in {$key} */\n";
-                    $this->output_content($content);
+                    $this->outputContents($content);
                     $imported = TRUE;
                     break;
                 }
@@ -299,7 +299,7 @@ public function ViewStyle($file_name) {
     }
 //==============================================================================
 //    ファイルをコンパクト化して出力
-    private function output_content($content) {
+    private function outputContents($content) {
         if($this->do_min) {         // コメント・改行を削除して最小化して出力する
             $pat = '[:(){}\[\]<>\=\?;,]';    // 前後の空白を削除する文字
             $content = preg_replace("/\\s*({$pat})\\s+|\\s+({$pat})\\s*|(\\s)+/sm", '$1$2$3',
@@ -314,7 +314,7 @@ public function ViewStyle($file_name) {
     }
 //==============================================================================
 //  変数を置換する
-    private function expand_walk(&$val, $key, $vars) {
+    private function expand_Walk(&$val, $key, $vars) {
         if($val[0] === '$') {           // 先頭の一文字が変数文字
             $var = mb_substr($val,1);
             $var = trim($var,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
@@ -335,13 +335,13 @@ public function ViewStyle($file_name) {
 //==============================================================================
 //  文字列の変数置換を行う
 // $[@#%$]varname | ${[@#%$]varname} | {$SysVar$} | {%Params%}
-    private function expandStrings($str,$vars) {
+    private function expand_Strings($str,$vars) {
         $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
         preg_match_all($p, $str, $m);
         $varList = $m[0];
         if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
         $values = $varList = array_unique($varList);
-        array_walk($values, array($this, 'expand_walk'), $vars);
+        array_walk($values, array($this, 'expand_Walk'), $vars);
         // 配列が返ることもある
         $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
         return $exvar;

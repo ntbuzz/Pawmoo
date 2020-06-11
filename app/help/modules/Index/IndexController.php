@@ -11,7 +11,7 @@ class IndexController extends AppController {
 //	クラス初期化処理
 	protected function ClassInit() {
 //		MySession::PostToEnv(['TabSelect']);
-//		$this->SetEvent('Model.OnGetRecord',$this->View->Helper,"echo_dump");
+//		$this->setEvent('Model.OnGetRecord',$this->View->Helper,"echo_dump");
 	}
 //==============================================================================
 // デフォルトの動作
@@ -22,7 +22,7 @@ public function DisplayAction() {
 //==============================================================================
 // デフォルトの動作
 public function RedirectAction() {
-	$url = App::getAppRoot();
+	$url = App::Get_AppRoot();
 	header("Location:{$url}");
 }
 //==============================================================================
@@ -44,7 +44,7 @@ public function ViewAction() {
 
 	$this->Section->getSectionDoc($Chap);
 	$this->ViewSet(['Part' => $Part,'Chapter' => $Chap,'Section' => $this->Section->Records, 'Tabmenu' => $Tabs]);
-	APPDEBUG::arraydump(5, [
+	APPDEBUG::DebugDump(5, [
 		'パラメータ' => App::$Params,
 		'レコード' => $this->Model->Records,
 		'アウトライン' => $this->Model->outline,

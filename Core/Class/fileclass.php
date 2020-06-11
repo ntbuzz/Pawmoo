@@ -104,7 +104,7 @@ public function GetAttribute($path) {
 //==============================================================================
 // フォルダ内を探査する
 public function GetFiles($dirtop,$lvl) {
-	$top = LocalCharset(pathcomplete($dirtop));		// Windows対策
+	$top = LocalCharset(path_complete($dirtop));		// Windows対策
 	$drc = dir($top);
 	$files = array('FILE' => array(), 'DIR' => array() );
 	while(false !== ($fl=$drc->read())) {
@@ -166,14 +166,14 @@ public function GetFiles($dirtop,$lvl) {
 		$this->GetSubFolder($frcat);			// 移動もとのファイル一覧を取得
 		foreach($this->Files as $fval) {
 			$srcname = LocalCharset($fval['fullname']);	// 対象ファイルパス
-			$tagname = LocalCharset($this->getFullpath($tocat,$fval['filename']));
+			$tagname = LocalCharset($this->Get_Fullpath($tocat,$fval['filename']));
 			file_move($srcname, $tagname);			// ファイル移動、移動先のフォルダがなければ作成
 		}
 	}
 //==============================================================================
 // ファイル削除
 	public function DeleteFile($fcat,$fname) {
-		$srcname = LocalCharset($this->getFullpath($fcat,$fname));
+		$srcname = LocalCharset($this->Get_Fullpath($fcat,$fname));
 		if(file_exists($srcname)) unlink($srcname);         // 移動先に同名ファイルがあれば削除
 		echo $fname . ' を削除しました';
 	}
@@ -188,7 +188,7 @@ public function GetFiles($dirtop,$lvl) {
 	}
 //==============================================================================
 // ZIPファイルの作成
-public function MakeZipFile($filepath,$zipname) {
+public function Make_ZipFile($filepath,$zipname) {
 	// Zipクラスロード
 	$zip = new ZipArchive();
 	// Zipファイル一時保存ディレクトリ
@@ -206,7 +206,7 @@ public function MakeZipFile($filepath,$zipname) {
 	// ディレクトリ指定なら一括ZIP
 	if(is_dir($filepath)) {
 		// 指定パスのファイルリストを取得する
-		$this->GetList($filepath);
+		$this->get_FolderLists($filepath);
 		$filelist = $this->GetFiles($filepath,1);			// ファイル一覧を取得
 		// 取得ファイルをZipに追加していく
 		foreach($filelist['FILE'] as $key => $fval) {

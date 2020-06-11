@@ -1,7 +1,22 @@
 <?php
 /* -------------------------------------------------------------
- * Biscuits(MAP)ミニフレームワーク
- *   Main: メイン処理
+ * Biscuits(MAP) Object-orientation PHP mini_framework
+ *   Main: routing and redirection process
+ *      method naming
+ *      void = camel case (first upper is 'PUBLIC')
+ *          PascalCase      Public method/function, void function
+ *              PublicMethod
+ *          camelCase       private/protected method/function,void
+ *              privateFunction
+ *          Pascal_snake    public void function
+ *              Set_on_void
+ *      return value = snake_case (first upper, all lower is 'PUBLIC')
+ *          Camel_Snake     Public method/function, return value
+ *              Get_Default
+ *          snake_Camel     private/protected method/function with return value
+ *              private_Function
+ *          snake_case      Public function with return value
+ *              all_public_function
  */
 global $on_server;
 // デバッグ用のクラス
@@ -18,16 +33,16 @@ require_once('Base/AppModel.php');
 require_once('Base/AppFilesModel.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
-require_once('Base/LangUI.php');           // static class
+require_once('Base/LangUI.php');
 
 APPDEBUG::INIT(DEBUG_LEVEL);
-// タイムゾーンの設定
+// Setup TIMEZONE
 date_default_timezone_set(TIME_ZONE);
 
-$redirect = false;      // リダイレクトフラグ
+$redirect = false;      // Redirect flag
 
 // REQUEST_URIを分解
-list($appname,$app_uri,$module,$q_str) = getRoutingParams(__DIR__);
+list($appname,$app_uri,$module,$q_str) = get_routing_params(__DIR__);
 list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filter,$params) = $module;
 parse_str($q_str, $query);
@@ -35,7 +50,7 @@ if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
 
 // アプリ名が有効かどうか確認する
 if(empty($appname) || !file_exists("app/$appname")) {
-    $applist = GetFoloders("app/");     // アプリケーションフォルダ名を取得
+    $applist = get_folder_lists("app/");     // アプリケーションフォルダ名を取得
     $appname = $applist[0];             // 最初に見つかったアプリケーションを指定
     $approot = "{$fwroot}{$appname}";   // アプリURIを生成
     $controller = ucfirst(strtolower($appname)); // 指定がなければ 
@@ -71,12 +86,12 @@ App::__Init($appname,$app_uri,$module,$query,$requrl);
 App::$Controller  = $controller;    // コントローラー名
 
 // 共通サブルーチンライブラリを読み込む
-$libs = GetPHPFiles(App::AppPath("common/"));
+$libs = get_php_files(App::Get_AppPath("common/"));
 foreach($libs as $files) {
     require_once $files;
 }
 // コアクラスのアプリ固有の拡張クラス
-$libs = GetPHPFiles(App::AppPath("extends/"));
+$libs = get_php_files(App::Get_AppPath("extends/"));
 foreach($libs as $files) {
     require_once $files;
 }
@@ -84,7 +99,7 @@ foreach($libs as $files) {
 $lang = (isset($query['lang'])) ? $query['lang'] : $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 
 // コントローラ用の言語ファイルを読み込む
-LangUI::construct($lang,App::AppPath("View/lang/"));
+LangUI::construct($lang,App::Get_AppPath("View/lang/"));
 LangUI::LangFiles(['#common',$controller]);
 // アプリにログイン要求が必要で、未ログイン状態ならコントローラーを切替える
 if(defined('LOGIN_NEED')) {
@@ -94,12 +109,12 @@ if(defined('LOGIN_NEED')) {
         $method = 'Login';
     } else if($controller === 'Login' && $method !== 'Logout') {
         // Logoutメソッドでなければログインの繰返しを回避する
-        $url = App::getAppRoot(DEFAULT_CONTROLLER);
+        $url = App::Get_AppRoot(DEFAULT_CONTROLLER);
         header("Location:{$url}");
     }
 }
 // モジュールファイルを読み込む
-App::appController($controller);
+App::LoadModuleFiles($controller);
 
 // コントローラ/メソッドをクラス名/アクションメソッドに変換
 $ContClass = "{$controller}Controller";
@@ -113,9 +128,9 @@ if(!method_exists($controllerInstance,$ContAction) ||
     $method = $controllerInstance->defaultAction;
     $ContAction = "{$method}Action";
     if(strcasecmp($appname,$controller) === 0) {
-        App::ChangeMTHOD('','');     // メソッドの書換えはリダイレクトしない
+        App::ChangeMethod('','');     // メソッドの書換えはリダイレクトしない
     } else {
-        App::ChangeMTHOD($controller,$method);     // メソッドの書換えはリダイレクトしない
+        App::ChangeMethod($controller,$method);     // メソッドの書換えはリダイレクトしない
     }
 }
 App::$ActionMethod= $ContAction;    // アクションメソッド名
@@ -146,7 +161,7 @@ debug_dump(0, [
         "Param"    => $params,
     ],
     "ReqCont" => $ReqCont,
-    "Location" => App::getRelocateURL(),
+    "Location" => App::Get_RelocateURL(),
 
 ]);
 
@@ -156,7 +171,7 @@ $controllerInstance->$ContAction();
 
 APPDEBUG::RUN_FINISH(0);
 MySession::CloseSession();
-APPDEBUG::arraydump(0, [
+APPDEBUG::DebugDump(0, [
     "セッションクローズ" => [
         "ENVDATA" => MySession::$EnvData,
         "POSTENV" => MySession::$PostEnv,

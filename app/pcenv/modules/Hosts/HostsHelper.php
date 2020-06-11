@@ -39,11 +39,11 @@ protected function putColumnData($lno,$columns) {
 }
 //==============================================================================
 // ページャーボタンの表示
-public function makePageLinks() {
+public function MakePageLinks() {
     if($this->MyModel->pagesize == 0) {
         echo "<span>＜全 {$this->MyModel->record_max}件＞</span>";
     } else
-        parent::makePageLinks();
+        parent::MakePageLinks();
 }
 //==============================================================================
 // セレクトリストをjavascript配列へ

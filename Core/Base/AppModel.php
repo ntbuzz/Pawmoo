@@ -153,7 +153,7 @@ public function RecordFinder($cond,$filter=[],$sort='') {
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
     while ($this->fetchRecord()) {
-        APPDEBUG::arraydump(13, [
+        APPDEBUG::DebugDump(13, [
             "fields:".(count($data)+1) => $this->fields,
             "Head:" => $this->Header,
         ]);

@@ -28,7 +28,7 @@ public function makeOutlineTree() {
 //==============================================================================
 // セクション名をキーにタブ表示する
 public function Part_Chapter_Data() {
-    APPDEBUG::arraydump(6, [
+    APPDEBUG::DebugDump(6, [
         'パート' => $this->PartData,
         'チャプタ' => $this->ChapterData,
     ]);    
@@ -48,7 +48,7 @@ public function Part_Chapter_Data() {
 //==============================================================================
 // セクション名をキーにタブ表示する
 public function SectionTab() {
-    APPDEBUG::arraydump(6, [
+    APPDEBUG::DebugDump(6, [
         'パート' => $this->PartData,
         'チャプタ' => $this->ChapterData,
         'セクション' => $this->Section,

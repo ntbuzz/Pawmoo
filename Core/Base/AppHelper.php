@@ -20,19 +20,8 @@ class AppHelper  extends AppObject {
         $this->autoload = TRUE;
 	}
 //==============================================================================
-// パラメータ指定の有無を判定
-	public function getParams($n, $alt) {
-		return (isset(App::$Params[$n])) ? App::$Params[$n] : $alt;
-	}
-//==============================================================================
-// パラメータ指定の有無を判定
-public function getFilter($alt = '') {
-	return (isset(App::$Filter)) ? App::$Filter : $alt;
-}
-//==============================================================================
 // 親のビューテンプレートを呼び出す
 public function ViewTemplate($layout) {
-	APPDEBUG::MSG(11, $layout,"HelperView");
 	$this->AOwner->ViewTemplate($layout);
 }
 //==============================================================================
@@ -47,7 +36,7 @@ public function SetData($data) {
 // リソースの出力
 public function Resource($res) {
 	APPDEBUG::MSG(11, $res);
-	list($filename,$ext) = extractBaseName($res);
+	list($filename,$ext) = extract_base_name($res);
 	// モジュール名と拡張子を使いテンプレートを決定する
 	$AppStyle = new AppStyle($this->ModuleName, $ext);
 	// 結合ファイルの出力
@@ -77,21 +66,21 @@ public function ALink($lnk,$txt,$under=false) {
 }
 //==============================================================================
 // ページリンクのURL生成
-	private function echo_pagelink($n, $anchor, $npage) {
+	private function get_PageButton($n, $anchor, $npage) {
 		$anchor = substr("00{$anchor}", -2);
 		$cls = (($n == $this->MyModel->page_num) || ($n == 0) || ($n > $npage)) ? 'active' : 'jump';
 		return "<span class='{$cls}' value='{$n}'>{$anchor}</span>";	// ページサイズはセッションに記憶
 	}
 //==============================================================================
 // ページ移動リンクのURL生成
-	private function echo_movelink($move, $anchor, $npage) {
+	private function get_MoveButton($move, $anchor, $npage) {
 		$n = $this->MyModel->page_num + $move;
 		$cls = ( ($n <= 0) || ($n > $npage)) ? 'disable' : 'move';
 		return "<span class='{$cls}' value='{$n}'>{$anchor}</span>";	// ページサイズはセッションに記憶
 	}
 //==============================================================================
 // ページリンクの一覧を出力
-public function makePageLinks() {
+public function MakePageLinks() {
 	if($this->MyModel->pagesize == 0) return;		// ページングを使わない
 	$npage = intval(($this->MyModel->record_max+$this->MyModel->pagesize-1)/$this->MyModel->pagesize);
 	$pnum = $this->MyModel->page_num;
@@ -102,20 +91,20 @@ public function makePageLinks() {
 	$ptitle = $this->__(".Page", FALSE);
 	echo "<span class='pager_title' id='pager_help'>{$ptitle}:</span>";
 	echo "<span class='separator'>";
-	echo $this->echo_movelink(-1,$this->__(".PrevPage"),$npage);
+	echo $this->get_MoveButton(-1,$this->__(".PrevPage"),$npage);
 	echo "|";
-	echo $this->echo_movelink(1,$this->__(".NextPage"),$npage);
+	echo $this->get_MoveButton(1,$this->__(".NextPage"),$npage);
 	echo "</span>";
 	if($npage > 1 && $begp > 1) {		// 先頭に飛ぶリンク
-		echo $this->echo_pagelink(1,1,$npage);
+		echo $this->get_PageButton(1,1,$npage);
 		if($begp > 2) echo '<span class="disable">…</span>';
 	}
 	for($n=$begp; $n <= $endp; $n++) {		// ページごとのリンクを作る
-		echo $this->echo_pagelink($n,$n,$npage);
+		echo $this->get_PageButton($n,$n,$npage);
 	}
 	if($endp < $npage) {		// 最後に飛ぶリンク
 		if($endp < ($npage - 1)) echo '<span class="disable">…</span>';
-		echo $this->echo_pagelink($npage,$npage,$npage);
+		echo $this->get_PageButton($npage,$npage,$npage);
 	}
 	$fmt = $this->__(".Total", FALSE);
 	$total = sprintf($fmt,$this->MyModel->record_max);
@@ -123,7 +112,7 @@ public function makePageLinks() {
 	echo "</div>\n";
 	// ページサイズの変更
 	$param = (App::$Filter==='') ? "1/" : "{App::$Filter}/1/";
-	$href = App::getAppRoot($this->ModuleName)."/page/{$param}";
+	$href = App::Get_AppRoot($this->ModuleName)."/page/{$param}";
 //		echo "<div class='rightalign'>表示数:<SELECT id='pagesize' onchange='location.href=\"{$href}\"+this.value;'>";
 	$dsp = "<span id='size_selector'>".$this->__(".Display", FALSE)."</span>";
 	echo "<div class='rightalign'>{$dsp}:<SELECT id='pagesize'>";
@@ -139,7 +128,7 @@ public function makePageLinks() {
 // テーブルヘッダを出力
 	protected function putTableHeader() {
 		// デバッグ情報
-		APPDEBUG::arraydump(11,[
+		APPDEBUG::DebugDump(11,[
 			'Header' => $this->MyModel->Header,
 		]);
 		echo '<tr>';
@@ -156,7 +145,7 @@ public function makePageLinks() {
 // レコードカラムを出力
 	protected function putColumnData($lno,$columns) {
 		// デバッグ情報
-		APPDEBUG::arraydump(11,[
+		APPDEBUG::DebugDump(11,[
 			'lno' => $lno,
 			'columns' => $columns,
 		]);
@@ -170,14 +159,14 @@ public function makePageLinks() {
 	}
 //==============================================================================
 // ヘッダー付きのテーブルリスト表示
-public function makeListTable($deftab) {
+public function MakeListTable($deftab) {
 	// デバッグ情報
-	APPDEBUG::arraydump(1,[
+	APPDEBUG::DebugDump(1,[
 		'deftab' => $deftab,
 		'Page' => $this->MyModel->page_num,
 		'Size' => $this->MyModel->pagesize,
 	]);
-	if($deftab['pager'] == 'true') $this->makePageLinks();
+	if($deftab['pager'] == 'true') $this->MakePageLinks();
 	if(is_array($deftab)) {
 		$tab = $deftab["category"];
 		$tbl = $deftab["tableId"];
@@ -198,7 +187,7 @@ public function makeListTable($deftab) {
 // タブセットの生成 (UL版)
 public function Tabset($name,$menu,$sel) {
 	echo "<ul class='{$name}'>\n";
-	$tab = $sel;	// $this->getFilter($sel);
+	$tab = $sel;
 	foreach($menu as $key => $val) {
 		echo '<li'.(($tab == $val)?' class="selected">':'>') . "{$key}</li>\n";
 	}
@@ -206,9 +195,9 @@ public function Tabset($name,$menu,$sel) {
 }
 //==============================================================================
 // タブリストの生成 (UL版)
-public function TabContents($sel,$default='') {
+public function Contents_Tab($sel,$default='') {
 	APPDEBUG::MSG(11, $sel);
-	$tab = $default; 	// $this->getParams(0,$default);
+	$tab = $default;
 	return '<li' . (($tab == $sel) ? '' : ' class="hide"') . ">\n";
 }
 //==============================================================================
@@ -219,7 +208,7 @@ public function TabContents($sel,$default='') {
 // 'id' => identifir
 //
 public function Form($act, $attr) {
-	if ($act[0] !== '/') $act = App::getAppRoot($act);
+	if ($act[0] !== '/') $act = App::Get_AppRoot($act);
 	$arg = '';
 	foreach($attr as $key => $val) {
 			$arg .= $key .'="' . $val . '"';

@@ -59,14 +59,14 @@ class App {
     }
 //==============================================================================
 // メソッドの置換
-public static function ChangeMTHOD($module,$method,$relocate = TRUE) { 
+public static function ChangeMethod($module,$method,$relocate = TRUE) { 
     self::$execURI['controller'] = $module;
     self::$execURI['method'] = $method;
     self::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================
 // メソッドの置換
-public static function getRelocateURL() { 
+public static function Get_RelocateURL() { 
     if(self::$ReLocate === FALSE) return NULL;
     $url = array_to_URI(self::$execURI);
     return $url;
@@ -88,13 +88,13 @@ public static function getRelocateURL() {
     }
 //==============================================================================
 // アプリケーションフォルダパスを取得
-public static function AppPath($path) {
+public static function Get_AppPath($path) {
     $appname = self::$AppName;
     return "app/{$appname}/{$path}";
 }
 //==============================================================================
 // appコントローラと付属モジュールファイルの読込
-public static function appController($controller) {  
+public static function LoadModuleFiles($controller) {  
     // モジュールファイルを読み込む
     $modulefiles = [
         'Controller',
@@ -102,7 +102,7 @@ public static function appController($controller) {
         'View',
         'Helper'
     ];
-    $modtop = getcwd() . "/" . self::AppPath("modules/{$controller}"); 
+    $modtop = getcwd() . "/" . self::Get_AppPath("modules/{$controller}"); 
     foreach($modulefiles as $files) {
         $reqfile = "{$modtop}/{$controller}{$files}.php";
         if(file_exists($reqfile)) {
@@ -112,21 +112,21 @@ public static function appController($controller) {
 }
 //==============================================================================
 // フレームワークのトップパスに付加パスを付けた文字列
-public static function getSysRoot($path = '') {  
+public static function Get_SysRoot($path = '') {  
     if($path[0] == '/') $path = mb_substr($path,1);
     return self::$sysRoot . strtolower($path);
 }
 //==============================================================================
 // アプリケーションのトップパスに付加パスを付けた文字列
-public static function getAppRoot($path = '') {  
+public static function Get_AppRoot($path = '') {  
     if($path[0] !== '/') $path = "/{$path}";
     return self::$appRoot . strtolower($path);
 }
 //==============================================================================
 // cdd/js/icoファイルの読込タグ出力（単独）
-    private static function IncludeTag($tagfile) {
+    private static function includeTag($tagfile) {
         if(is_array($tagfile)) {
-            foreach($tagfile as $nm) self::IncludeTag($nm);
+            foreach($tagfile as $nm) self::includeTag($nm);
             return;
         }
         list($file,$q_str) = explode('?',$tagfile);     // クエリ文字列が付加されている時に備える
@@ -149,8 +149,8 @@ public static function getAppRoot($path = '') {
 //  webrootファイルの読込タグ出力（単独・配列）
     public static function WebInclude($files) {
         if(is_array($files)) {
-            foreach($files as $nm) self::IncludeTag($nm);
-        } else self::IncludeTag($files);
+            foreach($files as $nm) self::includeTag($nm);
+        } else self::includeTag($files);
     }
 //==============================================================================
 // imagesのインクルードタグ出力

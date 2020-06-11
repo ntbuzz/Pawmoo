@@ -1,7 +1,7 @@
 <script>
 $(function() {
 //タブクリックしたときのファンクションをまとめて指定
-$('.tabmenu li').off().click(function() {
+$('.tabmenu li').click(function() {
 	//.index()を使いクリックされたタブが何番目かを調べ、
 	//indexという変数に代入します。
 	var index = $('.tabmenu li').index(this);
@@ -32,7 +32,7 @@ var oss = [
 <div class='content-panel'>
 
 	<ul class="content">
-		<?= $Helper->TabContents('base','base'); ?>
+		<?= $Helper->Contents_Tab('base','base'); ?>
 
 			<?php $Helper->Form('host/update/' . $RecData['id'],array('id'=>"updatedata")); ?>
 				<table border="0" cellspacing="0" cellpadding="0">
@@ -82,8 +82,8 @@ var oss = [
 			</form>
 		</li>
 
-		<?= $Helper->TabContents('ext'); ?>
-		{%&TabContents('ext')%}
+		<?= $Helper->Contents_Tab('ext'); ?>
+		{%&Contents_Tab('ext')%}
 			拡張情報
 			<pre>
 				LicenseKey：	<?php  $Helper->Select('license_id','license'); ?>
@@ -91,19 +91,19 @@ var oss = [
 			</pre>
 		</li>
 
-		<?= $Helper->TabContents('app'); ?>
+		<?= $Helper->Contents_Tab('app'); ?>
 			<pre>
 				アプリケーション情報
 			</pre>
 		</li>
 
-		<?= $Helper->TabContents('licence'); ?>
+		<?= $Helper->Contents_Tab('licence'); ?>
 			<pre>
 				ライセンス情報
 			</pre>
 		</li>
 
-		<?= $Helper->TabContents('install'); ?>
+		<?= $Helper->Contents_Tab('install'); ?>
 			<?php $Helper->Form('host/filter/',array('id'=>"filterdata")); ?>
  				<pre>
 					インストール情報

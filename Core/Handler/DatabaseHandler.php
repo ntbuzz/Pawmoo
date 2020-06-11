@@ -28,12 +28,12 @@ class DatabaseHandler {
     private static $dbHandle = [];
 //==============================================================================
 // データベースへ接続してハンドルを返す
-public static function getDataSource($dbName) {
-    if(array_key_exists($dbName,self::DatabaseSpec)) {
-        $defs = self::DatabaseSpec[$dbName];
+public static function get_database_handle($handler,$dbname) {
+    if(array_key_exists($handler,self::DatabaseSpec)) {
+        $defs = self::DatabaseSpec[$handler];
         $func = $defs['callback'];      // 呼び出し関数
-        self::$dbHandle[$dbName] = self::$func(DatabaseParameter[$dbName],'open');
-        return self::$dbHandle[$dbName];
+        self::$dbHandle[$handler] = self::$func(DatabaseParameter[$handler],$dbname,'open');
+        return self::$dbHandle[$handler];
     }
     return NULL;
 }
@@ -44,8 +44,8 @@ public static function CloseConnection() {
 }
 //==============================================================================
 // ハンドルの取得
-public function getCallbackFunc($dbName) {
-    return self::DatabaseSpec[$dbName]['callback'];      // 呼び出し関数
+public function get_callback_func($handler) {
+    return self::DatabaseSpec[$handler]['callback'];      // 呼び出し関数
 }
 //==============================================================================
 // クローズ処理
@@ -59,10 +59,10 @@ private static function closeDb() {
 }
 //==============================================================================
 // PostgreSQL データベース
-private static function PgDatabase($dbdef,$action) {
+private static function PgDatabase($dbdef,$dbname,$action) {
     switch($action) {       //   [ .ptl, .tpl, .inc, .twg ]
     case 'open':
-        $conn = "host={$dbdef['host']} dbname={$dbdef['database']} port={$dbdef['port']}";
+        $conn = "host={$dbdef['host']} dbname={$dbname} port={$dbdef['port']}";
         $conn .= " user={$dbdef['login']} password={$dbdef['password']};";
         $dbb = pg_connect($conn);
         if(!$dbb) {
@@ -79,10 +79,10 @@ private static function PgDatabase($dbdef,$action) {
 }
 //==============================================================================
 // SQlite3 データベース
-private static function SQLiteDatabase($dbdef,$action) {
+private static function SQLiteDatabase($dbdef,$dbname,$action) {
     switch($action) {       //   [ .ptl, .tpl, .inc, .twg ]
     case 'open':
-        $dbb = new SQLite3($dbdef['database']);
+        $dbb = new SQLite3($dbname);
         if(!$dbb) {
             die('SQLite3 接続失敗');
         }
@@ -96,8 +96,8 @@ private static function SQLiteDatabase($dbdef,$action) {
 }
 //==============================================================================
 // 動作確認用(FMDB)
-static function Connect($dbName,$layout) {
-    $dbb = self::$dbHandle[$dbName];
+static function Connect($handler,$layout) {
+    $dbb = self::$dbHandle[$handler];
 }
 
 }

@@ -29,11 +29,6 @@ class AppController extends AppObject {
 		$this->View->__TerminateView();
 	}
 //==============================================================================
-// フィルタ指定の有無を判定
-public function getFilter($default = 'all') {
-	return strtolower(empty(App::$Filter) ? $default : App::$Filter);
-}
-//==============================================================================
 // View Helperクラスへの値セット
 public function ViewSet($arr) {
 	$this->View->Helper->SetData($arr);
@@ -56,7 +51,7 @@ public function PageSetup() {
 	App::$Params[0] =  $num;
 	App::$Params[1] =  $size;
 	$this->Model->SetPage($size,$num);
-	APPDEBUG::arraydump(2, [
+	APPDEBUG::DebugDump(2, [
 		'ページャーパラメータ' => [
 			"App" 		=> App::$Params,
 		],

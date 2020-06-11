@@ -24,7 +24,7 @@ public function LoginAction() {
 // ログアウト処理
 public function LogoutAction() {
 	MySession::ClearLogin();		// ログイン情報を接セッションから消去
-	$url = App::getAppRoot();
+	$url = App::Get_AppRoot();
 	header("Location:{$url}");
 }
 

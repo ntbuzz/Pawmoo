@@ -27,7 +27,8 @@ abstract class SQLHandler {	// extends SqlCreator {
 //==============================================================================
 function __construct($database,$table,$handler) {
 		$this->table = $table;
-		$this->dbb = DatabaseHandler::getDataSource($handler);
+		$this->Database = $database;
+		$this->dbb = DatabaseHandler::get_database_handle($handler,$database);
 		$this->Connect();
 		APPDEBUG::MSG(13,$this->columns,"フィールド名リスト");
 		$this->handler = $handler;
@@ -58,7 +59,7 @@ public function SetPaging($pagesize, $pagenum) {
 	$this->startrec = $pagesize * ($pagenum - 1);		// 開始レコード番号
 	if($this->startrec < 0) $this->startrec = 0;
 	$this->limitrec = $pagesize;		// 取得レコード数
-	APPDEBUG::arraydump(13,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
+	APPDEBUG::DebugDump(13,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
 }
 //==============================================================================
 //	findRecord(row): 

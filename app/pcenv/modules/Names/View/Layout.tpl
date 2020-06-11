@@ -25,7 +25,7 @@
 			&makePageLinks						// 右側固定表示
 			".split-pane fixed-top fit-win" => [		// 自動サイズ調整
 				".split-pane-component list-view#top-component" => [
-					&makeListTable =>  [
+					&MakeListTable =>  [
 						category => 'content2'
 						tableId => myTable
 					]

@@ -30,11 +30,11 @@ APPDEBUG::INIT(0);
 
 date_default_timezone_set('Asia/Tokyo');
 
-list($appname,$app_uri,$module,$q_str) = getRoutingParams(__DIR__);
+list($appname,$app_uri,$module,$q_str) = get_routing_params(__DIR__);
 list($fwroot,$appRoot) = $app_uri;
 list($controller,$category,$files) = $module;
 // ファイル名を拡張子と分離する
-list($filename,$ext) = extractBaseName($files);
+list($filename,$ext) = extract_base_name($files);
 // 言語ファイルの対応
 $lang = (isset($query['lang'])) ? $query['lang'] : $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 // コア用の言語ファイルを読み込む

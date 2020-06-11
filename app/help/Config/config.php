@@ -15,40 +15,28 @@ define('DEFAULT_LANG', 'ja');				// 言語ファイル
 
 const DatabaseParameter  = [
 	'Postgre' =>  array(
-		'persistent' => false,
 		'host' => PG_HOST,
-		'login' => 'postgres',
 		'port' => PG_PORT,
+		'login' => 'postgres',
 		'password' => 'postgres',
-		'database' => PG_DB,
-		'prefix' => '',
 		'encoding' => 'utf8'
 	),
 	'SQLite' => array(
-		'persistent' => false,
 		'host' => 'localhost',
 		'login' => '',
 		'password' => '',
-		'database' => SQLITE_DB,
-		'prefix' => '',
 		'encoding' => 'utf8'
 	),
 	'Filemaker' => array(
-		'persistent' => false,
 		'host' => HOST_SPEC,
 		'login' => 'admin',
 		'password' => 'kiwi',
-		'database' => '*',
-		'prefix' => '',
 		'encoding' => 'utf8'
 	),
 	'Folder' => array(
-		'persistent' => false,
 		'host' => 'localhost',
 		'login' => '',
 		'password' => '',
-		'database' => OSDEP,
-		'prefix' => '',
 		'encoding' => 'utf8'
 	),
 ];

@@ -45,7 +45,7 @@ class FMDBHandler extends FileMaker {
 		$this->fetchCount = 20;
 		$this->Finds = array();
 		$this->Connect($this->LayoutName);
-		self::$FMHandle = DatabaseHandler::getDataSource('FMDB');
+		self::$FMHandle = DatabaseHandler::get_database_handle('FMDB',$dbname);
 		APPDEBUG::MSG(13, DatabaseParameter['Filemaker']);
 	}
 //==============================================================================
@@ -170,7 +170,7 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 		if($this->recordMax > 0 && $this->skip_rec >= $this->recordMax) return 0;
 		if($this->limitrec > 0 && $this->skip_rec >= ($this->startrec + $this->limitrec)) return 0;
 		
-		APPDEBUG::arraydump($this->onetime,[
+		APPDEBUG::DebugDump($this->onetime,[
 		    'Param' => [
         		"skip_rec" => $this->skip_rec,
 	        	"startrec" => $this->startrec,
@@ -224,7 +224,7 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 		}
 		APPDEBUG::MSG(13, $this->r_fetched, "Fetch: ");
 	}
-	APPDEBUG::arraydump($this->onetime,[
+	APPDEBUG::DebugDump($this->onetime,[
 		'fetched' => [
 			"recordMax" => $this->recordMax,
 			"r_fetched" => $this->r_fetched,

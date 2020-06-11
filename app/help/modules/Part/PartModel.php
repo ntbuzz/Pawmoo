@@ -3,7 +3,7 @@
 class PartModel extends AppModel {
     static $DatabaseSchema = [
         'Handler' => 'SQLite',
-        'DatabaseName' => 'mvcman',
+        'DatabaseName' => SQLITE_DB,
         'DataTable' => 'Part',
         'Primary' => 'id',
         'Unique' => 'id',

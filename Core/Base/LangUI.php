@@ -33,7 +33,7 @@ class LangUI {
         self::$LangDir = 'Core/Template/lang/';
         self::LoadLang('core');
         // アプリケーションの言語リソースパス
-        self::$LangDir = $default;      // App::AppPath("View/lang/");
+        self::$LangDir = $default;      // App::Get_AppPath("View/lang/");
     }
 //==============================================================================
 //  言語ファイルの読み込み

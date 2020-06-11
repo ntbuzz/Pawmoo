@@ -3,7 +3,7 @@
 class OsModel extends AppModel {
   static $DatabaseSchema = [
         'Handler' => 'Postgre',
-        'DatabaseName' => 'pcenv',
+        'DatabaseName' => PG_DB,
         'DataTable' => 'operating_systems',
         'Primary' => 'id',
         'Unique' => 'name',

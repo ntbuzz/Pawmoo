@@ -16,7 +16,7 @@
 	@Toolbar
 	&makePageLinks
 	".list-view" => [
-		&makeListTable =>  [
+		&MakeListTable =>  [
 			category => 'content2'
 			tableId => myTable
 		]

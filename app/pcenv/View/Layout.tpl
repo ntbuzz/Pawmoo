@@ -27,7 +27,7 @@
     	    .split-pane-divider#vertical-divider => []
         	.split-pane-component#right-component => [	&makePageLinks
                 	".split-pane-component list-view#list-component" => [
-						&makeListTable =>  [
+						&MakeListTable =>  [
 							category => 'content2'
 							tableId => myTable
 						]

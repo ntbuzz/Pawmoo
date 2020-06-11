@@ -12,13 +12,13 @@ class HelpController extends AppController {
 //==============================================================================
 //	クラス初期化処理
 	protected function ClassInit() {
-//		$this->SetEvent('Model.OnGetRecord',$this->View->Helper,"echo_dump");
+//		$this->setEvent('Model.OnGetRecord',$this->View->Helper,"echo_dump");
 	}
 //==============================================================================
 // デフォルトの動作
 public function ListAction() {
 	$this->Model->MakeOutline();
-	APPDEBUG::arraydump(5, [
+	APPDEBUG::DebugDump(5, [
 		'レコード' => $this->Model->Records,
 		'アウトライン' => $this->Model->outline,
 	]);
