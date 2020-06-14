@@ -43,7 +43,7 @@ var oss = [
 					</td>
 					<td>
 						IP：<?= $RecData['subnet'] ?>.<input type="text" name="ipaddr" size="3" value="<?= $RecData['id'] ?>">
-						<input type="checkbox" name="active" value=1<?= ($RecData['active'])?' checked':''; ?>>:<?=  $Helper->_('.Dialog.有効') ?>
+						<input type="checkbox" name="active" value='TRUE'<?= ($RecData['active'])?' checked':''; ?>>:<?=  $Helper->_('.Dialog.有効') ?>
 						<hr>
 						<input type="radio" name="subnet" value="DHCP"<?= ($RecData['subnet']==='DHCP')?' checked':''; ?>>:DHCP
 						<input type="radio" name="subnet" value="192.168.111"<?= ($RecData['subnet']!=='DHCP')?' checked':''; ?>>:IP
