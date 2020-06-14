@@ -5,6 +5,7 @@ define('SQLITE_DB',__DIR__ . '/mvcman.db');
 define('PG_HOST','spider');
 define('PG_PORT',  '5532');
 define('PG_DB',  'pcmanager');
+define('MYSQL_DB',  'pcmanager');
 
 define("VIEWFILE",0);
 define("POSTFILE",1);
