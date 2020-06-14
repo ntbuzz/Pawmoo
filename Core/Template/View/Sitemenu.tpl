@@ -36,6 +36,7 @@
       [ span.file => [ %${#Core.GitHib} => 'https://github.com/' ] ]
       [ span.file => [ %${#Core.管理ページ.SQLite} => ":SQLiteManager" ] ]
       [ span.file => [ %${#Core.管理ページ.PostgreSQL} => ":phppgadmin" ] ]
+      [ span.file => [ %${#Core.管理ページ.MySQL} => ":phpMyAdmin" ] ]
       [ span.file => [ %${#Core.TestLink} => 'http://spider.starship.net/testlink-1.9.20/' ] ]
     ]
   ]

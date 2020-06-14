@@ -19,7 +19,7 @@ public function LoginAction() {
 			'再ログイン' => $newlogin,
 		]);
 		MySession::SetLogin($newlogin);
-//		$url = App::getAppRoot();
+//		$url = App::Get_AppRoot();
 		$url = App::$SysVAR['URI'];
 		header("Location:{$url}");
 	}
@@ -34,7 +34,7 @@ public function LoginAction() {
 // ログアウト処理
 public function LogoutAction() {
 	MySession::ClearLogin();
-	$url = App::getAppRoot();
+	$url = App::Get_AppRoot();
 	header("Location:{$url}");
 }
 

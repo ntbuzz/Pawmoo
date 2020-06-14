@@ -3,7 +3,6 @@
 class ChapterModel extends customModel {
     static $DatabaseSchema = [
         'Handler' => 'SQLite',
-        'DatabaseName' => 'mvcman',
         'DataTable' => 'Chapter',
         'Primary' => 'id',
         'Unique' => 'id',

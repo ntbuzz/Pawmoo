@@ -405,9 +405,9 @@
   App::$ActionMethod;           // メソッド名
 
 ・静的メソッド
-  App::appController(コントローラ名)      // appコントローラと付属モジュールファイルの読込
-  App::getSysRoot(付加パス)               // フレームワークのトップパスに付加パスを付けた文字列
-  App::getAppRoot(付加パス)               // アプリケーションのトップパスに付加パスを付けた文字列
+  App::LoadModuleFiles(コントローラ名)      // appコントローラと付属モジュールファイルの読込
+  App::Get_SysRoot(付加パス)               // フレームワークのトップパスに付加パスを付けた文字列
+  App::Get_AppRoot(付加パス)               // アプリケーションのトップパスに付加パスを付けた文字列
   App::WebInclude(読込み配列)             //  css/js/icoファイルの読込タグ出力（単独）
   App::ImageSRC(ファイル名, 属性)         // imagesのインクルードタグ出力
 
@@ -421,7 +421,7 @@
   APPDEBUG::MSG_SORT()                    // メッセージ要素の並替え
   APPDEBUG::MSG(メッセージレベル,出力オブジェクト, タイトル)    // デバッグ用のメッセージ出力
   APPDEBUG::DumpMessage()                 // デバッグダンプ
-  APPDEBUG::arraydump(メッセージレベル,出力配列)                // 配列のダンプ
+  APPDEBUG::DebugDump(メッセージレベル,出力配列)                // 配列のダンプ
 
 ◆ LangUI クラス
 ・静的変数
@@ -532,14 +532,13 @@
     ViewTemplate($name)         // レイアウトテンプレート処理
 
 ・ヘルパークラス(AppHelper)
-      getParams($n, $alt)                 // パラメータ指定の有無を判定し、存在しなければ$altを返す
-      ViewTemplate($name)         // 親のレイアウトテンプレート処理を呼び出す
+    ViewTemplate($name)         // 親のレイアウトテンプレート処理を呼び出す
     SetData($data)                      // ヘルパープロパティ変数のセット
     Resource ($res)             // リソースの出力
     ALink ($lnk,$txt)           // ハイパーリンクの生成, 言語IDを参照するには$txtを＃文字で始める
                                 // $lnk を / で始めるとフレームワークのTOP、:で始めるとサイトのTOPへリンクする
-    makePageLinks()             // ページング用のリンクボタンを生成する
-    makeListTable ($deftab)     // ヘッダー付きのテーブルリスト表示、$deftabにはパラメータ
+    MakePageLinks()             // ページング用のリンクボタンを生成する
+    MakeListTable ($deftab)     // ヘッダー付きのテーブルリスト表示、$deftabにはパラメータ
                                 // $deftab['category'] = テーブルクラス
                                 // $deftab['tableId']  = テーブルID 指定無しは "_TableList"
                                 // $deftab['pager']    = ページャーナビを表示する

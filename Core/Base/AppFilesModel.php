@@ -35,7 +35,7 @@ class AppFilesModel extends AppObject {
 // 指定フォルダの一覧
     public function GetSubFolder($home) {
         $this->TopFolder = $this->Home[$home] . $this->SubFolder;
-        if(! $this->GetList($this->TopFolder)) {
+        if(! $this->get_FolderLists($this->TopFolder)) {
             // フォルダが無ければ作成する
 //            mkdir($this->TopFolder);
         }
@@ -48,7 +48,7 @@ class AppFilesModel extends AppObject {
     }
 //==============================================================================
 // 指定ファイルのフルパス
-    public function getFullpath($home,$fname, $mkdir = FALSE) {
+    public function Get_Fullpath($home,$fname, $mkdir = FALSE) {
         $tagdir = $this->Home[$home] . "{$this->SubFolder}";
         if($mkdir && !file_exists($tagdir)) {
             mkdir($tagdir);             // フォルダが無く、作成が指定されていれば作成する
@@ -58,8 +58,8 @@ class AppFilesModel extends AppObject {
 //==============================================================================
 // ファイル移動
     public function MoveFile($fcat,$fname,$tocat) {
-        $frname = $this->getFullpath($fcat,$fname);
-        $toname = $this->getFullpath($tocat,$fname);
+        $frname = $this->Get_Fullpath($fcat,$fname);
+        $toname = $this->Get_Fullpath($tocat,$fname);
         $srcname = LocalCharset($frname);	// 移動元ファイルパス
         $tagname = LocalCharset($toname);		// 移動先ファイルパス
         file_move($srcname, $tagname);			// ファイル移動、移動先のフォルダがなければ作成
@@ -71,7 +71,7 @@ class AppFilesModel extends AppObject {
         $this->GetSubFolder($frcat);			// 移動もとのファイル一覧を取得
         foreach($this->Files as $fval) {
             $srcname = LocalCharset($fval['fullname']);	// 対象ファイルパス
-            $tagname = LocalCharset($this->getFullpath($tocat,$fval['filename']));
+            $tagname = LocalCharset($this->Get_Fullpath($tocat,$fval['filename']));
 			file_move($srcname, $tagname);			// ファイル移動、移動先のフォルダがなければ作成
 //			echo $srcname . "=>" . $tagname ."\n";
         }
@@ -79,7 +79,7 @@ class AppFilesModel extends AppObject {
 //==============================================================================
 // ファイル削除
     public function DeleteFile($fcat,$fname) {
-        $srcname = LocalCharset($this->getFullpath($fcat,$fname));
+        $srcname = LocalCharset($this->Get_Fullpath($fcat,$fname));
         if(file_exists($srcname)) unlink($srcname);         // 移動先に同名ファイルがあれば削除
         echo $fname . ' を削除しました';
     }
@@ -95,7 +95,7 @@ class AppFilesModel extends AppObject {
     }
 //==============================================================================
 // フォルダ内を探査する
-    private function GetList($dirs) {
+    private function get_FolderLists($dirs) {
 //    echo "GET::{$dirs}\n";
         $this->Files = array();
         if(!file_exists ($dirs)) {
@@ -131,7 +131,7 @@ class AppFilesModel extends AppObject {
     }
 //==============================================================================
 // ZIPファイルの作成
-    public function MakeZipFile($filepath,$zipname) {
+    public function Make_ZipFile($filepath,$zipname) {
 	    // Zipクラスロード
         $zip = new ZipArchive();
 		// Zipファイル一時保存ディレクトリ
@@ -141,7 +141,7 @@ class AppFilesModel extends AppObject {
     	// Zipファイルオープン
    		$result = $zip->open($zipFilePath, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE);
    		if ($result !== true) {
-    		print "Download ERROR!!!";
+    		echo "Download ERROR!!!";
    			exit(-1);
     	    // 失敗した時の処理
    		}
@@ -149,7 +149,7 @@ class AppFilesModel extends AppObject {
         // ディレクトリ指定なら一括ZIP
         if(is_dir($filepath)) {
             // 指定パスのファイルリストを取得する
-            $this->GetList($filepath);
+            $this->get_FolderLists($filepath);
             // 取得ファイルをZipに追加していく
 	        foreach($this->Files as $filelist) {
 		        $fullname = $filelist['fullname'];

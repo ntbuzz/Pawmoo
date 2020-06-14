@@ -24,7 +24,7 @@ $(function() {
         }
     );
     // クリックしたときのファンクション
-    $('.tab td').off().click(function() {
+    $('.tab td').click(function() {
         var txt = $(this).attr('value');
         var index = $('.tab td').index(this);               // index()関数を使いクリックされたタブが何番目かを取得する
         $('.content li').css('display','none');             // コンテンツを一旦すべて非表示にする

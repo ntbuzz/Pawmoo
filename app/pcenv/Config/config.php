@@ -5,6 +5,7 @@ define('SQLITE_DB',__DIR__ . '/pcenv.db');
 define('PG_HOST','localhost');
 define('PG_PORT',  '5532');
 define('PG_DB',  'pcmanager');
+define('MYSQL_DB',  'pcmanager');
 
 define("VIEWFILE",0);
 define("POSTFILE",1);
@@ -17,40 +18,39 @@ define('DEFAULT_LANG', 'ja');				// 言語ファイル
 
 const DatabaseParameter  = [
 	'Postgre' =>  array(
-		'persistent' => false,
 		'host' => PG_HOST,
-		'login' => 'postgres',
 		'port' => PG_PORT,
-		'password' => 'postgres',
 		'database' => PG_DB,
-		'prefix' => '',
+		'login' => 'postgres',
+		'password' => 'postgres',
 		'encoding' => 'utf8'
 	),
 	'SQLite' => array(
-		'persistent' => false,
 		'host' => 'localhost',
+		'database' => SQLITE_DB,
 		'login' => '',
 		'password' => '',
-		'database' => SQLITE_DB,
-		'prefix' => '',
+		'encoding' => 'utf8'
+	),
+	'MySQL' => array(
+		'host' => 'localhost',
+		'database' => MYSQL_DB,
+		'login' => 'root',
+		'password' => 'superman',
 		'encoding' => 'utf8'
 	),
 	'Filemaker' => array(
-		'persistent' => false,
 		'host' => HOST_SPEC,
+		'database' => '',
 		'login' => 'admin',
 		'password' => 'kiwi',
-		'database' => '*',
-		'prefix' => '',
 		'encoding' => 'utf8'
 	),
 	'Folder' => array(
-		'persistent' => false,
 		'host' => 'localhost',
+		'database' => '',
 		'login' => '',
 		'password' => '',
-		'database' => OSDEP,
-		'prefix' => '',
 		'encoding' => 'utf8'
 	),
 ];

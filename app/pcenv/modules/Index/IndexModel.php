@@ -2,8 +2,12 @@
 
 class IndexModel extends AppModel {
     static $DatabaseSchema = [
+<<<<<<< HEAD
         'Handler' => 'SQLite',
         'DatabaseName' => 'pcenv',
+=======
+        'Handler' => 'Postgre',
+>>>>>>> origin/master
         'DataTable' => 'host_lists',
         'Primary' => 'id',
         'Unique' => 'name_list_id',

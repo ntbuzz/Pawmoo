@@ -3,7 +3,6 @@
 class ParagraphModel extends customModel {
     static $DatabaseSchema = [
         'Handler' => 'SQLite',
-        'DatabaseName' => 'mvcman',
         'DataTable' => 'Paragraph',
         'Primary' => 'id',
         'Unique' => 'id',

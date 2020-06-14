@@ -12,15 +12,15 @@ class HostsHelper extends AppHelper {
 //==============================================================================
 // テーブルヘッダ出力をオーバーライド
 protected function putTableHeader($tab = '') {
-    print '<tr><th class="sorter-false">No.</th>';
+    echo '<tr><th class="sorter-false">No.</th>';
 	foreach($this->MyModel->Header as $key => $val) {
         list($nm,$flag,$align) = $val;
         if($flag > 0) {
 	        $tsort = ($flag==2) ? '' : ' class="sorter-false"';
-			print "<th${tsort}>{$nm}</th>";
+			echo "<th${tsort}>{$nm}</th>";
         }
     }
-    print "</tr>\n";
+    echo "</tr>\n";
 }
 //==============================================================================
 // レコードカラム出力をオーバーライド
@@ -28,22 +28,22 @@ protected function putColumnData($lno,$columns) {
     $element = $this->_('.Schema.Status');
     $columns[$element] = ($columns[$element] == 't') ? $this->_('.Busy') : '---';
     
-    print "<tr class='item' id='".$columns[$this->MyModel->Primary]."'>";
-    print '<td align="right">'.$lno.'</td>';
+    echo "<tr class='item' id='".$columns[$this->MyModel->Primary]."'>";
+    echo '<td align="right">'.$lno.'</td>';
 	foreach($this->MyModel->Header as $key => $val) {
         list($nm,$flag,$align) = $val;
         $pos = parent::AttrAlign[$align];
-		if($flag > 0) print "<td nowrap{$pos}>". $columns[$nm]."</td>";
+		if($flag > 0) echo "<td nowrap{$pos}>". $columns[$nm]."</td>";
 	}
-	print "</tr>\n";
+	echo "</tr>\n";
 }
 //==============================================================================
 // ページャーボタンの表示
-public function makePageLinks() {
+public function MakePageLinks() {
     if($this->MyModel->pagesize == 0) {
         echo "<span>＜全 {$this->MyModel->record_max}件＞</span>";
     } else
-        parent::makePageLinks();
+        parent::MakePageLinks();
 }
 //==============================================================================
 // セレクトリストをjavascript配列へ

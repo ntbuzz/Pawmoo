@@ -24,16 +24,21 @@ class DatabaseHandler {
             'datasource' => 'Database/Postgres',
             'callback' => 'PgDatabase',
         ],
+        // MariaDB(MySQL)データベースへの接続情報
+        'MySQL' => [
+            'datasource' => 'Database/MariaDB',
+            'callback' => 'MySQLDatabase',
+        ],
     ];
     private static $dbHandle = [];
 //==============================================================================
 // データベースへ接続してハンドルを返す
-public static function getDataSource($dbName) {
-    if(array_key_exists($dbName,self::DatabaseSpec)) {
-        $defs = self::DatabaseSpec[$dbName];
+public static function get_database_handle($handler) {
+    if(array_key_exists($handler,self::DatabaseSpec)) {
+        $defs = self::DatabaseSpec[$handler];
         $func = $defs['callback'];      // 呼び出し関数
-        self::$dbHandle[$dbName] = self::$func(DatabaseParameter[$dbName],'open');
-        return self::$dbHandle[$dbName];
+        self::$dbHandle[$handler] = self::$func(DatabaseParameter[$handler],'open');
+        return self::$dbHandle[$handler];
     }
     return NULL;
 }
@@ -44,8 +49,8 @@ public static function CloseConnection() {
 }
 //==============================================================================
 // ハンドルの取得
-public function getCallbackFunc($dbName) {
-    return self::DatabaseSpec[$dbName]['callback'];      // 呼び出し関数
+public function get_callback_func($handler) {
+    return self::DatabaseSpec[$handler]['callback'];      // 呼び出し関数
 }
 //==============================================================================
 // クローズ処理
@@ -53,7 +58,7 @@ private static function closeDb() {
     APPDEBUG::MSG(13, self::$dbHandle);
     foreach(self::$dbHandle as $key => $handle) {
         $func = self::DatabaseSpec[$key]['callback'];      // 呼び出し関数
-        self::$func($handle,'close');
+        self::$func($handle,NULL,'close');
     }
     self:$dbHandle = [];
 }
@@ -95,9 +100,28 @@ private static function SQLiteDatabase($dbdef,$action) {
     }
 }
 //==============================================================================
+// MariaDB(MySQL) データベース
+private static function MySQLDatabase($dbdef,$action) {
+    switch($action) {       //   [ .ptl, .tpl, .inc, .twg ]
+    case 'open':
+        // DB接続：mysqliクラスをオブジェクト化してから使う
+        $dbb = new mysqli($dbdef['host'], $dbdef['login'], $dbdef['password'], $dbdef['database']);
+        if($dbb->connect_error) {
+            echo $dbb->connect_error;
+            die('MariaDB 接続失敗');
+        }
+        return $dbb;
+    case 'close':
+        $dbdef->close();
+        break;
+    case 'query':
+        break;
+    }
+}
+//==============================================================================
 // 動作確認用(FMDB)
-static function Connect($dbName,$layout) {
-    $dbb = self::$dbHandle[$dbName];
+static function Connect($handler,$layout) {
+    $dbb = self::$dbHandle[$handler];
 }
 
 }

@@ -5,8 +5,6 @@
 require_once('vendor/vendor/FileMaker.php');
 
 class FMDBHandler extends FileMaker {
-	private static $FMHandle;			// FileMaker API ハンドル
-
 	private $LayoutName;	// アクセスレイアウト
 	private $skip_rec;		// 部分リストアップ用
 	private $r_pos;			// 現在のレコードポインタ
@@ -30,8 +28,10 @@ class FMDBHandler extends FileMaker {
 	private $onetime;		// デバッグ用：メッセージを1回に
 //==============================================================================
 // コンストラクタでデータベースに接続
-	function __construct($dbname,$table) {
+	function __construct($dbtable) {
 		parent::__construct(); // 継承元クラスのコンストラクターを呼ぶ
+		// DB_FILE:WEB-Layout
+		list($dbname,$table) = explode(':',$dbtable);
 		// クラスユニークなパラメータ
 		$this->setProperty('database', $dbname);
 		$this->LayoutName = $table;
@@ -45,7 +45,6 @@ class FMDBHandler extends FileMaker {
 		$this->fetchCount = 20;
 		$this->Finds = array();
 		$this->Connect($this->LayoutName);
-		self::$FMHandle = DatabaseHandler::getDataSource('FMDB');
 		APPDEBUG::MSG(13, DatabaseParameter['Filemaker']);
 	}
 //==============================================================================
@@ -170,7 +169,7 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 		if($this->recordMax > 0 && $this->skip_rec >= $this->recordMax) return 0;
 		if($this->limitrec > 0 && $this->skip_rec >= ($this->startrec + $this->limitrec)) return 0;
 		
-		APPDEBUG::arraydump($this->onetime,[
+		APPDEBUG::DebugDump($this->onetime,[
 		    'Param' => [
         		"skip_rec" => $this->skip_rec,
 	        	"startrec" => $this->startrec,
@@ -224,7 +223,7 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 		}
 		APPDEBUG::MSG(13, $this->r_fetched, "Fetch: ");
 	}
-	APPDEBUG::arraydump($this->onetime,[
+	APPDEBUG::DebugDump($this->onetime,[
 		'fetched' => [
 			"recordMax" => $this->recordMax,
 			"r_fetched" => $this->r_fetched,

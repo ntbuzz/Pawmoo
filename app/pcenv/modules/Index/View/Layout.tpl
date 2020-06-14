@@ -24,7 +24,7 @@
 		.split-pane-component#right-component => [
 			&makePageLinks						// 右側固定表示
 			".split-pane-component list-view" => [
-				&makeListTable =>  [
+				&MakeListTable =>  [
 					category => 'content2'
 					tableId => myTable
 				]

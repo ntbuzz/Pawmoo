@@ -6,11 +6,11 @@
  */
 //==============================================================================
 //	SQLite3用の抽象メソッドを実装する
-class SQLiteHandler extends SQLHandler {
+class MySQLHandler extends SQLHandler {
 //==============================================================================
 //	コンストラクタ：　データベースのテーブルに接続する
 	function __construct($table) {
-		parent::__construct($table,'SQLite');
+		parent::__construct($table,'MySQL');
 	}
 //==============================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
@@ -20,7 +20,7 @@ protected function Connect() {
 	$sql = "PRAGMA table_info({$this->table});";
 	$rows = $this->dbb->query($sql);
 	$this->columns = array();
-	while ($row = $rows->fetchArray(SQLITE3_ASSOC)) {
+	while ($row = $rows->fetch_assoc()) {
 		$this->columns[$row['name']] = $row['name'];
 	}
 	APPDEBUG::MSG(13,$this->columns);
@@ -35,7 +35,7 @@ public function doQuery($sql) {
 //==============================================================================
 //	fetchDB: 	レコードを取得してカラム配列を返す
 public function fetchDB() {
-	return $this->rows->fetchArray(SQLITE3_ASSOC); //またはSQLITE3_NUM
+	return $this->rows->fetch_assoc(); //またはSQLITE3_NUM
 }
 //==============================================================================
 //	getLastError: 	レコードを取得してカラム配列を返す

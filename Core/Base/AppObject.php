@@ -41,12 +41,12 @@ class AppObject {
 //==============================================================================
 //	イベント関数をセット
 //==============================================================================
-    protected function SetEvent($event,$Instance,$method) {
+    protected function setEvent($event,$Instance,$method) {
         list($class,$ev) = explode('.',$event);         // モジュール指定があればモジュールインスタンスにセットする
         if(empty($ev)) {
             $this->$event = array($Instance,$method);
         } else {
-            $this->$class->SetEvent($ev,$Instance,$method);
+            $this->$class->setEvent($ev,$Instance,$method);
         }
 	}
 //==============================================================================
@@ -91,7 +91,7 @@ public function __get($PropName) {
     }
     if($class === 'Controller') {
         // Controllerの場合はセットでロードする
-        App::appController($PropName);
+        App::LoadModuleFiles($PropName);
         // ロードできたか確かめる
         if(class_exists($props)) {
             $this->$PropName = new $props($this);
@@ -100,7 +100,7 @@ public function __get($PropName) {
     } else {
         // Models, modules フォルダにファイルがあればロードする
         foreach($fldr[$class] as $model) {
-            $modfile = App::AppPath("{$model}/{$props}.php");
+            $modfile = App::Get_AppPath("{$model}/{$props}.php");
             if(file_exists($modfile)) {
                 require_once($modfile);
                 $this->$PropName = new $props($this);

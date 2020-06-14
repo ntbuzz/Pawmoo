@@ -1,5 +1,5 @@
 //
-$("#add-paragraph").off().click(function () {  // セクションブロックから呼び出される
+$("#add-paragraph").click(function () {  // セクションブロックから呼び出される
     var obj = $('.tabmenu .tab li.selected');   // コンテンツエリアは選択されていない場合がある
     var para_obj = {    // フォームのデータを生成
         section_id: obj.attr("id"),
@@ -24,7 +24,7 @@ $("#add-paragraph").off().click(function () {  // セクションブロックか
 });
 //==============================================================================
 //   セクションを追加するダイアログ表示＆書き込み処理
-$(".add-section").off().click(function () {
+$(".add-section").click(function () {
     if (ChapterData.length == 0) {
         alert("チャプターが選択されていません！");
         return false;
@@ -50,7 +50,7 @@ $(".add-section").off().click(function () {
     return false;
 });
 // セクション編集メニュー
-$("#edit-section").off().click(function () {
+$("#edit-section").click(function () {
     var id = $('.tabmenu .tab li.selected').attr("id");
     // JSONメソッドを使ってレコードデータを入手する
     var url = location.origin + location.pathname.controller_path("section/json") + id;
@@ -72,7 +72,7 @@ $("#edit-section").off().click(function () {
     return false;
 });
 // セクション削除メニュー
-$("#delete-section").off().click(function () {
+$("#delete-section").click(function () {
     var id = $('.tabmenu .tab li.selected').attr("id");
     // データを取得
     var url = location.origin + location.pathname.controller_path("section/json") + id;
@@ -94,7 +94,7 @@ $("#delete-section").off().click(function () {
 //  ツールバーメニューのクリックアクション
 //==============================================================================
 //   パートレコード編集ダイアログ表示＆書き込み処理
-$("#part_edit").off().click(function () {
+$("#part_edit").click(function () {
     if (!("id" in PartData)) {
         alert("パートが選択されていません！");
         return false;
@@ -113,7 +113,7 @@ $("#part_edit").off().click(function () {
 });
 //==============================================================================
 //   パートレコードを追加するダイアログ表示＆書き込み処理
-$("#part_add").off().click(function () {
+$("#part_add").click(function () {
     var part_obj = {
         disp_id:    0,
         title:      '',
@@ -133,7 +133,7 @@ $("#part_add").off().click(function () {
 });
 //==============================================================================
 //   パートレコードを削除
-$("#part_del").off().click(function () {
+$("#part_del").click(function () {
     if (!("id" in PartData)) {
         alert("パートが選択されていません！");
         return false;
@@ -153,7 +153,7 @@ $("#part_del").off().click(function () {
 });
 //==============================================================================
 //   セクションを追加するダイアログ表示＆書き込み処理
-$("#chap_edit").off().click(function () {
+$("#chap_edit").click(function () {
     if (!("id" in ChapterData)) {
         alert("チャプターが選択されていません！");
         return false;
@@ -172,7 +172,7 @@ $("#chap_edit").off().click(function () {
 });
 //==============================================================================
 //   チャプターレコードを追加するダイアログ表示＆書き込み処理
-$("#chap_add").off().click(function () {
+$("#chap_add").click(function () {
     if (!("id" in PartData)) {
         alert("追加するパートが選択されていません！");
         return false;
@@ -197,7 +197,7 @@ $("#chap_add").off().click(function () {
 });
 //==============================================================================
 //   チャプターレコードを削除
-$("#chap_del").off().click(function () {
+$("#chap_del").click(function () {
     if (!("id" in ChapterData)) {
         alert("チャプターが選択されていません！");
         return false;
@@ -217,14 +217,14 @@ $("#chap_del").off().click(function () {
 });
 //==============================================================================
 //   テキストをクリップボードへコピー
-$("#ctxCopy").off().click(function () {
+$("#ctxCopy").click(function () {
 //    alert('COPY');
     document.execCommand('copy');
     return false;
 });
 //==============================================================================
 //   テキスト形式に変換
-$('#text_downld').off().click(function () {
+$('#text_downld').click(function () {
     var url = location.pathname.controller_path("index/download");
     location.href = url;
 /*

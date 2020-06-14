@@ -3,7 +3,6 @@
 class CategoryModel extends AppModel {
     static $DatabaseSchema = [
         'Handler' => 'SQLite',
-        'DatabaseName' => 'mvcman',
         'DataTable' => 'Category',
         'Primary' => 'id',
         'Unique' => 'id',

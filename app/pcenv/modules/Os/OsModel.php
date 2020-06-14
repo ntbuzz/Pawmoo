@@ -2,8 +2,12 @@
 
 class OsModel extends AppModel {
   static $DatabaseSchema = [
+<<<<<<< HEAD
         'Handler' => 'SQLite',
         'DatabaseName' => 'pcenv',
+=======
+        'Handler' => 'Postgre',
+>>>>>>> origin/master
         'DataTable' => 'operating_systems',
         'Primary' => 'id',
         'Unique' => 'name',

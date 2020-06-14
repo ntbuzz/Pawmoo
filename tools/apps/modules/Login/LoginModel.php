@@ -3,7 +3,6 @@
 class LoginModel extends AppModel {
     static $DatabaseSchema = [
         'Handler' => 'Postgre',
-        'DatabaseName' => 'pcmanager',
         'DataTable' => 'users',
         'Primary' => 'id',
         'Unique' => 'id',

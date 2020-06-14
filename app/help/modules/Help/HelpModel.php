@@ -3,7 +3,6 @@
 class HelpModel extends customModel {
     static $DatabaseSchema = [
         'Handler' => 'SQLite',
-        'DatabaseName' => 'mvcman',
         'DataTable' => 'Part',
         'Primary' => 'id',
         'Unique' => 'id',

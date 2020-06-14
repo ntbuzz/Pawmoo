@@ -9,7 +9,7 @@ define('DEBUG_DUMP_EXIT',   2);
 
 //==============================================================================
 // REQUEST_URI を分解しルーティングに必要なアプリ名、コントローラー名を抽出する
-function getRoutingParams($dir) {
+function get_routing_params($dir) {
     $root = basename(dirname($dir));        // FWフォルダ名
     $vv = $_SERVER['REQUEST_URI'];
     list($requrl,$q_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
@@ -75,7 +75,7 @@ function is_extst_module($appname,$modname,$classname) {
 }
 //==============================================================================
 // 指定フォルダ内のフォルダ名リストを取得する
-function GetFoloders($dirtop) {
+function get_folder_lists($dirtop) {
     $drc=dir($dirtop);
     $folders = array();
 	while(false !== ($fl=$drc->read())) {
@@ -91,7 +91,7 @@ function GetFoloders($dirtop) {
 }
 //==============================================================================
 // ミリセカンド取得
-function getUnixTimeMillSecond(){
+function get_UnixTime_MillSecond(){
     //microtimeを.で分割
     $arrTime = explode('.',microtime(true));
     //時＋ミリ秒
@@ -99,7 +99,7 @@ function getUnixTimeMillSecond(){
 }
 //==============================================================================
 // フォルダ内のPHPファイルを探査する
-function GetPHPFiles($dirtop) {
+function get_php_files($dirtop) {
     $drc=dir($dirtop);
     $files = array();
 	while(false !== ($fl=$drc->read())) {
@@ -131,7 +131,7 @@ function array_to_URI($arr) {
 }
 //==============================================================================
 // ファイルパスを / で終わるようにする
-function pathcomplete($path) {
+function path_complete($path) {
     if(mb_substr($path,-1) !== '/') $path .= '/';     // 最後は /で終わらせる
     return $path;
 }
@@ -144,7 +144,7 @@ function tag_body_name($key) {
 //==============================================================================
 // 拡張子をとりだす
 // 返り値は .拡張子
-function extractExtension($fn) {
+function extract_extension($fn) {
     $nn = strrpos($fn,'.');                     // ファイル名の拡張子を確認
     return ($nn === FALSE) ? '' :               // 拡張子が無いときに備える
             substr($fn,$nn+1);  // 拡張子を分離
@@ -152,7 +152,7 @@ function extractExtension($fn) {
 //==============================================================================
 // ファイルパスを分解する
 // 返り値は array(ファイル名,拡張子)
-function extractBaseName($fn) {
+function extract_base_name($fn) {
     $nn = strrpos($fn,'.');                     // ファイル名の拡張子を確認
     if($nn === FALSE) $nn = strlen($fn);        // 拡張子が無いときに備える
     $ext = substr($fn,$nn+1);                   // 拡張子を分離
@@ -162,15 +162,15 @@ function extractBaseName($fn) {
 //==============================================================================
 // ファイルパスを分解する
 // 返り値は array(パス,ファイル名,拡張子)
-function extractPath($path) {
-    list($path,$fn) = extractFileName($path);    // パスとファイル名に分解
-    list($fn,$ext) = extractBaseName($fn);    // ファイル名と拡張子に分解
+function extract_path_file_ext($path) {
+    list($path,$fn) = extract_path_filename($path);    // パスとファイル名に分解
+    list($fn,$ext) = extract_base_name($fn);    // ファイル名と拡張子に分解
     return array($path,$fn,$ext);
 }
 //==============================================================================
 // ファイルパスを分解する
 // 返り値は array(パス,ファイル名)
-function extractFileName($path) {
+function extract_path_filename($path) {
     if(mb_substr($path,-1) == '/') {
         $path = substr($path,0,strlen($path)-1);     // 末尾の /  は削除
     }
@@ -199,7 +199,7 @@ function str_fixwidth($exp,$pad,$w) {
 //==============================================================================
 // 移動先のフォルダ存在を確かめてファイル移動
 function file_move($src,$dest){
-    list($path,$fn) = extractFileName($dest);       // 移動先をパスとファイル名に分解
+    list($path,$fn) = extract_path_filename($dest);       // 移動先をパスとファイル名に分解
     if(!file_exists($path)) mkdir($path);           // 移動先のフォルダがなければ作成する
     return rename($src,$dest);                      // ファイル移動
 }
@@ -266,7 +266,7 @@ function array_override($a, $b) {
   }
 //==============================================================================
 // テキストの改行を変換
-function Text2HTML($atext) {
+function text_to_html($atext) {
     return nl2br(htmlspecialchars($atext));
 }
 //==============================================================================
@@ -323,12 +323,12 @@ function make_hyperlink($lnk,$modname) {
 		if($lnk[0] === ':') {
             $lnk[0] = '/';
         } else if($lnk[0] === '/') {
-			$lnk = App::getSysRoot("{$lnk}");
+			$lnk = App::Get_SysRoot("{$lnk}");
         } else if(mb_substr($lnk,0,2) === './') {
             $lnk = substr_replace($lnk, strtolower($modname), 0, 1);
-            $lnk = App::getAppRoot($lnk);
+            $lnk = App::Get_AppRoot($lnk);
         } else {
-            $lnk = App::getAppRoot($lnk);
+            $lnk = App::Get_AppRoot($lnk);
 		}
     }
     return $lnk;
@@ -358,7 +358,7 @@ function debug_dump($flag, $arr = []) {
     // バックトレースから呼び出し元の情報を取得
     $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,2);    // 呼び出し元のスタックまでの数
     $dbpath = str_replace('\\','/',$dbinfo[0]['file']);             // Windowsパス対策
-    list($pp,$fn) = extractFileName($dbpath);
+    list($pp,$fn) = extract_path_filename($dbpath);
     $fn .= "(".$dbinfo[0]['line'].")";
     if(isset($dbinfo[1]['object'])) {
         $pp = get_class($dbinfo[1]['object']);  // 呼出し元のクラス名

@@ -20,40 +20,28 @@ define('HOST_SPEC','http://192.168.1.1/');
 
 const DatabaseParameter  = [
 	'Postgre' =>  array(
-		'persistent' => false,
 		'host' => PG_HOST,
 		'port' => PG_PORT,
 		'login' => '',
 		'password' => '',
-		'database' => PG_DB,
-		'prefix' => '',
 		'encoding' => 'utf8'
 	),
 	'SQLite' => array(
-		'persistent' => false,
 		'host' => 'localhost',
 		'login' => '',
 		'password' => '',
-		'database' => SQLITE_DB,
-		'prefix' => '',
 		'encoding' => 'utf8'
 	),
 	'Filemaker' => array(
-		'persistent' => false,
 		'host' => HOST_SPEC,
 		'login' => '',
 		'password' => '',
-		'database' => '*',
-		'prefix' => '',
 		'encoding' => 'utf8'
 	),
 	'Folder' => array(
-		'persistent' => false,
 		'host' => 'localhost',
 		'login' => '',
 		'password' => '',
-		'database' => OSDEP,
-		'prefix' => '',
 		'encoding' => 'utf8'
 	),
 ];

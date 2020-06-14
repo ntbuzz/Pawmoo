@@ -11,7 +11,7 @@ require_once('Core/Handler/DatabaseHandler.php');
 class AppModel extends AppObject {
     static $DatabaseSchema = [];
     protected $dbDriver;        // データベースドライバー
-    private $TableHead;      // テーブルヘッダ
+    protected $TableHead;      // テーブルヘッダ
     protected $fields;            // レコードフィールドの値
 //    protected $OnGetRecord;   // レコード取得時のコールバック関数
     public $pagesize;           // 1ページ当たりのレコード取得件数
@@ -47,24 +47,10 @@ class AppModel extends AppObject {
 // クラス変数の初期化
     protected function __InitClass() {
         $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->DatabaseName,$this->DataTable);        // データベースドライバー
+        $this->dbDriver = new $driver($this->DataTable);        // データベースドライバー
         // ヘッダ表示用のスキーマ
-        $this->TableHead = array();
         APPDEBUG::MSG(13,$this->Schema);
-        foreach($this->Schema as $key => $val) {
-            list($nm,$mflag) = $val;
-            // 参照フィールド設定：*_id でRelations設定されていれば_idなしを参照フィールドにする
-            if((substr($key,-3)==='_id') && array_key_exists($key,$this->Relations)) {
-                $ref = substr($key,0,strlen($key)-3);    // _id を抜いた名称を表示名とする
-            } else $ref = $key;
-            if($nm == '') $nm = $ref;  // alias名が未定義なら参照名と同じにする
-            if($nm[0] == '.') {            // 言語ファイルの参照
-                $nm = $this->_(".Schema{$nm}");   //  Schema 構造体を参照する
-            }
-            $flag = $mflag % 10;
-            $align= ($mflag - $flag) / 10;
-            $this->TableHead[$key] = array($nm,$flag,$align,$ref);
-        }
+        $this->SchemaHeader($this->Schema);
         APPDEBUG::MSG(13, $this->TableHead, "TableHead");
         // 各種データ初期化
         $this->RecData = NULL;          // レコードデータ(JOINなし)
@@ -77,6 +63,26 @@ class AppModel extends AppObject {
         $this->record_max = 0;          // 総レコード数
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
     }
+//==============================================================================
+// スキーマを分解してヘッダー情報を生成
+protected function SchemaHeader($schema) {
+    // ヘッダ表示用のスキーマ
+    $this->TableHead = array();
+    foreach($schema as $key => $val) {
+        list($nm,$mflag) = $val;
+        // 参照フィールド設定：*_id でRelations設定されていれば_idなしを参照フィールドにする
+        if((substr($key,-3)==='_id') && array_key_exists($key,$this->Relations)) {
+            $ref = substr($key,0,strlen($key)-3);    // _id を抜いた名称を表示名とする
+        } else $ref = $key;
+        if($nm == '') $nm = $ref;  // alias名が未定義なら参照名と同じにする
+        if($nm[0] == '.') {            // 言語ファイルの参照
+            $nm = $this->_(".Schema{$nm}");   //  Schema 構造体を参照する
+        }
+        $flag = $mflag % 10;
+        $align= ($mflag - $flag) / 10;
+        $this->TableHead[$key] = array($nm,$flag,$align,$ref);
+    }
+}
 //==============================================================================
 // ページング設定
 public function SetPage($pagesize,$pagenum) {
@@ -147,7 +153,7 @@ public function RecordFinder($cond,$filter=[],$sort='') {
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
     while ($this->fetchRecord()) {
-        APPDEBUG::arraydump(13, [
+        APPDEBUG::DebugDump(13, [
             "fields:".(count($data)+1) => $this->fields,
             "Head:" => $this->Header,
         ]);
