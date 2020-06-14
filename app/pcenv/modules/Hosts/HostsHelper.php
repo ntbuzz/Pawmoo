@@ -26,7 +26,7 @@ protected function putTableHeader($tab = '') {
 // レコードカラム出力をオーバーライド
 protected function putColumnData($lno,$columns) {
     $element = $this->_('.Schema.Status');
-    $columns[$element] = ($columns[$element] == 't') ? $this->_('.Busy') : '---';
+    $columns[$element] = ($columns[$element] == 'TRUE') ? $this->_('.Busy') : '---';
     
     echo "<tr class='item' id='".$columns[$this->MyModel->Primary]."'>";
     echo '<td align="right">'.$lno.'</td>';

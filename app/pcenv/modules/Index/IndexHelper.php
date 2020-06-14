@@ -25,7 +25,7 @@ protected function putTableHeader($tab = '') {
 protected function putColumnData($lno,$columns) {
     if($this->_in($columns,'Schema.Host')==='') return;
     $element = $this->_('.Schema.active');
-    $columns[$element] = ($columns[$element] == 't') ? $this->_('.Busy') : '---';
+    $columns[$element] = ($columns[$element] == 'TRUE') ? $this->_('.Busy') : '---';
     
     echo "<tr class='item' id='".$columns[$this->MyModel->Primary]."'>";
     echo '<td align="right">'.$lno.'</td>';
@@ -60,7 +60,7 @@ public function SelectList($key) {
             $ipaddr = $this->_in($columns,".Schema.id");
             $status = $this->_in($columns,".Schema.active");
             $ln = ($isnum) ? str_fixwidth($lno++,' ',-3)."\t" : "";
-            if($status != 't') $ln .= ";";
+            if($status != 'TRUE') $ln .= ";";
             if($ipaddr < 255) {
                 $zone .= "{$ln}{$fixname}IN\tA\t192.168.111.{$ipaddr}\n";
                 $rev .= "{$ln}{$ipaddr}\tIN\tPTR\t{$hostname}.starship.net.\n";

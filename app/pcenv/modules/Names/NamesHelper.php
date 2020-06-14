@@ -26,7 +26,7 @@ protected function putColumnData($lno,$columns) {
     echo "<tr class='item downloadmenu' id='".$columns[$this->MyModel->Primary]."'>";
     echo '<td align="right">'.$lno.'</td>';
     $element = $this->_('.Schema.used');
-    $columns[$element] = ($columns[$element] == 't') ? $this->_('.Common.Busy') : '---';
+    $columns[$element] = ($columns[$element] == 'TRUE') ? $this->_('.Common.Busy') : '---';
     foreach($this->MyModel->Header as $key => $val) {
         list($nm,$flag,$align) = $val;
         $pos = parent::AttrAlign[$align];
