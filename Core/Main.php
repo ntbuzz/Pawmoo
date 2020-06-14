@@ -136,7 +136,7 @@ if(!method_exists($controllerInstance,$ContAction) ||
 App::$ActionMethod= $ContAction;    // アクションメソッド名
 //=================================
 // デバッグ用の情報ダンプ
-debug_dump(0, [
+APPDEBUG::DebugDump(0, [
     'デバッグ情報' => [
         "Application"=> $appname,
         "Controller"=> $controller,

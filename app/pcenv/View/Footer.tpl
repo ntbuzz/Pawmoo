@@ -2,7 +2,7 @@
 //
 .popup-box#setting-dialog{popup-dialog} => [ size => "420,450"
   .contents => [ +echo => ~
-<form method="post" action="/pcmanager/host/list" id="setfilter">
+<form method="post" action="/pcmanager/hosts/list" id="setfilter">
 	<table width="100%">
 	<tr>
 		<th nowrap>QA対象:</th><td nowrap colspan="3"></td>

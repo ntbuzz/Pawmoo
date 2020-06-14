@@ -120,6 +120,7 @@ public static function Get_SysRoot($path = '') {
 // アプリケーションのトップパスに付加パスを付けた文字列
 public static function Get_AppRoot($path = '') {  
     if($path[0] !== '/') $path = "/{$path}";
+//echo "appRoot:".self::$appRoot."\n"."Path]{$path}\n";exit;
     return self::$appRoot . strtolower($path);
 }
 //==============================================================================

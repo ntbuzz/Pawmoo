@@ -36,7 +36,7 @@ var oss = [
 	<ul class="content">
 		<?= $Helper->Contents_Tab('base','base'); ?>
 
-			<?php $Helper->Form('host/update/' . $RecData['id'],array('id'=>"updatedata")); ?>
+			<?php $Helper->Form('hosts/update/' . $RecData['id'],array('id'=>"updatedata","method"=>"POST")); ?>
 				<table border="0" cellspacing="0" cellpadding="0">
 				<tr>
 					<th><?=  $Helper->_('.Dialog.ホスト名：') ?></th>
@@ -106,7 +106,7 @@ var oss = [
 		</li>
 
 		<?= $Helper->Contents_Tab('install'); ?>
-			<?php $Helper->Form('host/filter/',array('id'=>"filterdata")); ?>
+			<?php $Helper->Form('hosts/filter/',array('id'=>"filterdata")); ?>
  				<pre>
 					インストール情報
  					このパソコンの構築手順を示す。

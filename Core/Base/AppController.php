@@ -110,9 +110,10 @@ public function MakepdfAction() {
 public function UpdateAction() {
 	try {
 		$num = App::$Params[0];
-		MySession::Dump();
+//		MySession::Dump();
 		$this->Model->UpdateRecord($num,MySession::$PostEnv);
-		header('Location:' . App::Get_AppPath(strtolower($this->ModuleName)) . '/list/' . $num );
+//		echo ('Location:' . App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/' . $num );exit;
+		header('Location:' . App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/' . $num );
 	} catch (Exception $e) {
 
 	}
