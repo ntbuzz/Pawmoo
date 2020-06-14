@@ -3,7 +3,6 @@
 class AppsModel extends AppModel {
   static $DatabaseSchema = [
         'Handler' => 'Postgre',
-        'DatabaseName' => PG_DB,
         'DataTable' => 'app_lists',
         'Primary' => 'id',
         'Unique' => 'name',

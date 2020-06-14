@@ -9,8 +9,8 @@
 class PostgreHandler extends SQLHandler {
 //==============================================================================
 //	コンストラクタ：　データベースのテーブルに接続する
-	function __construct($database,$table) {
-		parent::__construct($database,$table,'Postgre');
+	function __construct($table) {
+		parent::__construct($table,'Postgre');
 	}
 //==============================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする

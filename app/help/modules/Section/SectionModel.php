@@ -3,7 +3,6 @@
 class SectionModel extends customModel {
     static $DatabaseSchema = [
         'Handler' => 'SQLite',
-        'DatabaseName' => SQLITE_DB,
         'DataTable' => 'Section',
         'Primary' => 'id',
         'Unique' => 'id',

@@ -24,15 +24,20 @@ class DatabaseHandler {
             'datasource' => 'Database/Postgres',
             'callback' => 'PgDatabase',
         ],
+        // MariaDB(MySQL)データベースへの接続情報
+        'MySQL' => [
+            'datasource' => 'Database/MariaDB',
+            'callback' => 'MySQLDatabase',
+        ],
     ];
     private static $dbHandle = [];
 //==============================================================================
 // データベースへ接続してハンドルを返す
-public static function get_database_handle($handler,$dbname) {
+public static function get_database_handle($handler) {
     if(array_key_exists($handler,self::DatabaseSpec)) {
         $defs = self::DatabaseSpec[$handler];
         $func = $defs['callback'];      // 呼び出し関数
-        self::$dbHandle[$handler] = self::$func(DatabaseParameter[$handler],$dbname,'open');
+        self::$dbHandle[$handler] = self::$func(DatabaseParameter[$handler],'open');
         return self::$dbHandle[$handler];
     }
     return NULL;
@@ -53,16 +58,16 @@ private static function closeDb() {
     APPDEBUG::MSG(13, self::$dbHandle);
     foreach(self::$dbHandle as $key => $handle) {
         $func = self::DatabaseSpec[$key]['callback'];      // 呼び出し関数
-        self::$func($handle,'close');
+        self::$func($handle,NULL,'close');
     }
     self:$dbHandle = [];
 }
 //==============================================================================
 // PostgreSQL データベース
-private static function PgDatabase($dbdef,$dbname,$action) {
+private static function PgDatabase($dbdef,$action) {
     switch($action) {       //   [ .ptl, .tpl, .inc, .twg ]
     case 'open':
-        $conn = "host={$dbdef['host']} dbname={$dbname} port={$dbdef['port']}";
+        $conn = "host={$dbdef['host']} dbname={$dbdef['database']} port={$dbdef['port']}";
         $conn .= " user={$dbdef['login']} password={$dbdef['password']};";
         $dbb = pg_connect($conn);
         if(!$dbb) {
@@ -79,12 +84,31 @@ private static function PgDatabase($dbdef,$dbname,$action) {
 }
 //==============================================================================
 // SQlite3 データベース
-private static function SQLiteDatabase($dbdef,$dbname,$action) {
+private static function SQLiteDatabase($dbdef,$action) {
     switch($action) {       //   [ .ptl, .tpl, .inc, .twg ]
     case 'open':
-        $dbb = new SQLite3($dbname);
+        $dbb = new SQLite3($dbdef['database']);
         if(!$dbb) {
             die('SQLite3 接続失敗');
+        }
+        return $dbb;
+    case 'close':
+        $dbdef->close();
+        break;
+    case 'query':
+        break;
+    }
+}
+//==============================================================================
+// MariaDB(MySQL) データベース
+private static function MySQLDatabase($dbdef,$action) {
+    switch($action) {       //   [ .ptl, .tpl, .inc, .twg ]
+    case 'open':
+        // DB接続：mysqliクラスをオブジェクト化してから使う
+        $dbb = new mysqli($dbdef['host'], $dbdef['login'], $dbdef['password'], $dbdef['database']);
+        if($dbb->connect_error) {
+            echo $dbb->connect_error;
+            die('MariaDB 接続失敗');
         }
         return $dbb;
     case 'close':

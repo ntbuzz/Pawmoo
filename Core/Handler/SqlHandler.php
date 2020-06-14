@@ -25,10 +25,9 @@ abstract class SQLHandler {	// extends SqlCreator {
 //==============================================================================
 //	コンストラクタ：　テーブル名
 //==============================================================================
-function __construct($database,$table,$handler) {
+function __construct($table,$handler) {
 		$this->table = $table;
-		$this->Database = $database;
-		$this->dbb = DatabaseHandler::get_database_handle($handler,$database);
+		$this->dbb = DatabaseHandler::get_database_handle($handler);
 		$this->Connect();
 		APPDEBUG::MSG(13,$this->columns,"フィールド名リスト");
 		$this->handler = $handler;

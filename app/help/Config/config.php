@@ -13,28 +13,40 @@ define("DRAGFILE",2);
 define('DEFAULT_CONTROLLER', 'help');
 define('DEFAULT_LANG', 'ja');				// 言語ファイル
 
+
 const DatabaseParameter  = [
 	'Postgre' =>  array(
 		'host' => PG_HOST,
 		'port' => PG_PORT,
+		'database' => PG_DB,
 		'login' => 'postgres',
 		'password' => 'postgres',
 		'encoding' => 'utf8'
 	),
 	'SQLite' => array(
 		'host' => 'localhost',
+		'database' => SQLITE_DB,
 		'login' => '',
 		'password' => '',
 		'encoding' => 'utf8'
 	),
+	'MySQL' => array(
+		'host' => 'localhost',
+		'database' => MYSQL_DB,
+		'login' => 'root',
+		'password' => 'superman',
+		'encoding' => 'utf8'
+	),
 	'Filemaker' => array(
 		'host' => HOST_SPEC,
+		'database' => '',
 		'login' => 'admin',
 		'password' => 'kiwi',
 		'encoding' => 'utf8'
 	),
 	'Folder' => array(
 		'host' => 'localhost',
+		'database' => '',
 		'login' => '',
 		'password' => '',
 		'encoding' => 'utf8'

@@ -3,7 +3,6 @@
 class LicensesModel extends AppModel {
   static $DatabaseSchema = [
         'Handler' => 'Postgre',
-        'DatabaseName' => PG_DB,
         'DataTable' => 'licenses',
         'Primary' => 'id',
         'Unique' => 'operating_system_id',

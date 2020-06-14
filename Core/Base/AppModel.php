@@ -47,7 +47,7 @@ class AppModel extends AppObject {
 // クラス変数の初期化
     protected function __InitClass() {
         $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->DatabaseName,$this->DataTable);        // データベースドライバー
+        $this->dbDriver = new $driver($this->DataTable);        // データベースドライバー
         // ヘッダ表示用のスキーマ
         APPDEBUG::MSG(13,$this->Schema);
         $this->SchemaHeader($this->Schema);
