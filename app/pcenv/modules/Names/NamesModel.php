@@ -2,12 +2,7 @@
 
 class NamesModel extends AppModel {
   static $DatabaseSchema = [
-<<<<<<< HEAD
         'Handler' => 'SQLite',
-        'DatabaseName' => 'pcenv',
-=======
-        'Handler' => 'Postgre',
->>>>>>> origin/master
         'DataTable' => 'name_lists',
         'Primary' => 'id',
         'Unique' => 'id',
