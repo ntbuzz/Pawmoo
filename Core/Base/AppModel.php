@@ -9,7 +9,15 @@ require_once('Core/Handler/DatabaseHandler.php');
 
 //==============================================================================
 class AppModel extends AppObject {
-    static $DatabaseSchema = [];
+    static $DatabaseSchema = [
+        'Handler' => 'Null',
+        'DataTable' => 'dummy',
+        'Primary' => '',
+        'Unique' => '',
+        'Schema' => [],
+        'Relations' => [],
+        'PostRenames' => []
+    ];
     protected $dbDriver;        // データベースドライバー
     protected $TableHead;      // テーブルヘッダ
     protected $fields;            // レコードフィールドの値
