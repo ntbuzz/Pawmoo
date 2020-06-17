@@ -19,6 +19,7 @@ class MySession {
 //	public $Post;
 	public static $EnvData;
 	public static $PostEnv;
+	public static $LoginInfo;
 
 //==============================================================================
 // static クラスにおける初期化処理
@@ -42,7 +43,8 @@ static function InitSession() {
 		if($val == "on") $val = 1; elseif($val==="off") $val = 0;
 		self::$PostEnv[$key] = $val;
 	}
-	if(!isset(self::$PostEnv['cc'])) self::$PostEnv['cc'] = '';		// 一時的
+//	if(!isset(self::$PostEnv['cc'])) self::$PostEnv['cc'] = '';		// 一時的
+	self::$LoginInfo = self::$EnvData['Login'];
 }
 //==============================================================================
 // セッションに保存する
