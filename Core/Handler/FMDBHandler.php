@@ -191,7 +191,6 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 			$findInst->setOmit((substr($opr,0,3) == 'NOT'));
 			$compoundFind->add($n++,$findInst);
 		}
-		if($this->skip_rec == 0) APPDEBUG::MSG(13, $compoundFind, "先頭から取得");
 		//ソート順の設定
 		$kn = 1;
 		foreach($sortby as $akey) {

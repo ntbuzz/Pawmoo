@@ -307,7 +307,7 @@ public function ViewStyle($file_name) {
             $content =trim($content);
         } else if(!$this->do_com) {         // コメントと不要な改行を削除して出力する
             $content = preg_replace('/([\r\n])+/s',"\n",                  // コメント削除でできた空行を削除
-                    preg_replace('/\/\*[\s\S]*?\*\/|\s*\/\/.*/','',$content));  // コメント行を削除
+                    preg_replace('/\/\*[\s\S]*?\*\/|\s+\/\/.*|^\/\/.*/','',$content));  // コメント行を削除
             $content =trim($content);
         }
         echo "{$content}\n";

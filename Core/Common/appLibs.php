@@ -378,7 +378,7 @@ function debug_dump($flag, $arr = []) {
     } else {
         if($flag < 3) echo "<pre>\n{$str}\n";
         foreach($arr as $msg => $obj) {
-            if(empty($obj)) echo "{$msg}:EMPTY\n";
+            if(empty($obj)) echo "{$sep} {$msg} {$sep}\nEMPTY\n";
             else if(is_scalar($obj)) {
                 echo "{$sep} {$msg} {$sep}\n";
                 echo_safe("{$obj}\n",$danger);

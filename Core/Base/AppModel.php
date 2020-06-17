@@ -11,7 +11,7 @@ require_once('Core/Handler/DatabaseHandler.php');
 class AppModel extends AppObject {
     static $DatabaseSchema = [
         'Handler' => 'Null',
-        'DataTable' => 'dummy',
+        'DataTable' => '',
         'Primary' => '',
         'Unique' => '',
         'Schema' => [],
@@ -82,8 +82,8 @@ protected function SchemaHeader($schema) {
         if((substr($key,-3)==='_id') && array_key_exists($key,$this->Relations)) {
             $ref = substr($key,0,strlen($key)-3);    // _id を抜いた名称を表示名とする
         } else $ref = $key;
-        if($nm == '') $nm = $ref;  // alias名が未定義なら参照名と同じにする
-        if($nm[0] == '.') {            // 言語ファイルの参照
+        if($nm === '') $nm = $ref;  // alias名が未定義なら参照名と同じにする
+        if($nm[0] === '.') {            // 言語ファイルの参照
             $nm = $this->_(".Schema{$nm}");   //  Schema 構造体を参照する
         }
         $flag = $mflag % 10;
