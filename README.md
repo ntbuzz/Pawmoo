@@ -4,7 +4,7 @@
 <pre>
  @copyright  Copyright (c) 2018 - 2020 by nTak
  @license    MIT
- @version 0.8.1, 2020-05-15
+ @version 0.16.0, 2020-06-18
  System Require: PHP 5.6 or Higher
 </pre>
 <h3>特徴</h3> 

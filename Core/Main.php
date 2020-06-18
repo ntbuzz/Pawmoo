@@ -56,6 +56,8 @@ if(empty($appname) || !file_exists("app/$appname")) {
     $controller = ucfirst(strtolower($appname)); // 指定がなければ 
     $redirect = true;
 }
+MySession::InitSession($appname);
+
 // ここでは App クラスの準備ができていないので直接フォルダ指定する
 require_once("app/{$appname}/Config/config.php");
 // コントローラーファイルが存在するか確認する
@@ -149,6 +151,7 @@ APPDEBUG::DebugDump(0, [
     ],
     "QUERY" => App::$Query,
     "SESSION" => [
+        "SESSION_ID" => MySession::$MY_SESSION_ID,
         "POST" => MySession::$PostEnv,
         "ENV" => MySession::$PostEnv,
     ],

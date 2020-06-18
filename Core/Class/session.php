@@ -1,29 +1,26 @@
 <?php
 /* -------------------------------------------------------------
  * PHPフレームワーク
- * 	MySession:	セッション変数の管理
+ * 	MySession:	Management SESSION variable, POST/GET variables
  */
-//if($on_server) {
 	//セッションの有効期限を5分に設定
 	session_set_cookie_params(60 * 5);
 	session_start();
-//	$_SESSION = array();
-//	session_destroy();
-//}
-if(DEBUGGER && !$on_server) {
-	$_SESSION['_minimvc_biscuit']['Login'] = ['user' => 'dummy'];
-}
 
 class MySession {
-	const SESSION_NAME = "_minimvc_biscuit";	// セッションに保存するキー
-//	public $Post;
 	public static $EnvData;
 	public static $PostEnv;
 	public static $LoginInfo;
+	public static $MY_SESSION_ID;
 
 //==============================================================================
 // static クラスにおける初期化処理
-static function InitSession() {
+static function InitSession($appname = 'default') {
+	self::$MY_SESSION_ID = "_minimvc_biscuit_{$appname}";
+	// for Login skip on CLI debug.php processing
+	if(DEBUGGER && empty($_SERVER['SERVER_PORT'])) {
+		$_SESSION[self::$MY_SESSION_ID]['Login'] = ['user' => 'aaa'];
+	}
 	debug_dump(0,[
 		"SESSION" => $_SESSION,
 		"REQUEST" => $_REQUEST,
@@ -31,25 +28,24 @@ static function InitSession() {
 		"GET" => $_GET,
 		]);
 	// セッションキーがあれば読み込む
-	self::$EnvData = (array_key_exists(self::SESSION_NAME,$_SESSION)) ? $_SESSION[self::SESSION_NAME]:array();
-	// セッションに保存した値を戻す
+	self::$EnvData = (array_key_exists(self::$MY_SESSION_ID,$_SESSION)) ? $_SESSION[self::$MY_SESSION_ID]:array();
+	// copy from  SESSION variable to POST variable
 	if(isset(self::$EnvData)) {
 		foreach(self::$EnvData as $key => $val) {
 			self::$PostEnv[$key] = $val;
 		}
 	}
-	// POST/GET されてきた変数を取り出しセットする(SESSION値は上書き)
+	// overwrite real POST/GET variables
 	foreach($_REQUEST as $key => $val) {
 		if($val == "on") $val = 1; elseif($val==="off") $val = 0;
 		self::$PostEnv[$key] = $val;
 	}
-//	if(!isset(self::$PostEnv['cc'])) self::$PostEnv['cc'] = '';		// 一時的
 	self::$LoginInfo = self::$EnvData['Login'];
 }
 //==============================================================================
 // セッションに保存する
 static function CloseSession() {
-	$_SESSION[self::SESSION_NAME] = self::$EnvData;
+	$_SESSION[self::$MY_SESSION_ID] = self::$EnvData;
 	debug_dump(0, [
 		"CLOSE" => $_SESSION,
 	]);
@@ -106,14 +102,11 @@ static function UnsetEnvData($arr) {
 //==============================================================================
 // デバッグ用ダンプ
 static function Dump() {
-	echo "<pre>\n";
-	echo "SESSION\n";
-	print_r($_SESSION);
-	echo "ENV\n";
-	print_r(self::$EnvData);
-	echo "POST\n";
-	print_r(self::$PostEnv);
-	echo "</pre>\n";
+	debug_dump(1,[
+		"SESSION" => $_SESSION,
+		"ENV" => self::$EnvData,
+		"POST" => self::$PostEnv
+	]);
 }
 //==============================================================================
 // ログイン情報を保持
@@ -129,4 +122,4 @@ static function ClearLogin() {
 
 }
 // セッション変数を初期化
-MySession::InitSession();
+//MySession::InitSession();
