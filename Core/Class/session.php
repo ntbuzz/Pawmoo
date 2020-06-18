@@ -40,7 +40,7 @@ static function InitSession($appname = 'default') {
 		if($val == "on") $val = 1; elseif($val==="off") $val = 0;
 		self::$PostEnv[$key] = $val;
 	}
-	self::$LoginInfo = self::$EnvData['Login'];
+	self::$LoginInfo = (empty(self::$EnvData['Login'])? [] : self::$EnvData['Login'];
 }
 //==============================================================================
 // セッションに保存する
