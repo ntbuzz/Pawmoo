@@ -8,9 +8,10 @@ p => [ ~ Biscuits(MAP) is PHP wild-framwork. :-) ~ ]
   pre => [ ~
 @@Copyright (c) 2017 - 2020 by nTak
 @license    MIT
-@version 0.13.0, 2020-05-31
+@version 0.16.0, 2020-06-18
 @System Require: PHP 5.6 or Higher
-importと間違えないように先頭の＠は二個つける
+先頭に'@'を使用する時は、importコマンドと間違えないように
+先頭の＠は二個つける
 出力するときには先頭の1個は削除される
  ~  ]
 ]
