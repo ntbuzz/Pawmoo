@@ -2,130 +2,161 @@
 require_once('Core/Common/appLibs.php');
 
 $text = <<<'EOS'
-変数: ${#varname.単純変数}
-変数: {$varname$}単純変数
-変数: {%varname%}単純変数
-変数: $varname  単純変数
-変数: $varname,単純変数
-変数: ${#.管理ページ.言語} 日本語名
-変数: {$単純変数$},日本語名
-==============================-
-    スタイルシート
-.context-menu {
-	display: none;
-	position: absolute;
-	margin: 0;
-	padding: 2px;
-	border: 1px solid gray;
-	list-style-type: none;
-	background: #EEE;
-	font-size: 1em;
-	box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
-    -moz-box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
-    -webkit-box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
+# 吾輩は猫である
+## 吾輩は猫である
+### 吾輩は猫である
+#### 吾輩は猫である
+##### 吾輩は猫である
+###### 吾輩は猫である
+
+強調
+
+*吾輩は猫である。*名前はまだ無い。  
+どこで生れたかとんと見当がつかぬ。  
+何でも薄暗いじめじめした所で  
+**ニャーニャー**泣いていた事だけは記憶している。
+
+改行
+吾輩はここで  
+始めて人間という  
+ものを見た。  
+（青空文庫）
+
+
+1. 番号付きリスト1
+ 1. 番号付きリスト1_1
+ 1. 番号付きリスト1_2
+1. 番号付きリスト2
+1. 番号付きリスト3
+
+
+- リスト1
+ - ネスト リスト1_1
+  - ネスト リスト1_1_1
+  - ネスト リスト1_1_2
+ - ネスト リスト1_2
+- リスト2
+- リスト3
+
+
+> 引用文章  
+> 引用文章  
+> 
+> > 引用文章  
+> > 引用文章  
+
+水平線
+---
+___
+***
+
+リンク
+[株式会社アーティス](http://www.asobou.co.jp/)の運営サイト[名刺工房](http://meishi.artisj.com/index.html)
+
+```
+.body => [
+    $Helper->ALink($aaa);
+]
+class Sample()
+{
+	private int $a;
+	
+	public function __construct(int $a)
+	{
+		$this->a = $a;
+	}
+	
+	public function hoge(int $x, int $y):int
+	{
+		return ($x + $y) * $this->a;
+	}
 }
-.context-menu > li {
-	padding: 5px 20px 5px 10px;
-	cursor: default;
-}
-.context-menu > li:hover {
-	background: #06c;
-	color: white;
-}
-.context-menu > li.disable {
-	color:silver;
-}
-.hilight {
-	border: 1px dashed blue;
-}
-.context-menu li.separate {
-	color:silver;
-	margin:0;
-    padding:0;
-    height:3px;
-    border-top: 1px solid gray;
-}
-==============================-
-    javascript
-var selector = $(".popup-baloon");
-selector.each(function () {
-    var self = $(this); // jQueryオブジェクトを変数に代入しておく
-    var ref = self.attr("data-element");  // 紐付けるID
-    var act = ref.slice(0, 1);            // 先頭が＠ならmouseover
-    if (act == "@") ref = ref.slice(1);
-    var ev = (act == '@') ? "mouseover" : "click";
-    if (ref != "") {
-        var tag = ref.slice(0, 1);
-        if (tag == "!") ref = ref.slice(1); // 先頭が！ならアイコン追加しない
-        var icon = (tag == "!") ? ref : ref + "-help";
-        if ($('#' + icon).length == 0) {
-            $('#' + ref).append('<span class="help_icon" id="' + icon + '"></span>')
-                .css('padding-right','22px');
-            ev = 'mouseover';   // ポップアップイベントが登録されていることがあるので、強制的にマウスオーバーにする
-        }
-        ref = '#' + icon;
-        if (ev == "click") $(ref).css("cursor", "help");
-        $(ref).on(ev, function () {
-            // バルーンを消すための領域を定義
-            $('body').append('<div class="baloon-BK"></div>');
-            $('.baloon-BK').fadeIn('fast');
-            // バルーンコンテンツの表示位置をリンク先から取得して設定
-            var x = $(ref).offset().left + ($(ref).innerWidth()/3);
-            var y = $(ref).offset().top  + ($(ref).innerHeight()/2);
-            if ((x + self.width()) > $(window).innerWidth()) {
-                x = x - self.outerWidth() + $(ref).outerWidth();
-                self.addClass("baloon-right");
-            } else {
-                self.addClass("baloon-left");
-            }
-            // マウス移動の範囲を配列に記憶する
-            var bound = [ x, y, self.outerWidth(), self.outerHeight() ];
-            self.css({'left': x + 'px','top': y + 'px'});
-            self.fadeIn('fast');
-            // バルーン領域以外をクリックしたらバルーンを消して領域を削除
-            $('.baloon-BK').off().mousemove(function (e) {
-                if (!bound.inBound(5, e.pageX, e.pageY)) {
-                    // モーダルコンテンツとオーバーレイをフェードアウト
-                    self.fadeOut('fast');
-                    $('.baloon-BK').fadeOut('fast',function(){
-                        // オーバーレイを削除
-                        $('.baloon-BK').remove();
-                    });
-                }
-            });
-        });
-    };
-});
-EOS;
-$p = <<<'EOS'
-/(?:^|[,\s]+)
-((?:
-"(?:[^"]|(?:\\\\)*\\")+"|
-'(?:[^']|(?:\\\\)*\\')+'|
-<(?:[^>]|(?:\\\\)*\\>)+>|
-\((?:[^\)]+|(?:\\\\)*\\\))+\)|
-{(?:[^}]|(?:\\\\)*\\})+}|
-~(?:[^~]+|(?:\\\\)*\\~)+~|
-(?:\/\/.*)|
-[^,\s]+
-)*)/x
+```
+データベースの接続パラメータなどはフレームワーク内にはありません。  
+  
+アプリケーションごとに接続パラメータを定義してください。  
+アプリケーションのコンフィグは以下のファイルです。  
+  
+app/(アプリ名)/Config/config.php  
+
 EOS;
 
-$p = <<<'EOS'
-/(
-\${[^}]+?}|
-{\$[^\$]+?\$}|
-{%[^%]+?%}
-)/x
-EOS;
+$txt = pseudo_markdown($text);
+echo "INPUT ============\n{$text}";
+echo str_repeat("=", 50)."\n";
+echo "OUTPUT =====\n{$txt}";
+//debug_dump(5,["TEXT" => $text,"markdown" => $txt]);
+exit;
 /*
+$family = function ($children) use (&$family, &$contents) {
+    if (count($children) == 0) {
+        return;
+    } else {
+        foreach ($children as $child) {
+            // 前処理
+            $nextChildren = get_children(array(
+                'post_parent' => $child->ID,
+                'post_type' => 'page',
+            ));
+            $family($nextChildren);
+            // 後処理
+        }
+    }
+};
+$family($firstChildren);
+*/
 //$p = '/((?={%).+?\%})|((?={\$).+?\$})|((?=\${).+?})|((?=\$)[^,\s]+?})/s';
-$p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/';
-$p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
-
+//$p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/';
+//$p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
+$list_text = function($text,$pp) {
+    $ln = explode("\n", $text);	// とりあえず行に分割
+    $lc = 0;
+    $list_array = function ($parent,$level) use (&$list_array, &$ln, &$lc) {
+        $arr = "<{$parent}>\n";
+        while(!empty($ll = $ln[$lc++])) {
+            for($n=0;$ll[$n] === ' '||$ll[$n] === "\t";++$n) ;
+            if($n === $level) {
+                $ll = trim($ll);
+                if($ll[0] !== '-' && mb_substr($ll,0,2) !== '1.') return "{$arr}</{$parent}>\n";
+                $ll = trim(mb_substr($ll,2));
+                $arr = "{$arr}<li>{$ll}</li>\n";
+            } else if($n < $level) {
+                --$lc;
+                return "{$arr}</{$parent}>\n";
+            } else {
+                --$lc;
+                $arr = "{$arr}" . $list_array($parent,$level+1);
+            }
+        }
+        return "{$arr}</{$parent}>\n";
+    };
+    $quote_array = function ($level) use (&$quote_array, &$ln, &$lc) {
+        $arr = "<blockquote>\n";
+        while(!empty($ll = $ln[$lc++])) {
+            $ll = ltrim(mb_substr($ll,$level));   // 先頭の > を削除
+            if($ll[0] === '>' && $ll[1] === ' ') {
+                --$lc;
+                $arr = "{$arr}" . $quote_array($level+2);
+            } else {
+                $arr = "{$arr}{$ll}\n";
+            }
+        }
+        return "{$arr}</blockquote>\n";
+    };
+    return ($pp==='blockquote') ? $quote_array(1) : $list_array($pp,0);
+};
+$p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)((\r\n){2}|\r{2}|\n{2})/s';
 echo "Pattern:{$p}\n";
 preg_match_all($p,$text,$m);               // 全ての要素をトークン分離する
-debug_dump(4,["preg_match" => $m]);
+$token = $m[1];
+debug_dump(4,["preg_match" => $token]);
+foreach($token as $atext) {
+//    echo "TEXT({$atext})\n";
+    $tag = ($atext[0] === '>') ? 'blockquote' : (($atext[0] === '-') ? 'ul' : 'ol');
+    $list_item = $list_text($atext,$tag);
+    $text = str_replace($atext,$list_item,$text);
+}
+debug_dump(5,["TEXT" => $text]);
 exit;
 
 $lines = array_values(              // これはキーを連番に振りなおしてるだけ
@@ -138,7 +169,7 @@ foreach($lines as $line) {
     preg_match_all($p,$line,$m);               // 全ての要素をトークン分離する
     debug_dump(4,["preg_match" => $m]);
 }
-*/
+
 $row = ['id' => 1,
        'title' => 'a',
         'contents' => '-BBB',

@@ -16,3 +16,6 @@
 .index DD OL {
     padding-left:0.8em;   
 }
+textarea {
+    padding:5px;
+}
