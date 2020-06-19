@@ -66,8 +66,8 @@ class APPDEBUG {
         $info = self::backtraceinfo($stop);
         self::dbEcho($lvl, "<pre>\n");
         if(is_scalar($obj)) {
-            if($msg !== '') $msg .= ": ";
-            if($obj ==='') $obj ='NULL'; else $obj= wordwrap($obj,86,"\n");
+            if(!empty($msg)) $msg .= ": ";
+            if(empty($obj)) $obj ='NULL'; else $obj= wordwrap($obj,86,"\n");
             self::dbEcho($lvl,"{$info}\n{$msg}{$obj}\n");
         } else {
             $m = "{$info} obj dump\n======= {$msg} =======\n";
@@ -90,7 +90,7 @@ class APPDEBUG {
     // メッセージ登録
     private static function dbEcho($lvl,$msg,$is_safe = FALSE) {
         if(empty($msg)) return;
-        if($is_safe && $msg !== '') $msg = htmlspecialchars($msg);
+        if($is_safe && !empty($msg)) $msg = htmlspecialchars($msg);
         if($lvl < 0) {
             echo $msg;
         } else if($lvl < self::$MsgLevel) {

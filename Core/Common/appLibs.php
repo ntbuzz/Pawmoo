@@ -14,7 +14,7 @@ function get_routing_params($dir) {
     $vv = $_SERVER['REQUEST_URI'];
     list($requrl,$q_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
     $param = trim(urldecode($requrl),'/');  // 先頭と末尾の / を除去
-    $args = ($param == '') ? array() : explode('/', $param);
+    $args = (empty($param)) ? array() : explode('/', $param);
     $args = array_values(array_filter($args, 'strlen'));  // 文字数が0の行を取り除く
     $appname = array_shift($args);          // 先頭の要素を取り出す
     if($appname === $root) {                // URIがFWフォルダ名から始まる
@@ -295,7 +295,7 @@ function text_line_split($del,$txt) {
 }
 //==============================================================================
 // MarkDownもどきのパーサー
-// テーブルは生成できない
+// テーブルはサポートしていない
 function pseudo_markdown($atext) {
     $replace_defs = [
         "/\[([^\]]+)\]\(([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)\)/i" => '<a target="_blank" href="\\2">\\1</a>',
@@ -355,6 +355,7 @@ function pseudo_markdown($atext) {
     $p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)((\r\n){2}|\r{2}|\n{2})/s';
     preg_match_all($p,$atext,$m);               // 全ての要素をトークン分離する
     $token = $m[1];
+//debug_dump(5,["TEXT" => $atext,"TOKEN"=>$token]);
     foreach($token as $ln) {
         $tag = ($ln[0] === '>') ? 'bq' : (($ln[0] === '-') ? 'ul' : 'ol');
         $rep_str = $rep_text($ln,$tag);

@@ -63,7 +63,7 @@ class AppStyle {
             'アプリ共通' => "app/{$appname}/View/res",      // App共通のレイアウトテンプレートを探す
             'Libs' => "Core/Template/res",                  // ライブラリのテンプレートを探す
         );
-        if($this->ModuleName == '') {   // リソースフォルダならモジュール固有を削除
+        if(empty($this->ModuleName)) {   // リソースフォルダならモジュール固有を削除
             unset($this->Folders['モジュール固有']);
         }
         $myVARS = array(
@@ -96,7 +96,7 @@ class AppStyle {
 //　ヘッダ出力
 public function ViewHeader() {
     global $on_server; 
-	if($on_server === '' ) return;
+	if(empty($on_server)) return;
     header("Content-Type: {$this->Template['head']};");
 }
 //==============================================================================

@@ -59,7 +59,7 @@ public function SectionTab() {
         $n = 0;
         foreach($this->Section as $key => $val) {
             $sel = ($this->Tabmenu == $n++) ? ' class="selected"' : '';
-            $ttl = ($val['tabset']==='') ? $val['title']:$val['tabset'];
+            $ttl = (empty($val['tabset'])) ? $val['title']:$val['tabset'];
             echo "<li{$sel} id='$val[id]'>$ttl</li>\n";
             $first = '';
         }

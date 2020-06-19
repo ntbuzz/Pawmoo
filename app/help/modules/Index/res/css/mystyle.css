@@ -19,3 +19,8 @@
 textarea {
     padding:5px;
 }
+blockquote {
+    background-color:whitesmoke;
+    margin-left:20px;
+    padding:10px;
+}

@@ -185,7 +185,7 @@ class SQLTest {
 // 配列要素からのWHERE句を作成
 function sql_makeWHERE($row) {
     $sql = $this->makeOPR('AND', $row);
-    if($sql !== '') $sql = ' WHERE '.$sql;
+    if(!empty($sql)) $sql = ' WHERE '.$sql;
     return $sql;
 }
 //==============================================================================

@@ -36,7 +36,7 @@ public function SetLoginInfo($values) {
             $dval = ($vv[1]===1) ? openssl_encrypt($val, 'AES-128-CBC', '_minimvc_biscuit') : $val;
             // 復号化するときは
             // 'password' = openssl_decrypt('password', 'AES-128-CBC', '_minimvc_biscuit');
-            if($val !== '') $this->LoginData[$xkey] = $dval;    // 値があるものだけ
+            if(!empty($val)) $this->LoginData[$xkey] = $dval;    // 値があるものだけ
         }
     }
     // ログイン情報のvalidateを処理する
