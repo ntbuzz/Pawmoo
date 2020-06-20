@@ -42,8 +42,8 @@ $text = <<<'EOS'
 > 引用文章  
 > 引用文章  
 > 
-> > 引用文章  
-> > 引用文章  
+>> 引用文章  
+>>> 引用文章  
 
 水平線
 ---
@@ -82,10 +82,10 @@ app/(アプリ名)/Config/config.php
 EOS;
 
 $txt = pseudo_markdown($text);
-echo "INPUT ============\n{$text}";
-echo str_repeat("=", 50)."\n";
-echo "OUTPUT =====\n{$txt}";
-//debug_dump(5,["TEXT" => $text,"markdown" => $txt]);
+//echo "INPUT ============\n{$text}";
+//echo str_repeat("=", 50)."\n";
+//echo "OUTPUT =====\n{$txt}";
+debug_dump(5,["INPUT" => $text,"MARKDOWN" => $txt]);
 exit;
 /*
 $family = function ($children) use (&$family, &$contents) {

@@ -308,8 +308,8 @@ function pseudo_markdown($atext) {
         "/^######\s(.+?)$/m"=> "<h6>\\1</h6>",        // 見出し6
         "/\*\*(.+)\*\*/"   => '<strong>\\1</strong>', // 強調
         "/\*(.+)\*/"   => '<em>\\1</em>',             // 強調
-        "/```(.+)```/s"     => '<pre>\\1</pre>',      // code
-        "/\s{2}$/m"     => "<br>",                    // 改行
+        "/```(.+?)```/s"     => '<pre><code>\\1</code></pre>',      // code
+        "/(\s{2}|　)$/m"     => "<br>",               // 改行
         "/([-=])>/"     => "\\1&gt;",                 // タグ
     ];
     $replace_keys   = array_keys($replace_defs);
@@ -341,9 +341,9 @@ function pseudo_markdown($atext) {
             $arr = "<blockquote>\n";
             while(!empty($ll = $ln[$lc++])) {
                 $ll = ltrim(mb_substr($ll,$level));   // 先頭の > を削除
-                if($ll[0] === '>' && $ll[1] === ' ') {
+                if($ll[0] === '>') {
                     --$lc;
-                    $arr = "{$arr}" . $quote_array($level+2);
+                    $arr = "{$arr}" . $quote_array($level+1);
                 } else {
                     $arr = "{$arr}{$ll}\n";
                 }

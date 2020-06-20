@@ -5,36 +5,28 @@ String.prototype.trim2 = function() {
     return this.replace(/^[\s　]+|[\s　]+$/g, '');
 };
 //====================================================
-// モジュール名(メソッド)までのパスに引数を付加する
-String.prototype.module_path = function(e) {
-    var path = this.replace(/^[\/]+|[\/]+$/g, '').split('/');
-    var n = (path[0] == "{$appName$}") ? 2 : 3;
-    return '/'+path.slice(0,n).join('/')+'/'+e+'/';                   // 0 〜 n までの要素を / で結合し、指定パスを付加
-};
-//====================================================
 // コントローラー名までのパスに引数を付加する
-// URIのトップフォルダを返す
 String.prototype.controller_path = function(e) {
     var path = this.replace(/^[\/]+|[\/]+$/g, '').split('/');
     var n = (path[0] == "{$appName$}") ? 1 : 2;
     return '/'+path.slice(0,n).join('/')+'/'+e+'/';                   // 0 〜 n までの要素を / で結合し、指定パスを付加
 };
 //====================================================
-// メソッド名以下を書き換える
+// メソッド名までのパスに引数を付加する
 String.prototype.method_path = function(e) {
     var path = this.replace(/^[\/]+|[\/]+$/g, '').split('/');
     var n = (path[0] == "{$appName$}") ? 2 : 3;
     return '/'+path.slice(0,n).join('/')+'/'+e+'/';                   // 0 〜 n までの要素を / で結合し、指定パスを付加
 };
 //====================================================
-// フィルタ以下を書き換える
+// フィルタまでのパスに引数を付加する
 String.prototype.filter_path = function(e) {
     var path = this.replace(/^[\/]+|[\/]+$/g, '').split('/');
     var n = (path[0] == "{$appName$}") ? 3 : 4;
     return '/'+path.slice(0,n).join('/')+'/'+e+'/';                   // 0 〜 n までの要素を / で結合し、指定パスを付加
 };
 //====================================================
-// URLの末尾にある数字パラメータを除外して、指定パスを付加する
+// URLの末尾から数字パラメータを除外して、指定パスを付加する
 String.prototype.exclude_num_path = function(e) {
     var path = this.replace(/^[\/]+|[\/]+$/g, '').split('/');
     for (var n = 2; (n < path.length) && isNaN(path[n]); n++) ;    // メソッド位置から数字パラメータの位置まで進める
