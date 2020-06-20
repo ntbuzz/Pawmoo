@@ -111,7 +111,7 @@ public function MakePageLinks() {
 	echo "<span class='pager_message'>{$total}</span>";
 	echo "</div>\n";
 	// ページサイズの変更
-	$param = (App::$Filter==='') ? "1/" : "{App::$Filter}/1/";
+	$param = (empty(App::$Filter)) ? "1/" : "{App::$Filter}/1/";
 	$href = App::Get_AppRoot($this->ModuleName)."/page/{$param}";
 //		echo "<div class='rightalign'>表示数:<SELECT id='pagesize' onchange='location.href=\"{$href}\"+this.value;'>";
 	$dsp = "<span id='size_selector'>".$this->__(".Display", FALSE)."</span>";

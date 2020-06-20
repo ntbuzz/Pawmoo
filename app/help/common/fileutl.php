@@ -10,7 +10,7 @@ function str_parts($path,$sep) {
 // 拡張子なしのファイル名
 function GetFileName($fn) {
     $ext = str_parts($fn,'.');    // 拡張子を確認
-    if($ext !== '') $fn = str_replace('.'.$ext,'',$fn);
+    if(!empty($ext)) $fn = str_replace('.'.$ext,'',$fn);
     return $fn;
 }
 //==============================================================================

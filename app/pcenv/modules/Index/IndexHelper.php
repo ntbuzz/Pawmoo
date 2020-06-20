@@ -23,7 +23,7 @@ protected function putTableHeader($tab = '') {
 //==============================================================================
 // レコードカラム出力をオーバーライド
 protected function putColumnData($lno,$columns) {
-    if($this->_in($columns,'Schema.Host')==='') return;
+    if(empty($this->_in($columns,'Schema.Host'))) return;
     $element = $this->_('.Schema.active');
     $columns[$element] = ($columns[$element] == 'TRUE') ? $this->_('.Busy') : '---';
     

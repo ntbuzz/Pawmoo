@@ -13,7 +13,7 @@ class AppController extends AppObject {
 // コンストラクタでビューを生成、モデルはビュークラス内で生成する
 	function __construct($owner = NULL){
 		parent::__construct($owner);
-		if(App::$Filter == '') App::$Filter = $this->defaultFilter;	// フィルタが無ければデフォルトをセット
+		if(empty(App::$Filter)) App::$Filter = $this->defaultFilter;	// フィルタが無ければデフォルトをセット
 		$model = "{$this->ModuleName}Model";
 		if(!class_exists($model)) $model = 'AppModel';	// クラスがなければ基底クラスで代用
 		$this->Model = new $model($this);			// データアクセスモデルクラス

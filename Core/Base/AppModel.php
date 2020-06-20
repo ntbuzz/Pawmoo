@@ -82,7 +82,7 @@ protected function SchemaHeader($schema) {
         if((substr($key,-3)==='_id') && array_key_exists($key,$this->Relations)) {
             $ref = substr($key,0,strlen($key)-3);    // _id を抜いた名称を表示名とする
         } else $ref = $key;
-        if($nm === '') $nm = $ref;  // alias名が未定義なら参照名と同じにする
+        if(empty($nm)) $nm = $ref;  // alias名が未定義なら参照名と同じにする
         if($nm[0] === '.') {            // 言語ファイルの参照
             $nm = $this->_(".Schema{$nm}");   //  Schema 構造体を参照する
         }
@@ -157,7 +157,7 @@ public function RecordFinder($cond,$filter=[],$sort='') {
     APPDEBUG::MSG(3, $cond, "cond");
     $data = array();
     $this->Header = $this->TableHead;       // 作成済みのヘッダリストを使う
-    if($sort === '') $sort = $this->Primary;
+    if(empty($sort)) $sort = $this->Primary;
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
     while ($this->fetchRecord()) {
@@ -172,11 +172,11 @@ public function RecordFinder($cond,$filter=[],$sort='') {
             // フィルタが無指定、またはフィルタにヒット
             if($filter === [] || in_array($key,$filter)) {
                 // 参照フィールド名がキー名と違っていればオリジナルを登録する
-                if($nm !== $ref || $key !== $ref)  $record[$key] = trim($this->fields[$key]);
-                $record[$nm] = trim($this->fields[$ref]);
+                if($nm !== $ref || $key !== $ref)  $record[$key] = $this->fields[$key];
+                $record[$nm] = $this->fields[$ref];
             }
         }
-        APPDEBUG::MSG(13, $record, "RECORD:");
+        APPDEBUG::MSG(3, $record, "RECORD:");
         // プライマリキーは必ず含める
         $record[$this->Primary] = $this->fields[$this->Primary];
         if(! empty($record) ) {

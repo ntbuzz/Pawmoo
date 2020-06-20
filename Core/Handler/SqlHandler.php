@@ -165,7 +165,7 @@ protected function sql_safequote(&$value) {
 			}
 		}
 */
-		if($sql !== '') $sql = ' WHERE '.$sql;
+		if(!empty($sql)) $sql = ' WHERE '.$sql;
 		return $sql;
 	}
 //==============================================================================

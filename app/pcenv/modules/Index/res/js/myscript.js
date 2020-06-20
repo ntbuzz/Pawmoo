@@ -5,7 +5,7 @@
 // ダブルクリックでフロートウィンドウを表示する場合
 $("tr.item").dblclick(function () {
     var num = $(this).attr("id");
-    var url = location.pathname.module_path("view") + num;
+    var url = location.pathname.method_path("view") + num;
     $('#dialog1 dl dt').text("{$controller$}:" + num + " のデータ操作");
     //		alert(url);
     // コンテンツのIDを取得
