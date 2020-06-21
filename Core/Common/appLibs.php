@@ -435,6 +435,19 @@ function debug_dump($flag, $arr = []) {
     if(is_scalar($arr)) {
         echo_safe("{$arr}\n",$danger);
     } else {
+        // 子要素のオブジェクトをダンプする関数
+        $dump_object = function ($obj,$indent,$danger) use (&$dump_object) {
+            foreach($obj as $key => $val) {
+                echo str_repeat(' ',$indent*2) . "[{$key}] = ";
+                if(is_array($val)) {
+                    echo "array(" . count($val) . ")\n";
+                    $dump_object($val,$indent+1,$danger);
+                } else {
+                    echo_safe("'{$val}'",$danger);
+                    echo "\n";
+                }
+            }
+        };
         if($flag < 3) echo "<pre>\n{$str}\n";
         foreach($arr as $msg => $obj) {
             if(empty($obj)) echo "{$sep} {$msg} {$sep}\nEMPTY\n";
@@ -443,24 +456,10 @@ function debug_dump($flag, $arr = []) {
                 echo_safe("{$obj}\n",$danger);
             } else {
                 echo "{$sep} {$msg} {$sep}\n";
-                dumpobj($obj,0,$danger);
+                $dump_object($obj,0,$danger);
             }
         }
         if($flag < 3) echo "</pre>\n";
     }
     if($flag === 2) exit;
-}
-//==============================================================================
-// デバッグダンプ
-function dumpobj($obj,$indent,$danger){
-    foreach($obj as $key => $val) {
-        echo str_repeat(' ',$indent*2) . "[{$key}] = ";
-        if(is_array($val)) {
-            echo "array(" . count($val) . ")\n";
-            dumpobj($val,$indent+1,$danger);
-        } else {
-            echo_safe("'{$val}'",$danger);
-            echo "\n";
-        }
-    }
 }
