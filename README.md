@@ -146,10 +146,10 @@ HTTP_ACCEPT_LANGUAGE にもとづき対応するセクションが読み込ま�
 // Language Definition
 @Schema         // Import Common schema language
 .ja => [
-    TITLE => "Biscuitヘルプドキュメント"
+    TITLE => "Biscuitsヘルプドキュメント"
 ]
 .en => [
-    TITLE => "Biscuit Help Documents"
+    TITLE => "Biscuits Help Documents"
 ]
 ...
 ```
