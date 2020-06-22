@@ -99,18 +99,19 @@ public function SetPage($pagesize,$pagenum) {
     $this->dbDriver->SetPaging($this->pagesize,$this->page_num);
 }
 //==============================================================================
-// PrimaryKey でレコードを取得
-// 結果：   レコードデータ = RecData
-//          リレーションフィールドは取得しない
+// PrimaryKey で生レコードを取得
+// 結果：   レコードデータ = fields
 public function getRecordByKey($id) {
-    APPDEBUG::MSG(13,$id);
-    if(empty($id)) {
-        $this->field = array();
-        return;
-    }
-    $this->fields = $this->dbDriver->doQueryBy($this->Primary,$id);
-    APPDEBUG::MSG(13,$this->fields);
-    return $this;
+    return $this->getRecordBy($this->Primary,$id);
+}
+//==============================================================================
+// 指定フィールドで生レコードを取得
+// 結果：   レコードデータ = field
+public function getRecordBy($field,$value) {
+    if(!empty($value)) {
+        $this->fields = $this->dbDriver->doQueryBy($field,$value);
+    } else $this->fields = array();
+    return $this->fields;
 }
 //==============================================================================
 // アイテムの読み込み (JOIN無し)
