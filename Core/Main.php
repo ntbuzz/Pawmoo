@@ -21,12 +21,13 @@
 global $on_server;
 // デバッグ用のクラス
 require_once('AppDebug.php');
-require_once('Common/appLibs.php');
+require_once('Common/coreLibs.php');
 require_once('Class/session.php');
 require_once('Config/appConfig.php');
 
 require_once('App.php');
 require_once('Class/fileclass.php');
+require_once('Common/appLibs.php');
 require_once('Base/AppObject.php');
 require_once('Base/AppController.php');
 require_once('Base/AppModel.php');
