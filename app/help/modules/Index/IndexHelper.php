@@ -77,8 +77,8 @@ public function SectionContents() {
         echo "<ul class='content'>\n";
         $n = 0;
         foreach($this->Section as $key => $sec) {
-            $sel = ($this->Tabmenu == $n++) ? '' : ' class="hide"';
-            echo "<li{$sel}>";
+            $sel = ($this->Tabmenu == $n++) ? '' : ' hide';
+            echo "<li class='items{$sel}'>";
             echo "<div class='section' id='$sec[id]' data-disp='$sec[disp_id]' data-parent='$sec[chapter_id]' value='$sec[short_title]'>";
             echo "<h2 class='title'>$sec[title]</h2>\n";
             if(isset($sec['contents'])) {
