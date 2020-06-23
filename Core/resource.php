@@ -21,6 +21,7 @@
 
 // デバッグ用のクラス
 require_once('AppDebug.php');
+require_once('Common/coreLibs.php');
 require_once('Common/appLibs.php');
 require_once('Class/session.php');
 require_once('Base/AppStyle.php');
