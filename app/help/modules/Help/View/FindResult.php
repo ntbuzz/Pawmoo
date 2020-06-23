@@ -9,7 +9,7 @@ function MarkContents($ttl,$cont,$wd) {
 echo "<h1>【検索結果】: '$Helper->QUERY'</h1>\n";
 echo "<hr>\n";
 debug_dump(0,["FindResult" => $this->Model->outline]);
-debug_dump(0,["MyModel Dump" => $MyModel->outline]);
+debug_dump(4,["MyModel Dump" => $MyModel->outline]);
 // パートツリー
 foreach($MyModel->outline as $key => $part) {
 	list($title,$contents) = MarkContents($part['title'],$part['contents'],$Helper->QUERY);
@@ -25,25 +25,28 @@ foreach($MyModel->outline as $key => $part) {
 		echo "<DT>"; $Helper->ALink("index/view/{$lnk}","■ {$title}"); echo "</DT>\n";
 		echo "<DD>{$contents}\n";
 		// セクションツリーを表示
-		echo "<DL>\n";
-		foreach($chap['section'] as $kkk => $sec) {
-			list($title,$contents) = MarkContents($sec['title'],$sec['contents'],$Helper->QUERY);
-			$tab = intval($sec['disp_id']) - 1;
-			if($tab < 0) $tab = 0;
-			echo "<DT>"; $Helper->ALink("index/view/{$lnk}{$tab}","・{$title}");echo "</DT>\n";
-			echo "<DD>{$contents}\n";
+		if(!empty($chap['section'])) {
 			echo "<DL>\n";
-			foreach($sec['paragraph'] as $kkkk => $para) {
-				list($title,$contents) = MarkContents($para['title'],$para['contents'],$Helper->QUERY);
-				echo "<dt>{$title}</dt>\n";
-				echo "<dd>{$contents}</dd>\n";
+			foreach($chap['section'] as $kkk => $sec) {
+				list($title,$contents) = MarkContents($sec['title'],$sec['contents'],$Helper->QUERY);
+				$tab = intval($sec['disp_id']) - 1;
+				if($tab < 0) $tab = 0;
+				echo "<DT>"; $Helper->ALink("index/view/{$lnk}{$tab}","・{$title}");echo "</DT>\n";
+				echo "<DD>{$contents}\n";
+				if(!empty($sec['paragraph'])) {
+					echo "<DL>\n";
+					foreach($sec['paragraph'] as $kkkk => $para) {
+						list($title,$contents) = MarkContents($para['title'],$para['contents'],$Helper->QUERY);
+						echo "<dt>{$title}</dt>\n";
+						echo "<dd>{$contents}</dd>\n";
+					}
+					echo "</DL>\n";
+				}
+				echo "</DD>\n";
 			}
 			echo "</DL>\n";
-			echo "</DD>\n";
 		}
-		echo "</DL>\n";
 		echo "</DD>\n";
-		
 	}
 	echo "</DL>\n";
 }
