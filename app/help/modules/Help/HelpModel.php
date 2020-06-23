@@ -54,7 +54,7 @@ function MakeOutline() {
 //==============================================================================
 function SearchOutline($qstr) {
     // パラグラフを検索
-    $this->Paragraph->findKeyword($qstr,['section_id','id','title','contents']);
+    $this->Paragraph->findKeyword($qstr,['section_id','id','disp_id', 'title','contents']);
     // パラグラフをセクションIDでまとめる
     $section = [];
     foreach($this->Paragraph->outline as $key => $val) {
@@ -70,7 +70,7 @@ function SearchOutline($qstr) {
         $chapter[$pid][$key]['paragraph'] = $val;
     }
     // セクション内の検索
-    $this->Section->findKeyword($qstr,['chapter_id','id','title','contents']);
+    $this->Section->findKeyword($qstr,['chapter_id','id','disp_id', 'title','contents']);
     // 見つかった結果をチャプターツリーに統合する
     foreach($this->Section->outline as $val) {
         $pid = $val['chapter_id']; $id = $val['id'];
@@ -86,7 +86,7 @@ function SearchOutline($qstr) {
         $outline[$pid][$key]['section'] = $val;
     }
     // チャプター内を検索
-    $this->Chapter->findKeyword($qstr,['part_id','id','title','contents']);
+    $this->Chapter->findKeyword($qstr,['part_id','id','disp_id', 'title','contents']);
     // 見つかった結果とパラグラフの結果を結合する
     foreach($this->Chapter->outline as $val) {
         $pid = $val['part_id']; $id = $val['id'];
