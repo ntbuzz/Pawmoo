@@ -120,7 +120,7 @@ public function getRecordBy($field,$value) {
 //          リレーション先の選択リスト = Select (Relations)
 public function GetRecord($num) {
     APPDEBUG::MSG(13, $num);
-    $this->getRecordByKey($num);                    // レコードデータを読み込む
+    $this->getRecordBy($this->Primary,$num);
     $valueLists = array();
     foreach($this->Relations as $key => $val) {     // リレーション先の値リストを取得する
         list($table,$fn, $ref,$grp) = explode('.', $val);
