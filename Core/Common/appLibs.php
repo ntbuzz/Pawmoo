@@ -295,7 +295,7 @@ function text_line_split($del,$txt) {
 }
 //==============================================================================
 // MarkDownもどきのパーサー
-// テーブルはサポートしていない
+// テーブルは処理の都合上、独自書式でサポート
 function pseudo_markdown($atext) {
     $replace_defs = [
         "/\[([^\]]+)\]\(([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)\)/i" => '<a target="_blank" href="\\2">\\1</a>',
@@ -306,63 +306,75 @@ function pseudo_markdown($atext) {
         "/^####\s(.+?)$/m"  => "<h4>\\1</h4>",        // 見出し4
         "/^#####\s(.+?)$/m" => "<h5>\\1</h5>",        // 見出し5
         "/^######\s(.+?)$/m"=> "<h6>\\1</h6>",        // 見出し6
-        "/\*\*(.+)\*\*/"   => '<strong>\\1</strong>', // 強調
-        "/\*(.+)\*/"   => '<em>\\1</em>',             // 強調
-        "/```(.+?)```/s"     => '<pre><code>\\1</code></pre>',      // code
+        "/\*\*(.+?)\*\*/"   => '<strong>\\1</strong>', // 強調
+        "/\*(.+?)\*/"   => '<em>\\1</em>',             // 強調
+        "/```(?:\r\n|\r|\n)(.+?)```/s"     => '<pre class="code">\\1</pre>',      // code
+        "/```(([a-z]+?)(?:\r\n|\r|\n))(.+?)```/s"     => '<pre class="\\2">\\3</pre>',      // code
         "/(\s{2}|　)$/m"     => "<br>",               // 改行
         "/([-=])>/"     => "\\1&gt;",                 // タグ
     ];
     $replace_keys   = array_keys($replace_defs);
     $replace_values = array_values($replace_defs);
-    // 複数行の処理が必要なリストタグ、引用を処理する
-    $rep_text = function($text,$pp) {
-        $ln = explode("\n", $text);	// とりあえず行に分割
-        $lc = 0;
-        $list_array = function ($parent,$level) use (&$list_array, &$ln, &$lc) {
-            $arr = "<{$parent}>\n";
-            while(!empty($ll = $ln[$lc++])) {
-                for($n=0;$ll[$n] === ' '||$ll[$n] === "\t";++$n) ;
-                if($n === $level) {
-                    $ll = trim($ll);
-                    if($ll[0] !== '-' && mb_substr($ll,0,2) !== '1.') return "{$arr}</{$parent}>\n";
-                    $ll = trim(mb_substr($ll,2));
-                    $arr = "{$arr}<li>{$ll}</li>\n";
-                } else if($n < $level) {
-                    --$lc;
-                    return "{$arr}</{$parent}>\n";
-                } else {
-                    --$lc;
-                    $arr = "{$arr}" . $list_array($parent,$level+1);
-                }
-            }
-            return "{$arr}</{$parent}>\n";
-        };
-        $quote_array = function ($level) use (&$quote_array, &$ln, &$lc) {
-            $arr = "<blockquote>\n";
-            while(!empty($ll = $ln[$lc++])) {
-                $ll = ltrim(mb_substr($ll,$level));   // 先頭の > を削除
-                if($ll[0] === '>') {
-                    --$lc;
-                    $arr = "{$arr}" . $quote_array($level+1);
-                } else {
-                    $arr = "{$arr}{$ll}\n";
-                }
-            }
-            return "{$arr}</blockquote>\n";
-        };
-        return ($pp==='bq') ? $quote_array(1) : $list_array($pp,0);
-    };
+// 先に複数行のタグ変換を処理しておく
+    // リストと引用を処理を処理する
     $p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)((\r\n){2}|\r{2}|\n{2})/s';
-    preg_match_all($p,$atext,$m);               // 全ての要素をトークン分離する
-    $token = $m[1];
-//debug_dump(5,["TEXT" => $atext,"TOKEN"=>$token]);
-    foreach($token as $ln) {
-        $tag = ($ln[0] === '>') ? 'bq' : (($ln[0] === '-') ? 'ul' : 'ol');
-        $rep_str = $rep_text($ln,$tag);
-        $atext = str_replace($ln,$rep_str,$atext);
-    }
+    $atext = preg_replace_callback($p,function($maches) {
+        $tags = array(
+            '- ' => ['ul','ul_list',true],
+            '1.' => ['ol','ol_list',true],
+            '> ' => ['blockquote','bq_block',false]);
+        $txt = $maches[1];
+        list($ptag,$ptagcls,$islist) = $tags[mb_substr($txt,0,2)];
+        $pcls = "<{$ptag} class='{$ptagcls}'>\n";
+        $lvl = 0;
+        if($islist) {
+            $maptext = "{$pcls}{$txt}\n</{$ptag}>";
+            $arr = array_map(function($str) use (&$lvl, &$ptag, &$pcls) {
+                for($n=0;ctype_space($str[$n]);++$n) ;
+                if(!in_array(mb_substr($str,$n,2), ['- ','1.','> '])) return "{$str}";
+                $pretag = ($n < $lvl) ? "</{$ptag}>\n":(($n > $lvl) ? $pcls : '');
+                $lvl = $n;
+                $ll = ltrim(mb_substr($str,$n+2));
+                return "{$pretag}<li>{$ll}</li>";
+            },explode("\n", $maptext));         // とりあえず行に分割
+        } else {    // blockquote
+            $arr = array_map(function($str) use (&$lvl, &$ptag, &$pcls) {
+                for($n=0;$str[$n]==='>';++$n) ;
+                if($n === 0 && $str[0] !== '>') return "TERM:{$n}:{$str}";
+                $ll = ltrim(mb_substr($str,$n));   // 先頭の > を削除
+                $pretag = ($n === $lvl) ? '' : (
+                          ($n > $lvl) ? str_repeat("{$pcls}", $n - $lvl) :
+                          str_repeat("</{$ptag}>\n", $lvl - $n));
+                $lvl = $n;
+                return "{$pretag}{$ll}<br>";
+            },explode("\n", $txt));         // とりあえず行に分割
+            // ネスト分を閉じる
+            array_push($arr,str_repeat("</{$ptag}>\n", $lvl));
+        }
+        return implode("\n",$arr);
+    }, $atext);
+    // テーブルを変換
+    $p = '/\n(\|[\s\S]+?\|)((\r\n){2}|\r{2}|\n{2})/s';
+    $atext = preg_replace_callback($p,function($maches) {
+        $txt = $maches[1];
+        $arr = array_map(function($str) {
+            $tags = array(':' => ['th','center'],'>' => ['td','right'],'<' => ['td','left']);
+            $cols = explode("|", trim($str,"|\r\n"));   // 両側の|を削除して分割
+            $ln = "";
+            foreach($cols as $col) {
+                $is_attr = array_key_exists($col[0],$tags);
+                $vars = ($is_attr) ? $tags[$col[0]] : ['td','center'];
+                if(($is_attr)) $col = mb_substr($col,1);
+                list($tag,$align) = $vars;
+                $ln .= "<{$tag} align='{$align}'>{$col}</{$tag}>";
+            }
+            return "<tr>{$ln}</tr>";
+        },explode("\n", $txt));         // とりあえず行に分割
+        return "<table class='md_tbl'>".implode("\n",$arr)."</table>\n";
+    }, $atext);
+    // 残りを一気に置換する
     $atext = preg_replace($replace_keys,$replace_values, $atext);
-    return $atext;
+    return "<div class='easy_markdown'>{$atext}</div>";
 }
 //==============================================================================
 function get_protocol($href) {
@@ -461,5 +473,5 @@ function debug_dump($flag, $arr = []) {
         }
         if($flag < 3) echo "</pre>\n";
     }
-    if($flag === 2) exit;
+    if($flag === 2||$flag === 5) exit;
 }

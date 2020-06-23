@@ -47,10 +47,13 @@
     -webkit-user-select: text;
     -ms-user-select: text;
 }
-.content-panel ul {
+/*
+.content-panel ul.content {
 	list-style:none;
 }
-.content-panel .content {
+*/
+.content-panel ul.content {
+	list-style:none;
     clear:both;
     float:left;
     width: 96%;
@@ -58,10 +61,10 @@
     padding-left:20px;
     padding-bottom:10px;
 }
-.content-panel .content:after {
+.content-panel ul.content:after {
     clear:both;
 }
-.content-panel .content li{
+.content-panel ul.content li.tabset {
     width:100%;
     height:100%;
     padding:0;

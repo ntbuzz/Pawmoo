@@ -4,7 +4,7 @@
 @Schema         // 共通スキーマ
 
 .ja => [
-    TITLE => "パソコン台帳 on Biscuit"
+    TITLE => "パソコン台帳 on Biscuits"
     HOSTS => PC管理(ホスト・データベース)
     NAMES => PC管理(名前データベース)
     Busy => 使用中
@@ -44,7 +44,7 @@
         ~
 ]
 .en => [
-    TITLE => "PC manager Biscuit"
+    TITLE => "PC manager Biscuits"
     HOSTS => "PC Manager(Host Database)"
     NAMES => "PC Manager(Name Database)"
     Busy => BUSY

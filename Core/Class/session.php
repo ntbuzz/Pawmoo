@@ -119,6 +119,7 @@ static function SetLogin($login) {
 }
 static function ClearLogin() {
 	unset(self::$EnvData['Login']);
+	unset($_SESSION[self::$MY_SESSION_ID]['Login']);
 }
 
 }

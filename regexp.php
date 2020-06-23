@@ -22,14 +22,6 @@ $text = <<<'EOS'
 ものを見た。  
 （青空文庫）
 
-
-1. 番号付きリスト1
- 1. 番号付きリスト1_1
- 1. 番号付きリスト1_2
-1. 番号付きリスト2
-1. 番号付きリスト3
-
-
 - リスト1
  - ネスト リスト1_1
   - ネスト リスト1_1_1
@@ -39,11 +31,29 @@ $text = <<<'EOS'
 - リスト3
 
 
-> 引用文章  
-> 引用文章  
-> 
->> 引用文章  
->>> 引用文章  
+
+1. 番号付きリスト1
+ 1. 番号付きリスト1_1
+ 1. 番号付きリスト1_2
+1. 番号付きリスト2
+1. 番号付きリスト3
+
+
+> 引用文章1  
+> 引用文章2  
+>
+>> 引用文章21  
+>> 引用文章22  
+>>> 引用文章31  
+>>> 引用文章32 
+>>> 引用文章33  
+>> 引用文章23  
+
+
+|:テーブル|:列|
+|行| |
+|---|---|
+
 
 水平線
 ---
@@ -80,6 +90,72 @@ class Sample()
 app/(アプリ名)/Config/config.php  
 
 EOS;
+$p = '/\n(\|[\s\S]+?\|)((\r\n){2}|\r{2}|\n{2})/s';
+$atext = preg_replace_callback($p,function($maches) {
+    $txt = $maches[1];
+    $arr = array_map(function($str) {
+        $tags = array(
+            ':' => ['th','center'],
+            '>' => ['td','right'],
+            '<' => ['td','center']);
+        $cols = explode("|", trim($str,"|\r\n"));   // 両側の|を削除して分割
+        $ln = "";
+        foreach($cols as $col) {
+            if(array_key_exists($col[0],$tags)) {
+                list($tag,$align) = $tags[$col[0]];
+                $col = mb_substr($col,1);
+            } else {
+                $tag = 'td';
+                $align = 'left';
+            }
+            $ln .= "<{$tag} align='{$align}'>{$col}</{$tag}>";
+        }
+        return "<tr>{$ln}</tr>";
+    },explode("\n", $txt));         // とりあえず行に分割
+    return "<table class='md_tbl'>".implode("\n",$arr)."</table>\n";
+}, $text);
+debug_dump(5,["INPUT" => $text,"MARKDOWN" => $atext]);
+
+$p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)((\r\n){2}|\r{2}|\n{2})/s';
+$txt = preg_replace_callback($p,function($maches) {
+    $tags = array(
+        '- ' => ['ul','ul_list',true],
+        '1.' => ['ol','ol_list',true],
+        '> ' => ['blockquote','bq_block',false]);
+    $txt = $maches[1];
+    list($ptag,$ptagcls,$islist) = $tags[mb_substr($txt,0,2)];
+    $pcls = "<{$ptag} class='{$ptagcls}'>\n";
+    $lvl = 0;
+    if($islist) {
+        $maptext = "{$pcls}{$txt}\n</{$ptag}>";
+        $arr = array_map(function($str) use (&$lvl, &$ptag, &$pcls) {
+            for($n=0;ctype_space($str[$n]);++$n) ;
+            if(!in_array(mb_substr($str,$n,2), ['- ','1.','> '])) return "{$str}";
+            $pretag = ($n < $lvl) ? "</{$ptag}>\n":(($n > $lvl) ? $pcls : '');
+            $lvl = $n;
+            $ll = ltrim(mb_substr($str,$n+2));
+            return "{$pretag}<li>{$ll}</li>";
+        },explode("\n", $maptext));         // とりあえず行に分割
+    } else {    // blockquote
+        $arr = array_map(function($str) use (&$lvl, &$ptag, &$pcls) {
+            for($n=0;$str[$n]==='>';++$n) ;
+            if($n === 0 && $str[0] !== '>') return "TERM:{$n}:{$str}";
+            $ll = ltrim(mb_substr($str,$n));   // 先頭の > を削除
+            $pretag = ($n === $lvl) ? '' : (
+                      ($n > $lvl) ? str_repeat("{$pcls}", $n - $lvl) :
+                      str_repeat("</{$ptag}>\n", $lvl - $n));
+            $lvl = $n;
+            return "{$pretag}{$ll}<br>";
+        },explode("\n", $txt));         // とりあえず行に分割
+        // ネスト分を閉じる
+        array_push($arr,str_repeat("</{$ptag}>\n", $lvl));
+    }
+    return implode("\n",$arr);
+}, $text);
+
+debug_dump(5,["INPUT" => $text,"MARKDOWN" => $txt]);
+exit;
+preg_match_all($p,$atext,$m);               // 全ての要素をトークン分離する
 
 $txt = pseudo_markdown($text);
 //echo "INPUT ============\n{$text}";

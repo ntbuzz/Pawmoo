@@ -6,9 +6,9 @@ $(function() {
 		//indexという変数に代入します。
 		var index = $('.tab li').index(this);
 		//コンテンツを一度すべて非表示にし、
-		$('.content li').css('display','none');
+		$('.content li.items').css('display','none');
 		//クリックされたタブと同じ順番のコンテンツを表示します。
-		$('.content li').eq(index).css('display','block');
+		$('.content li.items').eq(index).css('display','block');
 		//一度タブについているクラスselectを消し、
 		$('.tab li').removeClass('selected');
 		//クリックされたタブのみにクラスselectをつけます。
