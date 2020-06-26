@@ -51,11 +51,17 @@ if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
 
 // アプリ名が有効かどうか確認する
 if(empty($appname) || !file_exists("app/$appname")) {
+    // 404エラーページを送信する
+    $content = file_get_contents('Core/error/404.html');
+    echo str_replace('{{appname}}',$appname,$content);
+    exit;
+/*
     $applist = get_folder_lists("app/");     // アプリケーションフォルダ名を取得
     $appname = $applist[0];             // 最初に見つかったアプリケーションを指定
     $approot = "{$fwroot}{$appname}";   // アプリURIを生成
     $controller = ucfirst(strtolower($appname)); // 指定がなければ 
     $redirect = true;
+*/
 }
 MySession::InitSession($appname);
 
@@ -125,17 +131,18 @@ $ContAction= "{$method}Action";
 // コントローラインスタンス生成
 $controllerInstance = new $ContClass();
 // 指定メソッドが存在するか、無視アクションかをチェック
-if(!method_exists($controllerInstance,$ContAction) || 
-   in_array($method,$controllerInstance->disableAction) ) {
-    // クラスのデフォルトメソッド
-    $method = $controllerInstance->defaultAction;
-    $ContAction = "{$method}Action";
+if(!method_exists($controllerInstance,$ContAction) ||           // メソッドが存在しない
+    is_scalar($controllerInstance->disableAction) ||            // 無視リストがスカラー定義されている
+    in_array($method,$controllerInstance->disableAction) ) {    // 無視リスト配列に存在
+    $method = $controllerInstance->defaultAction;               // クラスのデフォルトメソッド
+    $ContAction = "{$method}Action";                            // アクション名に変換
     if(strcasecmp($appname,$controller) === 0) {
         App::ChangeMethod('','');     // メソッドの書換えはリダイレクトしない
     } else {
         App::ChangeMethod($controller,$method);     // メソッドの書換えはリダイレクトしない
     }
 }
+
 App::$ActionMethod= $ContAction;    // アクションメソッド名
 //=================================
 // デバッグ用の情報ダンプ
@@ -153,8 +160,7 @@ APPDEBUG::DebugDump(0, [
     "QUERY" => App::$Query,
     "SESSION" => [
         "SESSION_ID" => MySession::$MY_SESSION_ID,
-        "POST" => MySession::$PostEnv,
-        "ENV" => MySession::$PostEnv,
+        "ENV" => MySession::$EnvData,
     ],
     'パス情報' => [
         "SERVER" => $_SERVER['REQUEST_URI'],
@@ -178,7 +184,6 @@ MySession::CloseSession();
 APPDEBUG::DebugDump(0, [
     "セッションクローズ" => [
         "ENVDATA" => MySession::$EnvData,
-        "POSTENV" => MySession::$PostEnv,
     ]
 ]);
 // クローズメソッドを呼び出して終了
