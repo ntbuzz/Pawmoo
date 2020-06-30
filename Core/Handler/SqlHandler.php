@@ -97,7 +97,7 @@ public function findRecord($row,$relations,$sort = []) {
 	if(!empty($sort)) {
 		$orderby = "";
 		foreach($sort as $key => $val) {
-			$order = ($val === SORTBY_DESCEND) ? "asc" : "desc";
+			$order = ($val === SORTBY_DESCEND) ? "desc" : "asc";
 			$orderby .=  "{$this->table}.\"{$key}\" {$order},";
 		}
 		$where .=  " ORDER BY ".trim($orderby,",");
