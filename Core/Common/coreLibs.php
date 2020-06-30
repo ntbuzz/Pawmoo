@@ -45,6 +45,15 @@ function get_routing_params($dir) {
     $args += array_fill(count($args),3,NULL);     // filter要素までを補填
     list($controller,$method,$filter) = $args;
     if(empty($controller)) $controller = $appname; // コントローラが空ならアプリ名と同じにする
+    else if(mb_strpos($controller,'.') !== FALSE) {
+        $method = $controller;      // put-off method analyzed 
+        $controller = $appname;     // same as appname
+    }
+    if(mb_strpos($method,'.') !== FALSE) {  // have a extension
+        list($filename,$ext) = extract_base_name($method);
+//        $method = $filename;   // dedicated METHOD
+//        $filter = $ext;        // filter is template name
+    }
     $module = array(
         ucfirst(strtolower($controller)),    // コントローラー名キャメルケースに変換
         ucfirst(strtolower($method)),        // メソッドもキャメルケースに変換
@@ -63,6 +72,12 @@ function get_routing_params($dir) {
         "RET" => $ret,
     ]);
     return $ret;
+}
+//==============================================================================
+// エラーページを返して終了
+function error_response($error_page,$page_name) {
+    require_once("Core/error/{$error_page}");
+    exit;
 }
 //==============================================================================
 // コントローラーが存在するかチェックする
@@ -154,12 +169,15 @@ function tag_body_name($key) {
 //==============================================================================
 // キー文字列＋比較演算子の分離
 function keystr_opr($str) {
-    // キー名の最後に関係演算子
-    $n = strlen($str);
-    while(strpos('=<>',$str[$n-1]) !== false) --$n;
-    $key = mb_substr($str,0,$n);
-    $opr = mb_substr($str,$n);
-    return array($key,$opr);
+    $opr_set = [ "==" => -2, "<>" => -2, "=>" => -2, "=<" => -2, "!=" => -2, "=" => -1, ">" => -1, "<" => -1];
+    foreach([-2,-1] as $nn) {
+        $opr = mb_substr($str,$nn);      // last-2char
+        if(array_key_exists($opr,$opr_set)) {
+            $key = mb_substr($str,0,$nn);    // exclude last 2-char
+            return array($key,$opr);
+        }
+    }
+    return array($str,'');
 }
 //==============================================================================
 // デバッグダンプ

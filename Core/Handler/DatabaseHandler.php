@@ -3,6 +3,9 @@
  * PHPフレームワーク
  *  DatabaseHandler: データベースの接続情報
  */
+define('SORTBY_ASCEND', 0);
+define('SORTBY_DESCEND', 1);
+
 require_once('Core/Handler/SqlHandler.php');
 // 各種データベースへのアクセスハンドラ
 require_once('Core/Handler/SQLiteHandler.php');

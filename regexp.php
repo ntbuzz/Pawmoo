@@ -1,4 +1,5 @@
 <?php
+require_once('Core/Common/coreLibs.php');
 require_once('Core/Common/appLibs.php');
 
 $text = <<<'EOS'

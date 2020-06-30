@@ -11,6 +11,7 @@ define("VIEWFILE",0);
 define("POSTFILE",1);
 define("DRAGFILE",2);
 
+define('FORCE_REDIRECT', FALSE);
 define('DEFAULT_CONTROLLER', 'help');
 define('DEFAULT_LANG', 'ja');				// 言語ファイル
 

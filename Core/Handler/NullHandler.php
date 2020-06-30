@@ -15,7 +15,7 @@ public function getLastError() { return ''; }
 public function getRecordValue($row,$relations) { return []; }
 public function doQueryBy($key,$val) { return []; }
 public function doQuery($sql) { return NULL; }
-public function findRecord($row,$relations,$sort = '') { }
+public function findRecord($row,$relations,$sort = []) { }
 public function fetchDB() { return FALSE; }
 public function insertRecord($row) { }
 public function replaceRecord($wh,$row) { }
