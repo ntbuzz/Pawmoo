@@ -139,9 +139,9 @@ if(!method_exists($controllerInstance,$ContAction) ||           // メソッド�
     }
 }
 if(strcasecmp($appname,$controller) === 0) {
-    App::ChangeMethod('',$method);     // メソッドの書換えはリダイレクトしない
+    App::ChangeMethod('',$method,TRUE);     // コントローラーを隠す
 } else {
-    App::ChangeMethod($controller,$method);     // メソッドの書換えはリダイレクトしない
+    App::ChangeMethod($controller,$method,FALSE);     // メソッドの書換えはリダイレクトしない
 }
 
 App::$ActionMethod= $ContAction;    // アクションメソッド名
