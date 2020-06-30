@@ -4,7 +4,7 @@
 class customModel  extends AppModel {
 
 function findKeyword($qstr,$filter) {
-    $this->RecordFinder([['title' => "{$qstr}",'contents' => "{$qstr}"] ],$filter,'disp_id');
+    $this->RecordFinder([['title' => "{$qstr}",'contents' => "{$qstr}"] ],$filter,'disp_id' );
     $outline= array();
     foreach($this->Records as $record) {
         $line = explode("\n",str_replace("\r\n","\n",$record['contents']));

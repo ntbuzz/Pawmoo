@@ -18,6 +18,7 @@ class FMDBHandler extends FileMaker {
 	public	$recordMax;		// 検索したレコード最大数
 	private	$fields;		// フィールド
 	private	$Finds;			// 検索フィールド
+	private	$SortBy;		// ソート順配列
 	private	$omit;			// 検索条件の反転
 	private	$fmtconv;		// 日付変換対象フィールド
 	public	$columns;		// フィールド情報
@@ -145,7 +146,7 @@ public function SetPaging($pagesize, $pagenum) {
 //==============================================================================
 // 複数条件を指定してレコードを読み込む
 // FileMaker では relations を使わない
-public function findRecord($row, $relations = NULL,$sort = NULL) {
+public function findRecord($row, $relations = NULL,$sort = []) {
 	if(empty($row)) {
 		$row = array($this->columns[0] => '*');	// 先頭カラムを代行検索
 	}
@@ -155,6 +156,8 @@ public function findRecord($row, $relations = NULL,$sort = NULL) {
 		$row = array($row);
 	}
 	$this->Finds = $row;
+	$this->SortBy = $sort;
+
     $this->skip_rec = $this->startrec;
     $this->recordMax = 0;
 	$this->r_pos = 0;
@@ -164,8 +167,9 @@ public function findRecord($row, $relations = NULL,$sort = NULL) {
 }
 //==============================================================================
 // 複数条件を指定してレコードを読み込む
-public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
-	if($this->r_fetched == 0) {
+//public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
+public function fetchDB() {
+		if($this->r_fetched == 0) {
 		if($this->recordMax > 0 && $this->skip_rec >= $this->recordMax) return 0;
 		if($this->limitrec > 0 && $this->skip_rec >= ($this->startrec + $this->limitrec)) return 0;
 		
@@ -193,7 +197,11 @@ public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
 		}
 		//ソート順の設定
 		$kn = 1;
-		foreach($sortby as $akey) {
+//		foreach($sortby as $akey) {
+//			$compoundFind->addSortRule($akey, $kn++, $order);
+//		}
+		foreach($this->SortBy as $akey => $aval) {
+			$order = ($aval === SORTBY_DESCEND) ? FILEMAKER_SORT_DESCEND : FILEMAKER_SORT_ASCEND;
 			$compoundFind->addSortRule($akey, $kn++, $order);
 		}
 		$maxcount = ($this->limitrec == 0) ? $this->fetchCount : $this->limitrec;

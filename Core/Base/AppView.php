@@ -10,7 +10,7 @@ require_once('Core/Class/Parser.php');
 class AppView extends AppObject {
     protected $Layout;        // デフォルトのレイアウト
     private $doTrailer = FALSE;
-    const Extensions = array("tpl","php","inc","twg");  // テンプレート拡張子
+    const Extensions = array("tpl","php","inc","html");  // テンプレート拡張子
     const SectionCMD = '<@&+*%-.#{[';  // 単独セクション処理コマンド文字
     private $rep_array;
     private $env_vars;
@@ -128,10 +128,11 @@ public function ViewTemplate($name,$vars = []) {
             // システム変数＋URIパラメータへの置換処理
             echo $this->expand_Strings($content, $vars);
             break;
+        case 3:     // 'html':     // HTML
+            echo file_get_contents($tmplate);
+            break;
         }
-    } else {
-        exit;
-    }
+    } else  error_response('page-404.php',$name);     // 404 ERROR PAGE Response
 }
 //==============================================================================
 // テンプレートファイルがビュークラスフォルダに存在しなければ共通のテンプレートを探す
@@ -149,7 +150,7 @@ public function ViewTemplate($name,$vars = []) {
                 }
             }
         }
-        check_cwd(get_class($this)."@{$name} in {$this->ModuleName}");
+//        check_cwd(get_class($this)."@{$name} in {$this->ModuleName}");
         return NULL;
     }
 //==============================================================================

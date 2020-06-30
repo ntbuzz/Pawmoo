@@ -84,7 +84,7 @@ public function getRecordValue($row,$relations) {
 // pgSQL: SELECT *, count('No') over() as full_count FROM public.mydb offset 10 limit 50;
 // SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
 //==============================================================================
-public function findRecord($row,$relations,$sort = '') {
+public function findRecord($row,$relations,$sort = []) {
 	// 検索条件
 	$where = $this->sql_makeWHERE($row);
 	// 全体件数を取得する
@@ -94,7 +94,14 @@ public function findRecord($row,$relations,$sort = '') {
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	// 実際のレコード検索
 	$sql = $this->sql_JoinTable($relations);
-	if(isset($sort)) $where .=  " ORDER BY {$this->table}.\"{$sort}\"";
+	if(!empty($sort)) {
+		$orderby = "";
+		foreach($sort as $key => $val) {
+			$order = ($val === SORTBY_DESCEND) ? "asc" : "desc";
+			$orderby .=  "{$this->table}.\"{$key}\" {$order},";
+		}
+		$where .=  " ORDER BY ".trim($orderby,",");
+	}
 	if($this->limitrec > 0) {		// 取得レコード数
 		if($this->handler == 'SQLite') {
 			$where .= " limit {$this->startrec},{$this->limitrec}";		// 取得レコード数

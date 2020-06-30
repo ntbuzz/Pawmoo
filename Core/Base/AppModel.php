@@ -154,11 +154,14 @@ public function getRecordValue($num) {
 // 結果：   レコードデータのリスト = Records
 //          読み込んだ列名 = Header (Schema)
 //          $filter[] で指定したオリジナル列名のみを抽出
-public function RecordFinder($cond,$filter=[],$sort='') {
+public function RecordFinder($cond,$filter=[],$sort=[]) {
     APPDEBUG::MSG(3, $cond, "cond");
     $data = array();
     $this->Header = $this->TableHead;       // 作成済みのヘッダリストを使う
-    if(empty($sort)) $sort = $this->Primary;
+    if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];
+    else if(is_scalar($sort)) {
+        $sort = [ $sort => SORTBY_ASCEND ];
+    }
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
     while ($this->fetchRecord()) {
