@@ -74,8 +74,16 @@ function get_routing_params($dir) {
     return $ret;
 }
 //==============================================================================
-// エラーページを返して終了
-function error_response($error_page,$page_name) {
+// Output 404 ERROR PAGE
+// enabled of PHP VARIABLE:
+//      $app_name   Applicatiopn Name
+//      $app_root   Application Top URI
+//      $app_module Controller Name
+//      $page_name  Rquest ERROR PAGE
+function error_response($error_page,$app_name, $module) {
+    list($app_module,$page_name) = array_map(function($a) {
+        return (gettype($a) === 'string')?strtolower($a):'';},$module);
+    $app_root = "/{$app_name}/";
     require_once("Core/error/{$error_page}");
     exit;
 }
@@ -167,13 +175,14 @@ function tag_body_name($key) {
     return ($n !== FALSE) ? substr($key,0,$n) : $key;
 }
 //==============================================================================
-// キー文字列＋比較演算子の分離
+// SQL Compare operator separate
 function keystr_opr($str) {
-    $opr_set = [ "==" => -2, "<>" => -2, "=>" => -2, "=<" => -2, "!=" => -2, "=" => -1, ">" => -1, "<" => -1];
+    $opr_set = ['=='=>NULL, '<>'=>NULL, '>='=>NULL, '<='=>NULL, '=>'=>'>=', '=<'=>'<=', '!='=>'<>', '='=>NULL, '>'=>NULL, '<'=>NULL];
     foreach([-2,-1] as $nn) {
         $opr = mb_substr($str,$nn);      // last-2char
         if(array_key_exists($opr,$opr_set)) {
             $key = mb_substr($str,0,$nn);    // exclude last 2-char
+            if(isset($opr_set[$opr])) $opr = $opr_set[$opr];    // Replace OPR string for SQL
             return array($key,$opr);
         }
     }
