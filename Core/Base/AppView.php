@@ -121,6 +121,7 @@ public function ViewTemplate($name,$vars = []) {
             $RecData = $this->Model->RecData;    // レコードデータ
             $Records = $this->Model->Records;    // レコードリスト
             $Header = $this->Model->Header;    // スキーマヘッダ
+            $_ = function($id) { return $this->_($id); };   // shortcut LANG-ID Convert
             require_once ($tmplate);
             break;
         case 2:     // 'inc':     // HTML template
@@ -132,7 +133,7 @@ public function ViewTemplate($name,$vars = []) {
             echo file_get_contents($tmplate);
             break;
         }
-    } else  error_response('page-404.php',$name);     // 404 ERROR PAGE Response
+    } else error_response('page-404.php',App::$AppName, [$this->ModuleName, $name]);     // 404 ERROR PAGE Response
 }
 //==============================================================================
 // テンプレートファイルがビュークラスフォルダに存在しなければ共通のテンプレートを探す

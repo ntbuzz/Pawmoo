@@ -4,7 +4,10 @@
  * 	MySession:	Management SESSION variable, POST/GET variables
  */
 	//セッションの有効期限を5分に設定
-	session_set_cookie_params(60 * 5);
+	$session_time = (60 * 5);			// SESSION KEEP 5-min
+	ini_set('session.gc_divisor',1);
+	ini_set('session.gc_maxlifetime',$session_time);
+//	session_set_cookie_params(60 * 5);
 	session_start();
 
 class MySession {

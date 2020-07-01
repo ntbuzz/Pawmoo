@@ -53,6 +53,7 @@ class App {
             'controller' => $controller,
             'method' => $method,
             'filter' => $filter,
+            'params' => $params,
             );
             // リクエスト情報を記憶
         MySession::SetEnvVar('sysVAR',self::$SysVAR);
@@ -70,6 +71,10 @@ public static function Get_RelocateURL() {
     if(self::$ReLocate === FALSE) return NULL;
     APPDEBUG::DebugDump(1, self::$execURI);
     $url = array_to_URI(self::$execURI);
+    if(!empty(self::$Query)) {                  // exists QUERY strings
+        $q = http_build_query(self::$Query);
+        $url = "{$url}?{$q}";
+    }
     return $url;
 }
 //==============================================================================

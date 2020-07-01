@@ -53,21 +53,35 @@ if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
 // アプリ名が有効かどうか確認する
 if(empty($appname) || !file_exists("app/$appname")) {
     // 404エラーページを送信するre
-    error_response('app-404.php',$appname);
+    error_response('app-404.php',$appname,$module);
 }
 MySession::InitSession($appname);
 
 // ここでは App クラスの準備ができていないので直接フォルダ指定する
 require_once("app/{$appname}/Config/config.php");
-
+// Check URI-Redirect direction
+if(!defined('FORCE_REDIRECT')) {
+    define('FORCE_REDIRECT', FALSE);
+}
+// 省略形を許可する
+if(empty($method) && !is_extst_module($appname,$controller,'Controller')) {
+    $module[0] = ucfirst($appname);
+    $module[1] = $controller;
+    list($controller,$method) = $module;
+}
 // コントローラーファイルが存在するか確認する
 if(!is_extst_module($appname,$controller,'Controller')) {
-    $controller = ucfirst(strtolower(DEFAULT_CONTROLLER)); // 指定がなければ 
-    $redirect = true;
+    // CHeck REDIRECT Enabled
+    if(FORCE_REDIRECT) {
+        $controller = ucfirst(strtolower(DEFAULT_CONTROLLER)); // CALL DEFAULT CONTROLLER
+        $redirect = true;
+    } else {
+        error_response('page-404.php',$appname,$module);
+    }
 }
 // リダイレクトする時はコントローラーが書換わっているので調整する
 if($redirect) $module[0] = $controller;
-// URLを再構成する
+// ReBuild URI
 $ReqCont = [
     'root' => $approot,
     'module' => $module,
@@ -126,16 +140,16 @@ $ContClass = "{$controller}Controller";
 $ContAction= "{$puremethod}Action";
 // コントローラインスタンス生成
 $controllerInstance = new $ContClass();
-// 指定メソッドが存在するか、無視アクションかをチェック
-if(!method_exists($controllerInstance,$ContAction) ||           // メソッドが存在しない
-    is_scalar($controllerInstance->disableAction) ||            // 無視リストがスカラー定義されている
-    in_array($puremethod,$controllerInstance->disableAction) ) {    // 無視リスト配列に存在
-    // 404エラーページを送信する
+// Method Existance Check
+if(!method_exists($controllerInstance,$ContAction) ||           // Not Exist Method Action
+    (is_scalar($controllerInstance->disableAction) ||           // diable Def is SCALAR VALUE
+    in_array($puremethod,$controllerInstance->disableAction)) ) { // or exist of Ignore-List
+        // Check DEFAULT METHOD CALL or 404 Page not found
     if(FORCE_REDIRECT || $method==='') {
         $puremethod = $controllerInstance->defaultAction;               // クラスのデフォルトメソッド
         $ContAction = "{$puremethod}Action";                            // アクション名に変換
     } else {
-        error_response('page-404.php',strtolower($method));
+        error_response('page-404.php',$appname,$module);
     }
 }
 if(strcasecmp($appname,$controller) === 0) {
@@ -143,7 +157,6 @@ if(strcasecmp($appname,$controller) === 0) {
 } else {
     App::ChangeMethod($controller,$method,FALSE);     // メソッドの書換えはリダイレクトしない
 }
-
 App::$ActionMethod= $ContAction;    // アクションメソッド名
 //=================================
 // デバッグ用の情報ダンプ
