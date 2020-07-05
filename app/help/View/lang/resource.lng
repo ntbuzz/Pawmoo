@@ -1,0 +1,55 @@
+// JSファイル内で使用できる言語IDの定義
+
+.ja => [
+    Part-Alert  => 'パートが選択されていません！'
+    Part-Add    => 'パートを追加'
+    Part-Edit   => 'パートを編集'
+    Part-Del    => 'パートを削除'
+
+    Chap-Alert  => 'チャプターが選択されていません！'
+    Chap-Add    => 'チャプターを追加'
+    Chap-Edit   => 'チャプターを編集'
+    Chap-Del    => 'チャプターを削除'
+
+    Sec-Add    => 'セクションを追加'
+    Sec-Edit   => 'セクションを編集'
+    Sec-Del    => 'セクションを削除'
+
+    Para-Edit   => 段落を編集
+    Para-Ins    => 段落を挿入
+    Para-Add    => 段落を追加
+    Para-Del    => 段落を削除
+    Para-Clear  => ' の段落をクリアしますか？'
+
+    Del-Confirm => 'を削除しますか？'
+    Canceld     => '取り消しました'
+
+    Copy    => コピー
+]
+.en => [
+    Part-Alert  => 'PART NOT SELECTED!'
+    Part-Add    => 'New Part'
+    Part-Edit   => 'Edit Part'
+    Part-Del    => 'Delete Part'
+
+    Chap-Alert  => 'CHAPTER NOT SELECTED!'
+    Chap-Add    => 'New CHapter'
+    Chap-Edit   => 'Edit Chapter'
+    Chap-Del    => 'Delete Chapter'
+
+    Sec-Add    => 'New Section'
+    Sec-Edit   => 'Edit Section'
+    Sec-Del    => 'Delete Section'
+
+    Para-Add    => "New Paragraph"
+    Para-Ins    => "Insert Paragraph"
+    Para-Edit   => "Edit Paragraph"
+    Para-Del    => "Delete Paragraph"
+    Para-Clear  => "Clear Paragraph"
+
+    Del-Confirm => ' will Delete?'
+    Canceld     => 'Canceled'
+
+    Copy => Copy
+]
+

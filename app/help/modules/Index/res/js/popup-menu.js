@@ -11,7 +11,7 @@ var popup_menu_function = {
 //        alert(url);
         $.getJSON(url, function (para_obj) {
             // フォームにパラメータをセットし、完了時の処理関数を登録する
-            $("#paragraph_dialog").floatWindow("段落を編集",para_obj, function (e) {
+            $("#paragraph_dialog").floatWindow("${#.Para-Edit}",para_obj, function (e) {
                 e["TabSelect"] = $('.tabmenu .tab li.selected').index();
                 var url = location.pathname.controller_path("paragraph/update") + e["id"];
 //                alert("段落編集\n"+url+"\n"+objDump(e));
@@ -39,7 +39,7 @@ var popup_menu_function = {
             title:      '',
             contents:   '',
         };
-        $("#paragraph_dialog").floatWindow("段落を挿入",para_obj, function (e) {
+        $("#paragraph_dialog").floatWindow("${#.Para-Ins}",para_obj, function (e) {
             e["TabSelect"] = $('.tabmenu .tab li.selected').index();
             var url = location.pathname.controller_path("paragraph/add");
             $.post(url, e,function(data){ //リクエストが成功した際に実行する関数
@@ -66,7 +66,7 @@ var popup_menu_function = {
     "ctxClear": function (obj) {
         var sec_id = obj.attr("id");
         var sec_ttl = obj.attr("value");
-        if (confirm(sec_ttl + ' の段落をクリアしますか？')) {
+        if (confirm(sec_ttl + '${#.Para-Clear}')) {
             var url = location.pathname.controller_path("paragraph/clear") + sec_id;
             var e = { TabSelect: $('.tabmenu .tab li.selected').index() };  // タブ選択用
             $.post(url, e, function (data) {           //リクエストが成功した際に実行する関数

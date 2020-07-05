@@ -320,7 +320,7 @@ public function ViewStyle($file_name) {
             $var = trim($var,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
             if($var[0] == '#') {
                 $var = mb_substr($var,1);     // 言語ファイルの参照
-                $val = LangUI::get_value('core', $var, FALSE);
+                $val = LangUI::get_value('resource', $var, FALSE);
             } else if(isset($vars[$var])) {
                 $val = $vars[$var];             // 環境変数で置換
             }

@@ -8,6 +8,7 @@ class AppController extends AppObject {
 	public $defaultAction = 'List';		// デフォルトのアクション
 	public $defaultFilter = 'all';		// デフォルトのフィルタ
 	public $disableAction = [];			// 禁止する継承元のアクション
+	private $my_method;					// active method list on Instance
 
 //==============================================================================
 // コンストラクタでビューを生成、モデルはビュークラス内で生成する
@@ -22,12 +23,34 @@ class AppController extends AppObject {
 		if(!class_exists($view)) $view = 'AppView';	// クラスがなければ基底クラスで代用
 		$this->View = new $view($this);			// ビュークラス
 		$this->__InitClass();                       // クラス固有の初期化メソッド
+		// filter of '*Action' method
+		$map_conv = function($nm) { return (substr_compare($nm,'Action',-6) === 0) ? substr($nm,0,-6):''; };
+		// mekae active method list
+		$en = $this->defaultAction;		// default Action must be ENABLED
+		if(is_scalar($this->disableAction)) {
+			$except = array_filter( array_map( $map_conv,get_class_methods('AppController')),
+						function($v) use ($en) { return !empty($v) && ($en !== $v);});
+		} else $except = $this->disableAction;
+		// Instance method
+		$this->my_method = array_filter( 		// $except array filter
+							array_filter(		// *Action method pickup filter
+								array_map( $map_conv,get_class_methods($this)),'strlen'),
+								function($v) use ($except) {
+									return !in_array($v,$except);
+								});
+		debug_dump(0, [ 'MY METHOD' => $this->my_method ]);
 	}
 //==============================================================================
 // 後始末の処理
 	function __TerminateApp() {
 		$this->View->__TerminateView();
 	}
+//==============================================================================
+// check active METHOD
+function is_enable_action($action) {
+	if(in_array($action,$this->my_method)) return TRUE;	// exist ENABLED List
+	return FALSE;	// diable ActionMethod
+}
 //==============================================================================
 // View Helperクラスへの値セット
 public function ViewSet($arr) {

@@ -9,11 +9,12 @@ class LangUI {
     public  static $STRINGS;        // 翻訳言語配列
     private static $LangDir;        // 言語ファイルのパス
     private static $Locale;         // 言語識別子
+    private static $LocaleFiles;    // for debug
 
 //==============================================================================
 // HTTP_ACCEPT_LANGUAGE を元にデフォルトの言語を決定する
     public static function construct($lang,$default) {
-        APPDEBUG::MSG(4,$lang, "言語リスト");
+        APPDEBUG::MSG(14,$lang, "言語リスト");
         $_ = 'constant';                                    // 定数を取り出す関数
         $arr = array_unique(             // 重複行を取り除く
                 array_filter(           // strlen を使って空行を取り除く
@@ -39,18 +40,26 @@ class LangUI {
 //  言語ファイルの読み込み
 public static function LangFiles($files) {
     if(is_array($files)) {          // 配列引数の時は各要素を言語ファイルとして処理
-        $msg = '';
         foreach($files as $lang_file) {
             self::LoadLang($lang_file);
-            $msg .= "[{$lang_file}]";
         }
     } else {
         self::LoadLang($files);        // スカラー引数は単独読み込み
-        $msg = $files;
     }
-    $msg = self::$Locale . " / " . trim($msg,' /');
-    APPDEBUG::MSG(4, self::$STRINGS, "ロケール({$msg})");
+    self::$LocaleFiles = $files;
+    self::LangDebug();
 }
+//==============================================================================
+//  言語ファイルの読み込み
+public static function LangDebug() {
+    APPDEBUG::DebugDump(4, [
+            "ロケール情報" => [
+                'Locale' => self::$Locale,
+                'File'   => self::$LocaleFiles,
+                'Folder' => self::$LangDir,
+                'STRING' => self::$STRINGS,
+            ]]);
+    }
 //==============================================================================
 //  セクション要素から空配列を削除する
     private static function emptyDelete($arr) {
@@ -124,6 +133,8 @@ public static function LangFiles($files) {
             unset($parser);
             unset($section);
             return TRUE;
+        } else {
+            APPDEBUG::MSG(4,"{$lang_file}.lng", "UNDEFINED");
         }
         return FALSE;
     }

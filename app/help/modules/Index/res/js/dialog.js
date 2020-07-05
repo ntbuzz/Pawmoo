@@ -8,7 +8,7 @@ $("#add-paragraph").click(function () {  // セクションブロックから呼
         title:      '',
         contents:   '',
     };
-    $("#paragraph_dialog").floatWindow("段落を追加",para_obj, function (e) {
+    $("#paragraph_dialog").floatWindow("${#.Para-Add}",para_obj, function (e) {
         e["TabSelect"] = $('.tabmenu .tab li.selected').index();
         var url = location.pathname.controller_path("paragraph/add");
 //        alert("段落追加\n"+url+"\n"+objDump(e));
@@ -26,7 +26,7 @@ $("#add-paragraph").click(function () {  // セクションブロックから呼
 //   セクションを追加するダイアログ表示＆書き込み処理
 $(".add-section").click(function () {
     if (ChapterData.length == 0) {
-        alert("チャプターが選択されていません！");
+        alert("${#.Chap-Alert}");
         return false;
     }
     var sec_obj = {
@@ -37,7 +37,7 @@ $(".add-section").click(function () {
         short_title:'',
         contents:   '',
     };
-    $("#section_dialog").floatWindow("セクションを追加", sec_obj, function (e) {
+    $("#section_dialog").floatWindow("${#.Sec-Add}", sec_obj, function (e) {
         e["TabSelect"] = $('.tabmenu .tab li.selected').index();
         var url = location.pathname.controller_path("section/add");
         $.post(url, e,function (data) { //リクエストが成功した際に実行する関数
@@ -77,7 +77,7 @@ $("#delete-section").click(function () {
     // データを取得
     var url = location.origin + location.pathname.controller_path("section/json") + id;
     $.getJSON(url, function (sec_obj) {
-        $.dialogBox("セクションの削除","["+sec_obj.title + '] を削除しますか？' ,function (result) {
+        $.dialogBox("${#.Sec-Del}","["+sec_obj.title + '] ${#.Del-Confirm}' ,function (result) {
             if (result) { // OK のときに削除
                 var url = location.pathname.controller_path("section/delete") + id;
                 $.post(url,function (data) {  //リクエストが成功した際に実行する関数
@@ -85,7 +85,7 @@ $("#delete-section").click(function () {
                 }).fail(function () {  //リクエストが失敗
                     alert("error:" + url);
                 });
-            } else alert("取り消しました");
+            } else alert("${#.Canceled}");
         });
     });
     return false;
@@ -96,10 +96,10 @@ $("#delete-section").click(function () {
 //   パートレコード編集ダイアログ表示＆書き込み処理
 $("#part_edit").click(function () {
     if (!("id" in PartData)) {
-        alert("パートが選択されていません！");
+        alert("${#.Part-Alert}");
         return false;
     }
-    $("#part_dialog").floatWindow("パートを編集",PartData, function (e) {
+    $("#part_dialog").floatWindow("${#.Part-Edit}",PartData, function (e) {
         e["TabSelect"] = $('.tabmenu .tab li.selected').index();
         var url = location.pathname.controller_path("part/update") + e["id"];
         $.post(url, e,function (data) { //リクエストが成功した際に実行する関数
@@ -119,7 +119,7 @@ $("#part_add").click(function () {
         title:      '',
         contents:   '',
     };
-    $("#part_dialog").floatWindow("パートを追加",part_obj, function (e) {
+    $("#part_dialog").floatWindow("${#.Part-Add}",part_obj, function (e) {
         e["TabSelect"] = $('.tabmenu .tab li.selected').index();
         var url = location.pathname.controller_path("part/add");
         $.post(url, e,function (data) { //リクエストが成功した際に実行する関数
@@ -138,7 +138,7 @@ $("#part_del").click(function () {
         alert("パートが選択されていません！");
         return false;
     }
-    $.dialogBox("パートの削除","["+PartData.title + '] を削除しますか？' ,function (result) {
+    $.dialogBox("${#.Part-Del}","["+PartData.title + '] ${#.Del-Confirm}' ,function (result) {
         if (result) { // OK のときに削除
             var id = PartData.id;
             var url = location.pathname.controller_path("part/delete") + id;
@@ -155,10 +155,10 @@ $("#part_del").click(function () {
 //   セクションを追加するダイアログ表示＆書き込み処理
 $("#chap_edit").click(function () {
     if (!("id" in ChapterData)) {
-        alert("チャプターが選択されていません！");
+        alert("${#.Chap-Alert}");
         return false;
     }
-    $("#chapter_dialog").floatWindow("チャプターを編集",ChapterData, function (e) {
+    $("#chapter_dialog").floatWindow("${#.Chap-Edit}",ChapterData, function (e) {
         e["TabSelect"] = $('.tabmenu .tab li.selected').index();
         var url = location.pathname.controller_path("chapter/update") + e["id"];
         $.post(url, e,function (data) { //リクエストが成功した際に実行する関数
@@ -174,7 +174,7 @@ $("#chap_edit").click(function () {
 //   チャプターレコードを追加するダイアログ表示＆書き込み処理
 $("#chap_add").click(function () {
     if (!("id" in PartData)) {
-        alert("追加するパートが選択されていません！");
+        alert("${#.Part-Alert}");
         return false;
     }
     var chap_obj = {
@@ -183,7 +183,7 @@ $("#chap_add").click(function () {
         title:      '',
         contents:   '',
     };
-    $("#chapter_dialog").floatWindow("チャプターを追加",chap_obj, function (e) {
+    $("#chapter_dialog").floatWindow("${#.Chap-Add}",chap_obj, function (e) {
         e["TabSelect"] = $('.tabmenu .tab li.selected').index();
         var url = location.pathname.controller_path("chapter/add");
         $.post(url, e,function (data) { //リクエストが成功した際に実行する関数
@@ -199,10 +199,10 @@ $("#chap_add").click(function () {
 //   チャプターレコードを削除
 $("#chap_del").click(function () {
     if (!("id" in ChapterData)) {
-        alert("チャプターが選択されていません！");
+        alert("${#.Chap-Alert}");
         return false;
     }
-    if(confirm(ChapterData.title+' を削除しますか？')){
+    if(confirm(ChapterData.title+' ${#.Del-Confirm}')){
         /*　OKの時の処理 */
         var id = ChapterData.id;
         var url = location.pathname.controller_path("chapter/delete")+id;

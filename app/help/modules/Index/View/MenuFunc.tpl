@@ -5,35 +5,35 @@
 //=========================================
 // パラグラフ・コンテキストメニュー
 +ul.context-menu#popup_menu{.paragraph} => [
-	#ctxEdit => [ ${#.Popup.Para-Edit} ]
-	#ctxIns  => [ ${#.Popup.Para-Ins} ]
-	#ctxAdd  => [ ${#.Popup.Para-Add} ]
+	#ctxEdit => [ ${#resource.Para-Edit} ]
+	#ctxIns  => [ ${#resource.Para-Ins} ]
+	#ctxAdd  => [ ${#resource.Para-Add} ]
 	.separate => [ ]
-	#ctxCopy1 => [ ${#.Popup.Copy} ]
+	#ctxCopy1 => [ ${#resource.Copy} ]
 	.separate => [ ]
-	#ctxDel => [ ${#.Popup.Para-Delete} ]
+	#ctxDel => [ ${#resource.Para-Del} ]
 ]
 //=========================================
 // パラグラフ・コンテキストメニュー
 "+ul.context-menu#popup_menu{.section}" => [
-	#ctxSecEdit => [ ${#.Popup.Sec-Edit} ]
-	#ctxSecAdd  => [ ${#.Popup.Sec-Add} ]
+	#ctxSecEdit => [ ${#resource.Sec-Edit} ]
+	#ctxSecAdd  => [ ${#resource.Sec-Add} ]
 	.separate => [ <hr> ]
-	#ctxSecDel => [ ${#.Popup.Sec-Delete} ]
+	#ctxSecDel => [ ${#resource.Sec-Del} ]
 	.separate => [ <hr> ]
-	#add-paragraph  => [ ${#.Popup.Para-Add} ]
+	#add-paragraph  => [ ${#resource.Para-Add} ]
 	.separate => [ <hr> ]
-	#ctxClear => [ ${#.Popup.Para-Clear} ]
+	#ctxClear => [ ${#resource.Para-Clear} ]
 	.separate => [ <hr> ]
-	#ctxCopy2 => [ ${#.Popup.Copy} ]
+	#ctxCopy2 => [ ${#resource.Copy} ]
 ]
 //=========================================
 // セクションタブ・コンテキストメニュー
 "+ul.context-menu#popup_tab{.tab li}" => [
-	#edit-section => [ ${#.Popup.Sec-Edit} ]
-	#add_section  => [ ${#.Popup.Sec-Add} ]
+	#edit-section => [ ${#resource.Sec-Edit} ]
+	#add_section  => [ ${#resource.Sec-Add} ]
 	.separate => [ <hr> ]
-	#delete-section => [ ${#.Popup.Sec-Delete} ]
+	#delete-section => [ ${#.Popup.Sec-Del} ]
 ]
 //------------------------------------------------------------------------------
 // パラグラフ操作・フロートウィンドウ

@@ -11,13 +11,13 @@ home => [
 ドキュメント => [
     .en => [
         Documents
-        パート編集 => Edit-Part
-        パート追加 => Add-Part
-        パート削除 => Del-Part
-        チャプター編集 => Edit-Chapter
-        チャプター追加 => Add-Chapter
-        チャプター削除 => Del-Chapter
-        テキストDL => TextDownload
+        パート編集 => 'Edit Part'
+        パート追加 => 'Add Part'
+        パート削除 => 'Delete Part'
+        チャプター編集 => 'Edit Chapter'
+        チャプター追加 => 'Add Chapter'
+        チャプター削除 => 'Delete Chapter'
+        テキストDL => 'Text Download'
     ]
 ]
 

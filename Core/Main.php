@@ -73,7 +73,8 @@ if(empty($method) && !is_extst_module($appname,$controller,'Controller')) {
 if(!is_extst_module($appname,$controller,'Controller')) {
     // CHeck REDIRECT Enabled
     if(FORCE_REDIRECT) {
-        $controller = ucfirst(strtolower(DEFAULT_CONTROLLER)); // CALL DEFAULT CONTROLLER
+        $controller = ucfirst(strtolower(DEFAULT_CONTROLLER));  // CALL DEFAULT CONTROLLER
+        $module = [ucfirst($controller),''];                    // REDIRECT URL
         $redirect = true;
     } else {
         error_response('page-404.php',$appname,$module);
@@ -133,22 +134,26 @@ if(defined('LOGIN_NEED')) {
 App::LoadModuleFiles($controller);
 // 拡張子を考慮する
 if(mb_strpos($method,'.') !== FALSE) {  // have a extension
-    list($puremethod,$ext) = extract_base_name($method);
-} else $puremethod = $method;
+    list($method,$ext) = extract_base_name($method);
+}
 // コントローラ/メソッドをクラス名/アクションメソッドに変換
 $ContClass = "{$controller}Controller";
-$ContAction= "{$puremethod}Action";
+$ContAction= "{$method}Action";
 // コントローラインスタンス生成
 $controllerInstance = new $ContClass();
 // Method Existance Check
-if(!method_exists($controllerInstance,$ContAction) ||           // Not Exist Method Action
-    (is_scalar($controllerInstance->disableAction) ||           // diable Def is SCALAR VALUE
-    in_array($puremethod,$controllerInstance->disableAction)) ) { // or exist of Ignore-List
-        // Check DEFAULT METHOD CALL or 404 Page not found
+if(!$controllerInstance->is_enable_action($method)) {
     if(FORCE_REDIRECT || $method==='') {
-        $puremethod = $controllerInstance->defaultAction;               // クラスのデフォルトメソッド
-        $ContAction = "{$puremethod}Action";                            // アクション名に変換
+        $method = $controllerInstance->defaultAction;               // クラスのデフォルトメソッド
+        $ContAction = "{$method}Action";                            // アクション名に変換
     } else {
+        $module[0] = $controller;       // may-be rewrited
+        $module[1] = $method;           // may-be rewrited
+        debug_dump(1,[
+            'Cont' => $ContClass,
+            'Action' => $ContAction,
+            'Module' => $module,
+        ]);
         error_response('page-404.php',$appname,$module);
     }
 }
