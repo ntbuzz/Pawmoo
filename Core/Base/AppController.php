@@ -52,6 +52,11 @@ function is_enable_action($action) {
 	return FALSE;	// diable ActionMethod
 }
 //==============================================================================
+// authorised login mode, if need view LOGIN form, return FALSE
+function is_authorised() {
+	return TRUE;
+}
+//==============================================================================
 // View Helperクラスへの値セット
 public function ViewSet($arr) {
 	$this->View->Helper->SetData($arr);

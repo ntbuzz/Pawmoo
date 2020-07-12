@@ -31,7 +31,7 @@ class AppModel extends AppObject {
 //==============================================================================
 	function __construct($owner) {
 	    parent::__construct($owner);                    // 継承元クラスのコンストラクターを呼ぶ
-        APPDEBUG::MSG(13,$DatabaseSchema);
+        APPDEBUG::MSG(13,static::$DatabaseSchema);
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
         $this->__InitClass();                             // クラス固有の初期化メソッド
         $this->autoload = TRUE;

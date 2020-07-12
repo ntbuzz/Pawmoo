@@ -148,7 +148,7 @@ public function SetPaging($pagesize, $pagenum) {
 // FileMaker では relations を使わない
 public function findRecord($row, $relations = NULL,$sort = []) {
 	if(empty($row)) {
-		$row = array($this->columns[0] => '*');	// 先頭カラムを代行検索
+		$row = array(reset($this->columns) => '*');	// 先頭カラムを代行検索
 	}
 	// 検索条件を記録する
 	$n = array_depth($row);
@@ -157,7 +157,11 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 	}
 	$this->Finds = $row;
 	$this->SortBy = $sort;
-
+	debug_dump(0,[
+		'Columns'	=> $this->columns,
+		'FindBy'	=> $this->Finds,
+		'SortBy'	=> $this->SortBy,
+	]);
     $this->skip_rec = $this->startrec;
     $this->recordMax = 0;
 	$this->r_pos = 0;
@@ -214,6 +218,11 @@ public function fetchDB() {
 			$this->errMessage= $result->getMessage();
             if ($this->errCode !== '401') {
 				APPDEBUG::MSG(3, $this->errMessage, "エラー");
+				// Check Find Condition
+				debug_dump(4,[
+					'FindBy'	=> $this->Finds,
+					'SortBy'	=> $this->SortBy,
+				]);
 				throw new Exception('ExecError');
             }
 		    $this->recordMax = 0;

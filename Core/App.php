@@ -136,7 +136,8 @@ public static function Get_AppRoot($path = '') {
             foreach($tagfile as $nm) self::includeTag($nm);
             return;
         }
-        list($file,$q_str) = explode('?',$tagfile);     // クエリ文字列が付加されている時に備える
+        //separate query string if exist
+        list($file,$q_str) = (strpos($tagfile,'?') !== FALSE) ? explode('?',$tagfile):[$tagfile,'']; 
         $ext = substr($file,strrpos($file,'.') + 1);    // 拡張子を確認
         $path = make_hyperlink($file,self::$Controller);
         switch($ext) {

@@ -10,6 +10,9 @@ class AppFilesModel extends AppObject {
     public $TopFolder;		// フォルダトップ
     public $SubFolder;		// 付加文字列
     private $Folders;       // フォルダ操作クラス
+    public $RecData;        // dummy for same AppModel
+    public $Records;        // dummy for same AppModel
+    public $Header;         // dummy for same AppModel
 //==============================================================================
 // コンストラクタでフォルダ内を探索
     function __construct($owner) {

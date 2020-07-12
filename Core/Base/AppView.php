@@ -288,7 +288,7 @@ public function ViewTemplate($name,$vars = []) {
             if(is_array($func)) {       // サブコマンドテーブル
                 $cmd = $func[$tag];
                 if(array_key_exists($tag,$func) && (method_exists($this, $cmd))) {
-                    $this->$cmd($tag,$attrs,$sec,$vars);
+                    $this->$cmd($tag,$attrs,$subsec,$sec,$vars);
                 } else echo "***NOT FOUND({$cmd}): {$cmd}({$tag},\$attrs,\$sec,\$vars)\n";
             } else if(method_exists($this, $func)) {
                 $this->$func($kkey,$sec,$vars);
@@ -389,27 +389,27 @@ public function ViewTemplate($name,$vars = []) {
     //  cmd_xxx(タグ名,属性リスト,セクション,環境変数)
     //--------------------------------------------------------------------------
     //  外部ファイルのインクルード
-    private function cmd_include($tag,$attrs,$sec,$vars) {
+    private function cmd_include($tag,$attrs,$subsec,$sec,$vars) {
         App::WebInclude($sec);
     }
     //--------------------------------------------------------------------------
     //  JQueryスクリプトの出力
-    private function cmd_jquery($tag,$attrs,$sec,$vars) {
+    private function cmd_jquery($tag,$attrs,$subsec,$sec,$vars) {
         $this->directOutput("<script type='text/javascript'>\n$(function() {", "});\n</script>",$sec);
     }
     //--------------------------------------------------------------------------
     //  javascriptの出力
-    private function cmd_script($tag,$attrs,$sec,$vars) {
+    private function cmd_script($tag,$attrs,$subsec,$sec,$vars) {
         $this->directOutput("<script type='text/javascript'>", "</script>",$sec);
     }
     //--------------------------------------------------------------------------
     //  スタイルシートの出力
-    private function cmd_style($tag,$attrs,$sec,$vars) {
+    private function cmd_style($tag,$attrs,$subsec,$sec,$vars) {
         $this->directOutput('<style type="text/css">', "</style>",$sec);
     }
     //--------------------------------------------------------------------------
     //  イメージタグの出力
-    private function cmd_image($tag,$attrs,$sec,$vars) {
+    private function cmd_image($tag,$attrs,$subsec,$sec,$vars) {
         if(is_array($sec)) { // 連想キーが無いスカラー値のみ抽出
             foreach($sec as $key => $val) {
                 if(is_numeric($key) && is_scalar($val)) $src = $val;
@@ -421,12 +421,12 @@ public function ViewTemplate($name,$vars = []) {
     }
     //--------------------------------------------------------------------------
     //  単純エコー出力
-    private function cmd_echo($tag,$attrs,$sec,$vars) {
+    private function cmd_echo($tag,$attrs,$subsec,$sec,$vars) {
         $this->directOutput('', '',$sec);
     }
     //--------------------------------------------------------------------------
     //  インラインセクションの登録
-    private function cmd_inline($tag,$attrs,$sec,$vars) {
+    private function cmd_inline($tag,$attrs,$subsec,$sec,$vars) {
         $name = $attrs['class'];
         $this->inlineSection[$name] = $sec;
     }
@@ -435,11 +435,11 @@ public function ViewTemplate($name,$vars = []) {
     // +ul => [
     //   { li.class#id => } [   ]       
     // ]
-    private function cmd_list($tag,$attrs,$sec,$vars) {
+    private function cmd_list($tag,$attrs,$subsec,$sec,$vars) {
         $attr = $this->gen_Attrs($attrs);
         echo "<{$tag}{$attr}>\n";
         // リスト要素の出力
-        foreach($sec as $kk => $vv) {
+        foreach($subsec as $kk => $vv) {
             // $key と $sec をタグと属性に分解する
             list($s_tag,$s_text,$s_attr,$s_sec) = $this->tag_attr_Section($kk,$vv);
             $attr = $this->gen_Attrs($s_attr);
@@ -460,11 +460,11 @@ public function ViewTemplate($name,$vars = []) {
     //      { DD-ATTR => } [ SECTION ]
     //    ]
     // ]
-    private function cmd_dl($tag,$attrs,$sec,$vars) {
+    private function cmd_dl($tag,$attrs,$subsec,$sec,$vars) {
         $attr = $this->gen_Attrs($attrs);
         echo "<{$tag}{$attr}>\n";
         // DTのリスト要素の出力
-        foreach($sec as $kk => $vv) {
+        foreach($subsec as $kk => $vv) {
             // $key と $sec をタグと属性に分解する
             list($dt_tag,$dt_text,$dt_attrs,$dd_sec) = $this->tag_attr_Section($kk,$vv);
             $attr = $this->gen_Attrs($dt_attrs);

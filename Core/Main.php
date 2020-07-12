@@ -52,8 +52,10 @@ if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
 
 // アプリ名が有効かどうか確認する
 if(empty($appname) || !file_exists("app/$appname")) {
+    header("Location:/index.html");
+    exit;
     // 404エラーページを送信するre
-    error_response('app-404.php',$appname,$module);
+//    error_response('app-404.php',$appname,$module);
 }
 MySession::InitSession($appname);
 
@@ -63,20 +65,21 @@ require_once("app/{$appname}/Config/config.php");
 if(!defined('FORCE_REDIRECT')) {
     define('FORCE_REDIRECT', FALSE);
 }
-// 省略形を許可する
-if(empty($method) && !is_extst_module($appname,$controller,'Controller')) {
-    $module[0] = ucfirst($appname);
-    $module[1] = $controller;
-    list($controller,$method) = $module;
-}
-// コントローラーファイルが存在するか確認する
 if(!is_extst_module($appname,$controller,'Controller')) {
-    // CHeck REDIRECT Enabled
-    if(FORCE_REDIRECT) {
-        $controller = ucfirst(strtolower(DEFAULT_CONTROLLER));  // CALL DEFAULT CONTROLLER
-        $module = [ucfirst($controller),''];                    // REDIRECT URL
-        $redirect = true;
-    } else {
+    // if BAD controller name, try DEFAULT CONTROLLER and shift follows
+    $cont = (DEFAULT_CONTROLLER === '') ? $appname : DEFAULT_CONTROLLER;
+    $module[0] = ucfirst(strtolower($cont));
+    $module[1] = $controller;
+    $module[2] = $method;
+    list($controller,$method,$filter) = $module;
+    // RE-TRY DEFAULT CONTROLLER,if FAILED,then NOT FOUND
+    if(!is_extst_module($appname,$controller,'Controller')) {
+        debug_dump(1,[
+            "ROUTING FAILED." => [
+                'AppName' => $appname,
+                'Controller' => $controller,
+                'Module' => $module,
+            ]]);
         error_response('page-404.php',$appname,$module);
     }
 }
@@ -118,18 +121,6 @@ $lang = (isset($query['lang'])) ? $query['lang'] : $_SERVER['HTTP_ACCEPT_LANGUAG
 // コントローラ用の言語ファイルを読み込む
 LangUI::construct($lang,App::Get_AppPath("View/lang/"));
 LangUI::LangFiles(['#common',$controller]);
-// アプリにログイン要求が必要で、未ログイン状態ならコントローラーを切替える
-if(defined('LOGIN_NEED')) {
-    $login = MySession::getLoginInfo();
-    if(empty($login)) {     // ログイン状態ではない
-        $controller = 'Login';      // ログインコントローラーに制御を渡す
-        $method = 'Login';
-    } else if($controller === 'Login' && $method !== 'Logout') {
-        // Logoutメソッドでなければログインの繰返しを回避する
-        $url = App::Get_AppRoot(DEFAULT_CONTROLLER);
-        header("Location:{$url}");
-    }
-}
 // モジュールファイルを読み込む
 App::LoadModuleFiles($controller);
 // 拡張子を考慮する
@@ -195,8 +186,10 @@ APPDEBUG::DebugDump(0, [
 ]);
 
 APPDEBUG::RUN_START();
-// コントローラーの実行
-$controllerInstance->$ContAction();
+// ログイン不要ならTRUEが返る
+if($controllerInstance->is_authorised()) {
+    $controllerInstance->$ContAction();
+}
 
 APPDEBUG::RUN_FINISH(0);
 MySession::CloseSession();
