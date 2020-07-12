@@ -1,6 +1,6 @@
 <?php
 
-class IndexController extends AppController {
+class IndexController extends customController {
 	public $defaultAction = 'List';		//  デフォルトのアクション
 	public $disableAction = [ 'Page', 'Find' ];	// 無視するアクション
 

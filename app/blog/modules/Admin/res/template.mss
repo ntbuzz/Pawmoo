@@ -14,7 +14,7 @@ Stylesheet => [
 Javascript => [
     '*モジュール固有のテンプレート'
     common => [
-        +import => [
+        +jquery => [
             myscript.js
         ]
         +section => ^common       // 上位のセクションを呼出す

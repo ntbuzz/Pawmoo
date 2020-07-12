@@ -1,6 +1,6 @@
 <?php
 
-class NamesController extends AppController {
+class NamesController extends customController {
     public $defaultAction = 'Page';		//  デフォルトのメソッド
 	public $disableAction = ['List'];	// 禁止する継承元のアクション
 //==============================================================================

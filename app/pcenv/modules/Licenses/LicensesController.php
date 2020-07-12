@@ -1,6 +1,6 @@
 <?php
 
-class LicensesController extends AppController {
+class LicensesController extends customController {
 //==============================================================================
 // モジュールクラスではコンストラクタを定義しない
 //  必要なら ClassInit() メソッドで初期化する

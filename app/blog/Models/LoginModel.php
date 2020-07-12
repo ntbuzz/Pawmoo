@@ -7,16 +7,17 @@ class LoginModel extends AppModel {
         'Primary' => 'id',
         'Unique' => 'id',
         'Schema' => [
-            'id' =>         ['',0],          // モジュールSchemaの言語ID
-            'active' =>     ['',0],
-            'username'=>    ['',0],
-            'password'=>    ['',1],
-            'email' =>      ['',0],
-            'note'=>        ['',0],
-            'last_login'=>  ['',0],
+            'id'        => ['',0],          // モジュールSchemaの言語ID
+            'roll'      => ['',0],
+            'active'    => ['',0],
+            'username'  => ['',0],
+            'password'  => ['',1],
+            'email'     => ['',0],
+            'note'      => ['',0],
+            'lastlogin' => ['',0],
+            'created'   => ['',0],
         ],
-        'Relations' => [
-        ],
+        'Relations' => [],
         'PostRenames' => [
             'userid' => 'username',
             'passwd' => 'password',

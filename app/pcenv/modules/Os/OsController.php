@@ -1,6 +1,6 @@
 <?php
 
-class OsController extends AppController {
+class OsController extends customController {
 
 
 }

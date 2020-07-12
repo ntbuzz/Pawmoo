@@ -1,10 +1,10 @@
 <?php
 
-class AppsController extends customController {
-
+class AdminHelper extends AppHelper {
 //==============================================================================
 // モジュールクラスではコンストラクタを定義しない
 //  必要なら ClassInit() メソッドで初期化する
-//==============================================================================
+    protected function ClassInit() {
+    }
 
 }

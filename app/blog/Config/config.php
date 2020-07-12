@@ -1,6 +1,7 @@
 <?php
 
 define("LOGIN_NEED",FALSE);		// ログインを要求する
+define('FORCE_REDIRECT', TRUE);
 
 define('DEFAULT_CONTROLLER', 'index');
 define('DEFAULT_LANG', 'ja');				// 言語ファイル

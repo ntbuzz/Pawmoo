@@ -1,6 +1,6 @@
 <?php
 
-class LoginController extends AppController {
+class LoginController extends customController {
 	public $defaultAction = 'Login';		//  デフォルトのアクション
 
 //==============================================================================

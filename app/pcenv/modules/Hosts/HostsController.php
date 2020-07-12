@@ -1,6 +1,6 @@
 <?php
 
-class HostsController extends AppController {
+class HostsController extends customController {
 
 //==============================================================================
 // モジュールクラスではコンストラクタを定義しない

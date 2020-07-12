@@ -1,0 +1,19 @@
+
+/*
+ブログスタイル
+*/
+.blogContents {
+    width: 100%;
+    height:100%;
+    border: 2px solid black;
+}
+.diaryIndex {
+    float:left;
+    width:70%;
+    border: 1px solid black;
+}
+.sideMenu {
+    float:left;
+    width:29%;
+    border: 1px solid black;
+}
