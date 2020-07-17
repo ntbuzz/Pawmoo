@@ -123,18 +123,20 @@ function get_UnixTime_MillSecond(){
 //==============================================================================
 // フォルダ内のPHPファイルを探査する
 function get_php_files($dirtop) {
-    $drc=dir($dirtop);
     $files = array();
-	while(false !== ($fl=$drc->read())) {
-        if(! in_array($fl,IgnoreFiles,FALSE)) {
-            $path = "{$dirtop}{$fl}";
-            $ext = substr($fl,strrpos($fl,'.') + 1);    // 拡張子を確認
-            if(!is_dir($path) && ($ext == 'php')) {
-                $files[] = $path;
+    if(file_exists($dirtop)) {
+        $drc=dir($dirtop);
+        while(false !== ($fl=$drc->read())) {
+            if(! in_array($fl,IgnoreFiles,FALSE)) {
+                $path = "{$dirtop}{$fl}";
+                $ext = substr($fl,strrpos($fl,'.') + 1);    // 拡張子を確認
+                if(!is_dir($path) && ($ext == 'php')) {
+                    $files[] = $path;
+                }
             }
         }
+        $drc->close();
     }
-    $drc->close();
     return $files;
 }
 //==============================================================================

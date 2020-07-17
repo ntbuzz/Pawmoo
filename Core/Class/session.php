@@ -83,6 +83,16 @@ static function EnvVars(...$arr) {
 	return $result;
 }
 //==============================================================================
+// ENV変数を取り出す
+static function get_envVars($names) {
+	$vset = (mb_strpos($names,'.') !== FALSE) ? explode(".", $names) : [ $names ];
+	$nVal = self::$EnvData;
+	foreach($vset as $nm) {
+		$nVal = (isset($nVal[$nm])) ? $nVal[$nm] : '';
+	}
+	return (is_array($nVal)) ? array_to_text($nVal,',') : $nVal;
+}
+//==============================================================================
 // POST変数に値が無ければ、デフォルト値をセット
 static function SetDefault($nm,$val) {
 	if(!isset(self::$EnvData[$nm])) self::$EnvData[$nm] = $val;

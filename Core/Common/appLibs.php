@@ -114,10 +114,6 @@ function echo_safe($atext,$is_safe = TRUE) {
     echo ($is_safe) ? htmlspecialchars($atext) : $atext;
 }
 //==============================================================================
-function trim_delsp($a) {
-    return trim(preg_replace('/\s+/', ' ', str_replace('　',' ',$a)));
-}
-//==============================================================================
 function json_escape($a) {
     $vv = str_replace(["\\","/","\r\n", "\r", "\n","\"","\t"],["\\\\","\\/","\\n","\\n","\\n","\\\"","\\t"], $a);
     return $vv;
@@ -125,24 +121,35 @@ function json_escape($a) {
 //==============================================================================
 // テキストを分割した配列
 function text_line_split($del,$txt) {
+/*
     $array = array_values(              // これはキーを連番に振りなおしてるだけ
         array_filter(                   // 文字数が0の行を取り除く
             array_map('trim_delsp',     // 各行にtrim()をかける
             explode($del, $txt)         // とりあえず行に分割
-            ), 'strlen'));  // array_filter
+            ), 'strlen'
+        ));
+*/
+    $array = array_values(              // これはキーを連番に振りなおしてるだけ
+            array_map(function($a) {return trim(preg_replace('/\s+/', ' ', str_replace('　',' ',$a)));},
+                explode($del, $txt)         // とりあえず行に分割
+            ));
     return $array;
 }
 //==============================================================================
 // 排列要素を改行テキストに変換
-function array_to_text($array) {
-    $dump_text = function ($indent, $items)  use (&$dump_text)  {
+function array_to_text($array,$sep = "\n") {
+    $dump_text = function ($indent, $items)  use (&$dump_text,&$sep)  {
         $txt = ''; $spc = str_repeat(' ', $indent);
         foreach($items as $key => $val) {
-            $txt .= (is_array($val)) ? $dump_text($indent+2, $val) : "{$spc}{$val}\n";
+            if(is_array($val)) {
+                $txt .= $dump_text($indent+2, $val);
+            } else {
+                $txt .= (is_numeric($key)) ? "{$spc}{$val}{$sep}" : "{$spc}{$key}={$val}{$sep}" ;
+            }
         }
-        return $txt;
+        return trim($txt,$sep);
     };
-    return $dump_text(0,$array);
+    return (is_array($array)) ? $dump_text(0,$array) : $array;
 }
 //==============================================================================
 // MarkDownもどきのパーサー

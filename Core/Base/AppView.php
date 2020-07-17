@@ -167,7 +167,7 @@ public function ViewTemplate($name,$vars = []) {
                 break;
             case '#': $var = mb_substr($var,1);     // 言語ファイルの参照
                 $val = $this->_($var);              // 言語ファイルの定義配列から文字列を取り出す
-            break;
+                break;
             default:
                 if(isset($vars[$var])) {
                     $val = $vars[$var];             // 環境変数で置換
@@ -176,13 +176,16 @@ public function ViewTemplate($name,$vars = []) {
                 }
             }
         } else if($val[0] === '{') {           // 先頭の一文字が変数文字
-            $var = trim($var,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
+            $var = trim($val,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
             switch($var[0]) {
             case '%': $var = trim($var,'%');        // URLの引数番号
                 $val = App::$Params[$var];          // Params[] プロパティから取得
                 break;
             case '$': $var = trim($var,'$');        // システム変数値
                 $val = App::$SysVAR[$var];          // SysVAR[] プロパティから取得
+                break;
+            case "'": $var = trim($var,"'");        // セッション変数
+                $val = MySession::get_envVars($var);          // EnvData[] プロパティから取得
                 break;
             }
         }
@@ -191,15 +194,21 @@ public function ViewTemplate($name,$vars = []) {
 //  文字列の変数置換を行う
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
     private function expand_Strings($str,$vars) {
-            $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
-            preg_match_all($p, $str, $m);
-            $varList = $m[0];
-            if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
-            $values = $varList = array_unique($varList);
-            array_walk($values, array($this, 'expand_Walk'), $vars);
-            // 配列が返ることもある
-            $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
-            return $exvar;
+        $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%}|{\'[^\']+?\'})/'; // 変数リストの配列を取得
+        preg_match_all($p, $str, $m);
+        $varList = $m[0];
+        if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
+        $values = $varList = array_unique($varList);
+        array_walk($values, array($this, 'expand_Walk'), $vars);
+        debug_dump(0,[ "EXPAND" => [
+            "STR" => $str,
+            "変換" => $varList,
+            "置換" => $values,
+            ]]);
+
+        // 配列が返ることもある
+        $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
+        return $exvar;
     }
 //==============================================================================
 //  セクション要素内の変数を展開する
@@ -436,7 +445,13 @@ public function ViewTemplate($name,$vars = []) {
     // 属性要素は持たない
     private function cmd_markdown($tag,$attrs,$subsec,$sec,$vars) {
         $atext = array_to_text($sec);   // array to Text convert
-        echo pseudo_markdown( $this->expand_Strings( $atext, $vars));
+        $mtext = pseudo_markdown( $atext );
+    debug_dump(0,[ 
+        "SEC" => $sec,
+        "STRING" => $atext,
+        "MARKDOWN" => $mtext,
+    ]);
+        echo $mtext;
     }
     //--------------------------------------------------------------------------
     //  ul/ol リストの出力
