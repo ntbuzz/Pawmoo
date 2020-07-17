@@ -156,7 +156,7 @@ if(strcasecmp($appname,$controller) === 0) {
 App::$ActionMethod= $ContAction;    // アクションメソッド名
 //=================================
 // デバッグ用の情報ダンプ
-APPDEBUG::DebugDump(0, [
+APPDEBUG::DebugDump(1, [
     'デバッグ情報' => [
         "Application"=> $appname,
         "Controller"=> $controller,

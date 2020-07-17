@@ -30,6 +30,7 @@ class AppView extends AppObject {
             'ol'        => 'cmd_list',
             'dl'        => 'cmd_dl',
             'inline'    => 'cmd_inline',
+            'markdown'  => 'cmd_markdown',
         ],
         '*'    => 'sec_comment',
         '%'    => 'sec_link',
@@ -429,6 +430,13 @@ public function ViewTemplate($name,$vars = []) {
     private function cmd_inline($tag,$attrs,$subsec,$sec,$vars) {
         $name = $attrs['class'];
         $this->inlineSection[$name] = $sec;
+    }
+    //--------------------------------------------------------------------------
+    //  セクション配列をマークダウン変換
+    // 属性要素は持たない
+    private function cmd_markdown($tag,$attrs,$subsec,$sec,$vars) {
+        $atext = array_to_text($sec);   // array to Text convert
+        echo pseudo_markdown( $this->expand_Strings( $atext, $vars));
     }
     //--------------------------------------------------------------------------
     //  ul/ol リストの出力

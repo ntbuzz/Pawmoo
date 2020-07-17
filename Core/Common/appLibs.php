@@ -133,6 +133,18 @@ function text_line_split($del,$txt) {
     return $array;
 }
 //==============================================================================
+// 排列要素を改行テキストに変換
+function array_to_text($array) {
+    $dump_text = function ($indent, $items)  use (&$dump_text)  {
+        $txt = ''; $spc = str_repeat(' ', $indent);
+        foreach($items as $key => $val) {
+            $txt .= (is_array($val)) ? $dump_text($indent+2, $val) : "{$spc}{$val}\n";
+        }
+        return $txt;
+    };
+    return $dump_text(0,$array);
+}
+//==============================================================================
 // MarkDownもどきのパーサー
 // テーブルは処理の都合上、独自書式でサポート
 function pseudo_markdown($atext) {

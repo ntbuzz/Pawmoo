@@ -159,19 +159,8 @@ protected function sql_safequote(&$value) {
 // 配列要素からのWHERE句を作成
 	private function sql_makeWHERE($row) {
 		APPDEBUG::MSG(13, $row );
-		$sql = $this->makeOPR('AND', $row);
-/*
-		$n = array_depth($row);
-		if($n == 1) {
-			$sql = $this->SingleSQL('AND', $row);
-		} else {
-			$sql = ''; $or_op = '';
-			foreach($row as $opr => $andval ) {
-				$sql .= $or_op . $this->SingleSQL($opr, $andval);
-				$or_op = ' OR ';
-			}
-		}
-*/
+//		$sql = $this->makeOPR('AND', $row);
+		$sql = $this->makeExpr($row);
 		if(!empty($sql)) $sql = ' WHERE '.$sql;
 		return $sql;
 	}
@@ -203,37 +192,37 @@ protected function sql_safequote(&$value) {
 		return $sql;
 	}
 //==============================================================================
-// 配列要素からのSQL生成
-// AND => [ フィールド名 => 検索条件, フィールド名 => 検索条件, ... ] 全て一致する
-// NAND/NOT => [ フィールド名 => 検索条件, フィールド名 => 検索条件, ... ] 全て一致するものを除外 NOT AND
-// OR => [ フィールド名 => 検索条件, フィールド名 => 検索条件, ... ] どれかが一致する
-// NOR => [ フィールド名 => 検索条件, フィールド名 => 検索条件, ... ] どれかが一致するものを除外 NOT OR
-	private function SingleSQL($opr, $row) {
-		APPDEBUG::MSG(13, $row );
-		$and_sql = ''; $and_op = '';
-		$opr_str = ($opr==='OR' || $opr==='NOR') ? ' OR ' : ' AND ';
-		foreach($row as $key => $val) {
-			$and_sql .= $and_op;
-			if($val[0] == '-') {
-				$vval = substr($val,1);
-				$LIKE_str = ' NOT LIKE ';
-				$vopr = '<>';
-			} else {
-				$vval = $val;
-				$LIKE_str = ' LIKE ';
-				$vopr = '=';
+// 配列要素から論理演算式を生成
+// item := 
+//   	AND => [ itenm, item,... ] | [ item, item,...]
+//   	OR => [ itenm, item,... ] |
+//   	NOT => [ itenm ] |
+//		fieldkey => findvalue
+	private function makeExpr($row) {
+		$dump_object = function ($opr,$items)  use (&$dump_object)  {
+			$opc = '';
+			foreach($items as $key => $val) {
+				if(is_array($val)) {
+					$opp = $dump_object($key,$val);
+				} else {
+					// キー名の最後に関係演算子
+					list($key,$op) = keystr_opr($key);
+					if(empty($op)) {
+						$op = (gettype($val) === 'string') ? ' LIKE ' : '=';
+					}
+					if($val[0] == '-') {
+						$val = mb_substr($val,1);
+						$op = ' NOT LIKE ';
+					}
+					if(strpos($op,'LIKE') !== false) $val = "%{$val}%";
+					$opp = "({$this->table}.\"{$key}\"{$op}'{$val}')";
+				}
+				$opc = (empty($opc)) ? $opp : "{$opc} {$opr} {$opp}";
 			}
-			if($vval[0] == '%') {
-				$and_sql .= "({$this->table}.\"{$key}\"{$LIKE_str}'{$vval}')";
-			} else if(strpos('<>=',$vval[0]) !== FALSE) {
-				$and_sql .= "({$this->table}.\"{$key}\"{$vval})";
-			} else {
-				$and_sql .= "({$this->table}.\"{$key}\"{$vopr}'{$vval}')";
-			}
-			$and_op = $opr_str;
-		}
-		if($opr == 'NAND' || $opr == 'NOR' || $opr == 'NOT') $and_sql = "NOT ({$and_sql})";
-		return $and_sql;
+			return (empty($opc)) ? '' : "({$opc})";
+		};
+		$sql = $dump_object('AND',$row);
+		return $sql;
 	}
 
 }
