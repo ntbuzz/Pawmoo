@@ -12,7 +12,7 @@ public function LoginAction() {
 		"POSTENV" => MySession::$PostEnv,
 	]);
 	$login = MySession::getLoginInfo();
-	$newlogin = $this->Model->SetLoginInfo(MySession::$PostEnv);
+	$newlogin = $this->Model->isValidLogin(MySession::$PostEnv);
 	if(!empty($newlogin)) {
 		debug_dump(1, [
 			'ログイン中' => $login,
@@ -25,7 +25,7 @@ public function LoginAction() {
 	}
     if(!empty($login)) {     // ログイン状態ではない
 		// 新しいログインでなければセッションに記憶された情報を書き込む
-		$newlogin = $this->Model->SetLoginInfo($login);
+		$newlogin = $this->Model->isValidLogin($login);
 	}
 	// ログインフォームを表示して終了
 	$this->View->ViewTemplate('Login');

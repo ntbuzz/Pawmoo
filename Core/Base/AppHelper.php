@@ -67,7 +67,7 @@ public function ALink($lnk,$txt,$under=false) {
 //==============================================================================
 // ページリンクのURL生成
 	private function get_PageButton($n, $anchor, $npage) {
-		$anchor = substr("00{$anchor}", -2);
+		$anchor = substr("00{$anchor}", ($anchor>=100)?-3:-2);
 		$cls = (($n == $this->MyModel->page_num) || ($n == 0) || ($n > $npage)) ? 'active' : 'jump';
 		return "<span class='{$cls}' value='{$n}'>{$anchor}</span>";	// ページサイズはセッションに記憶
 	}

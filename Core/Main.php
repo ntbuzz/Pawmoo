@@ -54,8 +54,8 @@ if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
 if(empty($appname) || !file_exists("app/$appname")) {
     header("Location:/index.html");
     exit;
-    // 404エラーページを送信するre
-//    error_response('app-404.php',$appname,$module);
+    // 404エラーページを送信する時はこっち
+    // error_response('app-404.php',$appname,$module);
 }
 MySession::InitSession($appname);
 

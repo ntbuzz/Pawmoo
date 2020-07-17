@@ -1,13 +1,13 @@
 <?php
 
 class LoginController extends AppController {
-	public $defaultAction = 'Login';		//  デフォルトのアクション
+	public $defaultAction = 'Logout';		//  デフォルトのアクション
 
 //==============================================================================
 // ログイン要求を処理する
 public function LoginAction() {
 	$login = MySession::getLoginInfo();
-	$newlogin = $this->Model->SetLoginInfo(MySession::$PostEnv);
+	$newlogin = $this->Model->isValidLogin(MySession::$PostEnv);
 	if(!empty($newlogin)) {
 		MySession::SetLogin($newlogin);
 		$url = App::$SysVAR['URI'];
@@ -15,7 +15,7 @@ public function LoginAction() {
 	}
     if(!empty($login)) {     // ログイン状態ではない
 		// 新しいログインでなければセッションに記憶された情報を書き込む
-		$newlogin = $this->Model->SetLoginInfo($login);
+		$newlogin = $this->Model->isValidLogin($login);
 	}
 	// ログインフォームを表示して終了
 	$this->View->ViewTemplate('Login');

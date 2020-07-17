@@ -28,7 +28,7 @@ protected function ClassInit() {
 }
 //==============================================================================
 // ログイン情報を割り当てる
-public function SetLoginInfo($values) {
+public function isValidLogin($values) {
     $this->LoginData = array();
     foreach($values as $key => $val) {
         // POSTされてきた名前を読み替える

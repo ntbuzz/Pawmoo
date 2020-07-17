@@ -3,7 +3,7 @@
 .ja => [
     // ページャーボタン表示用
     Page => ページ
-    Total => "＜全 %d 件＞"
+    Total => "(全 %d件)"
     Display => 表示数
     NextPage => "次へ＞"
     PrevPage => "＜前へ"
@@ -17,7 +17,7 @@
 .en => [
     // for Pager Buttons
     Page => "Page"
-    Total => "&lt;Total %d records&gt;"
+    Total => "(Total %d)"
     Display => Count
     NextPage => "Next&gt;"
     PrevPage => "&lt;Prev"

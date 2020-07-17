@@ -62,14 +62,19 @@ function Connect($layout) {
 	if (FileMaker::isError($result)) {	// エラー処理..
 		$this->errCode = $result->getCode();
 		$this->errMessage= $result->getMessage();
-		APPDEBUG::MSG(13, $result, 'エラー結果');
+		debug_dump(1,[ 'Connect ERROR' => [
+			'Layout' => $this->LayoutName,
+			'Result' => $result,
+			'errCode' => $this->errCode,
+			'errMessage' => $this->errMessage,
+			]]);
 		throw new Exception('ExecError');
 	}
     $fmfields = $result->getFields();
 	foreach($fmfields as $key) {
 		$this->columns[$key] = $key;
 	}
-	APPDEBUG::MSG(13, $this->columns, "Columns @ {$this->Database}({$this->LayoutName})");
+	APPDEBUG::MSG(3, $this->columns, "Columns @ {$this->Database}({$this->LayoutName})");
 	// フィールド型を記憶する
 	$this->fmtconv = array();
     $layoutObj = $result->getLayout();

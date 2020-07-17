@@ -12,7 +12,7 @@ function is_authorised() {
     // 現在のログイン情報
     $login = MySession::getLoginInfo();
     // 再ログインのポストが発生しているか
-	$newlogin = $this->Login->SetLoginInfo(MySession::$PostEnv);
+	$newlogin = $this->Login->isValidLogin(MySession::$PostEnv);
     if(empty($newlogin)) {      // 再ログインではない
         if(empty($login)) {     // ログイン状態ではない
             // ログインフォームを表示して終了
