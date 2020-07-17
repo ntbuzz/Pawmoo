@@ -1,7 +1,0 @@
-// アプリ共有の言語ファイル
-.ja => [
-    TITLE => "nTak's Blog"
-]
-.en => [
-    TITLE => "nTak's Blog"
-]
