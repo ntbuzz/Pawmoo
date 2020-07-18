@@ -11,14 +11,14 @@
           +ul => [
               [ span.file => [ %${#Core.SW開発.BiscuitHelp} => "http://spider.starship.net/help/" ] ]
               [ span.file => [ %${#ToCoreolbar.SW開発.PC管理} => "http://spider.starship.net/pcenv/" ] ]
-              [ span.file => [ %${#ToCoreolbar.SW開発.ブログ} => "http://spider.starship.net/blog/" ] ]
+              [ span.file => [ %${#ToCoreolbar.SW開発.ブログ} => "http://spider.starship.net/blog/admin/" ] ]
             ]
         ]
         .closed => [  span.folder => [ ${#Core.VIRGO-BRANCH} ]
           +ul => [
               [ span.file => [ %${#Core.SW開発.BiscuitHelp} => "http://virgo.starship.net/help/" ] ]
               [ span.file => [ %${#ToCoreolbar.SW開発.PC管理} => "http://virgo.starship.net/pcenv/" ] ]
-              [ span.file => [ %${#ToCoreolbar.SW開発.ブログ} => "http://virgo.starship.net/blog/" ] ]
+              [ span.file => [ %${#ToCoreolbar.SW開発.ブログ} => "http://virgo.starship.net/blog/admin/" ] ]
             ]
         ]
         [ span.file => [ %${#Core.SW開発.Video管理} => "http://spider.starship.net/mediamgr/" ] ]
