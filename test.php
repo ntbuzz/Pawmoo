@@ -29,6 +29,18 @@ $row = [
     ],
     "2行目",
 ];
+$str = <<<EOS
+|:ログイン| 名前 |
+| {'Login'} | 変数 |
+EOS;
+
+$p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%}|{\'[^\']+?\'})/'; // 変数リストの配列を取得
+preg_match_all($p, $str, $m);
+debug_dump(5,[
+    "STR" => $str,
+    "変換" => $m,
+    ]);
+exit;
 
 //==============================================================================
 // デバッグ
@@ -51,6 +63,17 @@ function test_case_function($array) {
         return $txt;
     };
     return $dump_text(0,$array);
+}
+
+function expand_Strings($str,$vars) {
+
+    $varList = $m[0];
+    if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
+    $values = $varList = array_unique($varList);
+    array_walk($values, array($this, 'expand_Walk'), $vars);
+    // 配列が返ることもある
+    $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
+    return $exvar;
 }
 //******************************************************************************
 //==============================================================================

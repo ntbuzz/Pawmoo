@@ -1,0 +1,8 @@
+[submodule "vendor"]
+	path = vendor
+	ignore = dirty
+	url = http://spider.starship.net/gitbucket/git/root/vendor.git
+[submodule "app"]
+	path = app
+	ignore = dirty
+	url = http://spider.starship.net/gitbucket/git/ntak/biscuits_app.git

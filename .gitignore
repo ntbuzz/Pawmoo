@@ -1,5 +1,5 @@
-/common
 /vendor
+/app
 *.lzh
 *.bak
 *.zip
