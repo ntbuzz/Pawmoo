@@ -219,7 +219,7 @@ protected function sql_safequote(&$value) {
 				}
 				$opc = (empty($opc)) ? $opp : "{$opc} {$opr} {$opp}";
 			}
-			return (empty($opc)) ? '' : "({$opc})";
+			return (empty($opc)) ? '' : ((count($items)===1) ? $opc : "({$opc})");
 		};
 		$sql = $dump_object('AND',$row);
 		return $sql;

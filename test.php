@@ -3,19 +3,26 @@ require_once('Core/Common/coreLibs.php');
 require_once('Core/Common/appLibs.php');
 //==============================================================================
 // テストデータの生成
-function __expr($OPR,$items) {
+class E {
+    private static function __expr($OPR,$items) {
+        $arr = [];
+        foreach ($items as $val) $arr += $val;
+        return [$OPR => $arr];
+    }
+    public static function AND(...$items) { return self::__expr('AND',$items); }
+    public static function OR(...$items) { return self::__expr('OR',$items); }
+    public static function NOT(...$items) { return self::__expr('NOT',$items); }   
+}
+function xop_array($OPR,$items) {
     $arr = [];
-    foreach ($items as $val) $arr += $val;
+    foreach($items as $val) $arr += $val;
     return [$OPR => $arr];
 }
-function _AND_(...$items) { return __expr('AND',$items); };
-function _OR_(...$items) { return __expr('OR',$items); };
-function _NOT_(...$items) { return __expr('NOT',$items); };
 
-$row = _AND_(
-        _OR_(['name1=' => 'val1'], ['name2<' => 'val2'], ['name3!=' => 'val3']),
-        _AND_(['name_a=' => 'val_a', 'name_b>' => 'val_b','name_x' => 'val_x'], 
-            _NOT_([ 'name_z<>' => 'val_z' ]))
+$row = xop_array('AND',
+        E::OR(['name1=' => 'val1'], ['name2<' => 'val2'], ['name3!=' => 'val3']),
+        E::AND(['name_a=' => 'val_a', 'name_b>' => 'val_b','name_x' => 'val_x'], 
+        E::NOT([ 'name_z<>' => 'val_z' ]))
         );
 $row = [
     "1行目",
