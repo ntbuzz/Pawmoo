@@ -185,7 +185,7 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 	}
 	$this->Finds = $row;
 */
-	$this->Finds = $expr_array('AND',$row),
+	$this->Finds = $expr_array('AND',$row);
 	$this->SortBy = $sort;
 	debug_dump(0,[
 		'Columns'	=> $this->columns,
