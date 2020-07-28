@@ -155,12 +155,37 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 	if(empty($row)) {
 		$row = array(reset($this->columns) => '*');	// 先頭カラムを代行検索
 	}
+	// AND/OR 配列を整形する
+	$expr_array = function($op,$row) use(&$expr_array) {
+		$result = [[]];
+		foreach($row as $key => $val) {
+			if(is_array($val)) {
+				$res = $expr_array($key,$val);
+				if($op === 'OR') {
+					foreach($res as $vv) $result[] = $vv;
+				} else {
+					$base = $result; $result = [];
+					foreach($res as $vv)
+						foreach($base as $zz) $result[] = array_merge($zz,$vv);
+				}
+			} else if($op === 'OR') {
+				if(empty($result[0])) $result[0] = [ $key => $val];
+				else $result[] = [ $key => $val];
+			} else {
+				$result[0] += [$key => $val];
+			}
+		}
+		return $result;
+	};
 	// 検索条件を記録する
+/*
 	$n = array_depth($row);
 	if($n == 1) {
 		$row = array($row);
 	}
 	$this->Finds = $row;
+*/
+	$this->Finds = $expr_array('AND',$row),
 	$this->SortBy = $sort;
 	debug_dump(0,[
 		'Columns'	=> $this->columns,
@@ -201,7 +226,7 @@ public function fetchDB() {
 				list($key,$op) = keystr_opr($key);	// キー名の最後に関係演算子
 				$findInst->addFindCriterion($key, "{$op}{$val}");	// FMDBは比較文字列に演算子を付加する
 	    	}
-			$findInst->setOmit((substr($opr,0,3) == 'NOT'));
+//			$findInst->setOmit((substr($opr,0,3) == 'NOT'));		// NOT は使用不可
 			$compoundFind->add($n++,$findInst);
 		}
 		//ソート順の設定

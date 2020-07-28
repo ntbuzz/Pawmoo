@@ -273,3 +273,19 @@ function mark_active_words($atext,$word,$class) {
 	}
 	return implode("\n",$ret);
 }
+//==============================================================================
+//  論理演算用の配列生成
+function _opr($OPR,...$items) {
+    $arr = [];
+    foreach($items as $val) $arr += $val;
+    return [$OPR => $arr];
+}
+//==============================================================================
+// OPENSSLを使った暗号化
+function passwd_encrypt($str) {
+    $method_name = 'AES-256-CBC';
+    $key_string = '_minimvc_biscuit';
+    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method_name));
+    return openssl_encrypt($str,$method_name,$key_string,0,$iv);
+}
+

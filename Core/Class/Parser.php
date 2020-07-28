@@ -13,7 +13,6 @@
  */
 class SectionParser {
     const WORDSTRING = array( '()', '{}', '~~','""',"''");
-//    const WORDSTRING = array( '()', '{}', '""',"''");
     private $wpos;          // 処理中の単語インデックス
     private $wend;          // 単語リストの数
     private $wordlist;       // 単語配列

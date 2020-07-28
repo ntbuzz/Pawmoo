@@ -203,7 +203,7 @@ protected function sql_safequote(&$value) {
 			$opc = '';
 			foreach($items as $key => $val) {
 				if(is_array($val)) {
-					$opp = $dump_object($key,$val);
+					$opp = $dump_object((is_numeric($key))?'AND':$key,$val);
 				} else {
 					// キー名の最後に関係演算子
 					list($key,$op) = keystr_opr($key);
@@ -219,7 +219,7 @@ protected function sql_safequote(&$value) {
 				}
 				$opc = (empty($opc)) ? $opp : "{$opc} {$opr} {$opp}";
 			}
-			return (empty($opc)) ? '' : "({$opc})";
+			return (empty($opc)) ? '' : ((count($items)===1) ? $opc : "({$opc})");
 		};
 		$sql = $dump_object('AND',$row);
 		return $sql;
