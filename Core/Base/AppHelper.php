@@ -17,7 +17,6 @@ class AppHelper  extends AppObject {
 	function __construct($owner) {
 		parent::__construct($owner);
         $this->__InitClass();                       // クラス固有の初期化メソッド
-        $this->autoload = TRUE;
 	}
 //==============================================================================
 // 親のビューテンプレートを呼び出す

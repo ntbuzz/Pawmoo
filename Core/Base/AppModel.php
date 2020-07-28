@@ -34,7 +34,6 @@ class AppModel extends AppObject {
         APPDEBUG::MSG(13,static::$DatabaseSchema);
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
         $this->__InitClass();                             // クラス固有の初期化メソッド
-        $this->autoload = TRUE;
         $this->fields = [];
 	}
 //==============================================================================

@@ -11,7 +11,7 @@ class AppObject {
     protected $ModuleName;  // オブジェクトの名前
     protected $ClassName;   // クラス名
     protected $LocalePrefix;    // 言語プレフィクス
-    protected $autoload = FALSE;
+    protected $autoload = TRUE;
 
 //==============================================================================
 //	コンストラクタ：　テーブル名
