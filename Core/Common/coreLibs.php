@@ -191,6 +191,17 @@ function keystr_opr($str) {
     return array($str,'');
 }
 //==============================================================================
+// array_key_exists の再帰呼出し
+function array_key_exists_recursive($key,$arr) {
+    foreach($arr as $kk => $vv) {
+        if($kk === $key) return TRUE;
+        if(is_array($vv)) {
+            if(array_key_exists_recursive($key,$vv)) return TRUE;
+        }
+    }
+    return FALSE;
+}
+//==============================================================================
 // デバッグダンプ
 function check_cwd($here) {
     $cwd = getcwd();
@@ -210,7 +221,7 @@ function debug_dump($flag, $arr = []) {
         $pp = get_class($dbinfo[1]['object']);  // 呼出し元のクラス名
         if(substr($fn,0,strlen($pp)) !== $pp) $fn = "{$pp}::{$fn}";
     }
-    $str = "{$fn}->" . $dbinfo[1]['function'];
+    $str = (isset($dbinfo[1])) ? "{$fn}->" . $dbinfo[1]['function'] : '';
     $sep = 	str_repeat("-", 30);
     if($flag === 3) {
         echo "<pre>\n{$str}\n{$sep} {$msg} {$sep}\n";

@@ -120,19 +120,13 @@ function json_escape($a) {
 }
 //==============================================================================
 // テキストを分割した配列
-function text_line_split($del,$txt) {
-/*
+function text_line_split($del,$txt,$trim = FALSE) {
     $array = array_values(              // これはキーを連番に振りなおしてるだけ
-        array_filter(                   // 文字数が0の行を取り除く
-            array_map('trim_delsp',     // 各行にtrim()をかける
-            explode($del, $txt)         // とりあえず行に分割
-            ), 'strlen'
+            array_filter(                   // 文字数が0の行を取り除く
+                array_map(function($a) {return trim(preg_replace('/\s+/', ' ', str_replace('　',' ',$a)));},
+                    explode($del, $txt)         // とりあえず行に分割
+            ), ($trim) ? 'strlen' : function($a) { return TRUE;}
         ));
-*/
-    $array = array_values(              // これはキーを連番に振りなおしてるだけ
-            array_map(function($a) {return trim(preg_replace('/\s+/', ' ', str_replace('　',' ',$a)));},
-                explode($del, $txt)         // とりあえず行に分割
-            ));
     return $array;
 }
 //==============================================================================
@@ -288,4 +282,3 @@ function passwd_encrypt($str) {
     $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method_name));
     return openssl_encrypt($str,$method_name,$key_string,0,$iv);
 }
-

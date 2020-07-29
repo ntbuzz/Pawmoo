@@ -70,7 +70,7 @@ if(!is_extst_module($appname,$controller,'Controller')) {
     $cont = (DEFAULT_CONTROLLER === '') ? $appname : DEFAULT_CONTROLLER;
     $module[0] = ucfirst(strtolower($cont));
     $module[1] = $controller;
-    $module[2] = $method;
+    $module[2] = strtolower($method);
     list($controller,$method,$filter) = $module;
     // RE-TRY DEFAULT CONTROLLER,if FAILED,then NOT FOUND
     if(!is_extst_module($appname,$controller,'Controller')) {
