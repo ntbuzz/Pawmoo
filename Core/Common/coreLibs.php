@@ -221,7 +221,7 @@ function debug_dump($flag, $arr = []) {
         $pp = get_class($dbinfo[1]['object']);  // 呼出し元のクラス名
         if(substr($fn,0,strlen($pp)) !== $pp) $fn = "{$pp}::{$fn}";
     }
-    $str = (isset($dbinfo[1])) ? "{$fn}->" . $dbinfo[1]['function'] : '';
+    $str = (isset($dbinfo[1]['function'])) ? "{$fn}->" . $dbinfo[1]['function'] : '';
     $sep = 	str_repeat("-", 30);
     if($flag === 3) {
         echo "<pre>\n{$str}\n{$sep} {$msg} {$sep}\n";
@@ -240,7 +240,7 @@ function debug_dump($flag, $arr = []) {
                 if(is_array($val)) {
                     echo "array(" . count($val) . ")\n";
                     $dump_object($val,$indent+1,$danger);
-                } else {
+                } else if(is_scalar($val)) {
                     echo_safe("'{$val}'",$danger);
                     echo "\n";
                 }

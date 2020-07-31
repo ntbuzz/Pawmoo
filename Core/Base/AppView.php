@@ -163,7 +163,11 @@ public function ViewTemplate($name,$vars = []) {
             $var = trim($var,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
             switch($var[0]) {
             case '@': $var = mb_substr($var,1);     // レコードデータの参照指定
-                $val = $this->Model->RecData[$var]; // レコードのフィールド値で置換
+                if($var[0] === '@') {
+                    $var = mb_substr($var,1);     // 生データ
+                    $val = $this->Model->RecData[$var];
+                } else  // HTML変換
+                    $val = str_replace("\n",'',nl2br($this->Model->RecData[$var]));
                 break;
             case '#': $var = mb_substr($var,1);     // 言語ファイルの参照
                 $val = $this->_($var);              // 言語ファイルの定義配列から文字列を取り出す
