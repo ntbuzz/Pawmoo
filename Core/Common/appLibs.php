@@ -164,8 +164,8 @@ function pseudo_markdown($atext) {
         "/\s\*\*(\S+?)\*\*\s/" => '<strong>\\1</strong>',  // BOLD
         "/\s__(\S+?)__\s/"     => '<em>\\1</em>',   // BOLD
         "/\s--([^-]+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
-        "/\s\*([^*]+?)\*\s/"   => '<i>\\1</i>',     // ITALIC
-        "/\s_([^_]+?)_\s/"     => '<span style="text-decoration: underline;">\\1</span>',     // UNDERLINE
+        "/\s\*([^*]+?)\*\s/"   => '<span style="font-style:italic;">\\1</span>',             // ITALIC
+        "/\s_([^_]+?)_\s/"     => '<span style="text-decoration:underline;">\\1</span>',     // UNDERLINE
         "/([^ ]) {2}$/m"       => '\\1<br>',        // newline
     ];
     // 先にタグ文字のエスケープとCR-LFをLFのみに置換しておく
