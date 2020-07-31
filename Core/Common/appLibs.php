@@ -120,19 +120,13 @@ function json_escape($a) {
 }
 //==============================================================================
 // テキストを分割した配列
-function text_line_split($del,$txt) {
-/*
+function text_line_split($del,$txt,$trim = FALSE) {
     $array = array_values(              // これはキーを連番に振りなおしてるだけ
-        array_filter(                   // 文字数が0の行を取り除く
-            array_map('trim_delsp',     // 各行にtrim()をかける
-            explode($del, $txt)         // とりあえず行に分割
-            ), 'strlen'
+            array_filter(                   // 文字数が0の行を取り除く
+                array_map(function($a) {return trim(preg_replace('/\s+/', ' ', str_replace('　',' ',$a)));},
+                    explode($del, $txt)         // とりあえず行に分割
+            ), ($trim) ? 'strlen' : function($a) { return TRUE;}
         ));
-*/
-    $array = array_values(              // これはキーを連番に振りなおしてるだけ
-            array_map(function($a) {return trim(preg_replace('/\s+/', ' ', str_replace('　',' ',$a)));},
-                explode($del, $txt)         // とりあえず行に分割
-            ));
     return $array;
 }
 //==============================================================================
@@ -157,19 +151,19 @@ function array_to_text($array,$sep = "\n") {
 function pseudo_markdown($atext) {
     $replace_defs = [
         "/\[([^\]]+)\]\(([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)\)/i" => '<a target="_blank" href="\\2">\\1</a>',
-        "/^(---|___|\*\*\*)$/m"     => "<hr>",        // 水平線
-        "/^#\s(.+?)$/m"     => "<h1>\\1</h1>",        // 見出し1
-        "/^##\s(.+?)$/m"    => "<h2>\\1</h2>",        // 見出し2
-        "/^###\s(.+?)$/m"   => "<h3>\\1</h3>",        // 見出し3
-        "/^####\s(.+?)$/m"  => "<h4>\\1</h4>",        // 見出し4
-        "/^#####\s(.+?)$/m" => "<h5>\\1</h5>",        // 見出し5
-        "/^######\s(.+?)$/m"=> "<h6>\\1</h6>",        // 見出し6
-        "/\*\*(.+?)\*\*/"   => '<strong>\\1</strong>', // 強調
-        "/\*(.+?)\*/"   => '<em>\\1</em>',             // 強調
-        "/```(?:\r\n|\r|\n)(.+?)```/s"     => '<pre class="code">\\1</pre>',      // code
-        "/```(([a-z]+?)(?:\r\n|\r|\n))(.+?)```/s"     => '<pre class="\\2">\\3</pre>',      // code
-        "/(\s{2}|　)$/m"     => "<br>",               // 改行
-        "/([-=])>/"     => "\\1&gt;",                 // タグ
+        "/^(---|___|\*\*\*)$/m"     => "<hr>",        // <HR>
+        "/^#\s(.+?)$/m"     => "<h1>\\1</h1>",        // <H1>
+        "/^##\s(.+?)$/m"    => "<h2>\\1</h2>",        // <H2>
+        "/^###\s(.+?)$/m"   => "<h3>\\1</h3>",        // <H3>
+        "/^####\s(.+?)$/m"  => "<h4>\\1</h4>",        // <H4>
+        "/^#####\s(.+?)$/m" => "<h5>\\1</h5>",        // <H5>
+        "/^######\s(.+?)$/m"=> "<h6>\\1</h6>",        // <H6>
+        "/\*\*(\S+?)\*\*/"  => '<strong>\\1</strong>',// BOLD
+        "/\*(\S+?)\*/"      => '<em>\\1</em>',        // BOLD
+        "/```(?:\r\n|\r|\n)(.+?)```/s"              => '<pre class="code">\\1</pre>',   // code
+        "/```(([a-z]+?)(?:\r\n|\r|\n))(.+?)```/s"   => '<pre class="\\2">\\3</pre>',    // code
+        "/(\s{2}|　)$/m"    => "<br>",               // 改行
+        "/([-=])>/"         => "\\1&gt;",                 // タグ
     ];
     $replace_keys   = array_keys($replace_defs);
     $replace_values = array_values($replace_defs);
@@ -216,15 +210,20 @@ function pseudo_markdown($atext) {
     $atext = preg_replace_callback($p,function($maches) {
         $txt = $maches[1];
         $arr = array_map(function($str) {
-            $tags = array(':' => ['th','center'],'>' => ['td','right'],'<' => ['td','left']);
             $cols = explode("|", trim($str,"|\r\n"));   // 両側の|を削除して分割
             $ln = "";
+            $tags = [ '<' => 'left','>' => 'right','=' => 'center'];
             foreach($cols as $col) {
-                $is_attr = array_key_exists($col[0],$tags);
-                $vars = ($is_attr) ? $tags[$col[0]] : ['td','center'];
-                if(($is_attr)) $col = mb_substr($col,1);
-                list($tag,$align) = $vars;
-                $ln .= "<{$tag} align='{$align}'>{$col}</{$tag}>";
+                if($col[0]===':') {     // TH cell
+                    $col = mb_substr($col,1);
+                    $tag = 'th';
+                } else $tag = 'td';
+                if(array_key_exists($col[0],$tags)) {
+                    $ali = $tags[$col[0]];
+                    $vars = " style='text-align:{$ali};'";
+                    $col = mb_substr($col,1);
+                } else $vars = '';
+                $ln .= "<{$tag}{$vars}>{$col}</{$tag}>";
             }
             return "<tr>{$ln}</tr>";
         },explode("\n", $txt));         // とりあえず行に分割
@@ -288,4 +287,3 @@ function passwd_encrypt($str) {
     $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method_name));
     return openssl_encrypt($str,$method_name,$key_string,0,$iv);
 }
-

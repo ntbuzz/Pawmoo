@@ -11,7 +11,7 @@ class AppObject {
     protected $ModuleName;  // オブジェクトの名前
     protected $ClassName;   // クラス名
     protected $LocalePrefix;    // 言語プレフィクス
-    protected $autoload = FALSE;
+    protected $autoload = TRUE;
 
 //==============================================================================
 //	コンストラクタ：　テーブル名
@@ -71,7 +71,7 @@ class AppObject {
 //==============================================================================
 // クラスの動的クラスプロパティを生成
 public function __get($PropName) {
-    if($autoload === FALSE) return NULL;
+    if($this->autoload === FALSE) return NULL;
     $fldr = array(
         'Controller'=> [],
         'Helper'    => ["modules/{$PropName}"],

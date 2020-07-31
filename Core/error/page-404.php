@@ -22,7 +22,7 @@
     <?php
         $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,3);    // 呼び出し元のスタックまでの数
         // backtrace
-        debug_dump(4,['dbinfo' => $dbinfo]);
+        debug_dump(1,['dbinfo' => $dbinfo]);
     ?>
 </body>
 </html>

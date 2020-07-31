@@ -275,6 +275,13 @@ public function ViewStyle($file_name) {
     private function filesImport($tmplist, $sec) {
         $files = (is_array($sec)) ? $sec : array($sec);
         foreach($files as $vv) {
+            if(get_protocol($vv) !== NULL) {    // IMPORT from INTERNET URL
+                // ouput row-data, not modified
+                if($this->do_msg) echo "/* import from {$vv} */\n";
+                echo file_get_contents($vv)."\n";
+                $imported = TRUE;
+                continue;
+            }
             list($filename,$v_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];  // クエリ文字列を変数セットとして扱う
             parse_str($v_str, $vars);
             $vars = is_array($vars) ? array_merge($this->repVARS,$vars) : $this->repVARS;

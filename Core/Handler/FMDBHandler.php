@@ -74,7 +74,7 @@ function Connect($layout) {
 	foreach($fmfields as $key) {
 		$this->columns[$key] = $key;
 	}
-	APPDEBUG::MSG(3, $this->columns, "Columns @ {$this->Database}({$this->LayoutName})");
+	APPDEBUG::MSG(13, $this->columns, "Columns @ {$this->Database}({$this->LayoutName})");
 	// フィールド型を記憶する
 	$this->fmtconv = array();
     $layoutObj = $result->getLayout();
@@ -157,38 +157,39 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 	}
 	// AND/OR 配列を整形する
 	$expr_array = function($op,$row) use(&$expr_array) {
-		$result = [[]];
+		$result = [];
 		foreach($row as $key => $val) {
 			if(is_array($val)) {
 				$res = $expr_array($key,$val);
-				if($op === 'OR') {
-					foreach($res as $vv) $result[] = $vv;
+				if($op === 'OR' || array_key_exists_recursive('NOT', $res)) {
+					foreach($res as $kk => $vv) if(is_numeric($kk)) $result[] = $vv;
 				} else {
-					$base = $result; $result = [];
-					foreach($res as $vv)
-						foreach($base as $zz) $result[] = array_merge($zz,$vv);
+					if(empty($result)) $result = $res;
+					else {
+						$base = $result; $result = [];
+						foreach($res as $vv) {
+							foreach($base as $zz) $result[] = array_merge($zz,$vv);
+						}
+					}
 				}
-			} else if($op === 'OR') {
-				if(empty($result[0])) $result[0] = [ $key => $val];
-				else $result[] = [ $key => $val];
 			} else {
-				$result[0] += [$key => $val];
+				if(empty($result[0])) $result[0] = [ $key => $val];
+				else if($op === 'OR') $result[] = [ $key => $val];
+				else $result[0] += [$key => $val];
+			}
+		}
+		if($op === 'NOT') {
+			$base = $result; $result = [];
+			foreach($base as $zz) {
+				$result[] = array_merge($zz,['NOT' => TRUE]);
 			}
 		}
 		return $result;
 	};
-	// 検索条件を記録する
-/*
-	$n = array_depth($row);
-	if($n == 1) {
-		$row = array($row);
-	}
-	$this->Finds = $row;
-*/
-	$this->Finds = $expr_array('AND',$row),
+	$this->Finds = $expr_array('AND',$row);
 	$this->SortBy = $sort;
 	debug_dump(0,[
-		'Columns'	=> $this->columns,
+		'row'	=> $row,
 		'FindBy'	=> $this->Finds,
 		'SortBy'	=> $this->SortBy,
 	]);
@@ -222,18 +223,17 @@ public function fetchDB() {
 		$n = 1;
 		foreach($this->Finds as $opr => $andval ) {
 			$findInst = $this->newFindRequest($this->LayoutName);
+			$not = FALSE;
     		foreach($andval as $key => $val) {
 				list($key,$op) = keystr_opr($key);	// キー名の最後に関係演算子
-				$findInst->addFindCriterion($key, "{$op}{$val}");	// FMDBは比較文字列に演算子を付加する
+				if($key === 'NOT') $not = TRUE;
+				else $findInst->addFindCriterion($key, "{$op}{$val}");	// FMDBは比較文字列に演算子を付加する
 	    	}
-//			$findInst->setOmit((substr($opr,0,3) == 'NOT'));		// NOT は使用不可
+			$findInst->setOmit($not);
 			$compoundFind->add($n++,$findInst);
 		}
 		//ソート順の設定
 		$kn = 1;
-//		foreach($sortby as $akey) {
-//			$compoundFind->addSortRule($akey, $kn++, $order);
-//		}
 		foreach($this->SortBy as $akey => $aval) {
 			$order = ($aval === SORTBY_DESCEND) ? FILEMAKER_SORT_DESCEND : FILEMAKER_SORT_ASCEND;
 			$compoundFind->addSortRule($akey, $kn++, $order);

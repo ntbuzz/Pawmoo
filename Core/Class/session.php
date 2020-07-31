@@ -125,7 +125,7 @@ static function Dump() {
 //==============================================================================
 // ログイン情報を保持
 static function getLoginInfo() {
-	return self::$EnvData['Login'];
+	return isset(self::$EnvData['Login'])?self::$EnvData['Login']:[];
 }
 static function SetLogin($login) {
 	self::$EnvData['Login'] = $login;
