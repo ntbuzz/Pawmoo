@@ -149,6 +149,11 @@ public function getRecordValue($num) {
     $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],$this->Relations);
 }
 //==============================================================================
+// 条件に一致するレコード数を検索する
+public function getCount($cond) {
+    return $this->dbDriver->getRecordCount($cond);
+}
+//==============================================================================
 // レコードリストの読み込み(JOIN済レコード)
 // 結果：   レコードデータのリスト = Records
 //          読み込んだ列名 = Header (Schema)

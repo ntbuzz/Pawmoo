@@ -130,7 +130,7 @@ function text_line_split($del,$txt,$trim = FALSE) {
     return $array;
 }
 //==============================================================================
-// 排列要素を改行テキストに変換
+// 配列要素を改行テキストに変換
 function array_to_text($array,$sep = "\n") {
     $dump_text = function ($indent, $items)  use (&$dump_text,&$sep)  {
         $txt = ''; $spc = str_repeat(' ', $indent);
@@ -150,26 +150,31 @@ function array_to_text($array,$sep = "\n") {
 // テーブルは処理の都合上、独自書式でサポート
 function pseudo_markdown($atext) {
     $replace_defs = [
-        "/\[([^\]]+)\]\(([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)\)/i" => '<a target="_blank" href="\\2">\\1</a>',
-        "/^(---|___|\*\*\*)$/m"     => "<hr>",        // <HR>
-        "/^#\s(.+?)$/m"     => "<h1>\\1</h1>",        // <H1>
-        "/^##\s(.+?)$/m"    => "<h2>\\1</h2>",        // <H2>
-        "/^###\s(.+?)$/m"   => "<h3>\\1</h3>",        // <H3>
-        "/^####\s(.+?)$/m"  => "<h4>\\1</h4>",        // <H4>
-        "/^#####\s(.+?)$/m" => "<h5>\\1</h5>",        // <H5>
-        "/^######\s(.+?)$/m"=> "<h6>\\1</h6>",        // <H6>
-        "/\*\*(\S+?)\*\*/"  => '<strong>\\1</strong>',// BOLD
-        "/\*(\S+?)\*/"      => '<em>\\1</em>',        // BOLD
-        "/```(?:\r\n|\r|\n)(.+?)```/s"              => '<pre class="code">\\1</pre>',   // code
-        "/```(([a-z]+?)(?:\r\n|\r|\n))(.+?)```/s"   => '<pre class="\\2">\\3</pre>',    // code
-        "/(\s{2}|　)$/m"    => "<br>",               // 改行
-        "/([-=])>/"         => "\\1&gt;",                 // タグ
+        '/\s+```([a-z]+?)\n(.+?)\n```/s' => '<pre class="\\1">\\2</pre>',    // code
+        '/\s+```\n(.+?)\n```/s'          => '<pre class="code">\\1</pre>',   // code
+        "/!\[([^\]]+)\]\(([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)\)/i"   => '<img src="\\2" alt="\\1">',
+        "/\[([^\]]+)\]\(([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)\)/i"    => '<a target="_blank" href="\\2">\\1</a>',
+        "/^(---|___|\*\*\*)$/m"     => "<hr>",       // <HR>
+        "/^# (.+?)$/m"     => "<h1>\\1</h1>",        // <H1>
+        "/^## (.+?)$/m"    => "<h2>\\1</h2>",        // <H2>
+        "/^### (.+?)$/m"   => "<h3>\\1</h3>",        // <H3>
+        "/^#### (.+?)$/m"  => "<h4>\\1</h4>",        // <H4>
+        "/^##### (.+?)$/m" => "<h5>\\1</h5>",        // <H5>
+        "/^###### (.+?)$/m"=> "<h6>\\1</h6>",        // <H6>
+        "/\s\*\*(\S+?)\*\*\s/" => '<strong>\\1</strong>',  // BOLD
+        "/\s__(\S+?)__\s/"     => '<em>\\1</em>',   // BOLD
+        "/\s--([^-]+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
+        "/\s\*([^*]+?)\*\s/"   => '<i>\\1</i>',     // ITALIC
+        "/\s_([^_]+?)_\s/"     => '<span style="text-decoration: underline;">\\1</span>',     // UNDERLINE
+        "/([^ ]) {2}$/m"       => '\\1<br>',        // newline
     ];
-    $replace_keys   = array_keys($replace_defs);
-    $replace_values = array_values($replace_defs);
-// 先に複数行のタグ変換を処理しておく
+    // 先にタグ文字のエスケープとCR-LFをLFのみに置換しておく
+    $p = '/\s[ \-\=]>\s|\\\[<>]+\s|\\\<[^>\r\n]*?>|\r\n/';
+    $atext = preg_replace_callback($p, function($maches) {
+                return str_replace(['\<','\>','<','>',"\r"],['&lt;','&gt;','&lt;','&gt;',''],$maches[0]);}
+            ,$atext);
     // リストと引用を処理を処理する
-    $p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)((\r\n){2}|\r{2}|\n{2})/s';
+    $p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)\n{2}/s';
     $atext = preg_replace_callback($p,function($maches) {
         $tags = array(
             '- ' => ['ul','ul_list',true],
@@ -203,12 +208,13 @@ function pseudo_markdown($atext) {
             // ネスト分を閉じる
             array_push($arr,str_repeat("</{$ptag}>\n", $lvl));
         }
-        return implode("\n",$arr);
+        return implode("\n",$arr)."\n";
     }, $atext);
     // テーブルを変換
-    $p = '/\n(\|[\s\S]+?\|)((\r\n){2}|\r{2}|\n{2})/s';
+    $p = '/\n(\|[\s\S]+?\|)\n{2}/s';
     $atext = preg_replace_callback($p,function($maches) {
-        $txt = $maches[1];
+        // | で終わらない行は複数行として結合しておく
+        $txt = preg_replace('/([^|])\n/','\\1<br>', $maches[1]);
         $arr = array_map(function($str) {
             $cols = explode("|", trim($str,"|\r\n"));   // 両側の|を削除して分割
             $ln = "";
@@ -230,10 +236,16 @@ function pseudo_markdown($atext) {
         return "<table class='md_tbl'>".implode("\n",$arr)."</table>\n";
     }, $atext);
     // 残りを一気に置換する
+    $replace_keys   = array_keys($replace_defs);
+    $replace_values = array_values($replace_defs);
     $atext = preg_replace($replace_keys,$replace_values, $atext);
-    return "<div class='easy_markdown'>{$atext}</div>";
+    //エスケープ文字を置換
+    $p = '/\\\([\-_<>\[\]`*#|\(\)])/s';
+    $atext = preg_replace_callback($p,function($maches) {return $maches[1];}, $atext);
+    return "<div class='easy_markdown'>{$atext}</div>\n";
 }
 //==============================================================================
+// プロトコルで始まっているか確認
 function get_protocol($href) {
     $n = strpos($href,':');
     if($n === FALSE) return NULL;
@@ -262,7 +274,7 @@ function make_hyperlink($lnk,$modname) {
     return $lnk;
 }
 //==============================================================================
-// デバッグダンプ
+// 単語を span タグでマーキングする
 function mark_active_words($atext,$word,$class) {
 	$ln = array_values(array_map('trim', explode("\n", $atext)));
 	$ret = array();
