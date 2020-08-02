@@ -184,26 +184,26 @@
   .inc, .tplテンプレートではHTMLデータ以外に、フレームワーク内の変数参照ができます。
   フレームワーク変数には以下のものがあります。
   ・システム変数
-      {$SYSROOT$}     フレームワークのトップURL
-      {$APPNAME$}     アプリケーション名
-      {$URIROOT$}     アプリケーションURLのトップ
-      {$URI$}         リクエストされたURI
-      {$REFERER$}     リファラー
-      {$controller$}  コントローラ名
-      {$method$}      メソッド名 (Actionを付加する前)
-      {$filter$}      フィルタ名
-      {%0%}～{%9%}    フィルタ以降の数値または文字列パラメータ
+      ${$SYSROOT$}     フレームワークのトップURL
+      ${$APPNAME$}     アプリケーション名
+      ${$URIROOT$}     アプリケーションURLのトップ
+      ${$URI$}         リクエストされたURI
+      ${$REFERER$}     リファラー
+      ${$controller$}  コントローラ名
+      ${$method$}      メソッド名 (Actionを付加する前)
+      ${$filter$}      フィルタ名
+      ${%0%}～{%9%}    フィルタ以降の数値または文字列パラメータ
   ・テンプレート変数
       ${変数名}       +setvar コマンドやテンプレート引数に与えられた変数
             例: +setvar => [
                   varnamse => values
                 ]
-              → {$varname$}  =  "values"
+              → ${varname}  =  "values"
   ・レコード変数
       ${@フィールド名}  レコードデータのフィールド値、改行を<br>変換したもの
       ${@@フィールド名} フィールド値の生データ
   ・セッション変数
-      {'キー名'}        セッション変数内のキー名で指定される値
+      ${'キー名'}        セッション変数内のキー名で指定される値
   ・言語リソース変数
       ${#言語ID}        言語リソースの識別子
 
@@ -540,7 +540,7 @@
     モジュール側で例外発生するようにオーバーライドします。
 
     // ページングアクションを無効にする
-    public function PageAction() {
+    public PageAction() {
         throw new Exception('BAD Method...');
     }
 
@@ -653,10 +653,10 @@
     ]
 
     ポップアップメニューを処理するコールバック関数をグローバルオブジェクト
-    popup_menu_function オブジェクトに登録します。
+    popup_menu_オブジェクトに登録します。
 
-      var popup_menu_function = {
-          "＜メニューID＞": function (＜メニュー表示対象のJQueryオブジェクト＞) {
+      var popup_menu_= {
+          "＜メニューID＞": (＜メニュー表示対象のJQueryオブジェクト＞) {
               // ここにメニュー実行の処理を記述する
           },
           ...
@@ -671,3 +671,43 @@
       <div class='fixedsticky' data-element="selector">
         selector 要素のスクロールに合わせて固定表示される
       </dev>
+
+◆ ライブラリ関数
+  コアシステムに組み込んである、アプリケーションから利用できるライブラリ関数一覧です。
+
+・ファイル名関連
+  extract_extension($filename)     $filename から拡張子を取り出す
+  extract_base_name($ffilename)    返り値は array(ファイル名,拡張子)
+  extract_path_file_ext($path)     返り値は array(パス,ファイル名,拡張子)
+  extract_path_filename($path)     返り値は array(パス,ファイル名)
+  file_move($src,$dest)            $src ファイルを $dest へ移動
+  byte_format($size)               ファイルサイズを表す文字列を返す(KB,MB,GB)
+
+・文字列操作
+  str_fixwidth($exp,$pading,$width)    $exp を固定長に変換する
+  instr_array($str,$hayz)              $hayz 配列内に $str 文字列があるか
+  text_to_html($atext)                 テキストをHTML文字列への変換
+  json_escape($a)                      JSONで使用できる文字列に変換
+  pseudo_markdown($atext)              簡易マークダウン
+  get_protocol($href)                  先頭がプロトコルかどうか判定
+  make_hyperlink($lnk,$modname)        ハイパーリンク生成
+  mark_active_words($atext,$word,$class) span タグでのマーキング
+  passwd_encrypt($str)                 OPENSSLを使った暗号化
+
+・配列操作
+  array_override($a, $b)                array_merge() の代替え、無名要素も上書きする
+  text_line_split($del,$txt [,$trim])   テキストを配列に変換 $trimがTRUEなら空行削除
+  array_to_text($array,$sep = "\n")     配列要素を改行テキストに変換
+  _opr($OPR,...$items)                  検索用の論理配列生成用
+
+◆ Javascript関数
+  Javascriptで使用できるプロトタイプ関数の一覧です。
+
+・フレームワークのパス関連
+  String.controller_path(e)   コントローラー名までのパスに引数を付加する
+  String.method_path(e)       メソッド名までのパスに引数を付加する
+  String.filter_path(e)       フィルタまでのパスに引数を付加する
+  String.exclude_num_path(e)  URLの末尾から数字パラメータを除外して、指定パスを付加する
+
+・その他
+  Array.inBound(e, x, y)      (x,y)座標が矩形範囲内にあるか判定(eは矩形のマージン)
