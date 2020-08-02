@@ -261,7 +261,7 @@ function pseudo_markdown($atext) {
     $replace_values = array_values($replace_defs);
     $atext = preg_replace($replace_keys,$replace_values, $atext);
     //エスケープ文字を置換
-    $p = '/\\\([\-_<>\[\]`*#|\(\)])/s';
+    $p = '/\\\([~\-_<>\[\]`*#|\(\)])/s';
     $atext = preg_replace_callback($p,function($maches) {return $maches[1];}, $atext);
     return "<div class='easy_markdown'>{$atext}</div>\n";
 }

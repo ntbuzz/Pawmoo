@@ -101,6 +101,12 @@ if($redirect) {
     }
     exit;
 }
+// 拡張子を考慮する
+if(mb_strpos($method,'.') !== FALSE) {  // have a extension
+    list($method,$filter) = extract_base_name($method);
+    $module[1] = $method;
+    $module[2] = $filter;
+}
 // アプリケーション変数を初期化する
 App::__Init($appname,$app_uri,$module,$query,$requrl);
 App::$Controller  = $controller;    // コントローラー名
@@ -123,10 +129,7 @@ LangUI::construct($lang,App::Get_AppPath("View/lang/"));
 LangUI::LangFiles(['#common',$controller]);
 // モジュールファイルを読み込む
 App::LoadModuleFiles($controller);
-// 拡張子を考慮する
-if(mb_strpos($method,'.') !== FALSE) {  // have a extension
-    list($method,$ext) = extract_base_name($method);
-}
+
 // コントローラ/メソッドをクラス名/アクションメソッドに変換
 $ContClass = "{$controller}Controller";
 $ContAction= "{$method}Action";
@@ -141,8 +144,12 @@ if(!$controllerInstance->is_enable_action($method)) {
         $module[0] = $controller;       // may-be rewrited
         $module[1] = $method;           // may-be rewrited
         debug_dump(1,[
-            'Cont' => $ContClass,
-            'Action' => $ContAction,
+            'Module Info' => [
+                'App' => $appname,
+                'Cont' => $ContClass,
+                'Action' => $ContAction,
+                'Filter' => $filter,
+            ],
             'Module' => $module,
         ]);
         error_response('page-404.php',$appname,$module);
@@ -162,6 +169,7 @@ APPDEBUG::DebugDump(1, [
         "Controller"=> $controller,
         "Class"     => $ContClass,
         "Method"    => $method,
+        "Filter"    => $filter,
         "URI"       => $requrl,
         "QUERY"     => $q_str,
         "Controller"=> App::$Controller,
