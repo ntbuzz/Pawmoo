@@ -152,7 +152,7 @@ function pseudo_markdown($atext) {
     $replace_defs = [
         '/\n```([a-z]+?)\n(.+?)\n```/s' => "\n<pre class=\"\\1\">\n\\2</pre>\n",    // class name
         '/\n```\n(.+?)\n```/s'          => "\n<pre class=\"code\">\n\\1</pre>\n",   // code
-        '/\n~~~\n(.+?)\n~~~/s'          => "\n<pre class=\"indent\">\n\\1</pre>\n",  // indent block
+        '/\n(~~~|\^\^\^)\n(.+?)\n\1/s'  => "\n<pre class=\"indent\">\n\\2</pre>\n", // indent block
         "/!\[([^\]]+)\]\(([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)\)/i"   => '<img src="\\2" alt="\\1">',
         "/\[([^\]]+)\]\(([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)\)/i"    => '<a target="_blank" href="\\2">\\1</a>',
         "/^(---|___|\*\*\*)$/m"     => "<hr>",       // <HR>
@@ -261,7 +261,7 @@ function pseudo_markdown($atext) {
     $replace_values = array_values($replace_defs);
     $atext = preg_replace($replace_keys,$replace_values, $atext);
     //エスケープ文字を置換
-    $p = '/\\\([~\-_<>\[\]`*#|\(\)])/s';
+    $p = '/\\\([~\-_<>\^\[\]`*#|\(\)])/s';
     $atext = preg_replace_callback($p,function($maches) {return $maches[1];}, $atext);
     return "<div class='easy_markdown'>{$atext}</div>\n";
 }
