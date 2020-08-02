@@ -39,10 +39,10 @@ list($filename,$ext) = extract_base_name($files);
 // 言語ファイルの対応
 $lang = (isset($query['lang'])) ? $query['lang'] : $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 LangUI::construct($lang,"app/{$appname}/View/lang/");    // Load CORE lang and SET app-Folder
-LangUI::LangFiles('resource');                          // Load app RESOURCE lang
+LangUI::LangFiles(($controller=='Res')?'resource':['resource',$controller]);  // Load app RESOURCE lang
 LangUI::LangDebug();
 
-MySession::InitSession();
+MySession::InitSession($appname);
 // モジュール名と拡張子を使いテンプレートを決定する
 $AppStyle = new AppStyle($appname,$appRoot, $controller, $filename, $ext);
 // ヘッダの出力

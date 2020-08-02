@@ -68,7 +68,7 @@ class AppStyle {
         }
         $myVARS = array(
             'appName' => $appname,
-            'moduleName' => $this->ModuleName,
+            'controller' => $this->ModuleName,
             'filename' => $filename,
             'extension' => $ext,
         );
@@ -330,10 +330,9 @@ public function ViewStyle($file_name) {
                 $var = mb_substr($var,1);     // 言語ファイルの参照
                 $val = LangUI::get_value('resource', $var, FALSE);
                 break;
-            case '$':
-                if(substr($var,-1) === '$') {
-                    $var = trim($var,'$');        // システム変数値
-                    if(isset($vars[$var])) $val = $vars[$var];             // 環境変数で置換
+            case '$': if(substr($var,-1) === '$') {     // 末尾文字を確かめる
+                    $var = trim($var,'$');              // システム変数値
+                    if(isset($this->repVARS[$var])) $val = $this->repVARS[$var];
                 }
                 break;
             case "'":
@@ -343,9 +342,7 @@ public function ViewStyle($file_name) {
                 }
                 break;
             default:
-                if(isset($vars[$var])) {
-                    $val = $vars[$var];             // 環境変数で置換
-                }
+                if(isset($vars[$var])) $val = $vars[$var];             // 環境変数で置換
             }
         }
     }
@@ -354,9 +351,9 @@ public function ViewStyle($file_name) {
 // $[@#%$]varname | ${[@#%$]varname} | {$SysVar$} | {%Params%}
     private function expand_Strings($str,$vars) {
 //        $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
-        $p = '/\${[^}\s]+?}|\${[#%\'\$][^}\s]+?}/';          // 変数リストの配列を取得
+        $p = '/(?:\${[^}\s]+?}|\${[#%\'\$][^}\s]+?})/';          // 変数リストの配列を取得
         preg_match_all($p, $str, $m);
-//echo "EXPAND:\n{$str}\n-----------------\n"; var_dump($m);
+debug_dump(0,["STR" => $str, "PREG" => $m,"VAR" => $vars,"SESSION" => MySession::$EnvData]);
         $varList = $m[0];
         if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
         $values = $varList = array_unique($varList);
