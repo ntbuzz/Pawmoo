@@ -131,14 +131,16 @@ function text_line_split($del,$txt,$trim = FALSE) {
 }
 //==============================================================================
 // 配列要素を改行テキストに変換
-function array_to_text($array,$sep = "\n") {
-    $dump_text = function ($indent, $items)  use (&$dump_text,&$sep)  {
+function array_to_text($array,$sep = "\n", $in_key = TRUE) {
+    $dump_text = function ($indent, $items)  use (&$dump_text,&$sep,&$in_key)  {
         $txt = ''; $spc = str_repeat(' ', $indent);
         foreach($items as $key => $val) {
             if(is_array($val)) {
                 $txt .= $dump_text($indent+2, $val);
+            } else if(is_numeric($key) || $in_key === FALSE) {
+                $txt .= "{$spc}{$val}{$sep}";
             } else {
-                $txt .= (is_numeric($key)) ? "{$spc}{$val}{$sep}" : "{$spc}{$key}={$val}{$sep}" ;
+                $txt .= "{$spc}{$key}={$val}{$sep}" ;
             }
         }
         return trim($txt,$sep);
@@ -148,7 +150,8 @@ function array_to_text($array,$sep = "\n") {
 //==============================================================================
 // MarkDownもどきのパーサー
 // テーブルは処理の都合上、独自書式でサポート
-function pseudo_markdown($atext) {
+function pseudo_markdown($atext, $md_class = '') {
+    if(empty($md_class)) $md_class = 'easy_markdown';
     $replace_defs = [
         '/\n```([a-z]+?)\n(.+?)\n```/s' => "\n<pre class=\"\\1\">\n\\2</pre>\n",    // class name
         '/\n```\n(.+?)\n```/s'          => "\n<pre class=\"code\">\n\\1</pre>\n",   // code
@@ -221,7 +224,7 @@ function pseudo_markdown($atext) {
                     } else if($islist) {
                         $res .= (is_array(next($array)))?"{$spc}<li>{$val}":"{$spc}<li>{$val}</li>";
                     } else {
-                        $res .= "{$spc}{$val}\n";
+                        $res .= "{$spc}{$val}<br>\n";
                     }
                 }
                 return $res;
@@ -263,7 +266,7 @@ function pseudo_markdown($atext) {
     //エスケープ文字を置換
     $p = '/\\\([~\-_<>\^\[\]`*#|\(\)])/s';
     $atext = preg_replace_callback($p,function($maches) {return $maches[1];}, $atext);
-    return "<div class='easy_markdown'>{$atext}</div>\n";
+    return "<div class='{$md_class}'>{$atext}</div>\n";
 }
 //==============================================================================
 // プロトコルで始まっているか確認

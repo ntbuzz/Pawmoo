@@ -41,6 +41,7 @@
         });
         $(window).resize();
     };
+    // CSS の padding 値を取得する
     $.fn.paddingWidth = function() {
         var widths = {
             top    : 0,
@@ -95,7 +96,7 @@
     // Yes/No ダイアログボックスを開く
     $.dialogBox = function (title,msg, callback) {
         var dialog_box = '<div class="dialog-box"><dl class="title"><dt>'+title+'</dt><dd><span class="dialog-msg">'+msg+'</span></dd></dl><div class="buttonList">';
-        var controlls = ["okButton:${#core.Yes}", "cancelButton:${#core.Cancel}"];
+        var controlls = ["okButton:${#core.Yes}", "cancelButton:${#core.No}"];
         controlls.forEach(function (value) {
             var cls = value.split(':');
             dialog_box = dialog_box + '<span class="'+cls[0]+'">'+cls[1]+'</span>';

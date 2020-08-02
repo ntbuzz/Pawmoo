@@ -449,12 +449,16 @@ public function ViewTemplate($name,$vars = []) {
     }
     //--------------------------------------------------------------------------
     //  セクション配列をマークダウン変換
-    // 属性要素は持たない
+    // 連想配列ならキー名をクラス名として扱う
     private function cmd_markdown($tag,$attrs,$subsec,$sec,$vars) {
-        $atext = array_to_text($sec);   // array to Text convert
-        $mtext = pseudo_markdown( $atext );
+        $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
+        $key = is_array($sec) ? array_key_first($sec) : 0;
+        $mtext =(is_numeric($key))
+                ? pseudo_markdown( $atext )
+                : pseudo_markdown( $atext,$key);
     debug_dump(0,[ 
         "SEC" => $sec,
+        "KEY" => $key,
         "STRING" => $atext,
         "MARKDOWN" => $mtext,
     ]);
