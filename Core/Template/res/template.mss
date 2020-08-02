@@ -9,6 +9,7 @@ Stylesheet => [
         // ページャー用ジャンプボタン
         +import => [
             libstyle.css
+            markdown.css
             pagerstyle.css
             floatwin.css
             baloon.css

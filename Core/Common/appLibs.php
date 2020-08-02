@@ -150,8 +150,9 @@ function array_to_text($array,$sep = "\n") {
 // テーブルは処理の都合上、独自書式でサポート
 function pseudo_markdown($atext) {
     $replace_defs = [
-        '/\s+```([a-z]+?)\n(.+?)\n```/s' => '<pre class="\\1">\\2</pre>',    // code
-        '/\s+```\n(.+?)\n```/s'          => '<pre class="code">\\1</pre>',   // code
+        '/\n```([a-z]+?)\n(.+?)\n```/s' => "\n<pre class=\"\\1\">\n\\2</pre>\n",    // class name
+        '/\n```\n(.+?)\n```/s'          => "\n<pre class=\"code\">\n\\1</pre>\n",   // code
+        '/\n~~~\n(.+?)\n~~~/s'          => "\n<pre class=\"indent\">\n\\1</pre>\n",  // indent block
         "/!\[([^\]]+)\]\(([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)\)/i"   => '<img src="\\2" alt="\\1">',
         "/\[([^\]]+)\]\(([-_.!~*\'()a-z0-9;\/?:\@&=+\$,%#]+)\)/i"    => '<a target="_blank" href="\\2">\\1</a>',
         "/^(---|___|\*\*\*)$/m"     => "<hr>",       // <HR>
@@ -163,10 +164,10 @@ function pseudo_markdown($atext) {
         "/^###### (.+?)$/m"=> "<h6>\\1</h6>",        // <H6>
         "/\s\*\*(\S+?)\*\*\s/" => '<strong>\\1</strong>',  // BOLD
         "/\s__(\S+?)__\s/"     => '<em>\\1</em>',   // BOLD
-        "/\s--([^-]+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
-        "/\s\*([^*]+?)\*\s/"   => '<span style="font-style:italic;">\\1</span>',             // ITALIC
-        "/\s_([^_]+?)_\s/"     => '<span style="text-decoration:underline;">\\1</span>',     // UNDERLINE
-        "/([^ ]) {2}$/m"       => '\\1<br>',        // newline
+        "/\s--(\S+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
+        "/\s\*(\S+?)\*\s/"   => '<span style="font-style:italic;">\\1</span>',             // ITALIC
+        "/\s_(\S+?)_\s/"     => '<span style="text-decoration:underline;">\\1</span>',     // UNDERLINE
+        "/([^ ]) {2}$/m"     => '\\1<br>',        // newline
     ];
     // 先にタグ文字のエスケープとCR-LFをLFのみに置換しておく
     $p = '/\s[ \-\=]>\s|\\\[<>]+\s|\\\<[^>\r\n]*?>|\r\n/';
@@ -176,39 +177,59 @@ function pseudo_markdown($atext) {
     // リストと引用を処理を処理する
     $p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)\n{2}/s';
     $atext = preg_replace_callback($p,function($maches) {
-        $tags = array(
-            '- ' => ['ul','ul_list',true],
-            '1.' => ['ol','ol_list',true],
-            '> ' => ['blockquote','bq_block',false]);
         $txt = $maches[1];
-        list($ptag,$ptagcls,$islist) = $tags[mb_substr($txt,0,2)];
-        $pcls = "<{$ptag} class='{$ptagcls}'>\n";
-        $lvl = 0;
-        if($islist) {
-            $maptext = "{$pcls}{$txt}\n</{$ptag}>";
-            $arr = array_map(function($str) use (&$lvl, &$ptag, &$pcls) {
-                for($n=0;ctype_space($str[$n]);++$n) ;
-                if(!in_array(mb_substr($str,$n,2), ['- ','1.','> '])) return "{$str}";
-                $pretag = ($n < $lvl) ? "</{$ptag}>\n":(($n > $lvl) ? $pcls : '');
-                $lvl = $n;
-                $ll = ltrim(mb_substr($str,$n+2));
-                return "{$pretag}<li>{$ll}</li>";
-            },explode("\n", $maptext));         // とりあえず行に分割
-        } else {    // blockquote
-            $arr = array_map(function($str) use (&$lvl, &$ptag, &$pcls) {
-                for($n=0;$str[$n]==='>';++$n) ;
-                if($n === 0 && $str[0] !== '>') return "TERM:{$n}:{$str}";
-                $ll = ltrim(mb_substr($str,$n));   // 先頭の > を削除
-                $pretag = ($n === $lvl) ? '' : (
-                          ($n > $lvl) ? str_repeat("{$pcls}", $n - $lvl) :
-                          str_repeat("</{$ptag}>\n", $lvl - $n));
-                $lvl = $n;
-                return "{$pretag}{$ll}<br>";
-            },explode("\n", $txt));         // とりあえず行に分割
-            // ネスト分を閉じる
-            array_push($arr,str_repeat("</{$ptag}>\n", $lvl));
-        }
-        return implode("\n",$arr)."\n";
+        $user_func = function($text) {
+            $tags = array(
+                '- ' => ['ul','ul_list',true],
+                '1.' => ['ol','ol_list',true],
+                '> ' => ['blockquote','bq_block',false]);
+            $call_func = function($arr) use(&$tags) {
+                $key_str = mb_substr($arr[0],0,2);
+                $islist = $tags[$key_str][2];
+                $app = 0;
+                $make_array = function($array,$lvl) use(&$make_array,&$app,&$key_str,&$islist) {
+                    $result = [];
+                    while(isset($array[$app])) {
+                        $str = $array[$app];
+                        for($n = 0; ($islist)?ctype_space($str[$n]):($str[$n+1]==='>'); ++$n) ;
+                        if(mb_substr($str,$n,2) !== $key_str) break;
+                        $ll = ltrim(mb_substr($str,$n+2));
+                        if($n === $lvl) {
+                            $result[] = $ll;
+                            $app++;
+                        } else if($n > $lvl) {
+                            $result[] = $make_array($array,$lvl+1);
+                        } else break;
+                    }
+                    return $result;
+                };
+                return [ $key_str => $make_array($arr,0)];
+            };
+            $arr = $call_func(explode("\n", $text));			// Make Level array
+            $key = array_key_first($arr);
+            list($ptag,$ptagcls,$islist) = $tags[$key]; 
+            $ptag_start = (empty($ptagcls)) ? "<{$ptag}>" : "<{$ptag} class='{$ptagcls}'>";
+            $ptag_close = "</{$ptag}>";
+            $ul_text = function($array,$n) use(&$ul_text,&$ptag,&$ptag_start,&$ptag_close,$islist) {
+                $spc = '';//str_repeat(' ',$n);
+                $res = "";
+                foreach($array as $n => $val) {
+                    if(is_array($val)) {
+                        $low = $ul_text($val,$n+1);
+                        $res .= "{$spc}<{$ptag}>{$low}{$spc}{$ptag_close}";
+                        if($n > 0 && $islist)	$res .= "</li>";
+                    } else if($islist) {
+                        $res .= (is_array(next($array)))?"{$spc}<li>{$val}":"{$spc}<li>{$val}</li>";
+                    } else {
+                        $res .= "{$spc}{$val}\n";
+                    }
+                }
+                return $res;
+            };
+            $tag_body = $ul_text($arr[$key],0);
+            return "{$ptag_start}{$tag_body}{$ptag_close}\n";
+        };
+        return $user_func($txt);
     }, $atext);
     // テーブルを変換
     $p = '/\n(\|[\s\S]+?\|)\n{2}/s';

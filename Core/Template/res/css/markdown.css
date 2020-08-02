@@ -1,0 +1,80 @@
+/* マークダウン用クラス */
+.easy_markdown {
+	padding:0;
+}
+/* CODE viewing 
+*/
+.easy_markdown pre {
+	width:100%;
+	margin-left:20px;
+	padding:5px 50px;	/* 上下 左右 */
+	line-height:1.4em;
+	overflow:hidden;
+}
+/* code writing */
+.easy_markdown pre.code {
+	width:95%;
+	margin-left:40px;
+	padding-left:30px;	/* 上下 左右 */
+	color:white;
+	background-color: #333;
+}
+.easy_markdown pre.code a:visited {color:orange;}
+.easy_markdown pre.code a:link {color:skyblue;}
+/* quote writing */
+.easy_markdown pre.quote {
+	line-height:1em;
+	color:#333;
+	border: 1px solid whitesmoke;
+}
+/* indent block */
+.easy_markdown pre.indent {
+	padding-left:0px;	/* 上下 左右 */
+	margin-bottom:10px;
+}
+
+/*	UL/OL style
+*/
+.easy_markdown .ol_list,
+.easy_markdown .ul_list {
+	margin-top: 10px;
+	padding-left:25px;
+}
+.easy_markdown .ol_list li,
+.easy_markdown .ul_list li {
+	margin: 0 0 0 10px;
+	padding:0;
+	line-height:1.5em;
+}
+.easy_markdown .ol_list ol,
+.easy_markdown .ul_list ul {
+	margin: 0 0 0 10px;
+	padding:0;
+}
+/*	blockquote style
+*/
+.easy_markdown .bq_block,
+.easy_markdown .bq_block blockquote {
+	margin-left:10px;
+	padding:5px 0 2px 10px;
+	border-left: 6px solid silver;
+	background-color:white;
+}
+/*	TABLE style
+*/
+.easy_markdown .md_tbl {
+	padding-left:10px;
+	border-collapse: collapse;
+	border:1px solid silver;
+}
+.easy_markdown .md_tbl th {
+	text-align: center;
+	background-color: #eee;
+	border: 1px solid silver;
+	padding: 0 10px;
+}
+.easy_markdown .md_tbl td {
+	border: 1px solid silver;
+	padding: 0 10px;
+}
+

@@ -172,6 +172,21 @@ public function ViewTemplate($name,$vars = []) {
             case '#': $var = mb_substr($var,1);     // 言語ファイルの参照
                 $val = $this->_($var);              // 言語ファイルの定義配列から文字列を取り出す
                 break;
+            case '%': if(substr($var,-1) === '%') {     // 末尾文字を確かめる
+                    $var = trim($var,'%');              // URLの引数番号
+                    $val = App::$Params[$var];          // Params[] プロパティから取得
+                }
+                break;
+            case '$': if(substr($var,-1) === '$') {     // 末尾文字を確かめる
+                    $var = trim($var,'$');              // システム変数値
+                    $val = App::$SysVAR[$var];          // SysVAR[] プロパティから取得
+                }
+                break;
+            case "'": if(substr($var,-1) === "'") {     // 末尾文字を確かめる
+                    $var = trim($var,"'");              // セッション変数
+                    $val = MySession::get_envVars($var);// EnvData[] プロパティから取得
+                }
+                break;
             default:
                 if(isset($vars[$var])) {
                     $val = $vars[$var];             // 環境変数で置換
@@ -179,26 +194,14 @@ public function ViewTemplate($name,$vars = []) {
                     $val = $this->$var;             // プロパティ変数で置換
                 }
             }
-        } else if($val[0] === '{') {           // 先頭の一文字が変数文字
-            $var = trim($val,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
-            switch($var[0]) {
-            case '%': $var = trim($var,'%');        // URLの引数番号
-                $val = App::$Params[$var];          // Params[] プロパティから取得
-                break;
-            case '$': $var = trim($var,'$');        // システム変数値
-                $val = App::$SysVAR[$var];          // SysVAR[] プロパティから取得
-                break;
-            case "'": $var = trim($var,"'");        // セッション変数
-                $val = MySession::get_envVars($var);          // EnvData[] プロパティから取得
-                break;
-            }
         }
     }
 //==============================================================================
 //  文字列の変数置換を行う
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
     private function expand_Strings($str,$vars) {
-        $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%}|{\'[^\']+?\'})/'; // 変数リストの配列を取得
+//        $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%}|{\'[^\']+?\'})/'; // 変数リストの配列を取得
+        $p = '/\${[^}\s]+?}|\${[#%\'\$][^}\s]+?}/';          // 変数リストの配列を取得
         preg_match_all($p, $str, $m);
         $varList = $m[0];
         if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要

@@ -8,21 +8,21 @@ String.prototype.trim2 = function() {
 // コントローラー名までのパスに引数を付加する
 String.prototype.controller_path = function(e) {
     var path = this.replace(/^[\/]+|[\/]+$/g, '').split('/');
-    var n = (path[0] == "{$appName$}") ? 1 : 2;
+    var n = (path[0] == "${$appName$}") ? 1 : 2;
     return '/'+path.slice(0,n).join('/')+'/'+e+'/';                   // 0 〜 n までの要素を / で結合し、指定パスを付加
 };
 //====================================================
 // メソッド名までのパスに引数を付加する
 String.prototype.method_path = function(e) {
     var path = this.replace(/^[\/]+|[\/]+$/g, '').split('/');
-    var n = (path[0] == "{$appName$}") ? 2 : 3;
+    var n = (path[0] == "${$appName$}") ? 2 : 3;
     return '/'+path.slice(0,n).join('/')+'/'+e+'/';                   // 0 〜 n までの要素を / で結合し、指定パスを付加
 };
 //====================================================
 // フィルタまでのパスに引数を付加する
 String.prototype.filter_path = function(e) {
     var path = this.replace(/^[\/]+|[\/]+$/g, '').split('/');
-    var n = (path[0] == "{$appName$}") ? 3 : 4;
+    var n = (path[0] == "${$appName$}") ? 3 : 4;
     return '/'+path.slice(0,n).join('/')+'/'+e+'/';                   // 0 〜 n までの要素を / で結合し、指定パスを付加
 };
 //====================================================
