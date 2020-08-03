@@ -13,6 +13,7 @@
 }
 /* code writing */
 .easy_markdown pre.code {
+	line-height:1.2em;
 	width:95%;
 	margin-left:25px;
 	padding-left:30px;	/* 上下 左右 */
@@ -28,8 +29,8 @@
 	border: 1px solid whitesmoke;
 }
 /* indent block */
-.easy_markdown pre.indent {
-	padding-left:0px;	/* 上下 左右 */
+.easy_markdown .indent {
+	padding-left:20px;	/* 上下 左右 */
 	margin-bottom:10px;
 }
 

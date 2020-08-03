@@ -66,6 +66,12 @@ public static function ChangeMethod($module,$method,$relocate = TRUE) {
     self::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================
+// パラメータパスの置換
+public static function ChangeParams($params,$relocate = TRUE) { 
+    self::$execURI['params'] = $params;
+    self::$ReLocate = $relocate;        // URLの書き換え
+}
+//==============================================================================
 // メソッドの置換
 public static function Get_RelocateURL() { 
     if(self::$ReLocate === FALSE) return NULL;

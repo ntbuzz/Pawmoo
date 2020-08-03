@@ -153,6 +153,7 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
 function pseudo_markdown($atext, $md_class = '') {
     if(empty($md_class)) $md_class = 'easy_markdown';
     $replace_defs = [
+        '/\n...{\n(.+?)\n}.../s'        => "\n<div class=\"indent\">\n\\1</div>\n", // indent block
         '/\n```([a-z]+?)\n(.+?)\n```/s' => "\n<pre class=\"\\1\">\n\\2</pre>\n",    // class name
         '/\n```\n(.+?)\n```/s'          => "\n<pre class=\"code\">\n\\1</pre>\n",   // code
         '/\n(~~~|\^\^\^)\n(.+?)\n\1/s'  => "\n<pre class=\"indent\">\n\\2</pre>\n", // indent block
@@ -170,7 +171,7 @@ function pseudo_markdown($atext, $md_class = '') {
         "/\s--(\S+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
         "/\s\*(\S+?)\*\s/"   => '<span style="font-style:italic;">\\1</span>',             // ITALIC
         "/\s_(\S+?)_\s/"     => '<span style="text-decoration:underline;">\\1</span>',     // UNDERLINE
-        "/([^ ]) {2}$/m"     => '\\1<br>',        // newline
+        "/([^ ])(?: {2}$|　$)/m"     => '\\1<br>',        // newline
     ];
     // 先にタグ文字のエスケープとCR-LFをLFのみに置換しておく
     $p = '/\s[ \-\=]>\s|\\\[<>]+\s|\\\<[^>\r\n]*?>|\r\n/';
@@ -196,7 +197,8 @@ function pseudo_markdown($atext, $md_class = '') {
                         $str = $array[$app];
                         for($n = 0; ($islist)?ctype_space($str[$n]):($str[$n+1]==='>'); ++$n) ;
                         if(mb_substr($str,$n,2) !== $key_str) break;
-                        $ll = ltrim(mb_substr($str,$n+2));
+                        $ll = mb_substr($str,$n+2);
+//                        $ll = ltrim(mb_substr($str,$n+2));
                         if($n === $lvl) {
                             $result[] = $ll;
                             $app++;
@@ -264,7 +266,7 @@ function pseudo_markdown($atext, $md_class = '') {
     $replace_values = array_values($replace_defs);
     $atext = preg_replace($replace_keys,$replace_values, $atext);
     //エスケープ文字を置換
-    $p = '/\\\([~\-_<>\^\[\]`*#|\(\)])/s';
+    $p = '/\\\([~\-_<>\^\[\]`*#|\(\.{}])/s';
     $atext = preg_replace_callback($p,function($maches) {return $maches[1];}, $atext);
     return "<div class='{$md_class}'>{$atext}</div>\n";
 }
