@@ -42,7 +42,7 @@ static function InitSession($appname = 'default') {
 	// overwrite real POST/GET variables
 	foreach($_REQUEST as $key => $val) {
 		if($val == "on") $val = 1; elseif($val==="off") $val = 0;
-		self::$PostEnv[$key] = $val;
+		if(ctype_alnum(str_replace(['-','_'],'', $key))) self::$PostEnv[$key] = $val;
 	}
 	self::$LoginInfo = (empty(self::$EnvData['Login']) ) ? [] : self::$EnvData['Login'];
 }

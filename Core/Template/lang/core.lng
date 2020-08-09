@@ -9,6 +9,7 @@
     PrevPage => "＜前へ"
     // ダイアログ用
     Yes => はい
+    No => いいえ
     Cancel => キャンセル
     SizeDisplay => サイズ表示
     Close => 閉じる
@@ -23,6 +24,7 @@
     PrevPage => "&lt;Prev"
     // for Dialog
     Yes => Yes
+    No => No
     Cancel => Cancel
     SizeDisplay => "Display Size"
     Close => "Close"

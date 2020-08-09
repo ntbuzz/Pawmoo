@@ -61,16 +61,22 @@ public function SetPaging($pagesize, $pagenum) {
 	APPDEBUG::DebugDump(13,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
 }
 //==============================================================================
-//	findRecord(row): 
-//	row 配列を条件にレコード検索する
-//      [ AND条件... ] OR条件 [ AND条件... ]
-// pgSQL: SELECT *, count('No') over() as full_count FROM public.mydb offset 10 limit 50;
-// SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
+//	getRecordCount($row) 
+//	$row 条件に一致したレコード数を返す
+//==============================================================================
+public function getRecordCount($row) {
+	$where = $this->sql_makeWHERE($row);	// 検索条件
+	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
+	$this->doQuery("{$sql}{$where}");
+	$field = $this->fetchDB();
+	return ($field) ? $field["total"] : 0;
+}
+//==============================================================================
+//	getRecordValue($row,$relations) 
+//	$row 条件に一致したレコードデータを返す
 //==============================================================================
 public function getRecordValue($row,$relations) {
-	// 検索条件
-	$where = $this->sql_makeWHERE($row);
-	// 実際のレコード検索
+	$where = $this->sql_makeWHERE($row);		// 検索条件
 	$sql = $this->sql_JoinTable($relations);
 	$where .= ($this->handler == 'SQLite') ? " limit 0,1" : " offset 0 limit 1";		// 取得レコード数
 	$sql .= "{$where};";
@@ -85,8 +91,7 @@ public function getRecordValue($row,$relations) {
 // SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
 //==============================================================================
 public function findRecord($row,$relations,$sort = []) {
-	// 検索条件
-	$where = $this->sql_makeWHERE($row);
+	$where = $this->sql_makeWHERE($row);	// 検索条件
 	// 全体件数を取得する
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
 	$this->doQuery("{$sql}{$where}");
@@ -113,7 +118,7 @@ public function findRecord($row,$relations,$sort = []) {
 	$this->doQuery($sql);
 }
 //==============================================================================
-//	fdeleteRecord(wh): 
+//	deleteRecord(wh): 
 //	wh 配列を条件にレコードを1件だけ削除する
 public function deleteRecord($wh) {
 	$where = $this->sql_makeWHERE($wh);
@@ -159,36 +164,8 @@ protected function sql_safequote(&$value) {
 // 配列要素からのWHERE句を作成
 	private function sql_makeWHERE($row) {
 		APPDEBUG::MSG(13, $row );
-//		$sql = $this->makeOPR('AND', $row);
 		$sql = $this->makeExpr($row);
 		if(!empty($sql)) $sql = ' WHERE '.$sql;
-		return $sql;
-	}
-//==============================================================================
-// 配列要素からのSQL生成
-	private function makeOPR($opr,$row) {
-		$OP_REV = [ 'AND' => 'OR', 'OR' => 'AND'];
-		$sql = '';
-		$opcode = '';
-		foreach($row as $key => $val) {
-			if(is_array($val)) {
-				$sub_sql = $this->makeOPR($OP_REV[$opr],$val);
-				$sql .= "{$opcode}({$sub_sql})";
-			} else {
-				// キー名の最後に関係演算子
-				list($key,$op) = keystr_opr($key);
-				if(empty($op)) {
-					$op = (gettype($val) === 'string') ? ' LIKE ' : '=';
-				}
-				if($val[0] == '-') {
-					$val = mb_substr($val,1);
-					$op = ' NOT LIKE ';
-				}
-				if(strpos($op,'LIKE') !== false) $val = "%{$val}%";
-				$sql .= "{$opcode}({$this->table}.\"{$key}\"{$op}'{$val}')";
-			}
-			$opcode = " {$opr} ";
-		}
 		return $sql;
 	}
 //==============================================================================

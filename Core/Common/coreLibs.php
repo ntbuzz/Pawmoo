@@ -226,7 +226,7 @@ function debug_dump($flag, $arr = []) {
     if($flag === 3) {
         echo "<pre>\n{$str}\n{$sep} {$msg} {$sep}\n";
         var_dump($arr);
-        echo "</pre>\n";
+        echo str_replace("=",20)."\n</pre>\n";
         return;
     }
     // 変数出力
@@ -259,5 +259,6 @@ function debug_dump($flag, $arr = []) {
         }
         if($flag < 3) echo "</pre>\n";
     }
+    echo str_repeat("=",20)."\n";
     if($flag === 2||$flag === 5) exit;
 }

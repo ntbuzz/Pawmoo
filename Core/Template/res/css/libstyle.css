@@ -54,37 +54,3 @@ html, body {
 	background: #aaa;  
 	padding: 6px 10px 4px;  
 }
-/* マークダウン用クラス */
-.easy_markdown {
-	padding:0;
-}
-pre.code {
-	width:100%;
-	padding:5px 10px;	/* 上下 左右 */
-	background-color: whitesmoke;
-}
-.ol_list,
-.ul_list {
-	margin-top: 10px;
-	padding-left:25px;
-}
-.bq_block {
-	padding-left:10px;
-	background-color: #eee;
-}
-.md_tbl {
-	padding-left:10px;
-	border-collapse: collapse;
-	border:1px solid silver;
-}
-.md_tbl th {
-	text-align: center;
-	background-color: #eee;
-	border: 1px solid silver;
-	padding: 0 10px;
-}
-.md_tbl td {
-	border: 1px solid silver;
-	padding: 0 10px;
-}
-

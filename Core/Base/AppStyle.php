@@ -68,7 +68,7 @@ class AppStyle {
         }
         $myVARS = array(
             'appName' => $appname,
-            'moduleName' => $this->ModuleName,
+            'controller' => $this->ModuleName,
             'filename' => $filename,
             'extension' => $ext,
         );
@@ -322,19 +322,26 @@ public function ViewStyle($file_name) {
 //==============================================================================
 //  変数を置換する
     private function expand_Walk(&$val, $key, $vars) {
-        if($val[0] === '$') {           // 先頭の一文字が変数文字
+        if($val[0] === '$' && $val[1] === '{' ) {       // 先頭の2文字が変数文字
             $var = mb_substr($val,1);
             $var = trim($var,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
-            if($var[0] == '#') {
+            switch($var[0]) {
+            case '#':
                 $var = mb_substr($var,1);     // 言語ファイルの参照
                 $val = LangUI::get_value('resource', $var, FALSE);
-            } else if(isset($vars[$var])) {
-                $val = $vars[$var];             // 環境変数で置換
-            }
-        } else if($val[0] === '{') {           // 先頭の一文字が変数文字
-            $var = trim($val,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
-            if($var[0] == '$') {
-                $var = trim($var,'$');        // システム変数値
+                break;
+            case '$': if(substr($var,-1) === '$') {     // 末尾文字を確かめる
+                    $var = trim($var,'$');              // システム変数値
+                    if(isset($this->repVARS[$var])) $val = $this->repVARS[$var];
+                }
+                break;
+            case "'":
+                if(mb_substr($var,-1) === "'") {
+                    $var = trim($var,"'");        // セッション変数
+                    $val = MySession::get_envVars($var);          // EnvData[] プロパティから取得
+                }
+                break;
+            default:
                 if(isset($vars[$var])) $val = $vars[$var];             // 環境変数で置換
             }
         }
@@ -343,8 +350,10 @@ public function ViewStyle($file_name) {
 //  文字列の変数置換を行う
 // $[@#%$]varname | ${[@#%$]varname} | {$SysVar$} | {%Params%}
     private function expand_Strings($str,$vars) {
-        $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
+//        $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
+        $p = '/(?:\${[^}\s]+?}|\${[#%\'\$][^}\s]+?})/';          // 変数リストの配列を取得
         preg_match_all($p, $str, $m);
+debug_dump(0,["STR" => $str, "PREG" => $m,"VAR" => $vars,"SESSION" => MySession::$EnvData]);
         $varList = $m[0];
         if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
         $values = $varList = array_unique($varList);

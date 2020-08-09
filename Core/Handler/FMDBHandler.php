@@ -149,6 +149,34 @@ public function SetPaging($pagesize, $pagenum) {
 	$this->limitrec = $pagesize;		// 取得レコード数
 }
 //==============================================================================
+//	getRecordCount($row) 
+//	$row 条件に一致したレコード数を返す
+//==============================================================================
+public function getRecordCount($row) {
+	//複合検索クラスのインスタンスを作成
+	$compoundFind = $this->newCompoundFindCommand($this->LayoutName);
+	$n = 1;
+	foreach($row as $opr => $andval ) {
+		$findInst = $this->newFindRequest($this->LayoutName);
+		$not = FALSE;
+		foreach($andval as $key => $val) {
+			list($key,$op) = keystr_opr($key);	// キー名の最後に関係演算子
+			if($key === 'NOT') $not = TRUE;
+			else $findInst->addFindCriterion($key, "{$op}{$val}");	// FMDBは比較文字列に演算子を付加する
+		}
+		$findInst->setOmit($not);
+		$compoundFind->add($n++,$findInst);
+	}
+	//検索実行
+	$result = $compoundFind->execute();
+	//エラー処理
+	if (FileMaker::isError($result)) {
+		return 0;
+	} else {
+		return $result->getFoundSetCount();
+	}
+}
+//==============================================================================
 // 複数条件を指定してレコードを読み込む
 // FileMaker では relations を使わない
 public function findRecord($row, $relations = NULL,$sort = []) {
