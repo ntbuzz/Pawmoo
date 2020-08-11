@@ -163,7 +163,7 @@ public function ViewTemplate($name,$vars = []) {
             $var = trim($var,'{}');                 // triming of delimitter { }
             switch($var[0]) {
             case '@': $var = mb_substr($var,1);     // refer to RECORD DATA
-                list($var,$alt) = (mb_strpos('?',$var) !== FALSE) ? explode('?',$var) : [$var,''];
+                list($val,$alt) = (mb_strpos($var,':') !== FALSE) ? explode(':',$var) : [$var,''];
                 $is_row = ($var[0] === '@');            // is RAW DATA
                 if($is_row) $var = mb_substr($var,1);   // clip first @ char
                 $val = $this->Model->RecData[$var];     // get FIELD DATA
