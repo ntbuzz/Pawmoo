@@ -1,5 +1,15 @@
 <?php
 //==============================================================================
+// 配列の結合 PHP 7.3以前の場合に備える
+if (!function_exists('array_key_first')) {
+    function array_key_first(array $arr) {
+        foreach($arr as $key => $unused) {
+            return $key;
+        }
+        return NULL;
+    }
+}
+//==============================================================================
 // 拡張子をとりだす
 // 返り値は .拡張子
 function extract_extension($fn) {
