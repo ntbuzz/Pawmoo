@@ -29,6 +29,7 @@ class AppView extends AppObject {
             'ul'        => 'cmd_list',
             'ol'        => 'cmd_list',
             'dl'        => 'cmd_dl',
+            'select'    => 'cmd_select',
             'inline'    => 'cmd_inline',
             'markdown'  => 'cmd_markdown',
         ],
@@ -175,7 +176,9 @@ public function ViewTemplate($name,$vars = []) {
                 if($is_row === FALSE) $val = str_replace("\n",'',text_to_html($val));
                 break;
             case '#': $var = mb_substr($var,1);     // 言語ファイルの参照
-                $val = $this->_($var);              // 言語ファイルの定義配列から文字列を取り出す
+                $allow = ($var[0] === '#');         // 配列を許可する
+                if($allow) $var = mb_substr($var,1);
+                $val = $this->_($var,$allow);       // 言語ファイルの定義配列から文字列または配列を取り出す
                 break;
             case '%': if(substr($var,-1) === '%') {     // 末尾文字を確かめる
                     $var = trim($var,'%');              // URLの引数番号
@@ -521,6 +524,27 @@ public function ViewTemplate($name,$vars = []) {
             }
         }
         echo "</{$tag}>\n";
+    } 
+    //--------------------------------------------------------------------------
+    //  select リストの出力
+    // +select => [
+    //    selected_key = > [
+    //      option_text => value
+    //      ...
+    //    ]
+    // ]
+    private function cmd_select($tag,$attrs,$subsec,$sec,$vars) {
+        if(is_array($subsec)) {
+            $attr = $this->gen_Attrs($attrs);
+            echo "<{$tag}{$attr}>\n";
+            $opt_key = array_key_first($subsec);    // 最初の要素を処理
+            $sel_item = (is_numeric($opt_key)) ? '' : $this->expand_Strings($opt_key,$vars);
+            foreach($subsec[$opt_key] as $opt => $val) {
+                $sel = ($opt === $sel_item) ? ' selected':'';
+                echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
+            }
+            echo "</{$tag}>\n";
+        }
     }
     //==========================================================================
     // タグ文字列の分解

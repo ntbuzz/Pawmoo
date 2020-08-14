@@ -26,6 +26,7 @@ class AppModel extends AppObject {
     public $page_num;           // 取得ページ番号
     public $record_max;         // 総レコード数
 
+    private $LocaleField;       // ロケール置換フィールドセット
 //==============================================================================
 //	コンストラクタ：　テーブル名
 //==============================================================================
@@ -75,6 +76,7 @@ class AppModel extends AppObject {
 protected function SchemaHeader($schema) {
     // ヘッダ表示用のスキーマ
     $this->TableHead = array();
+    $this->LocaleField = [];
     foreach($schema as $key => $val) {
         list($nm,$mflag) = $val;
         // 参照フィールド設定：*_id でRelations設定されていれば_idなしを参照フィールドにする
@@ -85,10 +87,11 @@ protected function SchemaHeader($schema) {
         if($nm[0] === '.') {            // 言語ファイルの参照
             $nm = $this->_(".Schema{$nm}");   //  Schema 構造体を参照する
         }
-        $flag = $mflag % 10;
-        $align= ($mflag - $flag) / 10;
-        $this->TableHead[$key] = array($nm,$flag,$align,$ref);
+        list($lang,$align,$flag) = array_slice(str_split("000{$mflag}"),-3);
+        $this->TableHead[$key] = array($nm,(int)$flag,(int)$align,$ref);
+        if($lang === '1') $this->LocaleField[$key] = array($nm, "{$key}_" . LangUI::$LocaleName);
     }
+debug_dump(0,["LocaleField" => $this->LocaleField]);
 }
 //==============================================================================
 // ページング設定
@@ -97,6 +100,29 @@ public function SetPage($pagesize,$pagenum) {
     $this->page_num = ($pagenum <= 0) ? 1 : $pagenum;            // 現在のページ番号 1から始まる
     $this->dbDriver->SetPaging($this->pagesize,$this->page_num);
 }
+//==============================================================================
+// ロケールフィールドによる置換処理
+// 結果：   レコードデータ = field
+    private function readLocaleField() {
+        foreach($this->LocaleField as $key => $val) {
+            list($nm,$lang_nm) = $val;
+            if( array_key_exists($lang_nm,$this->dbDriver->columns)
+                && !empty($this->fields[$lang_nm]) )
+                    $this->fields[$nm] = $this->fields[$lang_nm];           // ロケールフィールドを取得
+        }
+    }
+//==============================================================================
+// ロケールフィールドによる置換処理
+// 結果：   レコードデータ = field
+    private function writeLocaleField() {
+        foreach($this->LocaleField as $key => $val) {
+            list($nm,$lang_nm) = $val;
+            if( array_key_exists($lang_nm,$this->dbDriver->columns)) {
+                $this->fields[$lang_nm] = $this->fields[$nm];           // ロケールフィールドへ書込み
+                unset($this->fields[$nm]);                             // もとのフィールドは消しておく
+            }
+        }
+    }
 //==============================================================================
 // PrimaryKey で生レコードを取得
 // 結果：   レコードデータ = fields
@@ -109,6 +135,7 @@ public function getRecordByKey($id) {
 public function getRecordBy($field,$value) {
     if(!empty($value)) {
         $this->fields = $this->dbDriver->doQueryBy($field,$value);
+        $this->readLocaleField();
     } else $this->fields = array();
     return $this->fields;
 }
@@ -174,6 +201,8 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
             "Head:" => $this->Header,
         ]);
         if(!isset($this->fields[$this->Unique])) continue;
+        // ロケールフィールドで置換しておく
+        $this->readLocaleField();
         $record = array();
         foreach($this->Header as $key => $val) {
             list($nm,$flag,$align,$ref) = $val;
@@ -214,6 +243,8 @@ public function AddRecord($row) {
         if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
     }
     unset($this->fields[$this->Primary]);
+    // ロケールフィールドに移動する
+    $this->writeLocaleField();
     APPDEBUG::MSG(13, $this->fields);
     $this->dbDriver->insertRecord($this->fields);
 }
@@ -244,8 +275,10 @@ public function UpdateRecord($num,$row) {
         if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
     }
     $this->fields[$this->Primary] = $num;
+    // ロケールフィールドに移動する
+    $this->writeLocaleField();
     APPDEBUG::MSG(3, $this->fields);
-    $this->dbDriver->replaceRecord([$this->Primary => $num],$this->fields);
+    $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
 }
 
 }

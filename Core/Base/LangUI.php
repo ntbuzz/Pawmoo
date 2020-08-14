@@ -7,6 +7,7 @@
 // 言語ファイルの操作クラス
 class LangUI {
     public  static $STRINGS;        // 翻訳言語配列
+    public  static $LocaleName;       // ロケール名
     private static $LangDir;        // 言語ファイルのパス
     private static $Locale;         // 言語識別子
     private static $LocaleFiles;    // for debug
@@ -29,6 +30,7 @@ class LangUI {
                     'strlen'));
         $langs = array_shift($arr);             // strict回避
         self::$Locale = ".{$langs}";            // 言語識別文字を付加
+        self::$LocaleName = $langs;
         self::$STRINGS = [];
         // フレームワークの言語リソースを読込む
         self::$LangDir = 'Core/Template/lang/';

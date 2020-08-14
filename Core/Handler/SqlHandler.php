@@ -21,7 +21,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	abstract protected function doQuery($sql);
 	abstract protected function fetchDB();
 	abstract protected function getLastError();
-	abstract protected function replaceRecord($wh, $row);		// INSERT or UPDATE
+	abstract protected function updateRecord($wh, $row);		// INSERT or UPDATE
 //==============================================================================
 //	コンストラクタ：　テーブル名
 //==============================================================================

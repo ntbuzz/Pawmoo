@@ -63,15 +63,19 @@ public function insertRecord($row) {
 //==============================================================================
 //	レコードの更新 $row[key] value
 //==============================================================================
-public function replaceRecord($wh,$row) {
+public function updateRecord($wh,$row) {
 	$this->sql_safequote($row);
 	APPDEBUG::MSG(13, $row );
-	$row = array_merge($wh,$row);				// 配列をマージ
-	// UPDATE OR INSERT => REPLACE SQL生成
-	$kstr = '"' . implode('","', array_keys($row)) . '"';
-	$vstr = "'" . implode("','", $row) . "'";
-
-	$sql = "REPLACE INTO {$this->table} ({$kstr}) VALUES ({$vstr});";
+	list($pkey,$pval) = array_first_item($wh);
+	unset($row[$pkey]);			// プライマリキーは削除しておく
+	$where = " WHERE \"{$pkey}\"={$pval}";		// プライマリキー名を取得
+	$set = " SET"; $sep = " ";				// UPDATE する時の代入文
+	foreach($row as $key => $val) {
+		$set .= "{$sep}\"{$key}\"='{$val}'";
+		$sep = ", ";
+	}
+	// UPSERT 文を生成
+	$sql = "UPDATE \"{$this->table}\"{$set}{$where};";
 	error_reporting(E_ERROR);
 	APPDEBUG::MSG(13, $sql );
 	$rows = $this->doQuery($sql);

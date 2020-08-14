@@ -9,6 +9,12 @@ if (!function_exists('array_key_first')) {
         return NULL;
     }
 }
+function array_first_item(array $arr) {
+    foreach($arr as $key => $val) {
+        return [$key,$val];
+    }
+    return ['',''];
+}
 //==============================================================================
 // 拡張子をとりだす
 // 返り値は .拡張子

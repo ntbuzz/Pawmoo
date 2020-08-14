@@ -59,7 +59,7 @@ public function getLastError() {
 // ON CONFLICT (id) DO UPDATE SET name = val_name；
 // pg_update($this->dbb,$this->table,$row,$wh);
 //==============================================================================
-public function replaceRecord($wh,$row) {
+public function updateRecord($wh,$row) {
 	$this->sql_safequote($row);
 	APPDEBUG::MSG(13, $row );
 	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ
