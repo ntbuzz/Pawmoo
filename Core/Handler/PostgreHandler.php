@@ -39,6 +39,7 @@ public function doQuery($sql) {
 	if(!$this->rows) {
 		$res1 = pg_get_result($this->dbb);
 		echo "ERROR:" . pg_result_error($res1) . "<br>\n";
+		echo "SQL:{$sql}\n";
 		die('Postgres QUERY失敗' . pg_last_error());
 	}
 	return $this->rows;

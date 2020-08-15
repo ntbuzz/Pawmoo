@@ -354,7 +354,7 @@ public function fetchDB() {
 public function insertRecord($row)
 public function deleteRecord($wh)
 public function getRecordValue($row,$relations)
-public function getValueLists($table,$ref,$id) 
+public function getValueLists($table,$ref,$id,$grp) 
 public function getLastError() 
 */
 

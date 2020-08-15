@@ -91,7 +91,24 @@ protected function SchemaHeader($schema) {
         $this->TableHead[$key] = array($nm,(int)$flag,(int)$align,$ref);
         if($lang === '1') $this->LocaleField[$key] = array($nm, "{$key}_" . LangUI::$LocaleName);
     }
-debug_dump(0,["LocaleField" => $this->LocaleField]);
+}
+//==============================================================================
+// スキーマを分解してヘッダー情報を生成
+public function RelationSetup() {
+    if(!empty($this->Relations)) {
+        // リレーション先の情報をモデル名からテーブル名とロケール先のフィールド名に置換する
+        foreach($this->Relations as $key => $rel) {
+            list($model,$field,$refer,$group) = explode('.', $rel);
+            if(array_key_exists($refer,$this->$model->LocaleField)) {
+                $lang_ref = "{$refer}_" . LangUI::$LocaleName;
+                if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $refer = $lang_ref;
+            }
+            // モデル名→テーブル名に置換
+            $arr = [$this->$model->DataTable,$field,$refer,$group];
+            $this->Relations[$key] =  implode('.',$arr);
+        }
+    }
+    APPDEBUG::DebugDump(3,["LocaleField" => $this->LocaleField, "Relations" => $this->Relations]);
 }
 //==============================================================================
 // ページング設定
@@ -106,9 +123,8 @@ public function SetPage($pagesize,$pagenum) {
     private function readLocaleField() {
         foreach($this->LocaleField as $key => $val) {
             list($nm,$lang_nm) = $val;
-            if( array_key_exists($lang_nm,$this->dbDriver->columns)
-                && !empty($this->fields[$lang_nm]) )
-                    $this->fields[$nm] = $this->fields[$lang_nm];           // ロケールフィールドを取得
+            if(array_key_exists($lang_nm,$this->dbDriver->columns) && !empty($this->fields[$lang_nm]))
+                $this->fields[$key] = $this->fields[$lang_nm];           // ロケールフィールドに置換
         }
     }
 //==============================================================================
@@ -147,16 +163,23 @@ public function getRecordBy($field,$value) {
 public function GetRecord($num) {
     APPDEBUG::MSG(13, $num);
     $this->getRecordBy($this->Primary,$num);
+    $this->RecData= $this->fields;          // レコードの生データ
+    APPDEBUG::DebugDump(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);
+}
+//==============================================================================
+//   リレーション先のラベルと値の連想配列リスト作成
+// 結果：  リレーション先の選択リスト = Select (Relations)
+public function GetValueList() {
+    APPDEBUG::MSG(13, $num);
     $valueLists = array();
     foreach($this->Relations as $key => $val) {     // リレーション先の値リストを取得する
         list($table,$fn, $ref,$grp) = explode('.', $val);
         if(!isset($grp)) $grp = 0;
         // $key カラムの一覧を取得する
-        $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn);
+        $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn,$grp);
     }
-    APPDEBUG::MSG(13, $valueLists);
-    $this->RecData= $this->fields;          // レコードの生データ
     $this->Select= $valueLists;             // JOIN先の値リスト
+    APPDEBUG::DebugDump(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);
 }
 //==============================================================================
 // フィールドの読み込み (JOIN無し)
@@ -174,6 +197,7 @@ public function getRecordValue($num) {
         return;
     }
     $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],$this->Relations);
+    $this->readLocaleField();
 }
 //==============================================================================
 // 条件に一致するレコード数を検索する
@@ -213,7 +237,9 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
                 $record[$nm] = $this->fields[$ref];
             }
         }
-        APPDEBUG::MSG(3, $record, "RECORD:");
+        if(!empty($this->LocaleField)) {
+            APPDEBUG::DebugDump(3, [ "RecordFinder" => [ "FIELD" => $this->fields, "RECORD" => $record]]);
+        }
         // プライマリキーは必ず含める
         $record[$this->Primary] = $this->fields[$this->Primary];
         if(! empty($record) ) {

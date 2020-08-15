@@ -18,6 +18,8 @@ class AppController extends AppObject {
 		$model = "{$this->ModuleName}Model";
 		if(!class_exists($model)) $model = 'AppModel';	// クラスがなければ基底クラスで代用
 		$this->Model = new $model($this);			// データアクセスモデルクラス
+		// Model側の construct 中にはデッドロックが発生し、呼び出せないのでコントローラ側で処理してやる
+		$this->Model->RelationSetup();				// リレーション情報を実テーブル名とロケール名に置換
 		$this->LocalePrefix = $this->Model->LocalePrefix;	// 言語プレフィクスをオーバーライド
 		$view = "{$this->ModuleName}View";		// ローカルビューが存在するなら使う
 		if(!class_exists($view)) $view = 'AppView';	// クラスがなければ基底クラスで代用
@@ -118,6 +120,7 @@ public function ViewAction() {
 	try {
 		$num = App::$Params[0];
 		$this->Model->GetRecord($num);
+		$this->Model->GetValueList();
 		$this->View->ViewTemplate('ContentView');
 	} catch (Exception $e) {
 
