@@ -324,7 +324,7 @@ public function fetchDB() {
 //	レコードの更新 $wh[Primary] = recordID
 // レコードIDをプライマリキーに設定するバージョン
 //==============================================================================
-	public function replaceRecord($wh,$row) {
+	public function updateRecord($wh,$row) {
 		APPDEBUG::MSG(13, $row );
 		$recordId = reset($wh);			// 先頭の値がPrimaryKey = recordId
 		if(empty($recordId)) {					// ID指定が無いときは空レコード生成
@@ -354,7 +354,7 @@ public function fetchDB() {
 public function insertRecord($row)
 public function deleteRecord($wh)
 public function getRecordValue($row,$relations)
-public function getValueLists($table,$ref,$id) 
+public function getValueLists($table,$ref,$id,$grp) 
 public function getLastError() 
 */
 

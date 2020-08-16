@@ -39,6 +39,7 @@ public function doQuery($sql) {
 	if(!$this->rows) {
 		$res1 = pg_get_result($this->dbb);
 		echo "ERROR:" . pg_result_error($res1) . "<br>\n";
+		echo "SQL:{$sql}\n";
 		die('Postgres QUERY失敗' . pg_last_error());
 	}
 	return $this->rows;
@@ -59,7 +60,7 @@ public function getLastError() {
 // ON CONFLICT (id) DO UPDATE SET name = val_name；
 // pg_update($this->dbb,$this->table,$row,$wh);
 //==============================================================================
-public function replaceRecord($wh,$row) {
+public function updateRecord($wh,$row) {
 	$this->sql_safequote($row);
 	APPDEBUG::MSG(13, $row );
 	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ

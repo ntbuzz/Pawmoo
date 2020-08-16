@@ -9,7 +9,7 @@ class NullHandler {
         $this->fields = [];
 	}
 public function SetPaging($pagesize, $pagenum) { }
-public function getValueLists($table,$ref,$id) { return []; }
+public function getValueLists($table,$ref,$id,$grp) { return []; }
 public function getLastError() { return ''; }
 
 public function getRecordValue($row,$relations) { return []; }
@@ -18,7 +18,7 @@ public function doQuery($sql) { return NULL; }
 public function findRecord($row,$relations,$sort = []) { }
 public function fetchDB() { return FALSE; }
 public function insertRecord($row) { }
-public function replaceRecord($wh,$row) { }
+public function updateRecord($wh,$row) { }
 public function deleteRecord($wh) { }
 
 }

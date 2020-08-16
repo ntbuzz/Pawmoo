@@ -26,6 +26,7 @@ class AppModel extends AppObject {
     public $page_num;           // 取得ページ番号
     public $record_max;         // 総レコード数
 
+    private $LocaleField;       // ロケール置換フィールドセット
 //==============================================================================
 //	コンストラクタ：　テーブル名
 //==============================================================================
@@ -75,6 +76,7 @@ class AppModel extends AppObject {
 protected function SchemaHeader($schema) {
     // ヘッダ表示用のスキーマ
     $this->TableHead = array();
+    $this->LocaleField = [];
     foreach($schema as $key => $val) {
         list($nm,$mflag) = $val;
         // 参照フィールド設定：*_id でRelations設定されていれば_idなしを参照フィールドにする
@@ -85,10 +87,28 @@ protected function SchemaHeader($schema) {
         if($nm[0] === '.') {            // 言語ファイルの参照
             $nm = $this->_(".Schema{$nm}");   //  Schema 構造体を参照する
         }
-        $flag = $mflag % 10;
-        $align= ($mflag - $flag) / 10;
-        $this->TableHead[$key] = array($nm,$flag,$align,$ref);
+        list($lang,$align,$flag) = array_slice(str_split("000{$mflag}"),-3);
+        $this->TableHead[$key] = array($nm,(int)$flag,(int)$align,$ref);
+        if($lang === '1') $this->LocaleField[$key] = array($nm, "{$key}_" . LangUI::$LocaleName);
     }
+}
+//==============================================================================
+// スキーマを分解してヘッダー情報を生成
+public function RelationSetup() {
+    if(!empty($this->Relations)) {
+        // リレーション先の情報をモデル名からテーブル名とロケール先のフィールド名に置換する
+        foreach($this->Relations as $key => $rel) {
+            list($model,$field,$refer,$group) = explode('.', $rel);
+            if(array_key_exists($refer,$this->$model->LocaleField)) {
+                $lang_ref = "{$refer}_" . LangUI::$LocaleName;
+                if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $refer = $lang_ref;
+            }
+            // モデル名→テーブル名に置換
+            $arr = [$this->$model->DataTable,$field,$refer,$group];
+            $this->Relations[$key] =  implode('.',$arr);
+        }
+    }
+    APPDEBUG::DebugDump(3,["LocaleField" => $this->LocaleField, "Relations" => $this->Relations]);
 }
 //==============================================================================
 // ページング設定
@@ -97,6 +117,28 @@ public function SetPage($pagesize,$pagenum) {
     $this->page_num = ($pagenum <= 0) ? 1 : $pagenum;            // 現在のページ番号 1から始まる
     $this->dbDriver->SetPaging($this->pagesize,$this->page_num);
 }
+//==============================================================================
+// ロケールフィールドによる置換処理
+// 結果：   レコードデータ = field
+    private function readLocaleField() {
+        foreach($this->LocaleField as $key => $val) {
+            list($nm,$lang_nm) = $val;
+            if(array_key_exists($lang_nm,$this->dbDriver->columns) && !empty($this->fields[$lang_nm]))
+                $this->fields[$key] = $this->fields[$lang_nm];           // ロケールフィールドに置換
+        }
+    }
+//==============================================================================
+// ロケールフィールドによる置換処理
+// 結果：   レコードデータ = field
+    private function writeLocaleField() {
+        foreach($this->LocaleField as $key => $val) {
+            list($nm,$lang_nm) = $val;
+            if( array_key_exists($lang_nm,$this->dbDriver->columns)) {
+                $this->fields[$lang_nm] = $this->fields[$nm];           // ロケールフィールドへ書込み
+                unset($this->fields[$nm]);                             // もとのフィールドは消しておく
+            }
+        }
+    }
 //==============================================================================
 // PrimaryKey で生レコードを取得
 // 結果：   レコードデータ = fields
@@ -109,6 +151,7 @@ public function getRecordByKey($id) {
 public function getRecordBy($field,$value) {
     if(!empty($value)) {
         $this->fields = $this->dbDriver->doQueryBy($field,$value);
+        $this->readLocaleField();
     } else $this->fields = array();
     return $this->fields;
 }
@@ -120,16 +163,23 @@ public function getRecordBy($field,$value) {
 public function GetRecord($num) {
     APPDEBUG::MSG(13, $num);
     $this->getRecordBy($this->Primary,$num);
+    $this->RecData= $this->fields;          // レコードの生データ
+    APPDEBUG::DebugDump(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);
+}
+//==============================================================================
+//   リレーション先のラベルと値の連想配列リスト作成
+// 結果：  リレーション先の選択リスト = Select (Relations)
+public function GetValueList() {
+    APPDEBUG::MSG(13, $num);
     $valueLists = array();
     foreach($this->Relations as $key => $val) {     // リレーション先の値リストを取得する
         list($table,$fn, $ref,$grp) = explode('.', $val);
         if(!isset($grp)) $grp = 0;
         // $key カラムの一覧を取得する
-        $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn);
+        $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn,$grp);
     }
-    APPDEBUG::MSG(13, $valueLists);
-    $this->RecData= $this->fields;          // レコードの生データ
     $this->Select= $valueLists;             // JOIN先の値リスト
+    APPDEBUG::DebugDump(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);
 }
 //==============================================================================
 // フィールドの読み込み (JOIN無し)
@@ -147,6 +197,7 @@ public function getRecordValue($num) {
         return;
     }
     $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],$this->Relations);
+    $this->readLocaleField();
 }
 //==============================================================================
 // 条件に一致するレコード数を検索する
@@ -174,6 +225,8 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
             "Head:" => $this->Header,
         ]);
         if(!isset($this->fields[$this->Unique])) continue;
+        // ロケールフィールドで置換しておく
+        $this->readLocaleField();
         $record = array();
         foreach($this->Header as $key => $val) {
             list($nm,$flag,$align,$ref) = $val;
@@ -184,7 +237,9 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
                 $record[$nm] = $this->fields[$ref];
             }
         }
-        APPDEBUG::MSG(3, $record, "RECORD:");
+        if(!empty($this->LocaleField)) {
+            APPDEBUG::DebugDump(3, [ "RecordFinder" => [ "FIELD" => $this->fields, "RECORD" => $record]]);
+        }
         // プライマリキーは必ず含める
         $record[$this->Primary] = $this->fields[$this->Primary];
         if(! empty($record) ) {
@@ -214,6 +269,8 @@ public function AddRecord($row) {
         if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
     }
     unset($this->fields[$this->Primary]);
+    // ロケールフィールドに移動する
+    $this->writeLocaleField();
     APPDEBUG::MSG(13, $this->fields);
     $this->dbDriver->insertRecord($this->fields);
 }
@@ -244,8 +301,10 @@ public function UpdateRecord($num,$row) {
         if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
     }
     $this->fields[$this->Primary] = $num;
+    // ロケールフィールドに移動する
+    $this->writeLocaleField();
     APPDEBUG::MSG(3, $this->fields);
-    $this->dbDriver->replaceRecord([$this->Primary => $num],$this->fields);
+    $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
 }
 
 }

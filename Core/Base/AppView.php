@@ -29,6 +29,7 @@ class AppView extends AppObject {
             'ul'        => 'cmd_list',
             'ol'        => 'cmd_list',
             'dl'        => 'cmd_dl',
+            'select'    => 'cmd_select',
             'inline'    => 'cmd_inline',
             'markdown'  => 'cmd_markdown',
         ],
@@ -160,17 +161,24 @@ public function ViewTemplate($name,$vars = []) {
     private function expand_Walk(&$val, $key, $vars) {
         if($val[0] === '$') {           // 先頭の一文字が変数文字
             $var = mb_substr($val,1);
-            $var = trim($var,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
+            $var = trim($var,'{}');                 // triming of delimitter { }
             switch($var[0]) {
-            case '@': $var = mb_substr($var,1);     // レコードデータの参照指定
-                if($var[0] === '@') {
-                    $var = mb_substr($var,1);     // 生データ
-                    $val = $this->Model->RecData[$var];
-                } else  // HTML変換と改行の削除
-                    $val = str_replace("\n",'',text_to_html($this->Model->RecData[$var]));
+            case '@': $var = mb_substr($var,1);     // refer to RECORD DATA
+                list($val,$alt) = (mb_strpos($var,':') !== FALSE) ? explode(':',$var) : [$var,''];
+                $is_row = ($var[0] === '@');            // is RAW DATA
+                if($is_row) $var = mb_substr($var,1);   // clip first @ char
+                $val = $this->Model->RecData[$var];     // get FIELD DATA
+                if(empty($val) && !empty($alt)) {       // FILED is EMPTY and ALTERNATIVE exist
+                    $val = ($alt[0] === "'") ? trim($alt,"'")       // is CONSTANT
+                                             : $this->Model->RecData[$alt]; // alternate FIELD
+                }
+                // not RAW will be HTML convert
+                if($is_row === FALSE) $val = str_replace("\n",'',text_to_html($val));
                 break;
             case '#': $var = mb_substr($var,1);     // 言語ファイルの参照
-                $val = $this->_($var);              // 言語ファイルの定義配列から文字列を取り出す
+                $allow = ($var[0] === '#');         // 配列を許可する
+                if($allow) $var = mb_substr($var,1);
+                $val = $this->_($var,$allow);       // 言語ファイルの定義配列から文字列または配列を取り出す
                 break;
             case '%': if(substr($var,-1) === '%') {     // 末尾文字を確かめる
                     $var = trim($var,'%');              // URLの引数番号
@@ -201,7 +209,7 @@ public function ViewTemplate($name,$vars = []) {
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
     private function expand_Strings($str,$vars) {
 //        $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%}|{\'[^\']+?\'})/'; // 変数リストの配列を取得
-        $p = '/\${[^}\s]+?}|\${[#%\'\$][^}\s]+?}/';          // 変数リストの配列を取得
+        $p = '/\${[^}\s]+?}|\${[#%\'\$@][^}\s]+?}/';          // 変数リストの配列を取得
         preg_match_all($p, $str, $m);
         $varList = $m[0];
         if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
@@ -516,6 +524,27 @@ public function ViewTemplate($name,$vars = []) {
             }
         }
         echo "</{$tag}>\n";
+    } 
+    //--------------------------------------------------------------------------
+    //  select リストの出力
+    // +select => [
+    //    selected_key = > [
+    //      option_text => value
+    //      ...
+    //    ]
+    // ]
+    private function cmd_select($tag,$attrs,$subsec,$sec,$vars) {
+        if(is_array($subsec)) {
+            $attr = $this->gen_Attrs($attrs);
+            echo "<{$tag}{$attr}>\n";
+            $opt_key = array_key_first($subsec);    // 最初の要素を処理
+            $sel_item = (is_numeric($opt_key)) ? '' : $this->expand_Strings($opt_key,$vars);
+            foreach($subsec[$opt_key] as $opt => $val) {
+                $sel = ($opt === $sel_item) ? ' selected':'';
+                echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
+            }
+            echo "</{$tag}>\n";
+        }
     }
     //==========================================================================
     // タグ文字列の分解

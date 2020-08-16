@@ -276,9 +276,14 @@ public function ViewStyle($file_name) {
         $files = (is_array($sec)) ? $sec : array($sec);
         foreach($files as $vv) {
             if(get_protocol($vv) !== NULL) {    // IMPORT from INTERNET URL
-                // ouput row-data, not modified
-                if($this->do_msg) echo "/* import from {$vv} */\n";
-                echo file_get_contents($vv)."\n";
+                list($filename,$v_str) = (strpos($vv,';')!==FALSE)?explode(';',$vv):[$vv,''];  // 置換文字列
+                parse_str($v_str, $vars);
+                if($this->do_msg) echo "/* import from {$filename} */\n";
+                $content = file_get_contents($filename);
+                $replace_keys   = array_keys($vars);
+                $replace_values = array_values($vars);
+                if(!empty($replace_keys)) $content = str_replace($replace_keys,$replace_values, $content);
+                echo "{$content}\n";
                 $imported = TRUE;
                 continue;
             }
