@@ -122,7 +122,7 @@ public function ViewTemplate($name,$vars = []) {
             $View = $this;              // ビュークラス自身
             $RecData = $this->Model->RecData;    // レコードデータ
             $Records = $this->Model->Records;    // レコードリスト
-            $Header = $this->Model->Header;    // スキーマヘッダ
+            $Header = $this->Model->HeaderSchema;    // スキーマヘッダ
             $_ = function($id) { return $this->_($id); };   // shortcut LANG-ID Convert
             require_once ($tmplate);
             break;
@@ -537,12 +537,14 @@ public function ViewTemplate($name,$vars = []) {
         if(is_array($subsec)) {
             $attr = $this->gen_Attrs($attrs);
             echo "<{$tag}{$attr}>\n";
-            $opt_key = array_key_first($subsec);    // 最初の要素を処理
+            list($opt_key, $opt_val) = array_first_item($subsec);    // 最初の要素を処理
             $sel_item = (is_numeric($opt_key)) ? '' : $this->expand_Strings($opt_key,$vars);
-            foreach($subsec[$opt_key] as $opt => $val) {
-                $sel = ($opt === $sel_item) ? ' selected':'';
-                echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
-            }
+            if(is_array($opt_val)) {
+                foreach($subsec[$opt_key] as $opt => $val) {
+                    $sel = ($opt === $sel_item) ? ' selected':'';
+                    echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
+                }
+            } else echo "<OPTION value='{$opt_val}'>{$opt_val}</OPTION>\n";
             echo "</{$tag}>\n";
         }
     }

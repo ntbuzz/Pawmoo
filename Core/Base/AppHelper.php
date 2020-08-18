@@ -126,33 +126,22 @@ public function MakePageLinks() {
 //==============================================================================
 // テーブルヘッダを出力
 	protected function putTableHeader() {
-		// デバッグ情報
-		APPDEBUG::DebugDump(11,[
-			'Header' => $this->MyModel->Header,
-		]);
 		echo '<tr>';
-		foreach($this->MyModel->Header as $key => $val) {
-			list($nm,$flag,$align) = $val;
-			if($flag > 0) {
-				$tsort = ($flag==2) ? '' : ' class="sorter-false"';
-				echo "<th${tsort}>{$nm}</th>";
-			}
+		foreach($this->MyModel->HeaderSchema as $key => $val) {
+			list($alias,$align,$flag) = $val;
+			$tsort = ($flag==2) ? '' : ' class="sorter-false"';
+			echo "<th${tsort}>{$alias}</th>";
 		}
 		echo "</tr>\n";
 	}
 //==============================================================================
 // レコードカラムを出力
 	protected function putColumnData($lno,$columns) {
-		// デバッグ情報
-		APPDEBUG::DebugDump(11,[
-			'lno' => $lno,
-			'columns' => $columns,
-		]);
 		echo "<tr class='item' id='".$columns[$this->MyModel->Primary]."'>";
-		foreach($this->MyModel->Header as $key => $val) {
-			list($nm,$flag,$align) = $val;
+		foreach($this->MyModel->HeaderSchema as $key => $val) {
+			list($alias,$align,$flag) = $val;
 			$pos = self::AttrAlign[$align];
-			if($flag > 0) echo "<td nowrap{$pos}>". $columns[$nm]."</td>";
+			echo "<td nowrap{$pos}>". $columns[$key]."</td>";
 		}
 		echo "</tr>\n";
 	}

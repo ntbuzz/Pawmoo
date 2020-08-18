@@ -44,6 +44,7 @@ class App {
             'controller' => $controller,  //ucfirst($uri_array[2]),
             'method' => $method,  //ucfirst($uri_array[3]),
             'filter' => $filter,  // ucfirst(self::$Filter),
+            'current_version' => CURRENT_VERSION,  // framework version
         );
         self::$Query = $query;
         // メソッドの書き換えによるアドレスバー操作用
