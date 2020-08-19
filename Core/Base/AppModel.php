@@ -32,9 +32,9 @@ class AppModel extends AppObject {
     public $Header = NULL;           // レコード検索したレコードの列名リスト
     public $OnGetRecord = NULL;      // レコード取得時のコールバック1関数
     // Schema を分解してヘッダ表示用エイリアス・属性＋参照フィールド名を記憶する
-    public $HeaderSchema;         // ヘッダー表示用のリスト [ field_name => [disp_name, align, sort_flag [, ref_name, org_name] ]
-    private $LocaleSchema;         // ロケール置換用のリスト [ field_name => locale_name,,... ]
-
+    public $HeaderSchema = [];       // ヘッダー表示用のリスト [ field_name => [disp_name, align, sort_flag ]
+    private $LocaleSchema= [];       // ロケール置換用のリスト [ field_name => locale_name,,... ]
+    private $FieldSchema = [];       // 取得フィールドのリスト [ref_name, org_name]
 //==============================================================================
 //	コンストラクタ：　テーブル名
 //==============================================================================
@@ -72,9 +72,7 @@ class AppModel extends AppObject {
 // スキーマを分解してヘッダー情報を生成
 protected function SchemaHeader($schema) {
     APPDEBUG::MSG(13,$schema);
-    // ヘッダ表示用のスキーマとロケール用のスキーマ
-    $this->HeaderSchema = [];
-    $this->LocaleSchema = [];
+    // ヘッダ表示用とフィールド取得用のスキーマとロケール用のスキーマ
     foreach($schema as $key => $val) {
         list($alias,$mflag) = $val;
         list($lang,$align,$flag) = array_slice(str_split("000{$mflag}"),-3);
@@ -90,9 +88,10 @@ protected function SchemaHeader($schema) {
             } else $ref_name = $key;
         }
         if(empty($alias)) $alias = $key_name;
+        $this->FieldSchema[$key_name] = [$ref_name,  $key];         // Schema 配列に定義されたフィールドを取得する
         if($alias[0] === '.') $alias = $this->_(".Schema{$alias}");   //  Schema 構造体を参照する
         if($flag !== '0') {
-            $this->HeaderSchema[$key_name] = [$alias,(int)$align,(int)$flag, $ref_name,  $key];
+            $this->HeaderSchema[$key_name] = [$alias,(int)$align,(int)$flag];
         }
     }
 }
@@ -228,8 +227,8 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
         if(!isset($this->fields[$this->Unique])) continue;
 //        $this->readLocaleField();        // レコードデータをロケールフィールドで置換しておく
         $record = array();
-        foreach($this->HeaderSchema as $key => $val) {
-            list(,,,$ref_name,$org_name) = $val;
+        foreach($this->FieldSchema as $key => $val) {
+            list($ref_name,$org_name) = $val;
             if($filter === [] || in_array($key,$filter)) { // フィルタが無指定、またはフィルタにヒット
                 $ref_key = (empty($this->fields[$ref_name])) ? $org_name : $ref_name;
                 $record[$key] = $this->fields[$ref_key];
