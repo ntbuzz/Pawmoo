@@ -69,41 +69,55 @@ class AppObject {
         }
     }
 //==============================================================================
-// クラスの動的クラスプロパティを生成
+// クラスの動的クラスプロパティを生成(オードロード)
 public function __get($PropName) {
     if($this->autoload === FALSE) return NULL;
-    $fldr = array(
-        'Controller'=> [],
-        'Helper'    => ["modules/{$PropName}"],
-        'Model'     => ["Models","modules/{$PropName}"],
-    );
-    APPDEBUG::MSG(10, $PropName . " を動的生成します。");
     if(isset($this->$PropName)) return $this->$PropName;
-    // Model or View or Helper or Controller を付加する
+    // クラス名を取り出す
     preg_match('/[A-Z][a-z]+?$/', $PropName, $matches);
-    $class = $matches[0];
-    if(!array_key_exists($class,$fldr)) $class = 'Model';
-    $props = "{$PropName}{$class}";
+    $cls_name = $matches[0];
+    if(empty($cls_name)) {
+        throw new Exception("Bad name request for SubClass '{$PropName}'");
+    }
+    $class_list = array(
+        'Class'     => 0,
+        'Model'     => 1,
+        'Helper'    => 2,
+        'Controller'=> 2,
+    );
+    if(array_key_exists($cls_name,$class_list)) {
+        $mod_name = str_replace($cls_name,'',$PropName);
+    } else {
+        $mod_name = $PropName;
+        $cls_name = 'Model';
+    }
+    $prop_name = "{$mod_name}{$cls_name}";
     // ロード済か確認
-    if(class_exists($props)) {
-        $this->$PropName = new $props($this);
+    if(class_exists($prop_name)) {
+        $this->$PropName = new $prop_name($this);
         return $this->$PropName;
     }
-    if($class === 'Controller') {
-        // Controllerの場合はセットでロードする
-        App::LoadModuleFiles($PropName);
-        // ロードできたか確かめる
-        if(class_exists($props)) {
-            $this->$PropName = new $props($this);
-            return $this->$PropName;
-        }
-    } else {
-        // Models, modules フォルダにファイルがあればロードする
-        foreach($fldr[$class] as $model) {
-            $modfile = App::Get_AppPath("{$model}/{$props}.php");
-            if(file_exists($modfile)) {
+    // 格納パスを探索する
+    $fldr = array(
+        ["Class"],
+        ["Models","modules/{$mod_name}"],
+        ["modules/{$mod_name}"],
+    );
+    $path_list = $fldr[$class_list[$cls_name]];
+    foreach($path_list as $path) {
+        $modfile = App::Get_AppPath("{$path}/{$prop_name}.php");
+        if(file_exists($modfile)) {
+//            echo "Found:{$modfile}\n";
+            if($cls_name === 'Controller') {
+                App::LoadModuleFiles($mod_name);    // Controllerの場合はモジュールセットでロードする
+                if(class_exists($prop_name)) {      // ロードできたか確かめる
+                    $this->$PropName = new $prop_name($this);
+                    return $this->$PropName;
+                }
+            } else {
+//echo "Require:{$modfile} {$prop_name}\n";
                 require_once($modfile);
-                $this->$PropName = new $props($this);
+                $this->$PropName = new $prop_name($this);
                 return $this->$PropName;
             }
         }
