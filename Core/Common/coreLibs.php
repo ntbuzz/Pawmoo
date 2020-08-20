@@ -242,8 +242,8 @@ function debug_dump($flag, $arr = []) {
                     $dump_object($val,$indent+1,$danger);
                 } else if(is_scalar($val)) {
                     echo_safe("'{$val}'",$danger);
-                    echo "\n";
                 }
+                echo "\n";
             }
         };
         if($flag < 3) echo "<pre>\n{$str}\n";
