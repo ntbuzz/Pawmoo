@@ -143,7 +143,7 @@ if(!$controllerInstance->is_enable_action($method)) {
     } else {
         $module[0] = $controller;       // may-be rewrited
         $module[1] = $method;           // may-be rewrited
-        debug_dump(1,[
+        debug_dump(0,[
             'Module Info' => [
                 'App' => $appname,
                 'Cont' => $ContClass,

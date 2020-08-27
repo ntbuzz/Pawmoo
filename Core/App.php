@@ -36,11 +36,12 @@ class App {
         self::$ParamCount = $k;
 		self::$Params += array_fill($k, 10 - $k, '');
         self::$SysVAR = array(
+            'SERVER' => $_SERVER['SERVER_NAME'],
+            'REFERER' => self::$Referer,
+            'URI' => $uri,
             'SYSROOT' => self::$sysRoot,
             'APPNAME' => self::$AppName,
             'URIROOT' => self::$appRoot,
-            'URI' => $uri,
-            'REFERER' => self::$Referer,
             'controller' => $controller,  //ucfirst($uri_array[2]),
             'method' => $method,  //ucfirst($uri_array[3]),
             'filter' => $filter,  // ucfirst(self::$Filter),

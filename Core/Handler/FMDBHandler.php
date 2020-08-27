@@ -31,28 +31,47 @@ class FMDBHandler extends FileMaker {
 // コンストラクタでデータベースに接続
 	function __construct($dbtable) {
 		parent::__construct(); // 継承元クラスのコンストラクターを呼ぶ
+		// FileMakerへのアクセスに共通
+		foreach( DatabaseParameter['Filemaker'] as $key => $val ){
+			$this->setProperty($key, $val);
+		}
+		$this->DatabaseConnect($dbtable);
+/*
 		// DB_FILE:WEB-Layout
 		list($dbname,$table) = explode(':',$dbtable);
 		// クラスユニークなパラメータ
 		$this->setProperty('database', $dbname);
 		$this->LayoutName = $table;
 		$this->Database = $dbname;
-		// FileMakerへのアクセスに共通
-		foreach( DatabaseParameter['Filemaker'] as $key => $val ){
-			$this->setProperty($key, $val);
-		}
 		$this->startrec = 0;		// 開始レコード番号
 		$this->limitrec = 0;		// 取得レコード数
 		$this->fetchCount = 20;
 		$this->Finds = array();
 		$this->Connect($this->LayoutName);
+*/
 		APPDEBUG::MSG(13, DatabaseParameter['Filemaker']);
 	}
+
+//==============================================================================
+// コンストラクタでデータベースに接続
+public function DatabaseConnect($dbtable) {
+	// DB_FILE:WEB-Layout
+	list($dbname,$table) = explode(':',$dbtable);
+	// クラスユニークなパラメータ
+	$this->setProperty('database', $dbname);
+	$this->LayoutName = $table;
+	$this->Database = $dbname;
+	$this->startrec = 0;		// 開始レコード番号
+	$this->limitrec = 0;		// 取得レコード数
+	$this->fetchCount = 20;
+	$this->Finds = array();
+	$this->Connect($this->LayoutName);
+}
 //==============================================================================
 //	Connect: テーブル名
 //	fields[] 連想配列にフィールド名をセットする
 //==============================================================================
-function Connect($layout) {
+private function Connect($layout) {
 	APPDEBUG::MSG(13, $this->LayoutName, 'レイアウト');
 	$this->fields = array();
     // 先頭のレコードをひとつダミーで読み込む
