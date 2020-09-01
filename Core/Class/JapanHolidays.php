@@ -1,5 +1,5 @@
 <?php
-require_once('Core/Class/HolidayClass.php');
+//require_once('Core/Class/HolidayClass.php');
 
 class JapanHolidays extends CommonHolidays {
 	const HolidayList = [

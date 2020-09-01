@@ -20,6 +20,7 @@
             self.css("top", top + "px");
 //            alert(e+":"+top);
         });
+        $(e).scrollTop(0);
     };
     // 親要素の高さに調整する
     $.fn.adjustHeight = function () {

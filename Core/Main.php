@@ -192,6 +192,8 @@ APPDEBUG::DebugDump(1, [
     "Location" => App::Get_RelocateURL(),
 
 ]);
+require_once('Class/ClassLoader.php');
+ClassLoader::Setup($appname,$controller);
 
 APPDEBUG::RUN_START();
 // ログイン不要ならTRUEが返る

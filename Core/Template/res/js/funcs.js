@@ -26,6 +26,13 @@ String.prototype.filter_path = function(e) {
     return '/'+path.slice(0,n).join('/')+'/'+e+'/';                   // 0 〜 n までの要素を / で結合し、指定パスを付加
 };
 //====================================================
+// パラメータまでのパスに引数を付加する
+String.prototype.param_path = function(e) {
+    var path = this.replace(/^[\/]+|[\/]+$/g, '').split('/');
+    var n = (path[0] == "${$appName$}") ? 4 : 5;
+    return '/'+path.slice(0,n).join('/')+'/'+e+'/';                   // 0 〜 n までの要素を / で結合し、指定パスを付加
+};
+//====================================================
 // URLの末尾から数字パラメータを除外して、指定パスを付加する
 String.prototype.exclude_num_path = function(e) {
     var path = this.replace(/^[\/]+|[\/]+$/g, '').split('/');
