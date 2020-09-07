@@ -173,10 +173,11 @@ function pseudo_markdown($atext, $md_class = '') {
         '/\n```([a-z]+?)\n(.+?)\n```/s' => "\n<pre class=\"\\1\">\n\\2</pre>\n",    // class name
         '/\n```\n(.+?)\n```/s'          => "\n<pre class=\"code\">\n\\1</pre>\n",   // code
         '/\n(~~~|\^\^\^)\n(.+?)\n\1/s'  => "\n<pre class=\"indent\">\n\\2</pre>\n", // indent block
-        '/!\[([^\]]+)\]\(!([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'   => '<img src="'.App::Get_AppRoot().'images/\\2" alt="\\1">',
-        '/!\[([^\]]+)\]\(:([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'   => '<img src="/res/images/\\2" alt="\\1">',
-        '/!\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:\@&=+\$,%#]+)\)/'   => '<img src="\\2" alt="\\1">',
-        '/\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:\@&=+\$,%#]+)\)/'    => '<a href="\\2">\\1</a>',
+        '/\.(\w+){(.+?)}/s'             => '<span class="\\1">\\2</span>',          // span inline
+        '/!\[([^\]]+)\]\(!([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'  => '<img src="'.App::Get_AppRoot().'images/\\2" alt="\\1">',
+        '/!\[([^\]]+)\]\(:([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'  => '<img src="/res/images/\\2" alt="\\1">',
+        '/!\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'   => '<img src="\\2" alt="\\1">',
+        '/\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'    => '<a href="\\2">\\1</a>',
         "/^(---|___|\*\*\*)$/m"     => "<hr>",       // <HR>
         "/^# (.+?)$/m"     => "<h1>\\1</h1>",        // <H1>
         "/^## (.+?)$/m"    => "<h2>\\1</h2>",        // <H2>
@@ -306,13 +307,22 @@ function make_hyperlink($lnk,$modname) {
     if(get_protocol($lnk) === NULL) {
 		if($lnk[0] === ':') {
             $lnk[0] = '/';
+//        } else if($lnk[0] === '#') {
+			// LABEL-Jump no-action
         } else if($lnk[0] === '/') {
 			$lnk = App::Get_SysRoot("{$lnk}");
-        } else if(mb_substr($lnk,0,2) === './') {
-            $lnk = substr_replace($lnk, strtolower($modname), 0, 1);
-            $lnk = App::Get_AppRoot($lnk);
         } else {
-            $lnk = App::Get_AppRoot($lnk);
+            $prf = mb_substr($lnk,0,2); // 先頭から2文字取り出す
+            $ref = mb_substr($lnk,2);   // 残りの文字列
+            if($lnk[0] === '!') {
+                $protocols = [ '!!' => 'https://', '!:' => ' http://' ];
+                if(array_key_exists($prf,$protocols)) {
+                    $lnk = $protocols[$prf] . App::$SysVAR['SERVER'] . $ref;
+                } else $lnk = $ref;
+            } else if($prf === './') {
+                $lnk = substr_replace($lnk, strtolower($modname), 0, 1);
+                $lnk = App::Get_AppRoot($lnk);
+            } else  $lnk = App::Get_AppRoot($lnk);
 		}
     }
     return $lnk;
