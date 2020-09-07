@@ -5,7 +5,7 @@
  *              PHPテンプレート(*.tpl)とセクションテンプレート(*.ptl)を読み込んでHTMLを出力する
  *              HTML出力のため AppHelper を所有する
  */
-require_once('Core/Class/Parser.php');
+//require_once('Core/Class/Parser.php');
 
 class AppView extends AppObject {
     protected $Layout;        // デフォルトのレイアウト

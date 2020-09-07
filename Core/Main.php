@@ -20,20 +20,25 @@
  */
 global $on_server;
 // デバッグ用のクラス
-require_once('AppDebug.php');
-require_once('Common/coreLibs.php');
-require_once('Class/session.php');
-require_once('Config/appConfig.php');
 
-require_once('App.php');
-require_once('Class/fileclass.php');
+require_once('AppDebug.php');
+require_once('Config/appConfig.php');
+require_once('Common/coreLibs.php');
 require_once('Common/appLibs.php');
+require_once('Class/session.php');
+require_once('Class/fileclass.php');
+require_once('Class/Parser.php');
+
+/*
+require_once('App.php');
 require_once('Base/AppObject.php');
 require_once('Base/AppController.php');
 require_once('Base/AppModel.php');
 require_once('Base/AppFilesModel.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
+*/
+
 require_once('Base/LangUI.php');
 
 APPDEBUG::INIT(DEBUG_LEVEL);
@@ -107,6 +112,10 @@ if(mb_strpos($method,'.') !== FALSE) {  // have a extension
     $module[1] = $method;
     $module[2] = $filter;
 }
+// アプリ固有クラスをオートロードできるようにする
+require_once('Class/ClassLoader.php');
+ClassLoader::Setup($appname,$controller);
+
 // アプリケーション変数を初期化する
 App::__Init($appname,$app_uri,$module,$query,$requrl);
 App::$Controller  = $controller;    // コントローラー名
@@ -117,10 +126,13 @@ foreach($libs as $files) {
     require_once $files;
 }
 // コアクラスのアプリ固有の拡張クラス
+/*
+オートローダーにまかせる
 $libs = get_php_files(App::Get_AppPath("extends/"));
 foreach($libs as $files) {
     require_once $files;
 }
+*/
 // 言語ファイルの対応
 $lang = (isset($query['lang'])) ? $query['lang'] : $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 
@@ -192,8 +204,6 @@ APPDEBUG::DebugDump(1, [
     "Location" => App::Get_RelocateURL(),
 
 ]);
-require_once('Class/ClassLoader.php');
-ClassLoader::Setup($appname,$controller);
 
 APPDEBUG::RUN_START();
 // ログイン不要ならTRUEが返る

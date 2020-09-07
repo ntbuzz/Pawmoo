@@ -8,7 +8,7 @@ class ClassLoader {
         foreach(static::$LoadDirs as $directory) {
             $file_name = "{$directory}/{$className}.php";
             if(is_file($file_name)) {
-                echo "Load Class File:{$file_name}\n";
+//echo "ClassLoader File:{$file_name}<br>\n";
                 require_once($file_name);
                 return true;
             }
@@ -23,8 +23,9 @@ public static function Setup($appname,$controller) {
         'Core/Class',
         "app/{$appname}/Class",
         "app/{$appname}/extends",
-        "app/{$appname}/Models",
-        "app/{$appname}/modules/{$controller}",
+//  以下の2つはAppObjectのマジックメソッドでロードする
+//        "app/{$appname}/Models",
+//        "app/{$appname}/modules/{$controller}",
     ];
     spl_autoload_register(array('ClassLoader','loadClass'));
 }

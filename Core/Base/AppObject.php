@@ -107,7 +107,6 @@ public function __get($PropName) {
     foreach($path_list as $path) {
         $modfile = App::Get_AppPath("{$path}/{$prop_name}.php");
         if(file_exists($modfile)) {
-//            echo "Found:{$modfile}\n";
             if($cls_name === 'Controller') {
                 App::LoadModuleFiles($mod_name);    // Controllerの場合はモジュールセットでロードする
                 if(class_exists($prop_name)) {      // ロードできたか確かめる
@@ -115,7 +114,6 @@ public function __get($PropName) {
                     return $this->$PropName;
                 }
             } else {
-//echo "Require:{$modfile} {$prop_name}\n";
                 require_once($modfile);
                 $this->$PropName = new $prop_name($this);
                 return $this->$PropName;
