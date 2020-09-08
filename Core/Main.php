@@ -20,16 +20,19 @@
  */
 global $on_server;
 // デバッグ用のクラス
-
 require_once('AppDebug.php');
+
+// このファイルが依存している関数定義ファイル
 require_once('Config/appConfig.php');
 require_once('Common/coreLibs.php');
 require_once('Common/appLibs.php');
+// オートローダーの初期化前に必要、または命名規則から外れたクラス
 require_once('Class/session.php');
 require_once('Class/fileclass.php');
 require_once('Class/Parser.php');
-
+require_once('Base/LangUI.php');
 /*
+以下の依存ファイルはオードロード機能によって読込む
 require_once('App.php');
 require_once('Base/AppObject.php');
 require_once('Base/AppController.php');
@@ -39,7 +42,6 @@ require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
 */
 
-require_once('Base/LangUI.php');
 
 APPDEBUG::INIT(DEBUG_LEVEL);
 // Setup TIMEZONE
