@@ -26,7 +26,6 @@ public function ViewTemplate($layout) {
 //==============================================================================
 // プロパティ変数のセット
 public function SetData($data) {
-	APPDEBUG::MSG(11, $data);
 	foreach($data as $key => $val) {
 		$this->$key = $val;
 	}
@@ -34,7 +33,6 @@ public function SetData($data) {
 //==============================================================================
 // リソースの出力
 public function Resource($res) {
-	APPDEBUG::MSG(11, $res);
 	list($filename,$ext) = extract_base_name($res);
 	// モジュール名と拡張子を使いテンプレートを決定する
 	$AppStyle = new AppStyle($this->ModuleName, $ext);
@@ -57,10 +55,10 @@ public function ALink($lnk,$txt,$under=false) {
 	}
 	$href = make_hyperlink($lnk,$this->ModuleName);
 	if(get_protocol($href) !== NULL) {
-		echo "<a href='{$href}' target=_blank>{$txt}</a>\n";
+		echo "<a href='{$href}' target=_blank>{$txt}</a>";
 	} else {
 		$uline = ($under) ? '' : ' class="nounder"';
-		echo "<a{$uline} href='{$href}'>{$txt}</a>\n";
+		echo "<a{$uline} href='{$href}'>{$txt}</a>";
 	}
 }
 //==============================================================================
@@ -112,7 +110,6 @@ public function MakePageLinks() {
 	// ページサイズの変更
 	$param = (empty(App::$Filter)) ? "1/" : "{App::$Filter}/1/";
 	$href = App::Get_AppRoot($this->ModuleName)."/page/{$param}";
-//		echo "<div class='rightalign'>表示数:<SELECT id='pagesize' onchange='location.href=\"{$href}\"+this.value;'>";
 	$dsp = "<span id='size_selector'>".$this->__(".Display", FALSE)."</span>";
 	echo "<div class='rightalign'>{$dsp}:<SELECT id='pagesize'>";
 	foreach(array(5,10,15,20,25,50,100) as $val) {
@@ -149,7 +146,7 @@ public function MakePageLinks() {
 // ヘッダー付きのテーブルリスト表示
 public function MakeListTable($deftab) {
 	// デバッグ情報
-	APPDEBUG::DebugDump(1,[
+	APPDEBUG::LOG(1,[
 		'deftab' => $deftab,
 		'Page' => $this->MyModel->page_num,
 		'Size' => $this->MyModel->pagesize,
@@ -184,7 +181,6 @@ public function Tabset($name,$menu,$sel) {
 //==============================================================================
 // タブリストの生成 (UL版)
 public function Contents_Tab($sel,$default='') {
-	APPDEBUG::MSG(11, $sel);
 	$tab = $default;
 	return '<li' . (($tab == $sel) ? '' : ' class="hide"') . ">\n";
 }
@@ -208,7 +204,7 @@ public function Form($act, $attr) {
 //	$this->Select ($key,$name)
 //
 public function Select($key,$name) {
-	APPDEBUG::MSG(1, $this->MyModel->Select);
+	APPDEBUG::LOG(1, $this->MyModel->Select);
 	$dat = $this->MyModel->RecData[$key];
 	echo "<SELECT name='{$name}'>";
 	foreach($this->MyModel->Select[$key] as $ttl => $id) {

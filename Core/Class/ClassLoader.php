@@ -18,8 +18,6 @@ class ClassLoader {
 // ロードパスの登録
 public static function Setup($appname,$controller) {
     static::$LoadDirs = [
-        'Core',
-        'Core/Base',
         'Core/Class',
         "app/{$appname}/Class",
         "app/{$appname}/extends",

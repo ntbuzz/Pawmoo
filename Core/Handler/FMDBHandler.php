@@ -49,7 +49,7 @@ class FMDBHandler extends FileMaker {
 		$this->Finds = array();
 		$this->Connect($this->LayoutName);
 */
-		APPDEBUG::MSG(13, DatabaseParameter['Filemaker']);
+		APPDEBUG::LOG(13, DatabaseParameter['Filemaker']);
 	}
 
 //==============================================================================
@@ -72,7 +72,7 @@ public function DatabaseConnect($dbtable) {
 //	fields[] 連想配列にフィールド名をセットする
 //==============================================================================
 private function Connect($layout) {
-	APPDEBUG::MSG(13, $this->LayoutName, 'レイアウト');
+	APPDEBUG::LOG(13, ['レイアウト' => $this->LayoutName]);
 	$this->fields = array();
     // 先頭のレコードをひとつダミーで読み込む
     $findCommand = $this->newFindAllCommand($this->LayoutName);
@@ -93,7 +93,7 @@ private function Connect($layout) {
 	foreach($fmfields as $key) {
 		$this->columns[$key] = $key;
 	}
-	APPDEBUG::MSG(13, $this->columns, "Columns @ {$this->Database}({$this->LayoutName})");
+	APPDEBUG::LOG(13, ["Columns @ {$this->Database}({$this->LayoutName})" => $this->columns]);
 	// フィールド型を記憶する
 	$this->fmtconv = array();
     $layoutObj = $result->getLayout();
@@ -244,7 +244,7 @@ public function findRecord($row, $relations = NULL,$sort = []) {
     $this->recordMax = 0;
 	$this->r_pos = 0;
 	$this->r_fetched = 0;		// 取り出したレコード数
-	APPDEBUG::MSG(13, $this->Finds, "検索設定");
+	APPDEBUG::LOG(13, ["検索設定" => $this->Finds]);
 	$this->onetime = 3;
 }
 //==============================================================================
@@ -255,7 +255,7 @@ public function fetchDB() {
 		if($this->recordMax > 0 && $this->skip_rec >= $this->recordMax) return 0;
 		if($this->limitrec > 0 && $this->skip_rec >= ($this->startrec + $this->limitrec)) return 0;
 		
-		APPDEBUG::DebugDump($this->onetime,[
+		APPDEBUG::LOG($this->onetime,[
 		    'Param' => [
         		"skip_rec" => $this->skip_rec,
 	        	"startrec" => $this->startrec,
@@ -294,7 +294,7 @@ public function fetchDB() {
 			$this->errCode = $result->getCode();
 			$this->errMessage= $result->getMessage();
             if ($this->errCode !== '401') {
-				APPDEBUG::MSG(3, $this->errMessage, "エラー");
+				APPDEBUG::LOG(3, ["エラー" => $this->errMessage]);
 				// Check Find Condition
 				debug_dump(4,[
 					'FindBy'	=> $this->Finds,
@@ -314,9 +314,9 @@ public function fetchDB() {
 		    $this->FetchRecords = $result->getRecords();
 			$this->r_pos = 0;
 		}
-		APPDEBUG::MSG(13, $this->r_fetched, "Fetch: ");
+		APPDEBUG::LOG(13, ["Fetch: " => $this->r_fetched]);
 	}
-	APPDEBUG::DebugDump($this->onetime,[
+	APPDEBUG::LOG($this->onetime,[
 		'fetched' => [
 			"recordMax" => $this->recordMax,
 			"r_fetched" => $this->r_fetched,
@@ -344,7 +344,7 @@ public function fetchDB() {
 // レコードIDをプライマリキーに設定するバージョン
 //==============================================================================
 	public function updateRecord($wh,$row) {
-		APPDEBUG::MSG(13, $row );
+		APPDEBUG::LOG(13, $row );
 		$recordId = reset($wh);			// 先頭の値がPrimaryKey = recordId
 		if(empty($recordId)) {					// ID指定が無いときは空レコード生成
 			// 空のレコードを生成

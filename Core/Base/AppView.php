@@ -77,7 +77,7 @@ public function SetLayout($layoutfile) {
 // レイアウト出力
 //==============================================================================
 public function PutLayout() {
-    APPDEBUG::MSG(1, $this->Layout,'$Layout');
+    APPDEBUG::LOG(1, "\$Layout = {$this->Layout}");
     $this->ViewTemplate($this->Layout);
     $this->doTrailer = TRUE;
 }
@@ -91,11 +91,11 @@ public function __TerminateView() {
         // リクエストURLと処理メソッドが違っていたときはRelocateフラグが立つ
         $url = App::Get_RelocateURL();
         if(isset($url)) {
-            APPDEBUG::MSG(1,$url, "URL書換");
+            APPDEBUG::LOG(1,"URL書換: {$url}\n");
             echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";
         }
         if(DEBUGGER) {
-            APPDEBUG::MSG_SORT();                   // メッセージ要素の並べ替え
+            APPDEBUG::LOG_SORT();                   // メッセージ要素の並べ替え
             $this->ViewTemplate('debugbar');
         }
     }
@@ -112,7 +112,7 @@ public function ViewTemplate($name,$vars = []) {
             $parser = new SectionParser($tmplate);
             $divSection = $parser->getSectionDef();
             $this->inlineSection = [];         // インラインセクション定義をクリア
-            APPDEBUG::DebugDump(1,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
+            APPDEBUG::LOG(1,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
             $this->sectionAnalyze($divSection,$vars);
             break;
         case 1:     // 'php'     // PHP Template
@@ -322,7 +322,7 @@ public function ViewTemplate($name,$vars = []) {
             list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($key,$sec);
             $attr = $this->gen_Attrs($attrs);
             if(is_array($sec)) {
-                echo "<{$tag}{$attr}>{$text}\n";
+                echo "<{$tag}{$attr}>{$text}";
                 $this->sectionAnalyze($subsec,$vars);
                 echo "</{$tag}>\n";
             } else {
@@ -336,7 +336,7 @@ public function ViewTemplate($name,$vars = []) {
         $attr = "";
         if($attrs !== array()) {
             foreach($attrs as $name => $val) {
-                $attr = " {$name}=\"{$val}\"{$attr}";
+                $attr = "{$attr} {$name}=\"{$val}\"";
             }
         }
         return $attr;
@@ -399,7 +399,7 @@ public function ViewTemplate($name,$vars = []) {
         // ヘルパーに指定メソッドが存在するかチェック
         if(method_exists($this->Helper,$key)) {
             (is_numeric($key)) 
-                ? $this->Helper->$key()
+                ? $this->Helper->$key(is_scalar($sec)?$sec:'')
                 : $this->Helper->$key($sec);
         } else if(method_exists('App',$key)) {
             (is_numeric($key)) 

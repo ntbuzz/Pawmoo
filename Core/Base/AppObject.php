@@ -63,7 +63,6 @@ class AppObject {
 //==============================================================================
 //	プロパティ初期化
     protected function setProperty($database) {
-        APPDEBUG::MSG(10,$database);
         foreach($database as $key => $val) {
             $this->$key = $val;
         }

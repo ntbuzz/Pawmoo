@@ -40,7 +40,7 @@ class AppModel extends AppObject {
 //==============================================================================
 	function __construct($owner) {
 	    parent::__construct($owner);                    // 継承元クラスのコンストラクターを呼ぶ
-        APPDEBUG::MSG(13,static::$DatabaseSchema);
+        APPDEBUG::LOG(13,static::$DatabaseSchema);
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
         $this->__InitClass();                             // クラス固有の初期化メソッド
         $this->fields = [];
@@ -65,13 +65,12 @@ class AppModel extends AppObject {
         $this->dbDriver = new $driver($this->DataTable);        // データベースドライバー
         // ヘッダ表示用のスキーマ
         $this->SchemaHeader($this->Schema);
-        APPDEBUG::MSG(3, $this->HeaderSchema, "HeaderSchema");
+        APPDEBUG::LOG(3, ["HeaderSchema" => $this->HeaderSchema]);
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
     }
 //==============================================================================
 // スキーマを分解してヘッダー情報を生成
 protected function SchemaHeader($schema) {
-    APPDEBUG::MSG(13,$schema);
     // ヘッダ表示用とフィールド取得用のスキーマとロケール用のスキーマ
     foreach($schema as $key => $val) {
         list($alias,$mflag) = $val;
@@ -111,7 +110,7 @@ public function RelationSetup() {
             $this->Relations[$key] =  implode('.',$arr);            // Relations変数に書き戻す
         }
     }
-    APPDEBUG::DebugDump(3,["LocaleSchema" => $this->LocaleSchema, "Relations" => $this->Relations]);
+    APPDEBUG::LOG(3,["LocaleSchema" => $this->LocaleSchema, "Relations" => $this->Relations]);
 }
 //==============================================================================
 // ページング設定
@@ -162,16 +161,13 @@ public function getRecordBy($key,$value) {
 // 結果：   レコードデータ = RecData
 //          リレーション先の選択リスト = Select (Relations)
 public function GetRecord($num) {
-    APPDEBUG::MSG(13, $num);
     $this->getRecordBy($this->Primary,$num);
     $this->RecData= $this->fields;          // レコードの生データ
-    APPDEBUG::DebugDump(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);
 }
 //==============================================================================
 //   リレーション先のラベルと値の連想配列リスト作成
 // 結果：  リレーション先の選択リスト = Select (Relations)
 public function GetValueList() {
-    APPDEBUG::MSG(13, $num);
     $valueLists = array();
     foreach($this->Relations as $key => $val) {     // リレーション先の値リストを取得する
         list($table,$fn, $ref,$grp) = explode('.', $val);
@@ -180,13 +176,12 @@ public function GetValueList() {
         $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn,$grp);
     }
     $this->Select= $valueLists;             // JOIN先の値リスト
-    APPDEBUG::DebugDump(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);
+    APPDEBUG::LOG(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);
 }
 //==============================================================================
 // フィールドの読み込み (JOIN無し)
 // 結果：   フィールドデータ
 public function getRecordField($key,$field) {
-    APPDEBUG::MSG(13, $key);
     $this->getRecordByKey($key);                // レコードデータを読み込む
     return $this->fields[$field];               // フィールド値を返す
 }
@@ -211,7 +206,7 @@ public function getCount($cond) {
 //          読み込んだ列名 = Header (Schema)
 //          $filter[] で指定したオリジナル列名のみを抽出
 public function RecordFinder($cond,$filter=[],$sort=[]) {
-    APPDEBUG::DebugDump(3, [ "cond" => $cond, "filter" => $filter]);
+    APPDEBUG::LOG(3, [ "cond" => $cond, "filter" => $filter]);
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];
     else if(is_scalar($sort)) {
@@ -220,12 +215,11 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
     while ($this->fetchRecord()) {
-        APPDEBUG::DebugDump(13, [
-            "fields:".(count($data)+1) => $this->fields,
-            "Head:" => $this->HeaderSchema,
-        ]);
+//        APPDEBUG::LOG(13, [
+//            "fields:".(count($data)+1) => $this->fields,
+//            "Head:" => $this->HeaderSchema,
+//        ]);
         if(!isset($this->fields[$this->Unique])) continue;
-//        $this->readLocaleField();        // レコードデータをロケールフィールドで置換しておく
         $record = array();
         foreach($this->FieldSchema as $key => $val) {
             list($ref_name,$org_name) = $val;
@@ -241,11 +235,11 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
             $this->record_max = $this->dbDriver->recordMax;
             $this->doEvent('OnGetRecord', $record);     // イベントコールバック
         } else {
-            APPDEBUG::MSG(3, $this->fields, "fields");
+            APPDEBUG::LOG(3, ["fields" => $this->fields]);
         }
     }
     $this->Records = $data;
-    APPDEBUG::DebugDump(3, [ "record_max" => $this->record_max, "Header" => $this->HeaderSchema,"RECORDS" => $this->Records]);
+    APPDEBUG::LOG(3, [ "record_max" => $this->record_max, "Header" => $this->HeaderSchema,"RECORDS" => $this->Records]);
 }
 //==============================================================================
 // レコードの取得
@@ -255,7 +249,6 @@ public function fetchRecord() {
 //==============================================================================
 // レコードの追加
 public function AddRecord($row) {
-    APPDEBUG::MSG(13, $row);
     $this->fields = array();
     foreach($row as $key => $val) {
         $xkey = (isset($this->PostRenames[$key])) ? $xkey = $this->PostRenames[$key] : $key;
@@ -265,26 +258,23 @@ public function AddRecord($row) {
     unset($this->fields[$this->Primary]);
     // ロケールフィールドに移動する
     $this->writeLocaleField();
-    APPDEBUG::MSG(13, $this->fields);
     $this->dbDriver->insertRecord($this->fields);
 }
 //==============================================================================
 // レコードの削除
 public function DeleteRecord($num) {
-    APPDEBUG::MSG(13, $row);
     $this->dbDriver->deleteRecord([$this->Primary => $num]);
 }
 //==============================================================================
 // レコードの削除
 // 検索条件がインプット
 public function MultiDeleteRecord($cond) {
-    APPDEBUG::MSG(13, $cond);
+    APPDEBUG::LOG(13, $cond);
     $this->dbDriver->deleteRecord($cond);
 }
 //==============================================================================
 // レコードの更新
 public function UpdateRecord($num,$row) {
-    APPDEBUG::MSG(13, $row);
     // 更新しないカラムを保護する
 //        $this->getRecordByKey($num);
     // 更新内容で書き換える
@@ -297,7 +287,7 @@ public function UpdateRecord($num,$row) {
     $this->fields[$this->Primary] = $num;
     // ロケールフィールドに移動する
     $this->writeLocaleField();
-    APPDEBUG::MSG(3, $this->fields);
+    APPDEBUG::LOG(3, $this->fields);
     $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
 }
 

@@ -210,6 +210,7 @@
   .inc, .tplテンプレートではHTMLデータ以外に、フレームワーク内の変数参照ができます。
   フレームワーク変数には以下のものがあります。
   ・システム変数
+      ${$SERVER$}      サーバー名
       ${$SYSROOT$}     フレームワークのトップURL
       ${$APPNAME$}     アプリケーション名
       ${$URIROOT$}     アプリケーションURLのトップ
@@ -292,6 +293,10 @@
           list-item,                        スカラー要素：　単純リスト項目
           [ list-section ],           　    配列要素：　セクション項目
           .XXXX#DDDD => [ list-section ]    クラス名(XXXX)、ID名(DDDD)付のリストセクション項目
+  +select => [ attr => value , items ]    SELECTタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
+        items :=                          リスト項目は次の要素から構成する
+          [ defalt-option           　      先頭の要素はデフォルト選択要素
+            option => value ... ]           選択テキストと値のペアリスト
   +dl => [ attr => value , [ items ]  ]   DLタグ専用のリスト出力、attr => value はDLタグの属性になる
       items :=                            リスト項目は次の要素から構成する
           inner-text,                       無名キースカラー要素：　DTタグのインナーテキスト
@@ -347,6 +352,8 @@
 
  > 引用                     // 引用 (blockquote)
  >> 引用ネスト
+
+ .クラス名{ テキスト }      // span class="クラス名"
 
   ```                       // pre class="code"
   source-code
@@ -531,10 +538,8 @@
 ・静的メソッド
   APPDEBUG::INIT(メッセージレベル)        // メッセージ出力レベルの設定
   APPDEBUG::RUN_START()                   // 実行時間測定
-  APPDEBUG::MSG_SORT()                    // メッセージ要素の並替え
-  APPDEBUG::MSG(メッセージレベル,出力オブジェクト, タイトル)    // デバッグ用のメッセージ出力
-  APPDEBUG::DumpMessage()                 // デバッグダンプ
-  APPDEBUG::DebugDump(メッセージレベル,出力配列)                // 配列のダンプ
+  APPDEBUG::LOG_SORT()                    // メッセージ要素の並替え
+  APPDEBUG::LOG(メッセージレベル,...出力要素) // 出力要素のログ出力
 
 ◆ LangUI クラス
 ・静的変数

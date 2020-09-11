@@ -31,8 +31,7 @@ require_once('Class/session.php');
 require_once('Class/fileclass.php');
 require_once('Class/Parser.php');
 require_once('Base/LangUI.php');
-/*
-以下の依存ファイルはオードロード機能によって読込む
+// 以下のクラスはオートロードできるが速度低下を防ぐためここでは使わない
 require_once('App.php');
 require_once('Base/AppObject.php');
 require_once('Base/AppController.php');
@@ -40,8 +39,6 @@ require_once('Base/AppModel.php');
 require_once('Base/AppFilesModel.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
-*/
-
 
 APPDEBUG::INIT(DEBUG_LEVEL);
 // Setup TIMEZONE
@@ -177,7 +174,7 @@ if(strcasecmp($appname,$controller) === 0) {
 App::$ActionMethod= $ContAction;    // アクションメソッド名
 //=================================
 // デバッグ用の情報ダンプ
-APPDEBUG::DebugDump(1, [
+APPDEBUG::LOG(0, [
     'デバッグ情報' => [
         "Application"=> $appname,
         "Controller"=> $controller,
@@ -215,7 +212,7 @@ if($controllerInstance->is_authorised()) {
 
 APPDEBUG::RUN_FINISH(0);
 MySession::CloseSession();
-APPDEBUG::DebugDump(0, [
+APPDEBUG::LOG(0, [
     "セッションクローズ" => [
         "ENVDATA" => MySession::$EnvData,
     ]

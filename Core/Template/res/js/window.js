@@ -2,6 +2,7 @@
 //=========================================================
 // JQueryプラグインを定義する
 (function ($) {
+/*
     var wsz = {
         theme: 'white',
         adjustClass: '',
@@ -10,6 +11,13 @@
             wleft = this.parent().offset().left;
             this.css("width", wsize - wleft + "px");
         }
+    };
+*/
+    // 指定要素 e のスクロールに追従する
+    $.fn.busy_icon = function (disp) {
+        var self = this; // jQueryオブジェクトを変数に代入しておく
+        self.css('display', (disp) ? 'block' : 'none');
+        $('body').css('cursor', (disp) ? 'wait' : 'default');
     };
     // 指定要素 e のスクロールに追従する
     $.fn.stickyOn = function (e) {

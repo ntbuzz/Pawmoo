@@ -15,7 +15,7 @@ class LangUI {
 //==============================================================================
 // HTTP_ACCEPT_LANGUAGE を元にデフォルトの言語を決定する
     public static function construct($lang,$default) {
-        APPDEBUG::MSG(14,$lang, "言語リスト");
+        APPDEBUG::LOG(14,["言語リスト" => $lang]);
         $_ = 'constant';                                    // 定数を取り出す関数
         $arr = array_unique(             // 重複行を取り除く
                 array_filter(           // strlen を使って空行を取り除く
@@ -54,7 +54,7 @@ public static function LangFiles($files) {
 //==============================================================================
 //  言語ファイルの読み込み
 public static function LangDebug() {
-    APPDEBUG::DebugDump(4, [
+    APPDEBUG::LOG(4, [
             "ロケール情報" => [
                 'Locale' => self::$Locale,
                 'File'   => self::$LocaleFiles,
@@ -136,7 +136,7 @@ public static function LangDebug() {
             unset($section);
             return TRUE;
         } else {
-            APPDEBUG::MSG(4,"{$lang_file}.lng", "UNDEFINED");
+            APPDEBUG::LOG(4,"UNDEFINED : {$lang_file}.lng\n");
         }
         return FALSE;
     }
