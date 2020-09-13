@@ -56,19 +56,17 @@ if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
 
 // アプリ名が有効かどうか確認する
 if(empty($appname) || !file_exists("app/$appname")) {
-    header("Location:/index.html");
-    exit;
+//  header("Location:/index.html");exit;
     // 404エラーページを送信する時はこっち
-    // error_response('app-404.php',$appname,$module);
+    error_response('app-404.php',$appname,$module);
 }
 MySession::InitSession($appname);
 
 // ここでは App クラスの準備ができていないので直接フォルダ指定する
 require_once("app/{$appname}/Config/config.php");
 // Check URI-Redirect direction
-if(!defined('FORCE_REDIRECT')) {
-    define('FORCE_REDIRECT', FALSE);
-}
+if(!defined('FORCE_REDIRECT')) define('FORCE_REDIRECT', FALSE);
+
 if(!is_extst_module($appname,$controller,'Controller')) {
     // if BAD controller name, try DEFAULT CONTROLLER and shift follows
     $cont = (DEFAULT_CONTROLLER === '') ? $appname : DEFAULT_CONTROLLER;
@@ -78,12 +76,6 @@ if(!is_extst_module($appname,$controller,'Controller')) {
     list($controller,$method,$filter) = $module;
     // RE-TRY DEFAULT CONTROLLER,if FAILED,then NOT FOUND
     if(!is_extst_module($appname,$controller,'Controller')) {
-        debug_dump(1,[
-            "ROUTING FAILED." => [
-                'AppName' => $appname,
-                'Controller' => $controller,
-                'Module' => $module,
-            ]]);
         error_response('page-404.php',$appname,$module);
     }
 }
@@ -124,14 +116,6 @@ $libs = get_php_files(App::Get_AppPath("common/"));
 foreach($libs as $files) {
     require_once $files;
 }
-// コアクラスのアプリ固有の拡張クラス
-/*
-オートローダーにまかせる
-$libs = get_php_files(App::Get_AppPath("extends/"));
-foreach($libs as $files) {
-    require_once $files;
-}
-*/
 // 言語ファイルの対応
 $lang = (isset($query['lang'])) ? $query['lang'] : $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 
@@ -154,15 +138,6 @@ if(!$controllerInstance->is_enable_action($method)) {
     } else {
         $module[0] = $controller;       // may-be rewrited
         $module[1] = $method;           // may-be rewrited
-        debug_dump(0,[
-            'Module Info' => [
-                'App' => $appname,
-                'Cont' => $ContClass,
-                'Action' => $ContAction,
-                'Filter' => $filter,
-            ],
-            'Module' => $module,
-        ]);
         error_response('page-404.php',$appname,$module);
     }
 }

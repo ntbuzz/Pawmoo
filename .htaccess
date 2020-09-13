@@ -8,7 +8,8 @@ RewriteRule ^(css|js|images)/(.*)$       vendor/webroot/$1/$2 [END]
 
 # テンプレートリソース(CSS/画像ファイル)
 RewriteRule ^.*/css/res/img/(.*)$ Core/Template/cssimg/$1 [END]
-RewriteRule ^res/images/(.*)$     Core/Template/images/$1 [END]
+#RewriteRule ^res/images/(.*)$     Core/Template/images/$1 [END]
+RewriteRule ^res/(css|js|images)/(.*)$   Core/Template/$1/$2 [END]
 
 # アプリごとに異なるリダイレクト
 RewriteRule ^([^/]+)/.*/css/img/(.*)$ app/$1/webroot/cssimg/$2 [END]

@@ -4,15 +4,11 @@
 </head>
 <body>
     <div class='error_box'>
-        <h1>404</h1>
+        <h1>403</h1>
         <hr>
-        <p>Page: '<?= $page_name; ?>' not found.</p>
+        <p>Page: '<?= $page_name; ?>' Forbidden.</p>
         <hr>
         return to <a href='<?= $app_root; ?>'>TOP</a>
-        <?php
-            // backtrace
-            debug_dump(1,['dbinfo' => debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,3)]);
-        ?>
     </div>
 </body>
 </html>
