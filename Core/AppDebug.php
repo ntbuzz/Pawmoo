@@ -39,12 +39,21 @@ class APPDEBUG {
     //==========================================================================
     // バックトレースから呼び出し元の情報を取得
     private static function backtraceinfo($stop=FALSE){
-        $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,3);    // 呼び出し元のスタックまでの数
+        $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,6);    // 呼び出し元のスタックまでの数
+        array_shift($dbinfo);   // 自クラスの情報は不要
         if($stop) { 
             echo "TYPE:".get_class($dbinfo[2]['object'])."\n";
             var_dump($dbinfo[2]['object']);
             exit;
         }
+        $str = "";
+        foreach($dbinfo as $stack) {
+            $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
+            list($pp,$fn,$ext) = extract_path_file_ext($path);
+            $func = "{$fn}({$stack['line']})";
+            $str = (empty($str)) ? $func : "{$func}>{$str}";
+        }
+/*
         $dbpath = str_replace('\\','/',$dbinfo[1]['file']);             // Windowsパス対策
         list($pp,$fn) = extract_path_filename($dbpath);
         $fn .= "(".$dbinfo[1]['line'].")";
@@ -53,7 +62,8 @@ class APPDEBUG {
             if(substr($fn,0,strlen($pp)) !== $pp) $fn = "{$pp}::{$fn}";
         }
         $str = "{$fn}->" . $dbinfo[2]['function'];
-        return $str;
+*/
+        return "[TRACE]::{$str}";
     }
     //==========================================================================
     // メッセージ要素の並替え
@@ -66,7 +76,7 @@ class APPDEBUG {
     public static function LOG($lvl,...$items) {
         if(!DEBUGGER) return;
         $info = self::backtraceinfo($lvl > 100);
-        self::dbEcho($lvl, "<pre>\n{$info}\n");
+        self::dbEcho($lvl, "<pre>\n\n{$info}\n");
         foreach($items as $arg) {
             if(is_scalar($arg)) {
                 if(empty($arg)) $arg ='NULL'; else $arg= wordwrap($arg,86,"\n");
@@ -114,8 +124,8 @@ class APPDEBUG {
                 } else {
                     self::dbEcho($level, gettype($val),TRUE);
                 }
+                self::dbEcho($level, "\n",TRUE);
             }
-            self::dbEcho($level, "\n",TRUE);
         } else if(is_scalar($obj)) {    // スカラー出力
             self::dbEcho($level, $obj,TRUE);
         } else {

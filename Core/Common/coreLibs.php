@@ -213,7 +213,15 @@ function debug_dump($flag, $arr = []) {
     if($flag === 0) return;
     $danger = ($flag < 4);
     // バックトレースから呼び出し元の情報を取得
-    $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,2);    // 呼び出し元のスタックまでの数
+    $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,5);    // 呼び出し元のスタックまでの数
+    $str = "";
+    foreach($dbinfo as $stack) {
+        $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
+        list($pp,$fn,$ext) = extract_path_file_ext($path);
+        $func = "{$fn}({$stack['line']})";
+        $str = (empty($str)) ? $func : "{$func}->{$str}";
+    }
+/*
     $dbpath = str_replace('\\','/',$dbinfo[0]['file']);             // Windowsパス対策
     list($pp,$fn) = extract_path_filename($dbpath);
     $fn .= "(".$dbinfo[0]['line'].")";
@@ -222,6 +230,7 @@ function debug_dump($flag, $arr = []) {
         if(substr($fn,0,strlen($pp)) !== $pp) $fn = "{$pp}::{$fn}";
     }
     $str = (isset($dbinfo[1]['function'])) ? "{$fn}->" . $dbinfo[1]['function'] : '';
+*/
     $sep = 	str_repeat("-", 30);
     if($flag === 3) {
         echo "<pre>\n{$str}\n{$sep} {$msg} {$sep}\n";

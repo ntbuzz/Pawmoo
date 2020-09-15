@@ -101,7 +101,7 @@ public function RelationSetup() {
     if(!empty($this->Relations)) {
         // リレーション先の情報をモデル名からテーブル名とロケール先のフィールド名に置換する
         foreach($this->Relations as $key => $rel) {
-            list($model,$field,$refer,$group) = explode('.', $rel);
+            list($model,$field,$refer,$group) = explode('.', "{$rel}...");
             if(array_key_exists($refer,$this->$model->LocaleSchema)) {
                 $lang_ref = "{$refer}_" . LangUI::$LocaleName;
                 if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $refer = $lang_ref;
