@@ -221,16 +221,6 @@ function debug_dump($flag, $arr = []) {
         $func = "{$fn}({$stack['line']})";
         $str = (empty($str)) ? $func : "{$func}->{$str}";
     }
-/*
-    $dbpath = str_replace('\\','/',$dbinfo[0]['file']);             // Windowsパス対策
-    list($pp,$fn) = extract_path_filename($dbpath);
-    $fn .= "(".$dbinfo[0]['line'].")";
-    if(isset($dbinfo[1]['object'])) {
-        $pp = get_class($dbinfo[1]['object']);  // 呼出し元のクラス名
-        if(substr($fn,0,strlen($pp)) !== $pp) $fn = "{$pp}::{$fn}";
-    }
-    $str = (isset($dbinfo[1]['function'])) ? "{$fn}->" . $dbinfo[1]['function'] : '';
-*/
     $sep = 	str_repeat("-", 30);
     if($flag === 3) {
         echo "<pre>\n{$str}\n{$sep} {$msg} {$sep}\n";
@@ -246,7 +236,9 @@ function debug_dump($flag, $arr = []) {
         $dump_object = function ($obj,$indent,$danger) use (&$dump_object) {
             foreach($obj as $key => $val) {
                 echo str_repeat(' ',$indent*2) . "[{$key}] = ";
-                if(is_array($val)) {
+                if(empty($val)) {
+                    echo "NULL\n";
+                } else if(is_array($val)) {
                     echo "array(" . count($val) . ")\n";
                     $dump_object($val,$indent+1,$danger);
                 } else if(is_scalar($val)) {

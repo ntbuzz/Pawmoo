@@ -51,18 +51,8 @@ class APPDEBUG {
             $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
             list($pp,$fn,$ext) = extract_path_file_ext($path);
             $func = "{$fn}({$stack['line']})";
-            $str = (empty($str)) ? $func : "{$func}>{$str}";
+            $str = (empty($str)) ? $func : "{$func}->{$str}";
         }
-/*
-        $dbpath = str_replace('\\','/',$dbinfo[1]['file']);             // Windowsパス対策
-        list($pp,$fn) = extract_path_filename($dbpath);
-        $fn .= "(".$dbinfo[1]['line'].")";
-        if(isset($dbinfo[2]['object'])) {
-            $pp = get_class($dbinfo[2]['object']);  // 呼出し元のクラス名
-            if(substr($fn,0,strlen($pp)) !== $pp) $fn = "{$pp}::{$fn}";
-        }
-        $str = "{$fn}->" . $dbinfo[2]['function'];
-*/
         return "[TRACE]::{$str}";
     }
     //==========================================================================
@@ -71,12 +61,27 @@ class APPDEBUG {
         ksort( self::$LevelMsg );
     }
     //==============================================================================
-    //  ログ出力
-    //
+    //  デバッグログ出力
     public static function LOG($lvl,...$items) {
         if(!DEBUGGER) return;
         $info = self::backtraceinfo($lvl > 100);
-        self::dbEcho($lvl, "<pre>\n\n{$info}\n");
+        self::dbEcho($lvl, "<pre>\n{$info}\n");
+        // 子要素のオブジェクトをダンプする関数
+        $dump_object = function ($obj,$indent) use (&$dump_object) {
+            $dmp = "";
+            foreach($obj as $key => $val) {
+                $dmp .= str_repeat(' ',$indent*2) . "[{$key}] = ";
+                if(empty($val)) {
+                    $dmp .= "NULL\n";
+                } else if(is_array($val)) {
+                    $dmp .= "array(" . count($val) . ")\n";
+                    $dmp .= $dump_object($val,$indent+1);
+                } else if(is_scalar($val)) {
+                    $dmp .= "'{$val}'\n";
+                }
+            }
+            return $dmp;
+        };
         foreach($items as $arg) {
             if(is_scalar($arg)) {
                 if(empty($arg)) $arg ='NULL'; else $arg= wordwrap($arg,86,"\n");
@@ -88,12 +93,12 @@ class APPDEBUG {
                     } else {
                         self::dbEcho($lvl, "===== {$msg} =====\n");
                         if(empty($obj)) self::dbEcho($lvl,EMPTY_MSG);
-                        else self::dumpObject($obj,0, $lvl);
+                        else self::dbEcho($lvl,$dump_object($obj,0)."\n",TRUE);
                     }
                 }
             }
         }
-        self::dbEcho($lvl, "</pre>\n");
+        self::dbEcho($lvl, "\n</pre>\n");
         if($lvl === -99) exit;
     }
     //==========================================================================
@@ -108,28 +113,5 @@ class APPDEBUG {
             else self::$LevelMsg[$lvl] = $msg;
         }
     }
-    //==========================================================================
-    // 配列のダンプ
-    private static function dumpObject($obj,$indent,$level){
-        if(is_array($obj)) {    // 配列出力
-            foreach($obj as $key => $val) {
-                self::dbEcho($level, str_repeat(' ',$indent*2) . "[{$key}] = ");
-                if(empty($val)) {
-                    self::dbEcho($level, "NULL");
-                } else if(is_scalar($val)) {
-                    self::dbEcho($level, "'{$val}'",TRUE);
-                } else if(is_array($val)) {
-                    self::dbEcho($level, "array(" . count($val) . ")\n");
-                    self::dumpObject($val,$indent+1,$level);
-                } else {
-                    self::dbEcho($level, gettype($val),TRUE);
-                }
-                self::dbEcho($level, "\n",TRUE);
-            }
-        } else if(is_scalar($obj)) {    // スカラー出力
-            self::dbEcho($level, $obj,TRUE);
-        } else {
-            self::dbEcho($level, 'UNKNOW $obj',TRUE);
-        }
-    }
+
 }
