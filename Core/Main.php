@@ -106,7 +106,6 @@ if(mb_strpos($method,'.') !== FALSE) {  // have a extension
 // アプリ固有クラスをオートロードできるようにする
 require_once('Class/ClassLoader.php');
 ClassLoader::Setup($appname,$controller);
-
 // アプリケーション変数を初期化する
 App::__Init($appname,$app_uri,$module,$query,$requrl);
 App::$Controller  = $controller;    // コントローラー名
@@ -167,6 +166,7 @@ APPDEBUG::LOG(0, [
         "ENV" => MySession::$EnvData,
     ],
     'パス情報' => [
+        "REFERER" => $_SERVER['HTTP_REFERER'],
         "SERVER" => $_SERVER['REQUEST_URI'],
         "RootURI"=> $approot,
         "appname"=> $appname,

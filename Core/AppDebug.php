@@ -79,12 +79,12 @@ class APPDEBUG {
                         self::dbEcho($lvl, "===== {$msg} =====\n");
                         if(empty($obj)) self::dbEcho($lvl,EMPTY_MSG);
                         else self::dumpObject($obj,0, $lvl);
-                        self::dbEcho($lvl,"\n");
                     }
                 }
             }
         }
-        self::dbEcho($lvl, "\n</pre>\n");
+        self::dbEcho($lvl, "</pre>\n");
+        if($lvl === -99) exit;
     }
     //==========================================================================
     // メッセージ登録
@@ -102,19 +102,20 @@ class APPDEBUG {
     // 配列のダンプ
     private static function dumpObject($obj,$indent,$level){
         if(is_array($obj)) {    // 配列出力
-        foreach($obj as $key => $val) {
-            self::dbEcho($level, str_repeat(' ',$indent*2) . "[{$key}] = ");
-            if($val == NULL) {
-                self::dbEcho($level, "NULL\n");
-            } else if(is_scalar($val)) {
-                self::dbEcho($level, "'{$val}'\n",TRUE);
-            } else if(is_array($val)) {
-                self::dbEcho($level, "array(" . count($val) . ")\n");
-                self::dumpObject($val,$indent+1,$level);
-            } else {
-                self::dbEcho($level, gettype($val) . "\n",TRUE);
+            foreach($obj as $key => $val) {
+                self::dbEcho($level, str_repeat(' ',$indent*2) . "[{$key}] = ");
+                if(empty($val)) {
+                    self::dbEcho($level, "NULL");
+                } else if(is_scalar($val)) {
+                    self::dbEcho($level, "'{$val}'",TRUE);
+                } else if(is_array($val)) {
+                    self::dbEcho($level, "array(" . count($val) . ")\n");
+                    self::dumpObject($val,$indent+1,$level);
+                } else {
+                    self::dbEcho($level, gettype($val),TRUE);
+                }
             }
-            }
+            self::dbEcho($level, "\n",TRUE);
         } else if(is_scalar($obj)) {    // スカラー出力
             self::dbEcho($level, $obj,TRUE);
         } else {
