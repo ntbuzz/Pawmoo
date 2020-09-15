@@ -30,15 +30,11 @@ class APPDEBUG {
     public static function RUN_FINISH($lvl) {
         $tm = round((microtime(TRUE) - self::$RunTime), 2);     // 少数2位まで
         $maxmem = round(memory_get_peak_usage()/(1024*1024),2);
-        self::DebugDump($lvl,[
-            "実行時間" => "{$tm} 秒",
+//        self::LOG($lvl,[
+        self::LOG($lvl,[
+                "実行時間" => "{$tm} 秒",
             "メモリ消費" => "最大: {$maxmem} MB",
         ]);
-    }
-    //==========================================================================
-    // メッセージ要素の並替え
-    public static function MSG_SORT() {
-        ksort( self::$LevelMsg );
     }
     //==========================================================================
     // バックトレースから呼び出し元の情報を取得
@@ -60,31 +56,35 @@ class APPDEBUG {
         return $str;
     }
     //==========================================================================
-    // デバッグ用のメッセージ出力
-    public static function MSG($lvl,$obj, $msg = '',$stop=FALSE){
-        if(!DEBUGGER) return;
-        $info = self::backtraceinfo($stop);
-        self::dbEcho($lvl, "<pre>\n");
-        if(is_scalar($obj)) {
-            if(!empty($msg)) $msg .= ": ";
-            if(empty($obj)) $obj ='NULL'; else $obj= wordwrap($obj,86,"\n");
-            self::dbEcho($lvl,"{$info}\n{$msg}{$obj}\n");
-        } else {
-            $m = "{$info} obj dump\n======= {$msg} =======\n";
-            self::dbEcho($lvl,$m);
-            if(empty($obj)) self::dbEcho($lvl,EMPTY_MSG);
-            else self::dumpObject($obj,0, $lvl);
-        }
-        self::dbEcho($lvl, "\n</pre>\n");
+    // メッセージ要素の並替え
+    public static function LOG_SORT() {
+        ksort( self::$LevelMsg );
     }
-    //==========================================================================
-    // デバッグダンプ
-    public static function DumpMessage(){
-        echo 'RunTime：' . (time() - self::$RunTime) . '秒';
-        echo str_repeat("=", 30)."\n";
-        foreach(self::$LevelMsg as $key => $msg) {
-            echo "メッセージ{$key}\n{$msg}";
+    //==============================================================================
+    //  ログ出力
+    //
+    public static function LOG($lvl,...$items) {
+        if(!DEBUGGER) return;
+        $info = self::backtraceinfo($lvl > 100);
+        self::dbEcho($lvl, "<pre>\n{$info}\n");
+        foreach($items as $arg) {
+            if(is_scalar($arg)) {
+                if(empty($arg)) $arg ='NULL'; else $arg= wordwrap($arg,86,"\n");
+                self::dbEcho($lvl,"{$arg}\n");
+            } else if(is_array($arg)) {                        // 配列要素の出力
+                foreach($arg as $msg => $obj) {
+                    if(is_scalar($obj)) {
+                        self::dbEcho($lvl, "{$msg} : {$obj}\n");
+                    } else {
+                        self::dbEcho($lvl, "===== {$msg} =====\n");
+                        if(empty($obj)) self::dbEcho($lvl,EMPTY_MSG);
+                        else self::dumpObject($obj,0, $lvl);
+                    }
+                }
+            }
         }
+        self::dbEcho($lvl, "</pre>\n");
+        if($lvl === -99) exit;
     }
     //==========================================================================
     // メッセージ登録
@@ -99,43 +99,23 @@ class APPDEBUG {
         }
     }
     //==========================================================================
-    // デバッグ配列のダンプ
-    public static function DebugDump($lvl,$arr=[]) {
-        if(!DEBUGGER) return;
-        $info = self::backtraceinfo();
-        if(is_array($lvl)) {
-            $arr = $lvl;
-            $lvl = 0;
-        }
-        self::dbEcho($lvl, "<pre>\n{$info}\n");
-        if(is_array($arr)) {                        // 配列要素の出力
-            foreach($arr as $msg => $obj) {
-                self::dbEcho($lvl, "***** {$msg} *****\n");
-                if(empty($obj)) self::dbEcho($lvl,EMPTY_MSG);
-                else self::dumpObject($obj,0, $lvl);
-                self::dbEcho($lvl,"\n");
-            }
-        } else
-            self::dbEcho($lvl, $arr,TRUE);              // スカラー要素の出力
-        self::dbEcho($lvl, "</pre>\n");
-    }
-    //==========================================================================
     // 配列のダンプ
     private static function dumpObject($obj,$indent,$level){
         if(is_array($obj)) {    // 配列出力
-        foreach($obj as $key => $val) {
-            self::dbEcho($level, str_repeat(' ',$indent*2) . "[{$key}] = ");
-            if($val == NULL) {
-                self::dbEcho($level, "NULL\n");
-            } else if(is_scalar($val)) {
-                self::dbEcho($level, "'{$val}'\n",TRUE);
-            } else if(is_array($val)) {
-                self::dbEcho($level, "array(" . count($val) . ")\n");
-                self::dumpObject($val,$indent+1,$level);
-            } else {
-                self::dbEcho($level, gettype($val) . "\n",TRUE);
+            foreach($obj as $key => $val) {
+                self::dbEcho($level, str_repeat(' ',$indent*2) . "[{$key}] = ");
+                if(empty($val)) {
+                    self::dbEcho($level, "NULL");
+                } else if(is_scalar($val)) {
+                    self::dbEcho($level, "'{$val}'",TRUE);
+                } else if(is_array($val)) {
+                    self::dbEcho($level, "array(" . count($val) . ")\n");
+                    self::dumpObject($val,$indent+1,$level);
+                } else {
+                    self::dbEcho($level, gettype($val),TRUE);
+                }
             }
-            }
+            self::dbEcho($level, "\n",TRUE);
         } else if(is_scalar($obj)) {    // スカラー出力
             self::dbEcho($level, $obj,TRUE);
         } else {

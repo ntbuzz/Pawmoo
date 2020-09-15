@@ -29,7 +29,7 @@ function __construct($table,$handler) {
 		$this->table = $table;
 		$this->dbb = DatabaseHandler::get_database_handle($handler);
 		$this->Connect();
-		APPDEBUG::MSG(13,$this->columns,"フィールド名リスト");
+		APPDEBUG::LOG(13,["フィールド名リスト" => $this->columns]);
 		$this->handler = $handler;
 	}
 //==============================================================================
@@ -59,7 +59,7 @@ public function SetPaging($pagesize, $pagenum) {
 	$this->startrec = $pagesize * ($pagenum - 1);		// 開始レコード番号
 	if($this->startrec < 0) $this->startrec = 0;
 	$this->limitrec = $pagesize;		// 取得レコード数
-	APPDEBUG::DebugDump(13,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
+	APPDEBUG::LOG(13,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
 }
 //==============================================================================
 //	getRecordCount($row) 
@@ -165,7 +165,6 @@ protected function sql_safequote(&$value) {
 //==============================================================================
 // 配列要素からのWHERE句を作成
 	private function sql_makeWHERE($row) {
-		APPDEBUG::MSG(13, $row );
 		$sql = $this->makeExpr($row);
 		if(!empty($sql)) $sql = ' WHERE '.$sql;
 		return $sql;

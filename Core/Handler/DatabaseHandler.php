@@ -59,7 +59,7 @@ public function get_callback_func($handler) {
 //==============================================================================
 // クローズ処理
 private static function closeDb() {
-    APPDEBUG::MSG(13, self::$dbHandle);
+    APPDEBUG::LOG(13, self::$dbHandle);
     foreach(self::$dbHandle as $key => $handle) {
         $func = self::DatabaseSpec[$key]['callback'];      // 呼び出し関数
         self::$func($handle,NULL,'close');

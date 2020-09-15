@@ -28,26 +28,25 @@ class AppFilesModel extends AppObject {
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
     }
 //==============================================================================
+// ダミーメソッド
+    public function RelationSetup() { }
+//==============================================================================
 // 指定フォルダを変更する
     public function SelectFolder($home) {
         $this->ActiveHome = $home;
         $this->TopFolder = $this->Home[$home] . $this->SubFolder;
-//        if(!file_exists($this->TopFolder)) mkdir($this->TopFolder);
     }
 //==============================================================================
 // 指定フォルダの一覧
     public function GetSubFolder($home) {
         $this->TopFolder = $this->Home[$home] . $this->SubFolder;
         if(! $this->get_FolderLists($this->TopFolder)) {
-            // フォルダが無ければ作成する
-//            mkdir($this->TopFolder);
         }
     }
 //==============================================================================
 // 指定フォルダの存在確認
     public function CheckFolder($home) {
         $this->TopFolder = $this->Home[$home] . $this->SubFolder;
-//        if(!file_exists($this->TopFolder)) mkdir($this->TopFolder);
     }
 //==============================================================================
 // 指定ファイルのフルパス
@@ -129,7 +128,7 @@ class AppFilesModel extends AppObject {
             }
         }
         $drc->close();
-		APPDEBUG::MSG(13,$this->Files);
+		APPDEBUG::LOG(13,$this->Files);
         return true;
     }
 //==============================================================================
@@ -144,7 +143,8 @@ class AppFilesModel extends AppObject {
     	// Zipファイルオープン
    		$result = $zip->open($zipFilePath, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE);
    		if ($result !== true) {
-    		echo "Download ERROR!!!";
+    		echo "PATH: {$filepath}\n";
+    		echo "{$zipname} Download ERROR!!!";
    			exit(-1);
     	    // 失敗した時の処理
    		}

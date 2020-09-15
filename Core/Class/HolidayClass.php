@@ -6,7 +6,7 @@ class CommonHolidays {
 // コンストラクタ
 	function __construct($HolidayList, $range) {
 		$this->Prefix = get_class($this);
-		APPDEBUG::MSG(10,$HolidayList);
+		APPDEBUG::LOG(10,$HolidayList);
 		// 休日用配列をプロパティ変数に登録
         foreach($HolidayList as $key => $val) $this->$key = $val;
 		$this->HolidayTable = array();
@@ -86,6 +86,30 @@ class CommonHolidays {
 			}
 		}
 		// 一般休日を加える
+		foreach($this->Vacations as $val) {
+			// 休日名,月,日,日数,該当年,無効
+			list($title,$mm,$dd,$nn,$yy,$enable) = $val;
+			if($title[0] === '.') $title = LangUI::get_value($this->Prefix,$title);
+			if($yy == 0) $yy = $yyyy;		// ０なら毎年
+			if($yyyy == $yy) {
+				$hol = mktime(0,0,0,$mm,$dd,$yyyy);
+				$key = ($hol - $begday)/86400;		// １月１日からの経過日数
+				do {
+					if( !array_key_exists( $key, $holidayarray)) {		// 途中に祝日があったらスキップ
+						$holidayarray[$key] = [$title,date('Y/m/d',$hol)];
+						$nn--;
+					}
+					$key++;
+					$hol += 86400;
+				} while ($nn > 0);
+			}
+		}
+		ksort($holidayarray);
+		return $holidayarray;
+	}
+//==============================================================================
+// 一般休日を加える
+	protected function AddVacations($yyyy,$vacations,$holidayarray) {
 		foreach($this->Vacations as $val) {
 			// 休日名,月,日,日数,該当年,無効
 			list($title,$mm,$dd,$nn,$yy,$enable) = $val;
