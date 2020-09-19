@@ -209,11 +209,10 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
     debug_log(3, [ "cond" => $cond, "filter" => $filter]);
     if($filter === []) $filter = $this->dbDriver->columns;
     // 取得フィールドリストを生成する
-    $fiels_list = [];
-    foreach($this->FieldSchema as $key => $val) {
-        list($ref_name,$org_name) = $val;
-        if(in_array($org_name,$filter)) $fiels_list[$key] = $val;
-    }
+    $fiels_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
+        list($ref_name,$org_name) = $vv;
+        return in_array($org_name,$filter);
+    });
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];
     else if(is_scalar($sort)) {

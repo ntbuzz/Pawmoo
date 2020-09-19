@@ -45,6 +45,7 @@
     ■仕様変更
     ・テンプレートのリソースでないcss/js等をwebrootフォルダへ移動
     ・APPDEBUGクラスの廃止とデバッグログ処理の統合
+    ・RecordFilder()のフィルタ処理改良
     ■バグ修正
     ・AppFilesModelクラスの不具合対応
 
