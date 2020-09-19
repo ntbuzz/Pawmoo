@@ -33,9 +33,8 @@ public function isValidLogin($values) {
         if(array_key_exists($xkey,$this->Schema)) {
             // 暗号化が必要化確認する
             $vv = $this->Schema[$xkey];
-            $dval = ($vv[1]===1) ? openssl_encrypt($val, 'AES-128-CBC', '_minimvc_biscuit') : $val;
-            // 復号化するときは
-            // 'password' = openssl_decrypt('password', 'AES-128-CBC', '_minimvc_biscuit');
+            $dval = ($vv[1]===1) ? openssl_encrypt($val, 'AES-128-CBC', '_minimvc_waffle_map') : $val;
+            // 復号化するときは 'password' = openssl_decrypt('password', 'AES-128-CBC', '_minimvc_waffle_map');
             if(!empty($val)) $this->LoginData[$xkey] = $dval;    // 値があるものだけ
         }
     }

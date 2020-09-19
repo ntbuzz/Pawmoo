@@ -32,7 +32,7 @@
     　IIS には該当する設定がないので修正不要です
   d) IISの場合は、WEBサーバーを再起動します
   e) ブラウザからWEBサーバーにアクセスします
-      例: http://localhost/biscuit/help/
+      例: http://localhost/waffle_map/help/
 
 2. 使用条件、免責事項など
   本ソフトウェアはMITライセンスに従います。

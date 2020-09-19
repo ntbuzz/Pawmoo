@@ -20,7 +20,7 @@ class MySession {
 // static クラスにおける初期化処理
 static function InitSession($appname = 'default') {
 	global $on_server;
-	self::$MY_SESSION_ID = "_minimvc_biscuit_{$appname}";
+	self::$MY_SESSION_ID = "_minimvc_waffle_map_{$appname}";
 	// for Login skip on CLI debug.php processing
 	if(DEBUGGER && empty($on_server)) {
 		$_SESSION[self::$MY_SESSION_ID]['Login'] = ['user' => 'aaa'];

@@ -1,6 +1,6 @@
 <?php
 /* -------------------------------------------------------------
- * Biscuits(MAP) Object-orientation PHP mini_framework
+ * WaffleMap Object-orientation PHP mini_framework
  *   Main: routing and redirection process
  *      method naming
  *      void = camel case (first upper is 'PUBLIC')

@@ -9,8 +9,8 @@ $text = <<<'EOS'
   [テキスト]\(URL)
 
 画像
-  ![代替テキスト]\(/res/images/biscuits.png)
-  ![代替テキスト](/res/images/biscuits.png)
+  ![代替テキスト]\(/res/images/waffle_map.png)
+  ![代替テキスト](/res/images/waffle_map.png)
 
 
 水平線 \<hr> <hr>
