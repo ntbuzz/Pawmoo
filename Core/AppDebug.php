@@ -40,17 +40,17 @@ function debug_log($lvl,...$items) {
     if($lvl > DEBUG_LEVEL) return;
     // バックトレースから呼び出し元の情報を取得
     $dump_log_info = function($items) {
-        $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,5);    // 呼び出し元のスタックまでの数
+        $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,4);    // 呼び出し元のスタックまでの数
         array_shift($dbinfo);   // 自クラスの情報は不要
         $trace = "";
         foreach($dbinfo as $stack) {
             $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
             list($pp,$fn,$ext) = extract_path_file_ext($path);
             $func = "{$fn}({$stack['line']})";
-            $trace = (empty($str)) ? $func : "{$func} > {$trace}";
+            $trace = (empty($trace)) ? $func : "{$func} > {$trace}";
         }
         $sep = 	str_repeat("-", 30);
-        $dmp_msg = '';
+        $dmp_msg = "TRACE::{$trace}\n";
         // 子要素のオブジェクトをダンプする関数
         $dump_object = function ($obj,$indent) use (&$dump_object) {
             $dmp = "";
@@ -90,13 +90,15 @@ function debug_log($lvl,...$items) {
     global $debug_log_str;
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
-        if($lvl < 0) echo $dmp_info;
+        if($lvl >= -4) {
+            $dmp_info = htmlspecialchars($dmp_info);
+            $dmp_info = "<pre>\n{$dmp_info}\n</pre>\n";
+        }
+        if($lvl < 0) echo "{$dmp_info}\n";
         else {
-            if($lvl >= 0) $dmp_info = htmlspecialchars($dmp_info);
-            $dmp_info = "<pre>\n{$dmp_info}</pre>\n";
             if(isset($debug_log_str[$lvl])) $debug_log_str[$lvl] .= $dmp_info;
             else $debug_log_str[$lvl] = $dmp_info;
         }
     }
-    if($lvl === -99) exit;
+    if(abs($lvl) > 100) exit;
 }

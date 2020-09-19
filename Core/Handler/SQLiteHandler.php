@@ -26,6 +26,7 @@ protected function Connect() {
 //==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
+	debug_log(3,['SQL' => $sql]);
 	$this->rows = $this->dbb->query($sql);
 	return $this->rows;
 }
