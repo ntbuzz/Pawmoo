@@ -77,7 +77,7 @@ function debug_log($lvl,...$items) {
                         $dmp_msg .= "{$msg} : {$obj}\n";
                     } else if(is_array($obj)) {
                         $dmp_msg .= "===== {$msg} =====\n";
-                        if(empty($obj)) $dmp_msg .= EMPTY_MSG0;
+                        if(empty($obj)) $dmp_msg .= EMPTY_MSG;
                         else $dmp_msg .= $dump_object($obj,0);
                     } else {
                         $dmp_msg .= "{$msg} : Object\n";
