@@ -333,7 +333,7 @@ public function ViewStyle($file_name) {
             switch($var[0]) {
             case '#':
                 $var = mb_substr($var,1);     // 言語ファイルの参照
-                $val = LangUI::get_value('resource', $var, FALSE);
+                $val = LangUI::get_value('resource', $var);
                 break;
             case '$': if(substr($var,-1) === '$') {     // 末尾文字を確かめる
                     $var = trim($var,'$');              // システム変数値
@@ -358,7 +358,7 @@ public function ViewStyle($file_name) {
 //        $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
         $p = '/(?:\${[^}\s]+?}|\${[#%\'\$][^}\s]+?})/';          // 変数リストの配列を取得
         preg_match_all($p, $str, $m);
-debug_dump(0,["STR" => $str, "PREG" => $m,"VAR" => $vars,"SESSION" => MySession::$EnvData]);
+debug_log(FALSE,["STR" => $str, "PREG" => $m,"VAR" => $vars,"SESSION" => MySession::$EnvData]);
         $varList = $m[0];
         if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
         $values = $varList = array_unique($varList);

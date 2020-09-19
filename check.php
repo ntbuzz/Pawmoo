@@ -37,7 +37,8 @@ echo mb_substr($pp,0,-2)."\n";
 
 //=================================
 // デバッグ用の情報ダンプ
-debug_dump(4, [
+echo "FALSE=".FALSE;
+debug_log(FALSE, [
     'デバッグ情報' => [
         "Application"=> $appname,
         "Controller"=> $controller,

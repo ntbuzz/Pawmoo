@@ -21,22 +21,25 @@
 global $on_server;
 // デバッグ用のクラス
 require_once('AppDebug.php');
-require_once('Common/coreLibs.php');
-require_once('Class/session.php');
-require_once('Config/appConfig.php');
 
-require_once('App.php');
-require_once('Class/fileclass.php');
+// このファイルが依存している関数定義ファイル
+require_once('Config/appConfig.php');
+require_once('Common/coreLibs.php');
 require_once('Common/appLibs.php');
+// オートローダーの初期化前に必要、または命名規則から外れたクラス
+require_once('Class/session.php');
+require_once('Class/fileclass.php');
+require_once('Class/Parser.php');
+require_once('Base/LangUI.php');
+// 以下のクラスはオートロードできるが速度低下を防ぐためここでは使わない
+require_once('App.php');
 require_once('Base/AppObject.php');
 require_once('Base/AppController.php');
 require_once('Base/AppModel.php');
 require_once('Base/AppFilesModel.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
-require_once('Base/LangUI.php');
 
-APPDEBUG::INIT(DEBUG_LEVEL);
 // Setup TIMEZONE
 date_default_timezone_set(TIME_ZONE);
 
@@ -48,23 +51,24 @@ list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filter,$params) = $module;
 parse_str($q_str, $query);
 if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
-//debug_dump(1,[ "Routing module" => $module]);
+debug_log(0,[ "Routing module" => $module]);
 
 // アプリ名が有効かどうか確認する
 if(empty($appname) || !file_exists("app/$appname")) {
-    header("Location:/index.html");
-    exit;
+//  header("Location:/index.html");exit;
     // 404エラーページを送信する時はこっち
-    // error_response('app-404.php',$appname,$module);
+    error_response('app-404.php',$appname,$module);
 }
 MySession::InitSession($appname);
-
+if($controller === 'Error') {       // ERROR PAGE
+    $code = $params[0];
+    error_response('page-{$code}.php',$appname,$module);
+}
 // ここでは App クラスの準備ができていないので直接フォルダ指定する
 require_once("app/{$appname}/Config/config.php");
 // Check URI-Redirect direction
-if(!defined('FORCE_REDIRECT')) {
-    define('FORCE_REDIRECT', FALSE);
-}
+if(!defined('FORCE_REDIRECT')) define('FORCE_REDIRECT', FALSE);
+
 if(!is_extst_module($appname,$controller,'Controller')) {
     // if BAD controller name, try DEFAULT CONTROLLER and shift follows
     $cont = (DEFAULT_CONTROLLER === '') ? $appname : DEFAULT_CONTROLLER;
@@ -74,12 +78,6 @@ if(!is_extst_module($appname,$controller,'Controller')) {
     list($controller,$method,$filter) = $module;
     // RE-TRY DEFAULT CONTROLLER,if FAILED,then NOT FOUND
     if(!is_extst_module($appname,$controller,'Controller')) {
-        debug_dump(1,[
-            "ROUTING FAILED." => [
-                'AppName' => $appname,
-                'Controller' => $controller,
-                'Module' => $module,
-            ]]);
         error_response('page-404.php',$appname,$module);
     }
 }
@@ -107,17 +105,15 @@ if(mb_strpos($method,'.') !== FALSE) {  // have a extension
     $module[1] = $method;
     $module[2] = $filter;
 }
+// アプリ固有クラスをオートロードできるようにする
+require_once('Class/ClassLoader.php');
+ClassLoader::Setup($appname,$controller);
 // アプリケーション変数を初期化する
 App::__Init($appname,$app_uri,$module,$query,$requrl);
 App::$Controller  = $controller;    // コントローラー名
 
 // 共通サブルーチンライブラリを読み込む
 $libs = get_php_files(App::Get_AppPath("common/"));
-foreach($libs as $files) {
-    require_once $files;
-}
-// コアクラスのアプリ固有の拡張クラス
-$libs = get_php_files(App::Get_AppPath("extends/"));
 foreach($libs as $files) {
     require_once $files;
 }
@@ -143,15 +139,6 @@ if(!$controllerInstance->is_enable_action($method)) {
     } else {
         $module[0] = $controller;       // may-be rewrited
         $module[1] = $method;           // may-be rewrited
-        debug_dump(1,[
-            'Module Info' => [
-                'App' => $appname,
-                'Cont' => $ContClass,
-                'Action' => $ContAction,
-                'Filter' => $filter,
-            ],
-            'Module' => $module,
-        ]);
         error_response('page-404.php',$appname,$module);
     }
 }
@@ -163,7 +150,7 @@ if(strcasecmp($appname,$controller) === 0) {
 App::$ActionMethod= $ContAction;    // アクションメソッド名
 //=================================
 // デバッグ用の情報ダンプ
-APPDEBUG::DebugDump(1, [
+debug_log(0, [
     'デバッグ情報' => [
         "Application"=> $appname,
         "Controller"=> $controller,
@@ -181,6 +168,7 @@ APPDEBUG::DebugDump(1, [
         "ENV" => MySession::$EnvData,
     ],
     'パス情報' => [
+        "REFERER" => $_SERVER['HTTP_REFERER'],
         "SERVER" => $_SERVER['REQUEST_URI'],
         "RootURI"=> $approot,
         "appname"=> $appname,
@@ -193,15 +181,15 @@ APPDEBUG::DebugDump(1, [
 
 ]);
 
-APPDEBUG::RUN_START();
+debug_run_start();
 // ログイン不要ならTRUEが返る
 if($controllerInstance->is_authorised()) {
     $controllerInstance->$ContAction();
 }
 
-APPDEBUG::RUN_FINISH(0);
+debug_run_time(0);
 MySession::CloseSession();
-APPDEBUG::DebugDump(0, [
+debug_log(0, [
     "セッションクローズ" => [
         "ENVDATA" => MySession::$EnvData,
     ]

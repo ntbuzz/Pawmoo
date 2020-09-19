@@ -27,8 +27,6 @@ require_once('Class/session.php');
 require_once('Base/AppStyle.php');
 require_once('Base/LangUI.php');           // static class
 
-APPDEBUG::INIT(0);
-
 date_default_timezone_set('Asia/Tokyo');
 
 list($appname,$app_uri,$module,$q_str) = get_routing_params(__DIR__);

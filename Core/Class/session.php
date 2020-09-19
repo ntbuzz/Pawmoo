@@ -25,7 +25,7 @@ static function InitSession($appname = 'default') {
 	if(DEBUGGER && empty($on_server)) {
 		$_SESSION[self::$MY_SESSION_ID]['Login'] = ['user' => 'aaa'];
 	}
-	debug_dump(0,[
+	debug_log(FALSE,[
 		"SESSION" => $_SESSION,
 		"REQUEST" => $_REQUEST,
 		"POST" => $_POST,
@@ -50,7 +50,7 @@ static function InitSession($appname = 'default') {
 // セッションに保存する
 static function CloseSession() {
 	$_SESSION[self::$MY_SESSION_ID] = self::$EnvData;
-	debug_dump(0, [
+	debug_log(FALSE, [
 		"CLOSE" => $_SESSION,
 	]);
 }
@@ -116,7 +116,7 @@ static function UnsetEnvData($arr) {
 //==============================================================================
 // デバッグ用ダンプ
 static function Dump() {
-	debug_dump(1,[
+	debug_log(-1,[
 		"SESSION" => $_SESSION,
 		"ENV" => self::$EnvData,
 		"POST" => self::$PostEnv

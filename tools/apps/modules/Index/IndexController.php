@@ -12,7 +12,6 @@ class IndexController extends AppController {
 //==============================================================================
 // デフォルトの動作
 public function ListAction() {
-	APPDEBUG::MSG(15,":Test");
 	$this->View->PutLayout();
 }
 

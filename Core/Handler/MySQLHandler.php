@@ -15,7 +15,6 @@ class MySQLHandler extends SQLHandler {
 //==============================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
 protected function Connect() {
-	APPDEBUG::MSG(13,$this->table);
 	// テーブル属性を取得
 	$sql = "PRAGMA table_info({$this->table});";
 	$rows = $this->dbb->query($sql);
@@ -23,12 +22,10 @@ protected function Connect() {
 	while ($row = $rows->fetch_assoc()) {
 		$this->columns[$row['name']] = $row['name'];
 	}
-	APPDEBUG::MSG(13,$this->columns);
 }
 //==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
-	APPDEBUG::MSG(3,$sql);
 	$this->rows = $this->dbb->query($sql);
 	return $this->rows;
 }
@@ -47,14 +44,12 @@ public function getLastError() {
 //==============================================================================
 public function insertRecord($row) {
 	$this->sql_safequote($row);
-	APPDEBUG::MSG(13, $row );
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
 	$vstr = "'" . implode("','", $row) . "'";
 
 	$sql = "INSERT INTO {$this->table} ({$kstr}) VALUES ({$vstr});";
 	error_reporting(E_ERROR);
-	APPDEBUG::MSG(13, $sql );
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
 		echo 'ERROR:'.$this->getLastError()."\n".$sql;
@@ -65,7 +60,6 @@ public function insertRecord($row) {
 //==============================================================================
 public function updateRecord($wh,$row) {
 	$this->sql_safequote($row);
-	APPDEBUG::MSG(13, $row );
 	list($pkey,$pval) = array_first_item($wh);
 	unset($row[$pkey]);			// プライマリキーは削除しておく
 	$where = " WHERE \"{$pkey}\"={$pval}";		// プライマリキー名を取得
@@ -77,7 +71,6 @@ public function updateRecord($wh,$row) {
 	// UPSERT 文を生成
 	$sql = "UPDATE \"{$this->table}\"{$set}{$where};";
 	error_reporting(E_ERROR);
-	APPDEBUG::MSG(13, $sql );
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
 		echo 'ERROR:'.$this->getLastError()."\n".$sql;

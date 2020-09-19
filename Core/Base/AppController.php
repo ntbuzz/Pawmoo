@@ -40,7 +40,7 @@ class AppController extends AppObject {
 								function($v) use ($except) {
 									return !in_array($v,$except);
 								});
-		debug_dump(0, [ 'MY METHOD' => $this->my_method ]);
+		debug_log(FALSE, [ 'MY METHOD' => $this->my_method ]);
 	}
 //==============================================================================
 // 後始末の処理
@@ -74,14 +74,14 @@ public function PageSetup() {
 	$num = App::$Params[0];
 	$size= App::$Params[1];
 	if($size == 0) {
-		$size = (isset(MySession::$PostEnv['PageSize'])) ? MySession::$PostEnv['PageSize'] : 15;
+		$size = (isset(MySession::$PostEnv['PageSize'])) ? MySession::$PostEnv['PageSize'] : 25;
 	} else MySession::$EnvData['PageSize'] = $size;		// 新しいページサイズに置換える
 	if($num == 0) $num = 1;
 	// 自分とヘルパーのパラメータを書き換える
 	App::$Params[0] =  $num;
 	App::$Params[1] =  $size;
 	$this->Model->SetPage($size,$num);
-	APPDEBUG::DebugDump(2, [
+	debug_log(1, [
 		'ページャーパラメータ' => [
 			"App" 		=> App::$Params,
 		],
@@ -90,7 +90,6 @@ public function PageSetup() {
 //==============================================================================
 // デフォルトの動作
 public function ListAction() {
-	APPDEBUG::MSG(12,":List");
 	$this->Model->RecordFinder([]);
 	$this->View->PutLayout();
 }
@@ -104,7 +103,6 @@ public function PageAction() {
 // 検索
 // find/カラム名/検索値
 public function FindAction() {
-	APPDEBUG::MSG(12,":Find");
 	if(App::$ParamCount > 1 ) {
 		$row = array(App::$Filter => "={App::$Params[0]}");
 	} else {
@@ -116,7 +114,6 @@ public function FindAction() {
 //==============================================================================
 // ビュー
 public function ViewAction() {
-	APPDEBUG::MSG(12,":View");
 	try {
 		$num = App::$Params[0];
 		$this->Model->GetRecord($num);
@@ -141,9 +138,7 @@ public function MakepdfAction() {
 public function UpdateAction() {
 	try {
 		$num = App::$Params[0];
-//		MySession::Dump();
 		$this->Model->UpdateRecord($num,MySession::$PostEnv);
-//		echo ('Location:' . App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/' . $num );exit;
 		header('Location:' . App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/' . $num );
 	} catch (Exception $e) {
 
@@ -153,7 +148,7 @@ public function UpdateAction() {
 //==============================================================================
 // デバッグダンプ
 public function DumpAction() {
-	APPDEBUG::MSG(12,MySession::$PostEnv);
+	debug_log(11,MySession::$PostEnv);
 }
 
 }

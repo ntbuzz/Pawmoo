@@ -36,14 +36,16 @@ class App {
         self::$ParamCount = $k;
 		self::$Params += array_fill($k, 10 - $k, '');
         self::$SysVAR = array(
+            'SERVER' => $_SERVER['SERVER_NAME'],
+            'REFERER' => self::$Referer,
+            'URI' => $uri,
             'SYSROOT' => self::$sysRoot,
             'APPNAME' => self::$AppName,
             'URIROOT' => self::$appRoot,
-            'URI' => $uri,
-            'REFERER' => self::$Referer,
             'controller' => $controller,  //ucfirst($uri_array[2]),
             'method' => $method,  //ucfirst($uri_array[3]),
             'filter' => $filter,  // ucfirst(self::$Filter),
+            'current_version' => CURRENT_VERSION,  // framework version
         );
         self::$Query = $query;
         // メソッドの書き換えによるアドレスバー操作用
@@ -75,7 +77,7 @@ public static function ChangeParams($params,$relocate = TRUE) {
 // メソッドの置換
 public static function Get_RelocateURL() { 
     if(self::$ReLocate === FALSE) return NULL;
-    APPDEBUG::DebugDump(1, self::$execURI);
+    debug_log(1, self::$execURI);
     $url = array_to_URI(self::$execURI);
     if(!empty(self::$Query)) {                  // exists QUERY strings
         $q = http_build_query(self::$Query);
@@ -83,21 +85,6 @@ public static function Get_RelocateURL() {
     }
     return $url;
 }
-//==============================================================================
-// デバッグメッセージ
-    private static function DEBUG($lvl,$msg) { 
-        if(DEBUG || ($lvl >= DEBUG_LEVEL)) {
-            echo "<pre>\n";
-            if(is_scalar($msg)) {
-                echo "{$msg}\n";
-            } else {
-                echo "msg obj dump\n";
-                echo str_repeat("=", 50)."\n";
-                print_r($msg);
-            }
-            echo "</pre>\n";
-        }
-    }
 //==============================================================================
 // アプリケーションフォルダパスを取得
 public static function Get_AppPath($path) {

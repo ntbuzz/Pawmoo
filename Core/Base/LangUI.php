@@ -15,7 +15,7 @@ class LangUI {
 //==============================================================================
 // HTTP_ACCEPT_LANGUAGE を元にデフォルトの言語を決定する
     public static function construct($lang,$default) {
-        APPDEBUG::MSG(14,$lang, "言語リスト");
+        debug_log(2,["言語リスト" => $lang]);
         $_ = 'constant';                                    // 定数を取り出す関数
         $arr = array_unique(             // 重複行を取り除く
                 array_filter(           // strlen を使って空行を取り除く
@@ -54,7 +54,7 @@ public static function LangFiles($files) {
 //==============================================================================
 //  言語ファイルの読み込み
 public static function LangDebug() {
-    APPDEBUG::DebugDump(4, [
+    debug_log(2, [
             "ロケール情報" => [
                 'Locale' => self::$Locale,
                 'File'   => self::$LocaleFiles,
@@ -136,14 +136,14 @@ public static function LangDebug() {
             unset($section);
             return TRUE;
         } else {
-            APPDEBUG::MSG(4,"{$lang_file}.lng", "UNDEFINED");
+            debug_log(2,"UNDEFINED : {$lang_file}.lng\n");
         }
         return FALSE;
     }
 //==============================================================================
 // ネストされた配列変数を取得する、要素名はピリオドで連結したキー名
 //  ex. Menu.File.OPEN  大文字小文字は区別される
-public static function get_value($mod, $id, $allow) {
+public static function get_value($mod, $id, $allow = FALSE) {
     //-----------------------------------------
     // 無名関数を定義して配列内の探索を行う
     $array_finder = function ($lst, $arr, $allow) {
@@ -176,7 +176,7 @@ public static function get_value($mod, $id, $allow) {
 // ネストされた配列変数を取得する、要素名はピリオドで連結したキー名
 //  ex. Menu.File.OPEN  大文字小文字は区別される
 public static function get_array($arr, $mod, $var) {
-    $element = self::get_value($mod,$var,FALSE);
+    $element = self::get_value($mod,$var);
     return $arr[$element];
 }
 
