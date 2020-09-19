@@ -40,17 +40,17 @@ function debug_log($lvl,...$items) {
     if($lvl > DEBUG_LEVEL) return;
     // バックトレースから呼び出し元の情報を取得
     $dump_log_info = function($items) {
-        $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,4);    // 呼び出し元のスタックまでの数
+        $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
         array_shift($dbinfo);   // 自クラスの情報は不要
         $trace = "";
         foreach($dbinfo as $stack) {
             $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
             list($pp,$fn,$ext) = extract_path_file_ext($path);
             $func = "{$fn}({$stack['line']})";
-            $trace = (empty($trace)) ? $func : "{$func} > {$trace}";
+            $trace = (empty($trace)) ? $func : "{$func}>{$trace}";
         }
         $sep = 	str_repeat("-", 30);
-        $dmp_msg = "TRACE::{$trace}\n";
+        $dmp_msg = "TRACE:: {$trace}\n";
         // 子要素のオブジェクトをダンプする関数
         $dump_object = function ($obj,$indent) use (&$dump_object) {
             $dmp = "";

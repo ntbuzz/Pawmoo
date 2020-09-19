@@ -71,8 +71,9 @@ public function ImportSession() {
 //==============================================================================
 // ページネーションのセットアップ
 public function PageSetup() {
-	$num = App::$Params[0];
-	$size= App::$Params[1];
+	list($num,$size) = App::$Params;
+//	$num = App::$Params[0];
+//	$size= App::$Params[1];
 	if($size == 0) {
 		$size = (isset(MySession::$PostEnv['PageSize'])) ? MySession::$PostEnv['PageSize'] : 25;
 	} else MySession::$EnvData['PageSize'] = $size;		// 新しいページサイズに置換える
