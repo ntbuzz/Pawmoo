@@ -11,9 +11,9 @@ class AppView extends AppObject {
     protected $Layout;        // デフォルトのレイアウト
     private $doTrailer = FALSE;
     const Extensions = array("tpl","php","inc","html");  // テンプレート拡張子
-    const SectionCMD = '<@&+*%-.#{[';  // 単独セクション処理コマンド文字
+    const SectionCMD = '<@&+*%-.#{[$';  // 単独セクション処理コマンド文字
     private $rep_array;
-    private $env_vars;
+    private $env_vars;              // テンプレート内のグローバル変数
     private $inlineSection;        // インラインのセクション
     const FunctionList = array(
         '<'   => 'sec_html',
@@ -60,12 +60,6 @@ class AppView extends AppObject {
 //==============================================================================
 // デフォルトレイアウト変更
 //==============================================================================
-public function SetEnv($key,$val) {
-    $this->env_vars[$key] = $val;
-}
-//==============================================================================
-// デフォルトレイアウト変更
-//==============================================================================
 public function SetLayout($layoutfile) {
     $tmplate = $this->get_TemplateName($layoutfile);   // ビューフォルダのテンプレート
     if(!file_exists($tmplate)) {                // 存在しないなら共通のテンプレートを探す
@@ -77,7 +71,7 @@ public function SetLayout($layoutfile) {
 // レイアウト出力
 //==============================================================================
 public function PutLayout() {
-    APPDEBUG::LOG(1, "\$Layout = {$this->Layout}");
+    debug_log(1, "\$Layout = {$this->Layout}");
     $this->ViewTemplate($this->Layout);
     $this->doTrailer = TRUE;
 }
@@ -91,11 +85,10 @@ public function __TerminateView() {
         // リクエストURLと処理メソッドが違っていたときはRelocateフラグが立つ
         $url = App::Get_RelocateURL();
         if(isset($url)) {
-            APPDEBUG::LOG(1,"URL書換: {$url}\n");
+            debug_log(1,"URL書換: {$url}\n");
             echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";
         }
         if(DEBUGGER) {
-            APPDEBUG::LOG_SORT();                   // メッセージ要素の並べ替え
             $this->ViewTemplate('debugbar');
         }
     }
@@ -112,7 +105,7 @@ public function ViewTemplate($name,$vars = []) {
             $parser = new SectionParser($tmplate);
             $divSection = $parser->getSectionDef();
             $this->inlineSection = [];         // インラインセクション定義をクリア
-            APPDEBUG::LOG(1,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
+            debug_log(1,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
             $this->sectionAnalyze($divSection,$vars);
             break;
         case 1:     // 'php'     // PHP Template
@@ -153,7 +146,6 @@ public function ViewTemplate($name,$vars = []) {
                 }
             }
         }
-//        check_cwd(get_class($this)."@{$name} in {$this->ModuleName}");
         return NULL;
     }
 //==============================================================================
@@ -196,10 +188,12 @@ public function ViewTemplate($name,$vars = []) {
                 }
                 break;
             default:
-                if(isset($vars[$var])) {
-                    $val = $vars[$var];             // 環境変数で置換
-                } else if(isset($this->$var)) {
-                    $val = $this->$var;             // プロパティ変数で置換
+                if(isset($vars[$var])) {            // ローカル変数に存在
+                    $val = $vars[$var];
+                } else if(isset($this->env_vars[$var])) {   // グローバル変数に存在
+                    $val = $this->env_vars[$var];
+                } else if(isset($this->$var)) {     // プロパティ変数に存在
+                    $val = $this->$var;
                 }
             }
         }
@@ -215,7 +209,7 @@ public function ViewTemplate($name,$vars = []) {
         if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
         $values = $varList = array_unique($varList);
         array_walk($values, array($this, 'expand_Walk'), $vars);
-        debug_dump(0,[ "EXPAND" => [
+        debug_log(FALSE,[ "EXPAND" => [
             "STR" => $str,
             "変換" => $varList,
             "置換" => $values,
@@ -232,9 +226,7 @@ public function ViewTemplate($name,$vars = []) {
             return $this->expand_Strings($vv,$vars);   // 変数置換を行う
         }
         foreach($vv as $kk => $nm) {
-            if(is_array($nm)) {
-                $vv[$kk] = $this->expand_SectionVar($nm,$vars);
-            } else {
+            if(!is_array($nm)) {        // 配列の子要素は後で展開する
                 $exvar = $this->expand_Strings($nm,$vars);   // 変数置換を行う
                 if(is_array($exvar)) {
                     $vv[$kk] =$exvar;     // 配列に置換する
@@ -279,9 +271,12 @@ public function ViewTemplate($name,$vars = []) {
 // セクション配列を解析して処理関数へディスパッチする
     private function sectionAnalyze($divSection,$vars) {
         foreach($divSection as $key => $sec) {
-            if($key === '+setvar') {
+            if($key === '+setvar') {        // グローバル変数に登録
                 $vv = $this->expand_SectionVar($sec,$vars);
-                $vars = $this->my_array_Merge($vv,$vars);  // 環境変数にマージ、引数側を優先
+                $this->env_vars = $this->my_array_Merge($vv,$this->env_vars);
+            } else if($key[0] === '$' && $key[1] !== '{') {     // ローカル変数に登録
+                $nm = mb_substr($key,1);      // 先頭文字を削除
+                $vars[$nm] = $this->expand_SectionVar($sec,$vars);
             } else
                 $this->sectionDispath($key,$sec,$vars);
         }
@@ -464,7 +459,7 @@ public function ViewTemplate($name,$vars = []) {
         $mtext =(is_numeric($key))
                 ? pseudo_markdown( $atext )
                 : pseudo_markdown( $atext,$key);
-    debug_dump(0,[ 
+    debug_log(FALSE,[ 
         "SEC" => $sec,
         "KEY" => $key,
         "STRING" => $atext,

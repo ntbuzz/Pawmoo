@@ -77,7 +77,7 @@ public static function ChangeParams($params,$relocate = TRUE) {
 // メソッドの置換
 public static function Get_RelocateURL() { 
     if(self::$ReLocate === FALSE) return NULL;
-    APPDEBUG::LOG(1, self::$execURI);
+    debug_log(1, self::$execURI);
     $url = array_to_URI(self::$execURI);
     if(!empty(self::$Query)) {                  // exists QUERY strings
         $q = http_build_query(self::$Query);
@@ -85,21 +85,6 @@ public static function Get_RelocateURL() {
     }
     return $url;
 }
-//==============================================================================
-// デバッグメッセージ
-    private static function DEBUG($lvl,$msg) { 
-        if(DEBUG || ($lvl >= DEBUG_LEVEL)) {
-            echo "<pre>\n";
-            if(is_scalar($msg)) {
-                echo "{$msg}\n";
-            } else {
-                echo "msg obj dump\n";
-                echo str_repeat("=", 50)."\n";
-                print_r($msg);
-            }
-            echo "</pre>\n";
-        }
-    }
 //==============================================================================
 // アプリケーションフォルダパスを取得
 public static function Get_AppPath($path) {

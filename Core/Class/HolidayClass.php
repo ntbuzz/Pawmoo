@@ -6,7 +6,7 @@ class CommonHolidays {
 // コンストラクタ
 	function __construct($HolidayList, $range) {
 		$this->Prefix = get_class($this);
-		APPDEBUG::LOG(10,$HolidayList);
+		debug_log(10,$HolidayList);
 		// 休日用配列をプロパティ変数に登録
         foreach($HolidayList as $key => $val) $this->$key = $val;
 		$this->HolidayTable = array();
@@ -17,7 +17,6 @@ class CommonHolidays {
 //==============================================================================
 // デバッグ用ダンプ
 	public function dumpHoliday() {
-//		debug_dump(1, [ "祝日一覧" => $this->HolidayTable]);
 		foreach($this->HolidayTable as $key => $val) {
 			echo "年: {$key}<br>\n";
 			echo "プレフィクス:{$this->Prefix}<br>\n";

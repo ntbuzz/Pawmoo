@@ -32,6 +32,7 @@ protected function Connect() {
 //==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
+	debug_log(3,['SQL' => $sql]);
 	$this->rows = pg_query($this->dbb, $sql);
 	if(!$this->rows) {
 		$res1 = pg_get_result($this->dbb);
@@ -92,9 +93,9 @@ public function updateRecord($wh,$row) {
 public function insertRecord($row) {
 	$this->sql_safequote($row);
 	// \ をエスケープする
-	foreach($row as $key => $val) {
-		$row[$key] = str_replace('\\', '\\\\', $val);
-	}
+//	foreach($row as $key => $val) {
+//		$row[$key] = str_replace('\\', '\\\\', $val);
+//	}
 	// PostgreSQLのデータ型に変換
 	$aa = pg_convert($this->dbb,$this->table,$row);
 	if($aa === FALSE) {
@@ -102,7 +103,6 @@ public function insertRecord($row) {
 		echo "ERROR:" . pg_result_error($res1) . "<br>\n";
 		die('Postgres CONVERT失敗' . pg_last_error());
 	}
-	$primary = '"' . key($wh) . '"';		// プライマリキー名を取得
 	$kstr = implode(',', array_keys($aa));	// フィールド名リストを作成
 	$vstr = implode(',', $aa);				// VALUES リストを作成
 	$set = " SET"; $sep = " ";				// UPDATE する時の代入文

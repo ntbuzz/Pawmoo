@@ -146,7 +146,7 @@ public function MakePageLinks() {
 // ヘッダー付きのテーブルリスト表示
 public function MakeListTable($deftab) {
 	// デバッグ情報
-	APPDEBUG::LOG(1,[
+	debug_log(1,[
 		'deftab' => $deftab,
 		'Page' => $this->MyModel->page_num,
 		'Size' => $this->MyModel->pagesize,
@@ -204,7 +204,7 @@ public function Form($act, $attr) {
 //	$this->Select ($key,$name)
 //
 public function Select($key,$name) {
-	APPDEBUG::LOG(1, $this->MyModel->Select);
+	debug_log(1, $this->MyModel->Select);
 	$dat = $this->MyModel->RecData[$key];
 	echo "<SELECT name='{$name}'>";
 	foreach($this->MyModel->Select[$key] as $ttl => $id) {

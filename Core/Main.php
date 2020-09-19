@@ -40,7 +40,6 @@ require_once('Base/AppFilesModel.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
 
-APPDEBUG::INIT(DEBUG_LEVEL);
 // Setup TIMEZONE
 date_default_timezone_set(TIME_ZONE);
 
@@ -52,7 +51,7 @@ list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filter,$params) = $module;
 parse_str($q_str, $query);
 if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
-//debug_dump(1,[ "Routing module" => $module]);
+debug_log(0,[ "Routing module" => $module]);
 
 // アプリ名が有効かどうか確認する
 if(empty($appname) || !file_exists("app/$appname")) {
@@ -61,7 +60,10 @@ if(empty($appname) || !file_exists("app/$appname")) {
     error_response('app-404.php',$appname,$module);
 }
 MySession::InitSession($appname);
-
+if($controller === 'Error') {       // ERROR PAGE
+    $code = $params[0];
+    error_response('page-{$code}.php',$appname,$module);
+}
 // ここでは App クラスの準備ができていないので直接フォルダ指定する
 require_once("app/{$appname}/Config/config.php");
 // Check URI-Redirect direction
@@ -148,7 +150,7 @@ if(strcasecmp($appname,$controller) === 0) {
 App::$ActionMethod= $ContAction;    // アクションメソッド名
 //=================================
 // デバッグ用の情報ダンプ
-APPDEBUG::LOG(0, [
+debug_log(0, [
     'デバッグ情報' => [
         "Application"=> $appname,
         "Controller"=> $controller,
@@ -179,15 +181,15 @@ APPDEBUG::LOG(0, [
 
 ]);
 
-APPDEBUG::RUN_START();
+debug_run_start();
 // ログイン不要ならTRUEが返る
 if($controllerInstance->is_authorised()) {
     $controllerInstance->$ContAction();
 }
 
-APPDEBUG::RUN_FINISH(0);
+debug_run_time(0);
 MySession::CloseSession();
-APPDEBUG::LOG(0, [
+debug_log(0, [
     "セッションクローズ" => [
         "ENVDATA" => MySession::$EnvData,
     ]

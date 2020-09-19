@@ -29,7 +29,7 @@ function __construct($table,$handler) {
 		$this->table = $table;
 		$this->dbb = DatabaseHandler::get_database_handle($handler);
 		$this->Connect();
-		APPDEBUG::LOG(13,["フィールド名リスト" => $this->columns]);
+		debug_log(13,["フィールド名リスト" => $this->columns]);
 		$this->handler = $handler;
 	}
 //==============================================================================
@@ -59,7 +59,7 @@ public function SetPaging($pagesize, $pagenum) {
 	$this->startrec = $pagesize * ($pagenum - 1);		// 開始レコード番号
 	if($this->startrec < 0) $this->startrec = 0;
 	$this->limitrec = $pagesize;		// 取得レコード数
-	APPDEBUG::LOG(13,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
+	debug_log(13,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
 }
 //==============================================================================
 //	getRecordCount($row) 
@@ -95,6 +95,7 @@ public function findRecord($row,$relations,$sort = []) {
 	$where = $this->sql_makeWHERE($row);	// 検索条件
 	// 全体件数を取得する
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
+	debug_log(3,['SQL' => $sql]);
 	$this->doQuery("{$sql}{$where}");
 	$field = $this->fetchDB();
 	$this->recordMax = ($field) ? $field["total"] : 0;
@@ -181,9 +182,15 @@ protected function sql_safequote(&$value) {
 			$opc = '';
 			foreach($items as $key => $val) {
 				if(is_array($val)) {
-					$opx = (is_numeric($key) || $key === 'NOT') ? 'AND' : $key; 
-                    $opp = $dump_object($opx,$val);
-                    if($key === 'NOT') $opp = "(NOT {$opp})";
+					if(in_array($key,['AND','OR','NOT'])) {
+						$opx = (is_numeric($key) || $key === 'NOT') ? 'AND' : $key; 
+						$opp = $dump_object($opx,$val);
+						if($key === 'NOT') $opp = "(NOT {$opp})";
+					} else {
+						$opp = "({$this->table}.\"{$key}\" IN "; $sep = '(';
+						foreach($val as $cmp) { $opp .= "{$sep}'{$cmp}'"; $sep = ','; }
+						$opp .= ')';
+					}
 				} else {
 					// キー名の最後に関係演算子
 					list($key,$op) = keystr_opr($key);
@@ -195,7 +202,15 @@ protected function sql_safequote(&$value) {
 						$op = ' NOT LIKE ';
 					}
 					if(strpos($op,'LIKE') !== false) $val = "%{$val}%";
-					$opp = "({$this->table}.\"{$key}\"{$op}'{$val}')";
+					if(strpos($key,'+') !== FALSE) {
+						$sep = '';
+						$opp = '';
+						foreach(explode('+',$key) as $cmp) {
+							$opp .= "{$sep}({$this->table}.\"{$cmp}\"{$op}'{$val}')";
+							$sep = ' OR ';
+						}
+						$opp = "({$opp})";
+					} else $opp = "({$this->table}.\"{$key}\"{$op}'{$val}')";
 				}
 				$opc = (empty($opc)) ? $opp : "{$opc} {$opr} {$opp}";
 			}

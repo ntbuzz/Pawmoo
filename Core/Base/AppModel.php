@@ -40,7 +40,7 @@ class AppModel extends AppObject {
 //==============================================================================
 	function __construct($owner) {
 	    parent::__construct($owner);                    // 継承元クラスのコンストラクターを呼ぶ
-        APPDEBUG::LOG(13,static::$DatabaseSchema);
+        debug_log(13,static::$DatabaseSchema);
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
         $this->__InitClass();                             // クラス固有の初期化メソッド
         $this->fields = [];
@@ -49,7 +49,7 @@ class AppModel extends AppObject {
 //	デバッグ用に空のレコードを生成
 //==============================================================================
     function DebugRecord() {
-        debug_dump(DEBUG_DUMP_NONE, [
+        debug_log(FALSE, [
             "Type:"     => $this->ClassType,   // オブジェクトの所属クラス(Controller, Model, View. Helper)
             "Module:"   => $this->ModuleName,  // オブジェクトの名前
             "Class:"    => $this->ClassName,   // クラス名
@@ -65,7 +65,7 @@ class AppModel extends AppObject {
         $this->dbDriver = new $driver($this->DataTable);        // データベースドライバー
         // ヘッダ表示用のスキーマ
         $this->SchemaHeader($this->Schema);
-        APPDEBUG::LOG(3, ["HeaderSchema" => $this->HeaderSchema]);
+        debug_log(3, ["HeaderSchema" => $this->HeaderSchema]);
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
     }
 //==============================================================================
@@ -110,7 +110,7 @@ public function RelationSetup() {
             $this->Relations[$key] =  implode('.',$arr);            // Relations変数に書き戻す
         }
     }
-    APPDEBUG::LOG(3,["LocaleSchema" => $this->LocaleSchema, "Relations" => $this->Relations]);
+    debug_log(3,["LocaleSchema" => $this->LocaleSchema, "Relations" => $this->Relations]);
 }
 //==============================================================================
 // ページング設定
@@ -176,7 +176,7 @@ public function GetValueList() {
         $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn,$grp);
     }
     $this->Select= $valueLists;             // JOIN先の値リスト
-    APPDEBUG::LOG(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);
+    debug_log(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);
 }
 //==============================================================================
 // フィールドの読み込み (JOIN無し)
@@ -206,7 +206,7 @@ public function getCount($cond) {
 //          読み込んだ列名 = Header (Schema)
 //          $filter[] で指定したオリジナル列名のみを抽出
 public function RecordFinder($cond,$filter=[],$sort=[]) {
-    APPDEBUG::LOG(3, [ "cond" => $cond, "filter" => $filter]);
+    debug_log(3, [ "cond" => $cond, "filter" => $filter]);
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];
     else if(is_scalar($sort)) {
@@ -215,7 +215,7 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
     while ($this->fetchRecord()) {
-//        APPDEBUG::LOG(13, [
+//        debug_log(13, [
 //            "fields:".(count($data)+1) => $this->fields,
 //            "Head:" => $this->HeaderSchema,
 //        ]);
@@ -235,11 +235,11 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
             $this->record_max = $this->dbDriver->recordMax;
             $this->doEvent('OnGetRecord', $record);     // イベントコールバック
         } else {
-            APPDEBUG::LOG(3, ["fields" => $this->fields]);
+            debug_log(3, ["fields" => $this->fields]);
         }
     }
     $this->Records = $data;
-    APPDEBUG::LOG(3, [ "record_max" => $this->record_max, "Header" => $this->HeaderSchema,"RECORDS" => $this->Records]);
+    debug_log(3, [ "record_max" => $this->record_max, "Header" => $this->HeaderSchema,"RECORDS" => $this->Records]);
 }
 //==============================================================================
 // レコードの取得
@@ -251,13 +251,12 @@ public function fetchRecord() {
 public function AddRecord($row) {
     $this->fields = array();
     foreach($row as $key => $val) {
-        $xkey = (isset($this->PostRenames[$key])) ? $xkey = $this->PostRenames[$key] : $key;
-        // フィールドキーが存在するものだけ書き換える
-        if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
+//        $xkey = (isset($this->PostRenames[$key])) ? $xkey = $this->PostRenames[$key] : $key;
+//        if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
+        if(array_key_exists($key,$this->dbDriver->columns)) $this->fields[$key] = $val;
     }
-    unset($this->fields[$this->Primary]);
-    // ロケールフィールドに移動する
-    $this->writeLocaleField();
+    $this->writeLocaleField();      // ロケールフィールドに移動する
+    debug_log(3, ["INSERT" => $this->fields]);
     $this->dbDriver->insertRecord($this->fields);
 }
 //==============================================================================
@@ -269,7 +268,6 @@ public function DeleteRecord($num) {
 // レコードの削除
 // 検索条件がインプット
 public function MultiDeleteRecord($cond) {
-    APPDEBUG::LOG(13, $cond);
     $this->dbDriver->deleteRecord($cond);
 }
 //==============================================================================
@@ -280,14 +278,13 @@ public function UpdateRecord($num,$row) {
     // 更新内容で書き換える
     $this->fields = array();
     foreach($row as $key => $val) {
-        $xkey = (isset($this->PostRenames[$key])) ? $xkey = $this->PostRenames[$key] : $key;
-        // フィールドキーが存在するものだけ書き換える
-        if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
+//        $xkey = (isset($this->PostRenames[$key])) ? $xkey = $this->PostRenames[$key] : $key;
+//        if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
+        if(array_key_exists($key,$this->dbDriver->columns)) $this->fields[$key] = $val;
     }
     $this->fields[$this->Primary] = $num;
-    // ロケールフィールドに移動する
-    $this->writeLocaleField();
-    APPDEBUG::LOG(3, $this->fields);
+    $this->writeLocaleField();          // ロケールフィールドに移動する
+    debug_log(3, ["UPDATE" => $this->fields]);
     $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
 }
 

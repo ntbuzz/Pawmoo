@@ -6,7 +6,6 @@
 define('CURRENT_VERSION','0.20.0 2020-08-18');	// フレームワークのバージョン
 
 define('TIME_ZONE','Asia/Tokyo');	// デフォルトのタイムゾーン
-define('DEBUG_LEVEL', 10);			// メッセージ出力許可レベル
 
 // OSタイプ
 if (PHP_OS == "Linux") {

@@ -11,7 +11,7 @@
         return to <a href='<?= $app_root; ?>'>TOP</a>
         <?php
             // backtrace
-            debug_dump(1,['dbinfo' => debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,3)]);
+            debug_log(-1,['dbinfo' => debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,3)]);
         ?>
     </div>
 </body>

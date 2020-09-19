@@ -128,7 +128,7 @@ class AppFilesModel extends AppObject {
             }
         }
         $drc->close();
-		APPDEBUG::LOG(13,$this->Files);
+		debug_log(13,$this->Files);
         return true;
     }
 //==============================================================================

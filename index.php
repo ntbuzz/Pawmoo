@@ -16,7 +16,9 @@ $on_server = $_SERVER['SERVER_PORT'];
  }
 // mod_rewrite の設定をシンプルにするため
 if(preg_match('/\/(?:css|js)\/.*/', $_SERVER['REQUEST_URI'])) {
+	define('DEBUG_LEVEL', 0);			// メッセージ出力許可レベル
 	require_once('Core/resource.php');
 } else {
+	define('DEBUG_LEVEL', 10);			// メッセージ出力許可レベル
 	require_once('Core/Main.php');
 }

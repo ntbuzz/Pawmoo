@@ -40,7 +40,7 @@ class AppController extends AppObject {
 								function($v) use ($except) {
 									return !in_array($v,$except);
 								});
-		debug_dump(0, [ 'MY METHOD' => $this->my_method ]);
+		debug_log(FALSE, [ 'MY METHOD' => $this->my_method ]);
 	}
 //==============================================================================
 // 後始末の処理
@@ -81,7 +81,7 @@ public function PageSetup() {
 	App::$Params[0] =  $num;
 	App::$Params[1] =  $size;
 	$this->Model->SetPage($size,$num);
-	APPDEBUG::LOG(1, [
+	debug_log(1, [
 		'ページャーパラメータ' => [
 			"App" 		=> App::$Params,
 		],
@@ -148,7 +148,7 @@ public function UpdateAction() {
 //==============================================================================
 // デバッグダンプ
 public function DumpAction() {
-	APPDEBUG::LOG(11,MySession::$PostEnv);
+	debug_log(11,MySession::$PostEnv);
 }
 
 }

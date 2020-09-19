@@ -196,11 +196,9 @@ $user_func = function($text) {
 		}
 		return $res;
 	};
-	debug_dump(0,[ "ARRAY" => $arr]);
+	debug_log(FALSE,[ "ARRAY" => $arr]);
 	return $ul_text($arr,0);
 };
 $arr = $user_func($text);
 
-debug_dump(5,[ "LIST DEBUG" => ["INPUT" => $text,"RESULT" => $arr, "ANSWER" => $ans]]);
-exit;
-
+debuglog(-5,[ "LIST DEBUG" => ["INPUT" => $text,"RESULT" => $arr, "ANSWER" => $ans]]);

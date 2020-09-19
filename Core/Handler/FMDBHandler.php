@@ -49,7 +49,7 @@ class FMDBHandler extends FileMaker {
 		$this->Finds = array();
 		$this->Connect($this->LayoutName);
 */
-		APPDEBUG::LOG(13, DatabaseParameter['Filemaker']);
+		debug_log(13, DatabaseParameter['Filemaker']);
 	}
 
 //==============================================================================
@@ -72,7 +72,7 @@ public function DatabaseConnect($dbtable) {
 //	fields[] 連想配列にフィールド名をセットする
 //==============================================================================
 private function Connect($layout) {
-	APPDEBUG::LOG(13, ['レイアウト' => $this->LayoutName]);
+	debug_log(13, ['レイアウト' => $this->LayoutName]);
 	$this->fields = array();
     // 先頭のレコードをひとつダミーで読み込む
     $findCommand = $this->newFindAllCommand($this->LayoutName);
@@ -81,7 +81,7 @@ private function Connect($layout) {
 	if (FileMaker::isError($result)) {	// エラー処理..
 		$this->errCode = $result->getCode();
 		$this->errMessage= $result->getMessage();
-		debug_dump(1,[ 'Connect ERROR' => [
+		debug_log(-1,[ 'Connect ERROR' => [
 			'Layout' => $this->LayoutName,
 			'Result' => $result,
 			'errCode' => $this->errCode,
@@ -93,7 +93,7 @@ private function Connect($layout) {
 	foreach($fmfields as $key) {
 		$this->columns[$key] = $key;
 	}
-	APPDEBUG::LOG(13, ["Columns @ {$this->Database}({$this->LayoutName})" => $this->columns]);
+	debug_log(13, ["Columns @ {$this->Database}({$this->LayoutName})" => $this->columns]);
 	// フィールド型を記憶する
 	$this->fmtconv = array();
     $layoutObj = $result->getLayout();
@@ -138,7 +138,7 @@ public function doQueryBy($fn,$recno) {
 	$findCommand = $this->newFindCommand($this->LayoutName);
     $findCommand->addFindCriterion($fn, '==' . $recno);
 	$findCommand->setRange(0,1);
-	debug_dump(0,["検索コマンド" => ['キー' => $fn,'値' => $recno]]);
+	debug_log(FALSE,["検索コマンド" => ['キー' => $fn,'値' => $recno]]);
 	$result = $findCommand->execute();
 	// 10. FileMaker::isErrorでエラー判定
 	if (FileMaker::isError($result)) {	// エラー処理..
@@ -235,7 +235,7 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 	};
 	$this->Finds = $expr_array('AND',$row);
 	$this->SortBy = $sort;
-	debug_dump(0,[
+	debug_log(FALSE,[
 		'row'	=> $row,
 		'FindBy'	=> $this->Finds,
 		'SortBy'	=> $this->SortBy,
@@ -244,7 +244,7 @@ public function findRecord($row, $relations = NULL,$sort = []) {
     $this->recordMax = 0;
 	$this->r_pos = 0;
 	$this->r_fetched = 0;		// 取り出したレコード数
-	APPDEBUG::LOG(13, ["検索設定" => $this->Finds]);
+	debug_log(13, ["検索設定" => $this->Finds]);
 	$this->onetime = 3;
 }
 //==============================================================================
@@ -255,7 +255,7 @@ public function fetchDB() {
 		if($this->recordMax > 0 && $this->skip_rec >= $this->recordMax) return 0;
 		if($this->limitrec > 0 && $this->skip_rec >= ($this->startrec + $this->limitrec)) return 0;
 		
-		APPDEBUG::LOG($this->onetime,[
+		debug_log($this->onetime,[
 		    'Param' => [
         		"skip_rec" => $this->skip_rec,
 	        	"startrec" => $this->startrec,
@@ -294,9 +294,9 @@ public function fetchDB() {
 			$this->errCode = $result->getCode();
 			$this->errMessage= $result->getMessage();
             if ($this->errCode !== '401') {
-				APPDEBUG::LOG(3, ["エラー" => $this->errMessage]);
+				debug_log(3, ["エラー" => $this->errMessage]);
 				// Check Find Condition
-				debug_dump(4,[
+				debug_log(-4,[
 					'FindBy'	=> $this->Finds,
 					'SortBy'	=> $this->SortBy,
 				]);
@@ -314,9 +314,9 @@ public function fetchDB() {
 		    $this->FetchRecords = $result->getRecords();
 			$this->r_pos = 0;
 		}
-		APPDEBUG::LOG(13, ["Fetch: " => $this->r_fetched]);
+		debug_log(13, ["Fetch: " => $this->r_fetched]);
 	}
-	APPDEBUG::LOG($this->onetime,[
+	debug_log($this->onetime,[
 		'fetched' => [
 			"recordMax" => $this->recordMax,
 			"r_fetched" => $this->r_fetched,
@@ -344,7 +344,7 @@ public function fetchDB() {
 // レコードIDをプライマリキーに設定するバージョン
 //==============================================================================
 	public function updateRecord($wh,$row) {
-		APPDEBUG::LOG(13, $row );
+		debug_log(13, $row );
 		$recordId = reset($wh);			// 先頭の値がPrimaryKey = recordId
 		if(empty($recordId)) {					// ID指定が無いときは空レコード生成
 			// 空のレコードを生成

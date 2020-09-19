@@ -3,10 +3,6 @@
  * PHPフレームワーク
  *  coreLibs: コアクラス内で呼び出す共通関数群
  */
-define('DEBUG_DUMP_NONE',   0);
-define('DEBUG_DUMP_DOIT',   1);
-define('DEBUG_DUMP_EXIT',   2);
-
 //==============================================================================
 // REQUEST_URI を分解しルーティングに必要なアプリ名、コントローラー名を抽出する
 function get_routing_params($dir) {
@@ -28,7 +24,7 @@ function get_routing_params($dir) {
         $appname = '';
     }
     $app_uri = [ $fwroot, "{$fwroot}{$appname}" ];      // URIセットを生成
-    debug_dump(0, [
+    debug_log(FALSE, [
         'URI' => $_SERVER['REQUEST_URI'],
         "app_uri"=> $app_uri,
         "args"=> $args,
@@ -61,7 +57,7 @@ function get_routing_params($dir) {
         $params                              // パラメータ
     );
     $ret = [$appname,$app_uri,$module,$q_str];
-    debug_dump(0, [
+    debug_log(FALSE, [
         'フレームワーク情報' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
             "app_uri"=> $app_uri,
@@ -200,66 +196,4 @@ function array_key_exists_recursive($key,$arr) {
         }
     }
     return FALSE;
-}
-//==============================================================================
-// デバッグダンプ
-function check_cwd($here) {
-    $cwd = getcwd();
-    echo "{$here} CWD:{$cwd}\n";
-}
-//==============================================================================
-// デバッグダンプ
-function debug_dump($flag, $arr = []) {
-    if($flag === 0) return;
-    $danger = ($flag < 4);
-    // バックトレースから呼び出し元の情報を取得
-    $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,5);    // 呼び出し元のスタックまでの数
-    $str = "";
-    foreach($dbinfo as $stack) {
-        $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
-        list($pp,$fn,$ext) = extract_path_file_ext($path);
-        $func = "{$fn}({$stack['line']})";
-        $str = (empty($str)) ? $func : "{$func}->{$str}";
-    }
-    $sep = 	str_repeat("-", 30);
-    if($flag === 3) {
-        echo "<pre>\n{$str}\n{$sep} {$msg} {$sep}\n";
-        var_dump($arr);
-        echo str_replace("=",20)."\n</pre>\n";
-        return;
-    }
-    // 変数出力
-    if(is_scalar($arr)) {
-        echo_safe("{$arr}\n",$danger);
-    } else {
-        // 子要素のオブジェクトをダンプする関数
-        $dump_object = function ($obj,$indent,$danger) use (&$dump_object) {
-            foreach($obj as $key => $val) {
-                echo str_repeat(' ',$indent*2) . "[{$key}] = ";
-                if(empty($val)) {
-                    echo "NULL\n";
-                } else if(is_array($val)) {
-                    echo "array(" . count($val) . ")\n";
-                    $dump_object($val,$indent+1,$danger);
-                } else if(is_scalar($val)) {
-                    echo_safe("'{$val}'",$danger);
-                }
-                echo "\n";
-            }
-        };
-        if($flag < 3) echo "<pre>\n{$str}\n";
-        foreach($arr as $msg => $obj) {
-            if(empty($obj)) echo "{$sep} {$msg} {$sep}\nEMPTY\n";
-            else if(is_scalar($obj)) {
-                echo "{$sep} {$msg} {$sep}\n";
-                echo_safe("{$obj}\n",$danger);
-            } else {
-                echo "{$sep} {$msg} {$sep}\n";
-                $dump_object($obj,0,$danger);
-            }
-        }
-        if($flag < 3) echo "</pre>\n";
-    }
-    echo str_repeat("=",20)."\n";
-    if($flag === 2||$flag === 5) exit;
 }
