@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2020 by nTak
  * @license    MIT
- * @version 0.23.0, 2020-09-15
+ * @version 0.23.1, 2020-09-19
  * System Require: PHP 5.6 or Higher
  *
 0. 概要
@@ -44,6 +44,7 @@
 【0.23.0】2020/09/15
     ■仕様変更
     ・テンプレートのリソースでないcss/js等をwebrootフォルダへ移動
+    ・APPDEBUGクラスの廃止とデバッグログ処理の統合
     ■バグ修正
     ・AppFilesModelクラスの不具合対応
 
