@@ -207,6 +207,13 @@ public function getCount($cond) {
 //          $filter[] で指定したオリジナル列名のみを抽出
 public function RecordFinder($cond,$filter=[],$sort=[]) {
     debug_log(3, [ "cond" => $cond, "filter" => $filter]);
+    if($filter === []) $filter = $this->dbDriver->columns;
+    // 取得フィールドリストを生成する
+    $fiels_list = [];
+    foreach($this->FieldSchema as $key => $val) {
+        list($ref_name,$org_name) = $val;
+        if(in_array($org_name,$filter)) $fiels_list[$key] = $val;
+    }
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];
     else if(is_scalar($sort)) {
@@ -214,19 +221,14 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
     }
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
-    while ($this->fetchRecord()) {
-//        debug_log(13, [
-//            "fields:".(count($data)+1) => $this->fields,
-//            "Head:" => $this->HeaderSchema,
-//        ]);
+    while (($this->fields = $this->dbDriver->fetchDB())) {
         if(!isset($this->fields[$this->Unique])) continue;
-        $record = array();
-        foreach($this->FieldSchema as $key => $val) {
+        unset($record);
+        foreach($fiels_list as $key => $val) {
             list($ref_name,$org_name) = $val;
-            if($filter === [] || in_array($key,$filter)) { // フィルタが無指定、またはフィルタにヒット
-                $ref_key = (empty($this->fields[$ref_name])) ? $org_name : $ref_name;
-                $record[$key] = $this->fields[$ref_key];
-            }
+            $ref_key = (empty($this->fields[$ref_name])) ? $org_name : $ref_name;
+            $record[$key] = $this->fields[$ref_key];
+            if($key !== $org_name) $record[$org_name] = $this->fields[$org_name];
         }
         // プライマリキーは必ず含める
         $record[$this->Primary] = $this->fields[$this->Primary];
@@ -240,11 +242,6 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
     }
     $this->Records = $data;
     debug_log(3, [ "record_max" => $this->record_max, "Header" => $this->HeaderSchema,"RECORDS" => $this->Records]);
-}
-//==============================================================================
-// レコードの取得
-public function fetchRecord() {
-    return ($this->fields = $this->dbDriver->fetchDB());
 }
 //==============================================================================
 // レコードの追加
