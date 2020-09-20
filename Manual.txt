@@ -542,6 +542,7 @@
 ◆ LangUI クラス
 ・静的変数
   LangUI::$STRINGS;                     // 翻訳言語配列
+  LangUI::$LocaleName;                  // ロケール名
 
 ・静的メソッド
   LangUI::construct($lang)              // 言語リストを元にクラスを初期化する (Main.phpのみで使用)

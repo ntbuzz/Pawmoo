@@ -205,7 +205,8 @@ public function getCount($cond) {
 // 結果：   レコードデータのリスト = Records
 //          読み込んだ列名 = Header (Schema)
 //          $filter[] で指定したオリジナル列名のみを抽出
-public function RecordFinder($cond,$filter=[],$sort=[]) {
+//          $vfilter[] で $filter した列名に指定の値が含むレコードのみ抽出
+public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
     debug_log(3, [ "cond" => $cond, "filter" => $filter]);
     if($filter === []) $filter = $this->dbDriver->columns;
     // 取得フィールドリストを生成する
@@ -220,26 +221,34 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
     }
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
-    while (($this->fields = $this->dbDriver->fetchDB())) {
-        if(!isset($this->fields[$this->Unique])) continue;
+    while (($fields = $this->dbDriver->fetchDB())) {
+        if(!isset($fields[$this->Unique])) continue;
         unset($record);
         foreach($fiels_list as $key => $val) {
             list($ref_name,$org_name) = $val;
-            $ref_key = (empty($this->fields[$ref_name])) ? $org_name : $ref_name;
-            $record[$key] = $this->fields[$ref_key];
-            if($key !== $org_name) $record[$org_name] = $this->fields[$org_name];
+            $ref_key = (empty($fields[$ref_name])) ? $org_name : $ref_name;
+            $record[$key] = $fields[$ref_key];
+            if($key !== $org_name) $record[$org_name] = $fields[$org_name];
         }
         // プライマリキーは必ず含める
-        $record[$this->Primary] = $this->fields[$this->Primary];
+        $record[$this->Primary] = $fields[$this->Primary];
+        // 抽出したレコード内に指定の値が含まれるか
+        if(!empty($vfilter)) {
+            $vf = array_filter($vfilter, function($v,$k) use(&$record) {
+                return ($v === '*') ? isset($record[$k]) : ($record[$k] === $v);
+            },ARRAY_FILTER_USE_BOTH);
+            if(empty($vf)) continue;
+        }
         if(! empty($record) ) {
             $data[] = $record;
             $this->record_max = $this->dbDriver->recordMax;
             $this->doEvent('OnGetRecord', $record);     // イベントコールバック
         } else {
-            debug_log(3, ["fields" => $this->fields]);
+            debug_log(3, ["fields" => $fields]);
         }
     }
     $this->Records = $data;
+    $this->record_max = count($data);
     debug_log(3, [ "record_max" => $this->record_max, "Header" => $this->HeaderSchema,"RECORDS" => $this->Records]);
 }
 //==============================================================================
