@@ -3,7 +3,7 @@
         <span class="closeButton"></span>
         <ul id="debugMenu">
 <?php
-        $level_msg = $this->_("core.Debug.Level");
+        $level_msg = $this->_("debug.Level");
         $debug_log_str = get_debug_logs();
         foreach($debug_log_str as $key => $msg) {
             echo "<li>{$level_msg}:{$key}</li>\n";

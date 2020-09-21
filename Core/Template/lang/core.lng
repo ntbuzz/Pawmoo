@@ -1,5 +1,8 @@
 // フレームワーク内で使用する言語リソース
 //
+// デバッグ用メッセージをインポート
+@debug
+
 .ja => [
     // ページャーボタン表示用
     Page => ページ
@@ -29,13 +32,4 @@
     SizeDisplay => "Display Size"
     Close => "Close"
     Resize => "Resize"
-]
-Debug => [
-    .ja => [
-        Level => レベル
-    ]
-    .en => [
-        Level => Level
-    ]
-
 ]

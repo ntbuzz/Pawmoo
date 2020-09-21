@@ -85,7 +85,7 @@ public function __TerminateView() {
         // リクエストURLと処理メソッドが違っていたときはRelocateフラグが立つ
         $url = App::Get_RelocateURL();
         if(isset($url)) {
-            debug_log(1,"URL書換: {$url}\n");
+            debug_log(1,"RedirectURL: {$url}\n");
             echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";
         }
         if(DEBUGGER) {

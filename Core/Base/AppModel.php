@@ -46,19 +46,6 @@ class AppModel extends AppObject {
         $this->fields = [];
 	}
 //==============================================================================
-//	デバッグ用に空のレコードを生成
-//==============================================================================
-    function DebugRecord() {
-        debug_log(FALSE, [
-            "Type:"     => $this->ClassType,   // オブジェクトの所属クラス(Controller, Model, View. Helper)
-            "Module:"   => $this->ModuleName,  // オブジェクトの名前
-            "Class:"    => $this->ClassName,   // クラス名
-            "Locale:"   => $this->LocalePrefix,    // 言語プレフィクス
-        ]);
-        $this->Records = array();          // レコード検索したレコードリスト(JOIN済)
-        $this->LogData = array();          // レコードデータ(JOINなし)
-    }
-//==============================================================================
 // クラス変数の初期化
     protected function __InitClass() {
         $driver = $this->Handler . 'Handler';

@@ -1,0 +1,25 @@
+// デバッグメッセージで使用する言語リソース
+//
+.ja => [
+    Level => レベル
+    DebugInfo => デバッグ情報
+    PathInfo => パス情報
+    SessionClose => セッションクローズ
+    PagerParam => ページャーパラメータ
+    ExecTime => "実行時間"
+    MaxMemory => "メモリ消費 最大: "
+    Second => 秒
+    LocalInfo => ロケール情報
+]
+.en => [
+    Level => Level
+    DebugInfo => "Debug Info"
+    PathInfo => "Path Info"
+    SessionClose => "Session Close"
+
+    PagerParam => "Pager Param"
+    ExecTime => "Execute Time"
+    MaxMemory => "Memory Max"
+    Second => sec.
+    LocalInfo => Locale
+]

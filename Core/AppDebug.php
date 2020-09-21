@@ -3,6 +3,8 @@
  * PHPフレームワーク
  *  デバッグ用のメッセージ出力処理関数
  */
+if(!defined('DEBUG_LEVEL')) define('DEBUG_LEVEL', 10);
+
 const EMPTY_MSG = " EMPTY\n";
 /*
     アプリケーションデバッグ情報
@@ -28,9 +30,10 @@ function debug_run_time($lvl) {
     global $debug_run_time;
     $tm = round((microtime(TRUE) - $debug_run_time), 2);     // 少数2位まで
     $maxmem = round(memory_get_peak_usage()/(1024*1024),2);
+    $sec = LangUI::get_value('debug','.Second');
     debug_log($lvl,[
-        "実行時間" => "{$tm} 秒",
-        "メモリ消費" => "最大: {$maxmem} MB",
+        "#ExecTime" => "{$tm} {$sec}",
+        "#MaxMemory" => "{$maxmem} MB",
     ]);
 }
 //==========================================================================
@@ -73,6 +76,10 @@ function debug_log($lvl,...$items) {
                 $dmp_msg .= "{$arg}\n";
             } else if(is_array($arg)) {                        // 配列要素の出力
                 foreach($arg as $msg => $obj) {
+                    if($msg[0] === '#') {
+                        $msg[0] = '.';
+                        $msg = LangUI::get_value('debug',$msg);
+                    }
                     if(is_scalar($obj)) {
                         $dmp_msg .= "{$msg} : {$obj}\n";
                     } else if(is_array($obj)) {

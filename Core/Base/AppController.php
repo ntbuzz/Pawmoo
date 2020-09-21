@@ -83,8 +83,8 @@ public function PageSetup() {
 	App::$Params[1] =  $size;
 	$this->Model->SetPage($size,$num);
 	debug_log(1, [
-		'ページャーパラメータ' => [
-			"App" 		=> App::$Params,
+		"$#PagerParam" => [
+			"App"  => App::$Params,
 		],
 	]);
 }
@@ -115,41 +115,30 @@ public function FindAction() {
 //==============================================================================
 // ビュー
 public function ViewAction() {
-	try {
-		$num = App::$Params[0];
-		$this->Model->GetRecord($num);
-		$this->Model->GetValueList();
-		$this->View->ViewTemplate('ContentView');
-	} catch (Exception $e) {
-
-	}
+	$num = App::$Params[0];
+	$this->Model->GetRecord($num);
+	$this->Model->GetValueList();
+	$this->View->ViewTemplate('ContentView');
 }
 //==============================================================================
 // PDFを作成する
 public function MakepdfAction() {
-	try {
-		$num = App::$Params[0];
-		$this->Model->GetRecord($num);
-		$this->View->ViewTemplate('MakePDF');
-	} catch (Exception $e) {
-	}
+	$num = App::$Params[0];
+	$this->Model->GetRecord($num);
+	$this->View->ViewTemplate('MakePDF');
 }
 //==============================================================================
 // 更新
 public function UpdateAction() {
-	try {
-		$num = App::$Params[0];
-		$this->Model->UpdateRecord($num,MySession::$PostEnv);
-		header('Location:' . App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/' . $num );
-	} catch (Exception $e) {
-
-	}
+	$num = App::$Params[0];
+	$this->Model->UpdateRecord($num,MySession::$PostEnv);
+	header('Location:' . App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/' . $num );
 }
 
 //==============================================================================
 // デバッグダンプ
 public function DumpAction() {
-	debug_log(11,MySession::$PostEnv);
+	debug_log(110,MySession::$PostEnv);
 }
 
 }

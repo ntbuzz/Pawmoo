@@ -151,7 +151,7 @@ App::$ActionMethod= $ContAction;    // アクションメソッド名
 //=================================
 // デバッグ用の情報ダンプ
 debug_log(0, [
-    'デバッグ情報' => [
+    '#DebugInfo' => [
         "Application"=> $appname,
         "Controller"=> $controller,
         "Class"     => $ContClass,
@@ -167,7 +167,7 @@ debug_log(0, [
         "SESSION_ID" => MySession::$MY_SESSION_ID,
         "ENV" => MySession::$EnvData,
     ],
-    'パス情報' => [
+    '#PathInfo' => [
         "REFERER" => $_SERVER['HTTP_REFERER'],
         "SERVER" => $_SERVER['REQUEST_URI'],
         "RootURI"=> $approot,
@@ -190,7 +190,7 @@ if($controllerInstance->is_authorised()) {
 debug_run_time(0);
 MySession::CloseSession();
 debug_log(0, [
-    "セッションクローズ" => [
+    "#SessionClose" => [
         "ENVDATA" => MySession::$EnvData,
     ]
 ]);

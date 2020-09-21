@@ -55,7 +55,7 @@ public static function LangFiles($files) {
 //  言語ファイルの読み込み
 public static function LangDebug() {
     debug_log(2, [
-            "ロケール情報" => [
+            "#LocalInfo" => [
                 'Locale' => self::$Locale,
                 'File'   => self::$LocaleFiles,
                 'Folder' => self::$LangDir,
