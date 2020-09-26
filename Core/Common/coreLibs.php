@@ -151,6 +151,13 @@ function array_to_URI($arr) {
     return implode('/',$ret);
 }
 //==============================================================================
+// 配列からURIを生成する、要素内に配列があるときにも対応する
+function array_concat_keys($arr,$keys) {
+    $ss = '';
+    foreach($keys as $kk) $ss .= " ".$arr[$kk];
+    return ltrim($ss);
+}
+//==============================================================================
 // ファイルパスを / で終わるようにする
 function path_complete($path) {
     if(mb_substr($path,-1) !== '/') $path .= '/';     // 最後は /で終わらせる

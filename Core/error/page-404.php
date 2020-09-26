@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <link rel='stylesheet' href='/res/css/errmsg.css' />

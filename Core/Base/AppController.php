@@ -9,7 +9,7 @@ class AppController extends AppObject {
 	public $defaultFilter = 'all';		// デフォルトのフィルタ
 	public $disableAction = [];			// 禁止する継承元のアクション
 	private $my_method;					// active method list on Instance
-
+	protected $needLogin = FALSE;
 //==============================================================================
 // コンストラクタでビューを生成、モデルはビュークラス内で生成する
 	function __construct($owner = NULL){
@@ -116,7 +116,7 @@ public function FindAction() {
 // ビュー
 public function ViewAction() {
 	$num = App::$Params[0];
-	$this->Model->GetRecord($num);
+	$this->Model->getRecordValue($num);
 	$this->Model->GetValueList();
 	$this->View->ViewTemplate('ContentView');
 }

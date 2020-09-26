@@ -68,7 +68,7 @@ public function SetPaging($pagesize, $pagenum) {
 public function getRecordCount($row) {
 	$where = $this->sql_makeWHERE($row);	// 検索条件
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
-	$this->doQuery("{$sql}{$where}");
+	$this->doQuery("{$sql}{$where};");
 	$field = $this->fetchDB();
 	return ($field) ? $field["total"] : 0;
 }
@@ -91,12 +91,12 @@ public function getRecordValue($row,$relations) {
 // pgSQL: SELECT *, count('No') over() as full_count FROM public.mydb offset 10 limit 50;
 // SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
 //==============================================================================
-public function findRecord($row,$relations,$sort = []) {
+public function findRecord($row,$relations = NULL,$sort = []) {
 	$where = $this->sql_makeWHERE($row);	// 検索条件
 	// 全体件数を取得する
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
 	debug_log(3,['SQL' => $sql]);
-	$this->doQuery("{$sql}{$where}");
+	$this->doQuery("{$sql}{$where};");
 	$field = $this->fetchDB();
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	// 実際のレコード検索
@@ -154,12 +154,14 @@ protected function sql_safequote(&$value) {
 		$sql = "SELECT {$this->table}.*";
 		$frm = " FROM {$this->table}";
 		$jstr = '';
-		foreach($Relations as $key => $val) {
-			list($table,$fn, $ref) = explode('.', $val);
-			$kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
-			$alias= "\"{$key}\"";
-			$sql .= ",{$table}.\"{$ref}\" AS \"{$kk}\"";
-			$jstr .= " LEFT JOIN {$table} ON {$this->table}.{$alias} = {$table}.\"{$fn}\"";
+		if(!empty($Relations)) {
+			foreach($Relations as $key => $val) {
+				list($table,$fn, $ref) = explode('.', $val);
+				$kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
+				$alias= "\"{$key}\"";
+				$sql .= ",{$table}.\"{$ref}\" AS \"{$kk}\"";
+				$jstr .= " LEFT JOIN {$table} ON {$this->table}.{$alias} = {$table}.\"{$fn}\"";
+			}
 		}
 		return "{$sql}{$frm}{$jstr}";
 	}
@@ -183,34 +185,36 @@ protected function sql_safequote(&$value) {
 			foreach($items as $key => $val) {
 				if(is_array($val)) {
 					if(in_array($key,['AND','OR','NOT'])) {
-						$opx = (is_numeric($key) || $key === 'NOT') ? 'AND' : $key; 
+						$opx = ($key === 'NOT') ? 'AND' : $key; 
 						$opp = $dump_object($opx,$val);
 						if($key === 'NOT') $opp = "(NOT {$opp})";
 					} else {
 						$opp = "({$this->table}.\"{$key}\" IN "; $sep = '(';
 						foreach($val as $cmp) { $opp .= "{$sep}'{$cmp}'"; $sep = ','; }
-						$opp .= ')';
+						$opp .= '))';
 					}
 				} else {
 					// キー名の最後に関係演算子
 					list($key,$op) = keystr_opr($key);
 					if(empty($op)) {
-						$op = (gettype($val) === 'string') ? ' LIKE ' : '=';
+//						$op = (gettype($val) === 'string') ? ' LIKE ' : '=';
+						$op = (is_numeric($val)) ? '=' : ' LIKE ';
 					}
 					if($val[0] == '-') {
 						$val = mb_substr($val,1);
 						$op = ' NOT LIKE ';
 					}
 					if(strpos($op,'LIKE') !== false) $val = "%{$val}%";
+					if(!is_numeric($val)) $val = "'{$val}'";
 					if(strpos($key,'+') !== FALSE) {
 						$sep = '';
 						$opp = '';
 						foreach(explode('+',$key) as $cmp) {
-							$opp .= "{$sep}({$this->table}.\"{$cmp}\"{$op}'{$val}')";
+							$opp .= "{$sep}({$this->table}.\"{$cmp}\"{$op}{$val})";
 							$sep = ' OR ';
 						}
 						$opp = "({$opp})";
-					} else $opp = "({$this->table}.\"{$key}\"{$op}'{$val}')";
+					} else $opp = "({$this->table}.\"{$key}\"{$op}{$val})";
 				}
 				$opc = (empty($opc)) ? $opp : "{$opc} {$opr} {$opp}";
 			}

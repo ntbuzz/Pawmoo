@@ -62,7 +62,7 @@ if(empty($appname) || !file_exists("app/$appname")) {
 MySession::InitSession($appname);
 if($controller === 'Error') {       // ERROR PAGE
     $code = $params[0];
-    error_response('page-{$code}.php',$appname,$module);
+    error_response("page-{$code}.php",$appname,$module);
 }
 // ここでは App クラスの準備ができていないので直接フォルダ指定する
 require_once("app/{$appname}/Config/config.php");
