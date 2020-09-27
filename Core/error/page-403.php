@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <link rel='stylesheet' href='/res/css/errmsg.css' />
@@ -9,7 +10,7 @@
         <p>Page: '<?= $app_name; ?>' Forbidden.</p>
         <p>Your Permission is not allows this Application.</p>
         <?php
-        debug_log(-1,['info' => $_SESSION]);
+        debug_log(-1,['info' => $_SESSION,'POST' => $_REQUEST]);
         ?>
         <hr>
         return to <a href='/index.html'>TOP</a>

@@ -105,7 +105,6 @@ private function Connect($layout) {
 		}
     }
     unset($fieldObj);
-//	var_dump($this->fmtconv);
 }
 public function isTableExist() {
 	return TRUE;

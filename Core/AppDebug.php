@@ -3,6 +3,8 @@
  * PHPフレームワーク
  *  デバッグ用のメッセージ出力処理関数
  */
+if(!defined('DEBUG_LEVEL')) define('DEBUG_LEVEL', 10);
+
 const EMPTY_MSG = " EMPTY\n";
 /*
     アプリケーションデバッグ情報
@@ -28,10 +30,16 @@ function debug_run_time($lvl) {
     global $debug_run_time;
     $tm = round((microtime(TRUE) - $debug_run_time), 2);     // 少数2位まで
     $maxmem = round(memory_get_peak_usage()/(1024*1024),2);
+    $sec = LangUI::get_value('debug','.Second');
     debug_log($lvl,[
-        "実行時間" => "{$tm} 秒",
-        "メモリ消費" => "最大: {$maxmem} MB",
+        "#ExecTime" => "{$tm} {$sec}",
+        "#MaxMemory" => "{$maxmem} MB",
     ]);
+}
+//==========================================================================
+// ログの表示
+function debug_dump(...$items) {
+    debug_log(-1,$items);
 }
 //==========================================================================
 // ログの記録または表示
@@ -40,17 +48,17 @@ function debug_log($lvl,...$items) {
     if($lvl > DEBUG_LEVEL) return;
     // バックトレースから呼び出し元の情報を取得
     $dump_log_info = function($items) {
-        $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,5);    // 呼び出し元のスタックまでの数
+        $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
         array_shift($dbinfo);   // 自クラスの情報は不要
         $trace = "";
         foreach($dbinfo as $stack) {
             $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
             list($pp,$fn,$ext) = extract_path_file_ext($path);
             $func = "{$fn}({$stack['line']})";
-            $trace = (empty($str)) ? $func : "{$func} > {$trace}";
+            $trace = (empty($trace)) ? $func : "{$func}>{$trace}";
         }
         $sep = 	str_repeat("-", 30);
-        $dmp_msg = '';
+        $dmp_msg = "TRACE:: {$trace}\n";
         // 子要素のオブジェクトをダンプする関数
         $dump_object = function ($obj,$indent) use (&$dump_object) {
             $dmp = "";
@@ -73,11 +81,15 @@ function debug_log($lvl,...$items) {
                 $dmp_msg .= "{$arg}\n";
             } else if(is_array($arg)) {                        // 配列要素の出力
                 foreach($arg as $msg => $obj) {
+                    if($msg[0] === '#') {
+                        $msg[0] = '.';
+                        $msg = LangUI::get_value('debug',$msg);
+                    }
                     if(is_scalar($obj)) {
                         $dmp_msg .= "{$msg} : {$obj}\n";
                     } else if(is_array($obj)) {
                         $dmp_msg .= "===== {$msg} =====\n";
-                        if(empty($obj)) $dmp_msg .= EMPTY_MSG0;
+                        if(empty($obj)) $dmp_msg .= EMPTY_MSG;
                         else $dmp_msg .= $dump_object($obj,0);
                     } else {
                         $dmp_msg .= "{$msg} : Object\n";
@@ -90,13 +102,15 @@ function debug_log($lvl,...$items) {
     global $debug_log_str;
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
-        if($lvl < 0) echo $dmp_info;
+        if($lvl >= -4) {
+            $dmp_info = htmlspecialchars($dmp_info);
+            $dmp_info = "<pre>\n{$dmp_info}\n</pre>\n";
+        }
+        if($lvl < 0) echo "{$dmp_info}\n";
         else {
-            if($lvl >= 0) $dmp_info = htmlspecialchars($dmp_info);
-            $dmp_info = "<pre>\n{$dmp_info}</pre>\n";
             if(isset($debug_log_str[$lvl])) $debug_log_str[$lvl] .= $dmp_info;
             else $debug_log_str[$lvl] = $dmp_info;
         }
     }
-    if($lvl === -99) exit;
+    if(abs($lvl) > 100) exit;
 }

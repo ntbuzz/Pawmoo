@@ -11,7 +11,7 @@ class AppView extends AppObject {
     protected $Layout;        // デフォルトのレイアウト
     private $doTrailer = FALSE;
     const Extensions = array("tpl","php","inc","html");  // テンプレート拡張子
-    const SectionCMD = '<@&+*%-.#{[$';  // 単独セクション処理コマンド文字
+    const SectionCMD = '<@&+*%-.#{[';  // 単独セクション処理コマンド文字
     private $rep_array;
     private $env_vars;              // テンプレート内のグローバル変数
     private $inlineSection;        // インラインのセクション
@@ -85,7 +85,7 @@ public function __TerminateView() {
         // リクエストURLと処理メソッドが違っていたときはRelocateフラグが立つ
         $url = App::Get_RelocateURL();
         if(isset($url)) {
-            debug_log(1,"URL書換: {$url}\n");
+            debug_log(1,"RedirectURL: {$url}\n");
             echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";
         }
         if(DEBUGGER) {
@@ -304,7 +304,7 @@ public function ViewTemplate($name,$vars = []) {
             }
             $func = self::FunctionList[$top_char];
             // + コマンドには属性が付いている
-            list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($kkey,$sec);
+            list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($kkey,$sec,$vars);
             if(is_array($func)) {       // サブコマンドテーブル
                 $cmd = $func[$tag];
                 if(array_key_exists($tag,$func) && (method_exists($this, $cmd))) {
@@ -314,7 +314,7 @@ public function ViewTemplate($name,$vars = []) {
                 $this->$func($kkey,$sec,$vars);
             } else echo "CALL: {$func}({$kkey},{$sec},vars)\n";
         } else {
-            list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($key,$sec);
+            list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($key,$sec,$vars);
             $attr = $this->gen_Attrs($attrs);
             if(is_array($sec)) {
                 echo "<{$tag}{$attr}>{$text}";
@@ -364,11 +364,11 @@ public function ViewTemplate($name,$vars = []) {
     //  属性のみの単独タグ要素の処理
     private function sec_singletag($key,$sec,$vars) {
         // $key と $sec をタグと属性に分解する
-        list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($key,$sec);
+        list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($key,$sec,$vars);
         $attr = $this->gen_Attrs($attrs);
         if(!empty($subsec)) {  // サブセクションがあればリピート
             foreach($subsec as $kk => $vv) {
-                list($tt,$txt,$at,$sub) = $this->tag_attr_Section($kk,$vv);
+                list($tt,$txt,$at,$sub) = $this->tag_attr_Section($kk,$vv,$vars);
                 $atr = $this->gen_Attrs($at);
                 echo "<{$tag}{$attr}{$atr}>\n";
             }
@@ -478,8 +478,9 @@ public function ViewTemplate($name,$vars = []) {
         // リスト要素の出力
         foreach($subsec as $kk => $vv) {
             // $key と $sec をタグと属性に分解する
-            list($s_tag,$s_text,$s_attr,$s_sec) = $this->tag_attr_Section($kk,$vv);
+            list($s_tag,$s_text,$s_attr,$s_sec) = $this->tag_attr_Section($kk,$vv,$vars);
             $attr = $this->gen_Attrs($s_attr);
+            $s_text = $this->expand_Strings($s_text,$vars);   // 変数置換を行う
             if(!empty($s_sec)) {  // サブセクションがあればセクション処理
                 echo "<li{$attr}>{$s_text}\n";
                 $this->sectionAnalyze($s_sec,$vars);
@@ -503,12 +504,13 @@ public function ViewTemplate($name,$vars = []) {
         // DTのリスト要素の出力
         foreach($subsec as $kk => $vv) {
             // $key と $sec をタグと属性に分解する
-            list($dt_tag,$dt_text,$dt_attrs,$dd_sec) = $this->tag_attr_Section($kk,$vv);
+            list($dt_tag,$dt_text,$dt_attrs,$dd_sec) = $this->tag_attr_Section($kk,$vv,$vars);
             $attr = $this->gen_Attrs($dt_attrs);
+            $dt_text = $this->expand_Strings($dt_text,$vars);   // 変数置換を行う
             echo "<dt{$attr}>{$dt_text}</dt>\n";
             if(!empty($dd_sec)) {  // DDセクションがあれば処理
                 foreach($dd_sec as $dd_key => $dd_sub) {
-                    list($dd_tag,$dd_text,$dd_attrs,$dd_child) = $this->tag_attr_Section($dd_key,$dd_sub);
+                    list($dd_tag,$dd_text,$dd_attrs,$dd_child) = $this->tag_attr_Section($dd_key,$dd_sub,$vars);
                     $dd_attr = $this->gen_Attrs($dd_attrs);
                     echo "<dd{$dd_attr}>{$dd_text}\n";
                     $this->sectionAnalyze($dd_child,$vars);
@@ -576,7 +578,7 @@ public function ViewTemplate($name,$vars = []) {
     }
     //==========================================================================
     // タグ文字列の分解
-    private function tag_attr_Section($tag,$sec) {
+    private function tag_attr_Section($tag,$sec,$vars) {
         $innerText = '';
         $secList = [];
         list($tag,$attrList) = $this->tag_Separate($tag);
@@ -588,7 +590,7 @@ public function ViewTemplate($name,$vars = []) {
                     if(is_array($val)||$this->is_section_tag($val)) {
                         $secList[] = $val;    // 配列かコマンド名ならセクション
                     } else {
-                        $innerText .= $val;    // スカラー値ならテキスト
+                        $innerText .= $val;   // スカラー値ならインナーテキスト
                     }
                 } else {
                     list($vv,$attrs) = $this->tag_Separate($key);   // タグ分解
@@ -600,6 +602,7 @@ public function ViewTemplate($name,$vars = []) {
         } else {
             $innerText .= $sec;        // スカラーならテキスト
         }
+        $innerText = $this->expand_Strings($innerText,$vars);   // 変数置換を行う
         return array($tag,$innerText,$attrList,$secList);
     }
 

@@ -16,7 +16,8 @@ class AppModel extends AppObject {
         'Unique' => '',
         'Schema' => [],
         'Relations' => [],
-        'PostRenames' => []
+        'PostRenames' => [],
+        'BindColumns' => [],
     ];
     protected $dbDriver;        // データベースドライバー
     protected $TableHead;      // テーブルヘッダ
@@ -46,19 +47,6 @@ class AppModel extends AppObject {
         $this->fields = [];
 	}
 //==============================================================================
-//	デバッグ用に空のレコードを生成
-//==============================================================================
-    function DebugRecord() {
-        debug_log(FALSE, [
-            "Type:"     => $this->ClassType,   // オブジェクトの所属クラス(Controller, Model, View. Helper)
-            "Module:"   => $this->ModuleName,  // オブジェクトの名前
-            "Class:"    => $this->ClassName,   // クラス名
-            "Locale:"   => $this->LocalePrefix,    // 言語プレフィクス
-        ]);
-        $this->Records = array();          // レコード検索したレコードリスト(JOIN済)
-        $this->LogData = array();          // レコードデータ(JOINなし)
-    }
-//==============================================================================
 // クラス変数の初期化
     protected function __InitClass() {
         $driver = $this->Handler . 'Handler';
@@ -87,10 +75,15 @@ protected function SchemaHeader($schema) {
             } else $ref_name = $key;
         }
         if(empty($alias)) $alias = $key_name;
-        $this->FieldSchema[$key_name] = [$ref_name,  $key];         // Schema 配列に定義されたフィールドを取得する
+        $this->FieldSchema[$key_name] = [$ref_name,  $key, NULL];         // Schema 配列に定義されたフィールドを取得する
         if($alias[0] === '.') $alias = $this->_(".Schema{$alias}");   //  Schema 構造体を参照する
         if($flag !== '0') {
             $this->HeaderSchema[$key_name] = [$alias,(int)$align,(int)$flag];
+        }
+    }
+    if(isset($this->BindColumns)) {
+        foreach($this->BindColumns as $key => $columns) {
+            $this->FieldSchema[$key] = [NULL,  NULL, $columns];
         }
     }
 }
@@ -120,12 +113,18 @@ public function SetPage($pagesize,$pagenum) {
     $this->dbDriver->SetPaging($this->pagesize,$this->page_num);
 }
 //==============================================================================
-// ロケールフィールドによる置換処理
+// ロケールフィールドとカラム連結の処理
 // 結果：   レコードデータ = field
-    private function readLocaleField() {
+    private function read_local_bind_field() {
         foreach($this->LocaleSchema as $key => $lang_nm) {
             if(!empty($this->fields[$lang_nm]))
                 $this->fields[$key] = $this->fields[$lang_nm];           // ロケールフィールドに置換
+        }
+        if(isset($this->BindColumns)) {
+            foreach($this->BindColumns as $key => $columns) {
+                $ss = array_concat_keys($this->fields,$columns);
+                $this->fields[$key] = $ss;
+            }
         }
     }
 //==============================================================================
@@ -151,7 +150,7 @@ public function getRecordByKey($id) {
 public function getRecordBy($key,$value) {
     if(!empty($value)) {
         $this->fields = $this->dbDriver->doQueryBy($key,$value);
-        $this->readLocaleField();
+        $this->read_local_bind_field();
     } else $this->fields = array();
     return $this->fields;
 }
@@ -193,7 +192,8 @@ public function getRecordValue($num) {
         return;
     }
     $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],$this->Relations);
-    $this->readLocaleField();
+    $this->read_local_bind_field();
+    $this->RecData = $this->fields;
 }
 //==============================================================================
 // 条件に一致するレコード数を検索する
@@ -205,8 +205,15 @@ public function getCount($cond) {
 // 結果：   レコードデータのリスト = Records
 //          読み込んだ列名 = Header (Schema)
 //          $filter[] で指定したオリジナル列名のみを抽出
-public function RecordFinder($cond,$filter=[],$sort=[]) {
+//          $vfilter[] で $filter した列名に指定の値が含むレコードのみ抽出
+public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
     debug_log(3, [ "cond" => $cond, "filter" => $filter]);
+    if(empty($filter)) $filter = $this->dbDriver->columns;
+    // 取得フィールドリストを生成する
+    $fiels_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
+        list($ref_name,$org_name,$bind) = $vv;
+        return in_array($org_name,$filter) || ($org_name === NULL); // バインド名は必ず含める
+    });
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];
     else if(is_scalar($sort)) {
@@ -214,6 +221,7 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
     }
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
+<<<<<<< HEAD
     while ($this->fetchRecord()) {
 //        debug_log(13, [
 //            "fields:".(count($data)+1) => $this->fields,
@@ -228,25 +236,43 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
             if($filter === [] || in_array($key,$filter)) { // フィルタが無指定、またはフィルタにヒット
                 $ref_key = (empty($this->fields[$ref_name])) ? $org_name : $ref_name;
                 $record[$key] = $this->fields[$ref_key];
+=======
+    while (($fields = $this->dbDriver->fetchDB())) {
+//        if(!isset($fields[$this->Unique])) continue;
+        unset($record);
+        foreach($fiels_list as $key => $val) {
+            list($ref_name,$org_name,$bind) = $val;
+            if($bind === NULL) {
+                $ref_key = (empty($fields[$ref_name])) ? $org_name : $ref_name;
+                $record[$key] = $fields[$ref_key];
+                if($key !== $org_name) $record[$org_name] = $fields[$org_name];
+            } else {
+                $record[$key] = array_concat_keys($this->fields,$bind); // バインド処理
+>>>>>>> 9b21b6f3170ccd562b394384b31531a76f68ffeb
             }
         }
         // プライマリキーは必ず含める
-        $record[$this->Primary] = $this->fields[$this->Primary];
+        $record[$this->Primary] = $fields[$this->Primary];
+        // 抽出したレコード内に指定の値が含まれるか
+/*      この方法はSQLカウント数と食い違いが起きるのでNG!
+        if(!empty($vfilter)) {
+            $vf = array_filter($vfilter, function($v,$k) use(&$record) {
+                return ($v === '*') ? isset($record[$k]) : ($record[$k] === $v);
+            },ARRAY_FILTER_USE_BOTH);
+            if(empty($vf)) continue;
+        }
+*/
         if(! empty($record) ) {
             $data[] = $record;
             $this->record_max = $this->dbDriver->recordMax;
             $this->doEvent('OnGetRecord', $record);     // イベントコールバック
         } else {
-            debug_log(3, ["fields" => $this->fields]);
+            debug_log(3, ["fields" => $fields]);
         }
     }
     $this->Records = $data;
+//    $this->record_max = count($data);
     debug_log(3, [ "record_max" => $this->record_max, "Header" => $this->HeaderSchema,"RECORDS" => $this->Records]);
-}
-//==============================================================================
-// レコードの取得
-public function fetchRecord() {
-    return ($this->fields = $this->dbDriver->fetchDB());
 }
 //==============================================================================
 // レコードの追加

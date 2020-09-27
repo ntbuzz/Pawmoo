@@ -542,6 +542,7 @@
 ◆ LangUI クラス
 ・静的変数
   LangUI::$STRINGS;                     // 翻訳言語配列
+  LangUI::$LocaleName;                  // ロケール名
 
 ・静的メソッド
   LangUI::construct($lang)              // 言語リストを元にクラスを初期化する (Main.phpのみで使用)
@@ -642,7 +643,6 @@
     getRecordField($key,$field) // フィールドの読み込み (JOIN無し)
     SetPage($pagesize,$pagenum) // ページング設定
     RecordFinder($cond [,$filter [,$sort ]]) // レコードリストの読み込み(JOIN済レコード)
-    fetchRecord()               // レコードの取得
     UpdateRecord($num,$row)     // レコードの更新
 
 ・ビュークラス(AppView)

@@ -3,16 +3,19 @@
  * Classが定義されていない場合に、ファイルを探すクラス
  */
 class ClassLoader {
+    const CLASSMAP = [
+
+    ];
     private static $LoadDirs = [];
     private static function loadClass($className) {
         foreach(static::$LoadDirs as $directory) {
             $file_name = "{$directory}/{$className}.php";
             if(is_file($file_name)) {
-//echo "ClassLoader File:{$file_name}<br>\n";
                 require_once($file_name);
                 return true;
             }
         }
+//        echo "Not found ClassName:{$className}\n";
     }
 // =================================
 // ロードパスの登録
