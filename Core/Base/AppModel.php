@@ -221,22 +221,6 @@ public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
     }
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
-<<<<<<< HEAD
-    while ($this->fetchRecord()) {
-//        debug_log(13, [
-//            "fields:".(count($data)+1) => $this->fields,
-//            "Head:" => $this->HeaderSchema,
-//        ]);
-        if(!isset($this->fields[$this->Unique])) continue;
-        // ロケールフィールドで置換しておく
-        $this->readLocaleField();
-        $record = array();
-        foreach($this->FieldSchema as $key => $val) {
-            list($ref_name,$org_name) = $val;
-            if($filter === [] || in_array($key,$filter)) { // フィルタが無指定、またはフィルタにヒット
-                $ref_key = (empty($this->fields[$ref_name])) ? $org_name : $ref_name;
-                $record[$key] = $this->fields[$ref_key];
-=======
     while (($fields = $this->dbDriver->fetchDB())) {
 //        if(!isset($fields[$this->Unique])) continue;
         unset($record);
@@ -248,7 +232,6 @@ public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
                 if($key !== $org_name) $record[$org_name] = $fields[$org_name];
             } else {
                 $record[$key] = array_concat_keys($this->fields,$bind); // バインド処理
->>>>>>> 9b21b6f3170ccd562b394384b31531a76f68ffeb
             }
         }
         // プライマリキーは必ず含める
