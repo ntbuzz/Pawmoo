@@ -103,10 +103,11 @@ public function RelationSetup() {
             $kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
             if(is_array($rel)) {
                 $sub_rel = [];
-                $link = array_key_first($rel);
-                list($model,$field) = explode('.', "{$link}.");
+                list($db,$ref_list) = array_first_item($rel);
+                if(is_numeric($db)) continue;
+                list($model,$field) = explode('.', "{$db}.");
                 $link = $this->$model->DataTable.".{$field}";
-                foreach($rel as $refer) {
+                foreach($ref_list as $refer) {
                     $key_name = "{$kk}_{$refer}";
                     if(array_key_exists($refer,$this->$model->LocaleSchema)) {
                         $lang_ref = "{$refer}_" . LangUI::$LocaleName;
