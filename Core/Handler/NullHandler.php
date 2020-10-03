@@ -9,7 +9,7 @@ class NullHandler {
         $this->fields = [];
 	}
 public function SetPaging($pagesize, $pagenum) { }
-public function getValueLists($table,$ref,$id,$grp) { return []; }
+public function getValueLists($table,$ref,$id) { return []; }
 public function getLastError() { return ''; }
 
 public function getRecordValue($row,$relations) { return []; }

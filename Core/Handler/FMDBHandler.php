@@ -376,7 +376,7 @@ public function fetchDB() {
 /*
 public function insertRecord($row)
 public function deleteRecord($wh)
-public function getValueLists($table,$ref,$id,$grp) 
+public function getValueLists($table,$ref,$id) 
 public function getLastError() 
 */
 

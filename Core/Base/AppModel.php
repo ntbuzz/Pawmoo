@@ -194,10 +194,9 @@ public function GetRecord($num) {
 public function GetValueList() {
     $valueLists = array();
     foreach($this->Relations as $key => $val) {     // リレーション先の値リストを取得する
-        list($table,$fn, $ref,$grp) = explode('.', $val);
-        if(!isset($grp)) $grp = 0;
+        list($table,$fn, $ref) = explode('.', $val);
         // $key カラムの一覧を取得する
-        $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn,$grp);
+        $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn);
     }
     $this->Select= $valueLists;             // JOIN先の値リスト
     debug_log(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);

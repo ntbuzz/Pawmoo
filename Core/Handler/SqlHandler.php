@@ -35,8 +35,8 @@ function __construct($table,$handler) {
 	}
 //==============================================================================
 //	getValueLists: 抽出カラム名, 値カラム名、グルーピングカラム名
-public function getValueLists($table,$ref,$id,$grp) {
-	$sql = $this->sql_QueryValues($table,$ref,$id,$grp);
+public function getValueLists($table,$ref,$id) {
+	$sql = $this->sql_QueryValues($table,$ref,$id);
 	$this->doQuery($sql);
 	$values = array();
 	while ($row = $this->fetchDB()) {
@@ -133,7 +133,7 @@ public function deleteRecord($wh) {
 // SQlite3, PostgreSQL, mariaDB 固有のSQLコマンド(update, insert, replace)は継承クラスで実装する
 //==============================================================================
 // 値リストを取得、重複はGROUP BY で除外したいけど...
-	private function sql_QueryValues($table,$ref,$id,$grp) {
+	private function sql_QueryValues($table,$ref,$id) {
 //		$groupby = (empty($grp)) ? '' : " GROUP BY \"{$grp}\"";
 		return "SELECT \"{$id}\",\"{$ref}\" FROM {$table} ORDER BY \"{$id}\";";
 	}
