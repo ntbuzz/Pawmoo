@@ -15,6 +15,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private	$startrec;		// 開始レコード番号
 	private	$limitrec;		// 取得レコード数
 	private $handler;		// SQLハンドラー
+	public  $DateStyle = 'Y-m-d';
 //==============================================================================
 //	抽象メソッド：継承先クラスで定義する
 	abstract protected function Connect();
@@ -156,11 +157,20 @@ protected function sql_safequote(&$value) {
 		$jstr = '';
 		if(!empty($Relations)) {
 			foreach($Relations as $key => $val) {
-				list($table,$fn, $ref) = explode('.', $val);
 				$kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
 				$alias= "\"{$key}\"";
-				$sql .= ",{$table}.\"{$ref}\" AS \"{$kk}\"";
-				$jstr .= " LEFT JOIN {$table} ON {$this->table}.{$alias} = {$table}.\"{$fn}\"";
+				if(is_array($val)) {
+					list($ref,$lnk) = array_first_item($val);
+					list($table,$fn) = explode('.', $lnk);
+					foreach($val as $refer => $lnk) {
+						$sql .= ",{$table}.\"{$refer}\" AS \"{$kk}_{$refer}\"";
+					}
+					$jstr .= " LEFT JOIN {$table} ON {$this->table}.{$alias} = {$table}.\"{$fn}\"";
+				} else {
+					list($table,$fn, $ref) = explode('.', $val);
+					$sql .= ",{$table}.\"{$ref}\" AS \"{$kk}\"";
+					$jstr .= " LEFT JOIN {$table} ON {$this->table}.{$alias} = {$table}.\"{$fn}\"";
+				}
 			}
 		}
 		return "{$sql}{$frm}{$jstr}";
@@ -197,15 +207,21 @@ protected function sql_safequote(&$value) {
 					// キー名の最後に関係演算子
 					list($key,$op) = keystr_opr($key);
 					if(empty($op)) {
-//						$op = (gettype($val) === 'string') ? ' LIKE ' : '=';
-						$op = (is_numeric($val)) ? '=' : ' LIKE ';
-					}
-					if($val[0] == '-') {
-						$val = mb_substr($val,1);
-						$op = ' NOT LIKE ';
-					}
-					if(strpos($op,'LIKE') !== false) $val = "%{$val}%";
-					if(!is_numeric($val)) $val = "'{$val}'";
+						if(mb_strpos($val,'...') !== FALSE) {
+							$op = ' BETWEEN ';
+							list($from,$to) = explode('...',$val);
+							$val = "'{$from}' AND '{$to}'";
+						} else if(is_numeric($val)) {
+							$op = '=';
+						} else {
+							$op = ' LIKE ';
+							if($val[0] == '-') {
+								$val = mb_substr($val,1);
+								$op = ' NOT LIKE ';
+							}
+							$val = "%{$val}%";
+						}
+					} else if(!is_numeric($val)) $val = "'{$val}'";
 					if(strpos($key,'+') !== FALSE) {
 						$sep = '';
 						$opp = '';
