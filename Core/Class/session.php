@@ -23,7 +23,7 @@ static function InitSession($appname = 'default') {
 	self::$MY_SESSION_ID = "_minimvc_waffle_map_{$appname}";
 	// for Login skip on CLI debug.php processing
 	if(DEBUGGER && empty($on_server)) {
-		$_SESSION[self::$MY_SESSION_ID]['Login'] = ['user' => 'aaa'];
+		$_SESSION[self::$MY_SESSION_ID]['Login'] = ['user' => 'ntak'];
 	}
 	debug_log(FALSE,[
 		"SESSION" => $_SESSION,

@@ -24,6 +24,12 @@ public function ViewTemplate($layout) {
 	$this->AOwner->ViewTemplate($layout);
 }
 //==============================================================================
+// 実行時間を表示する
+public function Runtime() {
+	echo "<hr>\n";
+	debug_run_time(-1);
+}
+//==============================================================================
 // プロパティ変数のセット
 public function SetData($data) {
 	foreach($data as $key => $val) {

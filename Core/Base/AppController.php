@@ -70,23 +70,23 @@ public function ImportSession() {
 }
 //==============================================================================
 // ページネーションのセットアップ
-public function PageSetup() {
-	list($num,$size) = App::$Params;
+public function PageSetup($pgsz = 0) {
+	$Params = array_filter(App::$Params, function($vv) {return is_numeric($vv);});
+	list($num,$size) = $Params;
 //	$num = App::$Params[0];
 //	$size= App::$Params[1];
-	if($size == 0) {
-		$size = (isset(MySession::$PostEnv['PageSize'])) ? MySession::$PostEnv['PageSize'] : 25;
+	if($size === 0) {
+		if($pgsz > 0) $size = $pgsz;
+		else {
+			$size = (isset(MySession::$PostEnv['PageSize'])) ? MySession::$PostEnv['PageSize'] : 0;
+		}
 	} else MySession::$EnvData['PageSize'] = $size;		// 新しいページサイズに置換える
-	if($num == 0) $num = 1;
+	if($num === 0) $num = 1;
 	// 自分とヘルパーのパラメータを書き換える
-	App::$Params[0] =  $num;
-	App::$Params[1] =  $size;
+//	App::$Params[0] =  $num;
+//	App::$Params[1] =  $size;
 	$this->Model->SetPage($size,$num);
-	debug_log(1, [
-		"$#PagerParam" => [
-			"App"  => App::$Params,
-		],
-	]);
+	debug_log(1, ["Param"  => $Params]);
 }
 //==============================================================================
 // デフォルトの動作

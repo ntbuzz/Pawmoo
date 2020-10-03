@@ -155,7 +155,7 @@ function array_to_URI($arr) {
 function array_concat_keys($arr,$keys) {
     $ss = '';
     foreach($keys as $kk) $ss .= " ".$arr[$kk];
-    return ltrim($ss);
+    return trim($ss);
 }
 //==============================================================================
 // ファイルパスを / で終わるようにする
