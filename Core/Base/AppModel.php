@@ -109,13 +109,14 @@ public function RelationSetup() {
                 $link = $this->$model->DataTable.".{$field}";
                 foreach($ref_list as $refer) {
                     $key_name = "{$kk}_{$refer}";
-                    if(array_key_exists($refer,$this->$model->LocaleSchema)) {
-                        $lang_ref = "{$refer}_" . LangUI::$LocaleName;
-                        if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $refer = $lang_ref;
+                    $ref_name = $refer;
+                    if(array_key_exists($ref_name,$this->$model->LocaleSchema)) {
+                        $lang_ref = "{$ref_name}_" . LangUI::$LocaleName;
+                        if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $ref_name = $lang_ref;
                     }
-                    $sub_rel[$refer] = $link;
-                    $ref_name = "{$kk}_{$refer}";
-                    $this->FieldSchema[$key_name] = [$ref_name,$key,NULL];
+                    $sub_rel[$refer] = "{$link}.{$ref_name}";
+                    $ref_name = "{$kk}_{$ref_name}";
+                    $this->FieldSchema[$key_name] = [$key_name,$key,NULL];
                 }
                 $this->Relations[$key] =  $sub_rel;
             } else {
@@ -195,9 +196,18 @@ public function GetRecord($num) {
 public function GetValueList() {
     $valueLists = array();
     foreach($this->Relations as $key => $val) {     // リレーション先の値リストを取得する
-        list($table,$fn, $ref) = explode('.', $val);
-        // $key カラムの一覧を取得する
-        $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn);
+        if(is_array($val)) {
+            $base = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
+            foreach($val as $kk => $ref) {
+                list($table,$id,$fn) = explode('.', $ref);
+                $key_name = "{$base}_{$kk}";
+                $valueLists[$key_name] = $this->dbDriver->getValueLists($table,$kk,$fn);
+            }
+        } else {
+            list($table,$fn, $ref) = explode('.', $val);
+            // $key カラムの一覧を取得する
+            $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn);
+        }
     }
     $this->Select= $valueLists;             // JOIN先の値リスト
     debug_log(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);

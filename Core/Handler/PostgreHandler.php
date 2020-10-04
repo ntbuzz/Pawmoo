@@ -70,6 +70,7 @@ public function updateRecord($wh,$row) {
 	if($aa === FALSE) {
 		$res1 = pg_get_result($this->dbb);
 		echo "ERROR:" . pg_result_error($res1) . "<br>\n";
+		debug_dump($this->dbb,$this->table,$row);
 		die('Postgres CONVERT失敗' . pg_last_error());
 	}
 	$primary = '"' . key($wh) . '"';		// プライマリキー名を取得

@@ -160,10 +160,11 @@ protected function sql_safequote(&$value) {
 				$kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
 				$alias= "\"{$key}\"";
 				if(is_array($val)) {
-					list($ref,$lnk) = array_first_item($val);
-					list($table,$fn) = explode('.', $lnk);
+//					list($ref,$lnk) = array_first_item($val);
+//					list($table,$fn) = explode('.', $lnk);
 					foreach($val as $refer => $lnk) {
-						$sql .= ",{$table}.\"{$refer}\" AS \"{$kk}_{$refer}\"";
+						list($table,$fn,$ref) = explode('.', $lnk);
+						$sql .= ",{$table}.\"{$ref}\" AS \"{$kk}_{$refer}\"";
 					}
 					$jstr .= " LEFT JOIN {$table} ON {$this->table}.{$alias} = {$table}.\"{$fn}\"";
 				} else {
