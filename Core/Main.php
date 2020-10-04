@@ -72,9 +72,11 @@ if(!defined('FORCE_REDIRECT')) define('FORCE_REDIRECT', FALSE);
 if(!is_extst_module($appname,$controller,'Controller')) {
     // if BAD controller name, try DEFAULT CONTROLLER and shift follows
     $cont = (DEFAULT_CONTROLLER === '') ? $appname : DEFAULT_CONTROLLER;
+    array_unshift($params,$filter);
     $module[0] = ucfirst(strtolower($cont));
     $module[1] = $controller;
     $module[2] = strtolower($method);
+    $module[3] = $params;
     list($controller,$method,$filter) = $module;
     // RE-TRY DEFAULT CONTROLLER,if FAILED,then NOT FOUND
     if(!is_extst_module($appname,$controller,'Controller')) {

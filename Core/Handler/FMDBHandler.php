@@ -27,6 +27,7 @@ class FMDBHandler extends FileMaker {
 	private	$startrec;		// 開始レコード番号
 	private	$limitrec;		// 取得レコード数
 	private $onetime;		// デバッグ用：メッセージを1回に
+	public  $DateStyle = 'm/d/Y';
 //==============================================================================
 // コンストラクタでデータベースに接続
 	function __construct($dbtable) {
@@ -51,7 +52,6 @@ class FMDBHandler extends FileMaker {
 */
 		debug_log(13, DatabaseParameter['Filemaker']);
 	}
-
 //==============================================================================
 // コンストラクタでデータベースに接続
 public function DatabaseConnect($dbtable) {
@@ -160,6 +160,11 @@ public function doQueryBy($fn,$recno) {
 	return $this->fields;
 }
 //==============================================================================
+public function getRecordValue($row,$relations) {
+	list($key,$val) = array_first_item($row);
+	return $this->doQueryBy($key,$val);
+}
+//==============================================================================
 // ページングでレコードを読み込むためのパラメータ
 // pagenum は１以上になることを呼び出し側で保証する
 public function SetPaging($pagesize, $pagenum) {
@@ -234,7 +239,7 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 	};
 	$this->Finds = $expr_array('AND',$row);
 	$this->SortBy = $sort;
-	debug_log(FALSE,[
+	debug_log(3,[
 		'row'	=> $row,
 		'FindBy'	=> $this->Finds,
 		'SortBy'	=> $this->SortBy,
@@ -371,8 +376,7 @@ public function fetchDB() {
 /*
 public function insertRecord($row)
 public function deleteRecord($wh)
-public function getRecordValue($row,$relations)
-public function getValueLists($table,$ref,$id,$grp) 
+public function getValueLists($table,$ref,$id) 
 public function getLastError() 
 */
 
