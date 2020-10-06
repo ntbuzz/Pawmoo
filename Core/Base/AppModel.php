@@ -57,6 +57,7 @@ class AppModel extends AppObject {
         $this->SchemaHeader($this->Schema);
         debug_log(3, ["HeaderSchema" => $this->HeaderSchema]);
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
+        $this->dbDriver->LocaleAlias($this->LocaleSchema);
     }
 //==============================================================================
 // スキーマを分解してヘッダー情報を生成

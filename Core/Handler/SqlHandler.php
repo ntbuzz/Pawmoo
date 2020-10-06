@@ -16,6 +16,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private	$limitrec;		// 取得レコード数
 	private $handler;		// SQLハンドラー
 	public  $DateStyle = 'Y-m-d';
+	public	$lang_alias =[];
 //==============================================================================
 //	抽象メソッド：継承先クラスで定義する
 	abstract protected function Connect();
@@ -32,6 +33,20 @@ function __construct($table,$handler) {
 		$this->Connect();
 		debug_log(13,["フィールド名リスト" => $this->columns]);
 		$this->handler = $handler;
+	}
+//==============================================================================
+//	LocaleAlias: 言語カラム
+public function LocaleAlias($alias) {
+	$this->lang_alias = $alias;
+//	debug_dump($alias);
+}
+//==============================================================================
+//	言語カラムの読み替えが必要か
+	private function get_aliasname($field_name) {
+		$aname = (array_key_exists($field_name,$this->lang_alias))
+				 ? $this->lang_alias[$field_name]
+				 : $field_name;
+		return $aname;
 	}
 //==============================================================================
 //	getValueLists: 抽出カラム名, 値カラム名、グルーピングカラム名
@@ -220,18 +235,24 @@ protected function sql_safequote(&$value) {
 								$val = mb_substr($val,1);
 								$op = ' NOT LIKE ';
 							}
-							$val = "%{$val}%";
+							$val = "'%{$val}%'";
 						}
 					} else if(!is_numeric($val)) $val = "'{$val}'";
 					if(strpos($key,'+') !== FALSE) {
 						$sep = '';
 						$opp = '';
 						foreach(explode('+',$key) as $cmp) {
+						// replace language-alias
+							$cmp = $this->get_aliasname($cmp);
 							$opp .= "{$sep}({$this->table}.\"{$cmp}\"{$op}{$val})";
 							$sep = ' OR ';
 						}
 						$opp = "({$opp})";
-					} else $opp = "({$this->table}.\"{$key}\"{$op}{$val})";
+					} else {
+						// replace language-alias
+						$key = $this->get_aliasname($key);
+						$opp = "({$this->table}.\"{$key}\"{$op}{$val})";
+					}
 				}
 				$opc = (empty($opc)) ? $opp : "{$opc} {$opr} {$opp}";
 			}
