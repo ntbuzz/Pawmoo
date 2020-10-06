@@ -74,20 +74,22 @@
     $.fn.floatWindow = function (ttl, obj, callback) {
         var self = this;
         if (ttl.length) self.find('dt').text(ttl);
-        $.each(obj, function (key, value) {
-            var target = self.find('[name="' + key + '"]');
-            if (target.length) {
-                if (target.prop("tagName") == "INPUT" || target.prop("tagName") == "SELECT") target.val(value);   // 自ID
-                else {
-                    if (target.prop("tagName") == "TEXTAREA") {     // 初期表示サイズを固定する
-                        var w = target.attr("cols");
-                        var h = target.attr("rows");
-                        target.css({"width": w+"em","height": h+"em"});
+        if (typeof obj == 'object') {
+            $.each(obj, function (key, value) {
+                var target = self.find('[name="' + key + '"]');
+                if (target.length) {
+                    if (target.prop("tagName") == "INPUT" || target.prop("tagName") == "SELECT") target.val(value);   // 自ID
+                    else {
+                        if (target.prop("tagName") == "TEXTAREA") {     // 初期表示サイズを固定する
+                            var w = target.attr("cols");
+                            var h = target.attr("rows");
+                            target.css({"width": w+"em","height": h+"em"});
+                        }
+                        target.text(value);   // 自ID
                     }
-                    target.text(value);   // 自ID
                 }
-            }
-        });
+            });
+        }
         self.find(".execButton").off().click(function () {
 //            alert($(this).attr('class'));
             var setobj = {};
