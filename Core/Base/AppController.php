@@ -71,10 +71,10 @@ public function ImportSession() {
 //==============================================================================
 // ページネーションのセットアップ
 public function PageSetup($pgsz = 0) {
-	$Params = array_filter(App::$Params, function($vv) {return is_numeric($vv);});
+	// 数字パラメータのみを抽出して数値変換する
+	$Params = array_map(function($v) {return (empty($v)) ? 0 : intval($v);}, 
+			array_values(array_filter(App::$Params, function($vv) { return empty($vv) || is_numeric($vv);})));
 	list($num,$size) = $Params;
-//	$num = App::$Params[0];
-//	$size= App::$Params[1];
 	if($size === 0) {
 		if($pgsz > 0) $size = $pgsz;
 		else {
@@ -82,11 +82,33 @@ public function PageSetup($pgsz = 0) {
 		}
 	} else MySession::$EnvData['PageSize'] = $size;		// 新しいページサイズに置換える
 	if($num === 0) $num = 1;
-	// 自分とヘルパーのパラメータを書き換える
-//	App::$Params[0] =  $num;
-//	App::$Params[1] =  $size;
 	$this->Model->SetPage($size,$num);
 	debug_log(1, ["Param"  => $Params]);
+}
+//==============================================================================
+// 自動ページネーション
+public function AutoPaging($cond, $max_count = 100) {
+	// 数字パラメータのみを抽出して数値変換する
+	$Params = array_map(function($v) {return (empty($v)) ? 0 : intval($v);}, 
+			array_values(array_filter(App::$Params, function($vv) { return empty($vv) || is_numeric($vv);})));
+	list($num,$size) = $Params;
+	if($num > 0) {
+		if($size === 0) {
+			$size = MySession::$PostEnv['PageSize'];
+			if($size === 0) $size = $max_count;
+		}
+	} else {
+		$cnt = $this->Model->getCount($cond);
+		if($cnt > $max_count) {
+			$num = 1;
+			if($size === 0) $size = $max_count;
+		}
+	}
+	if($size > 0) {
+		MySession::$EnvData['PageSize'] = $size;		// 新しいページサイズに置換える
+		$this->Model->SetPage($size,$num);
+		debug_log(1, ["Param"  => $Params]);
+	}
 }
 //==============================================================================
 // デフォルトの動作
