@@ -39,7 +39,7 @@ function debug_run_time($lvl) {
 //==========================================================================
 // ログの表示
 function debug_dump(...$items) {
-    debug_log(-10,$items);
+    if(CLI_DEBUG) debug_log(-99,$items);
 }
 //==========================================================================
 // ログの記録または表示
@@ -49,6 +49,7 @@ function debug_log($lvl,...$items) {
     // バックトレースから呼び出し元の情報を取得
     $dump_log_info = function($items) {
         $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
+        array_shift($dbinfo);   // 自クラスの情報は不要
         array_shift($dbinfo);   // 自クラスの情報は不要
         $trace = "";
         foreach($dbinfo as $stack) {

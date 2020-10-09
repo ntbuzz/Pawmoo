@@ -256,10 +256,11 @@ function pseudo_markdown($atext, $md_class = '') {
         return $user_func($txt);
     }, $atext);
     // テーブルを変換
-    $p = '/\n(\|[\s\S]+?\|)\n{2}/s';
+    $p = '/\n(\|[\s\S]+?\|)\n(?:\.(\w+))*\n/s';
     $atext = preg_replace_callback($p,function($maches) {
         // | で終わらない行は複数行として結合しておく
         $txt = preg_replace('/([^|])\n/','\\1<br>', $maches[1]);
+        $tbl_class = (empty($matches[2])) ? '':" {$matches[2]}";
         $arr = array_map(function($str) {
             $cols = explode("|", trim($str,"|\r\n"));   // 両側の|を削除して分割
             $ln = "";
@@ -278,7 +279,7 @@ function pseudo_markdown($atext, $md_class = '') {
             }
             return "<tr>{$ln}</tr>";
         },explode("\n", $txt));         // とりあえず行に分割
-        return "<table class='md_tbl'>".implode("\n",$arr)."</table>\n";
+        return "<table class='md_tbl{$tbl_class}'>".implode("\n",$arr)."</table>\n";
     }, $atext);
     // 残りを一気に置換する
     $replace_keys   = array_keys($replace_defs);

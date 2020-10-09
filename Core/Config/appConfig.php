@@ -25,3 +25,10 @@ const IgnoreFiles =[
 		".","..","Thumbs.db","web.config","desktop.ini","files.txt",
 		'$RECYCLE.BIN','System Volume Information'
 ];
+if(php_sapi_name() === 'cli') {
+	global $argv;
+	define('CLI_DEBUG',TRUE);
+	define('CLI_ARGV',$argv);
+} else {
+	define('CLI_DEBUG',FALSE);
+}

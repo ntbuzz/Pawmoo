@@ -43,8 +43,8 @@ public function doQuery($sql) {
 	return $this->rows;
 }
 //==============================================================================
-//	fetchDB: 	レコードを取得してカラム配列を返す
-public function fetchDB() {
+//	fetch_array: 	レコードを取得してカラム配列を返す
+public function fetch_array() {
 	return pg_fetch_array($this->rows,NULL,PGSQL_ASSOC);
 }
 //==============================================================================

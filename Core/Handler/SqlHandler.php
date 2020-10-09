@@ -16,12 +16,11 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private	$limitrec;		// 取得レコード数
 	private $handler;		// SQLハンドラー
 	public  $DateStyle = 'Y-m-d';
-	public	$lang_alias =[];
 //==============================================================================
 //	抽象メソッド：継承先クラスで定義する
 	abstract protected function Connect();
 	abstract protected function doQuery($sql);
-	abstract protected function fetchDB();
+	abstract protected function fetch_array();
 	abstract protected function getLastError();
 	abstract protected function updateRecord($wh, $row);		// INSERT or UPDATE
 //==============================================================================
@@ -33,21 +32,16 @@ function __construct($table,$handler) {
 		$this->Connect();
 		debug_log(13,["フィールド名リスト" => $this->columns]);
 		$this->handler = $handler;
+		$this->fieldAlias = new fieldAlias();
 	}
 //==============================================================================
-//	LocaleAlias: 言語カラム
-public function LocaleAlias($alias) {
-	$this->lang_alias = $alias;
-//	debug_dump($alias);
+// fetchDB: レコードを取得して言語エイリアスとカラム連結を適用する
+public function fetchDB() {
+	if($row = $this->fetch_array()) {
+		$this->fieldAlias->to_alias_field($row);
+	}
+	return $row;
 }
-//==============================================================================
-//	言語カラムの読み替えが必要か
-	private function get_aliasname($field_name) {
-		$aname = (array_key_exists($field_name,$this->lang_alias))
-				 ? $this->lang_alias[$field_name]
-				 : $field_name;
-		return $aname;
-	}
 //==============================================================================
 //	getValueLists: 抽出カラム名, 値カラム名、グルーピングカラム名
 public function getValueLists($table,$ref,$id) {
@@ -85,7 +79,7 @@ public function getRecordCount($row) {
 	$where = $this->sql_makeWHERE($row);	// 検索条件
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
 	$this->doQuery("{$sql}{$where};");
-	$field = $this->fetchDB();
+	$field = $this->fetch_array();
 	return ($field) ? $field["total"] : 0;
 }
 //==============================================================================
@@ -113,7 +107,7 @@ public function findRecord($row,$relations = NULL,$sort = []) {
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
 	debug_log(3,['SQL' => $sql]);
 	$this->doQuery("{$sql}{$where};");
-	$field = $this->fetchDB();
+	$field = $this->fetch_array();
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	// 実際のレコード検索
 	$sql = $this->sql_JoinTable($relations);
@@ -237,20 +231,18 @@ protected function sql_safequote(&$value) {
 							}
 							$val = "'%{$val}%'";
 						}
-					} else if(!is_numeric($val)) $val = "'{$val}'";
-					if(strpos($key,'+') !== FALSE) {
 						$sep = '';
 						$opp = '';
 						foreach(explode('+',$key) as $cmp) {
 						// replace language-alias
-							$cmp = $this->get_aliasname($cmp);
+							$cmp = $this->fieldAlias->get_lang_alias($cmp);
 							$opp .= "{$sep}({$this->table}.\"{$cmp}\"{$op}{$val})";
 							$sep = ' OR ';
 						}
 						$opp = "({$opp})";
 					} else {
 						// replace language-alias
-						$key = $this->get_aliasname($key);
+						$key = $this->fieldAlias->get_lang_alias($key);
 						$opp = "({$this->table}.\"{$key}\"{$op}{$val})";
 					}
 				}

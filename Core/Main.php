@@ -18,7 +18,6 @@
  *          snake_case      Public function with return value
  *              all_public_function
  */
-global $on_server;
 // デバッグ用のクラス
 require_once('AppDebug.php');
 
@@ -42,6 +41,12 @@ require_once('Base/AppHelper.php');
 
 // Setup TIMEZONE
 date_default_timezone_set(TIME_ZONE);
+// コマンドライン起動ならデバッグ情報を出力
+if(CLI_DEBUG) {
+	$ln = str_repeat("=", 50);
+	print_r($argv);
+	echo "{$ln} START HERE ${ln}\n";
+}
 
 $redirect = false;      // Redirect flag
 
@@ -94,10 +99,10 @@ $ReqCont = [
 $requrl = array_to_URI($ReqCont);
 // コントローラ名やアクション名が書き換えられてリダイレクトが必要なら終了
 if($redirect) {
-    if($on_server) {
-        header("Location:{$requrl}");
-    } else {
+    if(CLI_DEBUG) {
         echo "Location:{$requrl}\n";
+    } else {
+        header("Location:{$requrl}");
     }
     exit;
 }

@@ -31,7 +31,7 @@ public function doQuery($sql) {
 }
 //==============================================================================
 //	fetchDB: 	レコードを取得してカラム配列を返す
-public function fetchDB() {
+public function fetch_array() {
 	return $this->rows->fetch_assoc(); //またはSQLITE3_NUM
 }
 //==============================================================================
