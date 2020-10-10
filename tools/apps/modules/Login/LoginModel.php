@@ -5,7 +5,6 @@ class LoginModel extends AppModel {
         'Handler' =>HANDLER,
         'DataTable' => 'users',
         'Primary' => 'id',
-        'Unique' => 'id',
         'Schema' => [
             'id' =>         ['',0],          // モジュールSchemaの言語ID
             'active' =>     ['',0],
@@ -14,8 +13,6 @@ class LoginModel extends AppModel {
             'email' =>      ['',0],
             'note'=>        ['',0],
             'last_login'=>  ['',0],
-        ],
-        'Relations' => [
         ],
         'PostRenames' => [
             'userid' => 'username',

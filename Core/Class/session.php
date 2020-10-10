@@ -19,7 +19,6 @@ class MySession {
 //==============================================================================
 // static クラスにおける初期化処理
 static function InitSession($appname = 'default') {
-	global $on_server;
 	self::$MY_SESSION_ID = "_minimvc_waffle_map_{$appname}";
 	// for Login skip on CLI debug.php processing
 	if(DEBUGGER && CLI_DEBUG) {

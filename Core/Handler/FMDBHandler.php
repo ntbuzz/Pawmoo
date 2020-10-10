@@ -38,7 +38,7 @@ class FMDBHandler extends FileMaker {
 		}
 		$this->DatabaseConnect($dbtable);
 		$this->fieldAlias = new fieldAlias();
-		debug_log(13, DatabaseParameter['Filemaker']);
+		debug_log(FALSE, DatabaseParameter['Filemaker']);
 	}
 //==============================================================================
 // コンストラクタでデータベースに接続
@@ -60,7 +60,7 @@ public function DatabaseConnect($dbtable) {
 //	fields[] 連想配列にフィールド名をセットする
 //==============================================================================
 private function Connect($layout) {
-	debug_log(13, ['レイアウト' => $this->LayoutName]);
+	debug_log(FALSE, ['レイアウト' => $this->LayoutName]);
 	$this->fields = array();
     // 先頭のレコードをひとつダミーで読み込む
     $findCommand = $this->newFindAllCommand($this->LayoutName);
@@ -81,7 +81,7 @@ private function Connect($layout) {
 	foreach($fmfields as $key) {
 		$this->columns[$key] = $key;
 	}
-	debug_log(13, ["Columns @ {$this->Database}({$this->LayoutName})" => $this->columns]);
+	debug_log(FALSE, ["Columns @ {$this->Database}({$this->LayoutName})" => $this->columns]);
 	// フィールド型を記憶する
 	$this->fmtconv = array();
     $layoutObj = $result->getLayout();
@@ -244,7 +244,7 @@ public function findRecord($row, $relations = NULL,$sort = []) {
     $this->recordMax = 0;
 	$this->r_pos = 0;
 	$this->r_fetched = 0;		// 取り出したレコード数
-	debug_log(13, ["検索設定" => $this->Finds]);
+	debug_log(FALSE, ["検索設定" => $this->Finds]);
 	$this->onetime = 3;
 }
 //==============================================================================
@@ -316,7 +316,7 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 				$this->FetchRecords = $result->getRecords();
 				$this->r_pos = 0;
 			}
-			debug_log(13, ["Fetch: " => $this->r_fetched]);
+			debug_log(FALSE, ["Fetch: " => $this->r_fetched]);
 		}
 		debug_log($this->onetime,[
 			'fetched' => [
@@ -346,7 +346,7 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 // レコードIDをプライマリキーに設定するバージョン
 //==============================================================================
 	public function updateRecord($wh,$row) {
-		debug_log(13, $row );
+		debug_log(FALSE, $row );
 		$recordId = reset($wh);			// 先頭の値がPrimaryKey = recordId
 		if(empty($recordId)) {					// ID指定が無いときは空レコード生成
 			// 空のレコードを生成

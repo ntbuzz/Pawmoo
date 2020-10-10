@@ -3,7 +3,6 @@
  * PHPフレームワーク
  *  AppModel:    データベース操作用の基底クラス
  */
-
 // データベースの接続情報クラス
 require_once('Core/Handler/DatabaseHandler.php');
 
@@ -13,7 +12,6 @@ class AppModel extends AppObject {
         'Handler' => 'Null',
         'DataTable' => '',
         'Primary' => '',
-        'Unique' => '',
         'Schema' => [],
         'PostRenames' => [],
     ];
@@ -33,13 +31,14 @@ class AppModel extends AppObject {
     // Schema を分解してヘッダ表示用エイリアス・属性＋参照フィールド名を記憶する
     public $HeaderSchema = [];       // ヘッダー表示用のリスト [ field_name => [disp_name, align, sort_flag ]
     private $FieldSchema = [];       // 取得フィールドのリスト [ref_name, org_name]
-    public $DateFormat;             // 日付表示形式
+    private $Relations = [];         // リレーション情報
+    public $DateFormat;              // 日付表示形式
 //==============================================================================
 //	コンストラクタ：　テーブル名
 //==============================================================================
 	function __construct($owner) {
 	    parent::__construct($owner);                    // 継承元クラスのコンストラクターを呼ぶ
-        debug_log(13,static::$DatabaseSchema);
+        debug_log(FALSE,static::$DatabaseSchema);
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
         $this->__InitClass();                             // クラス固有の初期化メソッド
         $this->fields = [];
@@ -111,7 +110,7 @@ protected function NewSchemaAnalyzer($Schema) {
             $field[$ref_key] = $key;
         }
         if($disp_head !== 0) {
-            if($disp_name[0] === '.') $disp_name = $this->_(".Schema{$disp_name}");   //  Schema 構造体を参照する
+            if(!empty($disp_name) && $disp_name[0] === '.') $disp_name = $this->_(".Schema{$disp_name}");   //  Schema 構造体を参照する
             $header[$ref_key] = [$disp_name,$disp_align,$disp_head,$width];
         }
         // リレーションしているものはリレーション先の言語を後で調べる
@@ -122,7 +121,7 @@ protected function NewSchemaAnalyzer($Schema) {
             }
         }
     }
-    debug_log(9,[
+    debug_log(FALSE,[
         "Header" => $header, 
         "Field" => $field, 
         "Relation" => $relation, 
@@ -269,11 +268,11 @@ public function MultiDeleteRecord($cond) {
         $this->fields = array();
         foreach($row as $key => $val) {
             if(array_key_exists($key,$this->dbDriver->columns)) {
-                $alias = $this->$model->fieldAlias->get_lang_alias($key);
+                $alias = $this->dbDriver->fieldAlias->get_lang_alias($key);
                 $this->fields[$alias] = $val;
             }
         }
-        debug_log(3,['ALIAS' => $this->field]);
+        debug_log(3,['ALIAS' => $this->fields]);
     }
 //==============================================================================
 // レコードの追加

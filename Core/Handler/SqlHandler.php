@@ -30,7 +30,7 @@ function __construct($table,$handler) {
 		$this->table = $table;
 		$this->dbb = DatabaseHandler::get_database_handle($handler);
 		$this->Connect();
-		debug_log(13,["フィールド名リスト" => $this->columns]);
+		debug_log(FALSE,["フィールド名リスト" => $this->columns]);
 		$this->handler = $handler;
 		$this->fieldAlias = new fieldAlias();
 	}
@@ -69,7 +69,7 @@ public function SetPaging($pagesize, $pagenum) {
 	$this->startrec = $pagesize * ($pagenum - 1);		// 開始レコード番号
 	if($this->startrec < 0) $this->startrec = 0;
 	$this->limitrec = $pagesize;		// 取得レコード数
-	debug_log(13,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
+	debug_log(FALSE,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
 }
 //==============================================================================
 //	getRecordCount($row) 

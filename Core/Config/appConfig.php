@@ -3,7 +3,7 @@
  * PHPフレームワーク
  *  appConfig: フレームワークのコンフィグレーション
  */
-define('CURRENT_VERSION','0.23.1 2020-09-19');	// フレームワークのバージョン
+define('CURRENT_VERSION','0.24.0 2020-10-10');	// フレームワークのバージョン
 
 define('TIME_ZONE','Asia/Tokyo');	// デフォルトのタイムゾーン
 
