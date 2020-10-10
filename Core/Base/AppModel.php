@@ -15,9 +15,7 @@ class AppModel extends AppObject {
         'Primary' => '',
         'Unique' => '',
         'Schema' => [],
-        'Relations' => [],
         'PostRenames' => [],
-        'BindColumns' => [],
     ];
     protected $dbDriver;        // データベースドライバー
     protected $TableHead;      // テーブルヘッダ
@@ -53,85 +51,89 @@ class AppModel extends AppObject {
         $this->dbDriver = new $driver($this->DataTable);        // データベースドライバー
         $this->DateFormat = $this->dbDriver->DateStyle;         // データベースの日付書式
         // ヘッダ表示用のスキーマ
-        $this->SchemaAnalyzer($this->Schema);
-        debug_log(3, ["HeaderSchema" => $this->HeaderSchema]);
+        $this->NewSchemaAnalyzer($this->Schema);
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
     }
-//==============================================================================
-// スキーマを分解してヘッダー情報を生成
-protected function SchemaAnalyzer($schema) {
-    $LocaleSchema = [];
-    // ヘッダ表示用とフィールド取得用のスキーマとロケール用のスキーマ
-    foreach($schema as $key => $val) {
-        if(count($val)>=3)  list($alias,$mflag,$wd) = $val;
-        else {
-            list($alias,$mflag) = $val;
-            $wd = 0;
-        }
-        list($lang,$align,$flag) = array_slice(str_split("000{$mflag}"),-3);
-        // リレーション設定があれば _id を抜いたフィールド名を参照
-        if((substr($key,-3)==='_id') && array_key_exists($key,$this->Relations)) {
-            $key_name = substr($key,0,strlen($key)-3);    // _id を抜いた名称
-            $ref_name = $key_name;
-        } else {
-            $key_name = $key;
-            $ref_name = "{$key}_" . LangUI::$LocaleName;
-            if($lang === '1' && array_key_exists($ref_name,$this->dbDriver->columns)) {
-                $LocaleSchema[$key] = $ref_name;
-            } else $ref_name = $key;
-        }
-        if(empty($alias)) $alias = $key_name;
-        $this->FieldSchema[$key_name] = [$key, NULL];         // Schema 配列に定義されたフィールドを取得する
-        if($alias[0] === '.') $alias = $this->_(".Schema{$alias}");   //  Schema 構造体を参照する
-        if($flag !== '0') {
-            $this->HeaderSchema[$key_name] = [$alias,(int)$align,(int)$flag,(int)$wd];
-        }
-    }
-    if(isset($this->BindColumns)) {
-        foreach($this->BindColumns as $key => $columns) {
-            $this->FieldSchema[$key] = [NULL, $columns];
-        }
-    } else $this->BindColumns = [];
-    $this->dbDriver->fieldAlias->SetupAlias($LocaleSchema,$this->BindColumns,);
-}
 //==============================================================================
 // リレーション先のフィールド情報はインスタンスが生成された後でしか確認できない
 //
 public function RelationSetup() {
-    if(!empty($this->Relations)) {
-        // リレーション先の情報をモデル名からテーブル名とロケール先のフィールド名に置換する
-        foreach($this->Relations as $key => $rel) {
-            $kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
-            if(is_array($rel)) {
-                $sub_rel = [];
-                list($db,$ref_list) = array_first_item($rel);
-                if(is_numeric($db)) continue;
-                list($model,$field) = explode('.', "{$db}.");
-                $link = $this->$model->DataTable.".{$field}";
-                foreach($ref_list as $refer) {
-                    $key_name = "{$kk}_{$refer}";
-                    $ref_name = $refer;
-                    if($this->$model->dbDriver->fieldAlias->exists_locale($ref_name)) {
-                        $lang_ref = "{$ref_name}_" . LangUI::$LocaleName;
-                        if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $ref_name = $lang_ref;
-                    }
-                    $sub_rel[$refer] = "{$link}.{$ref_name}";
-                    $ref_name = "{$kk}_{$ref_name}";
-                    $this->FieldSchema[$key_name] = [$key,NULL];
+    // リレーション先の情報をモデル名からテーブル名とロケール先のフィールド名に置換する
+    foreach($this->Relations as $key => $rel) {
+        $kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
+        if(is_array($rel)) {
+            $sub_rel = [];
+            list($db,$ref_list) = array_first_item($rel);
+            if(is_numeric($db)) continue;
+            list($model,$field) = explode('.', "{$db}.");
+            $link = $this->$model->DataTable.".{$field}";
+            foreach($ref_list as $refer) {
+                $key_name = "{$kk}_{$refer}";
+                $ref_name = $refer;
+                if($this->$model->dbDriver->fieldAlias->exists_locale($ref_name)) {
+                    $lang_ref = "{$ref_name}_" . LangUI::$LocaleName;
+                    if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $ref_name = $lang_ref;
                 }
-                $this->Relations[$key] =  $sub_rel;
-            } else {
-                list($model,$field,$refer) = explode('.', "{$rel}...");
-                if($this->$model->dbDriver->fieldAlias->exists_locale($key)) {
-                    $lang_ref = "{$refer}_" . LangUI::$LocaleName;
-                    if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $refer = $lang_ref;
-                }
-                $arr = [$this->$model->DataTable,$field,$refer]; // モデル名→テーブル名に置換
-                $this->Relations[$key] =  implode('.',$arr);            // Relations変数に書き戻す
+                $sub_rel[$refer] = "{$link}.{$ref_name}";
+                $this->FieldSchema[$key_name] = NULL;//$key;
+            }
+            $this->Relations[$key] =  $sub_rel;
+        } else {
+            list($model,$field,$refer) = explode('.', "{$rel}...");
+            if($this->$model->dbDriver->fieldAlias->exists_locale($key)) {
+                $lang_ref = "{$refer}_" . LangUI::$LocaleName;
+                if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $refer = $lang_ref;
+            }
+            $arr = [$this->$model->DataTable,$field,$refer]; // モデル名→テーブル名に置換
+            $this->Relations[$key] =  implode('.',$arr);            // Relations変数に書き戻す
+        }
+    }
+    debug_log(3,["Relations" => $this->Relations]);
+}
+//==============================================================================
+// スキーマを分解してヘッダー情報を生成
+protected function NewSchemaAnalyzer($Schema) {
+    $header = $relation = $locale = $bind = $field = [];
+    foreach($Schema as $key => $defs) {
+        array_push($defs,0,NULL,NULL,NULL,NULL);
+        $ref_key = $key;
+        list($disp_name,$disp_flag,$width,$relations,$binds) = $defs;
+        list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
+        if(!empty($relations)) {
+            if(substr($key,-3)==='_id' && is_scalar($relations)) $ref_key = substr($key,0,strlen($key)-3);
+            $relation[$key] = $relations;//[$relations,$accept_lang];
+            if($disp_head !== 0) $field[$ref_key] = $key;
+        } else {
+            if(!empty($binds)) {
+                $bind[$ref_key] = $binds;
+                $key = NULL;
+            }
+            $field[$ref_key] = $key;
+        }
+        if($disp_head !== 0) {
+            if($disp_name[0] === '.') $disp_name = $this->_(".Schema{$disp_name}");   //  Schema 構造体を参照する
+            $header[$ref_key] = [$disp_name,$disp_align,$disp_head,$width];
+        }
+        // リレーションしているものはリレーション先の言語を後で調べる
+        if($accept_lang) {
+            $ref_name = "{$ref_key}_" . LangUI::$LocaleName;
+            if(array_key_exists($ref_name,$this->dbDriver->columns)) {
+                $locale[$ref_key] = $ref_name;
             }
         }
     }
-    debug_log(3,["FieldSchema" => $this->FieldSchema, "Relations" => $this->Relations]);
+    debug_log(9,[
+        "Header" => $header, 
+        "Field" => $field, 
+        "Relation" => $relation, 
+        "locale" => $locale,
+        "bind" => $bind,
+    ]);
+
+    $this->HeaderSchema = $header;
+    $this->FieldSchema = $field;
+    $this->Relations = $relation;
+    $this->dbDriver->fieldAlias->SetupAlias($locale,$bind);
 }
 //==============================================================================
 // ページング設定
@@ -219,10 +221,9 @@ public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
     // 取得フィールドリストを生成する
     $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
-        list($org_name,$bind) = $vv;
-        return in_array($org_name,$filter) || ($org_name === NULL); // orgがNULLならバインド名を必ず含める
+        return in_array($vv,$filter) || ($vv === NULL); // orgがNULLならバインド名を必ず含める
     });
-debug_dump(["ARG" => $filter,"FIELD" => $this->FieldSchema," => FILTER" => $fields_list]);
+debug_log(3,["ARG" => $filter,"FIELD" => $this->FieldSchema," => FILTER" => $fields_list]);
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];
     else if(is_scalar($sort)) {
@@ -231,12 +232,10 @@ debug_dump(["ARG" => $filter,"FIELD" => $this->FieldSchema," => FILTER" => $fiel
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
     while (($fields = $this->dbDriver->fetchDB())) {
-        debug_log(FALSE, ["Fech:" => $fields,"Filter:" => $fields_list]);
         unset($record);
         foreach($fields_list as $key => $val) {
-            list($org_name,$bind) = $val;
-            $record[$key] = ($bind === NULL) ? $fields[$key] : array_concat_keys($fields,$bind); // バインド処理
-            if($key !== $org_name) $record[$org_name] = $fields[$org_name];
+            $record[$key] = $fields[$key];
+            if($val !== NULL && $key !== $val) $record[$val] = $fields[$val];
         }
         // プライマリキーは必ず含める
         $record[$this->Primary] = $fields[$this->Primary];
@@ -247,6 +246,7 @@ debug_dump(["ARG" => $filter,"FIELD" => $this->FieldSchema," => FILTER" => $fiel
         } else {
             debug_log(3, ["fields" => $fields]);
         }
+        debug_log(3, ["Fech:" => $fields,"Filter:" => $fields_list,"record" => $record]);
     }
     $this->Records = $data;
     debug_log(3, [ "record_max" => $this->record_max, "Header" => $this->HeaderSchema,"RECORDS" => $this->Records]);

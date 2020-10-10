@@ -50,7 +50,7 @@ function debug_log($lvl,...$items) {
     $dump_log_info = function($items) {
         $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
         array_shift($dbinfo);   // 自クラスの情報は不要
-        array_shift($dbinfo);   // 自クラスの情報は不要
+//        array_shift($dbinfo);   // 自クラスの情報は不要
         $trace = "";
         foreach($dbinfo as $stack) {
             $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策

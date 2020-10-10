@@ -75,6 +75,7 @@ public function ImportSession() {
 }
 //==============================================================================
 // ページネーションのセットアップ
+/*
 public function PageSetup($pgsz = 0) {
 	// 数字パラメータのみを抽出して数値変換する
 	$Params = array_map(function($v) {return (empty($v)) ? 0 : intval($v);}, 
@@ -90,6 +91,7 @@ public function PageSetup($pgsz = 0) {
 	$this->Model->SetPage($size,$num);
 	debug_log(1, ["Param"  => $Params]);
 }
+*/
 //==============================================================================
 // 自動ページネーション
 public function AutoPaging($cond, $max_count = 100) {
@@ -99,7 +101,7 @@ public function AutoPaging($cond, $max_count = 100) {
 	list($num,$size) = $Params;
 	if($num > 0) {
 		if($size === 0) {
-			$size = MySession::$PostEnv['PageSize'];
+			$size = intval(MySession::$PostEnv['PageSize']);
 			if($size === 0) $size = $max_count;
 		}
 	} else {
@@ -124,7 +126,7 @@ public function ListAction() {
 //==============================================================================
 // ページング処理
 public function PageAction() {
-	$this->PageSetup();
+	$this->AutoPaging([],50);
 	$this->ListAction();
 }
 //==============================================================================
