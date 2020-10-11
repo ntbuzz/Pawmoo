@@ -3,7 +3,6 @@
  * PHPフレームワーク
  * 	AppController: コントローラー処理のコアクラス
  */
-
 class AppController extends AppObject {
 	public $defaultAction = 'List';		// デフォルトのアクション
 	public $defaultFilter = 'all';		// デフォルトのフィルタ
@@ -49,18 +48,18 @@ class AppController extends AppObject {
 	}
 //==============================================================================
 // 後始末の処理
-	function __TerminateApp() {
-		$this->View->__TerminateView();
-	}
+public function __TerminateApp() {
+	$this->View->__TerminateView();
+}
 //==============================================================================
 // check active METHOD
-function is_enable_action($action) {
+public function is_enable_action($action) {
 	if(in_array($action,$this->my_method)) return TRUE;	// exist ENABLED List
 	return FALSE;	// diable ActionMethod
 }
 //==============================================================================
 // authorised login mode, if need view LOGIN form, return FALSE
-function is_authorised() {
+public function is_authorised() {
 	return TRUE;
 }
 //==============================================================================
@@ -73,25 +72,6 @@ public function ViewSet($arr) {
 public function ImportSession() {
 	$this->View->Helper->SetData(MySession::$PostEnv);
 }
-//==============================================================================
-// ページネーションのセットアップ
-/*
-public function PageSetup($pgsz = 0) {
-	// 数字パラメータのみを抽出して数値変換する
-	$Params = array_map(function($v) {return (empty($v)) ? 0 : intval($v);}, 
-			array_values(array_filter(App::$Params, function($vv) { return empty($vv) || is_numeric($vv);})));
-	list($num,$size) = $Params;
-	if($size === 0) {
-		if($pgsz > 0) $size = $pgsz;
-		else {
-			$size = (isset(MySession::$PostEnv['PageSize'])) ? MySession::$PostEnv['PageSize'] : 0;
-		}
-	} else MySession::$EnvData['PageSize'] = $size;		// 新しいページサイズに置換える
-	if($num === 0) $num = 1;
-	$this->Model->SetPage($size,$num);
-	debug_log(1, ["Param"  => $Params]);
-}
-*/
 //==============================================================================
 // 自動ページネーション
 public function AutoPaging($cond, $max_count = 100) {

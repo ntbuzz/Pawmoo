@@ -133,6 +133,7 @@ public function __get($PropName) {
 public function _($defs, $allow_array = FALSE) {
     return LangUI::get_value($this->LocalePrefix, $defs, $allow_array);
 }
+//==============================================================================
 protected function __($defs, $allow_array = FALSE) {
     return LangUI::get_value('core', $defs, $allow_array);
 }
@@ -141,6 +142,7 @@ protected function __($defs, $allow_array = FALSE) {
 public function _in($arr,$defs) {
     return LangUI::get_array($arr, $this->LocalePrefix, $defs);          // 言語識別子から排列要素を取得する
 }
+//==============================================================================
 protected function __in($arr,$defs) {
     return LangUI::get_array($arr, 'core', $defs);          // 言語識別子から排列要素を取得する
 }

@@ -5,8 +5,6 @@
  *              PHPテンプレート(*.tpl)とセクションテンプレート(*.ptl)を読み込んでHTMLを出力する
  *              HTML出力のため AppHelper を所有する
  */
-//require_once('Core/Class/Parser.php');
-
 class AppView extends AppObject {
     protected $Layout;        // デフォルトのレイアウト
     private $doTrailer = FALSE;
@@ -202,7 +200,6 @@ public function ViewTemplate($name,$vars = []) {
 //  文字列の変数置換を行う
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
     private function expand_Strings($str,$vars) {
-//        $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%}|{\'[^\']+?\'})/'; // 変数リストの配列を取得
         $p = '/\${[^}\s]+?}|\${[#%\'\$@][^}\s]+?}/';          // 変数リストの配列を取得
         preg_match_all($p, $str, $m);
         $varList = $m[0];
@@ -214,7 +211,6 @@ public function ViewTemplate($name,$vars = []) {
             "変換" => $varList,
             "置換" => $values,
             ]]);
-
         // 配列が返ることもある
         $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
         return $exvar;

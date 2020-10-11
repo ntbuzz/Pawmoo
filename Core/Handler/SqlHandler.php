@@ -169,8 +169,6 @@ protected function sql_safequote(&$value) {
 				$kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
 				$alias= "\"{$key}\"";
 				if(is_array($val)) {
-//					list($ref,$lnk) = array_first_item($val);
-//					list($table,$fn) = explode('.', $lnk);
 					foreach($val as $refer => $lnk) {
 						list($table,$fn,$ref) = explode('.', $lnk);
 						$sql .= ",{$table}.\"{$ref}\" AS \"{$kk}_{$refer}\"";
