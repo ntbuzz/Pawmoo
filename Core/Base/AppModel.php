@@ -87,7 +87,7 @@ public function RelationSetup() {
             $this->Relations[$key] =  implode('.',$arr);            // Relations変数に書き戻す
         }
     }
-    debug_log(3,["Relations" => $this->Relations]);
+    debug_log(FALSE,["Relations" => $this->Relations]);
 }
 //==============================================================================
 // スキーマを分解してヘッダー情報を生成
@@ -101,7 +101,8 @@ protected function NewSchemaAnalyzer($Schema) {
         if(!empty($relations)) {
             if(substr($key,-3)==='_id' && is_scalar($relations)) $ref_key = substr($key,0,strlen($key)-3);
             $relation[$key] = $relations;//[$relations,$accept_lang];
-            if($disp_head !== 0) $field[$ref_key] = $key;
+            //if($disp_head !== 0) 
+            $field[$ref_key] = $key;
         } else {
             if(!empty($binds)) {
                 $bind[$ref_key] = $binds;
@@ -185,7 +186,7 @@ public function GetValueList() {
         }
     }
     $this->Select= $valueLists;             // JOIN先の値リスト
-    debug_log(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);
+    debug_log(3, [ "VALUE_LIST" => $valueLists]);
 }
 //==============================================================================
 // フィールドの読み込み (JOIN無し)
@@ -222,7 +223,6 @@ public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
     $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
         return in_array($vv,$filter) || ($vv === NULL); // orgがNULLならバインド名を必ず含める
     });
-debug_log(3,["ARG" => $filter,"FIELD" => $this->FieldSchema," => FILTER" => $fields_list]);
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];
     else if(is_scalar($sort)) {
@@ -245,10 +245,10 @@ debug_log(3,["ARG" => $filter,"FIELD" => $this->FieldSchema," => FILTER" => $fie
         } else {
             debug_log(3, ["fields" => $fields]);
         }
-        debug_log(3, ["Fech:" => $fields,"Filter:" => $fields_list,"record" => $record]);
+        debug_log(FALSE, ["Fech:" => $fields,"Filter:" => $fields_list,"record" => $record]);
     }
     $this->Records = $data;
-    debug_log(3, [ "record_max" => $this->record_max, "Header" => $this->HeaderSchema,"RECORDS" => $this->Records]);
+    debug_log(FALSE, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
 }
 //==============================================================================
 // レコードの削除
