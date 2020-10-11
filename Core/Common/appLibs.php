@@ -9,6 +9,15 @@ if (!function_exists('array_key_first')) {
         return NULL;
     }
 }
+//==============================================================================
+// 配列の結合 PHP 7.0以前の場合に備える
+if (!function_exists('intdiv')) {
+    function intdiv($var,$base) {
+        return ($var - ($var % $base)) / $base;
+    }
+}
+//==============================================================================
+// 連想配列の先頭要素を返す
 function array_first_item(array $arr) {
     foreach($arr as $key => $val) {
         return [$key,$val];
