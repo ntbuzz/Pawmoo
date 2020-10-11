@@ -247,7 +247,7 @@ public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
         debug_log(FALSE, ["Fech:" => $fields,"Filter:" => $fields_list,"record" => $record]);
     }
     $this->Records = $data;
-    debug_log(FALSE, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
+    if($this->pagesize > 0 && $this->pagesize < 50)  debug_log(3, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
 }
 //==============================================================================
 // レコードの削除
