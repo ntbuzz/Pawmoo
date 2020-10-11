@@ -3,7 +3,7 @@
  * PHPフレームワーク
  *  appConfig: フレームワークのコンフィグレーション
  */
-define('CURRENT_VERSION','0.23.1 2020-09-19');	// フレームワークのバージョン
+define('CURRENT_VERSION','0.24.0 2020-10-10');	// フレームワークのバージョン
 
 define('TIME_ZONE','Asia/Tokyo');	// デフォルトのタイムゾーン
 
@@ -25,3 +25,10 @@ const IgnoreFiles =[
 		".","..","Thumbs.db","web.config","desktop.ini","files.txt",
 		'$RECYCLE.BIN','System Volume Information'
 ];
+if(php_sapi_name() === 'cli') {
+	global $argv;
+	define('CLI_DEBUG',TRUE);
+	define('CLI_ARGV',$argv);
+} else {
+	define('CLI_DEBUG',FALSE);
+}

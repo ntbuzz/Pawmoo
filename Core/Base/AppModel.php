@@ -3,7 +3,6 @@
  * PHPフレームワーク
  *  AppModel:    データベース操作用の基底クラス
  */
-
 // データベースの接続情報クラス
 require_once('Core/Handler/DatabaseHandler.php');
 
@@ -13,11 +12,8 @@ class AppModel extends AppObject {
         'Handler' => 'Null',
         'DataTable' => '',
         'Primary' => '',
-        'Unique' => '',
         'Schema' => [],
-        'Relations' => [],
         'PostRenames' => [],
-        'BindColumns' => [],
     ];
     protected $dbDriver;        // データベースドライバー
     protected $TableHead;      // テーブルヘッダ
@@ -34,15 +30,15 @@ class AppModel extends AppObject {
     public $OnGetRecord = NULL;      // レコード取得時のコールバック1関数
     // Schema を分解してヘッダ表示用エイリアス・属性＋参照フィールド名を記憶する
     public $HeaderSchema = [];       // ヘッダー表示用のリスト [ field_name => [disp_name, align, sort_flag ]
-    private $LocaleSchema= [];       // ロケール置換用のリスト [ field_name => locale_name,,... ]
     private $FieldSchema = [];       // 取得フィールドのリスト [ref_name, org_name]
-    public $DateFormat;             // 日付表示形式
+    private $Relations = [];         // リレーション情報
+    public $DateFormat;              // 日付表示形式
 //==============================================================================
 //	コンストラクタ：　テーブル名
 //==============================================================================
 	function __construct($owner) {
 	    parent::__construct($owner);                    // 継承元クラスのコンストラクターを呼ぶ
-        debug_log(13,static::$DatabaseSchema);
+        debug_log(FALSE,static::$DatabaseSchema);
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
         $this->__InitClass();                             // クラス固有の初期化メソッド
         $this->fields = [];
@@ -54,83 +50,90 @@ class AppModel extends AppObject {
         $this->dbDriver = new $driver($this->DataTable);        // データベースドライバー
         $this->DateFormat = $this->dbDriver->DateStyle;         // データベースの日付書式
         // ヘッダ表示用のスキーマ
-        $this->SchemaHeader($this->Schema);
-        debug_log(3, ["HeaderSchema" => $this->HeaderSchema]);
+        $this->NewSchemaAnalyzer($this->Schema);
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
     }
-//==============================================================================
-// スキーマを分解してヘッダー情報を生成
-protected function SchemaHeader($schema) {
-    // ヘッダ表示用とフィールド取得用のスキーマとロケール用のスキーマ
-    foreach($schema as $key => $val) {
-        if(count($val)>=3)  list($alias,$mflag,$wd) = $val;
-        else {
-            list($alias,$mflag) = $val;
-            $wd = 0;
-        }
-        list($lang,$align,$flag) = array_slice(str_split("000{$mflag}"),-3);
-        // リレーション設定があれば _id を抜いたフィールド名を参照
-        if((substr($key,-3)==='_id') && array_key_exists($key,$this->Relations)) {
-            $key_name = substr($key,0,strlen($key)-3);    // _id を抜いた名称
-            $ref_name = $key_name;
-        } else {
-            $key_name = $key;
-            $ref_name = "{$key}_" . LangUI::$LocaleName;
-            if($lang === '1' && array_key_exists($ref_name,$this->dbDriver->columns)) {
-                $this->LocaleSchema[$key] = $ref_name;
-            } else $ref_name = $key;
-        }
-        if(empty($alias)) $alias = $key_name;
-        $this->FieldSchema[$key_name] = [$ref_name,  $key, NULL];         // Schema 配列に定義されたフィールドを取得する
-        if($alias[0] === '.') $alias = $this->_(".Schema{$alias}");   //  Schema 構造体を参照する
-        if($flag !== '0') {
-            $this->HeaderSchema[$key_name] = [$alias,(int)$align,(int)$flag,(int)$wd];
-        }
-    }
-    if(isset($this->BindColumns)) {
-        foreach($this->BindColumns as $key => $columns) {
-            $this->FieldSchema[$key] = [NULL,  NULL, $columns];
-        }
-    }
-}
 //==============================================================================
 // リレーション先のフィールド情報はインスタンスが生成された後でしか確認できない
 //
 public function RelationSetup() {
-    if(!empty($this->Relations)) {
-        // リレーション先の情報をモデル名からテーブル名とロケール先のフィールド名に置換する
-        foreach($this->Relations as $key => $rel) {
-            $kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
-            if(is_array($rel)) {
-                $sub_rel = [];
-                list($db,$ref_list) = array_first_item($rel);
-                if(is_numeric($db)) continue;
-                list($model,$field) = explode('.', "{$db}.");
-                $link = $this->$model->DataTable.".{$field}";
-                foreach($ref_list as $refer) {
-                    $key_name = "{$kk}_{$refer}";
-                    $ref_name = $refer;
-                    if(array_key_exists($ref_name,$this->$model->LocaleSchema)) {
-                        $lang_ref = "{$ref_name}_" . LangUI::$LocaleName;
-                        if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $ref_name = $lang_ref;
-                    }
-                    $sub_rel[$refer] = "{$link}.{$ref_name}";
-                    $ref_name = "{$kk}_{$ref_name}";
-                    $this->FieldSchema[$key_name] = [$key_name,$key,NULL];
+    // リレーション先の情報をモデル名からテーブル名とロケール先のフィールド名に置換する
+    foreach($this->Relations as $key => $rel) {
+        $kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
+        if(is_array($rel)) {
+            $sub_rel = [];
+            list($db,$ref_list) = array_first_item($rel);
+            if(is_numeric($db)) continue;
+            list($model,$field) = explode('.', "{$db}.");
+            $link = $this->$model->DataTable.".{$field}";
+            foreach($ref_list as $refer) {
+                $key_name = "{$kk}_{$refer}";
+                $ref_name = $refer;
+                if($this->$model->dbDriver->fieldAlias->exists_locale($ref_name)) {
+                    $lang_ref = "{$ref_name}_" . LangUI::$LocaleName;
+                    if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $ref_name = $lang_ref;
                 }
-                $this->Relations[$key] =  $sub_rel;
-            } else {
-                list($model,$field,$refer) = explode('.', "{$rel}...");
-                if(array_key_exists($refer,$this->$model->LocaleSchema)) {
-                    $lang_ref = "{$refer}_" . LangUI::$LocaleName;
-                    if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $refer = $lang_ref;
-                }
-                $arr = [$this->$model->DataTable,$field,$refer]; // モデル名→テーブル名に置換
-                $this->Relations[$key] =  implode('.',$arr);            // Relations変数に書き戻す
+                $sub_rel[$refer] = "{$link}.{$ref_name}";
+                $this->FieldSchema[$key_name] = NULL;//$key;
+            }
+            $this->Relations[$key] =  $sub_rel;
+        } else {
+            list($model,$field,$refer) = explode('.', "{$rel}...");
+            if($this->$model->dbDriver->fieldAlias->exists_locale($key)) {
+                $lang_ref = "{$refer}_" . LangUI::$LocaleName;
+                if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $refer = $lang_ref;
+            }
+            $arr = [$this->$model->DataTable,$field,$refer]; // モデル名→テーブル名に置換
+            $this->Relations[$key] =  implode('.',$arr);            // Relations変数に書き戻す
+        }
+    }
+    debug_log(FALSE,["Relations" => $this->Relations]);
+}
+//==============================================================================
+// スキーマを分解してヘッダー情報を生成
+protected function NewSchemaAnalyzer($Schema) {
+    $header = $relation = $locale = $bind = $field = [];
+    foreach($Schema as $key => $defs) {
+        array_push($defs,0,NULL,NULL,NULL,NULL);
+        $ref_key = $key;
+        list($disp_name,$disp_flag,$width,$relations,$binds) = $defs;
+        list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
+        if(!empty($relations)) {
+            if(substr($key,-3)==='_id' && is_scalar($relations)) $ref_key = substr($key,0,strlen($key)-3);
+            $relation[$key] = $relations;//[$relations,$accept_lang];
+            //if($disp_head !== 0) 
+            $field[$ref_key] = $key;
+        } else {
+            if(!empty($binds)) {
+                $bind[$ref_key] = $binds;
+                $key = NULL;
+            }
+            $field[$ref_key] = $key;
+        }
+        if($disp_head !== 0) {
+            if(!empty($disp_name) && $disp_name[0] === '.') $disp_name = $this->_(".Schema{$disp_name}");   //  Schema 構造体を参照する
+            $header[$ref_key] = [$disp_name,$disp_align,$disp_head,$width];
+        }
+        // リレーションしているものはリレーション先の言語を後で調べる
+        if($accept_lang) {
+            $ref_name = "{$ref_key}_" . LangUI::$LocaleName;
+            if(array_key_exists($ref_name,$this->dbDriver->columns)) {
+                $locale[$ref_key] = $ref_name;
             }
         }
     }
-    debug_log(3,["FieldSchema" => $this->FieldSchema, "Relations" => $this->Relations]);
+    debug_log(FALSE,[
+        "Header" => $header, 
+        "Field" => $field, 
+        "Relation" => $relation, 
+        "locale" => $locale,
+        "bind" => $bind,
+    ]);
+
+    $this->HeaderSchema = $header;
+    $this->FieldSchema = $field;
+    $this->Relations = $relation;
+    $this->dbDriver->fieldAlias->SetupAlias($locale,$bind);
 }
 //==============================================================================
 // ページング設定
@@ -139,32 +142,6 @@ public function SetPage($pagesize,$pagenum) {
     $this->page_num = ($pagenum <= 0) ? 1 : $pagenum;            // 現在のページ番号 1から始まる
     $this->dbDriver->SetPaging($this->pagesize,$this->page_num);
 }
-//==============================================================================
-// ロケールフィールドとカラム連結の処理
-// 結果：   レコードデータ = field
-    private function read_local_bind_field() {
-        foreach($this->LocaleSchema as $key => $lang_nm) {
-            if(!empty($this->fields[$lang_nm]))
-                $this->fields[$key] = $this->fields[$lang_nm];           // ロケールフィールドに置換
-        }
-        if(isset($this->BindColumns)) {
-            foreach($this->BindColumns as $key => $columns) {
-                $ss = array_concat_keys($this->fields,$columns);
-                $this->fields[$key] = $ss;
-            }
-        }
-    }
-//==============================================================================
-// ロケールフィールドによる置換処理
-// 結果：   レコードデータ = field
-    private function writeLocaleField() {
-        foreach($this->LocaleSchema as $key => $lang_nm) {
-            if( array_key_exists($lang_nm,$this->dbDriver->columns)) {
-                $this->fields[$lang_nm] = $this->fields[$key];          // ロケールフィールドへ書込み
-                unset($this->fields[$key]);                             // もとのフィールドは消しておく
-            }
-        }
-    }
 //==============================================================================
 // PrimaryKey で生レコードを取得
 // 結果：   レコードデータ = fields
@@ -177,7 +154,6 @@ public function getRecordByKey($id) {
 public function getRecordBy($key,$value) {
     if(!empty($value)) {
         $this->fields = $this->dbDriver->doQueryBy($key,$value);
-        $this->read_local_bind_field();
     } else $this->fields = array();
     return $this->fields;
 }
@@ -210,7 +186,7 @@ public function GetValueList() {
         }
     }
     $this->Select= $valueLists;             // JOIN先の値リスト
-    debug_log(3, [ "RELATIONS" => $this->Relations, "VALUE_LIST" => $valueLists]);
+    debug_log(3, [ "VALUE_LIST" => $valueLists]);
 }
 //==============================================================================
 // フィールドの読み込み (JOIN無し)
@@ -227,7 +203,6 @@ public function getRecordValue($num) {
         return;
     }
     $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],$this->Relations);
-    $this->read_local_bind_field();
     $this->RecData = $this->fields;
 }
 //==============================================================================
@@ -245,9 +220,8 @@ public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
     debug_log(3, [ "cond" => $cond, "filter" => $filter]);
     if(empty($filter)) $filter = $this->dbDriver->columns;
     // 取得フィールドリストを生成する
-    $fiels_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
-        list($ref_name,$org_name,$bind) = $vv;
-        return in_array($org_name,$filter) || ($org_name === NULL); // バインド名は必ず含める
+    $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
+        return in_array($vv,$filter) || ($vv === NULL); // orgがNULLならバインド名を必ず含める
     });
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];
@@ -257,30 +231,13 @@ public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
     while (($fields = $this->dbDriver->fetchDB())) {
-        debug_log(FALSE, ["Fech:" => $fields,"Filter:" => $fiels_list]);
-//        if(!isset($fields[$this->Unique])) continue;
         unset($record);
-        foreach($fiels_list as $key => $val) {
-            list($ref_name,$org_name,$bind) = $val;
-            if($bind === NULL) {
-                $ref_key = (empty($fields[$ref_name])) ? $org_name : $ref_name;
-                $record[$key] = $fields[$ref_key];
-                if($key !== $org_name) $record[$org_name] = $fields[$org_name];
-            } else {
-                $record[$key] = array_concat_keys($fields,$bind); // バインド処理
-            }
+        foreach($fields_list as $key => $val) {
+            $record[$key] = $fields[$key];
+            if($val !== NULL && $key !== $val) $record[$val] = $fields[$val];
         }
         // プライマリキーは必ず含める
         $record[$this->Primary] = $fields[$this->Primary];
-        // 抽出したレコード内に指定の値が含まれるか
-/*      この方法はSQLカウント数と食い違いが起きるのでNG!
-        if(!empty($vfilter)) {
-            $vf = array_filter($vfilter, function($v,$k) use(&$record) {
-                return ($v === '*') ? isset($record[$k]) : ($record[$k] === $v);
-            },ARRAY_FILTER_USE_BOTH);
-            if(empty($vf)) continue;
-        }
-*/
         if(! empty($record) ) {
             $data[] = $record;
             $this->record_max = $this->dbDriver->recordMax;
@@ -288,23 +245,10 @@ public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
         } else {
             debug_log(3, ["fields" => $fields]);
         }
+        debug_log(FALSE, ["Fech:" => $fields,"Filter:" => $fields_list,"record" => $record]);
     }
     $this->Records = $data;
-//    $this->record_max = count($data);
-    debug_log(3, [ "record_max" => $this->record_max, "Header" => $this->HeaderSchema,"RECORDS" => $this->Records]);
-}
-//==============================================================================
-// レコードの追加
-public function AddRecord($row) {
-    $this->fields = array();
-    foreach($row as $key => $val) {
-//        $xkey = (isset($this->PostRenames[$key])) ? $xkey = $this->PostRenames[$key] : $key;
-//        if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
-        if(array_key_exists($key,$this->dbDriver->columns)) $this->fields[$key] = $val;
-    }
-    $this->writeLocaleField();      // ロケールフィールドに移動する
-    debug_log(3, ["INSERT" => $this->fields]);
-    $this->dbDriver->insertRecord($this->fields);
+    debug_log(FALSE, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
 }
 //==============================================================================
 // レコードの削除
@@ -318,20 +262,28 @@ public function MultiDeleteRecord($cond) {
     $this->dbDriver->deleteRecord($cond);
 }
 //==============================================================================
+// ロケールフィールドによる置換処理
+    private function fieldSetup($row) {
+        unset($row[$this->Primary]);        // プライマリーキーは削除
+        $this->fields = array();
+        foreach($row as $key => $val) {
+            if(array_key_exists($key,$this->dbDriver->columns)) {
+                $alias = $this->dbDriver->fieldAlias->get_lang_alias($key);
+                $this->fields[$alias] = $val;
+            }
+        }
+        debug_log(3,['ALIAS' => $this->fields]);
+    }
+//==============================================================================
+// レコードの追加
+public function AddRecord($row) {
+    $this->fieldSetup($row);
+    $this->dbDriver->insertRecord($this->fields);
+}
+//==============================================================================
 // レコードの更新
 public function UpdateRecord($num,$row) {
-    // 更新しないカラムを保護する
-//        $this->getRecordByKey($num);
-    // 更新内容で書き換える
-    $this->fields = array();
-    foreach($row as $key => $val) {
-//        $xkey = (isset($this->PostRenames[$key])) ? $xkey = $this->PostRenames[$key] : $key;
-//        if(array_key_exists($xkey,$this->dbDriver->columns)) $this->fields[$xkey] = $val;
-        if(array_key_exists($key,$this->dbDriver->columns)) $this->fields[$key] = $val;
-    }
-    $this->fields[$this->Primary] = $num;
-    $this->writeLocaleField();          // ロケールフィールドに移動する
-    debug_log(3, ["UPDATE" => $this->fields]);
+    $this->fieldSetup($row);
     $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
 }
 

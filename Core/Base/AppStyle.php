@@ -95,8 +95,7 @@ class AppStyle {
 //==============================================================================
 //　ヘッダ出力
 public function ViewHeader() {
-    global $on_server; 
-	if(empty($on_server)) return;
+	if(CLI_DEBUG) return;
     header("Content-Type: {$this->Template['head']};");
 }
 //==============================================================================

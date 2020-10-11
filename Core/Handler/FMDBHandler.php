@@ -37,20 +37,8 @@ class FMDBHandler extends FileMaker {
 			$this->setProperty($key, $val);
 		}
 		$this->DatabaseConnect($dbtable);
-/*
-		// DB_FILE:WEB-Layout
-		list($dbname,$table) = explode(':',$dbtable);
-		// クラスユニークなパラメータ
-		$this->setProperty('database', $dbname);
-		$this->LayoutName = $table;
-		$this->Database = $dbname;
-		$this->startrec = 0;		// 開始レコード番号
-		$this->limitrec = 0;		// 取得レコード数
-		$this->fetchCount = 20;
-		$this->Finds = array();
-		$this->Connect($this->LayoutName);
-*/
-		debug_log(13, DatabaseParameter['Filemaker']);
+		$this->fieldAlias = new fieldAlias();
+		debug_log(FALSE, DatabaseParameter['Filemaker']);
 	}
 //==============================================================================
 // コンストラクタでデータベースに接続
@@ -72,7 +60,7 @@ public function DatabaseConnect($dbtable) {
 //	fields[] 連想配列にフィールド名をセットする
 //==============================================================================
 private function Connect($layout) {
-	debug_log(13, ['レイアウト' => $this->LayoutName]);
+	debug_log(FALSE, ['レイアウト' => $this->LayoutName]);
 	$this->fields = array();
     // 先頭のレコードをひとつダミーで読み込む
     $findCommand = $this->newFindAllCommand($this->LayoutName);
@@ -93,7 +81,7 @@ private function Connect($layout) {
 	foreach($fmfields as $key) {
 		$this->columns[$key] = $key;
 	}
-	debug_log(13, ["Columns @ {$this->Database}({$this->LayoutName})" => $this->columns]);
+	debug_log(FALSE, ["Columns @ {$this->Database}({$this->LayoutName})" => $this->columns]);
 	// フィールド型を記憶する
 	$this->fmtconv = array();
     $layoutObj = $result->getLayout();
@@ -131,6 +119,14 @@ public function isTableExist() {
 			}
 		}
 	}
+//==============================================================================
+// fetchDB: レコードを取得して言語エイリアスとカラム連結を適用する
+public function fetchDB() {
+	if($row = $this->fetch_array()) {
+		$this->fieldAlias->to_alias_field($row);
+	}
+	return $row;
+}
 //==============================================================================
 // 指定の番号を持つレコードひとつだけを読み込む
 public function doQueryBy($fn,$recno) {
@@ -248,107 +244,109 @@ public function findRecord($row, $relations = NULL,$sort = []) {
     $this->recordMax = 0;
 	$this->r_pos = 0;
 	$this->r_fetched = 0;		// 取り出したレコード数
-	debug_log(13, ["検索設定" => $this->Finds]);
+	debug_log(FALSE, ["検索設定" => $this->Finds]);
 	$this->onetime = 3;
 }
 //==============================================================================
 // 複数条件を指定してレコードを読み込む
 //public function fetchDB($sortby = [], $order=FILEMAKER_SORT_ASCEND) {
-public function fetchDB() {
+	private function fetch_array() {
 		if($this->r_fetched == 0) {
-		if($this->recordMax > 0 && $this->skip_rec >= $this->recordMax) return 0;
-		if($this->limitrec > 0 && $this->skip_rec >= ($this->startrec + $this->limitrec)) return 0;
-		
+			if($this->recordMax > 0 && $this->skip_rec >= $this->recordMax) return 0;
+			if($this->limitrec > 0 && $this->skip_rec >= ($this->startrec + $this->limitrec)) return 0;
+			
+			debug_log($this->onetime,[
+				'Param' => [
+					"skip_rec" => $this->skip_rec,
+					"startrec" => $this->startrec,
+					"limitrec" => $this->limitrec,
+				],
+				"検索設定" => $this->Finds
+			]);
+			//複合検索クラスのインスタンスを作成
+			$compoundFind = $this->newCompoundFindCommand($this->LayoutName);
+			//検索条件クラスのインスタンスを作成する
+			// cond = [ [And条件１], [And条件2] ,... ]
+			$n = 1;
+			foreach($this->Finds as $opr => $andval ) {
+				$findInst = $this->newFindRequest($this->LayoutName);
+				$not = FALSE;
+				foreach($andval as $key => $val) {
+					list($key,$op) = keystr_opr($key);	// キー名の最後に関係演算子
+					$key = $this->fieldAlias->get_lang_alias($key);	// キー名の読み替え
+					if($key === 'NOT') $not = TRUE;
+					else $findInst->addFindCriterion($key, "{$op}{$val}");	// FMDBは比較文字列に演算子を付加する
+				}
+				$findInst->setOmit($not);
+				$compoundFind->add($n++,$findInst);
+			}
+			//ソート順の設定
+			$kn = 1;
+			foreach($this->SortBy as $akey => $aval) {
+				$akey = $this->fieldAlias->get_lang_alias($akey);	// キー名の読み替え
+				$order = ($aval === SORTBY_DESCEND) ? FILEMAKER_SORT_DESCEND : FILEMAKER_SORT_ASCEND;
+				$compoundFind->addSortRule($akey, $kn++, $order);
+			}
+			$maxcount = ($this->limitrec == 0) ? $this->fetchCount : $this->limitrec;
+			$compoundFind->setRange($this->skip_rec,$maxcount);
+			//検索実行
+			$result = $compoundFind->execute();
+			//エラー処理
+			if (FileMaker::isError($result)) {
+				$this->errCode = $result->getCode();
+				$this->errMessage= $result->getMessage();
+				if ($this->errCode !== '401') {
+					debug_log(3, ["エラー" => $this->errMessage]);
+					// Check Find Condition
+					debug_log(-4,[
+						'FindBy'	=> $this->Finds,
+						'SortBy'	=> $this->SortBy,
+					]);
+					throw new Exception('ExecError');
+				}
+				$this->recordMax = 0;
+				$this->r_fetched = 0;
+				$this->FetchRecords = array();
+				$this->r_pos = 0;
+				return NULL;
+			} else {
+				$this->recordMax = $result->getFoundSetCount();
+				$this->r_fetched = $result->getFetchCount();
+				$this->skip_rec += $this->r_fetched;		// 次の読み込み位置
+				$this->FetchRecords = $result->getRecords();
+				$this->r_pos = 0;
+			}
+			debug_log(FALSE, ["Fetch: " => $this->r_fetched]);
+		}
 		debug_log($this->onetime,[
-		    'Param' => [
-        		"skip_rec" => $this->skip_rec,
-	        	"startrec" => $this->startrec,
-    	    	"limitrec" => $this->limitrec,
-    		],
-    		"検索設定" => $this->Finds
+			'fetched' => [
+				"recordMax" => $this->recordMax,
+				"r_fetched" => $this->r_fetched,
+				"r_pos" => $this->r_pos ,
+			],
 		]);
-		//複合検索クラスのインスタンスを作成
-		$compoundFind = $this->newCompoundFindCommand($this->LayoutName);
-		//検索条件クラスのインスタンスを作成する
-		// cond = [ [And条件１], [And条件2] ,... ]
-		$n = 1;
-		foreach($this->Finds as $opr => $andval ) {
-			$findInst = $this->newFindRequest($this->LayoutName);
-			$not = FALSE;
-    		foreach($andval as $key => $val) {
-				list($key,$op) = keystr_opr($key);	// キー名の最後に関係演算子
-				if($key === 'NOT') $not = TRUE;
-				else $findInst->addFindCriterion($key, "{$op}{$val}");	// FMDBは比較文字列に演算子を付加する
-	    	}
-			$findInst->setOmit($not);
-			$compoundFind->add($n++,$findInst);
+		if($this->r_fetched == 0) {
+			return;				// 検索結果がゼロ
 		}
-		//ソート順の設定
-		$kn = 1;
-		foreach($this->SortBy as $akey => $aval) {
-			$order = ($aval === SORTBY_DESCEND) ? FILEMAKER_SORT_DESCEND : FILEMAKER_SORT_ASCEND;
-			$compoundFind->addSortRule($akey, $kn++, $order);
+		$this->r_fetched--;
+		$record = $this->FetchRecords[$this->r_pos++];
+		$this->recordId = $record->getRecordId();		// 書き込み用ID
+		$this->modifyId = $record->getModificationId();	// 修正ID
+		foreach($this->columns as $key => $val ) {
+			$this->fields[$key] = $record->getField($key);	// 読替えは呼出し元でやる
 		}
-		$maxcount = ($this->limitrec == 0) ? $this->fetchCount : $this->limitrec;
-		$compoundFind->setRange($this->skip_rec,$maxcount);
-		//検索実行
-		$result = $compoundFind->execute();
-		//エラー処理
-		if (FileMaker::isError($result)) {
-			$this->errCode = $result->getCode();
-			$this->errMessage= $result->getMessage();
-            if ($this->errCode !== '401') {
-				debug_log(3, ["エラー" => $this->errMessage]);
-				// Check Find Condition
-				debug_log(-4,[
-					'FindBy'	=> $this->Finds,
-					'SortBy'	=> $this->SortBy,
-				]);
-				throw new Exception('ExecError');
-            }
-		    $this->recordMax = 0;
-			$this->r_fetched = 0;
-		    $this->FetchRecords = array();
-			$this->r_pos = 0;
-			return NULL;
-		} else {
-		    $this->recordMax = $result->getFoundSetCount();
-			$this->r_fetched = $result->getFetchCount();
-			$this->skip_rec += $this->r_fetched;		// 次の読み込み位置
-		    $this->FetchRecords = $result->getRecords();
-			$this->r_pos = 0;
-		}
-		debug_log(13, ["Fetch: " => $this->r_fetched]);
+		$this->fields['recordId'] = $this->recordId;
+		$this->SetDateTimeField($record);			// 日付フィールドの変換 YYYY/MM/DD
+		$this->onetime = 13;
+		return $this->fields;
 	}
-	debug_log($this->onetime,[
-		'fetched' => [
-			"recordMax" => $this->recordMax,
-			"r_fetched" => $this->r_fetched,
-			"r_pos" => $this->r_pos ,
-		],
-	]);
-	if($this->r_fetched == 0) {
-		return;				// 検索結果がゼロ
-	}
-	$this->r_fetched--;
-	$record = $this->FetchRecords[$this->r_pos++];
-	$this->recordId = $record->getRecordId();		// 書き込み用ID
-	$this->modifyId = $record->getModificationId();	// 修正ID
-	foreach($this->columns as $key => $val ) {
-		$this->fields[$key] = $record->getField($key);
-	}
-	$this->fields['recordId'] = $this->recordId;
-	$this->SetDateTimeField($record);			// 日付フィールドの変換 YYYY/MM/DD
-	$this->onetime = 13;
-	return $this->fields;
-}
 
 //==============================================================================
 //	レコードの更新 $wh[Primary] = recordID
 // レコードIDをプライマリキーに設定するバージョン
 //==============================================================================
 	public function updateRecord($wh,$row) {
-		debug_log(13, $row );
+		debug_log(FALSE, $row );
 		$recordId = reset($wh);			// 先頭の値がPrimaryKey = recordId
 		if(empty($recordId)) {					// ID指定が無いときは空レコード生成
 			// 空のレコードを生成
@@ -358,6 +356,7 @@ public function fetchDB() {
 		// フィールドを書き換えて書き込み
 		$edit = $this->newEditCommand($this->LayoutName,$recordId);
 		foreach($row as $key => $val) {
+			$key = $this->get_lang_alias($key);				// キー名の読替え
 			$val = preg_replace("/\r\n|\r|\n/", "\r", $val);		// APIが勝手にLFコードを付加する模様
 			$edit->setField($key , $val);		// フィールドキーの存在は上位クラスで検証済み
 		}

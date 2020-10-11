@@ -5,19 +5,14 @@ class IndexModel extends AppModel {
         'Handler' => 'SQLite',
         'DataTable' => 'Part',
         'Primary' => 'id',
-        'Unique' => 'id',
         'Schema' => [
             'id'            => ['',0],          // モジュールSchemaの言語ID
-            'category_id'   => ['',0],
+            'category_id'   => ['',0,0,'Category.id.title'],
             'disp_id'       => ['',0],
             'title'         => ['',0],
             'contents'      => ['',0],
         ],
-        'Relations' => [
-            'category_id' => 'Category.id.title',
-        ],
-        'PostRenames' => [
-        ]
+        'PostRenames' => [],
     ];
 //==============================================================================
 // モジュールクラスではコンストラクタを定義しない

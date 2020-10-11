@@ -72,23 +72,28 @@ class AppObject {
 public function __get($PropName) {
     if($this->autoload === FALSE) return NULL;
     if(isset($this->$PropName)) return $this->$PropName;
-    // クラス名を取り出す
-    preg_match('/[A-Z][a-z]+?$/', $PropName, $matches);
-    $cls_name = $matches[0];
-    if(empty($cls_name)) {
-        throw new Exception("Bad name request for SubClass '{$PropName}'");
-    }
     $class_list = array(
         'Class'     => 0,
         'Model'     => 1,
         'Helper'    => 2,
         'Controller'=> 2,
     );
-    if(array_key_exists($cls_name,$class_list)) {
-        $mod_name = str_replace($cls_name,'',$PropName);
-    } else {
-        $mod_name = $PropName;
-        $cls_name = 'Model';
+    if(array_key_exists($PropName,$class_list)) {
+        $mod_name = $this->ModuleName;
+        $cls_name = $PropName;
+    } else  {
+        // クラス名を取り出す
+        preg_match('/[A-Z][a-z]+?$/', $PropName, $matches);
+        $cls_name = $matches[0];
+        if(empty($cls_name)) {
+            throw new Exception("Bad name request for SubClass '{$PropName}'");
+        }
+        if(array_key_exists($cls_name,$class_list)) {
+            $mod_name = str_replace($cls_name,'',$PropName);
+        } else {
+            $mod_name = $PropName;
+            $cls_name = 'Model';
+        }
     }
     $prop_name = "{$mod_name}{$cls_name}";
     // ロード済か確認

@@ -12,6 +12,40 @@ require_once('Core/Handler/SQLiteHandler.php');
 require_once('Core/Handler/PostgreHandler.php');
 require_once('Core/Handler/NullHandler.php');
 require_once('Core/Handler/FMDBHandler.php');
+//==============================================================================
+// レコードフィールドの読替えクラス
+class fieldAlias {
+	private	$lang_alias = [];
+    private	$bind_columns = [];
+//==============================================================================
+// 言語エイリアスと結合カラム
+public function SetupAlias($alias,$binds) {
+	$this->lang_alias = $alias;
+	$this->bind_columns = $binds;
+}
+//==============================================================================
+// fetchDB: レコードを取得して言語エイリアスとカラム連結を適用する
+public function exists_locale($field_name) {
+    return (array_key_exists($field_name,$this->lang_alias));
+}
+//==============================================================================
+//	言語カラムの読み替えが必要か
+public function get_lang_alias($field_name) {
+    return ($this->exists_locale($field_name)) ? $this->lang_alias[$field_name] : $field_name;
+}
+//==============================================================================
+// fetchDB: レコードを取得して言語エイリアスとカラム連結を適用する
+public function to_alias_field(&$row) {
+    foreach($this->lang_alias as $key => $lang) {
+        if(!empty($row[$lang])) $row[$key] = $row[$lang];
+        unset($row[$lang]);
+    }
+    foreach($this->bind_columns as $key => $columns) {
+        $row[$key] = array_concat_keys($row,$columns);
+    }
+}
+
+}
 
 //==============================================================================
 // データベースの接続情報を保持するクラス
@@ -59,7 +93,7 @@ public function get_callback_func($handler) {
 //==============================================================================
 // クローズ処理
 private static function closeDb() {
-    debug_log(13, self::$dbHandle);
+    debug_log(FALSE, self::$dbHandle);
     foreach(self::$dbHandle as $key => $handle) {
         $func = self::DatabaseSpec[$key]['callback'];      // 呼び出し関数
         self::$func($handle,NULL,'close');

@@ -153,9 +153,13 @@ function array_to_URI($arr) {
 //==============================================================================
 // 配列からURIを生成する、要素内に配列があるときにも対応する
 function array_concat_keys($arr,$keys) {
-    $ss = '';
-    foreach($keys as $kk) $ss .= " ".$arr[$kk];
-    return trim($ss);
+    $ss = ''; $trim_sep = ' ';
+    foreach($keys as $kk => $val) {
+        $sep = (is_numeric($kk)) ? ' ' : $kk;
+        if(strpos($trim_sep,$sep) === FALSE) $trim_sep .= $sep;
+        $ss .= $sep . $arr[$val];
+    }
+    return trim($ss,$trim_sep);
 }
 //==============================================================================
 // ファイルパスを / で終わるようにする
