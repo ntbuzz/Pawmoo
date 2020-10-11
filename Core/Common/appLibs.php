@@ -226,7 +226,6 @@ function pseudo_markdown($atext, $md_class = '') {
                         for($n = 0; ($islist)?ctype_space($str[$n]):($str[$n+1]==='>'); ++$n) ;
                         if(mb_substr($str,$n,2) !== $key_str) break;
                         $ll = mb_substr($str,$n+2);
-//                        $ll = ltrim(mb_substr($str,$n+2));
                         if($n === $lvl) {
                             $result[] = $ll;
                             $app++;
@@ -317,8 +316,6 @@ function make_hyperlink($lnk,$modname) {
     if(get_protocol($lnk) === NULL) {
 		if($lnk[0] === ':') {
             $lnk[0] = '/';
-//        } else if($lnk[0] === '#') {
-			// LABEL-Jump no-action
         } else if($lnk[0] === '/') {
 			$lnk = App::Get_SysRoot("{$lnk}");
         } else {

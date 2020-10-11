@@ -47,8 +47,6 @@ function get_routing_params($dir) {
     }
     if(mb_strpos($method,'.') !== FALSE) {  // have a extension
         list($filename,$ext) = extract_base_name($method);
-//        $method = $filename;   // dedicated METHOD
-//        $filter = $ext;        // filter is template name
     }
     $module = array(
         ucfirst(strtolower($controller)),    // コントローラー名キャメルケースに変換

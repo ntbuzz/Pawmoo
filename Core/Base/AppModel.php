@@ -50,7 +50,7 @@ class AppModel extends AppObject {
         $this->dbDriver = new $driver($this->DataTable);        // データベースドライバー
         $this->DateFormat = $this->dbDriver->DateStyle;         // データベースの日付書式
         // ヘッダ表示用のスキーマ
-        $this->NewSchemaAnalyzer($this->Schema);
+        $this->SchemaAnalyzer($this->Schema);
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
     }
 //==============================================================================
@@ -91,50 +91,49 @@ public function RelationSetup() {
 }
 //==============================================================================
 // スキーマを分解してヘッダー情報を生成
-protected function NewSchemaAnalyzer($Schema) {
-    $header = $relation = $locale = $bind = $field = [];
-    foreach($Schema as $key => $defs) {
-        array_push($defs,0,NULL,NULL,NULL,NULL);
-        $ref_key = $key;
-        list($disp_name,$disp_flag,$width,$relations,$binds) = $defs;
-        list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
-        if(!empty($relations)) {
-            if(substr($key,-3)==='_id' && is_scalar($relations)) $ref_key = substr($key,0,strlen($key)-3);
-            $relation[$key] = $relations;//[$relations,$accept_lang];
-            //if($disp_head !== 0) 
-            $field[$ref_key] = $key;
-        } else {
-            if(!empty($binds)) {
-                $bind[$ref_key] = $binds;
-                $key = NULL;
+    protected function SchemaAnalyzer($Schema) {
+        $header = $relation = $locale = $bind = $field = [];
+        foreach($Schema as $key => $defs) {
+            array_push($defs,0,NULL,NULL,NULL,NULL);
+            $ref_key = $key;
+            list($disp_name,$disp_flag,$width,$relations,$binds) = $defs;
+            list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
+            if(!empty($relations)) {
+                if(substr($key,-3)==='_id' && is_scalar($relations)) $ref_key = substr($key,0,strlen($key)-3);
+                $relation[$key] = $relations;//[$relations,$accept_lang];
+                //if($disp_head !== 0) 
+                $field[$ref_key] = $key;
+            } else {
+                if(!empty($binds)) {
+                    $bind[$ref_key] = $binds;
+                    $key = NULL;
+                }
+                $field[$ref_key] = $key;
             }
-            $field[$ref_key] = $key;
-        }
-        if($disp_head !== 0) {
-            if(!empty($disp_name) && $disp_name[0] === '.') $disp_name = $this->_(".Schema{$disp_name}");   //  Schema 構造体を参照する
-            $header[$ref_key] = [$disp_name,$disp_align,$disp_head,$width];
-        }
-        // リレーションしているものはリレーション先の言語を後で調べる
-        if($accept_lang) {
-            $ref_name = "{$ref_key}_" . LangUI::$LocaleName;
-            if(array_key_exists($ref_name,$this->dbDriver->columns)) {
-                $locale[$ref_key] = $ref_name;
+            if($disp_head !== 0) {
+                if(!empty($disp_name) && $disp_name[0] === '.') $disp_name = $this->_(".Schema{$disp_name}");   //  Schema 構造体を参照する
+                $header[$ref_key] = [$disp_name,$disp_align,$disp_head,$width];
+            }
+            // リレーションしているものはリレーション先の言語を後で調べる
+            if($accept_lang) {
+                $ref_name = "{$ref_key}_" . LangUI::$LocaleName;
+                if(array_key_exists($ref_name,$this->dbDriver->columns)) {
+                    $locale[$ref_key] = $ref_name;
+                }
             }
         }
+        debug_log(FALSE,[
+            "Header" => $header, 
+            "Field" => $field, 
+            "Relation" => $relation, 
+            "locale" => $locale,
+            "bind" => $bind,
+        ]);
+        $this->HeaderSchema = $header;
+        $this->FieldSchema = $field;
+        $this->Relations = $relation;
+        $this->dbDriver->fieldAlias->SetupAlias($locale,$bind);
     }
-    debug_log(FALSE,[
-        "Header" => $header, 
-        "Field" => $field, 
-        "Relation" => $relation, 
-        "locale" => $locale,
-        "bind" => $bind,
-    ]);
-
-    $this->HeaderSchema = $header;
-    $this->FieldSchema = $field;
-    $this->Relations = $relation;
-    $this->dbDriver->fieldAlias->SetupAlias($locale,$bind);
-}
 //==============================================================================
 // ページング設定
 public function SetPage($pagesize,$pagenum) {
@@ -248,7 +247,7 @@ public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
         debug_log(FALSE, ["Fech:" => $fields,"Filter:" => $fields_list,"record" => $record]);
     }
     $this->Records = $data;
-    debug_log(FALSE, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
+    if($this->pagesize > 0 && $this->pagesize < 50)  debug_log(3, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
 }
 //==============================================================================
 // レコードの削除

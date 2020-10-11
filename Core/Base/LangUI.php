@@ -16,7 +16,6 @@ class LangUI {
 // HTTP_ACCEPT_LANGUAGE を元にデフォルトの言語を決定する
     public static function construct($lang,$default) {
         debug_log(2,["言語リスト" => $lang]);
-//        $_ = 'constant';                                    // 定数を取り出す関数
         $arr = array_unique(             // 重複行を取り除く
                 array_filter(           // strlen を使って空行を取り除く
                     array_map(          // 各要素に有効識別子の取り出し関数を適用

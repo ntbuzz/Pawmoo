@@ -2,17 +2,6 @@
 //=========================================================
 // JQueryプラグインを定義する
 (function ($) {
-/*
-    var wsz = {
-        theme: 'white',
-        adjustClass: '',
-        Width: function() {
-            wsize = this.parent().innerWidth();
-            wleft = this.parent().offset().left;
-            this.css("width", wsize - wleft + "px");
-        }
-    };
-*/
     // 指定要素 e のスクロールに追従する
     $.fn.busy_icon = function (disp) {
         var self = this; // jQueryオブジェクトを変数に代入しておく
@@ -26,7 +15,6 @@
             var top = $(e).scrollTop();
             self.css("position", "relative");
             self.css("top", top + "px");
-//            alert(e+":"+top);
         });
         $(e).scrollTop(0);
     };
@@ -91,13 +79,11 @@
             });
         }
         self.find(".execButton").off().click(function () {
-//            alert($(this).attr('class'));
             var setobj = {};
             self.find("*").each(function () {
                 var nm = $(this).attr('name');
                 if (nm) setobj[nm] = $(this).val();
             });
-//            alert("call" + callback);
             callback(setobj);
             return false;
         });

@@ -7,7 +7,6 @@
 	$session_time = (60 * 5);			// SESSION KEEP 5-min
 	ini_set('session.gc_divisor',1);
 	ini_set('session.gc_maxlifetime',$session_time);
-//	session_set_cookie_params(60 * 5);
 	if(!CLI_DEBUG) session_start();
 
 class MySession {
@@ -15,7 +14,6 @@ class MySession {
 	public static $PostEnv;
 	public static $LoginInfo;
 	public static $MY_SESSION_ID;
-
 //==============================================================================
 // static クラスにおける初期化処理
 static function InitSession($appname = 'default') {
@@ -59,7 +57,6 @@ static function PostToEnv($keys) {
 	foreach($keys as $nm) {
 		if(array_key_exists($nm,self::$PostEnv)) {
 			self::$EnvData[$nm] = self::$PostEnv[$nm];
-//			unset(self::$PostEnv[$nm]);
 		}
 	}
 }
@@ -135,5 +132,3 @@ static function ClearLogin() {
 }
 
 }
-// セッション変数を初期化
-//MySession::InitSession();

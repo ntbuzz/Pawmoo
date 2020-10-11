@@ -354,10 +354,8 @@ public function ViewStyle($file_name) {
 //  文字列の変数置換を行う
 // $[@#%$]varname | ${[@#%$]varname} | {$SysVar$} | {%Params%}
     private function expand_Strings($str,$vars) {
-//        $p = '/(\${[^}]+?}|{\$[^\$]+?\$}|{%[^%]+?%})/'; // 変数リストの配列を取得
         $p = '/(?:\${[^}\s]+?}|\${[#%\'\$][^}\s]+?})/';          // 変数リストの配列を取得
         preg_match_all($p, $str, $m);
-debug_log(FALSE,["STR" => $str, "PREG" => $m,"VAR" => $vars,"SESSION" => MySession::$EnvData]);
         $varList = $m[0];
         if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
         $values = $varList = array_unique($varList);
