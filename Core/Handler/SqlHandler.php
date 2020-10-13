@@ -16,6 +16,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private	$limitrec;		// 取得レコード数
 	private $handler;		// SQLハンドラー
 	public  $DateStyle = 'Y-m-d';
+	private $relations;
 //==============================================================================
 //	抽象メソッド：継承先クラスで定義する
 	abstract protected function Connect();
@@ -34,6 +35,12 @@ function __construct($table,$handler) {
 		$this->handler = $handler;
 		$this->fieldAlias = new fieldAlias();
 	}
+//==============================================================================
+// fetchDB: レコードを取得して言語エイリアスとカラム連結を適用する
+public function setupRelations($relations) {
+	$this->relations = $relations;
+	debug_log(3,["RELATIONS" => $this->relations]);
+}
 //==============================================================================
 // fetchDB: レコードを取得して言語エイリアスとカラム連結を適用する
 public function fetchDB() {
@@ -72,22 +79,22 @@ public function SetPaging($pagesize, $pagenum) {
 	debug_log(FALSE,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
 }
 //==============================================================================
-//	getRecordCount($row) 
-//	$row 条件に一致したレコード数を返す
+//	getRecordCount($cond) 
+//	$cond 条件に一致したレコード数を返す
 //==============================================================================
-public function getRecordCount($row) {
-	$where = $this->sql_makeWHERE($row);	// 検索条件
-	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
+public function getRecordCount($cond) {
+	$where = $this->sql_makeWHERE($cond);	// 検索条件
+	$sql = "SELECT count(*) as \"total\" FROM {$this->table},host_lists";
 	$this->doQuery("{$sql}{$where};");
 	$field = $this->fetch_array();
 	return ($field) ? $field["total"] : 0;
 }
 //==============================================================================
-//	getRecordValue($row,$relations) 
-//	$row 条件に一致したレコードデータを返す
+//	getRecordValue($cond,$relations) 
+//	$cond 条件に一致したレコードデータを返す
 //==============================================================================
-public function getRecordValue($row,$relations) {
-	$where = $this->sql_makeWHERE($row);		// 検索条件
+public function getRecordValue($cond,$relations) {
+	$where = $this->sql_makeWHERE($cond);		// 検索条件
 	$sql = $this->sql_JoinTable($relations);
 	$where .= ($this->handler == 'SQLite') ? " limit 0,1" : " offset 0 limit 1";		// 取得レコード数
 	$sql .= "{$where};";
@@ -101,13 +108,14 @@ public function getRecordValue($row,$relations) {
 // pgSQL: SELECT *, count('No') over() as full_count FROM public.mydb offset 10 limit 50;
 // SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
 //==============================================================================
-public function findRecord($row,$relations = NULL,$sort = []) {
-	$where = $this->sql_makeWHERE($row);	// 検索条件
+public function findRecord($cond,$relations = NULL,$sort = []) {
+	$where = $this->sql_makeWHERE($cond);	// 検索条件
 	// 全体件数を取得する
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
 	debug_log(3,['SQL' => $sql]);
 	$this->doQuery("{$sql}{$where};");
 	$field = $this->fetch_array();
+debug_log(3,["SQL" => "{$sql}{$where};", "DATA" => $field]);
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	// 実際のレコード検索
 	$sql = $this->sql_JoinTable($relations);
@@ -185,8 +193,8 @@ protected function sql_safequote(&$value) {
 	}
 //==============================================================================
 // 配列要素からのWHERE句を作成
-	private function sql_makeWHERE($row) {
-		$sql = $this->makeExpr($row);
+	private function sql_makeWHERE($cond) {
+		$sql = $this->makeExpr($cond);
 		if(!empty($sql)) $sql = ' WHERE '.$sql;
 		return $sql;
 	}
@@ -197,22 +205,44 @@ protected function sql_safequote(&$value) {
 //   	OR => [ itenm, item,... ] |
 //   	NOT => [ itenm ] |
 //		fieldkey => findvalue
-	private function makeExpr($row) {
-		$dump_object = function ($opr,$items)  use (&$dump_object)  {
+	private function makeExpr($cond) {
+		$dump_object = function ($opr,$items,$table)  use (&$dump_object)  {
 			$opc = '';
 			foreach($items as $key => $val) {
 				if(is_array($val)) {
 					if(in_array($key,['AND','OR','NOT'])) {
 						$opx = ($key === 'NOT') ? 'AND' : $key; 
-						$opp = $dump_object($opx,$val);
+						$opp = $dump_object($opx,$val,$table);
 						if($key === 'NOT') $opp = "(NOT {$opp})";
 					} else {
-						$opp = "({$this->table}.\"{$key}\" IN "; $sep = '(';
-						foreach($val as $cmp) { $opp .= "{$sep}'{$cmp}'"; $sep = ','; }
-						$opp .= '))';
+						// キー名の最後に演算子があるか確かめる
+						$in_op = [ '=' => 'IN', '==' => 'IN', '<>' => 'NOT IN', '!=' => 'NOT IN'];
+						list($key,$op) = keystr_opr($key);
+						if(array_key_exists($op,$in_op)) {
+							$cmp = implode(',',array_map(function($v) { return "'{$v}'";},$val));
+							$opx = $in_op[$op];
+							$opp = "{$table}.\"{$key}\" {$opx} ({$cmp})";
+						} else if($op === '@') {
+							if(array_key_exists($key,$this->relations)) {
+								$rel = $this->relations[$key];
+								if(is_array($rel)) list($nm,$rel) = array_first_item($rel);
+								list($tbl,$fn) = explode('.',$rel);
+								$ops = $dump_object('AND',$val,$tbl);
+								$opp = "{$table}.\"{$key}\" IN ( SELECT {$fn} FROM {$tbl} WHERE {$ops})";
+							} else continue;
+						} else {
+							$opk = "{$table}.\"{$key}\" ";
+							$cmp = array_map(function($v) use(&$opk) {
+									if($v[0] === '-') {
+										$v = mb_substr($v,1);
+										$opx = 'NOT LIKE';
+									} else $opx = 'LIKE';
+									return "({$opk} {$opx} '%{$v}%')";
+								},$val);
+							$opp = '('.implode(' OR ',$cmp).')';
+						}
 					}
-				} else {
-					// キー名の最後に関係演算子
+				} else {	// キー名の最後に関係演算子
 					list($key,$op) = keystr_opr($key);
 					if(empty($op)) {
 						if(mb_strpos($val,'...') !== FALSE) {
@@ -234,21 +264,22 @@ protected function sql_safequote(&$value) {
 						foreach(explode('+',$key) as $cmp) {
 						// replace language-alias
 							$cmp = $this->fieldAlias->get_lang_alias($cmp);
-							$opp .= "{$sep}({$this->table}.\"{$cmp}\"{$op}{$val})";
+							$opp .= "{$sep}({$table}.\"{$cmp}\"{$op}{$val})";
 							$sep = ' OR ';
 						}
 						$opp = "({$opp})";
 					} else {
+						if(!is_numeric($val)) $val = "'{$val}'";
 						// replace language-alias
 						$key = $this->fieldAlias->get_lang_alias($key);
-						$opp = "({$this->table}.\"{$key}\"{$op}{$val})";
+						$opp = "({$table}.\"{$key}\"{$op}{$val})";
 					}
 				}
 				$opc = (empty($opc)) ? $opp : "{$opc} {$opr} {$opp}";
 			}
 			return (empty($opc)) ? '' : ((count($items)===1) ? $opc : "({$opc})");
 		};
-		$sql = $dump_object('AND',$row);
+		$sql = $dump_object('AND',$cond,$this->table);
 		return $sql;
 	}
 

@@ -3,11 +3,12 @@
  * PHPフレームワーク
  * 	MySession:	Management SESSION variable, POST/GET variables
  */
-	//セッションの有効期限を5分に設定
-	$session_time = (60 * 5);			// SESSION KEEP 5-min
-	ini_set('session.gc_divisor',1);
-	ini_set('session.gc_maxlifetime',$session_time);
-	if(!CLI_DEBUG) session_start();
+//セッションの有効期限を5分に設定
+$session_time = (60 * 5);			// SESSION KEEP 5-min
+ini_set('session.gc_divisor',1);
+ini_set('session.gc_maxlifetime',$session_time);
+if(!CLI_DEBUG) session_start();
+if(!defined('DEFAULT_USER')) define('DEFAULT_USER',['user' => 'ntak']);
 
 class MySession {
 	public static $EnvData;
@@ -20,7 +21,7 @@ static function InitSession($appname = 'default') {
 	self::$MY_SESSION_ID = "_minimvc_waffle_map_{$appname}";
 	// for Login skip on CLI debug.php processing
 	if(DEBUGGER && CLI_DEBUG) {
-		$_SESSION[self::$MY_SESSION_ID]['Login'] = ['user' => 'ntak'];
+		$_SESSION[self::$MY_SESSION_ID]['Login'] = DEFAULT_USER;
 	}
 	debug_log(FALSE,[
 		"SESSION" => $_SESSION,

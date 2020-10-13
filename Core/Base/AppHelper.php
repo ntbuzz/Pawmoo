@@ -97,7 +97,7 @@ public function MakePageLinks() {
 	$endp = min($npage - 1, $begp + $bound);
 	echo "<div class='pager'><div class='navigate'>";
 	$ptitle = $this->__(".Page", FALSE);
-	echo "<span class='pager_title' id='pager_help'>{$ptitle}:</span>";
+	echo "<span class='pager_title' id='pager_help'>{$ptitle}</span>";
 	echo "<span class='separator'>";
 	echo $this->get_MoveButton(-1,$this->__(".PrevPage"),$npage);
 	echo "|";
@@ -122,7 +122,7 @@ public function MakePageLinks() {
 	$param = (empty(App::$Filter)) ? "1/" : "{App::$Filter}/1/";
 	$href = App::Get_AppRoot($this->ModuleName)."/page/{$param}";
 	$dsp = "<span id='size_selector'>".$this->__(".Display", FALSE)."</span>";
-	echo "<div class='rightalign'>{$dsp}:<SELECT id='pagesize'>";
+	echo "<div class='rightalign'>{$dsp}<SELECT id='pagesize'>";
 	foreach(array(5,10,15,20,25,50,100) as $val) {
 		$sel = ($val == $this->MyModel->pagesize) ? " selected" : "";
 		echo "<OPTION value='{$val}'{$sel}>{$val}</OPTION>\n";

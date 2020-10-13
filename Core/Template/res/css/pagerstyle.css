@@ -30,7 +30,7 @@
 	color: #aaa;
 }
 .pager .separator {
-	padding: 2px 8px;
+	padding: 2px 8px 2px 0;
 	color:gray;
 	background: linear-gradient(to bottom, white, silver);
 }
@@ -75,14 +75,14 @@
 .pager .rightalign {
 	float:right;
 	font-size: 10pt;
-	margin: 0 5px;
+	margin-right: 5px;
 	padding: 0;
 	overflow: hidden;
 }
 .pager .pager_title {
 	font-size: 10pt;
 	cursor: default;
-	padding: 2px 12px 2px 8px;
+	padding: 2px 0px 2px 8px;
 	background: #efefef;
 	text-align: right;
 }
