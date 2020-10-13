@@ -206,7 +206,21 @@ protected function sql_safequote(&$value) {
 //   	NOT => [ itenm ] |
 //		fieldkey => findvalue
 	private function makeExpr($cond) {
-		$dump_object = function ($opr,$items,$table)  use (&$dump_object)  {
+
+		// LIKE 演算子の生成関数を定義
+		$like_object = function ($key,$val,$table) {
+			$opk = "{$table}.\"{$key}\"";
+			$cmp = array_map(function($v) use(&$opk) {
+					if($v[0] === '-') {
+						$v = mb_substr($v,1);
+						$opx = 'NOT LIKE';
+					} else $opx = 'LIKE';
+					return "({$opk} {$opx} '%{$v}%')";
+				},$val);
+			return implode('OR',$cmp);
+		};
+		// 条件句(WHERE) の論理式を生成する関数
+		$dump_object = function ($opr,$items,$table)  use (&$dump_object,&$like_object)  {
 			$opc = '';
 			foreach($items as $key => $val) {
 				list($key,$op) = keystr_opr($key);		// キー名の最後に関係演算子
@@ -215,42 +229,31 @@ protected function sql_safequote(&$value) {
 						if(in_array($key,['AND','OR','NOT'])) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
-							if($key === 'NOT') $opp = "(NOT {$opp})";
+							if($key === 'NOT') $opp = "NOT {$opp}";
 						} else { // LIKE [ 配列 ]
-							$opk = "{$table}.\"{$key}\" ";
-							$cmp = array_map(function($v) use(&$opk) {
-									if($v[0] === '-') {
-										$v = mb_substr($v,1);
-										$opx = 'NOT LIKE';
-									} else $opx = 'LIKE';
-									return "({$opk} {$opx} '%{$v}%')";
-								},$val);
-							$opp = '('.implode(' OR ',$cmp).')';
+							$opp = $like_object($key,$val,$table);
 						}
 					} else { // 演算子がないスカラー値
 						if(mb_strpos($val,'...') !== FALSE) {
-							$op = ' BETWEEN ';
+							$op = 'BETWEEN';
 							list($from,$to) = explode('...',$val);
 							$val = "'{$from}' AND '{$to}'";
 						} else if(is_numeric($val)) {
 							$op = '=';
 						} else {
-							$op = ' LIKE ';
+							$op = 'LIKE';
 							if($val[0] == '-') {
 								$val = mb_substr($val,1);
-								$op = ' NOT LIKE ';
+								$op = 'NOT LIKE';
 							}
 							$val = "'%{$val}%'";
 						}
-						$sep = '';
-						$opp = '';
+						$expr = [];
 						foreach(explode('+',$key) as $cmp) {
-						// replace language-alias
 							$cmp = $this->fieldAlias->get_lang_alias($cmp);
-							$opp .= "{$sep}({$table}.\"{$cmp}\"{$op}{$val})";
-							$sep = ' OR ';
+							$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
 						}
-						$opp = "({$opp})";
+						$opp = implode('OR',$expr);
 					}
 				} else if($op === '@') {	// サブクエリー
 					// リレーション定義済みかを確かめる
@@ -268,23 +271,15 @@ protected function sql_safequote(&$value) {
 						$opx = $in_op[$op];
 						$opp = "{$table}.\"{$key}\" {$opx} ({$cmp})";
 					} else {
-						$opk = "{$table}.\"{$key}\" ";
-						$cmp = array_map(function($v) use(&$opk) {
-								if($v[0] === '-') {
-									$v = mb_substr($v,1);
-									$opx = 'NOT LIKE';
-								} else $opx = 'LIKE';
-								return "({$opk} {$opx} '%{$v}%')";
-							},$val);
-						$opp = '('.implode(' OR ',$cmp).')';
+						$opp = $like_object($key,$val,$table);
 					}
 				} else {
 					if(!is_numeric($val)) $val = "'{$val}'";
 					// replace language-alias
 					$key = $this->fieldAlias->get_lang_alias($key);
-					$opp = "({$table}.\"{$key}\"{$op}{$val})";
+					$opp = "{$table}.\"{$key}\"{$op}{$val}";
 				}
-				$opc = (empty($opc)) ? $opp : "{$opc} {$opr} {$opp}";
+				$opc = (empty($opc)) ? "({$opp})" : "{$opc}{$opr}({$opp})";
 			}
 			return (empty($opc)) ? '' : ((count($items)===1) ? $opc : "({$opc})");
 		};
