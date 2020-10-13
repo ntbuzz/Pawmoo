@@ -88,7 +88,7 @@ public function RelationSetup() {
         }
     }
     $this->dbDriver->setupRelations($this->Relations);
-    debug_log(4,["Relations" => $this->Relations]);
+    debug_log(FALSE,["Relations" => $this->Relations]);
 }
 //==============================================================================
 // スキーマを分解してヘッダー情報を生成
@@ -124,7 +124,7 @@ public function RelationSetup() {
                 }
             }
         }
-        debug_log(FALSE,[
+        debug_log(3,[
             "Header" => $header, 
             "Field" => $field, 
             "Relation" => $relation, 

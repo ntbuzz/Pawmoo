@@ -84,7 +84,7 @@ public function SetPaging($pagesize, $pagenum) {
 //==============================================================================
 public function getRecordCount($cond) {
 	$where = $this->sql_makeWHERE($cond);	// 検索条件
-	$sql = "SELECT count(*) as \"total\" FROM {$this->table},host_lists";
+	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
 	$this->doQuery("{$sql}{$where};");
 	$field = $this->fetch_array();
 	return ($field) ? $field["total"] : 0;
@@ -209,28 +209,14 @@ protected function sql_safequote(&$value) {
 		$dump_object = function ($opr,$items,$table)  use (&$dump_object)  {
 			$opc = '';
 			foreach($items as $key => $val) {
-				if(is_array($val)) {
-					if(in_array($key,['AND','OR','NOT'])) {
-						$opx = ($key === 'NOT') ? 'AND' : $key; 
-						$opp = $dump_object($opx,$val,$table);
-						if($key === 'NOT') $opp = "(NOT {$opp})";
-					} else {
-						// キー名の最後に演算子があるか確かめる
-						$in_op = [ '=' => 'IN', '==' => 'IN', '<>' => 'NOT IN', '!=' => 'NOT IN'];
-						list($key,$op) = keystr_opr($key);
-						if(array_key_exists($op,$in_op)) {
-							$cmp = implode(',',array_map(function($v) { return "'{$v}'";},$val));
-							$opx = $in_op[$op];
-							$opp = "{$table}.\"{$key}\" {$opx} ({$cmp})";
-						} else if($op === '@') {
-							if(array_key_exists($key,$this->relations)) {
-								$rel = $this->relations[$key];
-								if(is_array($rel)) list($nm,$rel) = array_first_item($rel);
-								list($tbl,$fn) = explode('.',$rel);
-								$ops = $dump_object('AND',$val,$tbl);
-								$opp = "{$table}.\"{$key}\" IN ( SELECT {$fn} FROM {$tbl} WHERE {$ops})";
-							} else continue;
-						} else {
+				list($key,$op) = keystr_opr($key);		// キー名の最後に関係演算子
+				if(empty($op)) {	// 演算子がない：配列なら論理式 または LIKE(マルチ)、スカラー：BETWEENまたはLIKEまたは数値比較(=)
+					if(is_array($val)) {
+						if(in_array($key,['AND','OR','NOT'])) {
+							$opx = ($key === 'NOT') ? 'AND' : $key; 
+							$opp = $dump_object($opx,$val,$table);
+							if($key === 'NOT') $opp = "(NOT {$opp})";
+						} else { // LIKE [ 配列 ]
 							$opk = "{$table}.\"{$key}\" ";
 							$cmp = array_map(function($v) use(&$opk) {
 									if($v[0] === '-') {
@@ -241,10 +227,7 @@ protected function sql_safequote(&$value) {
 								},$val);
 							$opp = '('.implode(' OR ',$cmp).')';
 						}
-					}
-				} else {	// キー名の最後に関係演算子
-					list($key,$op) = keystr_opr($key);
-					if(empty($op)) {
+					} else { // 演算子がないスカラー値
 						if(mb_strpos($val,'...') !== FALSE) {
 							$op = ' BETWEEN ';
 							list($from,$to) = explode('...',$val);
@@ -268,12 +251,38 @@ protected function sql_safequote(&$value) {
 							$sep = ' OR ';
 						}
 						$opp = "({$opp})";
-					} else {
-						if(!is_numeric($val)) $val = "'{$val}'";
-						// replace language-alias
-						$key = $this->fieldAlias->get_lang_alias($key);
-						$opp = "({$table}.\"{$key}\"{$op}{$val})";
 					}
+				} else if($op === '@') {	// サブクエリー
+					// リレーション定義済みかを確かめる
+					if(array_key_exists($key,$this->relations)) {
+						$rel = $this->relations[$key];
+						if(is_array($rel)) list($nm,$rel) = array_first_item($rel);
+						list($tbl,$fn) = explode('.',$rel);
+						$ops = $dump_object('AND',$val,$tbl);
+						$opp = "{$table}.\"{$key}\" IN (SELECT {$fn} FROM {$tbl} WHERE {$ops})";
+					} else continue;
+				} else if(is_array($val)) {
+					$in_op = [ '=' => 'IN', '==' => 'IN', '<>' => 'NOT IN', '!=' => 'NOT IN'];
+					if(array_key_exists($op,$in_op)) {
+						$cmp = implode(',',array_map(function($v) { return "'{$v}'";},$val));
+						$opx = $in_op[$op];
+						$opp = "{$table}.\"{$key}\" {$opx} ({$cmp})";
+					} else {
+						$opk = "{$table}.\"{$key}\" ";
+						$cmp = array_map(function($v) use(&$opk) {
+								if($v[0] === '-') {
+									$v = mb_substr($v,1);
+									$opx = 'NOT LIKE';
+								} else $opx = 'LIKE';
+								return "({$opk} {$opx} '%{$v}%')";
+							},$val);
+						$opp = '('.implode(' OR ',$cmp).')';
+					}
+				} else {
+					if(!is_numeric($val)) $val = "'{$val}'";
+					// replace language-alias
+					$key = $this->fieldAlias->get_lang_alias($key);
+					$opp = "({$table}.\"{$key}\"{$op}{$val})";
 				}
 				$opc = (empty($opc)) ? $opp : "{$opc} {$opr} {$opp}";
 			}
