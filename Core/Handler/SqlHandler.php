@@ -262,7 +262,7 @@ protected function sql_safequote(&$value) {
 						if(is_array($rel)) list($nm,$rel) = array_first_item($rel);
 						list($tbl,$fn) = explode('.',$rel);
 						$ops = $dump_object('AND',$val,$tbl);
-						$opp = "{$table}.\"{$key}\" IN (SELECT {$fn} FROM {$tbl} WHERE {$ops})";
+						$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$fn}) FROM {$tbl} WHERE {$ops})";
 					} else continue;
 				} else if(is_array($val)) {
 					$in_op = [ '=' => 'IN', '==' => 'IN', '<>' => 'NOT IN', '!=' => 'NOT IN'];
