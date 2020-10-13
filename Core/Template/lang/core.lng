@@ -5,9 +5,9 @@
 
 .ja => [
     // ページャーボタン表示用
-    Page => ページ
+    Page => ページ:
     Total => "(全 %d件)"
-    Display => 表示数
+    Display => 表示数:
     NextPage => "次へ＞"
     PrevPage => "＜前へ"
     // ダイアログ用
@@ -20,9 +20,9 @@
 ]
 .en => [
     // for Pager Buttons
-    Page => "Page"
+    Page => "Page:"
     Total => "(Total %d)"
-    Display => Count
+    Display => Count:
     NextPage => "Next&gt;"
     PrevPage => "&lt;Prev"
     // for Dialog

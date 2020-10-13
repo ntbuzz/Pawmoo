@@ -36,8 +36,10 @@ public function doQuery($sql) {
 	$this->rows = pg_query($this->dbb, $sql);
 	if(!$this->rows) {
 		$res1 = pg_get_result($this->dbb);
-		echo "ERROR:" . pg_result_error($res1) . "<br>\n";
-		echo "SQL:{$sql}\n";
+		debug_log(-99,[
+			"ERROR:" => pg_result_error($res1),
+			"SQL:" => $sql,
+		]);
 		die('Postgres QUERY失敗' . pg_last_error());
 	}
 	return $this->rows;
@@ -69,8 +71,12 @@ public function updateRecord($wh,$row) {
 	$aa = pg_convert($this->dbb,$this->table,$row);
 	if($aa === FALSE) {
 		$res1 = pg_get_result($this->dbb);
-		echo "ERROR:" . pg_result_error($res1) . "<br>\n";
-		debug_dump($this->dbb,$this->table,$row);
+		debug_log(-99,[
+			"ERROR:" => pg_result_error($res1),
+			"DBB" => $this->dbb,
+			"TABLE" => $this->table,
+			"ROW" => $row
+		]);
 		die('Postgres CONVERT失敗' . pg_last_error());
 	}
 	$primary = '"' . key($wh) . '"';		// プライマリキー名を取得
@@ -101,7 +107,12 @@ public function insertRecord($row) {
 	$aa = pg_convert($this->dbb,$this->table,$row);
 	if($aa === FALSE) {
 		$res1 = pg_get_result($this->dbb);
-		echo "ERROR:" . pg_result_error($res1) . "<br>\n";
+		debug_log(-99,[
+			"ERROR:" => pg_result_error($res1),
+			"DBB" => $this->dbb,
+			"TABLE" => $this->table,
+			"ROW" => $row
+		]);
 		die('Postgres CONVERT失敗' . pg_last_error());
 	}
 	$kstr = implode(',', array_keys($aa));	// フィールド名リストを作成

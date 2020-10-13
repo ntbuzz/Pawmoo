@@ -148,18 +148,13 @@
 span.help_icon {
     position:absolute;
     float:top;
-    margin-top:2px;
-    width:24px;
-    height:22px;
+    margin-top:0px;
+    width:17px;
+    height:15px;
     background: url(res/img/pop_help.png) no-repeat left top;
 }
-/* ヘルプアイコン */
-span.help_icon.mouseover {
-    margin-left:2px;
-    background: url(res/img/pop_help_b.png) no-repeat left top;
-}
 /*==============================================================================
-    インフォボックス
+インフォボックス
 */
 .info-box {
     z-index:2;

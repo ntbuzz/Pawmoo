@@ -26,7 +26,6 @@ class FMDBHandler extends FileMaker {
 	public	$modifyId;		// 修正ID
 	private	$startrec;		// 開始レコード番号
 	private	$limitrec;		// 取得レコード数
-	private $onetime;		// デバッグ用：メッセージを1回に
 	public  $DateStyle = 'm/d/Y';
 //==============================================================================
 // コンストラクタでデータベースに接続
@@ -245,7 +244,6 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 	$this->r_pos = 0;
 	$this->r_fetched = 0;		// 取り出したレコード数
 	debug_log(FALSE, ["検索設定" => $this->Finds]);
-	$this->onetime = 3;
 }
 //==============================================================================
 // 複数条件を指定してレコードを読み込む
@@ -255,7 +253,7 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 			if($this->recordMax > 0 && $this->skip_rec >= $this->recordMax) return 0;
 			if($this->limitrec > 0 && $this->skip_rec >= ($this->startrec + $this->limitrec)) return 0;
 			
-			debug_log($this->onetime,[
+			debug_log(FALSE,[
 				'Param' => [
 					"skip_rec" => $this->skip_rec,
 					"startrec" => $this->startrec,
@@ -318,7 +316,7 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 			}
 			debug_log(FALSE, ["Fetch: " => $this->r_fetched]);
 		}
-		debug_log($this->onetime,[
+		debug_log(FALSE,[
 			'fetched' => [
 				"recordMax" => $this->recordMax,
 				"r_fetched" => $this->r_fetched,
@@ -337,10 +335,8 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 		}
 		$this->fields['recordId'] = $this->recordId;
 		$this->SetDateTimeField($record);			// 日付フィールドの変換 YYYY/MM/DD
-		$this->onetime = 13;
 		return $this->fields;
 	}
-
 //==============================================================================
 //	レコードの更新 $wh[Primary] = recordID
 // レコードIDをプライマリキーに設定するバージョン

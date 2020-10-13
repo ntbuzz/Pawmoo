@@ -94,8 +94,15 @@ public function AutoPaging($cond, $max_count = 100) {
 	if($size > 0) {
 		MySession::$EnvData['PageSize'] = $size;		// 新しいページサイズに置換える
 		$this->Model->SetPage($size,$num);
-		debug_log(1, ["Param"  => $Params]);
+		debug_log(0, ["Param"  => $Params]);
 	}
+}
+//==============================================================================
+// 自動ページネーションと検索実行
+public function PagingFinder($cond, $max_count=100,$filter=[],$sort=[]) {
+//	debug_log(-11, ["cond"  => $cond, "count" => $max_count]);
+	$this->AutoPaging($cond, $max_count);
+	$this->Model->RecordFinder($cond,$filter,$sort);
 }
 //==============================================================================
 // デフォルトの動作

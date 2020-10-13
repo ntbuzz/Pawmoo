@@ -87,6 +87,7 @@ public function RelationSetup() {
             $this->Relations[$key] =  implode('.',$arr);            // Relations変数に書き戻す
         }
     }
+    $this->dbDriver->setupRelations($this->Relations);
     debug_log(FALSE,["Relations" => $this->Relations]);
 }
 //==============================================================================
@@ -111,7 +112,8 @@ public function RelationSetup() {
                 $field[$ref_key] = $key;
             }
             if($disp_head !== 0) {
-                if(!empty($disp_name) && $disp_name[0] === '.') $disp_name = $this->_(".Schema{$disp_name}");   //  Schema 構造体を参照する
+                if(empty($disp_name)) $disp_name = $key;
+                else if($disp_name[0] === '.') $disp_name = $this->_(".Schema{$disp_name}");   //  Schema 構造体を参照する
                 $header[$ref_key] = [$disp_name,$disp_align,$disp_head,$width];
             }
             // リレーションしているものはリレーション先の言語を後で調べる
@@ -122,7 +124,7 @@ public function RelationSetup() {
                 }
             }
         }
-        debug_log(FALSE,[
+        debug_log(3,[
             "Header" => $header, 
             "Field" => $field, 
             "Relation" => $relation, 
@@ -214,8 +216,7 @@ public function getCount($cond) {
 // 結果：   レコードデータのリスト = Records
 //          読み込んだ列名 = Header (Schema)
 //          $filter[] で指定したオリジナル列名のみを抽出
-//          $vfilter[] で $filter した列名に指定の値が含むレコードのみ抽出
-public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
+public function RecordFinder($cond,$filter=[],$sort=[]) {
     debug_log(3, [ "cond" => $cond, "filter" => $filter]);
     if(empty($filter)) $filter = $this->dbDriver->columns;
     // 取得フィールドリストを生成する
@@ -244,7 +245,7 @@ public function RecordFinder($cond,$filter=[],$sort=[],$vfilter=[]) {
         } else {
             debug_log(3, ["fields" => $fields]);
         }
-        debug_log(FALSE, ["Fech:" => $fields,"Filter:" => $fields_list,"record" => $record]);
+        debug_log(FALSE, ["record_max" => $this->record_max,"Fech:" => $fields,"Filter:" => $fields_list,"record" => $record]);
     }
     $this->Records = $data;
     if($this->pagesize > 0 && $this->pagesize < 50)  debug_log(3, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
