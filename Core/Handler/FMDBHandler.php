@@ -119,6 +119,12 @@ public function isTableExist() {
 		}
 	}
 //==============================================================================
+// setupRelations: リレーション情報を記憶する
+// FMDBでは使用しない
+public function setupRelations($relations) {
+	$this->relations = $relations;
+}
+//==============================================================================
 // fetchDB: レコードを取得して言語エイリアスとカラム連結を適用する
 public function fetchDB() {
 	if($row = $this->fetch_array()) {

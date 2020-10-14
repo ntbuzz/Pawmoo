@@ -18,9 +18,11 @@ if (!function_exists('intdiv')) {
 }
 //==============================================================================
 // 連想配列の先頭要素を返す
-function array_first_item(array $arr) {
-    foreach($arr as $key => $val) {
-        return [$key,$val];
+function array_first_item($arr) {
+    if(!empty($arr)) {
+        foreach($arr as $key => $val) {
+            return [$key,$val];
+        }
     }
     return ['',''];
 }

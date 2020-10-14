@@ -64,7 +64,6 @@ if(empty($appname) || !file_exists("app/$appname")) {
     // 404エラーページを送信する時はこっち
     error_response('app-404.php',$appname,$module);
 }
-MySession::InitSession($appname);
 if($controller === 'Error') {       // ERROR PAGE
     $code = $params[0];
     error_response("page-{$code}.php",$appname,$module);
@@ -73,6 +72,7 @@ if($controller === 'Error') {       // ERROR PAGE
 require_once("app/{$appname}/Config/config.php");
 // Check URI-Redirect direction
 if(!defined('FORCE_REDIRECT')) define('FORCE_REDIRECT', FALSE);
+MySession::InitSession($appname);
 
 if(!is_extst_module($appname,$controller,'Controller')) {
     // if BAD controller name, try DEFAULT CONTROLLER and shift follows
@@ -125,11 +125,16 @@ foreach($libs as $files) {
     require_once $files;
 }
 // 言語ファイルの対応
-$lang = (isset($query['lang'])) ? $query['lang'] : $_SERVER['HTTP_ACCEPT_LANGUAGE'];
-
+if(array_key_exists_recursive('lang', $query)) {
+    $lang = $query['lang'];
+    MySession::setLoginValue('LANG',$lang);
+} else {
+    $lang = MySession::getLoginValue('LANG');
+    if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+}
+if(empty($lang)) $lang = DEFAULT_LANG;
 // コントローラ用の言語ファイルを読み込む
-LangUI::construct($lang,App::Get_AppPath("View/lang/"));
-LangUI::LangFiles(['#common',$controller]);
+LangUI::construct($lang,App::Get_AppPath("View/lang/"),['#common',$controller]);
 // モジュールファイルを読み込む
 App::LoadModuleFiles($controller);
 
@@ -173,6 +178,7 @@ debug_log(0, [
     "SESSION" => [
         "SESSION_ID" => MySession::$MY_SESSION_ID,
         "ENV" => MySession::$EnvData,
+        "POST" => MySession::$PostEnv,
     ],
     '#PathInfo' => [
         "REFERER" => $_SERVER['HTTP_REFERER'],

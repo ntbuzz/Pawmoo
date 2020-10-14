@@ -11,32 +11,44 @@ class LangUI {
     private static $LangDir;        // 言語ファイルのパス
     private static $Locale;         // 言語識別子
     private static $LocaleFiles;    // for debug
+    private static $controllers;     // コントローラー
 
 //==============================================================================
 // HTTP_ACCEPT_LANGUAGE を元にデフォルトの言語を決定する
-    public static function construct($lang,$default) {
+    public static function construct($lang,$default,$initfiles) {
         debug_log(2,["言語リスト" => $lang]);
-        $arr = array_unique(             // 重複行を取り除く
-                array_filter(           // strlen を使って空行を取り除く
-                    array_map(          // 各要素に有効識別子の取り出し関数を適用
-                        function($a) {
-                            if(($n=strpos($a,'-')) !== FALSE)       return substr($a,0,$n);     // en-US => en
-                            else if(($n=strpos($a,';')) !== FALSE)  return substr($a,0,$n);     // en;q=0.9 => en
-                            else return $a;
-                        },
-                        explode(',', $lang)  // 言語受け入れリスト
-                    ),
-                    'strlen'));
-        $langs = array_shift($arr);             // strict回避
-        self::$Locale = ".{$langs}";            // 言語識別文字を付加
-        self::$LocaleName = $langs;
-        self::$STRINGS = [];
-        // フレームワークの言語リソースを読込む
-        self::$LangDir = 'Core/Template/lang/';
-        self::LoadLang('core');
         // アプリケーションの言語リソースパス
-        self::$LangDir = $default;      // App::Get_AppPath("View/lang/");
+        static::$LangDir = $default;      // App::Get_AppPath("View/lang/");
+        static::$controllers = $initfiles;  // 初期ロードする言語
+        self::SwitchLangs($lang);
     }
+//==============================================================================
+//  言語ファイルの切替え
+public static function SwitchLangs($newlang) {
+    log_reset(2);
+    $default = static::$LangDir;      // ロード先を保存
+    $arr = array_unique(             // 重複行を取り除く
+        array_filter(           // strlen を使って空行を取り除く
+            array_map(          // 各要素に有効識別子の取り出し関数を適用
+                function($a) {
+                    if(($n=strpos($a,'-')) !== FALSE)       return substr($a,0,$n);     // en-US => en
+                    else if(($n=strpos($a,';')) !== FALSE)  return substr($a,0,$n);     // en;q=0.9 => en
+                    else return $a;
+                },
+                explode(',', $newlang)  // 言語受け入れリスト
+            ),
+            'strlen'));
+    $langs = array_shift($arr);             // strict回避
+    static::$Locale = ".{$langs}";            // 言語識別文字を付加
+    static::$LocaleName = $langs;
+    static::$STRINGS = [];
+    // フレームワークの言語リソースを読込む
+    static::$LangDir = 'Core/Template/lang/';
+    self::LoadLang('core');
+    // アプリケーションの言語リソースパス
+    static::$LangDir = $default;
+    self::LangFiles(static::$controllers);
+}
 //==============================================================================
 //  言語ファイルの読み込み
 public static function LangFiles($files) {
@@ -47,7 +59,7 @@ public static function LangFiles($files) {
     } else {
         self::LoadLang($files);        // スカラー引数は単独読み込み
     }
-    self::$LocaleFiles = $files;
+    static::$LocaleFiles = $files;
     self::LangDebug();
 }
 //==============================================================================
@@ -55,10 +67,10 @@ public static function LangFiles($files) {
 public static function LangDebug() {
     debug_log(2, [
             "#LocalInfo" => [
-                'Locale' => self::$Locale,
-                'File'   => self::$LocaleFiles,
-                'Folder' => self::$LangDir,
-                'STRING' => self::$STRINGS,
+                'Locale' => static::$Locale,
+                'File'   => static::$LocaleFiles,
+                'Folder' => static::$LangDir,
+                'STRING' => static::$STRINGS,
             ]]);
     }
 //==============================================================================
@@ -79,8 +91,8 @@ public static function LangDebug() {
         if($is_global) {
             $lang_file = mb_substr($lang_file,1);
         }
-        if(isset(self::$STRINGS[$lang_file])) return TRUE;     // 連想キーが定義済なら処理しない
-        $fullpath = self::$LangDir . "{$lang_file}.lng";
+        if(isset(static::$STRINGS[$lang_file])) return TRUE;     // 連想キーが定義済なら処理しない
+        $fullpath = static::$LangDir . "{$lang_file}.lng";
         if(file_exists($fullpath)) {
             $parser = new SectionParser($fullpath);
             $section = $parser->getSectionDef();
@@ -93,7 +105,7 @@ public static function LangDebug() {
                         $import[] = mb_substr($val,1);
                     }
                 } else if($key[0] == '.') {        // ロケール定義
-                    if($key == self::$Locale) {         // モジュール名の直下に定義された言語
+                    if($key == static::$Locale) {         // モジュール名の直下に定義された言語
                         if(is_array($val)) {                           // ロケール定義配列になっていれば不要な言語を削除する
                             $values = array_override($values,$val);   // 最上位にマージ
                         }
@@ -103,7 +115,7 @@ public static function LangDebug() {
                         $zz = [];                                   // ロケールが無い識別子をマージするための配列
                         foreach($val as $kk => $vv) {              // 識別子の子要素に言語キーがあるか探索する
                             if($kk[0] == '.') {
-                                if($kk == self::$Locale) {        // 識別子の下に定義された言語
+                                if($kk == static::$Locale) {        // 識別子の下に定義された言語
                                     $zz = (is_array($vv)) ? array_override($zz,$vv) : $vv;  // 配列ならマージスカラー要素ならそのまま
                                 }
                             } else {
@@ -113,7 +125,7 @@ public static function LangDebug() {
                     } else $zz = $val;
                     if($key[0] == '#') {       // グローバルIDの登録
                         $kk = mb_substr($key,1);
-                        if(!empty($zz)) self::$STRINGS[$kk] = $zz;
+                        if(!empty($zz)) static::$STRINGS[$kk] = $zz;
                     } else {
                         $values[$key] = $zz;
                     }
@@ -121,13 +133,13 @@ public static function LangDebug() {
             }
             $values = self::emptyDelete($values);      // 空の要素を削除する
             if($is_global) {        // ファイル名がグローバル宣言ならトップレベルにマージする
-                self::$STRINGS = array_override(self::$STRINGS,$values);   // 同じIDは上書き
+                static::$STRINGS = array_override(static::$STRINGS,$values);   // 同じIDは上書き
             } else {
-                self::$STRINGS[$lang_file] = $values;       // ファイル名をキーに言語配列
+                static::$STRINGS[$lang_file] = $values;       // ファイル名をキーに言語配列
             }
             // インポート宣言されたファイルを読み込む
             foreach($import as $val) {                      // インポートリストの読み込み処理
-                if(! isset(self::$STRINGS[$val])) {          // ループ回避のため未定義のものだけ処理する
+                if(! isset(static::$STRINGS[$val])) {          // ループ回避のため未定義のものだけ処理する
                     self::LoadLang($val);                  // 再帰呼出
                 }
             }
@@ -161,12 +173,12 @@ public static function get_value($mod, $id, $allow = FALSE) {
     //-----------------------------------------
     if($id[0] == '.') {        // 相対検索ならモジュール名を使う
         $lst = explode('.', "{$mod}{$id}");
-        if( ($a=$array_finder($lst,self::$STRINGS,$allow)) !== FALSE) {
+        if( ($a=$array_finder($lst,static::$STRINGS,$allow)) !== FALSE) {
             return $a;
         }
         array_shift($lst);      // 先頭のモジュール名要素を消す
     } else $lst = explode('.', $id);    // 絶対検索
-    if( ($a=$array_finder($lst,self::$STRINGS,$allow)) !== FALSE) {     // 
+    if( ($a=$array_finder($lst,static::$STRINGS,$allow)) !== FALSE) {     // 
         return $a;
     }
     return array_pop($lst);     // 見つからなければ識別子の末尾要素を返す

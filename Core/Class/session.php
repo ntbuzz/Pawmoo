@@ -8,7 +8,6 @@ $session_time = (60 * 5);			// SESSION KEEP 5-min
 ini_set('session.gc_divisor',1);
 ini_set('session.gc_maxlifetime',$session_time);
 if(!CLI_DEBUG) session_start();
-if(!defined('DEFAULT_USER')) define('DEFAULT_USER',['user' => 'ntak']);
 
 class MySession {
 	public static $EnvData;
@@ -18,6 +17,7 @@ class MySession {
 //==============================================================================
 // static クラスにおける初期化処理
 static function InitSession($appname = 'default') {
+	if(!defined('DEFAULT_USER')) define('DEFAULT_USER',['user' => 'ntak']);
 	self::$MY_SESSION_ID = "_minimvc_waffle_map_{$appname}";
 	// for Login skip on CLI debug.php processing
 	if(DEBUGGER && CLI_DEBUG) {
@@ -121,6 +121,13 @@ static function Dump() {
 }
 //==============================================================================
 // ログイン情報を保持
+static function getLoginValue($id) {
+	return isset(self::$EnvData['Login'][$id])?self::$EnvData['Login'][$id]:NULL;
+}
+static function setLoginValue($id,$val) {
+	self::$EnvData['Login'][$id] = $val;
+}
+
 static function getLoginInfo() {
 	return isset(self::$EnvData['Login'])?self::$EnvData['Login']:[];
 }

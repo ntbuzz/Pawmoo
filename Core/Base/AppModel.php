@@ -102,17 +102,14 @@ public function RelationSetup() {
             if(!empty($relations)) {
                 if(substr($key,-3)==='_id' && is_scalar($relations)) $ref_key = substr($key,0,strlen($key)-3);
                 $relation[$key] = $relations;//[$relations,$accept_lang];
-                //if($disp_head !== 0) 
-                $field[$ref_key] = $key;
-            } else {
-                if(!empty($binds)) {
-                    $bind[$ref_key] = $binds;
-                    $key = NULL;
-                }
-                $field[$ref_key] = $key;
             }
+            if(!empty($binds)) {
+                $bind[$ref_key] = $binds;
+                $key = NULL;
+            }
+            $field[$ref_key] = $key;
             if($disp_head !== 0) {
-                if(empty($disp_name)) $disp_name = $key;
+                if(empty($disp_name)) $disp_name = $ref_key;
                 else if($disp_name[0] === '.') $disp_name = $this->_(".Schema{$disp_name}");   //  Schema 構造体を参照する
                 $header[$ref_key] = [$disp_name,$disp_align,$disp_head,$width];
             }
@@ -124,7 +121,8 @@ public function RelationSetup() {
                 }
             }
         }
-        debug_log(3,[
+        debug_log(FALSE,[
+            "Schema" => $Schema,
             "Header" => $header, 
             "Field" => $field, 
             "Relation" => $relation, 
@@ -248,7 +246,14 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
         debug_log(FALSE, ["record_max" => $this->record_max,"Fech:" => $fields,"Filter:" => $fields_list,"record" => $record]);
     }
     $this->Records = $data;
-    if($this->pagesize > 0 && $this->pagesize < 50)  debug_log(3, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
+//    if($this->pagesize > 0 && $this->pagesize < 50)  debug_log(3, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
+    debug_log(FALSE, [
+        "record_max" => $this->record_max,
+        "Filter" => $filter,
+        "FieldSchema" => $this->FieldSchema,
+        "FILTER" => $fields_list,
+        "RECORDS" => $this->Records,
+    ]);
 }
 //==============================================================================
 // レコードの削除
