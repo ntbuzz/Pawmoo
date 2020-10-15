@@ -22,65 +22,65 @@ class App {
 //==============================================================================
 // 静的クラスでのシステム変数初期化
 	public static function __Init($appname,$app_uri,$module,$query,$uri) {
-        self::$AppName = $appname;
-        list(self::$sysRoot,self::$appRoot) = $app_uri;
+        static::$AppName = $appname;
+        list(static::$sysRoot,static::$appRoot) = $app_uri;
         list($controller,$method,$filter,$params) = $module;
 
-        self::$DocRoot = (empty($_SERVER['DOCUMENT_ROOT'])) ? '' : $_SERVER['DOCUMENT_ROOT'];
-        self::$Referer = (empty($_SERVER['HTTP_REFERER'])) ? '' : $_SERVER['HTTP_REFERER'];
+        static::$DocRoot = (empty($_SERVER['DOCUMENT_ROOT'])) ? '' : $_SERVER['DOCUMENT_ROOT'];
+        static::$Referer = (empty($_SERVER['HTTP_REFERER'])) ? '' : $_SERVER['HTTP_REFERER'];
 
-        self::$Filter = $filter;
-        self::$Params = $params;
+        static::$Filter = $filter;
+        static::$Params = $params;
    		// 0 〜 9 の不足する要素を補填する
         $k = count($params);
-        self::$ParamCount = $k;
-		self::$Params += array_fill($k, 10 - $k, '');
-        self::$SysVAR = array(
+        static::$ParamCount = $k;
+		static::$Params += array_fill($k, 10 - $k, '');
+        static::$SysVAR = array(
             'SERVER' => $_SERVER['SERVER_NAME'],
-            'REFERER' => self::$Referer,
+            'REFERER' => static::$Referer,
             'URI' => $uri,
-            'SYSROOT' => self::$sysRoot,
-            'APPNAME' => self::$AppName,
-            'URIROOT' => self::$appRoot,
+            'SYSROOT' => static::$sysRoot,
+            'APPNAME' => static::$AppName,
+            'URIROOT' => static::$appRoot,
             'controller' => $controller,  //ucfirst($uri_array[2]),
             'method' => $method,  //ucfirst($uri_array[3]),
-            'filter' => $filter,  // ucfirst(self::$Filter),
+            'filter' => $filter,  // ucfirst(static::$Filter),
             'current_version' => CURRENT_VERSION,  // framework version
         );
-        self::$Query = $query;
+        static::$Query = $query;
         // メソッドの書き換えによるアドレスバー操作用
-        self::$ReLocate = FALSE;        // URLの書き換え
-        self::$execURI = array(
-            'root' => self::$appRoot,
+        static::$ReLocate = FALSE;        // URLの書き換え
+        static::$execURI = array(
+            'root' => static::$appRoot,
             'controller' => $controller,
             'method' => $method,
             'filter' => $filter,
             'params' => $params,
             );
             // リクエスト情報を記憶
-        MySession::SetEnvVar('sysVAR',self::$SysVAR);
+        MySession::$EnvData['sysVAR'] = static::$SysVAR;
     }
 //==============================================================================
 // メソッドの置換
 public static function ChangeMethod($module,$method,$relocate = TRUE) { 
-    self::$execURI['controller'] = $module;
-    self::$execURI['method'] = $method;
-    self::$ReLocate = $relocate;        // URLの書き換え
+    static::$execURI['controller'] = $module;
+    static::$execURI['method'] = $method;
+    static::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================
 // パラメータパスの置換
 public static function ChangeParams($params,$relocate = TRUE) { 
-    self::$execURI['params'] = $params;
-    self::$ReLocate = $relocate;        // URLの書き換え
+    static::$execURI['params'] = $params;
+    static::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================
 // メソッドの置換
 public static function Get_RelocateURL() { 
-    if(self::$ReLocate === FALSE) return NULL;
-    debug_log(1, self::$execURI);
-    $url = array_to_URI(self::$execURI);
-    if(!empty(self::$Query)) {                  // exists QUERY strings
-        $q = http_build_query(self::$Query);
+    if(static::$ReLocate === FALSE) return NULL;
+    debug_log(1, static::$execURI);
+    $url = array_to_URI(static::$execURI);
+    if(!empty(static::$Query)) {                  // exists QUERY strings
+        $q = http_build_query(static::$Query);
         $url = "{$url}?{$q}";
     }
     return $url;
@@ -88,7 +88,7 @@ public static function Get_RelocateURL() {
 //==============================================================================
 // アプリケーションフォルダパスを取得
 public static function Get_AppPath($path) {
-    $appname = self::$AppName;
+    $appname = static::$AppName;
     return "app/{$appname}/{$path}";
 }
 //==============================================================================
@@ -112,15 +112,15 @@ public static function LoadModuleFiles($controller) {
 //==============================================================================
 // フレームワークのトップパスに付加パスを付けた文字列
 public static function Get_SysRoot($path = '') {  
-    if($path[0] == '/') $path = mb_substr($path,1);
-    return self::$sysRoot . strtolower($path);
+    if(mb_substr($path,0,1) === '/') $path = mb_substr($path,1);
+    return static::$sysRoot . strtolower($path);
 }
 //==============================================================================
 // アプリケーションのトップパスに付加パスを付けた文字列
 public static function Get_AppRoot($path = '') {  
-    if($path[0] !== '/') $path = "/{$path}";
-//echo "appRoot:".self::$appRoot."\n"."Path]{$path}\n";exit;
-    return self::$appRoot . strtolower($path);
+    if(mb_substr($path,0,1) !== '/') $path = "/{$path}";
+//echo "appRoot:".static::$appRoot."\n"."Path]{$path}\n";exit;
+    return static::$appRoot . strtolower($path);
 }
 //==============================================================================
 // cdd/js/icoファイルの読込タグ出力（単独）
@@ -132,7 +132,7 @@ public static function Get_AppRoot($path = '') {
         //separate query string if exist
         list($file,$q_str) = (strpos($tagfile,'?') !== FALSE) ? explode('?',$tagfile):[$tagfile,'']; 
         $ext = substr($file,strrpos($file,'.') + 1);    // 拡張子を確認
-        $path = make_hyperlink($file,self::$Controller);
+        $path = make_hyperlink($file,static::$Controller);
         switch($ext) {
     	case 'js':
             echo "<script src='{$path}' charset='UTF-8'></script>\n";
@@ -156,7 +156,7 @@ public static function Get_AppRoot($path = '') {
 //==============================================================================
 // imagesのインクルードタグ出力
     public static function ImageSRC($name, $attr) {
-        $root = self::$appRoot;
+        $root = static::$appRoot;
         return "<img src=\"{$root}/images/{$name}\" {$attr} />";
     }
 

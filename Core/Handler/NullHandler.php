@@ -3,12 +3,14 @@
 //	データベースに接続しないNULLハンドラー
 
 class NullHandler {
+	public  $DateStyle = 'Y-m-d';
 //==============================================================================
 //	コンストラクタ：　データベースのテーブルに接続する
 	function __construct($table) {
 		$this->fields = [];
 		$this->fieldAlias = new fieldAlias();
 	}
+public function setupRelations($relations) { }
 public function SetPaging($pagesize, $pagenum) { }
 public function getValueLists($table,$ref,$id) { return []; }
 public function getLastError() { return ''; }

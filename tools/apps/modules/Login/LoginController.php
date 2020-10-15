@@ -6,26 +6,22 @@ class LoginController extends AppController {
 //==============================================================================
 // ログイン要求を処理する
 public function LoginAction() {
-	$login = MySession::getLoginInfo();
-	$newlogin = $this->Model->isValidLogin(MySession::$PostEnv);
-	if(!empty($newlogin)) {
-		MySession::SetLogin($newlogin);
-		$url = App::$SysVAR['URI'];
-		header("Location:{$url}");
+	// Login POST が発生しているか
+	$data = $this->Model->is_validLogin(MySession::$ReqData);
+	if($data === NULL) {
+		// ログインフォームを表示して終了
+		$this->View->ViewTemplate('Login');
+		return FALSE;
 	}
-    if(!empty($login)) {     // ログイン状態ではない
-		// 新しいログインでなければセッションに記憶された情報を書き込む
-		$newlogin = $this->Model->isValidLogin($login);
-	}
-	// ログインフォームを表示して終了
-	$this->View->ViewTemplate('Login');
+	echo MySession::get_envIDs('sysVAR.REFERER');
+	return FALSE;
 }
 //==============================================================================
 // ログアウト処理
 public function LogoutAction() {
-	MySession::ClearLogin();		// ログイン情報を接セッションから消去
+	MySession::setup_Login(NULL);		// ログイン情報を接セッションから消去
 	$url = App::Get_AppRoot();
-	header("Location:{$url}");
+	header("Location:{$url}index.html");
 }
 
 }

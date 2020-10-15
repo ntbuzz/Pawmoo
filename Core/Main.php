@@ -125,11 +125,11 @@ foreach($libs as $files) {
     require_once $files;
 }
 // 言語ファイルの対応
-if(array_key_exists_recursive('lang', $query)) {
+if(array_key_exists('lang', $query)) {
     $lang = $query['lang'];
-    MySession::setLoginValue('LANG',$lang);
+    MySession::set_LoginValue(['LANG' => $lang]);
 } else {
-    $lang = MySession::getLoginValue('LANG');
+    $lang = MySession::get_LoginValue('LANG');
     if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 }
 if(empty($lang)) $lang = DEFAULT_LANG;
@@ -176,9 +176,9 @@ debug_log(0, [
     ],
     "QUERY" => App::$Query,
     "SESSION" => [
-        "SESSION_ID" => MySession::$MY_SESSION_ID,
-        "ENV" => MySession::$EnvData,
-        "POST" => MySession::$PostEnv,
+        "SESSION_ID"=> MySession::$MY_SESSION_ID,
+        "ENV"       => MySession::$EnvData,
+        "REQUEST"   => MySession::$ReqData,
     ],
     '#PathInfo' => [
         "REFERER" => $_SERVER['HTTP_REFERER'],

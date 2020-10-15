@@ -342,7 +342,7 @@ public function ViewStyle($file_name) {
             case "'":
                 if(mb_substr($var,-1) === "'") {
                     $var = trim($var,"'");        // セッション変数
-                    $val = MySession::get_envVars($var);          // EnvData[] プロパティから取得
+                    $val = MySession::get_envIDs($var);          // EnvData[] プロパティから取得
                 }
                 break;
             default:

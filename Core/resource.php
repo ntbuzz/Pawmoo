@@ -39,10 +39,10 @@ list($filename,$ext) = extract_base_name($files);
 
 MySession::InitSession($appname);
 // 言語ファイルの対応
-if(array_key_exists_recursive('lang', $query)) {
+if(array_key_exists('lang', $query)) {
     $lang = $query['lang'];
 } else {
-    $lang = MySession::getLoginValue('LANG');
+    $lang = MySession::get_LoginValue('LANG');
     if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 }
 $contfiles = ($controller=='Res')?'resource':['resource',$controller];

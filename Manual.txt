@@ -613,15 +613,23 @@
 ◆ MySession クラス
 ・静的変数
   MySession::$EnvData;                  // セッションに記憶する環境変数
-  MySession::$PostEnv;                  // 環境変数とREQUEST されてきた変数(POST/GET)
+  MySession::$ReqData;                  // 環境変数とREQUEST されてきた変数(POST/GET)
+  MySession::$MY_SESSION_ID;            // セッション変数内のアプリ固有キー
 
 ・静的メソッド
   MySession::InitSession()              // セッション変数を初期化する(Main.phpのみで使用)
   MySession::CloseSession()             // セッション変数を書き戻す(Main.phpのみで使用)
-  MySession::PostVars(...$arr)          // POST変数を取り出す、引数は連想配列のキー名
-  MySession::SetDefault($nm,$val)       // POST変数に値が無ければ、$val値をセット
-  MySession::SetEnvVar($nm,$val)        // POST変数に値をセット
-  MySession::get_envVars($names)        // names 文字列を元にENV変数を取り出す
+  MySession::preservReqData(...$keys)   // REQUEST変数から環境変数に移動する
+  MySession::rollbackReqData(...$keys)  // SESSION変数からREQUESTに移動する
+  MySession::getVariables($tt,...$arr)  // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から値を取得した配列で返す
+  MySession::setVariables($tt,$arr)     // ENV(tt=TRUE) または REQ(tt=FALSE) 変数に値をセット
+  MySession::set_if_empty($tt,$arr)     // setVariables と同じだが、未定義キーだけを値セットする
+  MySession::get_envIDs($names)         // ENV変数を識別子指定で取得する
+  MySession::rm_EnvData(...$arr)        // ENV変数をクリア
+
+  MySession::get_LoginValue($id = NULL) // ログイン情報を取得
+  MySession::set_LoginValue($arr)       // ログイン情報に書込
+  MySession::setup_Login($login=NULL)   // ログイン情報を置換
 
 ◆ SendMail クラス
 ・静的変数

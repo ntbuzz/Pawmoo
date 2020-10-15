@@ -69,8 +69,10 @@ public function ViewSet($arr) {
 }
 //==============================================================================
 // View HelperクラスへのPOST変数セット
-public function ImportSession() {
-	$this->View->Helper->SetData(MySession::$PostEnv);
+public function ImportHelpProperty(...$keys) {
+	foreach($keys as $key) {
+		$this->View->Helper->$key = MySession::$ReqData[$key];
+	}
 }
 //==============================================================================
 // 自動ページネーション
@@ -81,8 +83,10 @@ public function AutoPaging($cond, $max_count = 100) {
 	list($num,$size) = $Params;
 	if($num > 0) {
 		if($size === 0) {
-			$size = intval(MySession::$PostEnv['PageSize']);
+			$size = intval(MySession::$EnvData['PageSize']);
 			if($size === 0) $size = $max_count;
+			$cnt = $this->Model->getCount($cond);
+			if($cnt < $max_count) $size = 0;
 		}
 	} else {
 		$cnt = $this->Model->getCount($cond);
@@ -147,14 +151,14 @@ public function MakepdfAction() {
 // 更新
 public function UpdateAction() {
 	$num = App::$Params[0];
-	$this->Model->UpdateRecord($num,MySession::$PostEnv);
+	$this->Model->UpdateRecord($num,MySession::$ReqData);
 	header('Location:' . App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/' . $num );
 }
 
 //==============================================================================
 // デバッグダンプ
 public function DumpAction() {
-	debug_log(110,MySession::$PostEnv);
+	debug_log(110,MySession::$ReqData);
 }
 
 }
