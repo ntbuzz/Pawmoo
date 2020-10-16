@@ -17,6 +17,10 @@
     SizeDisplay => サイズ表示
     Close => 閉じる
     Resize => サイズ変更
+    Login => ログイン
+    UserName => ユーザー名
+    Password => パスワード
+    SEND    => 送信
 ]
 .en => [
     // for Pager Buttons
@@ -32,4 +36,8 @@
     SizeDisplay => "Display Size"
     Close => "Close"
     Resize => "Resize"
+    Login => Login
+    UserName => "User Name"
+    Password => Password
+    SEND    => Send
 ]

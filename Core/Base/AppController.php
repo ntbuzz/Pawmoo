@@ -69,7 +69,8 @@ public function is_authorised() {
 			// check LOGIN POST
 			$data = $this->Login->is_validLogin(MySession::$ReqData);
 			if($data === NULL) {
-				error_response('app-999.php',App::$AppName, ['ログイン',$this->Login->error_type]);     // 404 ERROR PAGE Response
+				$msg = $this->__('.Login');
+				alert_response('app-999.php',$msg,$msg,$this->Login->error_type);     // 404 ERROR PAGE Response
 //				$this->View->ViewTemplate('Login');             // LoginFORM try it
 //				return FALSE;
 			}

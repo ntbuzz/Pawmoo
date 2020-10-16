@@ -82,6 +82,19 @@ function error_response($error_page,$app_name, $module) {
     exit;
 }
 //==============================================================================
+// Output Message Page
+// enabled of PHP VARIABLE:
+//      $app_root       Application Top URI
+//      $$page_title    Page Title
+//      $msg_title      Message Title
+//      $msg_body       Message Body
+function alert_response($app_page,...$msg_array) {
+    list($page_title,$msg_title,$msg_body) = $msg_array;
+    $app_root = App::Get_SysRoot();
+    require_once("Core/error/{$app_page}");
+    exit;
+}
+//==============================================================================
 // コントローラーが存在するかチェックする
 function is_extst_module($appname,$modname,$classname) {
     if($modname == NULL) return FALSE;      // そもそも名前が無い
