@@ -19,7 +19,7 @@ public function is_validUser($userid,$passwd = NULL) {
     if($userid === $data[$this->LoginID]) {
         // $passwd != NULL ならここでパスワードチェックをする
         if($passwd !== NULL) {
-            $this->error_type = 'password missing';
+            $this->error_type = $this->__('.PassError');
             $user_pass = $data['password'];
             if($passwd !== $user_pass) return NULL;
         }
@@ -28,7 +28,7 @@ public function is_validUser($userid,$passwd = NULL) {
         $this->error_type = '';
         return [$userid,$lang];
     }
-    $this->error_type = "unknown user:{$userid}";
+    $this->error_type = $this->__('.UnknownUser').":{$userid}";
     return NULL;
 }
 //==============================================================================

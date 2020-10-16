@@ -1,5 +1,4 @@
 <?php
-
 class LoginModel extends AppModel {
     static $DatabaseSchema = [
         'Handler' =>HANDLER,

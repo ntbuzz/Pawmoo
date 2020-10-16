@@ -3,7 +3,6 @@
  * PHPフレームワーク
  *  PostgreHandler: PostgreSSQLデータベースの入出力
  */
-
 //==============================================================================
 //	PostgreSQL用の抽象メソッドを実装する
 class PostgreHandler extends SQLHandler {

@@ -21,6 +21,8 @@
     UserName => ユーザー名
     Password => パスワード
     SEND    => 送信
+    PassError => パスワードが違います
+    UnknownUser => 不明なユーザー
 ]
 .en => [
     // for Pager Buttons
@@ -40,4 +42,6 @@
     UserName => "User Name"
     Password => Password
     SEND    => Send
+    PassError => 'PASSWORD Missing'
+    UnknownUser => "Unknown USER"
 ]

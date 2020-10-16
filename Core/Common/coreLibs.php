@@ -89,10 +89,16 @@ function error_response($error_page,$app_name, $module) {
 //      $msg_title      Message Title
 //      $msg_body       Message Body
 function alert_response($app_page,...$msg_array) {
+    $folders = array(App::Get_AppPath("error/"),"Core/error/");
     list($page_title,$msg_title,$msg_body) = $msg_array;
     $app_root = App::Get_SysRoot();
-    require_once("Core/error/{$app_page}");
-    exit;
+    foreach($folders as $file) {
+        $page_file = "{$file}{$app_page}";
+        if(file_exists($page_file)) {                // レイアウトファイルが見つかった
+            require_once($page_file);
+            exit;
+        }
+    }
 }
 //==============================================================================
 // コントローラーが存在するかチェックする

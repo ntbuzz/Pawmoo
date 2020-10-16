@@ -18,7 +18,6 @@
  *      method => css|js
  *      filter => xxxx.css|.js
  */
-
 // デバッグ用のクラス
 require_once('AppDebug.php');
 // このファイルが依存している関数定義ファイル

@@ -1,6 +1,4 @@
 <?php
-//require_once('app/Config/config.php');
-
 // FileMaker.phpの読み込み
 require_once('vendor/vendor/FileMaker.php');
 
