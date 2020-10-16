@@ -12,6 +12,7 @@ class AppModel extends AppObject {
         'Handler' => 'Null',
         'DataTable' => '',
         'Primary' => '',
+        'LoginID' => '',
         'Schema' => [],
         'PostRenames' => [],
     ];
@@ -54,6 +55,12 @@ class AppModel extends AppObject {
         parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
     }
 //==============================================================================
+// 言語クラスの切替え
+public function ResetSchema() {
+    $this->SchemaAnalyzer();
+    $this->RelationSetup();				// リレーション情報を実テーブル名とロケール名に置換
+}
+//==============================================================================
 // リレーション先のフィールド情報はインスタンスが生成された後でしか確認できない
 //
 public function RelationSetup() {
@@ -92,9 +99,9 @@ public function RelationSetup() {
 }
 //==============================================================================
 // スキーマを分解してヘッダー情報を生成
-    protected function SchemaAnalyzer($Schema) {
+    protected function SchemaAnalyzer() {
         $header = $relation = $locale = $bind = $field = [];
-        foreach($Schema as $key => $defs) {
+        foreach($this->Schema as $key => $defs) {
             array_push($defs,0,NULL,NULL,NULL,NULL);
             $ref_key = $key;
             list($disp_name,$disp_flag,$width,$relations,$binds) = $defs;
@@ -122,7 +129,7 @@ public function RelationSetup() {
             }
         }
         debug_log(FALSE,[
-            "Schema" => $Schema,
+            "Schema" => $this->Schema,
             "Header" => $header, 
             "Field" => $field, 
             "Relation" => $relation, 

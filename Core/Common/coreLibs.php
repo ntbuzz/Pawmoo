@@ -75,7 +75,7 @@ function get_routing_params($dir) {
 //      $app_module Controller Name
 //      $page_name  Rquest ERROR PAGE
 function error_response($error_page,$app_name, $module) {
-    list($app_module,$page_name) = array_map(function($a) {
+    list($app_module,$page_name,$page_filter) = array_map(function($a) {
         return (gettype($a) === 'string')?strtolower($a):'';},$module);
     $app_root = "/{$app_name}/";
     require_once("Core/error/{$error_page}");

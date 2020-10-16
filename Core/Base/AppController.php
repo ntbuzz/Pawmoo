@@ -60,7 +60,40 @@ public function is_enable_action($action) {
 //==============================================================================
 // authorised login mode, if need view LOGIN form, return FALSE
 public function is_authorised() {
+//	echo "LOGIN:".(($this->needLogin)?'TRUE':'FALSE')."\n";
+	if($this->needLogin) {
+		$login_key = isset($this->Login->LoginID)?$this->Login->LoginID:'login-user';
+		$userid = MySession::get_LoginValue($login_key);    // already Login check
+		$data = $this->Login->is_validUser($userid);
+		if($data === NULL) {
+			// check LOGIN POST
+			$data = $this->Login->is_validLogin(MySession::$ReqData);
+			if($data === NULL) {
+				error_response('app-999.php',App::$AppName, ['ログイン',$this->Login->error_type]);     // 404 ERROR PAGE Response
+//				$this->View->ViewTemplate('Login');             // LoginFORM try it
+//				return FALSE;
+			}
+			list($userid,$lang) = $data;
+			if(!empty($lang)) {
+				MySession::set_LoginValue([$login_key => $userid,'LANG'=>$lang]);
+				LangUI::SwitchLangs($lang);
+				$this->Model->ResetSchema();
+			}
+		}
+		debug_log(FALSE, [
+			"SESSION" => $_SESSION,
+			"ENVDATA" => MySession::$EnvData,
+			"POSTENV" => MySession::$ReqData,
+		]);
+	};
 	return TRUE;
+}
+//==============================================================================
+// ログアウト処理
+public function LogoutAction() {
+	MySession::setup_Login(NULL);
+	$url = App::Get_AppRoot();
+	header("Location:{$url}");
 }
 //==============================================================================
 // View Helperクラスへの値セット
