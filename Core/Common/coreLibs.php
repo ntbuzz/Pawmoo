@@ -88,7 +88,7 @@ function error_response($error_page,$app_name, $module) {
 //      $$page_title    Page Title
 //      $msg_title      Message Title
 //      $msg_body       Message Body
-function alert_response($app_page,...$msg_array) {
+function page_response($app_page,...$msg_array) {
     $folders = array(App::Get_AppPath("error/"),"Core/error/");
     list($page_title,$msg_title,$msg_body) = $msg_array;
     $app_root = App::Get_SysRoot();

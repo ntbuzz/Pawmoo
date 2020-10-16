@@ -70,7 +70,7 @@ public function is_authorised() {
 			$data = $this->Login->is_validLogin(MySession::$ReqData);
 			if($data === NULL) {
 				$msg = $this->__('.Login');
-				alert_response('app-999.php',$msg,$msg,$this->Login->error_type);     // 404 ERROR PAGE Response
+				page_response('app-999.php',$msg,$msg,$this->Login->error_type);     // 404 ERROR PAGE Response
 //				$this->View->ViewTemplate('Login');             // LoginFORM try it
 //				return FALSE;
 			}
