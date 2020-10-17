@@ -126,7 +126,7 @@ public function ViewTemplate($name,$vars = []) {
             echo file_get_contents($tmplate);
             break;
         }
-    } else error_response('page-404.php',App::$AppName, [$this->ModuleName, $name]);     // 404 ERROR PAGE Response
+    } else error_response('page-404.php',App::$AppName, [$this->ModuleName, $name,'']);     // 404 ERROR PAGE Response
 }
 //==============================================================================
 // テンプレートファイルがビュークラスフォルダに存在しなければ共通のテンプレートを探す
@@ -182,7 +182,7 @@ public function ViewTemplate($name,$vars = []) {
                 break;
             case "'": if(substr($var,-1) === "'") {     // 末尾文字を確かめる
                     $var = trim($var,"'");              // セッション変数
-                    $val = MySession::get_envVars($var);// EnvData[] プロパティから取得
+                    $val = MySession::get_envIDs($var);// EnvData[] プロパティから取得
                 }
                 break;
             default:

@@ -1,5 +1,4 @@
 <?php
-
 class IndexModel extends AppModel {
     static $DatabaseSchema = [
         'Handler' => 'SQLite',

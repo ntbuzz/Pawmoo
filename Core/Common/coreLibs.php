@@ -75,11 +75,30 @@ function get_routing_params($dir) {
 //      $app_module Controller Name
 //      $page_name  Rquest ERROR PAGE
 function error_response($error_page,$app_name, $module) {
-    list($app_module,$page_name) = array_map(function($a) {
+    list($app_module,$page_name,$page_filter) = array_map(function($a) {
         return (gettype($a) === 'string')?strtolower($a):'';},$module);
     $app_root = "/{$app_name}/";
     require_once("Core/error/{$error_page}");
     exit;
+}
+//==============================================================================
+// Output Message Page
+// enabled of PHP VARIABLE:
+//      $app_root       Application Top URI
+//      $$page_title    Page Title
+//      $msg_title      Message Title
+//      $msg_body       Message Body
+function page_response($app_page,...$msg_array) {
+    $folders = array(App::Get_AppPath("error/"),"Core/error/");
+    list($page_title,$msg_title,$msg_body) = $msg_array;
+    $app_root = App::Get_SysRoot();
+    foreach($folders as $file) {
+        $page_file = "{$file}{$app_page}";
+        if(file_exists($page_file)) {                // レイアウトファイルが見つかった
+            require_once($page_file);
+            exit;
+        }
+    }
 }
 //==============================================================================
 // コントローラーが存在するかチェックする

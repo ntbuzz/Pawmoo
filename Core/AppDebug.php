@@ -41,6 +41,10 @@ function debug_run_time($lvl) {
 function debug_dump(...$items) {
     if(CLI_DEBUG) debug_log(-99,$items);
 }
+function log_reset($lvl) {
+    global $debug_log_str;
+    unset($debug_log_str[$lvl]);
+}
 //==========================================================================
 // ログの記録または表示
 function debug_log($lvl,...$items) {
@@ -93,7 +97,8 @@ function debug_log($lvl,...$items) {
                         if(empty($obj)) $dmp_msg .= EMPTY_MSG;
                         else $dmp_msg .= $dump_object($obj,0);
                     } else {
-                        $dmp_msg .= "{$msg} : Object\n";
+                        $dmp_msg .= "{$msg} : Object=".gettype($obj)."\n";
+                        $dmp_msg .= print_r($obj,TRUE);
                     }
                 }
             }
@@ -103,7 +108,7 @@ function debug_log($lvl,...$items) {
     global $debug_log_str;
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
-        if($lvl >= -4) {
+        if(!CLI_DEBUG) {
             $dmp_info = htmlspecialchars($dmp_info);
             $dmp_info = "<pre>\n{$dmp_info}\n</pre>\n";
         }

@@ -37,11 +37,6 @@ public function SetData($data) {
 	}
 }
 //==============================================================================
-// プロパティ変数のセット
-public function Env($key) {
-	return MySession::$PostEnv[$key];
-}
-//==============================================================================
 // リソースの出力
 public function Resource($res) {
 	list($filename,$ext) = extract_base_name($res);

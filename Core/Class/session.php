@@ -7,129 +7,150 @@
 $session_time = (60 * 5);			// SESSION KEEP 5-min
 ini_set('session.gc_divisor',1);
 ini_set('session.gc_maxlifetime',$session_time);
-if(!CLI_DEBUG) session_start();
-if(!defined('DEFAULT_USER')) define('DEFAULT_USER',['user' => 'ntak']);
+if(CLI_DEBUG) $_SESSION = [];
+else session_start();
 
 class MySession {
 	public static $EnvData;
-	public static $PostEnv;
-	public static $LoginInfo;
+	public static $ReqData;
 	public static $MY_SESSION_ID;
 //==============================================================================
 // static クラスにおける初期化処理
 static function InitSession($appname = 'default') {
-	self::$MY_SESSION_ID = "_minimvc_waffle_map_{$appname}";
+	if(!defined('DEFAULT_USER')) define('DEFAULT_USER',['userid' => 'ntak']);
+	$session_id = "_minimvc_waffle_map_{$appname}";
+	static::$MY_SESSION_ID = $session_id;
+	// セッションキーがあれば読み込む
+	static::$EnvData = (array_key_exists($session_id,$_SESSION)) ? $_SESSION[$session_id] : [];
 	// for Login skip on CLI debug.php processing
 	if(DEBUGGER && CLI_DEBUG) {
-		$_SESSION[self::$MY_SESSION_ID]['Login'] = DEFAULT_USER;
-	}
-	debug_log(FALSE,[
-		"SESSION" => $_SESSION,
-		"REQUEST" => $_REQUEST,
-		"POST" => $_POST,
-		"GET" => $_GET,
-		]);
-	// セッションキーがあれば読み込む
-	self::$EnvData = (array_key_exists(self::$MY_SESSION_ID,$_SESSION)) ? $_SESSION[self::$MY_SESSION_ID]:array();
-	// copy from  SESSION variable to POST variable
-	if(isset(self::$EnvData)) {
-		foreach(self::$EnvData as $key => $val) {
-			self::$PostEnv[$key] = $val;
-		}
+		static::$EnvData['Login'] = DEFAULT_USER;
 	}
 	// overwrite real POST/GET variables
+	static::$ReqData = [];
+	$bool_value = [ 'on' => TRUE,'off' => FALSE,'t' => TRUE,'f' => FALSE,'1' => TRUE,'0' => FALSE];
 	foreach($_REQUEST as $key => $val) {
-		if($val == "on") $val = 1; elseif($val==="off") $val = 0;
-		if(ctype_alnum(str_replace(['-','_'],'', $key))) self::$PostEnv[$key] = $val;
+		if(array_key_exists($key,$bool_value)) $val = $bool_value[$key];
+		if(ctype_alnum(str_replace(['-','_'],'', $key))) static::$ReqData[$key] = $val;
 	}
-	self::$LoginInfo = (empty(self::$EnvData['Login']) ) ? [] : self::$EnvData['Login'];
 }
 //==============================================================================
 // セッションに保存する
 static function CloseSession() {
-	$_SESSION[self::$MY_SESSION_ID] = self::$EnvData;
+	$_SESSION[static::$MY_SESSION_ID] = static::$EnvData;
 	debug_log(FALSE, [
 		"CLOSE" => $_SESSION,
 	]);
 }
+//---------------------------- 新しいインタフェース ----------------------------
 //==============================================================================
-// POST変数から環境変数に移動する
-static function PostToEnv($keys) {
+// REQUEST変数から環境変数に移動する
+static function preservReqData(...$keys) {
 	foreach($keys as $nm) {
-		if(array_key_exists($nm,self::$PostEnv)) {
-			self::$EnvData[$nm] = self::$PostEnv[$nm];
+		if(array_key_exists($nm,static::$ReqData)) {
+			static::$EnvData[$nm] = static::$ReqData[$nm];
+			unset(static::$ReqData[$nm]);
 		}
 	}
 }
 //==============================================================================
-// POST変数を取り出す
-static function PostVars(...$arr) {
+// SESSION変数からREQUESTに移動する
+static function rollbackReqData(...$keys) {
+	foreach($keys as $nm) {
+		if(array_key_exists($nm,static::$EnvData)) {
+			static::$ReqData[$nm] = static::$EnvData[$nm];
+			unset(static::$EnvData[$nm]);
+		}
+	}
+}
+//==============================================================================
+// ENV(tt=TRUE) または REQ(tt=FALSE) 変数値を返す
+static function getValue($tt,$key) {
+	$varData = ($tt) ? static::$EnvData : static::$ReqData;
+	return (array_key_exists($key,$varData)) ? $varData[$key] : NULL;
+}
+//==============================================================================
+// ENV(tt=TRUE) または REQ(tt=FALSE) 変数から値を取得した配列で返す
+static function getVariables($tt,...$arr) {
+	$varData = ($tt) ? static::$EnvData : static::$ReqData;
 	$result = [];
 	foreach($arr as $nm) {
-		$result[] = (isset(self::$PostEnv[$nm])) ? self::$PostEnv[$nm] : '';
+		$result[] = (array_key_exists($nm,$varData)) ? $varData[$nm] : '';
 	}
 	return $result;
 }
 //==============================================================================
+// ENV(tt=TRUE) または REQ(tt=FALSE) 変数に値をセット
 // ENV変数を取り出す
-static function EnvVars(...$arr) {
+static function setVariables($tt,$arr) {
+	$varData = ($tt) ? 'EnvData' : 'ReqData';
 	$result = [];
-	foreach($arr as $nm) {
-		$result[] = (isset(self::$EnvData[$nm])) ? self::$EnvData[$nm] : '';
+	foreach($arr as $key => $val) {
+		static::$$varData[$key] = $val;
 	}
-	return $result;
 }
 //==============================================================================
-// ENV変数を取り出す
-static function get_envVars($names) {
+// setVariables と同じだが、未定義キーだけを値セットする
+static function set_if_empty($tt,$arr) {
+	$varData = ($tt) ? 'EnvData' : 'ReqData';
+	$result = [];
+	foreach($arr as $key => $val) {
+		if(array_key_exists($key,static::$$varData)) static::$$varData[$key] = $val;
+	}
+}
+//==============================================================================
+// ENV変数を識別子指定で取得する
+static function get_envIDs($names) {
 	$vset = (mb_strpos($names,'.') !== FALSE) ? explode(".", $names) : [ $names ];
-	$nVal = self::$EnvData;
+	$nVal = static::$EnvData;
 	foreach($vset as $nm) {
-		$nVal = (isset($nVal[$nm])) ? $nVal[$nm] : '';
+		$nVal = (array_key_exists($nm,$nVal)) ? $nVal[$nm] : '';
 	}
 	return (is_array($nVal)) ? array_to_text($nVal,',') : $nVal;
 }
 //==============================================================================
-// POST変数に値が無ければ、デフォルト値をセット
-static function SetDefault($nm,$val) {
-	if(!isset(self::$EnvData[$nm])) self::$EnvData[$nm] = $val;
-}
-//==============================================================================
-// POST変数に値をセット
-static function SetEnvVar($nm,$val) {
-	self::$EnvData[$nm] = $val;
-	self::$PostEnv[$nm] = $val;
-}
-//==============================================================================
-// POST変数に値をセット
-static function SetPostVars($arr) {
-	foreach($arr as $key => $val) self::$PostEnv[$key] = $val;
-}
-//==============================================================================
 // ENV変数をクリア
-static function UnsetEnvData($arr) {
-	foreach($arr as $key) unset(self::$PostEnv[$key]);
+static function rm_EnvData(...$arr) {
+	foreach($arr as $key) unset(static::$EnvData[$key]);
 }
-//==============================================================================
-// デバッグ用ダンプ
-static function Dump() {
-	debug_log(-1,[
-		"SESSION" => $_SESSION,
-		"ENV" => self::$EnvData,
-		"POST" => self::$PostEnv
-	]);
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// ログイン情報を取得
+static function get_LoginValue($id = NULL) {
+	$LoginData = static::$EnvData['Login'];
+	if($id === NULL) return $LoginData;
+	return (array_key_exists($id,$LoginData)) ? $LoginData[$id] : '';
 }
-//==============================================================================
-// ログイン情報を保持
-static function getLoginInfo() {
-	return isset(self::$EnvData['Login'])?self::$EnvData['Login']:[];
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// ログイン情報に書込
+static function set_LoginValue($arr) {
+	$LoginData = static::$EnvData['Login'];
+	foreach($arr as $key => $val) $LoginData[$key] = $val;
+	self::setup_Login($LoginData);
 }
-static function SetLogin($login) {
-	self::$EnvData['Login'] = $login;
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// ログイン情報を置換
+static function setup_Login($login=NULL) {
+	if($login === NULL) unset(static::$EnvData['Login']);
+	else static::$EnvData['Login'] = $login;
+	// SESSION 変数に即時反映させる
+	$_SESSION[static::$MY_SESSION_ID] = static::$EnvData;
 }
-static function ClearLogin() {
-	unset(self::$EnvData['Login']);
-	unset($_SESSION[self::$MY_SESSION_ID]['Login']);
-}
+/*
+==============================================================================
+	旧メソッドから新メソッドへの読替え
+static function PostToEnv($keys)	=> preservReqData() , rollbackReqData(...$keys)
+static function PostVars(...$arr)	=> getVariables($tt,...$arr)
+static function EnvVars(...$arr)	=> getVariables($tt,...$arr)
+static function get_envVars($names) => get_envIDs($names)
+static function SetDefault($nm,$val)=> set_if_empty($tt,$arr)
+static function SetEnvVar($nm,$val) => setVariables($tt,$arr)
+static function SetPostVars($arr)  	=> setVariables($tt,$arr)
+static function UnsetEnvData($arr) 	=> rm_EnvData(...$arr)
+static function getLoginValue($id) 	=> get_LoginValue($id)
+static function setLoginValue($id,$val) => set_LoginValue($array)
+static function getLoginInfo() 		=> get_LoginValue(NULL)
+static function SetLogin($login) 	=> setup_Login($login)
+static function ClearLogin()  		=> setup_Login(NULL)
+*/
 
 }

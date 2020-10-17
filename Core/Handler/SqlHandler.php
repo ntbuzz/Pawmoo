@@ -36,7 +36,7 @@ function __construct($table,$handler) {
 		$this->fieldAlias = new fieldAlias();
 	}
 //==============================================================================
-// fetchDB: レコードを取得して言語エイリアスとカラム連結を適用する
+// setupRelations: リレーション情報を記憶する
 public function setupRelations($relations) {
 	$this->relations = $relations;
 	debug_log(3,["RELATIONS" => $this->relations]);
@@ -206,7 +206,7 @@ protected function sql_safequote(&$value) {
 //   	NOT => [ itenm ] |
 //		fieldkey => findvalue
 	private function makeExpr($cond) {
-
+//		if(empty($cond)) return '';
 		// LIKE 演算子の生成関数を定義
 		$like_object = function ($key,$val,$table) {
 			$opk = "{$table}.\"{$key}\"";
@@ -220,9 +220,10 @@ protected function sql_safequote(&$value) {
 			return implode('OR',$cmp);
 		};
 		// 条件句(WHERE) の論理式を生成する関数
-		$dump_object = function ($opr,$items,$table)  use (&$dump_object,&$like_object)  {
+		$dump_object = function ($opr,$items,$table)  use (&$dump_object,&$like_object,&$cond)  {
 			$opc = '';
 			foreach($items as $key => $val) {
+				if(empty($key)) continue;
 				list($key,$op) = keystr_opr($key);		// キー名の最後に関係演算子
 				if(empty($op)) {	// 演算子がない：配列なら論理式 または LIKE(マルチ)、スカラー：BETWEENまたはLIKEまたは数値比較(=)
 					if(is_array($val)) {
@@ -262,7 +263,8 @@ protected function sql_safequote(&$value) {
 						if(is_array($rel)) list($nm,$rel) = array_first_item($rel);
 						list($tbl,$fn) = explode('.',$rel);
 						$ops = $dump_object('AND',$val,$tbl);
-						$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$fn}) FROM {$tbl} WHERE {$ops})";
+debug_log(3,['COND' => $cond, 'TBL' => $tbl, 'FN' => $fn,'VAL' => $val, 'OPS' => $ops]);
+						$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE {$ops})";
 					} else continue;
 				} else if(is_array($val)) {
 					$in_op = [ '=' => 'IN', '==' => 'IN', '<>' => 'NOT IN', '!=' => 'NOT IN'];
@@ -270,7 +272,7 @@ protected function sql_safequote(&$value) {
 						$cmp = implode(',',array_map(function($v) { return "'{$v}'";},$val));
 						$opx = $in_op[$op];
 						$opp = "{$table}.\"{$key}\" {$opx} ({$cmp})";
-					} else {
+					} else {	// LIKE [ 配列 ]
 						$opp = $like_object($key,$val,$table);
 					}
 				} else {

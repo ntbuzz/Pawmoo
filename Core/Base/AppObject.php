@@ -125,7 +125,7 @@ public function __get($PropName) {
         }
     }
     // 見つからなかった
-    throw new Exception("SubClass Create Error for '{$props}'");
+    throw new Exception("SubClass Create Error for '{$prop_name}'");
 }
 //==============================================================================
 // 言語リソース値を取り出す

@@ -1,5 +1,4 @@
 <?php
-
 class LoginModel extends AppModel {
     static $DatabaseSchema = [
         'Handler' =>HANDLER,
@@ -20,9 +19,9 @@ class LoginModel extends AppModel {
         ]
     ];
 //==============================================================================
-// ログイン情報を割り当てる
-public function isValidLogin($values) {
-    $this->LoginData = array();
+// ログイン情報のPOSTを受け取ってログイン処理をおこなう
+public function is_validLogin($values) {
+    $Login = [];
     foreach($values as $key => $val) {
         // POSTされてきた名前を読み替える
         $xkey = (isset($this->PostRenames[$key])) ? $xkey = $this->PostRenames[$key] : $key;
@@ -30,14 +29,28 @@ public function isValidLogin($values) {
         if(array_key_exists($xkey,$this->Schema)) {
             // 暗号化が必要化確認する
             $vv = $this->Schema[$xkey];
-            $dval = ($vv[1]===1) ? openssl_encrypt($val, 'AES-128-CBC', '_minimvc_waffle_map') : $val;
-            // 復号化するときは 'password' = openssl_decrypt('password', 'AES-128-CBC', '_minimvc_waffle_map');
-            if(!empty($val)) $this->LoginData[$xkey] = $dval;    // 値があるものだけ
+            $dval = ($vv[1]===1) ? passwd_encrypt($val) : $val;
+            if(!empty($val)) $Login[$xkey] = $dval;    // 値があるものだけ
         }
     }
-    // ログイン情報のvalidateを処理する
-    // セッションに記憶するログイン情報を返す
-    return $this->LoginData;
+    $userid = $Login['username'];
+    $data = $this->is_validUser($userid);
+    if($data !== NULL) {
+        $lang = $data['language'];
+        MySession::set_LoginValue(['username'=>$userid,'LANG'=>$lang]);
+    }
+    return $data;
+}
+//==============================================================================
+// ログイン情報のPOSTを受け取ってログイン処理をおこなう
+public function is_validUser($userid) {
+    if(empty($userid)) return NULL;
+    $data = $this->getRecordBy('username',$userid);
+    if($userid === $data['username']) {
+        static::$LoginUser = $data;
+        return $data;
+    }
+    return NULL;
 }
 
 }

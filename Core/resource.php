@@ -18,7 +18,6 @@
  *      method => css|js
  *      filter => xxxx.css|.js
  */
-
 // デバッグ用のクラス
 require_once('AppDebug.php');
 // このファイルが依存している関数定義ファイル
@@ -36,13 +35,17 @@ list($fwroot,$appRoot) = $app_uri;
 list($controller,$category,$files) = $module;
 // ファイル名を拡張子と分離する
 list($filename,$ext) = extract_base_name($files);
-// 言語ファイルの対応
-$lang = (isset($query['lang'])) ? $query['lang'] : $_SERVER['HTTP_ACCEPT_LANGUAGE'];
-LangUI::construct($lang,"app/{$appname}/View/lang/");    // Load CORE lang and SET app-Folder
-LangUI::LangFiles(($controller=='Res')?'resource':['resource',$controller]);  // Load app RESOURCE lang
-LangUI::LangDebug();
 
 MySession::InitSession($appname);
+// 言語ファイルの対応
+if(array_key_exists('lang', $query)) {
+    $lang = $query['lang'];
+} else {
+    $lang = MySession::get_LoginValue('LANG');
+    if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+}
+$contfiles = ($controller=='Res')?'resource':['resource',$controller];
+LangUI::construct($lang,"app/{$appname}/View/lang/",$contfiles);    // Load CORE lang and SET app-Folder
 // モジュール名と拡張子を使いテンプレートを決定する
 $AppStyle = new AppStyle($appname,$appRoot, $controller, $filename, $ext);
 // ヘッダの出力

@@ -41,6 +41,7 @@
   │  │   ├── common            共有ライブラリの格納フォルダ
   │  │   ├── Models            コントローラを持たないモデルクラスのフォルダ
   │  │   ├── extends           モジュール共通の拡張クラス定義
+  │  │   ├── error             エラーページ等の単一ページ出力用
   │  │   ├─┬ modules           アプリケーションモジュールフォルダ
   │  │   │  └─┬ Index         モジュール名フォルダ
   │  │   │      ├── View      モジュール固有ビューのテンプレート
@@ -65,15 +66,19 @@
   │  ├── Class             フレームワーク汎用クラス
   │  ├── Common            フレームワーク共有関数ファイル
   │  ├── Config            フレームワーク設定フォルダ
+  │  ├── error             エラーページ等の単一ページ出力用
   │  ├── handler           データベースドライバークラス
   │  └─┬ Template          フレームワークテンプレート
-  │      ├── cssimg          CSSで使用する画像フォルダ
-  │      ├── images          画像ファイル
   │      ├── lang            フレームワーク言語リソース
   │      ├── View            ビューテンプレート
-  │      └─┬ res             リソースフォルダ
-  │          ├── css         スタイルシート
-  │          └── js          javascript
+  │      ├─┬ res             リソースフォルダ
+  │      │  ├── css           スタイルシート
+  │      │  └── js            javascript
+  │      └─┬ webroot         テンプレート共通の静的リソース
+  │          ├── cssimg        CSS内で使用する画像
+  │          ├── css           スタイルシート
+  │          ├── images        イメージファイル
+  │          └── js            Javascript
   │
   └ vendor                  ベンダーライブラリフォルダ
       ├─ vendor               PHPライブラリフォルダ
@@ -179,9 +184,10 @@
   フィールドスキーマの定義は次のようにします。
 
   'Schema' => [
-      フィールド名    => [ 表示用エイリアス名 ,　制御フラグ [, 表示幅, JOIN定義, カラム連結 ] ],
+      フィールド名    => [ 表示用エイリアス名 ,　制御フラグ {}, 表示幅, JOIN定義, カラム連結 } ],
       ...
   ]
+  { ... } 内は省略可能
 
   フィールド名：      データベーステーブルの列名です
   表示用エイリアス：  列名を別名でアクセスするためのエイリアスフィールド名です。不要なら空文字列にします。
@@ -242,8 +248,10 @@
     これはスキーマ定義でJOIN定義を行ったフィールドを使い、リレーション先のレコードを検索した結果をもとに絞り込む演算子です。
     ex. host_id でリレーションしているテーブルから、product_name カラムが "Windows" または "MacOS" のものだけを抽出する
         'host_id@' => [ 'product_name=' => ['Windws','MacOS' ] ]
+        これは次のようにSQL展開されます
+          WHERE host_id IN (SELECT host_table.id FROM host_table WHERE (host_table.product_name IN ('Windws','MacOS')))
 
-    注意) 通常演算のカラムは言語設定により言語サフィックスが付いたカラム名に置換されますが、
+    注意) 通常演算のカラムは言語設定により言語サフィックスが付いたカラム名(column_name → column_name_en)に置換されますが、
           サブクエリのフィールド名は置換されません。そのため言語カラムを指定した場合想定外の結果になることがあります。
 
 2.3 ビュー詳細
@@ -609,15 +617,23 @@
 ◆ MySession クラス
 ・静的変数
   MySession::$EnvData;                  // セッションに記憶する環境変数
-  MySession::$PostEnv;                  // 環境変数とREQUEST されてきた変数(POST/GET)
+  MySession::$ReqData;                  // 環境変数とREQUEST されてきた変数(POST/GET)
+  MySession::$MY_SESSION_ID;            // セッション変数内のアプリ固有キー
 
 ・静的メソッド
   MySession::InitSession()              // セッション変数を初期化する(Main.phpのみで使用)
   MySession::CloseSession()             // セッション変数を書き戻す(Main.phpのみで使用)
-  MySession::PostVars(...$arr)          // POST変数を取り出す、引数は連想配列のキー名
-  MySession::SetDefault($nm,$val)       // POST変数に値が無ければ、$val値をセット
-  MySession::SetEnvVar($nm,$val)        // POST変数に値をセット
-  MySession::get_envVars($names)        // names 文字列を元にENV変数を取り出す
+  MySession::preservReqData(...$keys)   // REQUEST変数から環境変数に移動する
+  MySession::rollbackReqData(...$keys)  // SESSION変数からREQUESTに移動する
+  MySession::getVariables($tt,...$arr)  // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から値を取得した配列で返す
+  MySession::setVariables($tt,$arr)     // ENV(tt=TRUE) または REQ(tt=FALSE) 変数に値をセット
+  MySession::set_if_empty($tt,$arr)     // setVariables と同じだが、未定義キーだけを値セットする
+  MySession::get_envIDs($names)         // ENV変数を識別子指定で取得する
+  MySession::rm_EnvData(...$arr)        // ENV変数をクリア
+
+  MySession::get_LoginValue($id = NULL) // ログイン情報を取得
+  MySession::set_LoginValue($arr)       // ログイン情報に書込
+  MySession::setup_Login($login=NULL)   // ログイン情報を置換
 
 ◆ SendMail クラス
 ・静的変数
@@ -642,6 +658,28 @@
   アプリケーションモジュールはこれらのクラスを継承することで、モジュール固有の処理に専念できます。
   基底クラスに実装されたメソッドをモジュール固有のものに置き換えたいときは、メソッドを再定義してください。
   ただし、基底クラスの他のメソッドに影響がでないように、整合性をとる必要があるメソッドもあるので要注意。
+
+◆ 汎用クラス
+  モジュールクラスの基底クラスとなるクラスや汎用的なクラスを定義してあります。
+
+・祝日表クラス(CommonHolidays)
+  祝日を計算するクラスです。
+  このクラスを継承した、日本の祝日を定義している JapanHolidays クラスがあります。
+
+・ログインクラス(LoginClass)
+  LoginModel を実装するための基底クラス。AppModelから派生している。
+  このクラスではテーブルにユーザーID、パスワード、ユーザー言語の列が必要です。
+    ユーザーID(任意)        // LoginID プロパティで指定できます
+    'password'              // パスワード openssl_encrypt() で暗号化したもの
+    'language'              // ユーザー言語(ja;en)
+
+  ・クラスメソッド
+    is_validUser($userid,$passwd) // ユーザデータを読み込んで検証する
+    is_validLogin(POST変数)       // POSTされたログイン情報からユーザー情報を検証する
+
+・ファイルフォルダークラス(FlatFolder)
+  フォルダリストやファイルリストを管理するクラスです。
+  モジュールクラス AppFilesModel がこのクラスを利用しています。
 
 ◆ モジュールクラス (* protectedメソッド：継承クラスのみで使用可)
 

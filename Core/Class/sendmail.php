@@ -3,7 +3,6 @@
  * PHPフレームワーク
  *   SendMail: メール送信
  */
-
 class SendMail {
 
 	public static $Header;		// メールヘッダ

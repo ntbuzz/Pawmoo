@@ -1,5 +1,4 @@
 <?php
-
 class IndexController extends AppController {
 	public $defaultAction = 'List';		//  デフォルトのアクション
 	public $disableAction = [ 'Page','View','Makepdf','Update','Dump' ];	// 無視するアクション

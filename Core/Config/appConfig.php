@@ -29,3 +29,6 @@ if(php_sapi_name() === 'cli') {
 } else {
 	define('CLI_DEBUG',FALSE);
 }
+// ENV/REQ 変数のどちらを取得するか
+define('S_ENV',TRUE);		// App::$EnvData
+define('S_REQ',FALSE);		// App::$ReqData

@@ -7,3 +7,11 @@
     margin: 0 auto;
     background-color: whitesmoke;
 }
+.message_box {
+    position:relative;
+    width:30%;
+    height: auto;
+    padding: 0 50px;
+    margin: 0 auto;
+    background-color: whitesmoke;
+}

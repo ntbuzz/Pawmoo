@@ -11,8 +11,8 @@
 	$uri = $_SERVER['REQUEST_URI'];
 	list($url,$q_str) = (strpos($uri,'?')!==FALSE)?explode('?',$uri):[$uri,''];
 	parse_str($q_str, $query);
-	$query['begDate'] = '';
-	$query['endDate'] = '';
+//	$query['begDate'] = '';
+//	$query['endDate'] = '';
 	
 	$_REQUEST =  $query;
 
