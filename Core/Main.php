@@ -195,7 +195,7 @@ debug_log(0, [
 ]);
 
 debug_run_start();
-// ログイン不要ならTRUEが返る
+// ログイン不要または成功ならTRUEが返る
 if($controllerInstance->is_authorised()) {
     $controllerInstance->$ContAction();
 }
