@@ -1,9 +1,9 @@
-# WaffleMapフレームワーク
+# WaffleMap PHP WEB Framwork
 
-### コアリポジトリ
+### Core Repository
 
- 必要なサブ・リポジトリ
+This repository requires an application repository and vendor libraries.
 
-- waffle_app      アプリケーション・リポジトリ
-- vendor           外部ライブラリ・リポジトリ
+- waffle_app      Application Repository
+- vendor          JQuery, and other javascript Library
 
