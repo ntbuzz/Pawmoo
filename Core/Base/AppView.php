@@ -30,6 +30,7 @@ class AppView extends AppObject {
             'select'    => 'cmd_select',
             'inline'    => 'cmd_inline',
             'markdown'  => 'cmd_markdown',
+            'recordset' => 'cmd_recordset',
         ],
         '*'    => 'sec_comment',
         '%'    => 'sec_link',
@@ -68,9 +69,10 @@ public function SetLayout($layoutfile) {
 //==============================================================================
 // レイアウト出力
 //==============================================================================
-public function PutLayout() {
-    debug_log(1, "\$Layout = {$this->Layout}");
-    $this->ViewTemplate($this->Layout);
+public function PutLayout($layout = NULL) {
+    if($layout === NULL) $layout = $this->Layout;
+    debug_log(1, "\$Layout = {$layout}");
+    $this->ViewTemplate($layout);
     $this->doTrailer = TRUE;
 }
 //==============================================================================
@@ -281,7 +283,7 @@ public function ViewTemplate($name,$vars = []) {
 // key 文字列を元に処理関数へディスパッチする
 // key => sec (vars)
     private function sectionDispath($key,$sec,$vars) {
-        $sec = $this->expand_SectionVar($sec,$vars);
+        if($key !== '+recordset') $sec = $this->expand_SectionVar($sec,$vars);
         $num_key = is_numeric($key);
         if($num_key) {  // 連想キーでなければ値を解析する
             if(is_array($sec)) {
@@ -462,6 +464,18 @@ public function ViewTemplate($name,$vars = []) {
         "MARKDOWN" => $mtext,
     ]);
         echo $mtext;
+    }
+    //--------------------------------------------------------------------------
+    //  レコードリストを元にループする
+    // 特別に $sec は変数置換しないで渡される
+    private function cmd_recordset($tag,$attrs,$subsec,$sec,$vars) {
+      foreach($this->Model->Records as $records) {
+            $this->Model->RecData = $records;    // レコードデータ
+            debug_log(FALSE,[ 
+                "data" => $this->Model->RecData,
+            ]);
+            $this->sectionAnalyze($sec,$vars);
+        }
     }
     //--------------------------------------------------------------------------
     //  ul/ol リストの出力
