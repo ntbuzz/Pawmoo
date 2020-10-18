@@ -1,27 +1,9 @@
-# WaffleMapフレームワーク
+# WaffleMap PHP WEB Framwork
 
-### コアリポジトリ
+### Core Repository
 
- 必要なサブ・リポジトリ
+This repository requires an application repository and vendor libraries.
 
-- waffle_app      アプリケーション・リポジトリ
-- vendor           外部ライブラリ・リポジトリ
-
-## コア開発用リポジトリの作成手順
-
-1. コアリポジトリを fork する
-1. アプリケーション・リポジトリを fork する
-1. 手元のPCにコアリポジトリをクローンする
-1. コアリポジトリにアプリケーションリポジトリ(app)をサブモジュールとしてcheckout
-1. 同様に vendor リポジトリをチェックあうとする（サブモジュール登録はしない）
-
-
-## アプリ開発用リポジトリの作成手順
-
-1. アプリケーション・リポジトリを fork する
-1. 手元のPCにコアリポジトリをクローンする
-1. クローンしたフォルダ内にある「.git」フォルダを削除
-1. コアをクローンしたフォルダにアプリケーションリポジトリを[app]フォルダでcheckout
-1. 同様に vendor リポジトリもcheckoutし、念の為「.git」フォルダを削除しておく
-
+- waffle_app      Application Repository
+- vendor          JQuery, and other javascript Library
 
