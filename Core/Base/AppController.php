@@ -70,7 +70,7 @@ public function is_authorised() {
 			$data = $this->Login->is_validLogin(MySession::$ReqData);
 			if($data === NULL) {
 				$msg = $this->__('.Login');
-				page_response('app-999.php',$msg,$msg,$this->Login->error_type);     // 404 ERROR PAGE Response
+				page_response('app-999.php',$msg,$msg,$this->Login->error_type);     // LOGIN PAGE Response
 //				$this->View->ViewTemplate('Login');             // LoginFORM try it
 //				return FALSE;
 			}
@@ -93,8 +93,9 @@ public function is_authorised() {
 // ログアウト処理
 public function LogoutAction() {
 	MySession::setup_Login(NULL);
-	$url = App::Get_AppRoot();
-	header("Location:{$url}");
+	$url = App::Get_AppRoot('index.html');
+	if(CLI_DEBUG) echo "Location:{$url}\n";
+	else header("Location:{$url}");
 }
 //==============================================================================
 // View Helperクラスへの値セット

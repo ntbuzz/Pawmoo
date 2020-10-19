@@ -225,7 +225,7 @@ protected function sql_safequote(&$value) {
 			foreach($items as $key => $val) {
 				if(empty($key)) continue;
 				list($key,$op) = keystr_opr($key);		// キー名の最後に関係演算子
-				if(empty($op)) {	// 演算子がない：配列なら論理式 または LIKE(マルチ)、スカラー：BETWEENまたはLIKEまたは数値比較(=)
+				if(empty($op) || $op === '%') {	// 演算子がない：配列なら論理式 または LIKE(マルチ)、スカラー：BETWEENまたはLIKEまたは数値比較(=)
 					if(is_array($val)) {
 						if(in_array($key,['AND','OR','NOT'])) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
@@ -239,7 +239,7 @@ protected function sql_safequote(&$value) {
 							$op = 'BETWEEN';
 							list($from,$to) = explode('...',$val);
 							$val = "'{$from}' AND '{$to}'";
-						} else if(is_numeric($val)) {
+						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';
 						} else {
 							$op = 'LIKE';

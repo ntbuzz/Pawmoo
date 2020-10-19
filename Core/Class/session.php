@@ -95,7 +95,7 @@ static function set_if_empty($tt,$arr) {
 	$varData = ($tt) ? 'EnvData' : 'ReqData';
 	$result = [];
 	foreach($arr as $key => $val) {
-		if(array_key_exists($key,static::$$varData)) static::$$varData[$key] = $val;
+		if(!array_key_exists($key,static::$$varData)) static::$$varData[$key] = $val;
 	}
 }
 //==============================================================================

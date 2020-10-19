@@ -22,9 +22,10 @@
     $.fn.adjustHeight = function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
         $(window).on("load resize",function () {
-            hsize = self.parent().innerHeight();
+            hsize = self.parent().height();
             htop = self.offset().top;
-            self.css("height", hsize - htop + "px");
+            spc = self.outerHeight() - self.height();
+            self.css("height", hsize - htop - spc + "px");
         });
         $(window).resize();
     };
