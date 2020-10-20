@@ -170,6 +170,7 @@ function array_to_URI($arr) {
 //==============================================================================
 // 配列からURIを生成する、要素内に配列があるときにも対応する
 function array_concat_keys($arr,$keys) {
+    if(is_scalar($keys)) return $keys;
     $ss = ''; $trim_sep = ' ';
     foreach($keys as $kk => $val) {
         $sep = (is_numeric($kk)) ? ' ' : $kk;

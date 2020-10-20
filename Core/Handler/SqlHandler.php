@@ -67,7 +67,8 @@ public function getValueLists($table,$ref,$id) {
 public function doQueryBy($key,$val) {
 	$sql = $this->sql_GetRecordByKey($key,$val);
 	$this->doQuery($sql);
-	return $this->fetchDB();
+	$row = $this->fetchDB();
+	return $row;
 }
 //==============================================================================
 // ページングでレコードを読み込むためのパラメータ

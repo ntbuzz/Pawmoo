@@ -42,6 +42,6 @@
     UserName => "User Name"
     Password => Password
     SEND    => Send
-    PassError => 'PASSWORD Missing'
+    PassError => 'PASSWORD missing'
     UnknownUser => "Unknown USER"
 ]

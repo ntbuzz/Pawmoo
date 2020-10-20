@@ -17,14 +17,13 @@ class MySession {
 //==============================================================================
 // static クラスにおける初期化処理
 static function InitSession($appname = 'default') {
-	if(!defined('DEFAULT_USER')) define('DEFAULT_USER',['userid' => 'ntak']);
 	$session_id = "_minimvc_waffle_map_{$appname}";
 	static::$MY_SESSION_ID = $session_id;
 	// セッションキーがあれば読み込む
 	static::$EnvData = (array_key_exists($session_id,$_SESSION)) ? $_SESSION[$session_id] : [];
 	// for Login skip on CLI debug.php processing
 	if(DEBUGGER && CLI_DEBUG) {
-		static::$EnvData['Login'] = DEFAULT_USER;
+		static::$EnvData['Login'] = ['username' => 'ntak'];
 	}
 	// overwrite real POST/GET variables
 	static::$ReqData = [];

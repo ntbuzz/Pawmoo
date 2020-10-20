@@ -26,7 +26,7 @@ protected function Connect() {
 //==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
-	debug_log(3,['SQL' => $sql]);
+	debug_log(3,['SQL' => $sql,"DBB"=>$this->dbb]);
 	$this->rows = $this->dbb->query($sql);
 	return $this->rows;
 }
@@ -38,6 +38,7 @@ public function fetch_array() {
 //==============================================================================
 //	getLastError: 	レコードを取得してカラム配列を返す
 public function getLastError() {
+	return "SQLite3 ERROR";
 //		return sqlite_last_error($this->rows);
 }
 //==============================================================================
@@ -71,7 +72,7 @@ public function updateRecord($wh,$row) {
 	}
 	// UPSERT 文を生成
 	$sql = "UPDATE \"{$this->table}\"{$set}{$where};";
-	error_reporting(E_ERROR);
+	error_reporting(E_ALL);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
 		echo 'ERROR:'.$this->getLastError()."\n".$sql;
