@@ -146,6 +146,10 @@ function json_escape($a) {
     return $vv;
 }
 //==============================================================================
+function control_escape($a) {
+    return str_replace(["\r\n", "\r", "\n","\t"],["\\r\\n","\\r","\\n","\\t"], $a);
+}
+//==============================================================================
 // テキストを分割した配列
 function text_line_split($del,$txt,$trim = FALSE) {
     $array = array_values(              // これはキーを連番に振りなおしてるだけ
