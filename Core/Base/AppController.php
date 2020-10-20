@@ -70,17 +70,12 @@ public function is_authorised() {
 			if($this->Login->error_type === NULL) {		// NO-POST LOGIN
 				$userid = MySession::get_LoginValue($login_key);    // already Login check, IN SESSION
 				$data = $this->Login->is_validUser($userid);		// is_enabled account
-				if($data !== NULL) {
-					unset($this->Login);	// detach SQLite3 Table
-					return TRUE;		// login OK
-				}
+				if($data !== NULL) return TRUE;		// login OK
 			}
 			$msg = $this->__('.Login');
 			$err_msg = $this->Login->error_type;
-			unset($this->Login);				// detach SQLite3 Table
 			page_response('app-999.php',$msg,$msg,$err_msg);     // LOGIN PAGE Response
 		} else {
-			unset($this->Login);				// detach SQLite3 Table
 			list($userid,$lang) = $data;
 			if(!empty($lang)) {
 				MySession::set_LoginValue([$login_key => $userid,'LANG'=>$lang]);

@@ -16,12 +16,6 @@ public function is_validUser($userid,$passwd = NULL) {
     $this->error_type = "Login NEED A '{$this->LoginID}'";
     if(empty($userid)) return NULL;
     $data = $this->getRecordBy($this->LoginID,$userid);
-/*
-$data = [
-    'username' => 'ntak',
-    'language' => 'ja',
-];
-*/
     if($userid === $data[$this->LoginID]) {
         // $passwd != NULL ならここでパスワードチェックをする
         if($passwd !== NULL) {
@@ -47,7 +41,6 @@ public function is_validLogin($values) {
         if(array_key_exists($xkey,$this->Schema)) {     // pickup exists field name
             list($disp,$flag) = $this->Schema[$xkey];   // need encrypt password
             $dval = ($flag === 1) ? passwd_encrypt($val) : $val;
-//            if(!empty($val)) 
             $Login[$xkey] = $dval;    // accepta NULL value
         }
     }
