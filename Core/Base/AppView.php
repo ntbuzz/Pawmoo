@@ -487,6 +487,8 @@ public function ViewTemplate($name,$vars = []) {
             $this->Model->RecData = $records;    // レコードデータ
             debug_log(FALSE,[ 
                 "data" => $this->Model->RecData,
+                'sec' => $sec,
+                'var' => $vars,
             ]);
             $this->sectionAnalyze($sec,$vars);
         }

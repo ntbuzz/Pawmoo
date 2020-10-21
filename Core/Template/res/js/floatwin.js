@@ -51,6 +51,7 @@ selector.each(function () {
         // クローズイベントを登録
         $(id + " #close, .close, .cancel, .closeButton, .execButton").click( function() {
             self.fadeOut("fast");
+            self.find('#init_contents').html('');      // clear contents
             $(document).unbind("mousemove");
             $("body").find(".floatBack").remove();
         });

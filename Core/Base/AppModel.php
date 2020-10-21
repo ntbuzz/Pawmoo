@@ -41,6 +41,10 @@ class AppModel extends AppObject {
 	    parent::__construct($owner);                    // 継承元クラスのコンストラクターを呼ぶ
         debug_log(FALSE,static::$DatabaseSchema);
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
+        if(isset($this->ModelTables)) {                 // Multi-Language Tabele exists
+            $db_key = (array_key_exists(LangUI::$LocaleName,$this->ModelTables)) ? LangUI::$LocaleName : '*';
+            $this->DataTable = $this->ModelTables[$db_key]; // DataTable SWITCH
+        }
         $this->__InitClass();                             // クラス固有の初期化メソッド
         $this->fields = [];
 	}
@@ -128,8 +132,7 @@ public function RelationSetup() {
                 }
             }
         }
-        debug_log(FALSE,[
-            "Schema" => $this->Schema,
+        debug_log(1,[
             "Header" => $header, 
             "Field" => $field, 
             "Relation" => $relation, 

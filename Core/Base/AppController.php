@@ -95,7 +95,7 @@ public function is_authorised() {
 // ログアウト処理
 public function LogoutAction() {
 	MySession::setup_Login(NULL);
-	$url = App::Get_AppRoot('index.html');
+	$url = App::Get_SysRoot('index.html');
 	if(CLI_DEBUG) echo "Location:{$url}\n";
 	else header("Location:{$url}");
 }
