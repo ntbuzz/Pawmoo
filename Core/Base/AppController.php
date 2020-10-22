@@ -60,11 +60,11 @@ public function is_enable_action($action) {
 //==============================================================================
 // authorised login mode, if need view LOGIN form, return FALSE
 public function is_authorised() {
-	if(CLI_DEBUG) {
-		$this->Login->defaultUser();
-		$this->needLogin = FALSE;
-	}
 	if($this->needLogin) {
+		if(CLI_DEBUG) {
+			$this->Login->defaultUser();
+			return TRUE;
+		}
 		$login_key = isset($this->Login->LoginID)?$this->Login->LoginID:'login-user';
 		// new login request POST check
 		$data = $this->Login->is_validLogin(MySession::$ReqData);
