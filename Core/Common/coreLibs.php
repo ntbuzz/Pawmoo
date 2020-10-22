@@ -28,6 +28,8 @@ function get_routing_params($dir) {
         'URI' => $_SERVER['REQUEST_URI'],
         "app_uri"=> $app_uri,
         "args"=> $args,
+        "dir"=> $dir,
+        "root"=> $root,
     ]);
     // コントローラー名以降のパラメータを分解する
     $params = array();
@@ -74,10 +76,10 @@ function get_routing_params($dir) {
 //      $app_root   Application Top URI
 //      $app_module Controller Name
 //      $page_name  Rquest ERROR PAGE
-function error_response($error_page,$app_name, $module) {
+function error_response($error_page,$app_name, $app_uri, $module) {
     list($app_module,$page_name,$page_filter) = array_map(function($a) {
         return (gettype($a) === 'string')?strtolower($a):'';},$module);
-    $app_root = "/{$app_name}/";
+    list($sys_root,$app_root) = $app_uri;
     require_once("Core/error/{$error_page}");
     exit;
 }
@@ -91,7 +93,8 @@ function error_response($error_page,$app_name, $module) {
 function page_response($app_page,...$msg_array) {
     $folders = array(App::Get_AppPath("error/"),"Core/error/");
     list($page_title,$msg_title,$msg_body) = $msg_array;
-    $app_root = App::Get_SysRoot();
+    $sys_root = App::Get_SysRoot();
+    $app_root = App::Get_AppRoot();
     foreach($folders as $file) {
         $page_file = "{$file}{$app_page}";
         if(file_exists($page_file)) {                // レイアウトファイルが見つかった
@@ -179,6 +182,12 @@ function array_concat_keys($arr,$keys) {
     }
     return trim($ss,$trim_sep);
 }
+//==============================================================================
+// テキストを分割して空白を除去した配列を返す
+function array_explode($sep, $str) {
+    return array_map(function($v) { return trim($v); },explode($sep,$str));
+}
+
 //==============================================================================
 // ファイルパスを / で終わるようにする
 function path_complete($path) {

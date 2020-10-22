@@ -9,7 +9,7 @@
         <hr>
         <p>Application '<?= $app_name; ?>' not found.</p>
         <hr>
-        return to <a href='/index.html'>SITE TOP</a>
+        return to <a href='<?= $sys_root; ?>index.html'>SITE TOP</a>
     </div>
 </body>
 </html>

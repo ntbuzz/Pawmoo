@@ -1,6 +1,6 @@
 <?php
 	$cwd = basename(__DIR__);
-	$_SERVER['REQUEST_URI'] = "{$argv[1]}";	// getcwd() . 
+	$_SERVER['REQUEST_URI'] = "/{$argv[1]}";	// getcwd() . 
 	$_SERVER['DOCUMENT_ROOT'] = dirname(__DIR__);	// 
 	$_SERVER['SERVER_NAME'] = getHostByName(getHostName());
 	$_SERVER['LOCAL_ADDR'] = $_SERVER['SERVER_NAME'];

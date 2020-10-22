@@ -229,14 +229,14 @@ protected function sql_safequote(&$value) {
 						if(in_array($key,['AND','OR','NOT'])) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
-							if($key === 'NOT') $opp = "NOT {$opp}";
+							if($key === 'NOT') $opp = "(NOT {$opp})";
 						} else { // LIKE [ 配列 ]
 							$opp = $like_object($key,$val,$table);
 						}
 					} else { // 演算子がないスカラー値
 						if(mb_strpos($val,'...') !== FALSE) {
 							$op = 'BETWEEN';
-							list($from,$to) = explode('...',$val);
+							list($from,$to) = array_explode('...',$val);
 							$val = "'{$from}' AND '{$to}'";
 						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';
@@ -249,7 +249,7 @@ protected function sql_safequote(&$value) {
 							$val = "'%{$val}%'";
 						}
 						$expr = [];
-						foreach(explode('+',$key) as $cmp) {
+						foreach(array_explode('+',$key) as $cmp) {
 							$cmp = $this->fieldAlias->get_lang_alias($cmp);
 							$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
 						}
@@ -276,13 +276,13 @@ protected function sql_safequote(&$value) {
 				} else {
 					if(!is_numeric($val)) $val = "'{$val}'";
 					$expr = [];
-					foreach(explode('+',$key) as $cmp) {
+					foreach(array_explode('+',$key) as $cmp) {
 						$cmp = $this->fieldAlias->get_lang_alias($cmp);
 						$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
 					}
 					$opp = implode('OR',$expr);
 				}
-				$opc = (empty($opc)) ? "{$opp}" : "{$opc}{$opr}{$opp}";
+				$opc = (empty($opc)) ? "{$opp}" : "({$opc}){$opr}{$opp}";
 			}
 			return (empty($opc)) ? '' : "{$opc}";	// ((count($items)===1) ? $opc : "({$opc})");
 		};

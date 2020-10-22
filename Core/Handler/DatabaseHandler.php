@@ -31,6 +31,7 @@ public function exists_locale($field_name) {
 //==============================================================================
 //	言語カラムの読み替えが必要か
 public function get_lang_alias($field_name) {
+    
     return ($this->exists_locale($field_name)) ? $this->lang_alias[$field_name] : $field_name;
 }
 //==============================================================================

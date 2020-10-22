@@ -13,7 +13,7 @@ abstract class LoginClass extends AppModel {
 //==============================================================================
 //　ユーザーIDの妥当性を検証する
 public function is_validUser($userid,$passwd = NULL) {
-    $this->error_type = "Login NEED A '{$this->LoginID}'";
+    $this->error_type = "Login NEED at '{$this->LoginID}'";
     if(empty($userid)) return NULL;
     $data = $this->getRecordBy($this->LoginID,$userid);
     if($userid === $data[$this->LoginID]) {

@@ -116,7 +116,7 @@ static function rm_EnvData(...$arr) {
 // ログイン情報を取得
 static function get_LoginValue($id = NULL) {
 	$LoginData = static::$EnvData['Login'];
-	if($id === NULL) return $LoginData;
+	if($id === NULL || empty($LoginData)) return $LoginData;
 	return (array_key_exists($id,$LoginData)) ? $LoginData[$id] : '';
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

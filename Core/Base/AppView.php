@@ -128,7 +128,7 @@ public function ViewTemplate($name,$vars = []) {
             echo file_get_contents($tmplate);
             break;
         }
-    } else error_response('page-404.php',App::$AppName, [$this->ModuleName, $name,'']);     // 404 ERROR PAGE Response
+    } else error_response('page-404.php',App::$AppName,[ App::Get_SysRoot(),App::Get_AppRoot() ], [$this->ModuleName, $name,'']);     // 404 ERROR PAGE Response
 }
 //==============================================================================
 // テンプレートファイルがビュークラスフォルダに存在しなければ共通のテンプレートを探す

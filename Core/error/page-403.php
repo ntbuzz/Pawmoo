@@ -13,7 +13,7 @@
         debug_log(-1,['info' => $_SESSION,'POST' => $_REQUEST]);
         ?>
         <hr>
-        return to <a href='/index.html'>TOP</a>
+        return to <a href='<?= $sys_root; ?>index.html'>TOP</a>
     </div>
 </body>
 </html>

@@ -5,6 +5,12 @@ String.prototype.trim2 = function() {
     return this.replace(/^[\s　]+|[\s　]+$/g, '');
 };
 //====================================================
+// フレームワークのトップパスを生成
+String.prototype.fw_fullpath = function () {
+    var path = (this.charAt(0) == "/") ? this.slice(1) : this;
+    return "${$SYSROOT$}"+path;
+};
+//====================================================
 // URLを分割
 String.prototype.query_split = function (ix) {
     var path = this.replace(/%3F/g, '?').split('?');

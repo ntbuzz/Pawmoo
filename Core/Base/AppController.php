@@ -60,7 +60,10 @@ public function is_enable_action($action) {
 //==============================================================================
 // authorised login mode, if need view LOGIN form, return FALSE
 public function is_authorised() {
-//	echo "LOGIN:".(($this->needLogin)?'TRUE':'FALSE')."\n";
+	if(CLI_DEBUG) {
+		$this->Login->defaultUser();
+		$this->needLogin = FALSE;
+	}
 	if($this->needLogin) {
 		$login_key = isset($this->Login->LoginID)?$this->Login->LoginID:'login-user';
 		// new login request POST check

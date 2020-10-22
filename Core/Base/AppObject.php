@@ -1,20 +1,19 @@
 <?php
 /* -------------------------------------------------------------
- * PHPフレームワーク
- *  AppObject:    全てのクラスのベースになるオブジェクトクラス
- *                継承情報とクラス情報を保持する
+ * Object Oriented PHP MVC Framework
+ *  AppObject:    The object class on which all classes are based.
+ *                Hold inheritance information and class information.
  */
 //==============================================================================
 class AppObject {
-    protected $AOwner;      // 所有オブジェクト
-    protected $ClassType;   // オブジェクトの所属クラス(Controller, Model, View. Helper)
-    protected $ModuleName;  // オブジェクトの名前
-    protected $ClassName;   // クラス名
-    protected $LocalePrefix;    // 言語プレフィクス
-    protected $autoload = TRUE;
-
+    protected $AOwner;      // Object Owner
+    protected $ClassType;   // The class to which the object belongs.(Controller, Model, View. Helper)
+    protected $ModuleName;  // Object module name
+    protected $ClassName;   // Class Name
+    protected $LocalePrefix;    // Language Prefix(en,ja,...)
+    protected $autoload = TRUE; // autoload on __get() magic method
 //==============================================================================
-//	コンストラクタ：　テーブル名
+//	constructor( object owner )
 	function __construct($owner) {
         $this->AOwner = $owner;
         $this->ClassName = get_class($this);
@@ -25,24 +24,22 @@ class AppObject {
         $this->LocalePrefix = ($owner===NULL) ? $this->ModuleName : $owner->LocalePrefix;	// オーナーの言語プレフィクスを引継ぐ
 	}
 //==============================================================================
-//	デストラクタ
+//	destructor: none
 	function __destruct() {
     }
 //==============================================================================
-// 初期化
+// initialized call
 	protected function __InitClass() {
-        $this->ClassInit();                       // クラス固有の追加初期化メソッド
+        if(emthod_exists($this,'ClassInit')) {
+            if(CLI_DEBUG) echo "CALL ClassInit({$this->ClassName})\n";
+            $this->ClassInit();
+        }
 	}
 //==============================================================================
-//	クラス初期化処理
-//  必要ならサブクラスでオーバーライドする
-    protected function ClassInit() {
-    }
-//==============================================================================
-//	イベント関数をセット
+//	set on EVENT function
 //==============================================================================
     protected function setEvent($event,$Instance,$method) {
-        list($class,$ev) = explode('.',$event);         // モジュール指定があればモジュールインスタンスにセットする
+        list($class,$ev) = explode('.',$event);
         if(empty($ev)) {
             $this->$event = array($Instance,$method);
         } else {
@@ -50,10 +47,10 @@ class AppObject {
         }
 	}
 //==============================================================================
-// イベント関数が登録されていれば発火させる
+// Fires if the event function is registered.
 //==============================================================================
     public function doEvent($event, $args) {
-        if(is_array($this->$event)) {      // コールバックイベント
+        if(is_array($this->$event)) {      // event callback function
             list($Instance,$method) = $this->$event;
             if(method_exists($Instance,$method)) {
                 $Instance->$method($args);
@@ -61,14 +58,14 @@ class AppObject {
         }
     }
 //==============================================================================
-//	プロパティ初期化
+//	setup objerct property
     protected function setProperty($database) {
         foreach($database as $key => $val) {
             $this->$key = $val;
         }
     }
 //==============================================================================
-// クラスの動的クラスプロパティを生成(オードロード)
+// dynamic construct OBJECT CLass
 public function __get($PropName) {
     if($this->autoload === FALSE) return NULL;
     if(isset($this->$PropName)) return $this->$PropName;
@@ -112,8 +109,8 @@ public function __get($PropName) {
         $modfile = App::Get_AppPath("{$path}/{$prop_name}.php");
         if(file_exists($modfile)) {
             if($cls_name === 'Controller') {
-                App::LoadModuleFiles($mod_name);    // Controllerの場合はモジュールセットでロードする
-                if(class_exists($prop_name)) {      // ロードできたか確かめる
+                App::LoadModuleFiles($mod_name);    // Load on Controller + Model + Helper
+                if(class_exists($prop_name)) {      // is SUCCESS?
                     $this->$PropName = new $prop_name($this);
                     return $this->$PropName;
                 }
@@ -124,7 +121,7 @@ public function __get($PropName) {
             }
         }
     }
-    // 見つからなかった
+    // not found class file
     throw new Exception("SubClass Create Error for '{$prop_name}'");
 }
 //==============================================================================
