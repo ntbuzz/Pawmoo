@@ -236,7 +236,7 @@ protected function sql_safequote(&$value) {
 					} else { // 演算子がないスカラー値
 						if(mb_strpos($val,'...') !== FALSE) {
 							$op = 'BETWEEN';
-							list($from,$to) = array_explode('...',$val);
+							list($from,$to) = trim_explode('...',$val);
 							$val = "'{$from}' AND '{$to}'";
 						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';
@@ -249,7 +249,7 @@ protected function sql_safequote(&$value) {
 							$val = "'%{$val}%'";
 						}
 						$expr = [];
-						foreach(array_explode('+',$key) as $cmp) {
+						foreach(trim_explode('+',$key) as $cmp) {
 							$cmp = $this->fieldAlias->get_lang_alias($cmp);
 							$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
 						}
@@ -276,7 +276,7 @@ protected function sql_safequote(&$value) {
 				} else {
 					if(!is_numeric($val)) $val = "'{$val}'";
 					$expr = [];
-					foreach(array_explode('+',$key) as $cmp) {
+					foreach(trim_explode('+',$key) as $cmp) {
 						$cmp = $this->fieldAlias->get_lang_alias($cmp);
 						$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
 					}

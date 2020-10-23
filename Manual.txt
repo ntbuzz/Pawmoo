@@ -348,6 +348,11 @@
   +setvar => [ varname => value , ...]    セクション変数を定義します。varname に + 記号を付加すると既存の変数とマージする
   +include => [ value, ... ]              JS ファイル, CSS ファイルのインクルード
   +echo => [ value, ... ]                 value のリストをそのまま出力、キー名を指定しても無視する
+	+if => [ testvalue [ Section ] ]        testvalue の判定が真(TRUE)なら [ Section ] を実行する
+			testvalue:
+					'' => values                    empty(value) と同義
+					'*' => values                   !empty(value) と同義
+					compare => values               (compare === values) と同義
   +style => [ value, ... ]                value のリストをスタイルシートとして出力する
   +jquery => [ value, ... ]               value のリストをJQuery関数として出力する
   +img => [ attr => value, src ]          imageタグの簡易出力書式, class,id以外の属性を指定しない場合はスカラー値で定義できる
@@ -357,9 +362,13 @@
           list-item,                        スカラー要素：　単純リスト項目
           [ list-section ],           　    配列要素：　セクション項目
           .XXXX#DDDD => [ list-section ]    クラス名(XXXX)、ID名(DDDD)付のリストセクション項目
-  +select => [ attr => value , items ]    SELECTタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
+  +select => [                            SELECTタグ専用のリスト出力
+    selected_key = > [                    連想キーは初期選択するアイテム名
+      option_text => value                 選択テキストと値のペアリスト
+      ...   ]
+  +radio => [ attr => value , items ]    INPUT RADIOタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
         items :=                          リスト項目は次の要素から構成する
-          [ defalt-option           　      先頭の要素はデフォルト選択要素
+          [ checked-item           　     先頭の要素はデフォルト選択要素
             option => value ... ]           選択テキストと値のペアリスト
   +dl => [ attr => value , [ items ]  ]   DLタグ専用のリスト出力、attr => value はDLタグの属性になる
       items :=                            リスト項目は次の要素から構成する

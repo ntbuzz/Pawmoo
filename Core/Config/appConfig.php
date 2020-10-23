@@ -1,13 +1,12 @@
 <?php
 /* -------------------------------------------------------------
- * PHPフレームワーク
- *  appConfig: フレームワークのコンフィグレーション
+ * Object Oriented PHP MVC Framework
+ *  appConfig: Framework Configuration
  */
-define('CURRENT_VERSION','0.25.0 2020-10-13');	// フレームワークのバージョン
+define('CURRENT_VERSION','0.27.0 2020-10-22');
 
-define('TIME_ZONE','Asia/Tokyo');	// デフォルトのタイムゾーン
-
-// OSタイプ
+define('TIME_ZONE','Asia/Tokyo');
+// Running base OS
 if (PHP_OS == "Linux") {
 	define("OSDEP","UNIX");
 	define("ZIPTEMP","/tmp/");
@@ -29,6 +28,6 @@ if(php_sapi_name() === 'cli') {
 } else {
 	define('CLI_DEBUG',FALSE);
 }
-// ENV/REQ 変数のどちらを取得するか
+// argument of MySession
 define('S_ENV',TRUE);		// App::$EnvData
 define('S_REQ',FALSE);		// App::$ReqData

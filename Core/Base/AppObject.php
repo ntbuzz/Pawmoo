@@ -17,11 +17,11 @@ class AppObject {
 	function __construct($owner) {
         $this->AOwner = $owner;
         $this->ClassName = get_class($this);
-        $this->ModuleName = preg_replace("/[A-Z][a-z]+?$/",'',$this->ClassName);     // モジュール名
-        $this->ClassType = substr($this->ClassName,strlen($this->ModuleName));      // クラスタイプ
-        // 基底クラスでクリエイトされてきたら親のモジュール名を流用する
+        $this->ModuleName = preg_replace("/[A-Z][a-z]+?$/",'',$this->ClassName);
+        $this->ClassType = substr($this->ClassName,strlen($this->ModuleName));
+        // Call on Base-Class construct, Use parent Moddule Name divert.
         if($this->ClassName == "App{$this->ClassType}") $this->ModuleName = $owner->ModuleName;
-        $this->LocalePrefix = ($owner===NULL) ? $this->ModuleName : $owner->LocalePrefix;	// オーナーの言語プレフィクスを引継ぐ
+        $this->LocalePrefix = ($owner===NULL) ? $this->ModuleName : $owner->LocalePrefix;
 	}
 //==============================================================================
 //	destructor: none
@@ -93,12 +93,10 @@ public function __get($PropName) {
         }
     }
     $prop_name = "{$mod_name}{$cls_name}";
-    // ロード済か確認
     if(class_exists($prop_name)) {
         $this->$PropName = new $prop_name($this);
         return $this->$PropName;
     }
-    // 格納パスを探索する
     $fldr = array(
         ["Class"],
         ["Models","modules/{$mod_name}"],
@@ -137,11 +135,11 @@ protected function __($defs, $allow_array = FALSE) {
 //==============================================================================
 // 言語リソース値から連想配列の要素を取り出す
 public function _in($arr,$defs) {
-    return LangUI::get_array($arr, $this->LocalePrefix, $defs);          // 言語識別子から排列要素を取得する
+    return LangUI::get_array($arr, $this->LocalePrefix, $defs);
 }
 //==============================================================================
 protected function __in($arr,$defs) {
-    return LangUI::get_array($arr, 'core', $defs);          // 言語識別子から排列要素を取得する
+    return LangUI::get_array($arr, 'core', $defs);
 }
 
 }

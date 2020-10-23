@@ -22,12 +22,15 @@ class AppView extends AppObject {
             'style'     => 'cmd_style',
             'img'       => 'cmd_image',
             'echo'      => 'cmd_echo',
+            'if'        => 'cmd_if',
             'jquery'    => 'cmd_jquery',
             'script'    => 'cmd_script',
             'ul'        => 'cmd_list',
             'ol'        => 'cmd_list',
             'dl'        => 'cmd_dl',
             'select'    => 'cmd_select',
+            'radio'     => 'cmd_radio',
+            'checkbox'  => 'cmd_checkbox',
             'inline'    => 'cmd_inline',
             'markdown'  => 'cmd_markdown',
             'recordset' => 'cmd_recordset',
@@ -149,9 +152,9 @@ public function ViewTemplate($name,$vars = []) {
         return NULL;
     }
 //==============================================================================
-//  変数を置換する
+//  EXPAND variable
     private function expand_Walk(&$val, $key, $vars) {
-        if($val[0] === '$') {           // 先頭の一文字が変数文字
+        if($val[0] === '$') {           // top char is variable mark
             $var = mb_substr($val,1);
             $var = trim($var,'{}');                 // triming of delimitter { }
             switch($var[0]) {
@@ -167,21 +170,26 @@ public function ViewTemplate($name,$vars = []) {
                 // not RAW will be HTML convert
                 if($is_row === FALSE) $val = str_replace("\n",'',text_to_html($val));
                 break;
-            case '#': $var = mb_substr($var,1);     // 言語ファイルの参照
-                $allow = ($var[0] === '#');         // 配列を許可する
+            case '#': $var = mb_substr($var,1);     // Language refer
+                $allow = ($var[0] === '#');         // allow array
                 if($allow) $var = mb_substr($var,1);
-                $val = $this->_($var,$allow);       // 言語ファイルの定義配列から文字列または配列を取り出す
+                $val = $this->_($var,$allow);       // get Language define
                 break;
-            case '%': if(substr($var,-1) === '%') {     // 末尾文字を確かめる
-                    $var = trim($var,'%');              // URLの引数番号
-                    $val = App::$Params[$var];          // Params[] プロパティから取得
+            case '%': if(substr($var,-1) === '%') {     // is parameter number
+                    $var = trim($var,'%');
+                    $val = App::$Params[$var];          // get value from Params[] property
                 }
                 break;
-            case '$': if(substr($var,-1) === '$') {     // 末尾文字を確かめる
-                    $var = trim($var,'$');              // システム変数値
-                    $val = App::$SysVAR[$var];          // SysVAR[] プロパティから取得
+            case '$': if(substr($var,-1) === '$') {
+                    $var = trim($var,'$');
+                    $val = App::$SysVAR[$var];          // SysVAR[] property
                 }
                 break;
+            case ':': $var = mb_substr($var,1);     // Class Property
+                    if(isset($this->Model->$var)) { // ModelClass Property
+                        $val = $this->Model->$var;
+                    }
+                    break;
             case "'": if(substr($var,-1) === "'") {     // 末尾文字を確かめる
                     $var = trim($var,"'");              // セッション変数
                     $val = MySession::get_envIDs($var);// EnvData[] プロパティから取得
@@ -455,6 +463,27 @@ public function ViewTemplate($name,$vars = []) {
         $this->directOutput('', '',$sec);
     }
     //--------------------------------------------------------------------------
+    //  if selection
+    private function cmd_if($tag,$attrs,$subsec,$sec,$vars) {
+        $attrs = $this->expand_SectionVar($attrs,$vars);
+        if(!empty($attrs)) {
+            list($key, $val) = array_first_item($attrs);    // 最初の要素を処理
+            if($key === '') $result = empty($val);       // is_empty ?
+            else if($key === '*') $result = !empty($val);       // is_notempty ?
+            else $result = ($key === $val);
+        } else $result = FALSE;
+        debug_log(FALSE,[
+            'TAG' => $tag,
+            'ATTR' => $attrs,
+            'SUB' => $subsec,
+            'SEC' => $sec,
+            'KEY' => $key,
+            'VAL' => $val,
+            'RESULT' => $result,
+        ]);
+        if($result) $this->sectionAnalyze($subsec,$vars);
+    }
+    //--------------------------------------------------------------------------
     //  インラインセクションの登録
     private function cmd_inline($tag,$attrs,$subsec,$sec,$vars) {
         $sec = $this->expand_SectionVar($sec,$vars);
@@ -565,13 +594,89 @@ public function ViewTemplate($name,$vars = []) {
             echo "<{$tag}{$attr}>\n";
             list($opt_key, $opt_val) = array_first_item($subsec);    // 最初の要素を処理
             $sel_item = (is_numeric($opt_key)) ? '' : $this->expand_Strings($opt_key,$vars);
+            $opt_val = $this->expand_SectionVar($opt_val,$vars);
             if(is_array($opt_val)) {
-                foreach($subsec[$opt_key] as $opt => $val) {
-                    $sel = ($opt === $sel_item) ? ' selected':'';
+                $opt_val = array_flat_reduce($opt_val);
+//debug_log(6,["SELECT" => $sel_item,"OPTION" => $opt_val]);
+                foreach($opt_val as $opt => $val) {
+                    $sel = ($val == $sel_item) ? ' selected':'';
                     echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
                 }
             } else echo "<OPTION value='{$opt_val}'>{$opt_val}</OPTION>\n";
             echo "</{$tag}>\n";
+        }
+    }
+    //--------------------------------------------------------------------------
+    //  INPUT RADIO リストの出力
+    // +radio => [
+    //    radio_key = > [
+    //      option_text => value
+    //      ...
+    //    ]
+    // ]
+    private function cmd_radio($tag,$attrs,$subsec,$sec,$vars) {
+        $subsec = $this->expand_SectionVar($subsec,$vars);
+        if(is_array($subsec)) {
+            $attr = $this->gen_Attrs($attrs);
+            $tags = "<INPUT TYPE='radio'{$attr}";
+            list($opt_key, $opt_val) = array_first_item($subsec);    // 最初の要素を処理
+            $sel_item = (is_numeric($opt_key)) ? '' : $this->expand_Strings($opt_key,$vars);
+            $opt_val = $this->expand_SectionVar($opt_val,$vars);
+            if(is_array($opt_val)) {
+                $opt_val = array_flat_reduce($opt_val);
+                foreach($opt_val as $opt => $val) {
+                    $sel = ($opt == $sel_item) ? ' checked':'';
+                    echo "{$tags} value='{$opt}'{$sel}>{$val}\n";
+                }
+            } else echo "{$tags} value='{$opt_val}'>{$opt_val}\n";
+        }
+    }
+    //--------------------------------------------------------------------------
+    //  INPUT CHECKBOX の出力
+    // FORMAT-I
+    //  +checkbox[name] => [ 
+    //        値1 => テキスト
+    //         [ ${@published} => 't' ]
+    //          ${@published}
+    //  ]
+    //  FORMAT-II
+    //  +checkbox => [ 
+    //      name2 => [ 値2 => テキスト [ ${@published} => 't' ] ]
+    //      name3 => [ 値3 => テキスト [ ${@published} => 't' ] ]
+    //  ]
+    private function cmd_checkbox($tag,$attrs,$subsec,$sec,$vars) {
+        $tags = "<INPUT TYPE='checkbox'{$attr}";
+        if(is_array($sec)) {
+            $check_item = function($arr) use(&$vars) {
+                $check_func=function($if) {return ($if) ? ' checked':'';};
+                $checked ='';
+                $txt = '';
+                foreach($arr as $key => $val) {
+                    $val = $this->expand_SectionVar($val,$vars);
+                    if(is_numeric($key)) {
+                        if(is_array($val)) {
+                            list($cmp1, $cmp2) = array_first_item($val);    // 最初の要素を処理
+                            $checked = $check_func($cmp1 === $cmp2);
+                        } else $checked = $check_func(!empty($val));
+                    } else {
+                        $value = $key;
+                        $txt = $val;
+                    }
+                }
+                return " value='{$value}'{$checked}>{$txt}";
+            };
+            $attr = $this->gen_Attrs($attrs);
+            if(array_key_exists('name',$attrs)) {   // FORMAT-I
+                $item = $check_item($sec);
+                echo "{$tags}{$item}\n";
+            } else {            // FORMAT-II
+                foreach($sec as $key => $val) {
+                    if(!is_numeric($key)) {
+                        $item = $check_item($val);
+                        echo "{$tags} name='{$key}'{$item}\n";
+                    }
+                }
+            }
         }
     }
     //==========================================================================
@@ -584,14 +689,17 @@ public function ViewTemplate($name,$vars = []) {
             if( $n !== FALSE) {
                 $str = tag_body_name( substr($tag,$n + 1) );  // 重複回避文字列があれば除去
                 $tag = substr($tag,0, $n);    // 残りの文字列
-                if($sep[0] == '{') {            // data- 属性
+                switch($sep[0]) {
+                case '{':           // data-XXXX attribute
                     $str = trim($str,'{}');
                     $kk = "{$key}-element";
                     $attrList[$kk] = $str;
-                } else if($sep[0] == '[') { // name属性
+                    break;
+               case '[':           // name  attribute
                     $str = trim($str,'[]');
                     $attrList[$key] = $str;
-                } else {
+                    break;
+                default:
                     $attrList[$key] = $str;
                 }
             }
@@ -602,7 +710,7 @@ public function ViewTemplate($name,$vars = []) {
     //==========================================================================
     // タグ文字列の分解
     private function is_section_tag($tag) {
-        if(empty($tag)) return FALSE;
+        if(empty($tag) || strlen($tag)===1) return FALSE;
         return (strpos(self::SectionCMD,$tag[0]) !== FALSE);
     }
     //==========================================================================

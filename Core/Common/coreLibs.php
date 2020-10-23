@@ -1,7 +1,7 @@
 <?php
 /* -------------------------------------------------------------
- * PHPフレームワーク
- *  coreLibs: コアクラス内で呼び出す共通関数群
+ * Object Oriented PHP MVC Framework
+ *  coreLibs: Common Library for Core/Base Class
  */
 //==============================================================================
 // REQUEST_URI を分解しルーティングに必要なアプリ名、コントローラー名を抽出する
@@ -157,6 +157,26 @@ function get_php_files($dirtop) {
 }
 //==============================================================================
 // 配列からURIを生成する、要素内に配列があるときにも対応する
+function array_flat_reduce($arr) {
+    $wx = [];
+    $reduce_array = function ($arr) use(&$reduce_array,&$wx) {
+        if(is_array($arr)) {
+            foreach($arr as $key => $val) {
+                if(is_array($val)) {
+                    $reduce_array($val);
+                } else if(is_numeric($key)) {
+                    $wx[] = $val;
+                } else {
+                    $wx[$key] = $val;
+                }
+            }
+        } else $wx[] = $arr;
+    };
+    $reduce_array($arr);
+    return $wx;
+}
+//==============================================================================
+// 配列からURIを生成する、要素内に配列があるときにも対応する
 function array_to_URI($arr) {
     // 無名関数を定義して配列内の探索を行う
     $array_builder = function ($lst) {
@@ -184,7 +204,7 @@ function array_concat_keys($arr,$keys) {
 }
 //==============================================================================
 // テキストを分割して空白を除去した配列を返す
-function array_explode($sep, $str) {
+function trim_explode($sep, $str) {
     return array_map(function($v) { return trim($v); },explode($sep,$str));
 }
 
