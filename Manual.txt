@@ -390,6 +390,15 @@
   +recordset => [ Section ]               読み込んだレコードごとに Section を繰返します
  }
 
+  特定の変数やデータにより、タグ出力を切替えるにはスイッチセクション(?記号)を使います。
+  スイッチセクション := 
+    ?<判定値> => [
+      ''  => [ Section ]        // <判定値> が空のときに Section を実行
+      '*' => [ Section ]        // <判定値> に何か値が入っているときに Section を実行
+      <比較地> => [ Section ]   // <判定値> が <比較値>と等しい時に Section を実行
+    ]
+  判定条件のどれにも一致しなかったときは何も実行されません。
+
   .tpl はViewの中で配列に再構築してから、セクション処理によりタグ出力されます。
 
 □ 簡易マークダウン記法
@@ -665,18 +674,29 @@
 
 2.6.2 動的クラス
   動的クラスはモジュール実装のための基底クラスになっています。
-  コントローラーやビューの基本的なメソッドが実装されています。
-  アプリケーションモジュールはこれらのクラスを継承することで、モジュール固有の処理に専念できます。
-  基底クラスに実装されたメソッドをモジュール固有のものに置き換えたいときは、メソッドを再定義してください。
-  ただし、基底クラスの他のメソッドに影響がでないように、整合性をとる必要があるメソッドもあるので要注意。
-
-◆ 汎用クラス
-  モジュールクラスの基底クラスとなるクラスや汎用的なクラスを定義してあります。
-
-・祝日表クラス(CommonHolidays)
-  祝日を計算するクラスです。
-  このクラスを継承した、日本の祝日を定義している JapanHolidays クラスがあります。
-
+  コントローラーやビューの基本的なメソッドが実装されています。        $checkbox = ($columns['published'] === 't') ? " checked" : '';
+        $hastitle = (empty($columns['title'])) ? '':"<h3>{$columns['title']}</h3>";
+        $txtcol = (empty($columns['title'])) ? ' style="color:black;"':"";
+        $body_contents = pseudo_markdown($columns['contents']);
+        $atext = <<<EOF
+<div class='blog_content' id={$columns['id']}>
+    <span class='flapMenu rightitem' link='edit_form'{$txtcol}>【編集】</span>
+    {$hastitle}
+    {$body_contents}
+    <div class='edit_form'>
+        <hr size="2">
+        <table>
+        <tr>
+        <th>属性</th><td>
+            表示順：<input type='text' name='seq_no' value='{$columns['seq_no']}' size='3'>
+            <input type='checkbox' name='published' value='t'{$checkbox}> 公開
+        </td></tr>
+        <tr><th>タイトル：</th><td><input type='text' name='title' value='{$columns['title']}' size='76'></td></tr>
+        <tr><th>投稿内容：</th><td><textarea name='contents' rows=16 cols=80>{$columns['contents']}</textarea></td></tr>
+        <tr><td colspan="2" style="text-align:center;"><span class='button update_content'>【更新】</span></td></tr>
+        </table>
+    </div>
+</div>
 ・ログインクラス(LoginClass)
   LoginModel を実装するための基底クラス。AppModelから派生している。
   このクラスではテーブルにユーザーID、パスワード、ユーザー言語の列が必要です。

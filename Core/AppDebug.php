@@ -48,7 +48,7 @@ function log_reset($lvl) {
 //==========================================================================
 // ログの記録または表示
 function debug_log($lvl,...$items) {
-    if($lvl === FALSE) return;
+    if($lvl === FALSE || abs($lvl) > 100) return;
     if($lvl > DEBUG_LEVEL) return;
     // バックトレースから呼び出し元の情報を取得
     $dump_log_info = function($items) {
@@ -120,5 +120,5 @@ function debug_log($lvl,...$items) {
             else $debug_log_str[$lvl] = $dmp_info;
         }
     }
-    if(abs($lvl) > 100) exit;
+    if(abs($lvl) > 1000) exit;
 }
