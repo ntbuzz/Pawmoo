@@ -276,7 +276,8 @@ public function ViewTemplate($name,$vars = []) {
         // analyze IF-SELECTOR and EXPAND KEY
         $if_selector = function($sec,$key) use(&$vars,&$if_selector) {
                 if(substr($key,0,1)==='?') {
-                    $cmp_val = mb_substr(trim($key),1);    // expand variable
+//                    $cmp_val = mb_substr(trim($key),1);    // expand variable
+                    $cmp_val = str_replace(['?',"\n","\r"],'',$key);    // expand variable
                     foreach($sec as $check => $value) {
 debug_log(-999,["CMP({$key})" => $check,"VAL"=>$cmp_val]);
                         if($check === '') $result = empty($cmp_val);            // is_empty ?
