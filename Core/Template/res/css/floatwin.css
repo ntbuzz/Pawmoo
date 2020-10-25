@@ -2,7 +2,7 @@
     floatWin style
 */
 .floatWindow {
-    z-index: 1;
+    z-index: 9901;
     display: none;
     position:absolute;
     width:550px;

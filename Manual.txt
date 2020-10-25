@@ -231,17 +231,18 @@
       >   大きい
       <   小さい
       @   サブクエリ(※)
+      %   LIKE演算指定
 
   比較値に配列を指定すると複数の値と比較することができます(IN ,NOT IN演算)
     ex.  'status=" => ['終了','完了','削除']
 
-  最後の演算子を指定しない場合は LIKE 演算子が使用されます。
-  ただし、比較値がピリオド３つで連結("XXXX...YYYY")されていた場合は BETWEEN 演算子が使われます。
+  比較演算子を指定しない場合は LIKE 演算子が使用されます。
+  演算子の指定がなく比較値がピリオド３つで連結("XXXX...YYYY")されていた場合は BETWEEN 演算子が使われます。
     ex.  'period" => '2020/01/01...2021/01/01'
 
   複数のカラムを同じ比較値で比較する場合、カラム名を＋記号で連結した記述ができます。
     ex.  'title+contents' => "Keyword"
-    これは右記と同じです。    OR => [ 'title' => "Keyword",'contents' => "Keyword" ]
+    これは右の記述と同じです。    OR => [ 'title' => "Keyword",'contents' => "Keyword" ]
 
   ※ サブクエリ
     特殊演算子としてサブクエリ演算(@)を使用することができます。
@@ -347,6 +348,11 @@
   +setvar => [ varname => value , ...]    セクション変数を定義します。varname に + 記号を付加すると既存の変数とマージする
   +include => [ value, ... ]              JS ファイル, CSS ファイルのインクルード
   +echo => [ value, ... ]                 value のリストをそのまま出力、キー名を指定しても無視する
+	+if => [ testvalue [ Section ] ]        testvalue の判定が真(TRUE)なら [ Section ] を実行する
+			testvalue:
+					'' => values                    empty(value) と同義
+					'*' => values                   !empty(value) と同義
+					compare => values               (compare === values) と同義
   +style => [ value, ... ]                value のリストをスタイルシートとして出力する
   +jquery => [ value, ... ]               value のリストをJQuery関数として出力する
   +img => [ attr => value, src ]          imageタグの簡易出力書式, class,id以外の属性を指定しない場合はスカラー値で定義できる
@@ -356,9 +362,13 @@
           list-item,                        スカラー要素：　単純リスト項目
           [ list-section ],           　    配列要素：　セクション項目
           .XXXX#DDDD => [ list-section ]    クラス名(XXXX)、ID名(DDDD)付のリストセクション項目
-  +select => [ attr => value , items ]    SELECTタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
+  +select => [                            SELECTタグ専用のリスト出力
+    selected_key = > [                    連想キーは初期選択するアイテム名
+      option_text => value                 選択テキストと値のペアリスト
+      ...   ]
+  +radio => [ attr => value , items ]    INPUT RADIOタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
         items :=                          リスト項目は次の要素から構成する
-          [ defalt-option           　      先頭の要素はデフォルト選択要素
+          [ checked-item           　     先頭の要素はデフォルト選択要素
             option => value ... ]           選択テキストと値のペアリスト
   +dl => [ attr => value , [ items ]  ]   DLタグ専用のリスト出力、attr => value はDLタグの属性になる
       items :=                            リスト項目は次の要素から構成する
@@ -377,7 +387,17 @@
                                           Textが配列で渡された場合は、各要素を改行で結合したTextとして扱う
                                           配列の先頭要素が連想配列のときは、キー名をマークダウンのクラス名とする
                                           配列がネストしている要素は、先頭に空白2文字を付加して処理する。
+  +recordset => [ Section ]               読み込んだレコードごとに Section を繰返します
  }
+
+  特定の変数やデータにより、タグ出力を切替えるにはスイッチセクション(?記号)を使います。
+  スイッチセクション := 
+    ?<判定値> => [
+      ''  => [ Section ]        // <判定値> が空のときに Section を実行
+      '*' => [ Section ]        // <判定値> に何か値が入っているときに Section を実行
+      <比較地> => [ Section ]   // <判定値> が <比較値>と等しい時に Section を実行
+    ]
+  判定条件のどれにも一致しなかったときは何も実行されません。
 
   .tpl はViewの中で配列に再構築してから、セクション処理によりタグ出力されます。
 
@@ -654,18 +674,29 @@
 
 2.6.2 動的クラス
   動的クラスはモジュール実装のための基底クラスになっています。
-  コントローラーやビューの基本的なメソッドが実装されています。
-  アプリケーションモジュールはこれらのクラスを継承することで、モジュール固有の処理に専念できます。
-  基底クラスに実装されたメソッドをモジュール固有のものに置き換えたいときは、メソッドを再定義してください。
-  ただし、基底クラスの他のメソッドに影響がでないように、整合性をとる必要があるメソッドもあるので要注意。
-
-◆ 汎用クラス
-  モジュールクラスの基底クラスとなるクラスや汎用的なクラスを定義してあります。
-
-・祝日表クラス(CommonHolidays)
-  祝日を計算するクラスです。
-  このクラスを継承した、日本の祝日を定義している JapanHolidays クラスがあります。
-
+  コントローラーやビューの基本的なメソッドが実装されています。        $checkbox = ($columns['published'] === 't') ? " checked" : '';
+        $hastitle = (empty($columns['title'])) ? '':"<h3>{$columns['title']}</h3>";
+        $txtcol = (empty($columns['title'])) ? ' style="color:black;"':"";
+        $body_contents = pseudo_markdown($columns['contents']);
+        $atext = <<<EOF
+<div class='blog_content' id={$columns['id']}>
+    <span class='flapMenu rightitem' link='edit_form'{$txtcol}>【編集】</span>
+    {$hastitle}
+    {$body_contents}
+    <div class='edit_form'>
+        <hr size="2">
+        <table>
+        <tr>
+        <th>属性</th><td>
+            表示順：<input type='text' name='seq_no' value='{$columns['seq_no']}' size='3'>
+            <input type='checkbox' name='published' value='t'{$checkbox}> 公開
+        </td></tr>
+        <tr><th>タイトル：</th><td><input type='text' name='title' value='{$columns['title']}' size='76'></td></tr>
+        <tr><th>投稿内容：</th><td><textarea name='contents' rows=16 cols=80>{$columns['contents']}</textarea></td></tr>
+        <tr><td colspan="2" style="text-align:center;"><span class='button update_content'>【更新】</span></td></tr>
+        </table>
+    </div>
+</div>
 ・ログインクラス(LoginClass)
   LoginModel を実装するための基底クラス。AppModelから派生している。
   このクラスではテーブルにユーザーID、パスワード、ユーザー言語の列が必要です。

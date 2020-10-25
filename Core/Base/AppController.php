@@ -60,20 +60,25 @@ public function is_enable_action($action) {
 //==============================================================================
 // authorised login mode, if need view LOGIN form, return FALSE
 public function is_authorised() {
-//	echo "LOGIN:".(($this->needLogin)?'TRUE':'FALSE')."\n";
 	if($this->needLogin) {
+		if(CLI_DEBUG) {
+			$this->Login->defaultUser();
+			return TRUE;
+		}
 		$login_key = isset($this->Login->LoginID)?$this->Login->LoginID:'login-user';
-		$userid = MySession::get_LoginValue($login_key);    // already Login check
-		$data = $this->Login->is_validUser($userid);
-		if($data === NULL) {
-			// check LOGIN POST
-			$data = $this->Login->is_validLogin(MySession::$ReqData);
-			if($data === NULL) {
-				$msg = $this->__('.Login');
-				page_response('app-999.php',$msg,$msg,$this->Login->error_type);     // 404 ERROR PAGE Response
-//				$this->View->ViewTemplate('Login');             // LoginFORM try it
-//				return FALSE;
+		// new login request POST check
+		$data = $this->Login->is_validLogin(MySession::$ReqData);
+		if($data === NULL) {		// non-request NEW LOGIN POST
+			// check ALREADY LOGIN information if EXIST
+			if($this->Login->error_type === NULL) {		// NO-POST LOGIN
+				$userid = MySession::get_LoginValue($login_key);    // already Login check, IN SESSION
+				$data = $this->Login->is_validUser($userid);		// is_enabled account
+				if($data !== NULL) return TRUE;		// login OK
 			}
+			$msg = $this->__('.Login');
+			$err_msg = $this->Login->error_type;
+			page_response('app-999.php',$msg,$msg,$err_msg);     // LOGIN PAGE Response
+		} else {
 			list($userid,$lang) = $data;
 			if(!empty($lang)) {
 				MySession::set_LoginValue([$login_key => $userid,'LANG'=>$lang]);
@@ -93,8 +98,9 @@ public function is_authorised() {
 // ログアウト処理
 public function LogoutAction() {
 	MySession::setup_Login(NULL);
-	$url = App::Get_AppRoot();
-	header("Location:{$url}");
+	$url = App::Get_SysRoot('index.html');
+	if(CLI_DEBUG) echo "Location:{$url}\n";
+	else header("Location:{$url}");
 }
 //==============================================================================
 // View Helperクラスへの値セット

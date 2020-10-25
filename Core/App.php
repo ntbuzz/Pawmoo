@@ -41,7 +41,7 @@ class App {
             'URI' => $uri,
             'SYSROOT' => static::$sysRoot,
             'APPNAME' => static::$AppName,
-            'URIROOT' => static::$appRoot,
+            'APPROOT' => static::$appRoot,
             'controller' => $controller,  //ucfirst($uri_array[2]),
             'method' => $method,  //ucfirst($uri_array[3]),
             'filter' => $filter,  // ucfirst(static::$Filter),

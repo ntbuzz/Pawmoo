@@ -48,7 +48,7 @@ function log_reset($lvl) {
 //==========================================================================
 // ログの記録または表示
 function debug_log($lvl,...$items) {
-    if($lvl === FALSE) return;
+    if($lvl === FALSE || abs($lvl) > 100) return;
     if($lvl > DEBUG_LEVEL) return;
     // バックトレースから呼び出し元の情報を取得
     $dump_log_info = function($items) {
@@ -75,6 +75,7 @@ function debug_log($lvl,...$items) {
                     $dmp .= "array(" . count($val) . ")\n";
                     $dmp .= $dump_object($val,$indent+1);
                 } else if(is_scalar($val)) {
+                    $val = control_escape($val);
                     $dmp .= "'{$val}'\n";
                 }
             }
@@ -82,7 +83,7 @@ function debug_log($lvl,...$items) {
         };
         foreach($items as $arg) {
             if(is_scalar($arg)) {
-                if(empty($arg)) $arg ='NULL'; else $arg= wordwrap($arg,86,"\n");
+                if(empty($arg)) $arg ='NULL'; else $arg= wordwrap(control_escape($arg),86,"\n");
                 $dmp_msg .= "{$arg}\n";
             } else if(is_array($arg)) {                        // 配列要素の出力
                 foreach($arg as $msg => $obj) {
@@ -91,6 +92,7 @@ function debug_log($lvl,...$items) {
                         $msg = LangUI::get_value('debug',$msg);
                     }
                     if(is_scalar($obj)) {
+                        $obj = control_escape($obj);
                         $dmp_msg .= "{$msg} : {$obj}\n";
                     } else if(is_array($obj)) {
                         $dmp_msg .= "===== {$msg} =====\n";
@@ -118,5 +120,5 @@ function debug_log($lvl,...$items) {
             else $debug_log_str[$lvl] = $dmp_info;
         }
     }
-    if(abs($lvl) > 100) exit;
+    if(abs($lvl) > 1000) exit;
 }

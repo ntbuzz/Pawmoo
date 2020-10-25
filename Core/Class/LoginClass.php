@@ -13,7 +13,7 @@ abstract class LoginClass extends AppModel {
 //==============================================================================
 //　ユーザーIDの妥当性を検証する
 public function is_validUser($userid,$passwd = NULL) {
-    $this->error_type = '';
+    $this->error_type = "Login NEED at '{$this->LoginID}'";
     if(empty($userid)) return NULL;
     $data = $this->getRecordBy($this->LoginID,$userid);
     if($userid === $data[$this->LoginID]) {
@@ -28,26 +28,24 @@ public function is_validUser($userid,$passwd = NULL) {
         $this->error_type = '';
         return [$userid,$lang];
     }
-    $this->error_type = $this->__('.UnknownUser').":{$userid}";
+    $this->error_type = $this->__('.UnknownUser').": '{$userid}'";
     return NULL;
 }
 //==============================================================================
-// ログイン情報のPOSTを受け取ってログイン処理をおこなう
+// Recieved LOGIN POST FORM, do accept USER LOGIN correct
 public function is_validLogin($values) {
     $Login = [];
     foreach($values as $key => $val) {
-        // POSTされてきた名前を読み替える
+        // FORM POST name, renamed to Database column name
         $xkey = (isset($this->PostRenames[$key])) ? $xkey = $this->PostRenames[$key] : $key;
-        // フィールドキーが存在するものだけ書き換える
-        if(array_key_exists($xkey,$this->Schema)) {
-            // 暗号化が必要化確認する
-            list($disp,$flag) = $this->Schema[$xkey];
+        if(array_key_exists($xkey,$this->Schema)) {     // pickup exists field name
+            list($disp,$flag) = $this->Schema[$xkey];   // need encrypt password
             $dval = ($flag === 1) ? passwd_encrypt($val) : $val;
-            if(!empty($val)) $Login[$xkey] = $dval;    // 値があるものだけ
+            $Login[$xkey] = $dval;    // accepta NULL value
         }
     }
-    $this->error_type = '';
-    if(!isset($Login[$this->LoginID])) return NULL;
+    $this->error_type = NULL;
+    if(!array_key_exists($this->LoginID,$Login)) return NULL;
     return $this->is_validUser($Login[$this->LoginID],$Login['password']);
 }
 

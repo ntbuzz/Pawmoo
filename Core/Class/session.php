@@ -17,14 +17,13 @@ class MySession {
 //==============================================================================
 // static クラスにおける初期化処理
 static function InitSession($appname = 'default') {
-	if(!defined('DEFAULT_USER')) define('DEFAULT_USER',['userid' => 'ntak']);
 	$session_id = "_minimvc_waffle_map_{$appname}";
 	static::$MY_SESSION_ID = $session_id;
 	// セッションキーがあれば読み込む
 	static::$EnvData = (array_key_exists($session_id,$_SESSION)) ? $_SESSION[$session_id] : [];
 	// for Login skip on CLI debug.php processing
 	if(DEBUGGER && CLI_DEBUG) {
-		static::$EnvData['Login'] = DEFAULT_USER;
+		static::$EnvData['Login'] = ['username' => 'ntak'];
 	}
 	// overwrite real POST/GET variables
 	static::$ReqData = [];
@@ -95,7 +94,7 @@ static function set_if_empty($tt,$arr) {
 	$varData = ($tt) ? 'EnvData' : 'ReqData';
 	$result = [];
 	foreach($arr as $key => $val) {
-		if(array_key_exists($key,static::$$varData)) static::$$varData[$key] = $val;
+		if(!array_key_exists($key,static::$$varData)) static::$$varData[$key] = $val;
 	}
 }
 //==============================================================================
@@ -117,7 +116,7 @@ static function rm_EnvData(...$arr) {
 // ログイン情報を取得
 static function get_LoginValue($id = NULL) {
 	$LoginData = static::$EnvData['Login'];
-	if($id === NULL) return $LoginData;
+	if($id === NULL || empty($LoginData)) return $LoginData;
 	return (array_key_exists($id,$LoginData)) ? $LoginData[$id] : '';
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -1,7 +1,7 @@
 <?php
 /* -------------------------------------------------------------
- * PHPフレームワーク
- *  coreLibs: コアクラス内で呼び出す共通関数群
+ * Object Oriented PHP MVC Framework
+ *  coreLibs: Common Library for Core/Base Class
  */
 //==============================================================================
 // REQUEST_URI を分解しルーティングに必要なアプリ名、コントローラー名を抽出する
@@ -28,6 +28,8 @@ function get_routing_params($dir) {
         'URI' => $_SERVER['REQUEST_URI'],
         "app_uri"=> $app_uri,
         "args"=> $args,
+        "dir"=> $dir,
+        "root"=> $root,
     ]);
     // コントローラー名以降のパラメータを分解する
     $params = array();
@@ -74,10 +76,10 @@ function get_routing_params($dir) {
 //      $app_root   Application Top URI
 //      $app_module Controller Name
 //      $page_name  Rquest ERROR PAGE
-function error_response($error_page,$app_name, $module) {
+function error_response($error_page,$app_name, $app_uri, $module) {
     list($app_module,$page_name,$page_filter) = array_map(function($a) {
         return (gettype($a) === 'string')?strtolower($a):'';},$module);
-    $app_root = "/{$app_name}/";
+    list($sys_root,$app_root) = $app_uri;
     require_once("Core/error/{$error_page}");
     exit;
 }
@@ -91,7 +93,8 @@ function error_response($error_page,$app_name, $module) {
 function page_response($app_page,...$msg_array) {
     $folders = array(App::Get_AppPath("error/"),"Core/error/");
     list($page_title,$msg_title,$msg_body) = $msg_array;
-    $app_root = App::Get_SysRoot();
+    $sys_root = App::Get_SysRoot();
+    $app_root = App::Get_AppRoot();
     foreach($folders as $file) {
         $page_file = "{$file}{$app_page}";
         if(file_exists($page_file)) {                // レイアウトファイルが見つかった
@@ -154,6 +157,26 @@ function get_php_files($dirtop) {
 }
 //==============================================================================
 // 配列からURIを生成する、要素内に配列があるときにも対応する
+function array_flat_reduce($arr) {
+    $wx = [];
+    $reduce_array = function ($arr) use(&$reduce_array,&$wx) {
+        if(is_array($arr)) {
+            foreach($arr as $key => $val) {
+                if(is_array($val)) {
+                    $reduce_array($val);
+                } else if(is_numeric($key)) {
+                    $wx[] = $val;
+                } else {
+                    $wx[$key] = $val;
+                }
+            }
+        } else $wx[] = $arr;
+    };
+    $reduce_array($arr);
+    return $wx;
+}
+//==============================================================================
+// 配列からURIを生成する、要素内に配列があるときにも対応する
 function array_to_URI($arr) {
     // 無名関数を定義して配列内の探索を行う
     $array_builder = function ($lst) {
@@ -170,6 +193,7 @@ function array_to_URI($arr) {
 //==============================================================================
 // 配列からURIを生成する、要素内に配列があるときにも対応する
 function array_concat_keys($arr,$keys) {
+    if(is_scalar($keys)) return $keys;
     $ss = ''; $trim_sep = ' ';
     foreach($keys as $kk => $val) {
         $sep = (is_numeric($kk)) ? ' ' : $kk;
@@ -178,6 +202,12 @@ function array_concat_keys($arr,$keys) {
     }
     return trim($ss,$trim_sep);
 }
+//==============================================================================
+// テキストを分割して空白を除去した配列を返す
+function trim_explode($sep, $str) {
+    return array_map(function($v) { return trim($v); },explode($sep,$str));
+}
+
 //==============================================================================
 // ファイルパスを / で終わるようにする
 function path_complete($path) {
@@ -203,7 +233,8 @@ function tag_body_name($key) {
 //==============================================================================
 // SQL Compare operator separate
 function keystr_opr($str) {
-    $opr_set = ['=='=>NULL, '<>'=>NULL, '>='=>NULL, '<='=>NULL, '=>'=>'>=', '=<'=>'<=', '!='=>'<>', '='=>NULL, '>'=>NULL, '<'=>NULL, '@'=>NULL];
+    $opr_set = ['=='=>NULL, '<>'=>NULL, '>='=>NULL, '<='=>NULL, '=>'=>'>=', '=<'=>'<=', '!='=>'<>',
+                '='=>NULL, '>'=>NULL, '<'=>NULL, '@'=>NULL, '%'=>NULL ];
     foreach([-2,-1] as $nn) {
         $opr = mb_substr($str,$nn);      // last-2char
         if(array_key_exists($opr,$opr_set)) {

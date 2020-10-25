@@ -31,11 +31,11 @@ require_once('Base/LangUI.php');           // static class
 date_default_timezone_set('Asia/Tokyo');
 
 list($appname,$app_uri,$module,$q_str) = get_routing_params(__DIR__);
+parse_str($q_str, $query);
 list($fwroot,$appRoot) = $app_uri;
 list($controller,$category,$files) = $module;
 // ファイル名を拡張子と分離する
 list($filename,$ext) = extract_base_name($files);
-
 MySession::InitSession($appname);
 // 言語ファイルの対応
 if(array_key_exists('lang', $query)) {

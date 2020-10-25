@@ -206,7 +206,6 @@ protected function sql_safequote(&$value) {
 //   	NOT => [ itenm ] |
 //		fieldkey => findvalue
 	private function makeExpr($cond) {
-//		if(empty($cond)) return '';
 		// LIKE 演算子の生成関数を定義
 		$like_object = function ($key,$val,$table) {
 			$opk = "{$table}.\"{$key}\"";
@@ -220,26 +219,26 @@ protected function sql_safequote(&$value) {
 			return implode('OR',$cmp);
 		};
 		// 条件句(WHERE) の論理式を生成する関数
-		$dump_object = function ($opr,$items,$table)  use (&$dump_object,&$like_object,&$cond)  {
+		$dump_object = function ($opr,$items,$table)  use (&$dump_object,&$like_object)  {
 			$opc = '';
 			foreach($items as $key => $val) {
-				if(empty($key)) continue;
+				if(empty($val)) continue;
 				list($key,$op) = keystr_opr($key);		// キー名の最後に関係演算子
-				if(empty($op)) {	// 演算子がない：配列なら論理式 または LIKE(マルチ)、スカラー：BETWEENまたはLIKEまたは数値比較(=)
+				if(empty($op) || $op === '%') {	// 演算子がない：配列なら論理式 または LIKE(マルチ)、スカラー：BETWEENまたはLIKEまたは数値比較(=)
 					if(is_array($val)) {
 						if(in_array($key,['AND','OR','NOT'])) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
-							if($key === 'NOT') $opp = "NOT {$opp}";
+							if($key === 'NOT') $opp = "(NOT {$opp})";
 						} else { // LIKE [ 配列 ]
 							$opp = $like_object($key,$val,$table);
 						}
 					} else { // 演算子がないスカラー値
 						if(mb_strpos($val,'...') !== FALSE) {
 							$op = 'BETWEEN';
-							list($from,$to) = explode('...',$val);
+							list($from,$to) = trim_explode('...',$val);
 							$val = "'{$from}' AND '{$to}'";
-						} else if(is_numeric($val)) {
+						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';
 						} else {
 							$op = 'LIKE';
@@ -250,7 +249,7 @@ protected function sql_safequote(&$value) {
 							$val = "'%{$val}%'";
 						}
 						$expr = [];
-						foreach(explode('+',$key) as $cmp) {
+						foreach(trim_explode('+',$key) as $cmp) {
 							$cmp = $this->fieldAlias->get_lang_alias($cmp);
 							$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
 						}
@@ -263,8 +262,7 @@ protected function sql_safequote(&$value) {
 						if(is_array($rel)) list($nm,$rel) = array_first_item($rel);
 						list($tbl,$fn) = explode('.',$rel);
 						$ops = $dump_object('AND',$val,$tbl);
-debug_log(3,['COND' => $cond, 'TBL' => $tbl, 'FN' => $fn,'VAL' => $val, 'OPS' => $ops]);
-						$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE {$ops})";
+						$opp = "({$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE {$ops}))";
 					} else continue;
 				} else if(is_array($val)) {
 					$in_op = [ '=' => 'IN', '==' => 'IN', '<>' => 'NOT IN', '!=' => 'NOT IN'];
@@ -277,13 +275,16 @@ debug_log(3,['COND' => $cond, 'TBL' => $tbl, 'FN' => $fn,'VAL' => $val, 'OPS' =>
 					}
 				} else {
 					if(!is_numeric($val)) $val = "'{$val}'";
-					// replace language-alias
-					$key = $this->fieldAlias->get_lang_alias($key);
-					$opp = "{$table}.\"{$key}\"{$op}{$val}";
+					$expr = [];
+					foreach(trim_explode('+',$key) as $cmp) {
+						$cmp = $this->fieldAlias->get_lang_alias($cmp);
+						$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
+					}
+					$opp = implode('OR',$expr);
 				}
-				$opc = (empty($opc)) ? "({$opp})" : "{$opc}{$opr}({$opp})";
+				$opc = (empty($opc)) ? "{$opp}" : "({$opc}){$opr}{$opp}";
 			}
-			return (empty($opc)) ? '' : ((count($items)===1) ? $opc : "({$opc})");
+			return (empty($opc)) ? '' : "{$opc}";	// ((count($items)===1) ? $opc : "({$opc})");
 		};
 		$sql = $dump_object('AND',$cond,$this->table);
 		return $sql;

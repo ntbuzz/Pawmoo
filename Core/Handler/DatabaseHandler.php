@@ -11,7 +11,7 @@ require_once('Core/Handler/SqlHandler.php');
 require_once('Core/Handler/SQLiteHandler.php');
 require_once('Core/Handler/PostgreHandler.php');
 require_once('Core/Handler/NullHandler.php');
-require_once('Core/Handler/FMDBHandler.php');
+//require_once('Core/Handler/FMDBHandler.php');
 //==============================================================================
 // レコードフィールドの読替えクラス
 class fieldAlias {
@@ -31,6 +31,7 @@ public function exists_locale($field_name) {
 //==============================================================================
 //	言語カラムの読み替えが必要か
 public function get_lang_alias($field_name) {
+    
     return ($this->exists_locale($field_name)) ? $this->lang_alias[$field_name] : $field_name;
 }
 //==============================================================================
@@ -72,31 +73,34 @@ class DatabaseHandler {
 //==============================================================================
 // データベースへ接続してハンドルを返す
 public static function get_database_handle($handler) {
-    if(array_key_exists($handler,self::DatabaseSpec)) {
-        $defs = self::DatabaseSpec[$handler];
+    if(array_key_exists($handler,static::$dbHandle)) {
+        return static::$dbHandle[$handler];
+    }
+    if(array_key_exists($handler,static::DatabaseSpec)) {
+        $defs = static::DatabaseSpec[$handler];
         $func = $defs['callback'];      // 呼び出し関数
-        self::$dbHandle[$handler] = self::$func(DatabaseParameter[$handler],'open');
-        return self::$dbHandle[$handler];
+        static::$dbHandle[$handler] = static::$func(DatabaseParameter[$handler],'open');
+        return static::$dbHandle[$handler];
     }
     return NULL;
 }
 //==============================================================================
 // デストラクタ
 public static function CloseConnection() {
-    self::closeDb();
+    static::closeDb();
 }
 //==============================================================================
 // ハンドルの取得
 public function get_callback_func($handler) {
-    return self::DatabaseSpec[$handler]['callback'];      // 呼び出し関数
+    return static::DatabaseSpec[$handler]['callback'];      // 呼び出し関数
 }
 //==============================================================================
 // クローズ処理
 private static function closeDb() {
-    debug_log(FALSE, self::$dbHandle);
-    foreach(self::$dbHandle as $key => $handle) {
-        $func = self::DatabaseSpec[$key]['callback'];      // 呼び出し関数
-        self::$func($handle,NULL,'close');
+    debug_log(FALSE, static::$dbHandle);
+    foreach(static::$dbHandle as $key => $handle) {
+        $func = static::DatabaseSpec[$key]['callback'];      // 呼び出し関数
+        static::$func($handle,NULL,'close');
     }
     self:$dbHandle = [];
 }
@@ -159,7 +163,7 @@ private static function MySQLDatabase($dbdef,$action) {
 //==============================================================================
 // 動作確認用(FMDB)
 static function Connect($handler,$layout) {
-    $dbb = self::$dbHandle[$handler];
+    $dbb = static::$dbHandle[$handler];
 }
 
 }

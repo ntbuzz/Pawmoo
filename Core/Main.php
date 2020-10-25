@@ -62,11 +62,11 @@ debug_log(0,[ "Routing module" => $module]);
 if(empty($appname) || !file_exists("app/$appname")) {
 //  header("Location:/index.html");exit;
     // 404エラーページを送信する時はこっち
-    error_response('app-404.php',$appname,$module);
+    error_response('app-404.php',$appname,$app_uri,$module);
 }
 if($controller === 'Error') {       // ERROR PAGE
     $code = $params[0];
-    error_response("page-{$code}.php",$appname,$module);
+    error_response("page-{$code}.php",$appname,$app_uri,$module);
 }
 // ここでは App クラスの準備ができていないので直接フォルダ指定する
 require_once("app/{$appname}/Config/config.php");
@@ -85,7 +85,7 @@ if(!is_extst_module($appname,$controller,'Controller')) {
     list($controller,$method,$filter) = $module;
     // RE-TRY DEFAULT CONTROLLER,if FAILED,then NOT FOUND
     if(!is_extst_module($appname,$controller,'Controller')) {
-        error_response('page-404.php',$appname,$module);
+        error_response('page-404.php',$appname,$app_uri,$module);
     }
 }
 // リダイレクトする時はコントローラーが書換わっているので調整する
@@ -151,7 +151,7 @@ if(!$controllerInstance->is_enable_action($method)) {
     } else {
         $module[0] = $controller;       // may-be rewrited
         $module[1] = $method;           // may-be rewrited
-        error_response('page-404.php',$appname,$module);
+        error_response('page-404.php',$appname,$app_uri,$module);
     }
 }
 if(strcasecmp($appname,$controller) === 0) {
@@ -183,7 +183,8 @@ debug_log(0, [
     '#PathInfo' => [
         "REFERER" => $_SERVER['HTTP_REFERER'],
         "SERVER" => $_SERVER['REQUEST_URI'],
-        "RootURI"=> $approot,
+        "sysRoot"=> App::$SysVAR['SYSROOT'],
+        "appRoot"=> App::$SysVAR['APPROOT'],
         "appname"=> $appname,
         "Controller"=> $controller,
         "Action"    => $ContAction,

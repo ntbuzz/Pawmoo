@@ -211,6 +211,8 @@ public function Form($act, $attr) {
 //
 public function Select($key,$name) {
 	debug_log(1, $this->MyModel->Select);
+	echo $this->Select_str($key,$name);
+/*
 	$dat = $this->MyModel->RecData[$key];
 	echo "<SELECT name='{$name}'>";
 	foreach($this->MyModel->Select[$key] as $ttl => $id) {
@@ -218,6 +220,20 @@ public function Select($key,$name) {
 		echo "<OPTION value='{$id}'{$sel}>{$ttl}</option>\n";
 	}
 	echo "</SELECT>\n";
+*/
+}
+//==============================================================================
+// SELECTタグの生成
+//	$this->Select ($key,$name)
+//
+public function Select_str($key,$name) {
+    $dat = $this->MyModel->RecData[$key];
+    $select = "<SELECT name='{$name}'>";
+    foreach($this->MyModel->Select[$key] as $ttl => $id) {
+        $sel = ($id === $dat) ? " selected" : "";
+        $select .= "<OPTION value='{$id}'{$sel}>{$ttl}</option>\n";
+    }
+	return "{$select}\n</SELECT>\n";
 }
 //==============================================================================
 // INPUTタグの生成
