@@ -9,7 +9,7 @@ class AppView extends AppObject {
     protected $Layout;        // デフォルトのレイアウト
     private $doTrailer = FALSE;
     const Extensions = array("tpl","php","inc","html");  // テンプレート拡張子
-    const SectionCMD = '<@&+*%-.#{[?';  // 単独セクション処理コマンド文字
+    const SectionCMD = '<@&+*%-.#{[';  // 単独セクション処理コマンド文字
     private $rep_array;
     private $env_vars;              // テンプレート内のグローバル変数
     private $inlineSection;        // インラインのセクション
@@ -276,7 +276,7 @@ public function ViewTemplate($name,$vars = []) {
         // analyze IF-SELECTOR and EXPAND KEY
         $if_selector = function($sec,$key) use(&$vars,&$if_selector) {
                 if(substr($key,0,1)==='?') {
-                    $cmp_val = mb_substr($key,1);    // expand variable
+                    $cmp_val = mb_substr(trim($key),1);    // expand variable
                     foreach($sec as $check => $value) {
 debug_log(-999,["CMP({$key})" => $check,"VAL"=>$cmp_val]);
                         if($check === '') $result = empty($cmp_val);            // is_empty ?
@@ -288,11 +288,11 @@ debug_log(-999,["CMP({$key})" => $check,"VAL"=>$cmp_val]);
                 }
                 return [$key => $sec];
         };
-        $divSection = array_walk_replace($divSection, $if_selector,$vars);
+//        $divSection = array_walk_replace($divSection, $if_selector,$vars);
         foreach($divSection as $key => $sec) {
             $vv = $this->expand_SectionVar($sec,$vars);     // expand LEVEL-1
             $vv = array_walk_replace($vv, $if_selector,$vars);
-debug_log(-999,[ "SEC" => $vv,"BK"=>$sec]);
+debug_log(-999,[ "SEC" => $vv]);
             if($key === '+setvar') {        // グローバル変数に登録
                 $this->env_vars = $this->my_array_Merge($vv,$this->env_vars);
             } else if(strlen($key) > 2 && $key[0] === '$' && $key[1] !== '{') {     // ローカル変数に登録
@@ -581,8 +581,9 @@ debug_log(-999,[ "SEC" => $vv,"BK"=>$sec]);
             $attr = $this->gen_Attrs($attrs,$vars);
             echo "<{$tag}{$attr}>\n";
             list($opt_key, $opt_val) = array_first_item($subsec);    // 最初の要素を処理
-            $sel_item = (is_numeric($opt_key)) ? '' : $this->expand_Strings($opt_key,$vars);
+            $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
             $opt_val = $this->expand_SectionVar($opt_val,$vars);
+    debug_log(-999,["TAG"=>$tag,"ATTR"=>$attrs,"SUB"=>$subsec,"SEC"=>$sec,"OPT"=>$opt_val,"SEL"=>$sel_item,"KEY"=>$opt_key]);
             if(is_array($opt_val)) {
                 $opt_val = array_flat_reduce($opt_val);
                 foreach($opt_val as $opt => $val) {
@@ -738,7 +739,8 @@ debug_log(-999,[ "SEC" => $vv,"BK"=>$sec]);
                 if(is_numeric($key)) {  // 連想キーが無い場合
                     // 値が配列かセクション用コマンドならセクションデータ扱い
                     if(is_array($val)||$this->is_section_tag($val)) {
-                        $secList[] = $val;    // 配列かコマンド名ならセクション
+                        if(isset($secList[$key])) $secList[] = $val;
+                        else $secList[$key] = $val;    // 数字キーのものがあるため
                     } else {
                         $innerText .= $val;   // スカラー値ならインナーテキスト
                     }

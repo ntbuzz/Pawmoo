@@ -35,7 +35,7 @@ function array_walk_replace($arr, $callback, $var = NULL) {
         $ret = $callback($val,$key,$var);
         if(is_array($ret)) {
             foreach($ret as $kk => $vv) {
-                if(is_numeric($kk)) $wd[] = $vv;
+                if(is_numeric($kk) && isset($wd[$kk])) $wd[] = $vv;
                 else $wd[$kk] = $vv;
             }
         } else $wd[$key] = $ret;
