@@ -25,7 +25,7 @@
 1. 同様に vendor リポジトリもcheckoutし、念の為「.git」フォルダを削除しておく
 
 
-## ライセンス
+## ライセンス(MIT)
 
 Copyright (c)  2017 - 2020 by ntbuzz
 

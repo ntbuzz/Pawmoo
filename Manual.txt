@@ -236,9 +236,10 @@
   比較値に配列を指定すると複数の値と比較することができます(IN ,NOT IN演算)
     ex.  'status=" => ['終了','完了','削除']
 
-  比較演算子を指定しない場合は LIKE 演算子が使用されます。
-  演算子の指定がなく比較値がピリオド３つで連結("XXXX...YYYY")されていた場合は BETWEEN 演算子が使われます。
+  比較演算子を指定しない場合、または明示的にLIKE演算子(%)を指定したときには LIKE 演算子が使用されます。
+  演算子の指定がなく、比較値がピリオド３つで連結("XXXX...YYYY")されていた場合は BETWEEN 演算子が使われます。
     ex.  'period" => '2020/01/01...2021/01/01'
+          → period BETWEEN ('2020/01/01' AND '2021/01/01')
 
   複数のカラムを同じ比較値で比較する場合、カラム名を＋記号で連結した記述ができます。
     ex.  'title+contents' => "Keyword"
@@ -674,29 +675,18 @@
 
 2.6.2 動的クラス
   動的クラスはモジュール実装のための基底クラスになっています。
-  コントローラーやビューの基本的なメソッドが実装されています。        $checkbox = ($columns['published'] === 't') ? " checked" : '';
-        $hastitle = (empty($columns['title'])) ? '':"<h3>{$columns['title']}</h3>";
-        $txtcol = (empty($columns['title'])) ? ' style="color:black;"':"";
-        $body_contents = pseudo_markdown($columns['contents']);
-        $atext = <<<EOF
-<div class='blog_content' id={$columns['id']}>
-    <span class='flapMenu rightitem' link='edit_form'{$txtcol}>【編集】</span>
-    {$hastitle}
-    {$body_contents}
-    <div class='edit_form'>
-        <hr size="2">
-        <table>
-        <tr>
-        <th>属性</th><td>
-            表示順：<input type='text' name='seq_no' value='{$columns['seq_no']}' size='3'>
-            <input type='checkbox' name='published' value='t'{$checkbox}> 公開
-        </td></tr>
-        <tr><th>タイトル：</th><td><input type='text' name='title' value='{$columns['title']}' size='76'></td></tr>
-        <tr><th>投稿内容：</th><td><textarea name='contents' rows=16 cols=80>{$columns['contents']}</textarea></td></tr>
-        <tr><td colspan="2" style="text-align:center;"><span class='button update_content'>【更新】</span></td></tr>
-        </table>
-    </div>
-</div>
+  コントローラーやビューの基本的なメソッドが実装されています。
+  アプリケーションモジュールはこれらのクラスを継承することで、モジュール固有の処理に専念できます。
+  基底クラスに実装されたメソッドをモジュール固有のものに置き換えたいときは、メソッドを再定義してください。
+  ただし、基底クラスの他のメソッドに影響がでないように、整合性をとる必要があるメソッドもあるので要注意。
+
+◆ 汎用クラス
+  モジュールクラスの基底クラスとなるクラスや汎用的なクラスを定義してあります。
+ 
+・祝日表クラス(CommonHolidays)
+  祝日を計算するクラスです。
+  このクラスを継承した、日本の祝日を定義している JapanHolidays クラスがあります。
+
 ・ログインクラス(LoginClass)
   LoginModel を実装するための基底クラス。AppModelから派生している。
   このクラスではテーブルにユーザーID、パスワード、ユーザー言語の列が必要です。

@@ -32,54 +32,13 @@ $template = [
         '+input[title]' => [	'タイトル：', 'size'=> 76, 'value'=> '${@@title}' ]
     ]
 ];
-debug_log(-99,["ORIGIN" => $template]);
-echo "WALK\n";
-$arr = array_walk_replace($template, function($v,$k) {
-    debug_log(-99,["Check:" => $k,'VAL:'=>$v]);
-    if($k[0]==='?') {
-        foreach($v as $check => $value) {
-            if($check === '') {
-                debug_log(-99,["HIT:" => $value]);
-                return $value;
-            }
-        }
-    };
-    return [$k => $v];
-});
-debug_log(-99,["REPLACE" => $arr]);
-
+foreach([
+    ' aaaa=>bbbb ',
+    'aaaa=>',
+    '=>',
+    'bbbb',
+] as $vv) {
+    debug_log(-99,["SPLIT" => explode('=>',$vv)]);
+}
 exit;
-function array_walk_replace($arr, $callback, $var = NULL) {
-    $wd = [];
-    foreach($arr as $key => $val) {
-        $ret = $callback($val,$key);
-        foreach($ret as $kk => $vv) {
-            if(is_numeric($kk)) $wd[] = $vv;
-            else $wd[$kk] = $vv;
-        }
-    }
-    return $wd;
-}
 
-list($a,$b,$c,$d) = $arr;
-
-function array_flat_nexted($arr) {
-    $wx = [];
-    $reduce_array = function ($arr) use(&$reduce_array,&$wx) {
-        if(is_array($arr)) {
-            foreach($arr as $key => $val) {
-                if(is_array($val)) {
-                    $reduce_array($val);
-                } else if(is_numeric($key)) {
-                    $wx[] = $val;
-                } else {
-                    $wx[$key] = $val;
-                }
-            }
-        } else $wx[] = $arr;
-    };
-    $reduce_array($arr);
-    return $wx;
-}
-$wx = array_flat_nexted($sub);
-var_dump($sub,$wx);

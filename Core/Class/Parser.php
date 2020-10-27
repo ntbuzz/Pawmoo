@@ -35,20 +35,8 @@ class SectionParser {
 [^,\s]+
 )*)/x
 EOS;
-//        preg_match_all($p,$lines,$m);               // 全ての要素をトークン分離する
-//        $wd = $m[1];
-        $token_parser = function($pattern,$text) {
-            preg_match_all($pattern,$text,$m);      // All-Toke nsplit
-            $wd = [];                               // re-build token array
-            foreach($m[1] as $val) {
-                $md = explode('=>',trim($val));
-                if(count($md) === 2) {
-                    foreach(array_filter([$md[0],'=>',$md[1]],function($v) { return !empty($v);}) as $vv) $wd[] = $vv;
-                } else $wd[] = $md[0];
-            }
-            return $wd;
-        };
-        $wd = $token_parser($p,$lines);
+        preg_match_all($p,$lines,$m);               // 全ての要素をトークン分離する
+        $wd = $m[1];
         $incomm = FALSE;                            // コメントの処理
         foreach($wd as $token) {
             if(mb_substr($token,0,2) == '//') continue;    // 先頭が // 文字ならコメント・トークンなので単語帳には入れない
@@ -58,6 +46,17 @@ EOS;
                 $wrapstr = $token[0] . mb_substr($token,-1);     // 先頭文字と最終文字を取り出す
                 if ( in_array($wrapstr, self::WORDSTRING)) {
                     $token = implode( "\n" , text_line_split("\n",trim( $token, $wrapstr )) );    // 改行を含むので各行の前後の空白を除去
+                } else if($token !== '=>') {
+                    $md = explode('=>',trim($token));
+                    if(count($md)===2) {
+                        foreach(array_map(function($a) { $aa = $a[0] . mb_substr($a,-1);     // 先頭文字と最終文字を取り出す
+                                    if(in_array($aa, self::WORDSTRING)) $a = trim($a, $aa );
+                                    return $a;
+                                },array_filter([$md[0],'=>',$md[1]],'strlen')) as $vv) {
+                            $this->wordlist[] = $vv;
+                        }
+                        continue;
+                    }
                 }
                 // 改行文字\nを置換する
                 $this->wordlist[] = ($wrapstr == '""') ? str_replace('\n', "\n", $token) : $token;

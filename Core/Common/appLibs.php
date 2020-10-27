@@ -27,28 +27,6 @@ function array_first_item($arr) {
     return ['',''];
 }
 //==============================================================================
-// 配列要素をCALLBACK関数で置き換える
-function array_walk_replace($arr, $callback, $var = NULL) {
-    if(is_scalar($arr)) return $arr;
-    $wd = [];
-    foreach($arr as $key => $val) {
-        $ret = $callback($val,$key,$var);
-        if(is_array($ret)) {
-            foreach($ret as $kk => $vv) {
-                if(isset($wd[$kk])) {
-                    if(is_numeric($kk)) $wd[] = $vv;
-                    else {
-                        $dup = 0;
-                        while(isset($wd[$ks="{$kk}:{$dup}"])) ++$dup;
-                        $wd[$ks] = $vv;
-                    }
-                } else $wd[$kk] = $vv;
-            }
-        } else $wd[$key] = $ret;
-    }
-    return $wd;
-}
-//==============================================================================
 // 拡張子をとりだす
 // 返り値は .拡張子
 function extract_extension($fn) {

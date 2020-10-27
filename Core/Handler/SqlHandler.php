@@ -1,48 +1,46 @@
 <?php
 /* -------------------------------------------------------------
- * PHPフレームワーク
- *	SQLHandler: SQLデータベース用のベースハンドラ
- *
+ * Object Oriented PHP MVC Framework
+ *	SQLHandler: COMMON SQL-DB HANDLER Class
  */
 //==============================================================================
-//	アプリケーション内で共通のDBハンドラ
 abstract class SQLHandler {	// extends SqlCreator {
-	protected	$table;		// 接続テーブル
-	protected $dbb;  	    // データベースハンドル
+	protected	$table;		// connect table
+	protected $dbb;  	    // DB handle
 	protected $rows;
-	public $columns;        // レコードフィールドの値
-	public	$recordId;		// ダミー
-	private	$startrec;		// 開始レコード番号
-	private	$limitrec;		// 取得レコード数
-	private $handler;		// SQLハンドラー
-	public  $DateStyle = 'Y-m-d';
-	private $relations;
+	public $columns;        // record column data
+	public	$recordId;		// dummy
+	private	$startrec;		// start record number
+	private	$limitrec;		// get record count
+	private $handler;		// Databas Handler Name
+	public  $DateStyle = 'Y-m-d';	// Date format
+	private $relations;		// relation tables
 //==============================================================================
-//	抽象メソッド：継承先クラスで定義する
+//	abstruct method
 	abstract protected function Connect();
 	abstract protected function doQuery($sql);
 	abstract protected function fetch_array();
 	abstract protected function getLastError();
 	abstract protected function updateRecord($wh, $row);		// INSERT or UPDATE
 //==============================================================================
-//	コンストラクタ：　テーブル名
+//	Constructor( table name, DB Handler)
 //==============================================================================
 function __construct($table,$handler) {
 		$this->table = $table;
 		$this->dbb = DatabaseHandler::get_database_handle($handler);
 		$this->Connect();
-		debug_log(FALSE,["フィールド名リスト" => $this->columns]);
+		debug_log(FALSE,["Columns List" => $this->columns]);
 		$this->handler = $handler;
 		$this->fieldAlias = new fieldAlias();
 	}
 //==============================================================================
-// setupRelations: リレーション情報を記憶する
+// setupRelations: relation table reminder
 public function setupRelations($relations) {
 	$this->relations = $relations;
 	debug_log(3,["RELATIONS" => $this->relations]);
 }
 //==============================================================================
-// fetchDB: レコードを取得して言語エイリアスとカラム連結を適用する
+// fetchDB: get record data , and replace alias and bind column
 public function fetchDB() {
 	if($row = $this->fetch_array()) {
 		$this->fieldAlias->to_alias_field($row);
@@ -50,7 +48,7 @@ public function fetchDB() {
 	return $row;
 }
 //==============================================================================
-//	getValueLists: 抽出カラム名, 値カラム名、グルーピングカラム名
+//	getValueLists: list-colum name, value-colums
 public function getValueLists($table,$ref,$id) {
 	$sql = $this->sql_QueryValues($table,$ref,$id);
 	$this->doQuery($sql);
@@ -63,24 +61,24 @@ public function getValueLists($table,$ref,$id) {
 	return $values;
 }
 //==============================================================================
-//	doQueryBy: キー列名と値で検索しフィールド配列を返す
+//	doQueryBy: query by KEY-NAME
 public function doQueryBy($key,$val) {
 	$sql = $this->sql_GetRecordByKey($key,$val);
 	$this->doQuery($sql);
 	return $this->fetchDB();
 }
 //==============================================================================
-// ページングでレコードを読み込むためのパラメータ
-// pagenum は１以上になることを呼び出し側で保証する
+// SETUP Paging Parmeter
+// pagenum must be >=1 on call function
 public function SetPaging($pagesize, $pagenum) {
-	$this->startrec = $pagesize * ($pagenum - 1);		// 開始レコード番号
+	$this->startrec = $pagesize * ($pagenum - 1);		// start record num calc
 	if($this->startrec < 0) $this->startrec = 0;
-	$this->limitrec = $pagesize;		// 取得レコード数
+	$this->limitrec = $pagesize;		// get limit records
 	debug_log(FALSE,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
 }
 //==============================================================================
 //	getRecordCount($cond) 
-//	$cond 条件に一致したレコード数を返す
+//		get $cond match record count
 //==============================================================================
 public function getRecordCount($cond) {
 	$where = $this->sql_makeWHERE($cond);	// 検索条件
@@ -91,20 +89,20 @@ public function getRecordCount($cond) {
 }
 //==============================================================================
 //	getRecordValue($cond,$relations) 
-//	$cond 条件に一致したレコードデータを返す
+//	find $cond match record
 //==============================================================================
 public function getRecordValue($cond,$relations) {
 	$where = $this->sql_makeWHERE($cond);		// 検索条件
 	$sql = $this->sql_JoinTable($relations);
-	$where .= ($this->handler == 'SQLite') ? " limit 0,1" : " offset 0 limit 1";		// 取得レコード数
+	$where .= ($this->handler == 'SQLite') ? " limit 0,1" : " offset 0 limit 1";
 	$sql .= "{$where};";
 	$this->doQuery($sql);
 	return $this->fetchDB();
 }
 //==============================================================================
-//	findRecord(row): 
-//	row 配列を条件にレコード検索する
-//      [ AND条件... ] OR条件 [ AND条件... ]
+//	findRecord(cond): 
+//	cond: query condition
+//      [ AND... ] OR [ AND... ]
 // pgSQL: SELECT *, count('No') over() as full_count FROM public.mydb offset 10 limit 50;
 // SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
 //==============================================================================
@@ -127,11 +125,11 @@ debug_log(3,["SQL" => "{$sql}{$where};", "DATA" => $field]);
 		}
 		$where .=  " ORDER BY ".trim($orderby,",");
 	}
-	if($this->limitrec > 0) {		// 取得レコード数
+	if($this->limitrec > 0) {
 		if($this->handler == 'SQLite') {
-			$where .= " limit {$this->startrec},{$this->limitrec}";		// 取得レコード数
+			$where .= " limit {$this->startrec},{$this->limitrec}";
 		} else {
-			$where .= " offset {$this->startrec} limit {$this->limitrec}";		// 取得レコード数
+			$where .= " offset {$this->startrec} limit {$this->limitrec}";
 		}
 	}
 	$sql .= "{$where};";
@@ -139,17 +137,16 @@ debug_log(3,["SQL" => "{$sql}{$where};", "DATA" => $field]);
 }
 //==============================================================================
 //	deleteRecord(wh): 
-//	wh 配列を条件にレコードを1件だけ削除する
 public function deleteRecord($wh) {
 	$where = $this->sql_makeWHERE($wh);
 	$sql = "DELETE FROM {$this->table}{$where};";
 	$this->doQuery($sql);
 }
 //==============================================================================
-// 汎用SQL(SELECT 〜 WHERE 〜)コマンドの発行
-// SQlite3, PostgreSQL, mariaDB 固有のSQLコマンド(update, insert, replace)は継承クラスで実装する
+// Common SQL(SELECT 〜 WHERE 〜) generate
+// SQlite3, PostgreSQL, mariaDB unique SQL command(update, insert, replace) will be generate instance class
 //==============================================================================
-// 値リストを取得、重複はGROUP BY で除外したいけど...
+// get value lists
 	private function sql_QueryValues($table,$ref,$id) {
 //		$groupby = (empty($grp)) ? '' : " GROUP BY \"{$grp}\"";
 		return "SELECT \"{$id}\",\"{$ref}\" FROM {$table} ORDER BY \"{$id}\";";
@@ -160,14 +157,15 @@ public function deleteRecord($wh) {
 		return "SELECT * FROM {$this->table} WHERE \"{$key}\"='{$val}';";
 	}
 //==============================================================================
-// シングルクオートをエスケープする
+// escape to single-quote(')
 protected function sql_safequote(&$value) {
-	foreach($value as $key => $val) {
-		$value[$key] = str_replace("'","''",$val);
-	}
+	array_walk($value,function(&$v,$k){$v=str_replace("'","''",$v);});
+//	foreach($value as $key => $val) {
+//		$value[$key] = str_replace("'","''",$val);
+//	}
 }
 //==============================================================================
-// テーブルをジョインしてSELECT
+// generate JOIN token
 	private function sql_JoinTable($Relations) {
 		$sql = "SELECT {$this->table}.*";
 		$frm = " FROM {$this->table}";
@@ -192,48 +190,79 @@ protected function sql_safequote(&$value) {
 		return "{$sql}{$frm}{$jstr}";
 	}
 //==============================================================================
-// 配列要素からのWHERE句を作成
+// Re-Build Condition ARRAY, Create SQL-WHERE statement.
 	private function sql_makeWHERE($cond) {
-		$sql = $this->makeExpr($cond);
-		if(!empty($sql)) $sql = ' WHERE '.$sql;
+		$reduce_array = function($arr) use(&$reduce_array) {
+			$wd = [];
+			foreach($arr as $key => $val) {
+				while((is_numeric($key) || in_array($key,['AND','OR'])) && is_array($val) && (count($val)===1)) {
+					list($key,$val) = array_first_item($val);
+				}
+				if(is_array($val)) {
+					$sub = $reduce_array($val);
+					if(is_numeric($key)) {
+						foreach($sub as $kk => $vv) {
+							if(isset($wd[$kk])) {
+								if(is_numeric($kk)) $wd[] = $vv;
+								else {
+									for($dup=0; isset($wd[$ks="{$kk}:{$dup}"]);++$dup) ;
+									$wd[$ks] = $vv;
+								}
+							} else $wd[$kk] = $vv;
+						}
+					} else $wd[$key] = $sub;
+				} else {
+					$wd[$key] = $val;
+				}
+			}
+			return $wd;
+		};
+		$new_cond = $reduce_array(['AND' => $cond]);
+		$sql = $this->makeExpr($new_cond);
+		debug_log(3,['IN-COND'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);
+		if(strlen($sql)) $sql = ' WHERE '.$sql;
 		return $sql;
 	}
 //==============================================================================
-// 配列要素から論理演算式を生成
+// GENERATE WHERE token from ARRAY[] expression
 // item := 
 //   	AND => [ itenm, item,... ] | [ item, item,...]
 //   	OR => [ itenm, item,... ] |
 //   	NOT => [ itenm ] |
 //		fieldkey => findvalue
 	private function makeExpr($cond) {
-		// LIKE 演算子の生成関数を定義
-		$like_object = function ($key,$val,$table) {
-			$opk = "{$table}.\"{$key}\"";
-			$cmp = array_map(function($v) use(&$opk) {
-					if($v[0] === '-') {
-						$v = mb_substr($v,1);
-						$opx = 'NOT LIKE';
-					} else $opx = 'LIKE';
-					return "({$opk} {$opx} '%{$v}%')";
-				},$val);
-			return implode('OR',$cmp);
-		};
-		// 条件句(WHERE) の論理式を生成する関数
-		$dump_object = function ($opr,$items,$table)  use (&$dump_object,&$like_object)  {
+		$dump_object = function ($opr,$items,$table)  use (&$dump_object)  {
+			// LIKE operation build
+			$like_object = function ($key,$val,$table) {
+				$opk = "{$table}.\"{$key}\"";
+				$cmp = array_map(function($v) use(&$opk) {
+						if($v[0] === '-') {
+							$v = mb_substr($v,1);
+							$opx = 'NOT LIKE';
+						} else $opx = 'LIKE';
+						return "({$opk} {$opx} '%{$v}%')";
+					},$val);
+				return implode('OR',$cmp);
+			};
 			$opc = '';
 			foreach($items as $key => $val) {
-				if(empty($val)) continue;
-				list($key,$op) = keystr_opr($key);		// キー名の最後に関係演算子
-				if(empty($op) || $op === '%') {	// 演算子がない：配列なら論理式 または LIKE(マルチ)、スカラー：BETWEENまたはLIKEまたは数値比較(=)
+				if(is_numeric($key) && is_array($val)) {
+					echo "RETURN\n";
+					return $dump_object($opr,$val,$table);
+				}
+				if(empty($key)) continue;
+				list($key,$op) = keystr_opr($key);
+				if(empty($op) || $op === '%') {			// non-exist op or LIKE-op(%)
 					if(is_array($val)) {
 						if(in_array($key,['AND','OR','NOT'])) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
+							if(!empty($opp)) $opp = "({$opp})";
 							if($key === 'NOT') $opp = "(NOT {$opp})";
-						} else { // LIKE [ 配列 ]
+						} else { // LIKE [ array ]
 							$opp = $like_object($key,$val,$table);
 						}
-					} else { // 演算子がないスカラー値
+					} else { // not have op code
 						if(mb_strpos($val,'...') !== FALSE) {
 							$op = 'BETWEEN';
 							list($from,$to) = trim_explode('...',$val);
@@ -241,11 +270,10 @@ protected function sql_safequote(&$value) {
 						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';
 						} else {
-							$op = 'LIKE';
 							if($val[0] == '-') {
 								$val = mb_substr($val,1);
 								$op = 'NOT LIKE';
-							}
+							} else $op = 'LIKE';
 							$val = "'%{$val}%'";
 						}
 						$expr = [];
@@ -255,8 +283,8 @@ protected function sql_safequote(&$value) {
 						}
 						$opp = implode('OR',$expr);
 					}
-				} else if($op === '@') {	// サブクエリー
-					// リレーション定義済みかを確かめる
+				} else if($op === '@') {	// SUBQUERY op
+					// check exists relations
 					if(array_key_exists($key,$this->relations)) {
 						$rel = $this->relations[$key];
 						if(is_array($rel)) list($nm,$rel) = array_first_item($rel);
@@ -269,8 +297,8 @@ protected function sql_safequote(&$value) {
 					if(array_key_exists($op,$in_op)) {
 						$cmp = implode(',',array_map(function($v) { return "'{$v}'";},$val));
 						$opx = $in_op[$op];
-						$opp = "{$table}.\"{$key}\" {$opx} ({$cmp})";
-					} else {	// LIKE [ 配列 ]
+						$opp = "({$table}.\"{$key}\" {$opx} ({$cmp}))";
+					} else {	// LIKE [ array ]
 						$opp = $like_object($key,$val,$table);
 					}
 				} else {
@@ -282,7 +310,7 @@ protected function sql_safequote(&$value) {
 					}
 					$opp = implode('OR',$expr);
 				}
-				$opc = (empty($opc)) ? "{$opp}" : "({$opc}){$opr}{$opp}";
+				$opc = (empty($opc)) ? "{$opp}" : "{$opc}{$opr}{$opp}";
 			}
 			return (empty($opc)) ? '' : "{$opc}";	// ((count($items)===1) ? $opc : "({$opc})");
 		};
