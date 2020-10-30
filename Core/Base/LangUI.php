@@ -99,11 +99,8 @@ public static function LangDebug() {
             $import = [];           // インポートリスト
             $values = [];           // ロケール定義
             foreach($section as $key => $val) {
-                if(is_numeric($key)) {          // 配列番号の要素なら外部読み込み指示かチェック
-                    if($val[0] == '@') {
-                        // @以降の文字列をインポートリストに記憶しておき後で処理する
-                        $import[] = mb_substr($val,1);
-                    }
+                if($key[0] == '@') {                // @以降の文字列をインポートリストに記憶しておき後で処理する
+                        $import[] = mb_substr($key,1);
                 } else if($key[0] == '.') {        // ロケール定義
                     if($key == static::$Locale) {         // モジュール名の直下に定義された言語
                         if(is_array($val)) {                           // ロケール定義配列になっていれば不要な言語を削除する

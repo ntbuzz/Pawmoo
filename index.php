@@ -1,21 +1,21 @@
 <?php
 /* -------------------------------------------------------------
- * PHPフレームワーク
- *  index:  リダイレクト処理
+ * Object Oriented PHP MVC Framework
+ *  Module or Resource switcher.
  */
 define('DEBUGGER', TRUE);
 ini_set('display_errors',0);
 
-// IISのmod_rewriteが勝手にSJISにデコードするようなのでUTF-8に強制的に戻す
+// It seems that mod_rewrite of IIS decodes to SJIS without permission, so forcibly return to UTF-8.
  foreach(['REQUEST_URI', 'HTTP_REFERER'] as $id) {
 	$url = $_SERVER[$id];
 	$_SERVER[$id] = mb_convert_encoding($url,'UTF-8','sjis-win');
  }
-// mod_rewrite の設定をシンプルにするため
+// To simplify mod_rewrite settings ...
 if(preg_match('/\/(?:css|js)\/.*/', $_SERVER['REQUEST_URI'])) {
-	define('DEBUG_LEVEL', 0);			// メッセージ出力許可レベル
+	define('DEBUG_LEVEL', 0);
 	require_once('Core/resource.php');
 } else {
-	define('DEBUG_LEVEL', 10);			// メッセージ出力許可レベル
+	define('DEBUG_LEVEL', 10);
 	require_once('Core/Main.php');
 }

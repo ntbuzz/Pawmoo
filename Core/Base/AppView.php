@@ -1,23 +1,24 @@
 <?php
 /* -------------------------------------------------------------
- * PHPフレームワーク
- *  AppView:    ビュー生成用のテンプレート処理、
- *              PHPテンプレート(*.tpl)とセクションテンプレート(*.ptl)を読み込んでHTMLを出力する
- *              HTML出力のため AppHelper を所有する
+ * Object Oriented PHP MVC Framework
+ *  AppView:    View Template processing Engine.
+ *              Handle of *.php, *.inc. *.tpl
+ *              Having Chile Class AppHelper for HTML output
  */
 class AppView extends AppObject {
-    protected $Layout;        // デフォルトのレイアウト
+    protected $Layout;
     private $doTrailer = FALSE;
-    const Extensions = array("tpl","php","inc","html");  // テンプレート拡張子
-    const SectionCMD = '<@&+*%-.#{[';  // 単独セクション処理コマンド文字
+    const Extensions = array("tpl","php","inc","html");
+    private $currentTemplate;
     private $rep_array;
-    private $env_vars;              // テンプレート内のグローバル変数
-    private $inlineSection;        // インラインのセクション
+    private $env_vars;             // GLOBAL Variable in TEMPLATE
+    private $inlineSection;
     const FunctionList = array(
-//        '<'   => 'sec_html',
+        '<'    => 'sec_html',
         '@'    => 'sec_import',
         '&'    => 'sec_helper',
         '+'    => [
+            'setvar'    => 'cmd_setvar',
             'include'   => 'cmd_include',
             'style'     => 'cmd_style',
             'img'       => 'cmd_image',
@@ -40,37 +41,37 @@ class AppView extends AppObject {
         '-'    => 'sec_singletag',
     );
     //==========================================================================
-    // コンストラクタで他のデータベースに接続
+    // Constructor: Import Model Class by Owner Class, Create Helper
     //==========================================================================
     function __construct($owner) {
         parent::__construct($owner);
-        $this->Model = $owner->Model;       // ViewのオーナーはControllerなのでModelを参照する
+        $this->Model = $owner->Model;       // import Owner Property
         $helper = "{$this->ModuleName}Helper";
         if(! class_exists($helper)) $helper = 'AppHelper';
         $this->Helper = new $helper($this);
         $this->Helper->MyModel = $this->Model;
-        $this->__InitClass();                       // クラス固有の初期化メソッド
+        $this->__InitClass();
     }
     //==========================================================================
-    // クラス固有の初期化
+    // Class Initialized
     protected function __InitClass() {
         $this->Layout = 'Layout';
-        $this->rep_array = array_merge(App::$SysVAR, App::$Params);       // システム変数とパラメータをマージしておく
+        $this->rep_array = array_merge(App::$SysVAR, App::$Params);   // Import SYSTEM VARIABLE
         $this->env_vars = [];
-        parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
+        parent::__InitClass();                    // CALL Parent Method
     }
 //==============================================================================
-// デフォルトレイアウト変更
+// Output Default LAYOUT name.
 //==============================================================================
 public function SetLayout($layoutfile) {
-    $tmplate = $this->get_TemplateName($layoutfile);   // ビューフォルダのテンプレート
-    if(!file_exists($tmplate)) {                // 存在しないなら共通のテンプレートを探す
+    $tmplate = $this->get_TemplateName($layoutfile);
+    if(!file_exists($tmplate)) {
         $layoutfile = 'Layout';
     }
     $this->Layout = $layoutfile;
 }
 //==============================================================================
-// レイアウト出力
+// Output layout
 //==============================================================================
 public function PutLayout($layout = NULL) {
     if($layout === NULL) $layout = $this->Layout;
@@ -79,13 +80,13 @@ public function PutLayout($layout = NULL) {
     $this->doTrailer = TRUE;
 }
 //==============================================================================
-// ページ出力完了
+// Terminate Response,
 public function __TerminateView() {
     if($this->doTrailer) {
-        $tmplate = $this->get_TemplateName('Trailer');   // ビューフォルダのテンプレート
+        $tmplate = $this->get_TemplateName('Trailer');
         $Helper = $this->Helper;
         if($tmplate !== NULL) require_once ($tmplate);
-        // リクエストURLと処理メソッドが違っていたときはRelocateフラグが立つ
+        // Do Replacement ADDRESS-BAR in Browser
         $url = App::Get_RelocateURL();
         if(isset($url)) {
             debug_log(1,"RedirectURL: {$url}\n");
@@ -97,54 +98,55 @@ public function __TerminateView() {
     }
 }
 //==============================================================================
-//　レイアウトテンプレート処理
+//　Template file OUTPUT
 public function ViewTemplate($name,$vars = []) {
-    $tmplate = $this->get_TemplateName($name);   // ビューフォルダのテンプレート
+    $tmplate = $this->get_TemplateName($name);
     if(isset($tmplate)) {
-        $ext = substr($tmplate,strrpos($tmplate,'.') + 1);    // 拡張子を確認
+        $this->currentTemplate = $tmplate;
+        $ext = substr($tmplate,strrpos($tmplate,'.') + 1);
         $ix = array_search($ext, self::Extensions);
-        switch($ix) {       //   [ .tpl, .php, .inc, .twg ]
-        case 0:     // '.tpl'   div Section
+        switch($ix) {   //   [ .tpl, .php, .inc, .twg ]
+        case 0:         // '.tpl'   div Section
             $parser = new SectionParser($tmplate);
             $divSection = $parser->getSectionDef();
-            $this->inlineSection = [];         // インラインセクション定義をクリア
+            $this->inlineSection = [];         // Clear Inline-Section in this TEMPLATE
             debug_log(1,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
             $this->sectionAnalyze($divSection,$vars);
             break;
-        case 1:     // 'php'     // PHP Template
-            extract($vars);             // 変数展開
-            $Helper = $this->Helper;    // ヘルパークラス
-            $MyModel = $this->Model;    // モデルクラス
-            $View = $this;              // ビュークラス自身
-            $RecData = $this->Model->RecData;    // レコードデータ
-            $Records = $this->Model->Records;    // レコードリスト
-            $Header = $this->Model->HeaderSchema;    // スキーマヘッダ
+        case 1:         // 'php'     // PHP Template
+            extract($vars);
+            $Helper = $this->Helper;
+            $MyModel = $this->Model;
+            $View = $this;
+            $RecData = $this->Model->RecData;    // One-Record Data
+            $Records = $this->Model->Records;    // Record Data-List, column data is used HeaderSchema
+            $Header = $this->Model->HeaderSchema;  // Filterling for Display Header
             $_ = function($id) { return $this->_($id); };   // shortcut LANG-ID Convert
             require_once ($tmplate);
             break;
-        case 2:     // 'inc':     // HTML template
+        case 2:         // 'inc':     // HTML template
             $content = file_get_contents($tmplate);
-            // システム変数＋URIパラメータへの置換処理
             echo $this->expand_Strings($content, $vars);
             break;
-        case 3:     // 'html':     // HTML
+        case 3:         // 'html':     // HTML
             echo file_get_contents($tmplate);
             break;
         }
-    } else error_response('page-404.php',App::$AppName,[ App::Get_SysRoot(),App::Get_AppRoot() ], [$this->ModuleName, $name,'']);     // 404 ERROR PAGE Response
+    } else  // 404 ERROR PAGE Response
+        error_response('page-404.php',App::$AppName,[ App::Get_SysRoot(),App::Get_AppRoot() ], [$this->ModuleName, $name,'']);
 }
 //==============================================================================
-// テンプレートファイルがビュークラスフォルダに存在しなければ共通のテンプレートを探す
+// search Template file in folder
     private function get_TemplateName($name) {
         $temlatelist = array(
-            App::Get_AppPath("modules/{$this->ModuleName}/View/{$name}"),   // モジュールのビューレイアウト
-            App::Get_AppPath("View/{$name}"),                               // App共通のレイアウトテンプレートを探す
-            "Core/Template/View/{$name}"                               // ライブラリのテンプレートを探す
+            App::Get_AppPath("modules/{$this->ModuleName}/View/{$name}"),
+            App::Get_AppPath("View/{$name}"),
+            "Core/Template/View/{$name}"
         );
         foreach($temlatelist as $file) {
             foreach(self::Extensions as $ee) {
                 $form = "{$file}.{$ee}";
-                if(file_exists($form)) {                // レイアウトファイルが見つかった
+                if(file_exists($form)) {    // found it!
                     return $form;
                 }
             }
@@ -185,219 +187,237 @@ public function ViewTemplate($name,$vars = []) {
                     $val = App::$SysVAR[$var];          // SysVAR[] property
                 }
                 break;
-            case ':': $var = mb_substr($var,1);     // Class Property
-                    if(isset($this->Model->$var)) { // ModelClass Property
+            case ':': $var = mb_substr($var,1);     // ModelClass Property
+                    if(isset($this->Model->$var)) { // exist Property?
                         $val = $this->Model->$var;
                     }
                     break;
-            case "'": if(substr($var,-1) === "'") {     // 末尾文字を確かめる
-                    $var = trim($var,"'");              // セッション変数
-                    $val = MySession::get_envIDs($var);// EnvData[] プロパティから取得
+            case "'": if(substr($var,-1) === "'") {     // check end-char
+                    $var = trim($var,"'");
+                    $val = MySession::get_envIDs($var);// get SESSION ENV-VAR
                 }
                 break;
             default:
-                if(isset($vars[$var])) {            // ローカル変数に存在
+                if(isset($vars[$var])) {            // is LOCAL VAR-SET?
                     $val = $vars[$var];
-                } else if(isset($this->env_vars[$var])) {   // グローバル変数に存在
+                } else if(isset($this->env_vars[$var])) {   // is TEMPLATE GLOBAL?
                     $val = $this->env_vars[$var];
-                } else if(isset($this->$var)) {     // プロパティ変数に存在
+                } else if(isset($this->$var)) {     // is Class-Property?
                     $val = $this->$var;
                 }
             }
         }
     }
 //==============================================================================
-//  文字列の変数置換を行う
+//  variable format convert
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
     private function expand_Strings($str,$vars) {
         if(empty($str) || is_numeric($str)) return $str;
-        $p = '/\${[^}\s]+?}|\${[#%\'\$@][^}\s]+?}/';          // 変数リストの配列を取得
+        $p = '/\${[^}\s]+?}|\${[#%\'\$@][^}\s]+?}/';       // PARSE variable format
         preg_match_all($p, $str, $m);
         $varList = $m[0];
-        if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
+        if(empty($varList)) return $str;        // not use variable.
         $values = $varList = array_unique($varList);
         array_walk($values, array($this, 'expand_Walk'), $vars);
         debug_log(FALSE,[ "EXPAND" => [
             "STR" => $str,
-            "変換" => $varList,
-            "置換" => $values,
+            "VAR" => $varList,
+            "REPLACE" => $values,
             ]]);
-        // 配列が返ることもある
-        $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
+        $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);
         return $exvar;
     }
 //==============================================================================
-//  セクション要素内の変数を展開する
+//  EXPAND SECTION variable
     private function expand_SectionVar($vv,$vars) {
-        if(!is_array($vv)) {        // スカラー要素の場合
-            return $this->expand_Strings($vv,$vars);   // 変数置換を行う
-        }
+        if(is_scalar($vv)) return $this->expand_Strings($vv,$vars);
         $new_vv = [];
         foreach($vv as $kk => $nm) {
             $new_kk = $this->expand_Strings($kk,$vars);
-            if(!is_array($nm)) {        // 配列の子要素は後で展開する
-                $nm = $this->expand_Strings($nm,$vars);   // 変数置換を行う
-            }
+            if(is_scalar($nm)) $nm = $this->expand_Strings($nm,$vars);
             $new_vv[$new_kk] = $nm;
         }
         return $new_vv;
     }
 //==============================================================================
-// タグセクションレ出力
-    private function directOutput($beg_tag, $end_tag,$sec) {
+//  EXPAND SECTION at RECURSIVE
+    private function expand_Recursive($vv,$vars) {
+        if(is_scalar($vv)) return $this->expand_Strings($vv,$vars);
+        $new_vv = [];
+        foreach($vv as $kk => $nm) {
+            $new_kk = $this->expand_Strings($kk,$vars);
+            $nm = $this->expand_Recursive($nm,$vars);   // EXPAND CHILD
+            $new_vv[$new_kk] = $nm;
+        }
+        return $new_vv;
+    }
+//==============================================================================
+// TAG section direct OUTPUT
+    private function directOutput($beg_tag, $end_tag,$sec,$vars) {
         echo "{$beg_tag}\n";
         if(is_array($sec)) {
+            $sec = $this->expand_Recursive($sec,$vars);
             foreach($sec as $vv) echo "{$vv}\n";
         } else echo "{$sec}\n";
         echo "{$end_tag}";
     }
 //==============================================================================
-// 配列をマージ
+// like array_merge()
     private function my_array_Merge($arr1,$arr2) {
         foreach($arr2 as $key => $val) {
             if($key[0] === '+') {
-                $var = substr($key,1);                            // + 記号を取り除いた名前
+                $var = substr($key,1);                            // except '+' charactor
                 if(isset($arr1[$var])) {
-                    $arr1[$var] = array_merge($val,$arr1[$var]);  // 既存配列にマージ
+                    $arr1[$var] = array_merge($val,$arr1[$var]);
                 } else {
-                    $arr1[$var] = $val . $arr1[$var];             // 既存文字列にマージ
+                    $arr1[$var] = $val . $arr1[$var];
                 }
             } else {
-                $arr1[$key] = $val;               // 既存配列を置換
+                $arr1[$key] = $val;
             }
         }
         return $arr1;
     }
 //******************************************************************************
-// ここから新しいセクション解析処理
+// NEW processing Template-Engine
 //==============================================================================
-// セクション配列を解析して処理関数へディスパッチする
-    private function sectionAnalyze($divSection,$vars) {
+// Replace IF-SELECTOR
+    private function array_if_selector($arr,$vars) {
+        if(is_scalar($arr)) return $arr;
         // analyze IF-SELECTOR and EXPAND KEY
-        $if_selector = function($sec,$key) use(&$vars,&$if_selector) {
+        $if_selector = function($sec,$key) use(&$vars) {
                 if(substr($key,0,1)==='?') {
-//                    $cmp_val = mb_substr(trim($key),1);    // expand variable
-                    $cmp_val = str_replace(['?',"\n","\r"],'',$key);    // expand variable
+                    $cmp_val = str_replace(["\n","\r"],'',$this->expand_Strings(mb_substr($key,1),$vars));
                     foreach($sec as $check => $value) {
-debug_log(-999,["CMP({$key})" => $check,"VAL"=>$cmp_val]);
                         if($check === '') $result = empty($cmp_val);            // is_empty ?
                         else if($check === '*') $result = !empty($cmp_val);     // is_notempty ?
-                        else $result = ($cmp_val === $check);
+                        else $result = ($cmp_val === $check);                   // match if key
                         if($result) return $value;
                     }
                     return [];
                 }
                 return [$key => $sec];
         };
-//        $divSection = array_walk_replace($divSection, $if_selector,$vars);
+        $wd = [];       // re-build array
+        foreach($arr as $key => $val) {
+            $ret = $if_selector($val,$key);
+            if(is_array($ret)) {
+                foreach($ret as $kk => $vv) {
+                    if(isset($wd[$kk])) {
+                        if(is_numeric($kk)) $wd[] = $vv;
+                        else {
+                            for($dd=0;isset($wd[$ks="{$kk}:{$dup}"]);++$dd) ;
+                            $wd[$ks] = $vv;
+                        }
+                    } else $wd[$kk] = $vv;
+                }
+            } else $wd[$key] = $ret;
+        }
+        return $wd;
+    }
+//==============================================================================
+// Analyzed Section, and Dispatch Command method
+    private function sectionAnalyze($divSection,$vars) {
         foreach($divSection as $key => $sec) {
-            $vv = $this->expand_SectionVar($sec,$vars);     // expand LEVEL-1
-            $vv = array_walk_replace($vv, $if_selector,$vars);
-debug_log(-999,[ "SEC" => $vv]);
-            if($key === '+setvar') {        // グローバル変数に登録
-                $this->env_vars = $this->my_array_Merge($vv,$this->env_vars);
-            } else if(strlen($key) > 2 && $key[0] === '$' && $key[1] !== '{') {     // ローカル変数に登録
+            // analyze IF-SELECTOR and EXPAND KEY
+            $vv = $this->array_if_selector($sec, $vars);
+            if(strlen($key) > 2 && $key[0] === '$' && $key[1] !== '{') {  // set Local Variable
                 $nm = mb_substr($key,1);      // 先頭文字を削除
-                $vars[$nm] = $vv;   //$this->expand_SectionVar($sec,$vars);
+                $vars[$nm] = $this->expand_SectionVar($vv,$vars);
             } else
                 $this->sectionDispath($key,$vv,$vars);
         }
     }
 //==============================================================================
-// key 文字列を元に処理関数へディスパッチする
+// key command analyze and extract ATTRIBUTE, SUB-SECTION, INNER-TEXT for Command
 // key => sec (vars)
     private function sectionDispath($key,$sec,$vars) {
         $num_key = is_numeric($key);
-        if($num_key) {  // 連想キーでなければ値を解析する
+        if($num_key) {  // numeric element will recursive process
             if(is_array($sec)) {
                 $this->sectionAnalyze($sec,$vars);
                 return;
             }
+            if($this->is_section_tag($sec,$sec) === FALSE) {
+                echo "{$sec}\n";
+                return;
+            }
             $key = $sec; $sec = [];
-        } else { // キー名重複回避用の文字を削除
+        } else { // delete duplicate to avoid key-name
             $key = tag_body_name($key);
         }
         $top_char = mb_substr($key,0,1);
         if(array_key_exists($top_char,self::FunctionList)) {
-            $kkey = mb_substr($key,1);      // 先頭文字を削除
-            if($top_char === $kkey[0]) {    // コマンド文字が2個続いたら文字列出力
+            $kkey = mb_substr($key,1);
+            if($top_char === $kkey[0]) {    // dual command charctor will output 1 charactor
                 echo $kkey; return;
             }
             $func = self::FunctionList[$top_char];
-            // + コマンドには属性が付いている
-            list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($kkey,$sec,$vars);
-            if(is_array($func)) {       // サブコマンドテーブル
+            list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($key,$sec,$vars);
+            if(is_array($func)) {
                 $cmd = $func[$tag];
                 if(array_key_exists($tag,$func) && (method_exists($this, $cmd))) {
                     $this->$cmd($tag,$attrs,$subsec,$sec,$vars,$text);
-                } else echo "***NOT FOUND({$cmd}): {$cmd}({$tag},\$attrs,\$sec,\$vars)\n";
+                } else echo "***NOT FOUND({$cmd}): {$cmd}({$tag},\$attrs,\$sec,\$vars) IN {$this->currentTemplate}\n";
             } else if(method_exists($this, $func)) {
-                $this->$func($kkey,$sec,$vars);
+                if(is_array($sec)) $sec = $this->expand_SectionVar($sec,$vars);
+                $this->$func($tag,$attrs,$subsec,$sec,$vars,$text);
             } else echo "CALL: {$func}({$kkey},{$sec},vars)\n";
         } else {
             list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($key,$sec,$vars);
-            if($top_char === '<') {
-                echo "{$tag}\n";
+            $attr = $this->gen_Attrs($attrs,$vars);
+            if(is_array($sec)) {
+                echo "<{$tag}{$attr}>{$text}";
+                $this->sectionAnalyze($subsec,$vars);
+                echo "</{$tag}>\n";
             } else {
-                $attr = $this->gen_Attrs($attrs,$vars);
-                if(is_array($sec)) {
-                    echo "<{$tag}{$attr}>{$text}";
-                    $this->sectionAnalyze($subsec,$vars);
-                    echo "</{$tag}>\n";
-                } else {
-                    echo "<{$tag}{$attr}>{$text}</{$tag}>\n";
-                }
+                echo "<{$tag}{$attr}>{$text}</{$tag}>\n";
             }
         }
     }
     // *************************************************************************
-    // コマンド関数の引数
-    //  $key    expand済
-    //  $sec    スカラー：expand済
-    //          配列: 直下のキー、値がexpand済、値が配列なら未展開
+    // SECTION-TAG PROCESSIOG
     //==========================================================================
-    // ATTR属性のリスト,タグの直下にあるのでexpand済のものだけが渡ってくる
+    // Convert ATTRIBUTE-LIST ARRAY to tag attribute strings
     private function gen_Attrs($attrs,$vars) {
         $attr = "";
         if($attrs !== array()) {
-//            $attrs = $this->expand_SectionVar($attrs,$vars);
             foreach($attrs as $name => $val) {
-                $attr = "{$attr} {$name}=\"{$val}\"";
+                $attr .= (is_numeric($name)) ? " {$val}" : " {$name}=\"{$val}\"";
             }
         }
         return $attr;
     }
     //==========================================================================
-    // 先頭の < 文字が削除されているので補填する
-    private function sec_html($key,$sec,$vars) {
-        echo "<{$key}\n";
+    // DIRECT HTML TAG
+    private function sec_html($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $attr = $this->gen_Attrs($attrs,$vars);
+        echo (empty($text)) ? "<{$tag}{$attr}>\n" : "<{$tag}{$attr}>{$text}</{$tag}>\n" ;
     }
     //==========================================================================
-    // 先頭の < 文字が削除されているので補填する
-    private function sec_comment($key,$sec,$vars) {
-        echo "<!-- $key" . (empty($sec) ? " " : "\n");
+    // HTML Comment TAG
+    private function sec_comment($tag,$attrs,$subsec,$sec,$vars,$text) {
+        echo "<!-- $tag" . (empty($sec) ? " " : "\n");
         foreach($sec as $kk => $vv) echo "{$vv}\n";
         echo "-->\n";
     }
     //==========================================================================
-    private function sec_import($key,$sec,$vars) {
-        $is_inline = ($key[0] === '.');
-        if($is_inline) $key = substr($key,1);
-        // 引数を変数リストに追加
+    // IMPORT external TEMPLATE, or INLINE SECTION
+    private function sec_import($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $is_inline = ($tag[0] === '.');
+        if($is_inline) $tag = substr($tag,1);
         $mergevars = (is_array($sec)) ? array_merge($vars, $sec) : $vars;
-        if($is_inline && array_key_exists($key,$this->inlineSection)) {
-            $this->sectionAnalyze($this->inlineSection[$key],$mergevars);
+        if($is_inline && array_key_exists($tag,$this->inlineSection)) {
+            $this->sectionAnalyze($this->inlineSection[$tag],$mergevars);
         } else {
-            $this->ViewTemplate($key,$mergevars);
+            $this->ViewTemplate($tag,$mergevars);
         }
     }
     //==========================================================================
-    //  属性のみの単独タグ要素の処理
-    private function sec_singletag($key,$sec,$vars) {
-        // $key と $sec をタグと属性に分解する
-        list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($key,$sec,$vars);
+    //  single tag for attribute only
+    private function sec_singletag($tag,$attrs,$subsec,$sec,$vars,$text) {
         $attr = $this->gen_Attrs($attrs,$vars);
-        if(!empty($subsec)) {  // サブセクションがあればリピート
+        if(!empty($subsec)) {  // have repeat-section
             foreach($subsec as $kk => $vv) {
                 list($tt,$txt,$at,$sub) = $this->tag_attr_Section($kk,$vv,$vars);
                 $atr = $this->gen_Attrs($at,$vars);
@@ -408,60 +428,63 @@ debug_log(-999,[ "SEC" => $vv]);
         }
     }
     //==========================================================================
-    // ALink ハイパーリンク
-    private function sec_link($key,$sec,$vars) {
-        if($key === 'link') {
+    // ALink Hyperlink
+    private function sec_link($tag,$attrs,$subsec,$sec,$vars,$text) {
+        if($tag === 'link') {
             if(is_array($sec)) {
                 foreach($sec as $kk => $vv) $this->Helper->ALink($vv,$kk);
             } else echo "{$tagname} bad argument.\n";
         } else if(is_scalar($sec)) {
-            $this->expand_Walk($key,'', $vars);     // 変数展開する
-            $this->Helper->ALink($sec,$key);
+            $this->Helper->ALink($sec,$tag);
         } else echo "tag '{$tagname}' not for feature.\n";
     }
     //==========================================================================
-    // Helper関数の呼出
-    private function sec_helper($key,$sec,$vars) {
-        // ヘルパーに指定メソッドが存在するかチェック
-        if(method_exists($this->Helper,$key)) {
-            (is_numeric($key)) 
-                ? $this->Helper->$key(is_scalar($sec)?$sec:'')
-                : $this->Helper->$key($sec);
-        } else if(method_exists('App',$key)) {
-            (is_numeric($key)) 
-                ? App::$key()
-                : App::$key($sec);
+    // CALL Helper-Method
+    private function sec_helper($tag,$attrs,$subsec,$sec,$vars,$text) {
+        // EXPAND CHILD for Helper-Method
+        $sec = $this->expand_Recursive($sec,$vars);
+        if(method_exists($this->Helper,$tag)) {
+            $this->Helper->$tag($sec);
+        } else if(method_exists('App',$tag)) {
+            App::$tag($sec);
         } else {
-            echo "Helper Method:'{$key}' not found. Please Create this method.\n";
+            echo "Helper Method:'{$tag}' not found. Please Create this method.\n";
         }
     }
     //--------------------------------------------------------------------------
-    // cmd_xxxx の関数は引数が少し異なる
-    //  cmd_xxx(タグ名,属性リスト,セクション,環境変数)
+    // cmd_xxxx method
     //--------------------------------------------------------------------------
-    //  外部ファイルのインクルード
-    private function cmd_include($tag,$attrs,$subsec,$sec,$vars) {
+    //  iinclude external file, for CSS/JS/...
+    private function cmd_include($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $sec = $this->expand_Recursive($sec,$vars);   // EXPAND CHILD
         App::WebInclude($sec);
     }
     //--------------------------------------------------------------------------
-    //  JQueryスクリプトの出力
-    private function cmd_jquery($tag,$attrs,$subsec,$sec,$vars) {
-        $this->directOutput("<script type='text/javascript'>\n$(function() {", "});\n</script>",$sec);
+    //  SET GLOBAL VARIABLE
+    private function cmd_setvar($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $sec = $this->expand_Recursive($sec,$vars);   // EXPAND CHILD
+        $this->env_vars = $this->my_array_Merge($sec,$this->env_vars);
     }
     //--------------------------------------------------------------------------
-    //  javascriptの出力
-    private function cmd_script($tag,$attrs,$subsec,$sec,$vars) {
-        $this->directOutput("<script type='text/javascript'>", "</script>",$sec);
+    //  output JQuery function
+    private function cmd_jquery($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $this->directOutput("<script type='text/javascript'>\n$(function() {", "});\n</script>",$sec,$vars);
     }
     //--------------------------------------------------------------------------
-    //  スタイルシートの出力
-    private function cmd_style($tag,$attrs,$subsec,$sec,$vars) {
-        $this->directOutput('<style type="text/css">', "</style>",$sec);
+    //  javascript output
+    private function cmd_script($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $this->directOutput("<script type='text/javascript'>", "</script>",$sec,$vars);
     }
     //--------------------------------------------------------------------------
-    //  イメージタグの出力
-    private function cmd_image($tag,$attrs,$subsec,$sec,$vars) {
+    //  output STYLE tag
+    private function cmd_style($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $this->directOutput('<style type="text/css">', "</style>",$sec,$vars);
+    }
+    //--------------------------------------------------------------------------
+    //  output IMAGE-TAG
+    private function cmd_image($tag,$attrs,$subsec,$sec,$vars,$text) {
         if(is_array($sec)) { // 連想キーが無いスカラー値のみ抽出
+            $sec = $this->expand_SectionVar($sec,$vars);
             foreach($sec as $key => $val) {
                 if(is_numeric($key) && is_scalar($val)) $src = $val;
             }
@@ -471,21 +494,23 @@ debug_log(-999,[ "SEC" => $vv]);
         echo "<img src='{$src}'{$attr} />";
     }
     //--------------------------------------------------------------------------
-    //  単純エコー出力
-    private function cmd_echo($tag,$attrs,$subsec,$sec,$vars) {
-        $this->directOutput('', '',$sec);
+    //  echo string
+    private function cmd_echo($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $this->directOutput('', '',$sec,$vars);
     }
     //--------------------------------------------------------------------------
-    //  インラインセクションの登録
-    private function cmd_inline($tag,$attrs,$subsec,$sec,$vars) {
+    //  Define INLINE Section, for use after section
+    private function cmd_inline($tag,$attrs,$subsec,$sec,$vars,$text) {
         $name = $attrs['class'];
         $this->inlineSection[$name] = $sec;
     }
     //--------------------------------------------------------------------------
-    //  セクション配列をマークダウン変換
-    // 連想配列ならキー名をクラス名として扱う
-    private function cmd_markdown($tag,$attrs,$subsec,$sec,$vars) {
+    // MARKDOWN OUTPUT
+    //  if Associative ARRAY, KEY-NAME use to MARKDOWN Class
+    private function cmd_markdown($tag,$attrs,$subsec,$sec,$vars,$text) {
         $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
+        $atext = $this->expand_Strings($atext,$vars);
+        if(is_array($sec)) $atext = "\n{$atext}\n\n";
         $key = is_array($sec) ? array_key_first($sec) : 0;
         $mtext =(is_numeric($key))
                 ? pseudo_markdown( $atext )
@@ -499,27 +524,30 @@ debug_log(-999,[ "SEC" => $vv]);
         echo $mtext;
     }
     //--------------------------------------------------------------------------
-    //  レコードリストを元にループする
-    // 特別に $sec は変数置換しないで渡される
-    private function cmd_recordset($tag,$attrs,$subsec,$sec,$vars) {
+    // repeat Recode Data List (fetch Multi Record set)
+    // $sec variable expand on repeat RecData
+    private function cmd_recordset($tag,$attrs,$subsec,$sec,$vars,$text) {
         $save_data = $this->Model->RecData;         // backup RecData
         foreach($this->Model->Records as $records) {
-            $this->Model->RecData = $records;    // レコードデータ
+            $this->Model->RecData = $records;    // replace RecData
+            $v_sec = $this->expand_SectionVar($sec,$vars);
             debug_log(FALSE,[ 
                 "data" => $this->Model->RecData,
                 'sec' => $sec,
+                'vsec' => $v_sec,
+                'subsec' => $subsec,
                 'var' => $vars,
             ]);
-            $this->sectionAnalyze($sec,$vars);
+            $this->sectionAnalyze($v_sec,$vars);
         }
         $this->Model->RecData = $save_data;         // restore RecData
     }
     //--------------------------------------------------------------------------
-    //  ul/ol リストの出力
+    //  ul/ol List OUTPUT
     // +ul => [
-    //   { li.class#id => } [   ]       
+    //   { li.class#id => } [   ]
     // ]
-    private function cmd_list($tag,$attrs,$subsec,$sec,$vars) {
+    private function cmd_list($tag,$attrs,$subsec,$sec,$vars,$text) {
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<{$tag}{$attr}>\n";
         // リスト要素の出力
@@ -539,13 +567,13 @@ debug_log(-999,[ "SEC" => $vv]);
         echo "</{$tag}>\n";
     }
     //--------------------------------------------------------------------------
-    //  dl リストの出力
+    //  dl List OUTPUT
     // +dl => [
     //    [ DT-Text 
     //      { DD-ATTR => } [ SECTION ]
     //    ]
     // ]
-    private function cmd_dl($tag,$attrs,$subsec,$sec,$vars) {
+    private function cmd_dl($tag,$attrs,$subsec,$sec,$vars,$text) {
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<{$tag}{$attr}>\n";
         // DTのリスト要素の出力
@@ -570,21 +598,20 @@ debug_log(-999,[ "SEC" => $vv]);
         echo "</{$tag}>\n";
     } 
     //--------------------------------------------------------------------------
-    //  select リストの出力
+    //  select OUTPUT
     // +select => [
     //    selected_key = > [
     //      option_text => value
     //      ...
     //    ]
     // ]
-    private function cmd_select($tag,$attrs,$subsec,$sec,$vars) {
+    private function cmd_select($tag,$attrs,$subsec,$sec,$vars,$text) {
         if(is_array($subsec)) {
             $attr = $this->gen_Attrs($attrs,$vars);
             echo "<{$tag}{$attr}>\n";
-            list($opt_key, $opt_val) = array_first_item($subsec);    // 最初の要素を処理
+            list($opt_key, $opt_val) = array_first_item($subsec);
             $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
             $opt_val = $this->expand_SectionVar($opt_val,$vars);
-    debug_log(-999,["TAG"=>$tag,"ATTR"=>$attrs,"SUB"=>$subsec,"SEC"=>$sec,"OPT"=>$opt_val,"SEL"=>$sel_item,"KEY"=>$opt_key]);
             if(is_array($opt_val)) {
                 $opt_val = array_flat_reduce($opt_val);
                 foreach($opt_val as $opt => $val) {
@@ -596,13 +623,11 @@ debug_log(-999,[ "SEC" => $vv]);
         }
     }
     //--------------------------------------------------------------------------
-    //  TABLE リストの出力
+    //  TABLE OUTPUT
     // +table => [
-    //    tr [
-    //          th=> [ 値 ]
-    //    pre-text
+    //    [  th=>[ TH-CELL ] .td_attr=>[ TD-CELL ]  [ TD-CELL ] ]
     // ]
-    private function cmd_table($tag,$attrs,$subsec,$sec,$vars,$txt) {
+    private function cmd_table($tag,$attrs,$subsec,$sec,$vars,$text) {
         $attr = $this->gen_Attrs($attrs,$vars);
         if(is_array($subsec)) {
             echo "<TABLE{$attr}>\n";
@@ -616,8 +641,8 @@ debug_log(-999,[ "SEC" => $vv]);
                     foreach($val as $td_key => $td_val) {
                         list($td_key,$td_text,$td_attrs,$td_sec) = $this->tag_attr_Section($td_key,$td_val,$vars);
                         $td_attr = $this->gen_Attrs($td_attrs,$vars);
-                        if($td_key === 'div') $td_key='td';
-                        echo "<{$td_key}{$td_attr}>";
+                        if($td_key === 'div') $td_key='td';     // omitted TAG is DIV tag setting
+                        echo "<{$td_key}{$td_attr}>{$td_text}";
                         $this->sectionAnalyze($td_sec,$vars);
                         echo "</{$td_key}>";
                     }
@@ -628,18 +653,18 @@ debug_log(-999,[ "SEC" => $vv]);
         }
     }
     //--------------------------------------------------------------------------
-    //  INPUT RADIO リストの出力
+    //  INPUT RADIO OUTPUT
     // +radio => [
     //    radio_key = > [
-    //      option_text => value
+    //      option_text => option_value
     //      ...
     //    ]
     // ]
-    private function cmd_radio($tag,$attrs,$subsec,$sec,$vars) {
+    private function cmd_radio($tag,$attrs,$subsec,$sec,$vars,$text) {
         if(is_array($subsec)) {
             $attr = $this->gen_Attrs($attrs,$vars);
             $tags = "<INPUT TYPE='radio'{$attr}";
-            list($opt_key, $opt_val) = array_first_item($subsec);    // 最初の要素を処理
+            list($opt_key, $opt_val) = array_first_item($subsec);
             $sel_item = (is_numeric($opt_key)) ? '' : $this->expand_Strings($opt_key,$vars);
             $opt_val = $this->expand_SectionVar($opt_val,$vars);
             if(is_array($opt_val)) {
@@ -652,20 +677,21 @@ debug_log(-999,[ "SEC" => $vv]);
         }
     }
     //--------------------------------------------------------------------------
-    //  INPUT CHECKBOX の出力
+    //  INPUT CHECKBOX OUTPUT
     // FORMAT-I
     //  +checkbox[name] => [ 
-    //        @値1 => テキスト  [ ${@published} => 't' ]
+    //        @Value => TEXT  [ ${@published} => 't' ]
     //  ]
     //  FORMAT-II
     //  +checkbox => [ 
-    //      name2 => [ @値2 => テキスト [ ${@published} => 't' ] ]
-    //      name3 => [ @値3 => テキスト [ ${@published} => 't' ] ]
+    //      name1 => [ @VALUE1 => TEXT [ ${@published} => 't' ] ]
+    //      name2 => [ @VALUE2 => TEXT [ ${@published} => 't' ] ]
     //  ]
-    private function cmd_checkbox($tag,$attrs,$subsec,$sec,$vars) {
+    private function cmd_checkbox($tag,$attrs,$subsec,$sec,$vars,$text) {
         $attr = $this->gen_Attrs($attrs,$vars);
         $tags = "<INPUT TYPE='checkbox'{$attr}";
         if(is_array($sec)) {
+            $sec = $this->expand_Recursive($sec,$vars);   // EXPAND CHILD
             $check_item = function($arr) use(&$vars) {
                 $check_func=function($if) {return ($if) ? ' checked':'';};
                 $checked = $txt = $value = '';
@@ -673,7 +699,7 @@ debug_log(-999,[ "SEC" => $vv]);
                     $val = $this->expand_SectionVar($val,$vars);
                     if(is_numeric($key)) {
                         if(is_array($val)) {
-                            list($cmp1, $cmp2) = array_first_item($val);    // 最初の要素を処理
+                            list($cmp1, $cmp2) = array_first_item($val);
                             $checked = $check_func($cmp1 === $cmp2);
                         } else $checked = $check_func(!empty($val));
                     } else if($key[0]==='@') {
@@ -698,15 +724,31 @@ debug_log(-999,[ "SEC" => $vv]);
         }
     }
     //==========================================================================
-    // タグ文字列の分解
+    // TAG string SEPARATE
     private function tag_Separate($tag) {
         $attrList = [];
-        // $tag に含まれる属性を取り出す
+        // extract attribute in 'tags', and strip SECTION-COMMAND char
+        $top_ch = mb_substr($tag,0,1);
+        if(strpos(SECTION_TOKEN,$top_ch) !== FALSE) {
+            if($top_ch === '<') {
+                $tags = explode(' ',trim($tag,'<>'));
+                $tag = array_shift($tags);
+                foreach($tags as $val) {
+                    $attr = explode('=',trim($val));
+                    if(count($attr) === 2) {
+                        $attrList[$attr[0]] = trim($attr[1],"\"'");
+                    } else {
+                        $attrList[] = trim($val,"\"'");
+                    }
+                }
+            } else $tag = mb_substr($tag,1);
+        }
+        // pickup special attribute in $tag string
         foreach(['data' => '{', 'name' => '[', 'id' => '#', 'class' => '.'] as $key => $sep) {
             $n = strrpos($tag,$sep);
             if( $n !== FALSE) {
-                $str = tag_body_name( substr($tag,$n + 1) );  // 重複回避文字列があれば除去
-                $tag = substr($tag,0, $n);    // 残りの文字列
+                $str = tag_body_name( substr($tag,$n + 1) );
+                $tag = substr($tag,0, $n);
                 if($sep === '{') {
                     $str = trim($str,'{}');
                     $kk = "{$key}-element";
@@ -723,39 +765,40 @@ debug_log(-999,[ "SEC" => $vv]);
         return array($tag,$attrList);
     }
     //==========================================================================
-    // タグ文字列の分解
-    private function is_section_tag($tag) {
-        if(empty($tag) || strlen($tag)===1) return FALSE;
-        return (strpos(self::SectionCMD,$tag[0]) !== FALSE);
+    // Check $key will be SECTION.
+    private function is_section_tag($key,$val) {
+        if(is_array($val)) return TRUE;
+        if(strlen($key) <= 1) return FALSE;
+        return (strpos(SECTION_TOKEN.'.#',$key[0]) !== FALSE);
     }
     //==========================================================================
-    // タグ文字列の分解
+    // TAG SEPARATE,naked TAG, attribute list in $tag and $sec, sub-section array, and inner-text
     private function tag_attr_Section($tag,$sec,$vars) {
         $innerText = '';
         $secList = [];
         list($tag,$attrList) = $this->tag_Separate($tag);
-        // $sec の中から innerText と attr を取り出す
         if(is_array($sec)) {
+            $sec = $this->expand_SectionVar($sec,$vars);
             foreach($sec as $key => $val) {
-                if(is_numeric($key)) {  // 連想キーが無い場合
-                    // 値が配列かセクション用コマンドならセクションデータ扱い
-                    if(is_array($val)||$this->is_section_tag($val)) {
+                if(is_numeric($key)) {
+                    // if $val will be ARRAY,SECTION-COMMAND, then SET SUB-SECTION
+                    if($this->is_section_tag($val,$val)) {
                         if(isset($secList[$key])) $secList[] = $val;
-                        else $secList[$key] = $val;    // 数字キーのものがあるため
+                        else $secList[$key] = $val;
                     } else {
-                        $innerText .= $val;   // スカラー値ならインナーテキスト
+                        $innerText .= $val;
                     }
                 } else {
-                    list($vv,$attrs) = $this->tag_Separate($key);   // タグ分解
-                    // $val が配列かセクションコマンド、$key が属性付きならセクション扱い
-                    if(is_array($val) || !empty($attrs) || $this->is_section_tag($key)) $secList[$key] = $val;
-                    else $attrList[$key] = $val;    // それ以外は属性指定
+                    list($vv,$attrs) = $this->tag_Separate($key);
+                    // if $val is ARRAY,or $key is SECTION-COMMAND, and $key have ATTRIBUTE, then SET SUB-SECTION
+                    if(!empty($attrs) || $this->is_section_tag($key,$val)) $secList[$key] = $val;
+                    else $attrList[$key] = $val;
                 }
             }
         } else {
-            $innerText .= $sec;        // スカラーならテキスト
+            $innerText .= $sec;     // scalar is innertext
         }
-        $innerText = $this->expand_Strings($innerText,$vars);   // 変数置換を行う
+        $innerText = $this->expand_Strings($innerText,$vars);
         return array($tag,$innerText,$attrList,$secList);
     }
 

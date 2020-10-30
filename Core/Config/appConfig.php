@@ -3,19 +3,18 @@
  * Object Oriented PHP MVC Framework
  *  appConfig: Framework Configuration
  */
-define('CURRENT_VERSION','0.27.0 2020-10-22');
+define('CURRENT_VERSION','0.28.0 2020-10-25');
 
 define('TIME_ZONE','Asia/Tokyo');
 // Running base OS
 if (PHP_OS == "Linux") {
 	define("OSDEP","UNIX");
 	define("ZIPTEMP","/tmp/");
-	define('OS_CODEPAGE','UTF8');
 } else {
 	define("OSDEP","WIN");
 	define("ZIPTEMP","C:/tmp/");
-	define('OS_CODEPAGE','UTF8');
 }
+define('OS_CODEPAGE','UTF8');
 
 const IgnoreFiles =[
 		".","..","Thumbs.db","web.config","desktop.ini","files.txt",
@@ -31,3 +30,6 @@ if(php_sapi_name() === 'cli') {
 // argument of MySession
 define('S_ENV',TRUE);		// App::$EnvData
 define('S_REQ',FALSE);		// App::$ReqData
+
+define('SINGLE_TOKEN','&@-<');
+define('SECTION_TOKEN','<@&+*%-${[');

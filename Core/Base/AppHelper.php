@@ -53,6 +53,21 @@ public function IsRequestController($comp) {
 	echo ($hit) ? '' : ' class="closed"';
 }
 //==============================================================================
+// expand LOCALE varible in $str, after echo string
+// format {#locale-id}
+public function expand_echo($str) {
+	$p = '/\{#[^}\s]+?}/';
+	preg_match($p,$str,$m);
+	$vaList = $m[0];
+	if(empty($varList)) { echo $str; return; }
+	$varList = array_unique($varList);
+	$values = array_map(function($v) {
+			$v = trim($v,'#{}');
+			return $this->_($v);
+		},$varList);
+	echo str_replace($varList,$values,$str);
+}
+//==============================================================================
 // ハイパーリンクの生成
 public function ALink($lnk,$txt,$under=false) {
 	if($txt[0] == '#') {							// LocaleIDの参照

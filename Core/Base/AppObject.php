@@ -31,7 +31,7 @@ class AppObject {
 // initialized call
 	protected function __InitClass() {
         if(method_exists($this,'ClassInit')) {
-            if(CLI_DEBUG) echo "CALL ClassInit({$this->ClassName})\n";
+//            if(CLI_DEBUG) echo "CALL ClassInit({$this->ClassName})\n";
             $this->ClassInit();
         }
 	}

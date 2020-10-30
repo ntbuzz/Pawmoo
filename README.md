@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # WaffleMap PHP WEB Framwork
+=======
+# ntbuzzer - Object Oriented PHP Framework
+>>>>>>> 8d43e7310b1ca427f79c2b019facf9a6d4a18568
 
 ### Core Repository
 
@@ -7,7 +11,7 @@ This repository requires an application repository and vendor libraries.
 - waffle_app      Application Repository
 - vendor          JQuery, and other javascript Library
 
-## ライセンス
+## ライセンス(MIT)
 
 Copyright (c)  2017 - 2020 by ntbuzz
 

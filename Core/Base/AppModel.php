@@ -225,7 +225,7 @@ public function getCount($cond) {
 //          読み込んだ列名 = Header (Schema)
 //          $filter[] で指定したオリジナル列名のみを抽出
 public function RecordFinder($cond,$filter=[],$sort=[]) {
-    debug_log(3, [ "cond" => $cond, "filter" => $filter]);
+    debug_log(FALSE, [ "cond" => $cond, "filter" => $filter]);
     if(empty($filter)) $filter = $this->dbDriver->columns;
     // 取得フィールドリストを生成する
     $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {

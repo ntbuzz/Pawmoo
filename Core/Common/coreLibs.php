@@ -156,7 +156,7 @@ function get_php_files($dirtop) {
     return $files;
 }
 //==============================================================================
-// 配列からURIを生成する、要素内に配列があるときにも対応する
+// 配列をフラットな配列に変換する
 function array_flat_reduce($arr) {
     $wx = [];
     $reduce_array = function ($arr) use(&$reduce_array,&$wx) {
