@@ -291,7 +291,25 @@ function pseudo_markdown($atext, $md_class = '') {
                     $vars = " style='text-align:{$ali};'";
                     $col = mb_substr($col,1);
                 } else $vars = '';
-                $ln .= "<{$tag}{$vars}>{$col}</{$tag}>";
+                // maybe additional calss and colspan/rowspan
+                preg_match('/^([@\^]+)*(\.(\w+))*?\s/',$col,$m);
+                $bind = $cls = '';
+                switch(count($m)) {
+                case 4: $cls =" class='{$m[3]}'";
+                case 2: $len = strlen($m[1]);
+                        if($len === 0) $bind = '';
+                        else {
+                            $binds = [];
+                            foreach(['@'=>'colspan','^'=>'rowspan'] as $bkey => $bval) {
+                                $clen = substr_count($m[1],$bkey);
+                                if($clen !== 0) $binds[] = " {$bval}='{$clen}'";
+                            }
+                            $bind = implode($binds);
+                        }
+                        $col = mb_substr($col,strlen($m[0]));
+                        break;
+                }
+                $ln .= "<{$tag}{$cls}{$bind}{$vars}>{$col}</{$tag}>";
             }
             return "<tr>{$ln}</tr>";
         },explode("\n", $txt));         // とりあえず行に分割

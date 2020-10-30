@@ -1,4 +1,4 @@
-# WaffleMapフレームワーク
+# ntbuzzer - Object Oriented PHP Framework
 
 ### コアリポジトリ
 

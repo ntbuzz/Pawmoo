@@ -30,3 +30,6 @@ if(php_sapi_name() === 'cli') {
 // argument of MySession
 define('S_ENV',TRUE);		// App::$EnvData
 define('S_REQ',FALSE);		// App::$ReqData
+
+define('SINGLE_TOKEN','&@-<');
+define('SECTION_TOKEN','<@&+*%-${[');

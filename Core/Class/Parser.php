@@ -111,6 +111,8 @@ EOS;
                 } else {
                     $arr[$wkey] = $nw;                  // トークンを連想配列に代入
                 }
+            } else if(strpos(SINGLE_TOKEN,$wd[0]) !== FALSE) {
+                    $arr[$wd] = '';
             } else {
                 $arr[] = $wd;                           // キー名が指定されていないものはスカラー要素
             }
