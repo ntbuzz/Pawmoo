@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# WaffleMap PHP WEB Framwork
-=======
 # ntbuzzer - Object Oriented PHP Framework
->>>>>>> 8d43e7310b1ca427f79c2b019facf9a6d4a18568
 
 ### Core Repository
 
