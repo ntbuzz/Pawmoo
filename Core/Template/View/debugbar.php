@@ -4,9 +4,11 @@
         <ul id="debugMenu">
 <?php
         $level_msg = $this->_("debug.Level");
+        $category_msg = $this->_("debug.Level.Category",TRUE);
         $debug_log_str = get_debug_logs();
         foreach($debug_log_str as $key => $msg) {
-            echo "<li>{$level_msg}:{$key}</li>\n";
+            $title = (isset($category_msg[$key])) ? $category_msg[$key]:"{$level_msg}:{$key}";
+            echo "<li>{$title}</li>\n";
         }
 ?>
     	</ul>

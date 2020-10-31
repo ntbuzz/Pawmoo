@@ -5,6 +5,13 @@
  */
 if(!defined('DEBUG_LEVEL')) define('DEBUG_LEVEL', 10);
 
+define('DBMSG_SYSTEM',  0);      // for Main, App, Controller
+define('DBMSG_LOCALE',  1);      // for LangUI
+define('DBMSG_VIEW',    2);      // for View, Helper
+define('DBMSG_MODEL',   3);      // for Model
+define('DBMSG_HANDLER', 4);      // for DB-Handler
+// over 5 level for Application
+
 const EMPTY_MSG = " EMPTY\n";
 /*
     アプリケーションデバッグ情報

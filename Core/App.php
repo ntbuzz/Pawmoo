@@ -77,7 +77,7 @@ public static function ChangeParams($params,$relocate = TRUE) {
 // メソッドの置換
 public static function Get_RelocateURL() { 
     if(static::$ReLocate === FALSE) return NULL;
-    debug_log(1, static::$execURI);
+    debug_log(DBMSG_SYSTEM, static::$execURI);
     $url = array_to_URI(static::$execURI);
     if(!empty(static::$Query)) {                  // exists QUERY strings
         $q = http_build_query(static::$Query);

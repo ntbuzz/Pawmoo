@@ -16,7 +16,7 @@ class LangUI {
 //==============================================================================
 // HTTP_ACCEPT_LANGUAGE を元にデフォルトの言語を決定する
     public static function construct($lang,$default,$initfiles) {
-        debug_log(2,["言語リスト" => $lang]);
+        debug_log(DBMSG_LOCALE,["言語リスト" => $lang]);
         // アプリケーションの言語リソースパス
         static::$LangDir = $default;      // App::Get_AppPath("View/lang/");
         static::$controllers = $initfiles;  // 初期ロードする言語
@@ -65,7 +65,7 @@ public static function LangFiles($files) {
 //==============================================================================
 //  言語ファイルの読み込み
 public static function LangDebug() {
-    debug_log(2, [
+    debug_log(DBMSG_LOCALE, [
             "#LocalInfo" => [
                 'Locale' => static::$Locale,
                 'File'   => static::$LocaleFiles,
@@ -144,7 +144,7 @@ public static function LangDebug() {
             unset($section);
             return TRUE;
         } else {
-            debug_log(2,"UNDEFINED : {$lang_file}.lng\n");
+            debug_log(DBMSG_LOCALE,"UNDEFINED : {$lang_file}.lng\n");
         }
         return FALSE;
     }

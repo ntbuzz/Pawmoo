@@ -56,7 +56,7 @@ list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filter,$params) = $module;
 parse_str($q_str, $query);
 if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
-debug_log(0,[ "Routing module" => $module]);
+debug_log(DBMSG_SYSTEM,[ "Routing module" => $module]);
 
 // アプリ名が有効かどうか確認する
 if(empty($appname) || !file_exists("app/$appname")) {
@@ -162,7 +162,7 @@ if(strcasecmp($appname,$controller) === 0) {
 App::$ActionMethod= $ContAction;    // アクションメソッド名
 //=================================
 // デバッグ用の情報ダンプ
-debug_log(0, [
+debug_log(DBMSG_SYSTEM, [
     '#DebugInfo' => [
         "Application"=> $appname,
         "Controller"=> $controller,
@@ -203,7 +203,7 @@ if($controllerInstance->is_authorised()) {
 
 debug_run_time(0);
 MySession::CloseSession();
-debug_log(0, [
+debug_log(DBMSG_SYSTEM, [
     "#SessionClose" => [
         "ENVDATA" => MySession::$EnvData,
     ]

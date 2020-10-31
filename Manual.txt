@@ -372,10 +372,17 @@
           th=>TEXT | [ TH-CELL ]          TH ヘッダセル, 要素を配列にするとセクションコマンドが使える
           .td_attr=>[ TD-CELL ] | [ TD-CELL ]  TD セル、キー名を指定するとクラス/ID属性を付加できる
         ] ... ]
-  +radio => [ attr => value , items ]    INPUT RADIOタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
-        items :=                          リスト項目は次の要素から構成する
-          [ checked-item           　     先頭の要素はデフォルト選択要素
-            option => value ... ]           選択テキストと値のペアリスト
+  +radio => [ attr => value , items ]     INPUT RADIOタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
+        items :=                            リスト項目は次の要素から構成する
+          checked-option-value =>           キー名と同じ値がデフォルト選択要素
+            [ option => value ... ]           選択テキストと値のペアリスト
+  +checkbox => [  check-items ]           チェックボックス、2つのフォーマットが使用可能
+      FORMAT-I:                             単独のチェックボックスではname属性を指定する
+        name=TEXT
+        @Value => TEXT  [ STR => value ]
+      FORMAT-II:                          複数のチェックボックスをまとめて出力するときはname属性をキーにした連想配列
+        name1 => [ @value1=>TEXT [ STR1 => value1 ] ]
+        name2 => [ @value2=>TEXT [ STR2 => value2 ] ]
   +dl => [ attr => value , [ items ]  ]   DLタグ専用のリスト出力、attr => value はDLタグの属性になる
       items :=                            リスト項目は次の要素から構成する
           inner-text,                       無名キースカラー要素：　DTタグのインナーテキスト

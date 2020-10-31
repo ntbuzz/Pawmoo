@@ -239,7 +239,7 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 	};
 	$this->Finds = $expr_array('AND',$row);
 	$this->SortBy = $sort;
-	debug_log(3,[
+	debug_log(4,[
 		'row'	=> $row,
 		'FindBy'	=> $this->Finds,
 		'SortBy'	=> $this->SortBy,
@@ -299,7 +299,7 @@ public function findRecord($row, $relations = NULL,$sort = []) {
 				$this->errCode = $result->getCode();
 				$this->errMessage= $result->getMessage();
 				if ($this->errCode !== '401') {
-					debug_log(3, ["エラー" => $this->errMessage]);
+					debug_log(4, ["エラー" => $this->errMessage]);
 					// Check Find Condition
 					debug_log(-4,[
 						'FindBy'	=> $this->Finds,
