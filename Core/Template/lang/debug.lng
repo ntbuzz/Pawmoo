@@ -1,7 +1,16 @@
 // デバッグメッセージで使用する言語リソース
 //
 .ja => [
-    Level => レベル
+    Level => [
+        レベル
+        Category => [
+            システム
+            言語
+            ビュー
+            モデル
+            ハンドラー
+        ]
+    ]
     DebugInfo => デバッグ情報
     PathInfo => パス情報
     SessionClose => セッションクローズ
@@ -12,7 +21,16 @@
     LocalInfo => ロケール情報
 ]
 .en => [
-    Level => Level
+    Level => [
+        Level
+        Category => [
+            System
+            Locale
+            AppView
+            AppModel
+            Handler
+        ]
+    ]
     DebugInfo => "Debug Info"
     PathInfo => "Path Info"
     SessionClose => "Session Close"

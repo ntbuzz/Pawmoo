@@ -138,7 +138,7 @@ public function AutoPaging($cond, $max_count = 100) {
 	if($size > 0) {
 		MySession::$EnvData['PageSize'] = $size;		// 新しいページサイズに置換える
 		$this->Model->SetPage($size,$num);
-		debug_log(0, ["Param"  => $Params]);
+		debug_log(DBMSG_SYSTEM, ["Param"  => $Params]);
 	}
 }
 //==============================================================================

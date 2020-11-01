@@ -31,7 +31,7 @@ protected function Connect() {
 //==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
-	debug_log(3,['SQL' => $sql]);
+	debug_log(DBMSG_HANDLER,['SQL' => $sql]);
 	$this->rows = pg_query($this->dbb, $sql);
 	if(!$this->rows) {
 		$res1 = pg_get_result($this->dbb);

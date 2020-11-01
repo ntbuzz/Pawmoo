@@ -75,7 +75,7 @@ public function SetLayout($layoutfile) {
 //==============================================================================
 public function PutLayout($layout = NULL) {
     if($layout === NULL) $layout = $this->Layout;
-    debug_log(1, "\$Layout = {$layout}");
+    debug_log(DBMSG_VIEW, "\$Layout = {$layout}");
     $this->ViewTemplate($layout);
     $this->doTrailer = TRUE;
 }
@@ -89,7 +89,7 @@ public function __TerminateView() {
         // Do Replacement ADDRESS-BAR in Browser
         $url = App::Get_RelocateURL();
         if(isset($url)) {
-            debug_log(1,"RedirectURL: {$url}\n");
+            debug_log(DBMSG_VIEW,"RedirectURL: {$url}\n");
             echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";
         }
         if(DEBUGGER) {
@@ -110,7 +110,7 @@ public function ViewTemplate($name,$vars = []) {
             $parser = new SectionParser($tmplate);
             $divSection = $parser->getSectionDef();
             $this->inlineSection = [];         // Clear Inline-Section in this TEMPLATE
-            debug_log(1,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
+            debug_log(DBMSG_VIEW,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
             $this->sectionAnalyze($divSection,$vars);
             break;
         case 1:         // 'php'     // PHP Template
@@ -654,24 +654,25 @@ public function ViewTemplate($name,$vars = []) {
     }
     //--------------------------------------------------------------------------
     //  INPUT RADIO OUTPUT
-    // +radio => [
-    //    radio_key = > [
+    // +radio[name] => [
+    //    select_option_value = > [
     //      option_text => option_value
     //      ...
     //    ]
     // ]
     private function cmd_radio($tag,$attrs,$subsec,$sec,$vars,$text) {
         if(is_array($subsec)) {
+            $subsec = $this->expand_Recursive($subsec,$vars);   // EXPAND ALL-CHILD
             $attr = $this->gen_Attrs($attrs,$vars);
             $tags = "<INPUT TYPE='radio'{$attr}";
             list($opt_key, $opt_val) = array_first_item($subsec);
-            $sel_item = (is_numeric($opt_key)) ? '' : $this->expand_Strings($opt_key,$vars);
+            $sel_item = (is_numeric($opt_key)) ? '' : $opt_key;
             $opt_val = $this->expand_SectionVar($opt_val,$vars);
             if(is_array($opt_val)) {
                 $opt_val = array_flat_reduce($opt_val);
                 foreach($opt_val as $opt => $val) {
-                    $sel = ($opt == $sel_item) ? ' checked':'';
-                    echo "{$tags} value='{$opt}'{$sel}>{$val}\n";
+                    $sel = ($val == $sel_item) ? ' checked':'';
+                    echo "{$tags} value='{$val}'{$sel}>{$opt}\n";
                 }
             } else echo "{$tags} value='{$opt_val}'>{$opt_val}\n";
         }
@@ -691,12 +692,11 @@ public function ViewTemplate($name,$vars = []) {
         $attr = $this->gen_Attrs($attrs,$vars);
         $tags = "<INPUT TYPE='checkbox'{$attr}";
         if(is_array($sec)) {
-            $sec = $this->expand_Recursive($sec,$vars);   // EXPAND CHILD
+            $sec = $this->expand_Recursive($sec,$vars);   // EXPAND ALL-CHILD
             $check_item = function($arr) use(&$vars) {
                 $check_func=function($if) {return ($if) ? ' checked':'';};
                 $checked = $txt = $value = '';
                 foreach($arr as $key => $val) {
-                    $val = $this->expand_SectionVar($val,$vars);
                     if(is_numeric($key)) {
                         if(is_array($val)) {
                             list($cmp1, $cmp2) = array_first_item($val);

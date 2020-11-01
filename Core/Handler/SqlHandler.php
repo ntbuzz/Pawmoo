@@ -37,7 +37,7 @@ function __construct($table,$handler) {
 // setupRelations: relation table reminder
 public function setupRelations($relations) {
 	$this->relations = $relations;
-	debug_log(3,["RELATIONS" => $this->relations]);
+	debug_log(DBMSG_HANDLER,["RELATIONS" => $this->relations]);
 }
 //==============================================================================
 // fetchDB: get record data , and replace alias and bind column
@@ -110,10 +110,10 @@ public function findRecord($cond,$relations = NULL,$sort = []) {
 	$where = $this->sql_makeWHERE($cond);	// 検索条件
 	// 全体件数を取得する
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
-	debug_log(3,['SQL' => $sql]);
+	debug_log(DBMSG_HANDLER,['SQL' => $sql]);
 	$this->doQuery("{$sql}{$where};");
 	$field = $this->fetch_array();
-debug_log(3,["SQL" => "{$sql}{$where};", "DATA" => $field]);
+debug_log(DBMSG_HANDLER,["SQL" => "{$sql}{$where};", "DATA" => $field]);
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	// 実際のレコード検索
 	$sql = $this->sql_JoinTable($relations);
@@ -219,7 +219,7 @@ protected function sql_safequote(&$value) {
 		};
 		$new_cond = $reduce_array(['AND' => $cond]);
 		$sql = $this->makeExpr($new_cond);
-		debug_log(3,['IN-COND'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);
+		debug_log(DBMSG_HANDLER,['IN-COND'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);
 		if(strlen($sql)) $sql = ' WHERE '.$sql;
 		return $sql;
 	}

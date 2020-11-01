@@ -132,7 +132,7 @@ public function RelationSetup() {
                 }
             }
         }
-        debug_log(1,[
+        debug_log(DBMSG_MODEL,[
             "Header" => $header, 
             "Field" => $field, 
             "Relation" => $relation, 
@@ -195,7 +195,7 @@ public function GetValueList() {
         }
     }
     $this->Select= $valueLists;             // JOIN先の値リスト
-    debug_log(3, [ "VALUE_LIST" => $valueLists]);
+    debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $valueLists]);
 }
 //==============================================================================
 // フィールドの読み込み (JOIN無し)
@@ -251,7 +251,7 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
             $this->record_max = $this->dbDriver->recordMax;
             $this->doEvent('OnGetRecord', $record);     // イベントコールバック
         } else {
-            debug_log(3, ["fields" => $fields]);
+            debug_log(DBMSG_MODEL, ["fields" => $fields]);
         }
         debug_log(FALSE, ["record_max" => $this->record_max,"Fech:" => $fields,"Filter:" => $fields_list,"record" => $record]);
     }
@@ -287,7 +287,7 @@ public function MultiDeleteRecord($cond) {
                 $this->fields[$alias] = $val;
             }
         }
-        debug_log(3,['ALIAS' => $this->fields]);
+        debug_log(DBMSG_MODEL,['ALIAS' => $this->fields]);
     }
 //==============================================================================
 // レコードの追加
