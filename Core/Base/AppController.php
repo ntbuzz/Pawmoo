@@ -84,6 +84,7 @@ public function is_authorised() {
 				MySession::set_LoginValue([$login_key => $userid,'LANG'=>$lang]);
 				LangUI::SwitchLangs($lang);
 				$this->Model->ResetSchema();
+				debug_log(DBMSG_SYSTEM,['Language SWITCH'=>$lang]);
 			}
 		}
 		debug_log(FALSE, [

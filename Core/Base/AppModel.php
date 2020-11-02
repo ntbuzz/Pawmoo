@@ -284,7 +284,7 @@ public function MultiDeleteRecord($cond) {
         foreach($row as $key => $val) {
             if(array_key_exists($key,$this->dbDriver->columns)) {
                 $alias = $this->dbDriver->fieldAlias->get_lang_alias($key);
-                $this->fields[$alias] = $val;
+                if(!array_key_exists($alias,$this->fields)) $this->fields[$alias] = $val;
             }
         }
         debug_log(DBMSG_MODEL,['ALIAS' => $this->fields]);

@@ -16,7 +16,6 @@ class LangUI {
 //==============================================================================
 // HTTP_ACCEPT_LANGUAGE を元にデフォルトの言語を決定する
     public static function construct($lang,$default,$initfiles) {
-        debug_log(DBMSG_LOCALE,["言語リスト" => $lang]);
         // アプリケーションの言語リソースパス
         static::$LangDir = $default;      // App::Get_AppPath("View/lang/");
         static::$controllers = $initfiles;  // 初期ロードする言語
@@ -25,7 +24,8 @@ class LangUI {
 //==============================================================================
 //  言語ファイルの切替え
 public static function SwitchLangs($newlang) {
-    log_reset(2);
+    log_reset(DBMSG_LOCALE);
+    debug_log(DBMSG_LOCALE,["言語リスト" => $newlang]);
     $default = static::$LangDir;      // ロード先を保存
     $arr = array_unique(             // 重複行を取り除く
         array_filter(           // strlen を使って空行を取り除く
@@ -157,6 +157,7 @@ public static function get_value($mod, $id, $allow = FALSE) {
     $array_finder = function ($lst, $arr, $allow) {
             foreach($lst as $val) {
                 if(array_key_exists($val, $arr)) {
+                    $val = str_replace(['　',' '],'',$val);
                     $arr = $arr[$val];
                 } else return FALSE;        // 見つからなかった時
             }

@@ -173,8 +173,14 @@ public function ViewTemplate($name,$vars = []) {
                 if($is_row === FALSE) $val = str_replace("\n",'',text_to_html($val));
                 break;
             case '#': $var = mb_substr($var,1);     // Language refer
-                $allow = ($var[0] === '#');         // allow array
-                if($allow) $var = mb_substr($var,1);
+                if($var[0]==='@') {                 // AUTO Transfer
+                    $var = mb_substr($var,1);
+                    $var = 'Transfer.'.trim($this->Model->RecData[$va]);
+                    $allow = FALSE;
+                } else {
+                    $allow = ($var[0] === '#');         // allow array
+                    if($allow) $var = mb_substr($var,1);
+                }
                 $val = $this->_($var,$allow);       // get Language define
                 break;
             case '%': if(substr($var,-1) === '%') {     // is parameter number

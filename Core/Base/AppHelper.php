@@ -57,8 +57,8 @@ public function IsRequestController($comp) {
 // format {#locale-id}
 public function expand_echo($str) {
 	$p = '/\{#[^}\s]+?}/';
-	preg_match($p,$str,$m);
-	$vaList = $m[0];
+	preg_match_all($p,$str,$m);
+	$vaaList = $m[0];
 	if(empty($varList)) { echo $str; return; }
 	$varList = array_unique($varList);
 	$values = array_map(function($v) {

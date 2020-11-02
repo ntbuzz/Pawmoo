@@ -98,7 +98,9 @@ function debug_log($lvl,...$items) {
                         $msg[0] = '.';
                         $msg = LangUI::get_value('debug',$msg);
                     }
-                    if(is_scalar($obj)) {
+                    if(empty($obj)) {
+                        $dmp_msg .= "{$msg} : NULL\n";
+                    } else if(is_scalar($obj)) {
                         $obj = control_escape($obj);
                         $dmp_msg .= "{$msg} : {$obj}\n";
                     } else if(is_array($obj)) {
