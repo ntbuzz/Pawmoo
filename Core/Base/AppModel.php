@@ -23,6 +23,7 @@ class AppModel extends AppObject {
     public $pagesize = 0;           // 1ページ当たりのレコード取得件数
     public $page_num = 0;           // 取得ページ番号
     public $record_max = 0;         // 総レコード数
+    public $AliasMode = TRUE;       // Language Alias Enable
 
     public $RecData = NULL;          // レコードデータ(JOINなし)
     public $Select = NULL;           // リレーション先のラベルと値の連想配列リスト
@@ -283,8 +284,9 @@ public function MultiDeleteRecord($cond) {
         $this->fields = array();
         foreach($row as $key => $val) {
             if(array_key_exists($key,$this->dbDriver->columns)) {
-                $alias = $this->dbDriver->fieldAlias->get_lang_alias($key);
-                if(!array_key_exists($alias,$this->fields)) $this->fields[$alias] = $val;
+                $alias = ($this->AliasMode) ? $this->dbDriver->fieldAlias->get_lang_alias($key) :$key;
+//                if(!array_key_exists($alias,$this->fields)) 
+                $this->fields[$alias] = $val;
             }
         }
         debug_log(DBMSG_MODEL,['ALIAS' => $this->fields]);
