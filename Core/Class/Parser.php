@@ -45,7 +45,9 @@ EOS;
             else if( !$incomm && strlen($token)) {          // ブロック・コメント内でなく、トークンが空でなければ処理
                 $wrapstr = $token[0] . mb_substr($token,-1);     // 先頭文字と最終文字を取り出す
                 if ( in_array($wrapstr, self::WORDSTRING)) {
-                    $token = implode( "\n" , text_line_split("\n",trim( $token, $wrapstr )) );    // 改行を含むので各行の前後の空白を除去
+                    $token = ($wrapstr==='""') ?
+                            implode( "\n" , text_line_split("\n",trim($token, $wrapstr),FALSE)):
+                            trim( $token, $wrapstr );
                 } else if($token !== '=>') {
                     $md = explode('=>',trim($token));
                     if(count($md)===2) {

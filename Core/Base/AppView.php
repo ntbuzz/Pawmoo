@@ -517,10 +517,8 @@ public function ViewTemplate($name,$vars = []) {
         $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
         $atext = $this->expand_Strings($atext,$vars);
         if(is_array($sec)) $atext = "\n{$atext}\n\n";
-        $key = is_array($sec) ? array_key_first($sec) : 0;
-        $mtext =(is_numeric($key))
-                ? pseudo_markdown( $atext )
-                : pseudo_markdown( $atext,$key);
+        $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
+        $mtext = pseudo_markdown( $atext,$cls);
     debug_log(FALSE,[ 
         "SEC" => $sec,
         "KEY" => $key,
