@@ -35,7 +35,6 @@ class AppController extends AppObject {
 								function($v) use ($except) {
 									return !in_array($v,$except);
 								});
-		debug_log(FALSE, [ 'MY METHOD' => $this->my_method ]);
 		$this->__InitClass();                       // クラス固有の初期化メソッド
 	}
 //==============================================================================

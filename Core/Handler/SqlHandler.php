@@ -110,10 +110,9 @@ public function findRecord($cond,$relations = NULL,$sort = []) {
 	$where = $this->sql_makeWHERE($cond);	// 検索条件
 	// 全体件数を取得する
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
-	debug_log(DBMSG_HANDLER,['SQL' => $sql]);
 	$this->doQuery("{$sql}{$where};");
 	$field = $this->fetch_array();
-debug_log(DBMSG_HANDLER,["SQL" => "{$sql}{$where};", "DATA" => $field]);
+	debug_log(DBMSG_HANDLER,["SQL" => "{$sql}{$where};", "DATA" => $field]);
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	// 実際のレコード検索
 	$sql = $this->sql_JoinTable($relations);
@@ -192,32 +191,37 @@ protected function sql_safequote(&$value) {
 //==============================================================================
 // Re-Build Condition ARRAY, Create SQL-WHERE statement.
 	private function sql_makeWHERE($cond) {
-		$reduce_array = function($arr) use(&$reduce_array) {
-			$wd = [];
-			foreach($arr as $key => $val) {
-				while((is_numeric($key) || in_array($key,['AND','OR'])) && is_array($val) && (count($val)===1)) {
-					list($key,$val) = array_first_item($val);
-				}
-				if(is_array($val)) {
-					$sub = $reduce_array($val);
-					if(is_numeric($key)) {
-						foreach($sub as $kk => $vv) {
-							if(isset($wd[$kk])) {
-								if(is_numeric($kk)) $wd[] = $vv;
-								else {
-									for($dup=0; isset($wd[$ks="{$kk}:{$dup}"]);++$dup) ;
-									$wd[$ks] = $vv;
-								}
+		$re_build_array = function($cond) {
+			$reduce_array = function($opr,$arr) use(&$reduce_array) {
+				$wd = [];
+				foreach($arr as $key => $val) {
+					if(is_array($val)) $val = $reduce_array($key,$val);
+					if((is_numeric($key)||$key===$opr) && is_array($val)) {
+						foreach($val as $kk => $vv) {
+							if(is_array($vv) && count($vv)===1) list($kk,$vv) = array_first_item($vv);
+							if(isset($wd[$kk]) && is_array($vv)) {
+								foreach($vv as $k2 => $v2) $wd[$kk][$k2] = $v2;
 							} else $wd[$kk] = $vv;
 						}
-					} else $wd[$key] = $sub;
-				} else {
-					$wd[$key] = $val;
+					} else $wd[$key] = $val;
 				}
-			}
-			return $wd;
+				return is_numeric($opr) ? $wd : [$opr => $wd];
+			};
+			$sort_array = function($arr) use(&$sort_array) {
+				$wd = [];
+				foreach($arr as $key => $val) {
+					if(is_scalar($val)) $wd[$key] = $val;
+				}
+				foreach($arr as $key => $val) {
+					if(is_array($val)) $wd[$key] = $sort_array($val);
+				}
+				return $wd;
+			};
+			$new_cond = $reduce_array('AND',$cond);
+			$sort_cond = $sort_array($new_cond);
+			return $sort_cond;
 		};
-		$new_cond = $reduce_array(['AND' => $cond]);
+		$new_cond = $re_build_array($cond);
 		$sql = $this->makeExpr($new_cond);
 		debug_log(DBMSG_HANDLER,['IN-COND'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);
 		if(strlen($sql)) $sql = ' WHERE '.$sql;
@@ -246,10 +250,10 @@ protected function sql_safequote(&$value) {
 			};
 			$opc = '';
 			foreach($items as $key => $val) {
-				if(is_numeric($key) && is_array($val)) {
-					echo "RETURN\n";
-					return $dump_object($opr,$val,$table);
-				}
+//				if(is_numeric($key) && is_array($val)) {
+//					echo "RETURN\n";
+//					return $dump_object($opr,$val,$table);
+//				}
 				if(empty($key)) continue;
 				list($key,$op) = keystr_opr($key);
 				if(empty($op) || $op === '%') {			// non-exist op or LIKE-op(%)

@@ -1,0 +1,50 @@
+/*	padding: 0px 10px;	/* [上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
+.tabset {
+display:flex;
+}
+/* タブ表示用 */
+/*
+.tabControll {
+    background-color:whitesmoke;
+    border-bottom: 1px dotted gray;
+    border-right: 1px dotted red;
+}
+*/
+.tabControll>ul.tabmenu {
+    float:left;
+	list-style:none;
+    background-color:white;
+}
+.tabControll>ul.tabmenu:after {
+    clear:both;
+}
+.tabControll>ul.tabmenu li {
+    float:left;
+    height:1.5em;
+	padding: 0 20px; 
+    cursor:pointer;
+    font-size: 10pt;
+    background-color:silver;
+    border-radius:4px 4px 0 0;
+    border:1px solid black;
+}
+.tabControll>ul.tabmenu>li:hover {
+    background:gray;
+    color:white;
+}
+.tabControll>ul.tabmenu>li.selected {
+    font-style: bold;
+    background-color:navy;
+    color:white;
+}
+/* タブコンテンツ */
+.tabControll>ul.tabcontents {
+    clear:both;
+    width: 100%;
+	list-style:none;
+    border: 1px dotted gray;
+}
+
+.tabControll>ul.tabcontents>li{padding:0;}
+.tabControll>ul.tabcontents>.hide {display:none;}
+

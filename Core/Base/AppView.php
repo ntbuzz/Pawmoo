@@ -35,6 +35,8 @@ class AppView extends AppObject {
             'inline'    => 'cmd_inline',
             'markdown'  => 'cmd_markdown',
             'recordset' => 'cmd_recordset',
+            'tabset'    => 'cmd_tabset',
+            'php'       => 'cmd_php',
         ],
         '*'    => 'sec_comment',
         '%'    => 'sec_link',
@@ -225,11 +227,6 @@ public function ViewTemplate($name,$vars = []) {
         if(empty($varList)) return $str;        // not use variable.
         $values = $varList = array_unique($varList);
         array_walk($values, array($this, 'expand_Walk'), $vars);
-        debug_log(FALSE,[ "EXPAND" => [
-            "STR" => $str,
-            "VAR" => $varList,
-            "REPLACE" => $values,
-            ]]);
         $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);
         return $exvar;
     }
@@ -292,12 +289,28 @@ public function ViewTemplate($name,$vars = []) {
         if(is_scalar($arr)) return $arr;
         // analyze IF-SELECTOR and EXPAND KEY
         $if_selector = function($sec,$key) use(&$vars) {
+                if(substr($key,0,2)==='?&') {
+                    $tag = mb_substr($key,2);
+                    $sec = $this->expand_Recursive($sec,$vars);
+                    if(method_exists($this->Helper,$tag)) {
+                        return $this->Helper->$tag($sec);
+                    }
+                    echo "Helper Method:'{$tag}' not found. Please Create this method.\n";
+                    return [];
+                }
                 if(substr($key,0,1)==='?') {
                     $cmp_val = str_replace(["\n","\r"],'',$this->expand_Strings(mb_substr($key,1),$vars));
                     foreach($sec as $check => $value) {
                         if($check === '') $result = empty($cmp_val);            // is_empty ?
                         else if($check === '*') $result = !empty($cmp_val);     // is_notempty ?
-                        else $result = ($cmp_val === $check);                   // match if key
+                        else {
+                            $chk_arr = explode('|',$check);
+                            $result = FALSE;
+                            foreach($chk_arr as $cmp_chk) {
+                                $result = fnmatch($cmp_chk,$cmp_val);       // compare wild-char
+                                if($result) break;
+                            }
+                        }
                         if($result) return $value;
                     }
                     return [];
@@ -324,6 +337,10 @@ public function ViewTemplate($name,$vars = []) {
 //==============================================================================
 // Analyzed Section, and Dispatch Command method
     private function sectionAnalyze($divSection,$vars) {
+        if(is_scalar($divSection)) {
+            echo $divSection;
+            return;
+        }
         foreach($divSection as $key => $sec) {
             // analyze IF-SELECTOR and EXPAND KEY
             $vv = $this->array_if_selector($sec, $vars);
@@ -352,6 +369,7 @@ public function ViewTemplate($name,$vars = []) {
         } else { // delete duplicate to avoid key-name
             $key = tag_body_name($key);
         }
+        $key = $this->expand_Strings($key,$vars);        
         $top_char = mb_substr($key,0,1);
         if(array_key_exists($top_char,self::FunctionList)) {
             $kkey = mb_substr($key,1);
@@ -505,6 +523,18 @@ public function ViewTemplate($name,$vars = []) {
         $this->directOutput('', '',$sec,$vars);
     }
     //--------------------------------------------------------------------------
+    //  PHP eval, Danger Section!
+    private function cmd_php($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
+        $atext = $this->expand_Strings($atext,$vars);
+        $Helper = $this->Helper;
+        $RecData = $this->Model->RecData;    // One-Record Data
+        $Records = $this->Model->Records;    // Record Data-List, column data is used HeaderSchema
+        $_ = function($id) { return $this->_($id); };   // shortcut LANG-ID Convert
+        extract($vars);
+        eval($atext);
+    }
+    //--------------------------------------------------------------------------
     //  Define INLINE Section, for use after section
     private function cmd_inline($tag,$attrs,$subsec,$sec,$vars,$text) {
         $name = $attrs['class'];
@@ -519,12 +549,6 @@ public function ViewTemplate($name,$vars = []) {
         if(is_array($sec)) $atext = "\n{$atext}\n\n";
         $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
         $mtext = pseudo_markdown( $atext,$cls);
-    debug_log(FALSE,[ 
-        "SEC" => $sec,
-        "KEY" => $key,
-        "STRING" => $atext,
-        "MARKDOWN" => $mtext,
-    ]);
         echo $mtext;
     }
     //--------------------------------------------------------------------------
@@ -535,13 +559,6 @@ public function ViewTemplate($name,$vars = []) {
         foreach($this->Model->Records as $records) {
             $this->Model->RecData = $records;    // replace RecData
             $v_sec = $this->expand_SectionVar($sec,$vars);
-            debug_log(FALSE,[ 
-                "data" => $this->Model->RecData,
-                'sec' => $sec,
-                'vsec' => $v_sec,
-                'subsec' => $subsec,
-                'var' => $vars,
-            ]);
             $this->sectionAnalyze($v_sec,$vars);
         }
         $this->Model->RecData = $save_data;         // restore RecData
@@ -624,6 +641,45 @@ public function ViewTemplate($name,$vars = []) {
                 }
             } else echo "<OPTION value='{$opt_val}'>{$opt_val}</OPTION>\n";
             echo "</{$tag}>\n";
+        }
+    }
+    //--------------------------------------------------------------------------
+    // +tabset.classname => [
+    //      Menu1.selected => [ Contents1 ]
+    //      Menu2 => [ Contents2 ]
+    //      Menu3 => [ Contents3 ]
+    //      Menu4 => [ Contents4 ]
+    //  ]
+    private function cmd_tabset($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $mycls = (isset($attrs['class']))? $attrs['class'] :'';
+        $attrs['class'] = rtrim("tabControll {$mycls}");
+        $attr = $this->gen_Attrs($attrs,$vars);
+        if(is_array($subsec)) {
+            echo "<div{$attr}>\n";
+            // create tabset
+            echo "<ul class='tabmenu'>\n";
+            foreach($subsec as $key => $val) {
+                list($tag,$attrs) = $this->tag_Separate($key);
+                $attr = $this->gen_Attrs($attrs,$vars);
+                echo "<li{$attr}>{$tag}</li>\n";
+            }
+            echo "</ul>\n";
+            // create tab-contents block
+            echo "<ul class='tabcontents'>\n";
+            foreach($subsec as $key => $val) {
+                list($tag,$attrs) = $this->tag_Separate($key);
+                if(array_key_exists('class',$attrs)) {
+                    if(!preg_match('/hide|selected/', $attrs['class'])) {
+                        $attrs['class'] .= ' hide';
+                    }
+                } else $attrs['class'] = 'hide';
+                $attr = $this->gen_Attrs($attrs,$vars);
+                echo "<li{$attr}>";
+                $this->sectionAnalyze($val,$vars);
+                echo "</li>\n";
+            }
+            echo "</ul>\n";
+            echo "</div>";
         }
     }
     //--------------------------------------------------------------------------
@@ -730,8 +786,9 @@ public function ViewTemplate($name,$vars = []) {
     //==========================================================================
     // TAG string SEPARATE
     private function tag_Separate($tag) {
+        if($tag[0]==='\\') $tag = mb_substr($tag,1);
+        $tag = tag_body_name( $tag );       // delete dup-escapt char ':'
         $attrList = [];
-        // extract attribute in 'tags', and strip SECTION-COMMAND char
         $top_ch = mb_substr($tag,0,1);
         if(strpos(SECTION_TOKEN,$top_ch) !== FALSE) {
             if($top_ch === '<') {
@@ -745,16 +802,20 @@ public function ViewTemplate($name,$vars = []) {
                         $attrList[] = trim($val,"\"'");
                     }
                 }
-            } else $tag = mb_substr($tag,1);
+            } else {
+                $tag = mb_substr($tag,1);
+                if($top_ch === '*') return [$tag,''];
+            }
         }
-        // pickup special attribute in $tag string
         foreach(['data' => '{', 'name' => '[', 'id' => '#', 'class' => '.'] as $key => $sep) {
             $n = strrpos($tag,$sep);
             if( $n !== FALSE) {
-                $str = tag_body_name( substr($tag,$n + 1) );
+                $str = substr($tag,$n + 1);
                 $tag = substr($tag,0, $n);
                 if($sep === '{') {
-                    $str = trim($str,'{}');
+                    $m = strrpos($str,'}');
+                    $tag .= substr($str,$m+1);
+                    $str = substr($str,0, $m);
                     $kk = "{$key}-element";
                     $attrList[$kk] = $str;
                 } else if($sep === '[') {
@@ -773,7 +834,7 @@ public function ViewTemplate($name,$vars = []) {
     private function is_section_tag($key,$val) {
         if(is_array($val)) return TRUE;
         if(strlen($key) <= 1) return FALSE;
-        return (strpos(SECTION_TOKEN.'.#',$key[0]) !== FALSE);
+        return (strpos(SECTION_TOKEN.'.#\\',$key[0]) !== FALSE);
     }
     //==========================================================================
     // TAG SEPARATE,naked TAG, attribute list in $tag and $sec, sub-section array, and inner-text

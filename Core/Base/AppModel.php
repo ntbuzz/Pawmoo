@@ -40,7 +40,6 @@ class AppModel extends AppObject {
 //==============================================================================
 	function __construct($owner) {
 	    parent::__construct($owner);                    // 継承元クラスのコンストラクターを呼ぶ
-        debug_log(FALSE,static::$DatabaseSchema);
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
         if(isset($this->ModelTables)) {                 // Multi-Language Tabele exists
             $db_key = (array_key_exists(LangUI::$LocaleName,$this->ModelTables)) ? LangUI::$LocaleName : '*';
@@ -100,7 +99,6 @@ public function RelationSetup() {
         }
     }
     $this->dbDriver->setupRelations($this->Relations);
-    debug_log(FALSE,["Relations" => $this->Relations]);
 }
 //==============================================================================
 // スキーマを分解してヘッダー情報を生成
@@ -226,7 +224,6 @@ public function getCount($cond) {
 //          読み込んだ列名 = Header (Schema)
 //          $filter[] で指定したオリジナル列名のみを抽出
 public function RecordFinder($cond,$filter=[],$sort=[]) {
-    debug_log(FALSE, [ "cond" => $cond, "filter" => $filter]);
     if(empty($filter)) $filter = $this->dbDriver->columns;
     // 取得フィールドリストを生成する
     $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
@@ -254,7 +251,6 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
         } else {
             debug_log(DBMSG_MODEL, ["fields" => $fields]);
         }
-        debug_log(FALSE, ["record_max" => $this->record_max,"Fech:" => $fields,"Filter:" => $fields_list,"record" => $record]);
     }
     $this->Records = $data;
 //    if($this->pagesize > 0 && $this->pagesize < 50)  debug_log(3, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);

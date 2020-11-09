@@ -6,45 +6,61 @@ require_once('Core/Common/coreLibs.php');
 require_once('Core/Common/appLibs.php');
 echo str_repeat("=", 150)."\n";
 
-function tables($col) {
-    list($tag,$vars) = ['TD',''];
-    // maybe additional calss and colspan/rowspan
-    preg_match('/^([@\^]+)*(\.(\w+))*?\s/',$col,$m);
-    debug_log(-99,["MATCH" => $m]);
-    $bind = $cls = '';
-    switch(count($m)) {
-    case 4: $cls =" class='{$m[3]}'";
-    case 2: $len = strlen($m[1]);
-            if($len === 0) $bind = '';
-            else {
-                $binds = [];
-                foreach(['@'=>'colspan','^'=>'rowspan'] as $bkey => $bval) {
-                    $clen = substr_count($m[1],$bkey);
-                    if($clen !== 0) $binds[] = " {$bval}='{$clen}'";
-                }
-                $bind = implode($binds);
-            }
-            $col = mb_substr($col,strlen($m[0]));
-            break;
-    }
-    return "<{$tag}{$cls}{$bind}{$vars}>{$col}</{$tag}>";
-}
-
-
-$template = [
-    'class ヘッドクラス',
-    '.class ヘッドクラス',
-    '@@@ ヘッドクラス',
-    '^^^ ヘッドクラス',
-    '@^^@@^^ ヘッドクラス',
-    '@@.class ヘッドクラス',
-    '^^.class ヘッドクラス',
-    '^^^@@.class ヘッドクラス',
-    '@@@^^.class ヘッドクラス',
-    '^@@^@^^.class ヘッドクラス',
+$cond = [
+    [
+        [   'flag_a' => 't',
+            [ 'flag_g' => 'g' ],
+            'flag_b' => 'f',
+        ],
+        'AND' => [
+            [ 'mode' => 'test',
+              'OR'=>  [ 'name' => 'ntak','pass' => 'root'],
+              [
+              "one" => 100,
+              "two" => 200,
+              "three" => 300,
+               ],
+            ],
+        ],
+        [
+        'NOT' => [ 'scan' => 'OK', 'las'=>999 ],
+        ]
+    ],
 ];
-foreach($template as $vv) {
-        debug_log(-99,["INPUT" => $vv, "TABLE"=>tables($vv)]);
-}
-exit;
+
+function re_build_array($cond) {
+    $reduce_array = function($opr,$arr) use(&$reduce_array) {
+        $wd = [];
+        foreach($arr as $key => $val) {
+            if(is_array($val)) $val = $reduce_array($key,$val);
+            if((is_numeric($key)||$key===$opr) && is_array($val)) {
+                foreach($val as $kk => $vv) {
+                    if(is_array($vv) && count($vv)===1) list($kk,$vv) = array_first_item($vv);
+                    if(isset($wd[$kk]) && is_array($vv)) {
+                        foreach($vv as $k2 => $v2) $wd[$kk][$k2] = $v2;
+                    } else $wd[$kk] = $vv;
+                }
+            } else {
+                $wd[$key] = $val;
+            }
+        }
+        return is_numeric($opr) ? $wd : [$opr => $wd];
+    };
+    $sort_array = function($arr) use(&$sort_array) {
+        $wd = [];
+        foreach($arr as $key => $val) {
+            if(is_scalar($val)) $wd[$key] = $val;
+        }
+        foreach($arr as $key => $val) {
+            if(is_array($val)) $wd[$key] = $sort_array($val);
+        }
+        return $wd;
+    };
+    $new_cond = $reduce_array('AND',$cond);
+    $sort_cond = $sort_array($new_cond);
+    return $sort_cond;
+};
+
+$new_cond = re_build_array($cond);
+debug_log(-99,["INPUT" => $cond,"REBUILD" => $new_cond]);
 
