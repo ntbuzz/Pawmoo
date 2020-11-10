@@ -27,24 +27,17 @@ $cond = [
         ]
     ],
 ];
-
-function re_build_array($cond) {
-    $reduce_array = function($opr,$arr) use(&$reduce_array) {
+$cond = ['active=' => 't','name_list_id@' => ['source' => ['神話','元素','惑星']] ];
+function re_build_array2($cond) {
+    $reduce_array = function($cond) use(&$reduce_array) {
         $wd = [];
-        foreach($arr as $key => $val) {
-            if(is_array($val)) $val = $reduce_array($key,$val);
-            if((is_numeric($key)||$key===$opr) && is_array($val)) {
-                foreach($val as $kk => $vv) {
-                    if(is_array($vv) && count($vv)===1) list($kk,$vv) = array_first_item($vv);
-                    if(isset($wd[$kk]) && is_array($vv)) {
-                        foreach($vv as $k2 => $v2) $wd[$kk][$k2] = $v2;
-                    } else $wd[$kk] = $vv;
-                }
-            } else {
-                $wd[$key] = $val;
-            }
+        foreach($cond as $key => $val) {
+            if(is_array($val)) $val = $reduce_array($val);
+            if(is_numeric($key) && is_array($val)) {
+                foreach($val as $kk => $vv) $wd[$kk] =$vv;
+            } else $wd[$key] =$val;
         }
-        return is_numeric($opr) ? $wd : [$opr => $wd];
+        return $wd;
     };
     $sort_array = function($arr) use(&$sort_array) {
         $wd = [];
@@ -56,11 +49,10 @@ function re_build_array($cond) {
         }
         return $wd;
     };
-    $new_cond = $reduce_array('AND',$cond);
-    $sort_cond = $sort_array($new_cond);
-    return $sort_cond;
-};
+    return $sort_array($reduce_array($cond));
+}
 
-$new_cond = re_build_array($cond);
-debug_log(-99,["INPUT" => $cond,"REBUILD" => $new_cond]);
+debug_log(-99,["INPUT" => $cond]);
+$new_cond = re_build_array2($cond);
+debug_log(-99,["INPUT" => $cond, "REBUILD" => $new_cond]);
 

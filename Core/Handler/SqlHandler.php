@@ -15,6 +15,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private $handler;		// Databas Handler Name
 	public  $DateStyle = 'Y-m-d';	// Date format
 	private $relations;		// relation tables
+	private $LastCond;		// Last Query Condithin(re-builded)
 //==============================================================================
 //	abstruct method
 	abstract protected function Connect();
@@ -192,20 +193,15 @@ protected function sql_safequote(&$value) {
 // Re-Build Condition ARRAY, Create SQL-WHERE statement.
 	private function sql_makeWHERE($cond) {
 		$re_build_array = function($cond) {
-			$reduce_array = function($opr,$arr) use(&$reduce_array) {
+			$reduce_array = function($cond) use(&$reduce_array) {
 				$wd = [];
-				foreach($arr as $key => $val) {
-					if(is_array($val)) $val = $reduce_array($key,$val);
-					if((is_numeric($key)||$key===$opr) && is_array($val)) {
-						foreach($val as $kk => $vv) {
-							if(is_array($vv) && count($vv)===1) list($kk,$vv) = array_first_item($vv);
-							if(isset($wd[$kk]) && is_array($vv)) {
-								foreach($vv as $k2 => $v2) $wd[$kk][$k2] = $v2;
-							} else $wd[$kk] = $vv;
-						}
-					} else $wd[$key] = $val;
+				foreach($cond as $key => $val) {
+					if(is_array($val)) $val = $reduce_array($val);
+					if(is_numeric($key) && is_array($val)) {
+						foreach($val as $kk => $vv) $wd[$kk] =$vv;
+					} else $wd[$key] =$val;
 				}
-				return is_numeric($opr) ? $wd : [$opr => $wd];
+				return $wd;
 			};
 			$sort_array = function($arr) use(&$sort_array) {
 				$wd = [];
@@ -217,14 +213,16 @@ protected function sql_safequote(&$value) {
 				}
 				return $wd;
 			};
-			$new_cond = $reduce_array('AND',$cond);
-			$sort_cond = $sort_array($new_cond);
-			return $sort_cond;
+			return $sort_array($reduce_array($cond));
 		};
-		$new_cond = $re_build_array($cond);
+		if($cond === NULL) {
+			$new_cond = $this->LastCond;
+		} else {
+			$new_cond = $this->LastCond = $re_build_array($cond);
+		}
 		$sql = $this->makeExpr($new_cond);
-		debug_log(DBMSG_HANDLER,['IN-COND'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);
 		if(strlen($sql)) $sql = ' WHERE '.$sql;
+		debug_log(DBMSG_HANDLER,['COND-INPUT'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);
 		return $sql;
 	}
 //==============================================================================
@@ -248,7 +246,7 @@ protected function sql_safequote(&$value) {
 					},$val);
 				return implode('OR',$cmp);
 			};
-			$opc = '';
+			$opc = ''; $expr = ['AND','OR','NOT'];
 			foreach($items as $key => $val) {
 //				if(is_numeric($key) && is_array($val)) {
 //					echo "RETURN\n";
@@ -258,7 +256,7 @@ protected function sql_safequote(&$value) {
 				list($key,$op) = keystr_opr($key);
 				if(empty($op) || $op === '%') {			// non-exist op or LIKE-op(%)
 					if(is_array($val)) {
-						if(in_array($key,['AND','OR','NOT'])) {
+						if(in_array($key,$expr)) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
 							if(!empty($opp)) $opp = "({$opp})";

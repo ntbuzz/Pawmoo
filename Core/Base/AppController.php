@@ -146,7 +146,7 @@ public function AutoPaging($cond, $max_count = 100) {
 public function PagingFinder($cond, $max_count=100,$filter=[],$sort=[]) {
 //	debug_log(-11, ["cond"  => $cond, "count" => $max_count]);
 	$this->AutoPaging($cond, $max_count);
-	$this->Model->RecordFinder($cond,$filter,$sort);
+	$this->Model->RecordFinder(NULL,$filter,$sort);
 }
 //==============================================================================
 // デフォルトの動作
