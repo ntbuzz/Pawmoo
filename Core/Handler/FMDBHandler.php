@@ -42,7 +42,7 @@ class FMDBHandler extends FileMaker {
 public function DatabaseConnect($dbtable) {
 	// DB_FILE:WEB-Layout
 	list($dbname,$table) = explode(':',$dbtable);
-	debug_log(-4, ['DATABASE' => $dbname,'LAYOUT' => $table]);
+	debug_log(4, ['DATABASE' => $dbname,'LAYOUT' => $table]);
 	// クラスユニークなパラメータ
 	$this->setProperty('database', $dbname);
 	$this->LayoutName = $table;

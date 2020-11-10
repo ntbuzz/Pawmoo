@@ -235,6 +235,7 @@ function tag_body_name($key) {
 function keystr_opr($str) {
     $opr_set = ['=='=>NULL, '<>'=>NULL, '>='=>NULL, '<='=>NULL, '=>'=>'>=', '=<'=>'<=', '!='=>'<>',
                 '='=>NULL, '>'=>NULL, '<'=>NULL, '@'=>NULL, '%'=>NULL ];
+    $str = tag_body_name($str);
     foreach([-2,-1] as $nn) {
         $opr = mb_substr($str,$nn);      // last-2char
         if(array_key_exists($opr,$opr_set)) {

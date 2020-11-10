@@ -10,6 +10,7 @@
 	list-style-type: none;
 	background: #EEE;
 	font-size: 1em;
+	border-radius:6px;
 	box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
     -moz-box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
     -webkit-box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);

@@ -15,6 +15,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private $handler;		// Databas Handler Name
 	public  $DateStyle = 'Y-m-d';	// Date format
 	private $relations;		// relation tables
+	private $LastCond;		// Last Query Condithin(re-builded)
 //==============================================================================
 //	abstruct method
 	abstract protected function Connect();
@@ -110,10 +111,9 @@ public function findRecord($cond,$relations = NULL,$sort = []) {
 	$where = $this->sql_makeWHERE($cond);	// 検索条件
 	// 全体件数を取得する
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
-	debug_log(DBMSG_HANDLER,['SQL' => $sql]);
 	$this->doQuery("{$sql}{$where};");
 	$field = $this->fetch_array();
-debug_log(DBMSG_HANDLER,["SQL" => "{$sql}{$where};", "DATA" => $field]);
+	debug_log(DBMSG_HANDLER,["SQL" => "{$sql}{$where};", "DATA" => $field]);
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	// 実際のレコード検索
 	$sql = $this->sql_JoinTable($relations);
@@ -192,35 +192,33 @@ protected function sql_safequote(&$value) {
 //==============================================================================
 // Re-Build Condition ARRAY, Create SQL-WHERE statement.
 	private function sql_makeWHERE($cond) {
-		$reduce_array = function($arr) use(&$reduce_array) {
-			$wd = [];
-			foreach($arr as $key => $val) {
-				while((is_numeric($key) || in_array($key,['AND','OR'])) && is_array($val) && (count($val)===1)) {
-					list($key,$val) = array_first_item($val);
+		$re_build_array = function($cond) {
+			$reduce_array = function($opr,$cond) use(&$reduce_array) {
+				$wd = [];
+				foreach($cond as $key => $val) {
+					if(is_array($val)) {
+						$val_s = $val;
+						$val = $reduce_array(is_numeric($key)?$opr:$key,$val);
+					}
+					if(is_array($val) && (is_numeric($key) || $opr === $key)) {
+						foreach($val as $kk => $vv) $wd[$kk] =$vv;
+					} else $wd[$key] =$val;
 				}
-				if(is_array($val)) {
-					$sub = $reduce_array($val);
-					if(is_numeric($key)) {
-						foreach($sub as $kk => $vv) {
-							if(isset($wd[$kk])) {
-								if(is_numeric($kk)) $wd[] = $vv;
-								else {
-									for($dup=0; isset($wd[$ks="{$kk}:{$dup}"]);++$dup) ;
-									$wd[$ks] = $vv;
-								}
-							} else $wd[$kk] = $vv;
-						}
-					} else $wd[$key] = $sub;
-				} else {
-					$wd[$key] = $val;
+				return $wd;
+			};
+			$sort_array = function($arr) use(&$sort_array) {
+				$wd = array_filter($arr, function($vv) {return is_scalar($vv);});
+				foreach($arr as $key => $val) {
+					if(is_array($val)) $wd[$key] = $sort_array($val);
 				}
-			}
-			return $wd;
+				return $wd;
+			};
+			return $sort_array($reduce_array('AND',$cond));
 		};
-		$new_cond = $reduce_array(['AND' => $cond]);
+		$new_cond = ($cond===NULL) ? $this->LastCond : ($this->LastCond = $re_build_array($cond));
 		$sql = $this->makeExpr($new_cond);
-		debug_log(DBMSG_HANDLER,['IN-COND'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);
 		if(strlen($sql)) $sql = ' WHERE '.$sql;
+		debug_log(DBMSG_HANDLER,['COND-INPUT'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);
 		return $sql;
 	}
 //==============================================================================
@@ -244,17 +242,13 @@ protected function sql_safequote(&$value) {
 					},$val);
 				return implode('OR',$cmp);
 			};
-			$opc = '';
+			$opc = ''; $and_or_op = ['AND','OR','NOT'];
 			foreach($items as $key => $val) {
-				if(is_numeric($key) && is_array($val)) {
-					echo "RETURN\n";
-					return $dump_object($opr,$val,$table);
-				}
-				if(empty($key)) continue;
+				if(empty($key)) { echo "EMPTY!!!"; continue;}
 				list($key,$op) = keystr_opr($key);
 				if(empty($op) || $op === '%') {			// non-exist op or LIKE-op(%)
 					if(is_array($val)) {
-						if(in_array($key,['AND','OR','NOT'])) {
+						if(in_array($key,$and_or_op)) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
 							if(!empty($opp)) $opp = "({$opp})";

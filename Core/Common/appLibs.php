@@ -190,7 +190,8 @@ function pseudo_markdown($atext, $md_class = '') {
         '/\n```([a-z]+?)\n(.+?)\n```/s' => "\n<pre class=\"\\1\">\n\\2</pre>\n",    // class name
         '/\n```\n(.+?)\n```/s'          => "\n<pre class=\"code\">\n\\1</pre>\n",   // code
         '/\n(~~~|\^\^\^)\n(.+?)\n\1/s'  => "\n<pre class=\"indent\">\n\\2</pre>\n", // indent block
-        '/\.(\w+){(.+?)}/s'             => '<span class="\\1">\\2</span>',          // span inline
+        '/\.(\w+){([^}]+?)}/s'          => '<span class="\\1">\\2</span>',          // span inline
+        '/\.(\w+)\[([^\]]+?)\]/s'       => '<p class="\\1">\\2</span>',             // p inline
         '/!\[([^\]]+)\]\(!([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'  => '<img src="'.App::Get_AppRoot().'images/\\2" alt="\\1">',
         '/!\[([^\]]+)\]\(:([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'  => '<img src="/res/images/\\2" alt="\\1">',
         '/!\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'   => '<img src="\\2" alt="\\1">',
@@ -207,7 +208,7 @@ function pseudo_markdown($atext, $md_class = '') {
         "/\s--(\S+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
         "/\s\*(\S+?)\*\s/"   => '<span style="font-style:italic;">\\1</span>',             // ITALIC
         "/\s_(\S+?)_\s/"     => '<span style="text-decoration:underline;">\\1</span>',     // UNDERLINE
-        "/([^ ])(?: {2}$|　$)/m"     => '\\1<br>',        // newline
+        "/(?: {2}$|　$)/m"   => '<br>',        // newline
     ];
     // 先にタグ文字のエスケープとCR-LFをLFのみに置換しておく
     $p = '/\s[ \-\=]>\s|\\\[<>]+\s|\\\<[^>\r\n]*?>|\r\n/';
@@ -272,13 +273,13 @@ function pseudo_markdown($atext, $md_class = '') {
         return $user_func($txt);
     }, $atext);
     // テーブルを変換
-    $p = '/\n(\|[\s\S]+?\|)\n(?:\.(\w+))*\n/s';
+    $p = '/\n(\|[\s\S]+?\|)\n(?:(?:\.(\w+))*\n|$)/s';
     $atext = preg_replace_callback($p,function($maches) {
         // | で終わらない行は複数行として結合しておく
         $txt = preg_replace('/([^|])\n/','\\1<br>', $maches[1]);
         $tbl_class = (empty($matches[2])) ? '':" {$matches[2]}";
         $arr = array_map(function($str) {
-            $cols = explode("|", trim($str,"|\r\n"));   // 両側の|を削除して分割
+            $cols = explode("|", trim($str,"|"));
             $ln = "";
             $tags = [ '<' => 'left','>' => 'right','=' => 'center'];
             foreach($cols as $col) {

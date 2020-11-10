@@ -37,9 +37,6 @@ static function InitSession($appname = 'default') {
 // セッションに保存する
 static function CloseSession() {
 	$_SESSION[static::$MY_SESSION_ID] = static::$EnvData;
-	debug_log(FALSE, [
-		"CLOSE" => $_SESSION,
-	]);
 }
 //---------------------------- 新しいインタフェース ----------------------------
 //==============================================================================

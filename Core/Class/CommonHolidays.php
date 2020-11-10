@@ -6,7 +6,6 @@ class CommonHolidays {
 // コンストラクタ
 	function __construct($HolidayList, $range) {
 		$this->Prefix = get_class($this);
-		debug_log(FALSE,$HolidayList);
 		// 休日用配列をプロパティ変数に登録
         foreach($HolidayList as $key => $val) $this->$key = $val;
 		$this->HolidayTable = array();

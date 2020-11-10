@@ -4,47 +4,53 @@ require_once('Core/AppDebug.php');
 require_once('Core/Config/appConfig.php');
 require_once('Core/Common/coreLibs.php');
 require_once('Core/Common/appLibs.php');
-echo str_repeat("=", 150)."\n";
+echo str_repeat("=", 100)."\n";
 
-function tables($col) {
-    list($tag,$vars) = ['TD',''];
-    // maybe additional calss and colspan/rowspan
-    preg_match('/^([@\^]+)*(\.(\w+))*?\s/',$col,$m);
-    debug_log(-99,["MATCH" => $m]);
-    $bind = $cls = '';
-    switch(count($m)) {
-    case 4: $cls =" class='{$m[3]}'";
-    case 2: $len = strlen($m[1]);
-            if($len === 0) $bind = '';
-            else {
-                $binds = [];
-                foreach(['@'=>'colspan','^'=>'rowspan'] as $bkey => $bval) {
-                    $clen = substr_count($m[1],$bkey);
-                    if($clen !== 0) $binds[] = " {$bval}='{$clen}'";
-                }
-                $bind = implode($binds);
-            }
-            $col = mb_substr($col,strlen($m[0]));
-            break;
-    }
-    return "<{$tag}{$cls}{$bind}{$vars}>{$col}</{$tag}>";
-}
-
-
-$template = [
-    'class ヘッドクラス',
-    '.class ヘッドクラス',
-    '@@@ ヘッドクラス',
-    '^^^ ヘッドクラス',
-    '@^^@@^^ ヘッドクラス',
-    '@@.class ヘッドクラス',
-    '^^.class ヘッドクラス',
-    '^^^@@.class ヘッドクラス',
-    '@@@^^.class ヘッドクラス',
-    '^@@^@^^.class ヘッドクラス',
+$cond = [
+   'AND'=> [   'flag_a' => 't',
+            [ 'flag_g' => 'g' ],
+            'flag_b' => 'f',
+        'OR' => [
+            [ 'mode' => 'test',
+              'AND'=>  [ 'name' => 'ntak','pass' => 'root'],
+              'AND:0'=>  [ 'name' => 'root','pass' => 'super'],
+              [
+              "one" => 100,
+              "two" => 200,
+              "three" => 300,
+               ],
+            ],
+        ],
+        'NOT' => [ 'scan' => 'OK', 'las'=>999 ],
+    ],
 ];
-foreach($template as $vv) {
-        debug_log(-99,["INPUT" => $vv, "TABLE"=>tables($vv)]);
-}
-exit;
+//$cond = ['AND'=>['active=' => 't','name_list_id@' => ['source' => ['神話','元素','惑星']] ]];
+        function re_build_array2($cond) {
+            $reduce_array = function($opr,$cond) use(&$reduce_array) {
+                $wd = [];
+                foreach($cond as $key => $val) {
+                    if(is_array($val)) {
+                        $val_s = $val;
+                        $val = $reduce_array(is_numeric($key)?$opr:$key,$val);
+                    }
+                    if(is_array($val) && (is_numeric($key) || $opr === $key)) {
+                        foreach($val as $kk => $vv) $wd[$kk] =$vv;
+                    } else $wd[$key] =$val;
+                }
+                return $wd;
+            };
+            $sort_array = function($arr) use(&$sort_array) {
+                $wd = array_filter($arr, function($vv) {return is_scalar($vv);});
+                foreach($arr as $key => $val) {
+                    if(is_array($val)) $wd[$key] = $sort_array($val);
+                }
+                return $wd;
+            };
+            return $sort_array($reduce_array('AND',$cond));
+        //    return $reduce_array('AND',$cond);
+        }
+
+debug_log(-999,["INPUT" => $cond]);
+$new_cond = re_build_array2($cond);
+debug_log(-99,["INPUT" => $cond, "REBUILD" => $new_cond]);
 

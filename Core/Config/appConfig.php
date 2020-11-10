@@ -3,7 +3,9 @@
  * Object Oriented PHP MVC Framework
  *  appConfig: Framework Configuration
  */
-define('CURRENT_VERSION','0.28.0 2020-10-25');
+define('CURRENT_VERSION','0.31.0 2020-11-10');
+define('COPYTIGHT','Copyright (c) 2017 - 2020 by nTak');
+define('PLATFORM_NAME','Radweapst');
 
 define('TIME_ZONE','Asia/Tokyo');
 // Running base OS

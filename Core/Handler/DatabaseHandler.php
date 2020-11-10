@@ -97,7 +97,6 @@ public function get_callback_func($handler) {
 //==============================================================================
 // クローズ処理
 private static function closeDb() {
-    debug_log(FALSE, static::$dbHandle);
     foreach(static::$dbHandle as $key => $handle) {
         $func = static::DatabaseSpec[$key]['callback'];      // 呼び出し関数
         static::$func($handle,NULL,'close');
@@ -113,8 +112,8 @@ private static function PgDatabase($dbdef,$action) {
         $conn .= " user={$dbdef['login']} password={$dbdef['password']};";
         $dbb = pg_connect($conn);
         if(!$dbb) {
-            echo "{$conn}\n";
-            die('Postgres 接続失敗' . pg_last_error()."\n");
+            debug_log(-99,['DEF'=>$dbdef,'CONNECT'=>$conn]);
+            die('Postgres 接続失敗' . pg_result_error($dbb)."\n");
         }
         return $dbb;
     case 'close':

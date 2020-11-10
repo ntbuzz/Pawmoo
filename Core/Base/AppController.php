@@ -35,7 +35,6 @@ class AppController extends AppObject {
 								function($v) use ($except) {
 									return !in_array($v,$except);
 								});
-		debug_log(FALSE, [ 'MY METHOD' => $this->my_method ]);
 		$this->__InitClass();                       // クラス固有の初期化メソッド
 	}
 //==============================================================================
@@ -84,6 +83,7 @@ public function is_authorised() {
 				MySession::set_LoginValue([$login_key => $userid,'LANG'=>$lang]);
 				LangUI::SwitchLangs($lang);
 				$this->Model->ResetSchema();
+				debug_log(DBMSG_SYSTEM,['Language SWITCH'=>$lang]);
 			}
 		}
 		debug_log(FALSE, [
@@ -146,7 +146,7 @@ public function AutoPaging($cond, $max_count = 100) {
 public function PagingFinder($cond, $max_count=100,$filter=[],$sort=[]) {
 //	debug_log(-11, ["cond"  => $cond, "count" => $max_count]);
 	$this->AutoPaging($cond, $max_count);
-	$this->Model->RecordFinder($cond,$filter,$sort);
+	$this->Model->RecordFinder(NULL,$filter,$sort);
 }
 //==============================================================================
 // デフォルトの動作

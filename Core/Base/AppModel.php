@@ -23,6 +23,7 @@ class AppModel extends AppObject {
     public $pagesize = 0;           // 1ページ当たりのレコード取得件数
     public $page_num = 0;           // 取得ページ番号
     public $record_max = 0;         // 総レコード数
+    public $AliasMode = TRUE;       // Language Alias Enable
 
     public $RecData = NULL;          // レコードデータ(JOINなし)
     public $Select = NULL;           // リレーション先のラベルと値の連想配列リスト
@@ -39,7 +40,6 @@ class AppModel extends AppObject {
 //==============================================================================
 	function __construct($owner) {
 	    parent::__construct($owner);                    // 継承元クラスのコンストラクターを呼ぶ
-        debug_log(FALSE,static::$DatabaseSchema);
         $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
         if(isset($this->ModelTables)) {                 // Multi-Language Tabele exists
             $db_key = (array_key_exists(LangUI::$LocaleName,$this->ModelTables)) ? LangUI::$LocaleName : '*';
@@ -99,7 +99,6 @@ public function RelationSetup() {
         }
     }
     $this->dbDriver->setupRelations($this->Relations);
-    debug_log(FALSE,["Relations" => $this->Relations]);
 }
 //==============================================================================
 // スキーマを分解してヘッダー情報を生成
@@ -225,7 +224,6 @@ public function getCount($cond) {
 //          読み込んだ列名 = Header (Schema)
 //          $filter[] で指定したオリジナル列名のみを抽出
 public function RecordFinder($cond,$filter=[],$sort=[]) {
-    debug_log(FALSE, [ "cond" => $cond, "filter" => $filter]);
     if(empty($filter)) $filter = $this->dbDriver->columns;
     // 取得フィールドリストを生成する
     $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
@@ -253,7 +251,6 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
         } else {
             debug_log(DBMSG_MODEL, ["fields" => $fields]);
         }
-        debug_log(FALSE, ["record_max" => $this->record_max,"Fech:" => $fields,"Filter:" => $fields_list,"record" => $record]);
     }
     $this->Records = $data;
 //    if($this->pagesize > 0 && $this->pagesize < 50)  debug_log(3, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
@@ -283,7 +280,8 @@ public function MultiDeleteRecord($cond) {
         $this->fields = array();
         foreach($row as $key => $val) {
             if(array_key_exists($key,$this->dbDriver->columns)) {
-                $alias = $this->dbDriver->fieldAlias->get_lang_alias($key);
+                $alias = ($this->AliasMode) ? $this->dbDriver->fieldAlias->get_lang_alias($key) :$key;
+//                if(!array_key_exists($alias,$this->fields)) 
                 $this->fields[$alias] = $val;
             }
         }
