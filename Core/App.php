@@ -45,6 +45,8 @@ class App {
             'controller' => $controller,  //ucfirst($uri_array[2]),
             'method' => $method,  //ucfirst($uri_array[3]),
             'filter' => $filter,  // ucfirst(static::$Filter),
+            'platform' => PLATFORM_NAME,
+            'copytight' => COPYTIGHT,
             'current_version' => CURRENT_VERSION,  // framework version
         );
         static::$Query = $query;

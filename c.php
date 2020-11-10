@@ -4,11 +4,10 @@ require_once('Core/AppDebug.php');
 require_once('Core/Config/appConfig.php');
 require_once('Core/Common/coreLibs.php');
 require_once('Core/Common/appLibs.php');
-echo str_repeat("=", 150)."\n";
+echo str_repeat("=", 100)."\n";
 
 $cond = [
-    [
-   'OR'=> [   'flag_a' => 't',
+   'AND'=> [   'flag_a' => 't',
             [ 'flag_g' => 'g' ],
             'flag_b' => 'f',
         'OR' => [
@@ -24,9 +23,8 @@ $cond = [
         ],
         'NOT' => [ 'scan' => 'OK', 'las'=>999 ],
     ],
-    ],
 ];
-$cond = ['active=' => 't','name_list_id@' => ['source' => ['神話','元素','惑星']] ];
+$cond = ['AND'=>['active=' => 't','name_list_id@' => ['source' => ['神話','元素','惑星']] ]];
         function re_build_array2($cond) {
             $reduce_array = function($opr,$cond) use(&$reduce_array) {
                 $wd = [];
@@ -52,7 +50,7 @@ $cond = ['active=' => 't','name_list_id@' => ['source' => ['神話','元素','�
         //    return $reduce_array('AND',$cond);
         }
 
-debug_log(-99,["INPUT" => $cond]);
+debug_log(-999,["INPUT" => $cond]);
 $new_cond = re_build_array2($cond);
 debug_log(-99,["INPUT" => $cond, "REBUILD" => $new_cond]);
 

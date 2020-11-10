@@ -1,4 +1,4 @@
-# Raphwapf - Rapid PHP Web Application Platform
+# Radweapst - Rapid Development Web Application Platform by Section Template
 
 This repository is experimental code of a framework for easily creating web applications with PHP.
 The code license is based on MIT.

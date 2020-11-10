@@ -1,8 +1,8 @@
-***  Radweaps 使い方説明書
-Rapid Development Web Application Platform by Section Template Engine
+***  Radweapst 使い方説明書
+Rapid Development Web Application Platform by Section Template
 
  1. はじめに
-  Radweaps は Controller-View-Model のようなWEBアプリケーションを素早く作成するための
+  Radweapst は Controller-View-Model のようなWEBアプリケーションを素早く作成するための
   オブジェクト指向型のミニ・フレームワークです。
   M-V-Cに相当する各ファイルを「モジュール」というフォルダ単位で管理できるので
   ファイル間の見通しが良く、機能追加や修正の際にも修正漏れやバグ発生を抑えられます。
@@ -21,7 +21,7 @@ Rapid Development Web Application Platform by Section Template Engine
   容易になります。
 
   リクエストURIとモジュールの関係(ルーティング)
-    http://localhost/radweaps/help/index/view/100/20
+    http://localhost/radweapst/help/index/view/100/20
     ~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~ ~~~~~ ~~~~ ~~~~~~
       フレームワークフォルダ   ↑ 　↑  　↑　　↑
       　　　　　　　　　　　　 │ 　│  　│   メソッドへのパラメータ
@@ -31,7 +31,7 @@ Rapid Development Web Application Platform by Section Template Engine
 
 1.2 フォルダ構成
 
-(radweaps)         フレームワーク本体
+(radweapst)         フレームワーク本体
   ├ app
   │  ├─ (アプリ1)
   │  │   ├── Config            アプリケーション設定ファイルフォルダ
