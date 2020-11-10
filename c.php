@@ -24,7 +24,7 @@ $cond = [
         'NOT' => [ 'scan' => 'OK', 'las'=>999 ],
     ],
 ];
-$cond = ['AND'=>['active=' => 't','name_list_id@' => ['source' => ['神話','元素','惑星']] ]];
+//$cond = ['AND'=>['active=' => 't','name_list_id@' => ['source' => ['神話','元素','惑星']] ]];
         function re_build_array2($cond) {
             $reduce_array = function($opr,$cond) use(&$reduce_array) {
                 $wd = [];
