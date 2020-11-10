@@ -193,33 +193,29 @@ protected function sql_safequote(&$value) {
 // Re-Build Condition ARRAY, Create SQL-WHERE statement.
 	private function sql_makeWHERE($cond) {
 		$re_build_array = function($cond) {
-			$reduce_array = function($cond) use(&$reduce_array) {
+			$reduce_array = function($opr,$cond) use(&$reduce_array) {
 				$wd = [];
 				foreach($cond as $key => $val) {
-					if(is_array($val)) $val = $reduce_array($val);
-					if(is_numeric($key) && is_array($val)) {
+					if(is_array($val)) {
+						$val_s = $val;
+						$val = $reduce_array(is_numeric($key)?$opr:$key,$val);
+					}
+					if(is_array($val) && (is_numeric($key) || $opr === $key)) {
 						foreach($val as $kk => $vv) $wd[$kk] =$vv;
 					} else $wd[$key] =$val;
 				}
 				return $wd;
 			};
 			$sort_array = function($arr) use(&$sort_array) {
-				$wd = [];
-				foreach($arr as $key => $val) {
-					if(is_scalar($val)) $wd[$key] = $val;
-				}
+				$wd = array_filter($arr, function($vv) {return is_scalar($vv);});
 				foreach($arr as $key => $val) {
 					if(is_array($val)) $wd[$key] = $sort_array($val);
 				}
 				return $wd;
 			};
-			return $sort_array($reduce_array($cond));
+			return $sort_array($reduce_array('AND',$cond));
 		};
-		if($cond === NULL) {
-			$new_cond = $this->LastCond;
-		} else {
-			$new_cond = $this->LastCond = $re_build_array($cond);
-		}
+		$new_cond = ($cond===NULL) ? $this->LastCond : ($this->LastCond = $re_build_array($cond));
 		$sql = $this->makeExpr($new_cond);
 		if(strlen($sql)) $sql = ' WHERE '.$sql;
 		debug_log(DBMSG_HANDLER,['COND-INPUT'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);
@@ -246,17 +242,13 @@ protected function sql_safequote(&$value) {
 					},$val);
 				return implode('OR',$cmp);
 			};
-			$opc = ''; $expr = ['AND','OR','NOT'];
+			$opc = ''; $and_or_op = ['AND','OR','NOT'];
 			foreach($items as $key => $val) {
-//				if(is_numeric($key) && is_array($val)) {
-//					echo "RETURN\n";
-//					return $dump_object($opr,$val,$table);
-//				}
-				if(empty($key)) continue;
+				if(empty($key)) { echo "EMPTY!!!"; continue;}
 				list($key,$op) = keystr_opr($key);
 				if(empty($op) || $op === '%') {			// non-exist op or LIKE-op(%)
 					if(is_array($val)) {
-						if(in_array($key,$expr)) {
+						if(in_array($key,$and_or_op)) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
 							if(!empty($opp)) $opp = "({$opp})";
