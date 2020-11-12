@@ -1,5 +1,5 @@
 
-//タブクリックしたときのファンクションをまとめて指定
+// TabControll Click Event
 $('.tabControll > .tabmenu > li').click(function () {
     var control = $(this).closest('.tabControll');
     var menu = control.children('.tabmenu').children('li');

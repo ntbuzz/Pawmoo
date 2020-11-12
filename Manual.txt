@@ -980,9 +980,6 @@ Rapid Development Web Application Platform by Section Template
   String.filter_path(e)       フィルタまでのパスに引数を付加する
   String.exclude_num_path(e)  URLの末尾から数字パラメータを除外して、指定パスを付加する
 
-・その他
-  Array.inBound(e, x, y)      (x,y)座標が矩形範囲内にあるか判定(eは矩形のマージン)
-
 ◆ JQueryプラグイン
   JQueryのプラグインとして使用できる関数
 
