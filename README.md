@@ -1,4 +1,4 @@
-# Radweapst - Rapid Development Web Application Platform by Section Template
+# Rawdst - Rapid Web Application Development BY Section Template
 
 It is a simple framework based on the MVC model.  
 The biggest feature is that it supports the section template view using PHP associative array.  
