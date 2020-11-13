@@ -186,8 +186,8 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
 function pseudo_markdown($atext, $md_class = '') {
     if(empty($md_class)) $md_class = 'easy_markdown';
     $replace_defs = [
-        '/\s\[(?:\s*?|f|0|false|FALSE)\](\S+?)/'      => ' [ ] \\1',  // CHECK-BOX off
-        '/\s\[[^\]]+?\](\S+?)/'          => ' <b>[X]</b> \\1',  // CHECK-BOX ON
+        '/\s\[(?:\s*?|f|0|false|FALSE)\]{(\S+?)}/'      => ' [ ] \\1',  // CHECK-BOX off
+        '/\s\[[^\]]+?\]{(\S+?)}/'          => ' <b>[X]</b> \\1',  // CHECK-BOX ON
         '/\n...{\n(.+?)\n}.../s'        => "\n<div class=\"indent\">\n\\1</div>\n", // indent block
         '/\n```([a-z]+?)\n(.+?)\n```/s' => "\n<pre class=\"\\1\">\n\\2</pre>\n",    // class name
         '/\n```\n(.+?)\n```/s'          => "\n<pre class=\"code\">\n\\1</pre>\n",   // code
