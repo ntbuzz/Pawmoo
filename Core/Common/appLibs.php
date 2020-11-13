@@ -186,12 +186,14 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
 function pseudo_markdown($atext, $md_class = '') {
     if(empty($md_class)) $md_class = 'easy_markdown';
     $replace_defs = [
+        '/\s\[(?:\s*?|f|0|false|FALSE)\]{(\S+?)}/'      => ' [ ] \\1',  // CHECK-BOX off
+        '/\s\[[^\]]+?\]{(\S+?)}/'          => ' <b>[X]</b> \\1',  // CHECK-BOX ON
         '/\n...{\n(.+?)\n}.../s'        => "\n<div class=\"indent\">\n\\1</div>\n", // indent block
         '/\n```([a-z]+?)\n(.+?)\n```/s' => "\n<pre class=\"\\1\">\n\\2</pre>\n",    // class name
         '/\n```\n(.+?)\n```/s'          => "\n<pre class=\"code\">\n\\1</pre>\n",   // code
         '/\n(~~~|\^\^\^)\n(.+?)\n\1/s'  => "\n<pre class=\"indent\">\n\\2</pre>\n", // indent block
-        '/\.(\w+){([^}]+?)}/s'          => '<span class="\\1">\\2</span>',          // span inline
-        '/\.(\w+)\[([^\]]+?)\]/s'       => '<p class="\\1">\\2</span>',             // p inline
+        '/\.(\w+){([^}]*?)}/s'          => '<span class="\\1">\\2</span>',          // span inline
+        '/\.(\w+)\[([^\]]*?)\]/s'       => '<p class="\\1">\\2</span>',             // p inline
         '/!\[([^\]]+)\]\(!([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'  => '<img src="'.App::Get_AppRoot().'images/\\2" alt="\\1">',
         '/!\[([^\]]+)\]\(:([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'  => '<img src="/res/images/\\2" alt="\\1">',
         '/!\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'   => '<img src="\\2" alt="\\1">',

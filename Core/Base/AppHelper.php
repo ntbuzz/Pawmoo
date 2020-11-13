@@ -53,6 +53,12 @@ public function IsRequestController($comp) {
 	echo ($hit) ? '' : ' class="closed"';
 }
 //==============================================================================
+// expand String by USE Owner(AppView) Method
+public function expand_var($str,$vars=[]) {
+	$str = $this->AOwner->expand_Strings($str,$vars);
+	return $str;
+}
+//==============================================================================
 // expand LOCALE varible in $str, after echo string
 // format {#locale-id}
 public function expand_echo($str) {

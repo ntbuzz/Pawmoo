@@ -177,7 +177,7 @@ public function ViewTemplate($name,$vars = []) {
             case '#': $var = mb_substr($var,1);     // Language refer
                 if($var[0]==='@') {                 // AUTO Transfer
                     $var = mb_substr($var,1);
-                    $var = 'Transfer.'.trim($this->Model->RecData[$va]);
+                    $var = 'Transfer.'.trim($this->Model->RecData[$var]);
                     $allow = FALSE;
                 } else {
                     $allow = ($var[0] === '#');         // allow array
@@ -219,7 +219,7 @@ public function ViewTemplate($name,$vars = []) {
 //==============================================================================
 //  variable format convert
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
-    private function expand_Strings($str,$vars) {
+    public function expand_Strings($str,$vars) {
         if(empty($str) || is_numeric($str)) return $str;
         $p = '/\${[^}\s]+?}|\${[#%\'\$@][^}\s]+?}/';       // PARSE variable format
         preg_match_all($p, $str, $m);
@@ -407,6 +407,7 @@ public function ViewTemplate($name,$vars = []) {
         $attr = "";
         if($attrs !== array()) {
             foreach($attrs as $name => $val) {
+                if(is_array($val)) $val = implode('',$val);
                 $attr .= (is_numeric($name)) ? " {$val}" : " {$name}=\"{$val}\"";
             }
         }
@@ -853,6 +854,9 @@ public function ViewTemplate($name,$vars = []) {
                     } else {
                         $innerText .= $val;
                     }
+                } else if($key[0]==='!') {      // FORCE tag attribute
+                    $key = mb_substr($key,1);
+                    $attrList[$key] = $val;     // allow ARRAY attribute
                 } else {
                     list($vv,$attrs) = $this->tag_Separate($key);
                     // if $val is ARRAY,or $key is SECTION-COMMAND, and $key have ATTRIBUTE, then SET SUB-SECTION
@@ -863,7 +867,7 @@ public function ViewTemplate($name,$vars = []) {
         } else {
             $innerText .= $sec;     // scalar is innertext
         }
-        $innerText = $this->expand_Strings($innerText,$vars);
+        $innerText = implode( "\n" ,text_line_split("\n",$this->expand_Strings($innerText,$vars),TRUE));
         return array($tag,$innerText,$attrList,$secList);
     }
 

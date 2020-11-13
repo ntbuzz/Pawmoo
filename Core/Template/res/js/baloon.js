@@ -24,27 +24,49 @@ selector.each(function () {
             // バルーンを消すための領域を定義
             $('body').append('<div class="baloon-BK"></div>');
             $('.baloon-BK').fadeIn('fast');
-            // バルーンコンテンツの表示位置をリンク先から取得して設定
-            var x = $(ref).offset().left + ($(ref).innerWidth()/3);
-            var y = $(ref).offset().top  + ($(ref).innerHeight()/2);
-            if ((x + self.width()) > $(window).innerWidth()) {
-                x = x - self.outerWidth() + $(ref).outerWidth();
-                self.addClass("baloon-right");
-            } else {
-//                x = x + ($(ref).outerWidth()/3);
-                self.addClass("baloon-left");
-            }
-            // マウス移動の範囲を配列に記憶する
-            var bound = [ x, y, self.outerWidth(), self.outerHeight() ];
-            self.css({'left': x + 'px','top': y + 'px'});
+            var target = {
+                top: parseInt($(ref).offset().top, 10),
+                left: parseInt($(ref).offset().left, 10),
+                width: parseInt($(ref).outerWidth(), 10),
+                height: parseInt($(ref).outerHeight(), 10)
+            };
+            var Balloon = {
+                top: target.top + (target.height/2),
+                left: target.left + (target.width/2),
+                width: parseInt(self.outerWidth(true), 10),
+                height: parseInt(self.outerHeight(true), 10),
+                inBound: function (x, y) {
+                        return (x >= this.left) && (x <= (this.left + this.width))
+                                && (y >= this.top) && (y <= (this.top + this.height));
+                },
+                expand: function (e) {
+                    this.left = Math.min(this.left, e.left);
+                    this.top = Math.min(this.top, e.top);
+                    this.width = Math.max(this.left+this.width, e.left+e.width)-this.left;
+                    this.height = Math.max(this.top+this.height, e.top+e.height)-this.top;
+                },
+                outRangeX: function () {
+                    if ((this.left + this.width) <= $(window).width()) return false;
+                    this.left = target.left - this.width + (target.width/2);
+                    return true;
+                },
+                outRangeY: function () {
+                    if ((this.top + this.height) <= $(window).height()) return false;
+                    this.top = target.top - this.height - (target.height/2);
+                    return true;
+                }
+            };
+            var cls = 'popup-baloon baloon-';
+            cls = cls + ((Balloon.outRangeY()) ? 'bottom-' : 'top-');
+            cls = cls + ((Balloon.outRangeX()) ? 'right' : 'left');
+            self.attr('class', cls);
+            self.css({'left': Balloon.left + 'px','top': Balloon.top + 'px'});
             self.fadeIn('fast');
-            // バルーン領域以外をクリックしたらバルーンを消して領域を削除
+            Balloon.expand(target);
             $('.baloon-BK').off().mousemove(function (e) {
-                if (!bound.inBound(5, e.pageX, e.pageY)) {
-                    // モーダルコンテンツとオーバーレイをフェードアウト
+                if (!Balloon.inBound(e.clientX, e.clientY)) {
                     self.fadeOut('fast');
                     $('.baloon-BK').fadeOut('fast',function(){
-                        // オーバーレイを削除
                         $('.baloon-BK').remove();
                     });
                 }

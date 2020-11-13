@@ -108,14 +108,12 @@ public function getRecordValue($cond,$relations) {
 // SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
 //==============================================================================
 public function findRecord($cond,$relations = NULL,$sort = []) {
-	$where = $this->sql_makeWHERE($cond);	// 検索条件
-	// 全体件数を取得する
+	$where = $this->sql_makeWHERE($cond);
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
 	$this->doQuery("{$sql}{$where};");
 	$field = $this->fetch_array();
 	debug_log(DBMSG_HANDLER,["SQL" => "{$sql}{$where};", "DATA" => $field]);
 	$this->recordMax = ($field) ? $field["total"] : 0;
-	// 実際のレコード検索
 	$sql = $this->sql_JoinTable($relations);
 	if(!empty($sort)) {
 		$orderby = "";
@@ -200,7 +198,7 @@ protected function sql_safequote(&$value) {
 						$val_s = $val;
 						$val = $reduce_array(is_numeric($key)?$opr:$key,$val);
 					}
-					if(is_array($val) && (is_numeric($key) || $opr === $key)) {
+					if(is_array($val) && (is_numeric($key) || $opr === $key || (($key==='AND' || $key==='OR') && count($val)===1))) {
 						foreach($val as $kk => $vv) $wd[$kk] =$vv;
 					} else $wd[$key] =$val;
 				}
@@ -242,6 +240,16 @@ protected function sql_safequote(&$value) {
 					},$val);
 				return implode('OR',$cmp);
 			};
+			// multi-columns f1+f2+f3...  OP val
+			$multi_field = function($key,$op,$table,$val) {
+				$expr = [];
+				foreach(trim_explode('+',$key) as $cmp) {
+					$cmp = $this->fieldAlias->get_lang_alias($cmp);
+					$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
+				}
+				$opp = implode('OR',$expr);
+				return (count($expr)===1) ? $opp : "({$opp})";
+			};
 			$opc = ''; $and_or_op = ['AND','OR','NOT'];
 			foreach($items as $key => $val) {
 				if(empty($key)) { echo "EMPTY!!!"; continue;}
@@ -270,12 +278,7 @@ protected function sql_safequote(&$value) {
 							} else $op = 'LIKE';
 							$val = "'%{$val}%'";
 						}
-						$expr = [];
-						foreach(trim_explode('+',$key) as $cmp) {
-							$cmp = $this->fieldAlias->get_lang_alias($cmp);
-							$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
-						}
-						$opp = implode('OR',$expr);
+						$opp = $multi_field($key,$op,$table,$val);
 					}
 				} else if($op === '@') {	// SUBQUERY op
 					// check exists relations
@@ -297,12 +300,7 @@ protected function sql_safequote(&$value) {
 					}
 				} else {
 					if(!is_numeric($val)) $val = "'{$val}'";
-					$expr = [];
-					foreach(trim_explode('+',$key) as $cmp) {
-						$cmp = $this->fieldAlias->get_lang_alias($cmp);
-						$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
-					}
-					$opp = implode('OR',$expr);
+					$opp = $multi_field($key,$op,$table,$val);
 				}
 				$opc = (empty($opc)) ? "{$opp}" : "{$opc}{$opr}{$opp}";
 			}

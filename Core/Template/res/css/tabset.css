@@ -18,7 +18,7 @@ display:flex;
 .tabControll>ul.tabmenu:after {
     clear:both;
 }
-.tabControll>ul.tabmenu li {
+.tabControll>ul.tabmenu>li {
     float:left;
     height:1.5em;
 	padding: 0 20px; 

@@ -1,43 +1,41 @@
-// stylesheeet/javascript のテンプレート
-// 最上位キーはファイルタイプ(css/js)を示すキーワード
-// URLから必要なファイルタイプの要素を抜き出して解析する
-@message => yes     // デバッグ用コメント出力
+// stylesheeet/javascript Template
+//
+@message => yes
 // =====================================================
-// stylesheet テンプレートセクション
+// stylesheet SECTION
 Stylesheet => [
     common => [
-        // ページャー用ジャンプボタン
         +import => [
-            libstyle.css
-            markdown.css
-            pagerstyle.css
-            floatwin.css
-            baloon.css
-            context.css
+            libstyle.css        // Template Default Style
+            context.css         // context menu popup
+            floatwin.css        // floating Windows
+            markdown.css        // markdown sttle
+            pagerstyle.css      // pager button
+            popup.css           // balloon/popupbox/dialog
         ]
-        +section => @debugbar        // DEBUGGERフラグがONの時のみ
+        +section => @debugbar        // active on DEBUGGER flag is ON
     ]
     debugbar => [
         +import => debugbar.css
     ]
 ]
 // =====================================================
-// javascript テンプレートセクション
+// javascript SECTION
 Javascript => [
     common => [
         +jquery => [
-            pagerscript.js        // ページャー用スクリプト
-            floatwin.js             // フロートウィンドウ操作
-            baloon.js               // バルーンヘルプ
-            info-box.js             // 移動・リサイズ不可のポップアップBOX
-            popup-box.js            // ポップアップBOX(移動不可)
-            context.js
+            baloon.js               // Balloon Help
+            info-box.js             // info-box for cannot move/resize
+            popup-box.js            // popup-box 
+            context.js              // context menu popup
+            floatwin.js             // inner window 
+            pagerscript.js          // pager button
         ]
         +import => [
-            funcs.js                // 共通関数
-            window.js               // ウィンドウ操作関数
+            funcs.js                // common function/prototype
+            window.js               // JQuery-Plugins
         ]
-        +section => @debugbar        // DEBUGGERフラグがONの時のみ
+        +section => @debugbar       // active on DEBUGGER flag is ON
     ]
     debugbar => [
         +jquery => debugbar.js

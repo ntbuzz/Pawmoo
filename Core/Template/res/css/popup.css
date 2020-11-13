@@ -15,47 +15,46 @@
 .baloon-BK:not(:target) {height:100%\9} /* IE9,10 */
 /*    ポップアップ吹き出し */
 .popup-baloon {
-    z-index:9002;
+    z-index:9999;
     position:fixed;
+    top:0;
+    left:0;
     display:none;
     margin-top: 16px;
-    padding: 5px 10px 10px 15px;
+    padding: 10px;
     border: 1px solid gray;
     border-radius:12px;
     background: lightyellow;
     font-size:10pt;
     color:black;
 }
-/* 左フキダシ部分を作成 */
-.baloon-left:before {
+/* 左上フキダシ部分を作成 */
+.baloon-top-left:before {
     content: "";
     position: absolute;
-    border-top: 15px solid transparent;
     top:-15px;
     left:8px;
+    border-top: 15px solid transparent;
     border-left: 12px solid gray;
-    width : 0px;
 }
-.baloon-left:after {
+.baloon-top-left:after {
     content: "";
     position: absolute;
-    border-top: 15px solid transparent;
     top:-13px;
     left:9px;
+    border-top: 15px solid transparent;
     border-left: 12px solid lightyellow;
-    width : 0px;
 }
-/* 右フキダシ部分を作成 */
-.baloon-right:before {
+/* 右上フキダシ部分を作成 */
+.baloon-top-right:before {
     content: "";
     position: absolute;
     top:-15px;
     right:18px;
     border-top: 15px solid transparent;
     border-right: 12px solid gray;
-    width : 0px;
 }
-.baloon-right:after {
+.baloon-top-right:after {
     content: "";
     position: absolute;
     top:-13px;
@@ -63,6 +62,41 @@
     border-top: 15px solid transparent;
     border-right: 12px solid lightyellow;
 }
+/* 左下フキダシ部分を作成 */
+.baloon-bottom-left:before {
+    content: "";
+    position: absolute;
+    bottom:-15px;
+    left:8px;
+    border-bottom: 15px solid transparent;
+    border-left: 12px solid gray;
+}
+.baloon-bottom-left:after {
+    content: "";
+    position: absolute;
+    bottom:-13px;
+    left:9px;
+    border-bottom: 15px solid transparent;
+    border-left: 12px solid lightyellow;
+}
+/* 右フキダシ部分を作成 */
+.baloon-bottom-right:before {
+    content: "";
+    position: absolute;
+    bottom:-15px;
+    right:18px;
+    border-bottom: 15px solid transparent;
+    border-right: 12px solid gray;
+}
+.baloon-bottom-right:after {
+    content: "";
+    position: absolute;
+    bottom:-13px;
+    right:19px;
+    border-bottom: 15px solid transparent;
+    border-right: 12px solid lightyellow;
+}
+
 /*==============================================================================
     ポップアップボックス
 */

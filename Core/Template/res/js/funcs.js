@@ -61,11 +61,8 @@ String.prototype.exclude_num_path = function (e) {
     for (var n = 2; (n < path.length) && isNaN(path[n]); n++) ;    // メソッド位置から数字パラメータの位置まで進める
     return '/'+path.slice(0,n).join('/')+'/'+e+query;
 };
-Array.prototype.inBound = function (e, x, y) {
-    return (x >= (this[0] - e)) && (x <= (this[0] + this[2] + e))
-        && (y >= (this[1] - e)) && (y <= (this[1] + this[3]));
-};
-
+//====================================================
+// for DEBUG dump Object
 var objDump = function(obj, rIndent) {
     if (!obj) return '';
      var result = '', indent = '\t', br = '\n';
