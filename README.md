@@ -14,6 +14,10 @@ You will need the app repository and vendor libraries to run as an application.
 - vendor          JQuery, and other javascript Library
 
 ### SECTION template SAMPLE
+
+Detail specification is [Here](../../wiki/Home)
+
+
 ```
 // Section layout definition
 @Header => [// @ ViewTemplate () call
