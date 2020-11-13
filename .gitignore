@@ -1,9 +1,13 @@
-/vendor
-/app
 *.lzh
 *.bak
 *.zip
 *.orig
-/test.php
-app
+/vendor
+/app
 /index.html
+/c.php
+/check.php
+/phpinfo.php
+/regexp.php
+/test.php
+
