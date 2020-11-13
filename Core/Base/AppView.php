@@ -557,7 +557,13 @@ public function ViewTemplate($name,$vars = []) {
     // $sec variable expand on repeat RecData
     private function cmd_recordset($tag,$attrs,$subsec,$sec,$vars,$text) {
         $save_data = $this->Model->RecData;         // backup RecData
-        foreach($this->Model->Records as $records) {
+debug_log(-999,['TAG'=>$tag,'ATTR'=>$attrs,'SUB'=>$subsec,'SEC'=>$sec,'VAR'=>$vars,'TEXT'=>$text]);
+        $props = 'Records';
+        if(isset($attrs['name'])) {
+            $nm = mb_substr($attrs['name'],1);     // except ':' char
+            if(isset($this->Model->$nm)) $props = $nm;
+        }
+        foreach($this->Model->$props as $records) {
             $this->Model->RecData = $records;    // replace RecData
             $v_sec = $this->expand_SectionVar($sec,$vars);
             $this->sectionAnalyze($v_sec,$vars);

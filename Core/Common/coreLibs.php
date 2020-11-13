@@ -228,7 +228,11 @@ function LocalCharset($str) {
 // 重複文字列の除去
 function tag_body_name($key) {
     $n = strrpos($key,':');
-    return ($n !== FALSE) ? substr($key,0,$n) : $key;
+    if($n !== FALSE) {
+        $dd = substr($key,$n);
+        if(is_numeric($dd)) $key = substr($key,0,$n);
+    }
+    return $key;
 }
 //==============================================================================
 // SQL Compare operator separate
