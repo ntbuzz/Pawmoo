@@ -229,7 +229,7 @@ function LocalCharset($str) {
 function tag_body_name($key) {
     $n = strrpos($key,':');
     if($n !== FALSE) {
-        $dd = substr($key,$n);
+        $dd = substr($key,$n+1);
         if(is_numeric($dd)) $key = substr($key,0,$n);
     }
     return $key;

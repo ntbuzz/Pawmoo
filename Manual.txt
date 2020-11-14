@@ -429,7 +429,7 @@ Rapid Development Web Application Platform by Section Template
   +checkbox => [  check-items ]           チェックボックス、2つのフォーマットが使用可能
       FORMAT-I:                             単独のチェックボックスではname属性を指定する
         name=TEXT
-        @Value => TEXT  [ STR => value ]
+        @Value => TEXT  [ STR => value ]   @Value=>TEXTはチェックされたときの値と表示文字、STRとvalue が等しいときはchecked
       FORMAT-II:                          複数のチェックボックスをまとめて出力するときはname属性をキーにした連想配列
         name1 => [ @value1=>TEXT [ STR1 => value1 ] ]
         name2 => [ @value2=>TEXT [ STR2 => value2 ] ]
