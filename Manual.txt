@@ -447,6 +447,8 @@ Rapid Development Web Application Platform by Section Template
                                           クラス属性を指定するとマークダウンのクラス名とする。
                                           Textが配列で渡された場合は、各要素を改行で結合したTextとして扱う
   +recordset => [ Section ]               読み込んだレコードごとに Section を繰返します
+                                          name属性に：をつけるとモデルクラスのプロパティ変数で繰り返す
+                                          ex. +recordset[:Outline] => [ Section ]
   +tabset => [                            ul タグを使ったタブセットの出力
       Title1 => [ Section ]               テンプレート内の tabset.css を読み込むことでタブコントロール表示する
       ...                                 タブ切替え時に独自の処理が不要なら、テンプレートの tabset.js を読み込む
