@@ -1,6 +1,7 @@
 /* マークダウン用クラス */
 .easy_markdown {
 	padding:0;
+	overflow-x:hidden;
 }
 /* CODE viewing 
 */
@@ -14,7 +15,7 @@
 /* code writing */
 .easy_markdown pre.code {
 	line-height:1.2em;
-	width:95%;
+	width:100%;
 	margin-left:25px;
 	padding-left:30px;	/* 上下 左右 */
 	color:white;
