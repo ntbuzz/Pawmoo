@@ -557,7 +557,12 @@ public function ViewTemplate($name,$vars = []) {
     // $sec variable expand on repeat RecData
     private function cmd_recordset($tag,$attrs,$subsec,$sec,$vars,$text) {
         $save_data = $this->Model->RecData;         // backup RecData
-        foreach($this->Model->Records as $records) {
+        $props = 'Records';
+        if(isset($attrs['name'])) {
+            $nm = mb_substr($attrs['name'],1);     // except ':' char
+            if(isset($this->Model->$nm)) $props = $nm;
+        }
+        foreach($this->Model->$props as $records) {
             $this->Model->RecData = $records;    // replace RecData
             $v_sec = $this->expand_SectionVar($sec,$vars);
             $this->sectionAnalyze($v_sec,$vars);
@@ -787,9 +792,10 @@ public function ViewTemplate($name,$vars = []) {
     //==========================================================================
     // TAG string SEPARATE
     private function tag_Separate($tag) {
+        $attrList = [];
+        if (is_numeric($tag)) return ['div',$attrList];
         if($tag[0]==='\\') $tag = mb_substr($tag,1);
         $tag = tag_body_name( $tag );       // delete dup-escapt char ':'
-        $attrList = [];
         $top_ch = mb_substr($tag,0,1);
         if(strpos(SECTION_TOKEN,$top_ch) !== FALSE) {
             if($top_ch === '<') {

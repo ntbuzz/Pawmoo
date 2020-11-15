@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2020 by nTak
  * @license    MIT
- * @version 0.32.0, 2020-11-12
+ * @version 0.33.0, 2020-11-14
  * System Require: PHP 5.6 or Higher
  *
 0. 概要
@@ -41,6 +41,12 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 履歴
+【0.33.0】2020/11/14
+    ○改善
+    ・floatWinダイアログのinput checkbox不具合修正
+    ・タグの重複文字削除の不具合修正
+    ・+recordsetにモデルクラスプロパティを指定できるよう変更
+
 【0.32.0】2020/11/12
     ○改善
     ・WHERE句のマルチカラムSQL生成バグを修正
