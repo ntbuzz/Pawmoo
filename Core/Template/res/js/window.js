@@ -67,7 +67,9 @@
             $.each(obj, function (key, value) {
                 var target = self.find('[name="' + key + '"]');
                 if (target.length) {
-                    if (target.prop("tagName") == "INPUT" || target.prop("tagName") == "SELECT") target.val(value);   // 自ID
+                    if (target.prop("tagName") == "INPUT" && target.attr("type") == "checkbox") {
+                        target.prop('checked',(value=='t'));
+                    } else if (target.prop("ta)gName") == "INPUT" || target.prop("tagName") == "SELECT") target.val(value);   // 自ID
                     else {
                         if (target.prop("tagName") == "TEXTAREA") {     // 初期表示サイズを固定する
                             var w = target.attr("cols");
