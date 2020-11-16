@@ -186,8 +186,8 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
 function pseudo_markdown($atext, $md_class = '') {
     if(empty($md_class)) $md_class = 'easy_markdown';
     $replace_defs = [
-        '/\s\[(?:\s*?|f|0|false|FALSE)\]{(\S+?)}/'      => ' [ ] \\1',  // CHECK-BOX off
-        '/\s\[[^\]]+?\]{(\S+?)}/'          => ' <b>[X]</b> \\1',  // CHECK-BOX ON
+        '/\[(?:\s*?|f|0|false|FALSE)\]{([^}]+?)}/'      => ' [ ] \\1',  // CHECK-BOX off
+        '/\[[^\]]+?\]{([^}]+?)}/'          => ' <b>[X]</b> \\1',  // CHECK-BOX ON
         '/\n...{\n(.+?)\n}.../s'        => "\n<div class=\"indent\">\n\\1</div>\n", // indent block
         '/\n```([a-z]+?)\n(.+?)\n```/s' => "\n<pre class=\"\\1\">\n\\2</pre>\n",    // class name
         '/\n```\n(.+?)\n```/s'          => "\n<pre class=\"code\">\n\\1</pre>\n",   // code
@@ -205,11 +205,11 @@ function pseudo_markdown($atext, $md_class = '') {
         "/^#### (.+?)$/m"  => "<h4>\\1</h4>",        // <H4>
         "/^##### (.+?)$/m" => "<h5>\\1</h5>",        // <H5>
         "/^###### (.+?)$/m"=> "<h6>\\1</h6>",        // <H6>
-        "/\s\*\*(\S+?)\*\*\s/" => '<strong>\\1</strong>',  // BOLD
-        "/\s__(\S+?)__\s/"     => '<em>\\1</em>',   // BOLD
-        "/\s--(\S+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
-        "/\s\*(\S+?)\*\s/"   => '<span style="font-style:italic;">\\1</span>',             // ITALIC
-        "/\s_(\S+?)_\s/"     => '<span style="text-decoration:underline;">\\1</span>',     // UNDERLINE
+        "/\s\*\*(.+?)\*\*\s/" => '<strong>\\1</strong>',  // BOLD
+        "/\s__(.+?)__\s/"     => '<em>\\1</em>',   // BOLD
+        "/\s--(.+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
+        "/\s\*(.+?)\*\s/"   => '<span style="font-style:italic;">\\1</span>',             // ITALIC
+        "/\s_(.+?)_\s/"     => '<span style="text-decoration:underline;">\\1</span>',     // UNDERLINE
         "/(?: {2}$|　$)/m"   => '<br>',        // newline
     ];
     // 先にタグ文字のエスケープとCR-LFをLFのみに置換しておく

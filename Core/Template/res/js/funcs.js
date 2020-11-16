@@ -5,62 +5,56 @@ String.prototype.trim2 = function() {
     return this.replace(/^[\s　]+|[\s　]+$/g, '');
 };
 //====================================================
-// フレームワークのトップパスを生成
-String.prototype.fw_fullpath = function () {
-    var path = (this.charAt(0) == "/") ? this.slice(1) : this;
-    return "${$SYSROOT$}"+path;
-};
-//====================================================
-// URLを分割
-String.prototype.query_split = function (ix) {
-    var path = this.replace(/%3F/g, '?').split('?');
-    var url = path[0];
-    var query = (path.lenght > 1) ? "?"+path[1] :'';
-    var url_arr = url.replace(/^[\/]+|[\/]+$/g, '').split('/');
-    if (ix > 0) {
-        var n = (url_arr[0] == "${$appName$}") ? ix : ix+1;
-        url = '/'+url_arr.slice(0,n).join('/')+'/';
+// customize location object class for this framework
+class Locations {
+    constructor(url = location.href) {
+        var path = url.replace(/%3F/g, '?').split('?');
+        this.url = path[0];
+        this.qstr = (path.length == 1) ? '' : path[1];
+        this.base = location.origin;
+        this.array = this.url.replace(/^[\/]+|[\/]+$/g, '').split('/');
+        if (this.array[0] == "http:" || this.array[0] == "https:") {
+            this.base = this.array.slice(0, 3).join("/");
+            this.array = this.array.slice(3);
+            this.url = this.array.join("/") + "/";
+        }
+        this.is_app = (this.array[0] == "${$appName$}")
     }
-    var setobj = {
-        url: url,
-        array: url_arr,
-        query: query
-    };
-    return setobj;
-};
-//====================================================
-// コントローラー名までのパスに引数を付加する
-String.prototype.controller_path = function (e) {
-    var urlobj = this.query_split(1);
-    return urlobj['url']+e+'/';
-};
-//====================================================
-// メソッド名までのパスに引数を付加する
-String.prototype.method_path = function(e) {
-    var urlobj = this.query_split(2);
-    return urlobj['url']+e+'/';
-};
-//====================================================
-// フィルタまでのパスに引数を付加する
-String.prototype.filter_path = function(e) {
-    var urlobj = this.query_split(3);
-    return urlobj['url']+e+'/';
-};
-//====================================================
-// パラメータまでのパスに引数を付加する
-String.prototype.param_path = function(e) {
-    var urlobj = this.query_split(4);
-    return urlobj['url']+e+'/';
-};
-//====================================================
-// URLの末尾から数字パラメータを除外して、指定パスを付加する
-String.prototype.exclude_num_path = function (e) {
-    var urlobj = this.query_split(0);
-    var query = urlobj['query'];
-    var path = urlobj['array'];
-    for (var n = 2; (n < path.length) && isNaN(path[n]); n++) ;    // メソッド位置から数字パラメータの位置まで進める
-    return '/'+path.slice(0,n).join('/')+'/'+e+query;
-};
+    get query() { return (this.qstr == "") ? "" : "?" + this.qstr; }
+    get last_path() { return this.array[this.array.length - 2]; }
+// :url     http://host/url             type:3
+// /url     http://host/sysRoot/url     type:2
+// .url     http://host/appRoot/url     type:1
+// url      http://host/appRoot/url     type:0
+    get fw_fullpath() {
+        this.type = "./:".indexOf(this.url.charAt(0))+1;
+        var path = (this.type == 0) ? this.url : this.url.slice(1);
+        switch (this.type) {
+            case 0:
+            case 1: path = "${$APPROOT$}/" + path; break;
+            case 2: path = "${$SYSROOT$}/" + path; break;
+        }
+        return this.base + path;
+    }
+    set_query(q) { this.qstr = q; }
+    trunc_path(ix, e) {
+        var n = (this.is_app) ? ix : ix + 1;
+        for (var i = 0; i < e.length; i++) this.array[n + i] = e[i];
+        n = n + e.length;
+        return "/" + this.array.slice(0, n).join("/")+this.query;
+    }
+    href_controller(e) { return this.trunc_path(1, e); }
+    href_action(e) { return this.trunc_path(2, e); }
+    href_filter(e) { return this.trunc_path(3, e); }
+    href_param(e) { return this.trunc_path(4, e); }
+    href_number(e) {
+        var path = this.array;
+        for (var n = path.length; (n > 1) && (!isNaN(path[n-1])); --n) ;
+        if (!this.is_app) --n;
+//        alert(objDump(path) + "\n" + n+"\n"+this.query);
+        return this.trunc_path(n, e);
+    }
+}
 //====================================================
 // for DEBUG dump Object
 var objDump = function(obj, rIndent) {

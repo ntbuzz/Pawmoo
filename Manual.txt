@@ -1005,11 +1005,16 @@ Rapid Development Web Application Platform by Section Template
 ◆ Javascript関数
   Javascriptで使用できるプロトタイプ関数の一覧です。
 
-・フレームワークのパス関連
-  String.controller_path(e)   コントローラー名までのパスに引数を付加する
-  String.method_path(e)       メソッド名までのパスに引数を付加する
-  String.filter_path(e)       フィルタまでのパスに引数を付加する
-  String.exclude_num_path(e)  URLの末尾から数字パラメータを除外して、指定パスを付加する
+・フレームワークのパス関連クラス
+    Locations.query
+    Locations.last_path
+    Locations.fw_fullpath             http:// で始まるフルパス変換
+    Locations.set_query(string)       クエリ文字列の設定
+    Locations.href_controller(array)  コントローラーパス以降を配列値で置換したURL
+    Locations.href_action(array)      アクションパス以降を配列値で置換したURL
+    Locations.href_filter(array)      コントローラーパス以降を配列値で置換したURL
+    Locations.href_param(array)       パラメータパス以降を配列値で置換したURL
+    Locations.href_number(array)    　数値パス以降を配列値で置換したURL
 
 ◆ JQueryプラグイン
   JQueryのプラグインとして使用できる関数
