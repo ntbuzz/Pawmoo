@@ -195,9 +195,14 @@ public function ViewTemplate($name,$vars = []) {
                     $val = App::$SysVAR[$var];          // SysVAR[] property
                 }
                 break;
-            case ':': $var = mb_substr($var,1);     // ModelClass Property
+            case ':': 
+                   	$p = '/:(\w+)(?:\[(\w+)\])*/';
+                    preg_match($p,$var,$m);
+                    list($match,$var,$mem) = $m;
                     if(isset($this->Model->$var)) { // exist Property?
-                        $val = $this->Model->$var;
+                        if(!empty($mem) && isset($this->Model->$var[$mem]))
+                            $val = $this->Model->$var[$mem];
+                        else $val = $this->Model->$var;
                     }
                     break;
             case "'": if(substr($var,-1) === "'") {     // check end-char
