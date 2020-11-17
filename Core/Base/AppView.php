@@ -826,7 +826,7 @@ public function ViewTemplate($name,$vars = []) {
             while( $n !== FALSE) {
                 $m = strrpos($tag,$tsep);
                 $str = ($m === FALSE || $m === $n) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
-                $tag = substr($tag,0,$n);
+                $tag = mb_strcut($tag,0,$n);
                 $attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} {$attrList[$key]}" : $str;
                 $n = strrpos($tag,$sep);
             }
