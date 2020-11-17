@@ -90,7 +90,12 @@
             var setobj = {};
             self.find("*").each(function () {
                 var nm = $(this).attr('name');
-                if (nm) setobj[nm] = $(this).val();
+                if (nm) {
+                    if ($(this).prop("tagName") == 'TEXTAREA') {
+                        alert(nm);
+                        setobj[nm] = "\n" + $(this).val() + "\n";
+                    } else setobj[nm] = $(this).val();
+                }
             });
             callback(setobj);
             return false;
@@ -175,4 +180,7 @@ $(function () {
         });
     });
     $(window).resize();
+    // マークダウン外部リンク
+     $('.easy_markdown a[href^=http]:not(:has(img))').addClass("externalLink");
+
 });
