@@ -135,7 +135,7 @@ public function MakePageLinks() {
 	echo "<span class='pager_message'>{$total}</span>";
 	echo "</div>\n";
 	// ページサイズの変更
-	$param = (empty(App::$Filter)) ? "1/" : "{App::$Filter}/1/";
+	$param = (empty(App::$Filter)) ? "1/" : App::$Filter."/1/";
 	$href = App::Get_AppRoot($this->ModuleName)."/page/{$param}";
 	$dsp = "<span id='size_selector'>".$this->__(".Display", FALSE)."</span>";
 	echo "<div class='rightalign'>{$dsp}<SELECT id='pagesize'>";
@@ -178,7 +178,7 @@ public function MakeListTable($deftab) {
 		'Page' => $this->MyModel->page_num,
 		'Size' => $this->MyModel->pagesize,
 	]);
-	if($deftab['pager'] == 'true') $this->MakePageLinks();
+	if(array_key_exists('pager',$deftab) && $deftab['pager'] == 'true') $this->MakePageLinks();
 	if(is_array($deftab)) {
 		$tab = $deftab["category"];
 		$tbl = $deftab["tableId"];

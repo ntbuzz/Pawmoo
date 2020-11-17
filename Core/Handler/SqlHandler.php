@@ -54,7 +54,7 @@ public function getValueLists($table,$ref,$id) {
 	$sql = $this->sql_QueryValues($table,$ref,$id);
 	$this->doQuery($sql);
 	$values = array();
-	while ($row = $this->fetchDB()) {
+	while ($row = $this->fetch_array()) {	// other table refer is not bind!
 		$key = $row[$ref];
 		if(!empty($key)) $values[$key] = $row[$id];
 	}

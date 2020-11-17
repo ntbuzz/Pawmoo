@@ -148,7 +148,6 @@ $(function () {
     selector.each(function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
         var ref = self.attr("data-element");  // 紐付けるID
-
         if (ref != "") {
             // 指定要素 e のスクロールに追従する
             $(ref).on("scroll", function () {
@@ -157,5 +156,23 @@ $(function () {
             });
         }
     });
-
+    // ウィンドウ高さ調整
+    var selector = $(".fitWindow");
+    selector.each(function () {
+        var self = $(this); // jQueryオブジェクトを変数に代入しておく
+//        alert(self.attr('class'));
+        $(window).on("load resize",function () {
+            wsize = self.parent().innerWidth();
+            wleft = self.parent().offset().left;
+            hsize = self.parent().height();
+            htop = self.offset().top;
+            spc = self.outerHeight() - self.height();
+            self.css({
+                'width': wsize - wleft + "px",
+                'height': hsize - htop - spc + "px",
+                'overflow-y':"auto"
+            });
+        });
+    });
+    $(window).resize();
 });

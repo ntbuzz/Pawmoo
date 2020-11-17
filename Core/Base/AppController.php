@@ -124,7 +124,7 @@ public function AutoPaging($cond, $max_count = 100) {
 	$cnt = $this->Model->getCount($cond);
 	if($num > 0) {
 		if($size === 0) {
-			$size = intval(MySession::$EnvData['PageSize']);
+			$size = (array_key_exists('PageSize',MySession::$EnvData)) ? intval(MySession::$EnvData['PageSize']):0;
 			if($size === 0) $size = $max_count;
 			if($cnt < $max_count) $size = 0;
 		}
