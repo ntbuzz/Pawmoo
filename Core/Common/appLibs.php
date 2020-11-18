@@ -280,7 +280,7 @@ function pseudo_markdown($atext, $md_class = '') {
     $atext = preg_replace_callback($p,function($maches) {
         // | で終わらない行は複数行として結合しておく
         $txt = preg_replace('/([^|])\n/','\\1<br>', $maches[1]);
-        $tbl_class = (empty($matches[2])) ? '':" {$matches[2]}";
+        $tbl_class = (empty($maches[2])) ? '':" {$maches[2]}";
         $arr = array_map(function($str) {
             $cols = explode("|", trim($str,"|"));
             $ln = "";

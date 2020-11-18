@@ -181,6 +181,6 @@ $(function () {
     });
     $(window).resize();
     // マークダウン外部リンク
-     $('.easy_markdown a[href^=http]:not(:has(img))').addClass("externalLink");
+     $('.easy_markdown a[href^=http]:not(:has(img))').addClass("externalLink").attr('target','_blank');
 
 });

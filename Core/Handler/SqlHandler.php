@@ -229,13 +229,18 @@ protected function sql_safequote(&$value) {
 	private function makeExpr($cond) {
 		$dump_object = function ($opr,$items,$table)  use (&$dump_object)  {
 			// LIKE operation build
+			$like_opstr = function($v) {
+				if($v[0] == '-' && strlen($v) > 1) {
+					$v = mb_substr($v,1);
+					$op = 'NOT LIKE';
+				} else $op = 'LIKE';
+				return [$v,$op];
+			};
+
 			$like_object = function ($key,$val,$table) {
 				$opk = "{$table}.\"{$key}\"";
-				$cmp = array_map(function($v) use(&$opk) {
-						if($v[0] === '-') {
-							$v = mb_substr($v,1);
-							$opx = 'NOT LIKE';
-						} else $opx = 'LIKE';
+				$cmp = array_map(function($v) use(&$opk,&$like_opstr) {
+						list($v,$opx) = $like_opstr($v);
 						return "({$opk} {$opx} '%{$v}%')";
 					},$val);
 				return implode('OR',$cmp);
@@ -272,10 +277,7 @@ protected function sql_safequote(&$value) {
 						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';
 						} else {
-							if($val[0] == '-') {
-								$val = mb_substr($val,1);
-								$op = 'NOT LIKE';
-							} else $op = 'LIKE';
+							list($val,$op) = $like_opstr($val);
 							$val = "'%{$val}%'";
 						}
 						$opp = $multi_field($key,$op,$table,$val);

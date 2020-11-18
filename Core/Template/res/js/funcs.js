@@ -6,6 +6,10 @@ String.prototype.trim2 = function() {
 };
 //====================================================
 // customize location object class for this framework
+const LOC_FULL      = 3;     // :url     http://host/url
+const LOC_SYS       = 2;     // /url     http://host/sysRoot/url
+const LOC_APPNEW    = 1;     // .url     http://host/appRoot/url
+const LOC_APPSELF   = 0;     // url      http://host/appRoot/url
 class Locations {
     constructor(url = location.href) {
         var path = url.replace(/%3F/g, '?').split('?');
@@ -22,16 +26,15 @@ class Locations {
     }
     get query() { return (this.qstr == "") ? "" : "?" + this.qstr; }
     get last_path() { return this.array[this.array.length - 2]; }
-// :url     http://host/url             type:3
-// /url     http://host/sysRoot/url     type:2
-// .url     http://host/appRoot/url     type:1
-// url      http://host/appRoot/url     type:0
     get fw_fullpath() {
         this.type = "./:".indexOf(this.url.charAt(0))+1;
         var path = (this.type == 0) ? this.url : this.url.slice(1);
         switch (this.type) {
-            case 0:
-            case 1: path = "${$APPROOT$}/" + path; break;
+            case 1:
+                if (path.charAt(0) == '/') {
+                    path = path.slice(1);
+                } else this.type = 0;
+            case 0: path = "${$APPROOT$}/" + path; break;
             case 2: path = "${$SYSROOT$}/" + path; break;
         }
         return this.base + path;

@@ -191,7 +191,7 @@ function array_to_URI($arr) {
     return implode('/',$ret);
 }
 //==============================================================================
-// 配列からURIを生成する、要素内に配列があるときにも対応する
+// 配列の値をキー値で連結
 function array_concat_keys($arr,$keys) {
     if(is_scalar($keys)) return $keys;
     $ss = ''; $trim_sep = ' ';

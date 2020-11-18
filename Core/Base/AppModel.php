@@ -263,6 +263,44 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
     ]);
 }
 //==============================================================================
+// レコードリストの読み込みJOIN/ALIASなし
+public function realFinder($cond,$filter=[],$sort=[]) {
+    if(empty($filter)) $filter = $this->dbDriver->columns;
+    $fields_list =[];
+    foreach($filter as $kk) $fields_list[$kk] = $kk;
+    // プライマリキーは必ず含める
+    $fields_list[$this->Primary] = $this->Primary;
+    $data = array();
+    if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];
+    else if(is_scalar($sort)) {
+        $sort = [ $sort => SORTBY_ASCEND ];
+    }
+    // 複数条件の検索
+    $this->dbDriver->findRecord($cond,NULL,$sort);
+    while (($fields = $this->dbDriver->fetch_array())) {
+        unset($record);
+        foreach($fields_list as $key => $val) {
+            $record[$key] = $fields[$key];
+        }
+        if(! empty($record) ) {
+            $data[] = $record;
+            $this->record_max = $this->dbDriver->recordMax;
+            $this->doEvent('OnGetRecord', $record);     // イベントコールバック
+        } else {
+            debug_log(DBMSG_MODEL, ["fields" => $fields]);
+        }
+    }
+    $this->Records = $data;
+//    if($this->pagesize > 0 && $this->pagesize < 50)  debug_log(3, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
+    debug_log(FALSE, [
+        "record_max" => $this->record_max,
+        "Filter" => $filter,
+        "FieldSchema" => $this->FieldSchema,
+        "FILTER" => $fields_list,
+        "RECORDS" => $this->Records,
+    ]);
+}
+//==============================================================================
 // レコードの削除
 public function DeleteRecord($num) {
     $this->dbDriver->deleteRecord([$this->Primary => $num]);
