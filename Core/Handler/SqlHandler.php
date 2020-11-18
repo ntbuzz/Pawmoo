@@ -237,7 +237,7 @@ protected function sql_safequote(&$value) {
 				return [$v,$op];
 			};
 
-			$like_object = function ($key,$val,$table) {
+			$like_object = function($key,$val,$table) use(&$like_opstr) {
 				$opk = "{$table}.\"{$key}\"";
 				$cmp = array_map(function($v) use(&$opk,&$like_opstr) {
 						list($v,$opx) = $like_opstr($v);
