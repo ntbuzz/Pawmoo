@@ -192,12 +192,6 @@ function pseudo_markdown($atext, $md_class = '') {
         '/\n```([a-z]+?)\n(.+?)\n```/s' => "\n<pre class=\"\\1\">\n\\2</pre>\n",    // class name
         '/\n```\n(.+?)\n```/s'          => "\n<pre class=\"code\">\n\\1</pre>\n",   // code
         '/\n(~~~|\^\^\^)\n(.+?)\n\1/s'  => "\n<pre class=\"indent\">\n\\2</pre>\n", // indent block
-        '/\.(\w+){([^}]*?)}/s'          => '<span class="\\1">\\2</span>',          // span inline
-        '/\.(\w+)\[([^\]]*?)\]/s'       => '<p class="\\1">\\2</span>',             // p inline
-        '/!\[([^\]]+)\]\(!([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'  => '<img src="'.App::Get_AppRoot().'images/\\2" alt="\\1">',
-        '/!\[([^\]]+)\]\(:([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'  => '<img src="/res/images/\\2" alt="\\1">',
-        '/!\[([^:\]]+):(\d+),(\d+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'  => '<img src="\\4" alt="\\1" width="\\2>" height="\\3">',
-        '/!\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'   => '<img src="\\2" alt="\\1">',
         '/\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'    => '<a href="\\2">\\1</a>',
         "/^(---|___|\*\*\*)$/m"     => "<hr>",       // <HR>
         "/^# (.+?)$/m"     => "<h1>\\1</h1>",        // <H1>
@@ -215,13 +209,13 @@ function pseudo_markdown($atext, $md_class = '') {
     ];
     // 先にタグ文字のエスケープとCR-LFをLFのみに置換しておく
     $p = '/\s[ \-\=]>\s|\\\[<>]+\s|\\\<[^>\r\n]*?>|\r\n/';
-    $atext = preg_replace_callback($p, function($maches) {
-                return str_replace(['\<','\>','<','>',"\r"],['&lt;','&gt;','&lt;','&gt;',''],$maches[0]);}
+    $atext = preg_replace_callback($p, function($matches) {
+                return str_replace(['\<','\>','<','>',"\r"],['&lt;','&gt;','&lt;','&gt;',''],$matches[0]);}
             ,$atext);
     // リストと引用を処理を処理する
     $p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)\n{2}/s';
-    $atext = preg_replace_callback($p,function($maches) {
-        $txt = $maches[1];
+    $atext = preg_replace_callback($p,function($matches) {
+        $txt = $matches[1];
         $user_func = function($text) {
             $tags = array(
                 '- ' => ['ul','ul_list',true],
@@ -277,10 +271,10 @@ function pseudo_markdown($atext, $md_class = '') {
     }, $atext);
     // テーブルを変換
     $p = '/\n(\|[\s\S]+?\|)\n(?:(?:\.(\w+))*\n|$)/s';
-    $atext = preg_replace_callback($p,function($maches) {
+    $atext = preg_replace_callback($p,function($matches) {
         // | で終わらない行は複数行として結合しておく
-        $txt = preg_replace('/([^|])\n+/','\\1<br>', $maches[1]);
-        $tbl_class = (empty($maches[2])) ? '':" {$maches[2]}";
+        $txt = preg_replace('/([^|])\n+/','\\1<br>', $matches[1]);
+        $tbl_class = (empty($matches[2])) ? '':" {$matches[2]}";
         $arr = array_map(function($str) {
             $cols = explode("|", trim($str,"|"));
             $ln = "";
@@ -321,13 +315,40 @@ function pseudo_markdown($atext, $md_class = '') {
         },explode("\n", $txt));         // とりあえず行に分割
         return "<table class='md_tbl{$tbl_class}'>".implode("\n",$arr)."</table>\n";
     }, $atext);
+    // CLASS/ID attributed SPAN/P replacement
+    $atext = preg_replace_callback(
+        '/\.\.(?:(\w+))*(?:#(\w+))*(:)*{([^}]*?)}/',
+        function ($m) {
+            $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
+            $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
+            $tag = ($m[3]==='') ? 'span' : 'p';
+            $txt = $m[4];
+            return "<{$tag}{$cls}{$ids}>{$txt}</{$tag}>";
+        },$atext);
+    // IMAGE TAG /multi-pattern replace
+    $atext = preg_replace_callback(
+        '/!\[([^:\]]+)(?::(\d+,\d+))*\]\(([!:])*([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/',
+        function ($m) {
+            $alt = $m[1];
+            if($m[2]==='') $sz = '';
+            else {
+                $wh = explode(',',$m[2]);
+                $sz = " width='{$wh[0]}' height='{$wh[1]}'";
+            }
+            switch($m[3]) {
+            case '!': $src = App::Get_AppRoot()."images/{$m[4]}"; break;
+            case ':': $src = "/images/{$m[4]}";break;
+            default: $src = $m[4];
+            }
+            return "<img src='{$src}' alt='{$alt}'{$sz} />";
+        },$atext);
     // 残りを一気に置換する
     $replace_keys   = array_keys($replace_defs);
     $replace_values = array_values($replace_defs);
     $atext = preg_replace($replace_keys,$replace_values, $atext);
     //エスケープ文字を置換
     $p = '/\\\([~\-_<>\^\[\]`*#|\(\.{}])/s';
-    $atext = preg_replace_callback($p,function($maches) {return $maches[1];}, $atext);
+    $atext = preg_replace_callback($p,function($matches) {return $matches[1];}, $atext);
     return "<div class='{$md_class}'>{$atext}</div>\n";
 }
 //==============================================================================

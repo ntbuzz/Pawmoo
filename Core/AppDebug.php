@@ -63,11 +63,13 @@ function debug_log($lvl,...$items) {
         array_shift($dbinfo);   // 自クラスの情報は不要
 //        array_shift($dbinfo);   // 自クラスの情報は不要
         $trace = "";
-        foreach($dbinfo as $stack) {
-            $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
-            list($pp,$fn,$ext) = extract_path_file_ext($path);
-            $func = "{$fn}({$stack['line']})";
-            $trace = (empty($trace)) ? $func : "{$func}>{$trace}";
+        if(isset($stack['file'])) {
+            foreach($dbinfo as $stack) {
+                $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
+                list($pp,$fn,$ext) = extract_path_file_ext($path);
+                $func = "{$fn}({$stack['line']})";
+                $trace = (empty($trace)) ? $func : "{$func}>{$trace}";
+            }
         }
         $sep = 	str_repeat("-", 30);
         $dmp_msg = "TRACE:: {$trace}\n";
