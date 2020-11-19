@@ -52,7 +52,7 @@ class AppStyle {
     private $repVARS;           // 置換文字列
 //==============================================================================
 // コンストラクタ
-    function __construct($appname, $sysRoot, $modname, $filename, $ext) {
+    function __construct($appname, $app_uri, $modname, $filename, $ext) {
         // モジュール名(res)は共通URIモジュールとして扱う
         $this->ModuleName = ($modname == 'Res') ? '' : $modname;  
         $this->Template = self::ContentList[$ext];
@@ -66,7 +66,11 @@ class AppStyle {
         if(empty($this->ModuleName)) {   // リソースフォルダならモジュール固有を削除
             unset($this->Folders['モジュール固有']);
         }
+        list($sysRoot,$appRoot) = $app_uri;
         $myVARS = array(
+            'SERVER' => $_SERVER['SERVER_NAME'],
+            'SYSROOT' => $sysRoot,
+            'APPROOT' => $appRoot,
             'appName' => $appname,
             'controller' => $this->ModuleName,
             'filename' => $filename,

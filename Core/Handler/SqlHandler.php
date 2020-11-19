@@ -15,7 +15,9 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private $handler;		// Databas Handler Name
 	public  $DateStyle = 'Y-m-d';	// Date format
 	private $relations;		// relation tables
-	private $LastCond;		// Last Query Condithin(re-builded)
+	protected $LastCond;	// for DEBUG
+	protected $LastBuild;	// for DEBUG
+	private $LastSQL;		// Last Query WHERE term
 //==============================================================================
 //	abstruct method
 	abstract protected function Connect();
@@ -191,16 +193,23 @@ protected function sql_safequote(&$value) {
 // Re-Build Condition ARRAY, Create SQL-WHERE statement.
 	private function sql_makeWHERE($cond) {
 		$re_build_array = function($cond) {
-			$reduce_array = function($opr,$cond) use(&$reduce_array) {
+			$reduce_array = function($arr) use(&$reduce_array) {
 				$wd = [];
-				foreach($cond as $key => $val) {
-					if(is_array($val)) {
-						$val_s = $val;
-						$val = $reduce_array(is_numeric($key)?$opr:$key,$val);
+				foreach($arr as $key => $val) {
+					if(is_numeric($key) || $key==='') {
+						if(is_array($val)) {
+							$child = $reduce_array($val);
+							if(!empty($child)) {
+								foreach($child as $kk => $vv) {
+									$wkey = $kk;
+									for($n=1;array_key_exists($kk,$wd); $n++) $kk = "{$wkey}:{$n}";
+									$wd[$kk] =$vv;
+								}
+							}
+						} else if($val!=='') $wd[] = $val;
+					} else {
+						$wd[$key] = (is_array($val)) ? $reduce_array($val) : $val;
 					}
-					if(is_array($val) && (is_numeric($key) || $opr === $key || (($key==='AND' || $key==='OR') && count($val)===1))) {
-						foreach($val as $kk => $vv) $wd[$kk] =$vv;
-					} else $wd[$key] =$val;
 				}
 				return $wd;
 			};
@@ -211,13 +220,15 @@ protected function sql_safequote(&$value) {
 				}
 				return $wd;
 			};
-			return $sort_array($reduce_array('AND',$cond));
+			return $sort_array($reduce_array($cond));
 		};
-		$new_cond = ($cond===NULL) ? $this->LastCond : ($this->LastCond = $re_build_array($cond));
+		if($cond ===NULL) return $this->LastSQL;
+		$this->LastCond = $cond;
+		$this->LastBuild= $new_cond = $re_build_array($cond);
 		$sql = $this->makeExpr($new_cond);
 		if(strlen($sql)) $sql = ' WHERE '.$sql;
 		debug_log(DBMSG_HANDLER,['COND-INPUT'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);
-		return $sql;
+		return ($this->LastSQL = $sql);
 	}
 //==============================================================================
 // GENERATE WHERE token from ARRAY[] expression

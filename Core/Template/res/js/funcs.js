@@ -8,8 +8,8 @@ String.prototype.trim2 = function() {
 // customize location object class for this framework
 const LOC_FULL      = 3;     // :url     http://host/url
 const LOC_SYS       = 2;     // /url     http://host/sysRoot/url
-const LOC_APPNEW    = 1;     // .url     http://host/appRoot/url
-const LOC_APPSELF   = 0;     // url      http://host/appRoot/url
+const LOC_APPNEW    = 1;     // ./url    http://host/appRoot/url
+const LOC_APPSELF   = 0;     // url .url http://host/appRoot/url
 class Locations {
     constructor(url = location.href) {
         var path = url.replace(/%3F/g, '?').split('?');
@@ -31,11 +31,11 @@ class Locations {
         var path = (this.type == 0) ? this.url : this.url.slice(1);
         switch (this.type) {
             case 1:
-                if (path.charAt(0) == '/') {
-                    path = path.slice(1);
-                } else this.type = 0;
-            case 0: path = "${$APPROOT$}/" + path; break;
-            case 2: path = "${$SYSROOT$}/" + path; break;
+                if (path.charAt(0) == '/') path = path.slice(1);
+                else this.type = 0;
+            case 0: path = "${$APPROOT$}" + path; break;
+            case 2: path = "${$SYSROOT$}" + path; break;
+            case 3: path = "/" + path; break;
         }
         return this.base + path;
     }

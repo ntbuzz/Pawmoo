@@ -279,7 +279,7 @@ function pseudo_markdown($atext, $md_class = '') {
     $p = '/\n(\|[\s\S]+?\|)\n(?:(?:\.(\w+))*\n|$)/s';
     $atext = preg_replace_callback($p,function($maches) {
         // | で終わらない行は複数行として結合しておく
-        $txt = preg_replace('/([^|])\n/','\\1<br>', $maches[1]);
+        $txt = preg_replace('/([^|])\n+/','\\1<br>', $maches[1]);
         $tbl_class = (empty($maches[2])) ? '':" {$maches[2]}";
         $arr = array_map(function($str) {
             $cols = explode("|", trim($str,"|"));
@@ -292,14 +292,15 @@ function pseudo_markdown($atext, $md_class = '') {
                 } else $tag = 'td';
                 if(array_key_exists($col[0],$tags)) {
                     $ali = $tags[$col[0]];
-                    $vars = " style='text-align:{$ali};'";
+                    $style = "text-align:{$ali};";
                     $col = mb_substr($col,1);
-                } else $vars = '';
+                } else $style = '';
                 // maybe additional calss and colspan/rowspan
-                preg_match('/^([@\^]+)*(\.(\w+))*?\s/',$col,$m);
+                preg_match('/^([@\^]+)*(?:\.(\w+))*(?:#(\d+))*?\s/',$col,$m);
                 $bind = $cls = '';
                 switch(count($m)) {
-                case 4: $cls =" class='{$m[3]}'";
+                case 4: $style .= ($m[3]==='') ? '':"width:{$m[3]}px;";
+                case 3: $cls  = ($m[2]==='') ? '': " class='{$m[3]}'";
                 case 2: $len = strlen($m[1]);
                         if($len === 0) $bind = '';
                         else {
@@ -313,6 +314,7 @@ function pseudo_markdown($atext, $md_class = '') {
                         $col = mb_substr($col,strlen($m[0]));
                         break;
                 }
+                $vars = (empty($style)) ? '' : " style='{$style}'";
                 $ln .= "<{$tag}{$cls}{$bind}{$vars}>{$col}</{$tag}>";
             }
             return "<tr>{$ln}</tr>";

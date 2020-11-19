@@ -47,7 +47,7 @@ if(array_key_exists('lang', $query)) {
 $contfiles = ($controller=='Res')?'resource':['resource',$controller];
 LangUI::construct($lang,"app/{$appname}/View/lang/",$contfiles);    // Load CORE lang and SET app-Folder
 // モジュール名と拡張子を使いテンプレートを決定する
-$AppStyle = new AppStyle($appname,$appRoot, $controller, $filename, $ext);
+$AppStyle = new AppStyle($appname,$app_uri, $controller, $filename, $ext);
 // ヘッダの出力
 $AppStyle->ViewHeader();
 // 結合ファイルの出力
