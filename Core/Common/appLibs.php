@@ -186,12 +186,6 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
 function pseudo_markdown($atext, $md_class = '') {
     if(empty($md_class)) $md_class = 'easy_markdown';
     $replace_defs = [
-        '/\[(?:\s*?|f|0|false|FALSE)\]{([^}]+?)}/'      => ' [ ] \\1',  // CHECK-BOX off
-        '/\[[^\]]+?\]{([^}]+?)}/'          => ' <b>[X]</b> \\1',  // CHECK-BOX ON
-        '/\n...{\n(.+?)\n}.../s'        => "\n<div class=\"indent\">\n\\1</div>\n", // indent block
-        '/\n```([a-z]+?)\n(.+?)\n```/s' => "\n<pre class=\"\\1\">\n\\2</pre>\n",    // class name
-        '/\n```\n(.+?)\n```/s'          => "\n<pre class=\"code\">\n\\1</pre>\n",   // code
-        '/\n(~~~|\^\^\^)\n(.+?)\n\1/s'  => "\n<pre class=\"indent\">\n\\2</pre>\n", // indent block
         '/\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'    => '<a href="\\2">\\1</a>',
         "/^(---|___|\*\*\*)$/m"     => "<hr>",       // <HR>
         "/^# (.+?)$/m"     => "<h1>\\1</h1>",        // <H1>
@@ -315,6 +309,24 @@ function pseudo_markdown($atext, $md_class = '') {
         },explode("\n", $txt));         // とりあえず行に分割
         return "<table class='md_tbl{$tbl_class}'>".implode("\n",$arr)."</table>\n";
     }, $atext);
+    //---------------------------------------------------------------------------
+    // NL change <br> tag in DIV indent class
+    $atext = preg_replace_callback(
+            '/\n\.\.\.(?:(\w+)){0,1}\{(.+?)\n\}\.\.\./s',
+             function ($m) {
+                $txt = nl2br(trim($m[2]));
+                $cls = ($m[1]==='')?'indent':$m[1];
+                return "<div class='$cls'>{$txt}</div>";
+            },$atext);
+    // pre tag with class
+    $atext = preg_replace_callback(
+            '/\n(```|~~~|\^\^\^)(?:\.(\w+)){0,1}(.+?)\n\1/s',
+             function ($m) {
+                $class = [ '```' => 'code','~~~' => 'indent','^^^' => 'indent'];
+                $txt = trim($m[3]);
+                $cls = ($m[2]==='')?$class[$m[1]]:$m[2];
+                return "<pre class='$cls'>{$txt}</pre>";
+            },$atext);
     // CLASS/ID attributed SPAN/P replacement
     $atext = preg_replace_callback(
         '/\.\.(?:(\w+))*(?:#(\w+))*(:)*{([^}]*?)}/',
@@ -341,6 +353,13 @@ function pseudo_markdown($atext, $md_class = '') {
             default: $src = $m[4];
             }
             return "<img src='{$src}' alt='{$alt}'{$sz} />";
+        },$atext);
+    // CHECKBOX MARK
+    $atext = preg_replace_callback(
+        '/\[([^\]]*?)\]\{([^}]+?)\}/',
+            function ($m) {
+            $chek = (in_array(strtolower($m[1]),['','0','f','false']))?'[ ]':'<b>[X]</b>';
+            return " {$chek} {$m[2]}";
         },$atext);
     // 残りを一気に置換する
     $replace_keys   = array_keys($replace_defs);
