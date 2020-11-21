@@ -23,8 +23,8 @@ function get_routing_params($dir) {
         array_unshift($args,$appname);      // 数字はアプリ名でないので配列に戻す
         $appname = '';
     }
-    $app_uri = [ $fwroot, "{$fwroot}{$appname}" ];      // URIセットを生成
-    debug_log(FALSE, [
+    $app_uri = [ $fwroot, "{$fwroot}{$appname}/" ];      // URIセットを生成
+    debug_log(-999, [
         'URI' => $_SERVER['REQUEST_URI'],
         "app_uri"=> $app_uri,
         "args"=> $args,
@@ -191,7 +191,7 @@ function array_to_URI($arr) {
     return implode('/',$ret);
 }
 //==============================================================================
-// 配列からURIを生成する、要素内に配列があるときにも対応する
+// 配列の値をキー値で連結
 function array_concat_keys($arr,$keys) {
     if(is_scalar($keys)) return $keys;
     $ss = ''; $trim_sep = ' ';

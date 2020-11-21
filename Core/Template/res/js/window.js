@@ -67,15 +67,20 @@
             $.each(obj, function (key, value) {
                 var target = self.find('[name="' + key + '"]');
                 if (target.length) {
-                    if (target.prop("tagName") == "INPUT" && target.attr("type") == "checkbox") {
-                        target.prop('checked',(value=='t'));
-                    } else if (target.prop("ta)gName") == "INPUT" || target.prop("tagName") == "SELECT") target.val(value);   // 自ID
-                    else {
-                        if (target.prop("tagName") == "TEXTAREA") {     // 初期表示サイズを固定する
-                            var w = target.attr("cols");
-                            var h = target.attr("rows");
-                            target.css({"width": w+"em","height": h+"em"});
-                        }
+                    switch (target.prop("tagName")) {
+                    case 'INPUT':
+                        if (target.attr("type") == "checkbox" || target.attr("type") == "radio" ) {
+                            target.prop('checked', (value == 't'));
+                        } else target.val(value);   // 自ID
+                        break;
+                    case 'SELECT':
+                        target.val(value);   // 自ID
+                        break;
+                    case 'TEXTAREA':
+                        var w = target.attr("cols");
+                        var h = target.attr("rows");
+                        target.css({"width": w+"em","height": h+"em"});
+                    default:
                         target.text(value);   // 自ID
                     }
                 }
@@ -85,7 +90,12 @@
             var setobj = {};
             self.find("*").each(function () {
                 var nm = $(this).attr('name');
-                if (nm) setobj[nm] = $(this).val();
+                if (nm) {
+                    if ($(this).prop("tagName") == 'TEXTAREA') {
+                        alert(nm);
+                        setobj[nm] = "\n" + $(this).val() + "\n";
+                    } else setobj[nm] = $(this).val();
+                }
             });
             callback(setobj);
             return false;
@@ -143,7 +153,6 @@ $(function () {
     selector.each(function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
         var ref = self.attr("data-element");  // 紐付けるID
-
         if (ref != "") {
             // 指定要素 e のスクロールに追従する
             $(ref).on("scroll", function () {
@@ -152,5 +161,26 @@ $(function () {
             });
         }
     });
+    // ウィンドウ高さ調整
+    var selector = $(".fitWindow");
+    selector.each(function () {
+        var self = $(this); // jQueryオブジェクトを変数に代入しておく
+//        alert(self.attr('class'));
+        $(window).on("load resize",function () {
+            wsize = self.parent().innerWidth();
+            wleft = self.parent().offset().left;
+            hsize = self.parent().height();
+            htop = self.offset().top;
+            spc = self.outerHeight() - self.height();
+            self.css({
+                'width': wsize - wleft + "px",
+                'height': hsize - htop - spc + "px",
+                'overflow-y':"auto"
+            });
+        });
+    });
+    $(window).resize();
+    // マークダウン外部リンク
+     $('.easy_markdown a[href^=http]:not(:has(img))').addClass("externalLink").attr('target','_blank');
 
 });

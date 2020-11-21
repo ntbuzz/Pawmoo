@@ -121,15 +121,14 @@ public function AutoPaging($cond, $max_count = 100) {
 	$Params = array_map(function($v) {return (empty($v)) ? 0 : intval($v);}, 
 			array_values(array_filter(App::$Params, function($vv) { return empty($vv) || is_numeric($vv);})));
 	list($num,$size) = $Params;
+	$cnt = $this->Model->getCount($cond);
 	if($num > 0) {
 		if($size === 0) {
-			$size = intval(MySession::$EnvData['PageSize']);
+			$size = (array_key_exists('PageSize',MySession::$EnvData)) ? intval(MySession::$EnvData['PageSize']):0;
 			if($size === 0) $size = $max_count;
-			$cnt = $this->Model->getCount($cond);
 			if($cnt < $max_count) $size = 0;
 		}
 	} else {
-		$cnt = $this->Model->getCount($cond);
 		if($cnt > $max_count) {
 			$num = 1;
 			if($size === 0) $size = $max_count;

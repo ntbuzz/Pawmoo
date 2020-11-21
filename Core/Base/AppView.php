@@ -195,9 +195,14 @@ public function ViewTemplate($name,$vars = []) {
                     $val = App::$SysVAR[$var];          // SysVAR[] property
                 }
                 break;
-            case ':': $var = mb_substr($var,1);     // ModelClass Property
+            case ':': 
+                   	$p = '/:(\w+)(?:\[(\w+)\])*/';
+                    preg_match($p,$var,$m);
+                    list($match,$var,$mem) = $m;
                     if(isset($this->Model->$var)) { // exist Property?
-                        $val = $this->Model->$var;
+                        if(!empty($mem) && isset($this->Model->$var[$mem]))
+                            $val = $this->Model->$var[$mem];
+                        else $val = $this->Model->$var;
                     }
                     break;
             case "'": if(substr($var,-1) === "'") {     // check end-char
@@ -521,7 +526,7 @@ public function ViewTemplate($name,$vars = []) {
     //--------------------------------------------------------------------------
     //  echo string
     private function cmd_echo($tag,$attrs,$subsec,$sec,$vars,$text) {
-        $this->directOutput('', '',$sec,$vars);
+        $this->directOutput('', '',$text,$vars);
     }
     //--------------------------------------------------------------------------
     //  PHP eval, Danger Section!
@@ -814,25 +819,18 @@ public function ViewTemplate($name,$vars = []) {
                 if($top_ch === '*') return [$tag,''];
             }
         }
-        foreach(['data' => '{', 'name' => '[', 'id' => '#', 'class' => '.'] as $key => $sep) {
+        // allow multi attribute, and separater not space
+        foreach(['data-element' => '{}', 'name' => '[]', 'id' => '##', 'class' => '..'] as $key => $seps) {
+            list($sep,$tsep) = str_split($seps);
             $n = strrpos($tag,$sep);
-            if( $n !== FALSE) {
-                $str = substr($tag,$n + 1);
-                $tag = substr($tag,0, $n);
-                if($sep === '{') {
-                    $m = strrpos($str,'}');
-                    $tag .= substr($str,$m+1);
-                    $str = substr($str,0, $m);
-                    $kk = "{$key}-element";
-                    $attrList[$kk] = $str;
-                } else if($sep === '[') {
-                    $str = trim($str,'[]');
-                    $attrList[$key] = $str;
-                } else {
-                    $attrList[$key] = $str;
-                }
+            while( $n !== FALSE) {
+                $m = strrpos($tag,$tsep);
+                $str = ($m === FALSE || $m === $n) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
+                $tag = mb_strcut($tag,0,$n);
+                $attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} {$attrList[$key]}" : $str;
+                $n = strrpos($tag,$sep);
             }
-        }
+		}
         if(empty($tag)) $tag = 'div';
         return array($tag,$attrList);
     }
