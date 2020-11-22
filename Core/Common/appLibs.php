@@ -264,7 +264,7 @@ function pseudo_markdown($atext, $md_class = '') {
         return $user_func($txt);
     }, $atext);
     // テーブルを変換
-    $p = '/\n(\|[\s\S]+?\|)\n(?:(?:\.(\w+))*\n|$)/s';
+    $p = '/\n(\|[\s\S]+?\|)\n(?:(?:\.(\w+)){0,1}\n|$)/s';
     $atext = preg_replace_callback($p,function($matches) {
         // | で終わらない行は複数行として結合しておく
         $txt = preg_replace('/([^|])\n+/','\\1<br>', $matches[1]);
@@ -284,7 +284,7 @@ function pseudo_markdown($atext, $md_class = '') {
                     $col = mb_substr($col,1);
                 } else $style = '';
                 // maybe additional calss and colspan/rowspan
-                preg_match('/^([@\^]+)*(?:\.(\w+))*(?:#(\d+))*?\s/',$col,$m);
+                preg_match('/^([@\^]+){0,1}(?:\.(\w+)){0,1}(?:#(\d+)){0,1}?\s/',$col,$m);
                 $bind = $cls = '';
                 switch(count($m)) {
                 case 4: $style .= ($m[3]==='') ? '':"width:{$m[3]}px;";
@@ -314,22 +314,22 @@ function pseudo_markdown($atext, $md_class = '') {
     $atext = preg_replace_callback(
             '/\n\.\.\.(?:(\w+)){0,1}\{(.+?)\n\}\.\.\./s',
              function ($m) {
-                $txt = nl2br(trim($m[2]));
+                $txt = nl2br($m[2]);
                 $cls = ($m[1]==='')?'indent':$m[1];
                 return "<div class='$cls'>{$txt}</div>";
             },$atext);
     // pre tag with class
     $atext = preg_replace_callback(
-            '/\n(```|~~~|\^\^\^)(?:\.(\w+)){0,1}(.+?)\n\1/s',
+            '/\n(```|~~~|\^\^\^)(?:(\w+)){0,1}\n(.+?)\n\1/s',
              function ($m) {
                 $class = [ '```' => 'code','~~~' => 'indent','^^^' => 'indent'];
-                $txt = trim($m[3]);
+                $txt = $m[3];
                 $cls = ($m[2]==='')?$class[$m[1]]:$m[2];
                 return "<pre class='$cls'>{$txt}</pre>";
             },$atext);
     // CLASS/ID attributed SPAN/P replacement
     $atext = preg_replace_callback(
-        '/\.\.(?:(\w+))*(?:#(\w+))*(:)*{([^}]*?)}/',
+        '/\s\.\.(?:(\w+)){0,1}(?:#(\w+)){0,1}(:){0,1}{([^}]*?)}/',
         function ($m) {
             $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
             $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
@@ -339,7 +339,7 @@ function pseudo_markdown($atext, $md_class = '') {
         },$atext);
     // IMAGE TAG /multi-pattern replace
     $atext = preg_replace_callback(
-        '/!\[([^:\]]+)(?::(\d+,\d+))*\]\(([!:])*([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/',
+        '/!\[([^:\]]+)(?::(\d+,\d+)){0,1}\]\(([!:]){0,1}([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/',
         function ($m) {
             $alt = $m[1];
             if($m[2]==='') $sz = '';
