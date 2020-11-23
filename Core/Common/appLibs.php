@@ -27,6 +27,13 @@ function array_first_item($arr) {
     return ['',''];
 }
 //==============================================================================
+// 配列を指定の個数分生成する
+function array_fix_count($arr,$max) {
+    $n = count($arr);
+    if($n < $max) $arr += array_fill($n,$max - $n,NULL);     // filter要素までを補填
+    return $arr;
+}
+//==============================================================================
 // 拡張子をとりだす
 // 返り値は .拡張子
 function extract_extension($fn) {

@@ -1,5 +1,6 @@
 # Rawdst - Rapid Web Application Development BY Section Template
 
+This repository is a personal PHP framework experiment site.
 It is a simple framework based on the MVC model.  
 The biggest feature is that it supports the section template view using PHP associative array.  
 A section template is similar to the HTML tag description format, but it has its own command extension that allows you to define a view template that is easier and easier to read than writing a tag format.
