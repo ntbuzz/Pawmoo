@@ -44,25 +44,6 @@ function get_routing_params($dir) {
     list($controller,$method) = $args;
     $filters = array_splice($args,2);             // 取り出したパラメータを削除
     if(empty($controller)) $controller = $appname; // コントローラが空ならアプリ名と同じにする
-/*
-debug_dump([
-    "ARG"=>$args,
-    "CONT"=>$controller,
-    "METHOS"=>$method,
-    "FILTER"=>$filters,
-    "PARAM"=>$params,
-    ]);
-    $args += array_fill(count($args),3,NULL);     // filter要素までを補填
-    list($controller,$method,$filter) = $args;
-    if(empty($controller)) $controller = $appname; // コントローラが空ならアプリ名と同じにする
-    else if(mb_strpos($controller,'.') !== FALSE) {
-        $method = $controller;      // put-off method analyzed 
-        $controller = $appname;     // same as appname
-    }
-    if(mb_strpos($method,'.') !== FALSE) {  // have a extension
-        list($filename,$ext) = extract_base_name($method);
-    }
-*/
     $module = array(
         ucfirst(strtolower($controller)),    // コントローラー名キャメルケースに変換
         ucfirst(strtolower($method)),        // メソッドもキャメルケースに変換

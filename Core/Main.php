@@ -200,7 +200,7 @@ if($controllerInstance->is_authorised()) {
     $controllerInstance->$ContAction();
 }
 
-debug_run_time(0);
+debug_run_time(DBMSG_SYSTEM);
 MySession::CloseSession();
 debug_log(DBMSG_SYSTEM, [
     "#SessionClose" => [
