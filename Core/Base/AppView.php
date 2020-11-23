@@ -91,7 +91,7 @@ public function __TerminateView() {
         // Do Replacement ADDRESS-BAR in Browser
         $url = App::Get_RelocateURL();
         if(isset($url)) {
-            debug_log(DBMSG_VIEW,"RedirectURL: {$url}\n");
+            debug_log(DBMSG_VIEW,"RedirectURL: {$url}");
             echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";
         }
         if(DEBUGGER) {

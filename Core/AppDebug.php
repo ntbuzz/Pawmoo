@@ -60,15 +60,16 @@ function debug_log($lvl,...$items) {
     // バックトレースから呼び出し元の情報を取得
     $dump_log_info = function($items) {
         $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
-        array_shift($dbinfo);   // 自クラスの情報は不要
 //        array_shift($dbinfo);   // 自クラスの情報は不要
         $trace = "";
-        if(isset($stack['file'])) {
-            foreach($dbinfo as $stack) {
+        foreach($dbinfo as $stack) {
+            if(isset($stack['file'])) {
                 $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
                 list($pp,$fn,$ext) = extract_path_file_ext($path);
-                $func = "{$fn}({$stack['line']})";
-                $trace = (empty($trace)) ? $func : "{$func}>{$trace}";
+                if($fn !== 'AppDebug') {                            // 自クラスの情報は不要
+                    $func = "{$fn}({$stack['line']})";
+                    $trace = (empty($trace)) ? $func : "{$func}>{$trace}";
+                }
             }
         }
         $sep = 	str_repeat("-", 30);
