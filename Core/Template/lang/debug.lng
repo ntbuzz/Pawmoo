@@ -2,13 +2,13 @@
 //
 .ja => [
     Level => [
-        レベル
+        APP
         Category => [
-            システム
-            言語
-            ビュー
-            モデル
-            ハンドラー
+            -104 => システム
+            -103 => 言語
+            -102 => ビュー
+            -101 => モデル
+            -100 => ハンドラー
         ]
     ]
     DebugInfo => デバッグ情報
@@ -22,13 +22,13 @@
 ]
 .en => [
     Level => [
-        Level
+        App
         Category => [
-            System
-            Locale
-            AppView
-            AppModel
-            Handler
+            -104 => System
+            -103 => Locale
+            -102 => AppView
+            -101 => AppModel
+            -100 => Handler
         ]
     ]
     DebugInfo => "Debug Info"

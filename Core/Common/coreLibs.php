@@ -10,8 +10,8 @@ function get_routing_params($dir) {
     $vv = $_SERVER['REQUEST_URI'];
     list($requrl,$q_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
     $param = trim(urldecode($requrl),'/');  // 先頭と末尾の / を除去
-    $args = (empty($param)) ? array() : explode('/', $param);
-    $args = array_values(array_filter($args, 'strlen'));  // 文字数が0の行を取り除く
+//    $args = array_filter(explode('/', $param), function($vv) { return !empty($vv); });
+    $args = explode('/', $param);
     $appname = array_shift($args);          // 先頭の要素を取り出す
     if($appname === $root) {                // URIがFWフォルダ名から始まる
         $appname = array_shift($args);      // アプリ名を取り直す
@@ -34,30 +34,24 @@ function get_routing_params($dir) {
     // コントローラー名以降のパラメータを分解する
     $params = array();
     for($n=0;$n < count($args);$n++) {
-        if(is_numeric($args[$n]) || $n >= 3) {
+        if(is_numeric($args[$n]) || strpos($args[$n],'.') != FALSE) {
             $params = array_slice($args,$n);    // パラメータを取り出す
             array_splice($args,$n);             // 取り出したパラメータを削除
             break;
         }
     }
-    $args += array_fill(count($args),3,NULL);     // filter要素までを補填
-    list($controller,$method,$filter) = $args;
+    if(count($args) < 2)    $args += array_fill(count($args),2-count($args),NULL);     // filter要素までを補填
+    list($controller,$method) = $args;
+    $filters = array_splice($args,2);             // 取り出したパラメータを削除
     if(empty($controller)) $controller = $appname; // コントローラが空ならアプリ名と同じにする
-    else if(mb_strpos($controller,'.') !== FALSE) {
-        $method = $controller;      // put-off method analyzed 
-        $controller = $appname;     // same as appname
-    }
-    if(mb_strpos($method,'.') !== FALSE) {  // have a extension
-        list($filename,$ext) = extract_base_name($method);
-    }
     $module = array(
         ucfirst(strtolower($controller)),    // コントローラー名キャメルケースに変換
         ucfirst(strtolower($method)),        // メソッドもキャメルケースに変換
-        $filter,                             // フィルター
+        $filters,                             // フィルター
         $params                              // パラメータ
     );
     $ret = [$appname,$app_uri,$module,$q_str];
-    debug_log(FALSE, [
+    debug_log(-999, [
         'フレームワーク情報' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
             "app_uri"=> $app_uri,
@@ -183,7 +177,7 @@ function array_to_URI($arr) {
         $ret = [];
         foreach($lst as $val) {
             $uri = (is_array($val)) ? array_to_URI($val) : strtolower($val);
-            if(!empty($uri)) $ret[] = $uri;
+            if(!empty($uri)) $ret[] = trim($uri,'/');
         }
         return $ret;
     };

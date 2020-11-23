@@ -5,12 +5,12 @@
  */
 if(!defined('DEBUG_LEVEL')) define('DEBUG_LEVEL', 10);
 
-define('DBMSG_SYSTEM',  0);      // for Main, App, Controller
-define('DBMSG_LOCALE',  1);      // for LangUI
-define('DBMSG_VIEW',    2);      // for View, Helper
-define('DBMSG_MODEL',   3);      // for Model
-define('DBMSG_HANDLER', 4);      // for DB-Handler
-// over 5 level for Application
+define('DBMSG_SYSTEM',  -104);      // for Main, App, Controller
+define('DBMSG_LOCALE',  -103);      // for LangUI
+define('DBMSG_VIEW',    -102);      // for View, Helper
+define('DBMSG_MODEL',   -101);      // for Model
+define('DBMSG_HANDLER', -100);      // for DB-Handler
+define('DBMSG_LEVEL',   -100);      // logging level
 
 const EMPTY_MSG = " EMPTY\n";
 /*
@@ -55,20 +55,19 @@ function log_reset($lvl) {
 //==========================================================================
 // ログの記録または表示
 function debug_log($lvl,...$items) {
-    if($lvl === FALSE || abs($lvl) > 100) return;
-    if($lvl > DEBUG_LEVEL) return;
+    if($lvl === FALSE || $lvl < DBMSG_SYSTEM || $lvl > DEBUG_LEVEL) return;
     // バックトレースから呼び出し元の情報を取得
     $dump_log_info = function($items) {
         $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
-        array_shift($dbinfo);   // 自クラスの情報は不要
-//        array_shift($dbinfo);   // 自クラスの情報は不要
         $trace = "";
-        if(isset($stack['file'])) {
-            foreach($dbinfo as $stack) {
+        foreach($dbinfo as $stack) {
+            if(isset($stack['file'])) {
                 $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
                 list($pp,$fn,$ext) = extract_path_file_ext($path);
-                $func = "{$fn}({$stack['line']})";
-                $trace = (empty($trace)) ? $func : "{$func}>{$trace}";
+                if($fn !== 'AppDebug') {                            // 自クラスの情報は不要
+                    $func = "{$fn}({$stack['line']})";
+                    $trace = (empty($trace)) ? $func : "{$func}>{$trace}";
+                }
             }
         }
         $sep = 	str_repeat("-", 30);
@@ -125,7 +124,7 @@ function debug_log($lvl,...$items) {
             $dmp_info = htmlspecialchars($dmp_info);
             $dmp_info = "<pre>\n{$dmp_info}\n</pre>\n";
         }
-        if($lvl < 0) echo "{$dmp_info}\n";
+        if($lvl < 0 && $lvl > DBMSG_LEVEL) echo "{$dmp_info}\n";
         else {
             if(isset($debug_log_str[$lvl])) $debug_log_str[$lvl] .= $dmp_info;
             else $debug_log_str[$lvl] = $dmp_info;

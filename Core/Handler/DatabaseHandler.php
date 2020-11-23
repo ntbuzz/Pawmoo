@@ -112,7 +112,7 @@ private static function PgDatabase($dbdef,$action) {
         $conn .= " user={$dbdef['login']} password={$dbdef['password']};";
         $dbb = pg_connect($conn);
         if(!$dbb) {
-            debug_log(-99,['DEF'=>$dbdef,'CONNECT'=>$conn]);
+            debug_log(-1,['DEF'=>$dbdef,'CONNECT'=>$conn]);
             die('Postgres 接続失敗' . pg_result_error($dbb)."\n");
         }
         return $dbb;

@@ -56,7 +56,6 @@ list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filter,$params) = $module;
 parse_str($q_str, $query);
 if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
-debug_log(DBMSG_SYSTEM,[ "Routing module" => $module]);
 
 // アプリ名が有効かどうか確認する
 if(empty($appname) || !file_exists("app/$appname")) {
@@ -201,7 +200,7 @@ if($controllerInstance->is_authorised()) {
     $controllerInstance->$ContAction();
 }
 
-debug_run_time(0);
+debug_run_time(DBMSG_SYSTEM);
 MySession::CloseSession();
 debug_log(DBMSG_SYSTEM, [
     "#SessionClose" => [

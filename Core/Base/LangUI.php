@@ -156,7 +156,7 @@ public static function get_value($mod, $id, $allow = FALSE) {
     // 無名関数を定義して配列内の探索を行う
     $array_finder = function ($lst, $arr, $allow) {
             foreach($lst as $val) {
-                if(array_key_exists($val, $arr)) {
+                if(is_array($arr) && array_key_exists($val, $arr)) {
                     $val = str_replace(['　',' '],'',$val);
                     $arr = $arr[$val];
                 } else return FALSE;        // 見つからなかった時
