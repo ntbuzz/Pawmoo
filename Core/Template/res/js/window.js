@@ -92,7 +92,7 @@
                 var nm = $(this).attr('name');
                 if (nm) {
                     if ($(this).prop("tagName") == 'TEXTAREA') {
-                        alert(nm);
+//                        alert(nm);
                         setobj[nm] = "\n" + $(this).val() + "\n";
                     } else setobj[nm] = $(this).val();
                 }

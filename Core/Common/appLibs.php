@@ -188,12 +188,6 @@ function pseudo_markdown($atext, $md_class = '') {
     $replace_defs = [
         '/\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'    => '<a href="\\2">\\1</a>',
         "/^(---|___|\*\*\*)$/m"     => "<hr>",       // <HR>
-        "/^# (.+?)$/m"     => "<h1>\\1</h1>",        // <H1>
-        "/^## (.+?)$/m"    => "<h2>\\1</h2>",        // <H2>
-        "/^### (.+?)$/m"   => "<h3>\\1</h3>",        // <H3>
-        "/^#### (.+?)$/m"  => "<h4>\\1</h4>",        // <H4>
-        "/^##### (.+?)$/m" => "<h5>\\1</h5>",        // <H5>
-        "/^###### (.+?)$/m"=> "<h6>\\1</h6>",        // <H6>
         "/\s\*\*(.+?)\*\*\s/" => '<strong>\\1</strong>',  // BOLD
         "/\s__(.+?)__\s/"     => '<em>\\1</em>',   // BOLD
         "/\s--(.+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
@@ -309,6 +303,15 @@ function pseudo_markdown($atext, $md_class = '') {
         },explode("\n", $txt));         // とりあえず行に分割
         return "<table class='md_tbl{$tbl_class}'>".implode("\n",$arr)."</table>\n";
     }, $atext);
+    //---------------------------------------------------------------------------
+    // HEAD(#) TAG
+    $atext = preg_replace_callback(
+        "/^(#{1,6})(?:\.(\w+)){0,1} (.+?)$/m",
+         function ($m) {
+            $n = strlen($m[1]);
+            $cls = ($m[2]==='')?'':" class='{$m[2]}'";
+            return "<h{$n}{$cls}>{$m[3]}</h{$n}>\n";
+        },$atext);
     //---------------------------------------------------------------------------
     // NL change <br> tag in DIV indent class
     $atext = preg_replace_callback(
