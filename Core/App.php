@@ -12,7 +12,8 @@ class App {
     public static $DocRoot;         // DOCUMENT_ROOT 変数
     public static $Referer;         // HTTP_REFERER 変数
     public static $Query;           // urlのクエリー文字列の連想配列
-    public static $Filter;          // メソッドのフィルタ指示
+    public static $Filter;          // メソッドのフィルタ配列の先頭
+    public static $Filters;         // メソッドのフィルタ配列
     public static $Params;          // メソッドの数値パラメータ配列
     public static $ParamCount;      // 引数の数
     public static $Controller;      // 実行コントローラ名
@@ -24,12 +25,13 @@ class App {
 	public static function __Init($appname,$app_uri,$module,$query,$uri) {
         static::$AppName = $appname;
         list(static::$sysRoot,static::$appRoot) = $app_uri;
-        list($controller,$method,$filter,$params) = $module;
+        list($controller,$method,$filters,$params) = $module;
 
         static::$DocRoot = (empty($_SERVER['DOCUMENT_ROOT'])) ? '' : $_SERVER['DOCUMENT_ROOT'];
         static::$Referer = (empty($_SERVER['HTTP_REFERER'])) ? '' : $_SERVER['HTTP_REFERER'];
 
-        static::$Filter = $filter;
+        static::$Filters= $filters;
+        static::$Filter = empty($filters) ? '': $filters[0];
         static::$Params = $params;
    		// 0 〜 9 の不足する要素を補填する
         $k = count($params);
@@ -44,7 +46,7 @@ class App {
             'APPROOT' => static::$appRoot,
             'controller' => $controller,  //ucfirst($uri_array[2]),
             'method' => $method,  //ucfirst($uri_array[3]),
-            'filter' => $filter,  // ucfirst(static::$Filter),
+            'filter' => static::$Filter,  // ucfirst(static::$Filter),
             'platform' => PLATFORM_NAME,
             'copytight' => COPYTIGHT,
             'current_version' => CURRENT_VERSION,  // framework version
@@ -56,7 +58,7 @@ class App {
             'root' => static::$appRoot,
             'controller' => $controller,
             'method' => $method,
-            'filter' => $filter,
+            'filter' => $filters,
             'params' => $params,
             );
             // リクエスト情報を記憶
@@ -67,6 +69,7 @@ class App {
 public static function ChangeMethod($module,$method,$relocate = TRUE) { 
     static::$execURI['controller'] = $module;
     static::$execURI['method'] = $method;
+    debug_log(DBMSG_SYSTEM, ["RE-LOCATE" => static::$execURI]);
     static::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================
@@ -79,13 +82,13 @@ public static function ChangeParams($params,$relocate = TRUE) {
 // メソッドの置換
 public static function Get_RelocateURL() { 
     if(static::$ReLocate === FALSE) return NULL;
-    debug_log(DBMSG_SYSTEM, static::$execURI);
     $url = array_to_URI(static::$execURI);
     if(!empty(static::$Query)) {                  // exists QUERY strings
         $q = http_build_query(static::$Query);
         $url = "{$url}?{$q}";
     }
-    return $url;
+    debug_log(DBMSG_SYSTEM, ["RE-LOCATE-JMP" => static::$execURI,$url]);
+    return "/{$url}";
 }
 //==============================================================================
 // アプリケーションフォルダパスを取得
@@ -120,8 +123,7 @@ public static function Get_SysRoot($path = '') {
 //==============================================================================
 // アプリケーションのトップパスに付加パスを付けた文字列
 public static function Get_AppRoot($path = '') {  
-    if(mb_substr($path,0,1) !== '/') $path = "/{$path}";
-//echo "appRoot:".static::$appRoot."\n"."Path]{$path}\n";exit;
+    if(mb_substr($path,0,1) === '/') $path = mb_substr($path,1);
     return static::$appRoot . strtolower($path);
 }
 //==============================================================================
@@ -159,7 +161,7 @@ public static function Get_AppRoot($path = '') {
 // imagesのインクルードタグ出力
     public static function ImageSRC($name, $attr) {
         $root = static::$appRoot;
-        return "<img src=\"{$root}/images/{$name}\" {$attr} />";
+        return "<img src=\"{$root}images/{$name}\" {$attr} />";
     }
 
 }
