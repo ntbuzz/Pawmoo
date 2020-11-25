@@ -912,8 +912,17 @@ Rapid Development Web Application Platform by Section Template
       data#init => [ value => ＜ウィンドウに表示する初期データ＞ ]  // Drag&Dropウィンドウの時に使う
       dl => [ dt => [ "ウィンドウのタイトル" ]
       dd => [
-        div#datalist => [ ＜ウィンドウに表示するデータ＞ ]
+        div#datalist => [ ＜ダイアログに表示するデータ＞ ]
       ] ]
+    ]
+
+    data#init セクションを使用しない場合、専用コマンドを使うと定義を簡素化できます。
+
+    +dialog#＜要素ID＞ => [
+      size => "幅,高さ,最小幅,最小高さ"　　　　// 指定しない場合はデフォルトサイズ
+      data#init => [ value => ＜ウィンドウに表示する初期データ＞ ]  // Drag&Dropウィンドウの時に使う
+      ウィンドウのタイトル
+      #datalist => [ ＜ダイアログに表示するセクションデータ＞ ]
     ]
 
   #init タグはウィンドウがドラッグ＆ドロップタイプの時に、初期状態のコンテンツ表示に使用します。

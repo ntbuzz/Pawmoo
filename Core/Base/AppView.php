@@ -638,16 +638,21 @@ public function ViewTemplate($name,$vars = []) {
     //      [ DD-Section ] 
     // ]
     private function cmd_dialog($tag,$attrs,$subsec,$sec,$vars,$text) {
-        if(is_array($subsec)) {
-            $mycls = (isset($attrs['class']))? $attrs['class'] :'';
-            $attrs['class'] = rtrim("floatWindow {$mycls}");
-            $attr = $this->gen_Attrs($attrs,$vars);
-            echo "<div{$attr}>\n";
-            echo "<dl><dt>{$text}</dt>\n";
-            echo "<dd>\n";
-            $this->sectionAnalyze($subsec,$vars);
-            echo "</dd></dl></div>\n";
+        $mycls = (isset($attrs['class']))? $attrs['class'] :'';
+        $attrs['class'] = rtrim("floatWindow {$mycls}");
+        $attr = $this->gen_Attrs($attrs,$vars);
+        echo "<div{$attr}>\n";
+        // pick-up #init section
+        foreach($subsec as $key => $val) {
+            if(strpos($key,'#init')!==FALSE) {
+                unset($subsec[$key]);
+                $this->sectionAnalyze([$key => $val],$vars);
+            }
         }
+        echo "<dl><dt>{$text}</dt>\n";
+        echo "<dd>\n";
+        $this->sectionAnalyze($subsec,$vars);
+        echo "</dd></dl></div>\n";
     } 
     //--------------------------------------------------------------------------
     //  select OUTPUT
@@ -840,7 +845,7 @@ public function ViewTemplate($name,$vars = []) {
             }
         }
         // allow multi attribute, and separater not space
-        foreach(['data-element' => '{}', 'name' => '[]', 'id' => '##', 'class' => '..'] as $key => $seps) {
+        foreach(['data-element' => '{}', 'value' => '()', 'name' => '[]', 'id' => '##', 'class' => '..'] as $key => $seps) {
             list($sep,$tsep) = str_split($seps);
             $n = strrpos($tag,$sep);
             while( $n !== FALSE) {
