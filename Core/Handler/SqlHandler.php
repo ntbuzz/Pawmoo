@@ -195,20 +195,25 @@ protected function sql_safequote(&$value) {
 		$re_build_array = function($cond) {
 			$reduce_array = function($arr) use(&$reduce_array) {
 				$wd = [];
+				$merge_wd = function($child) use(&$wd) {
+					foreach($child as $kk => $vv) {
+						$wkey = $kk;
+						for($n=1;array_key_exists($kk,$wd); $n++) $kk = "{$wkey}:{$n}";
+						$wd[$kk] =$vv;
+					}
+				};
 				foreach($arr as $key => $val) {
 					if(is_numeric($key) || $key==='') {
 						if(is_array($val)) {
 							$child = $reduce_array($val);
-							if(!empty($child)) {
-								foreach($child as $kk => $vv) {
-									$wkey = $kk;
-									for($n=1;array_key_exists($kk,$wd); $n++) $kk = "{$wkey}:{$n}";
-									$wd[$kk] =$vv;
-								}
-							}
+							if(!empty($child)) $merge_wd($child);
 						} else if($val!=='') $wd[] = $val;
+					} else if(is_array($val)) {
+							$child = $reduce_array($val);
+							if(count($child)===1) $merge_wd($child);
+							else $wd[$key] = $child;
 					} else {
-						$wd[$key] = (is_array($val)) ? $reduce_array($val) : $val;
+						$wd[$key] = $val;
 					}
 				}
 				return $wd;

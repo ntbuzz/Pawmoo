@@ -28,10 +28,15 @@ function array_first_item($arr) {
 }
 //==============================================================================
 // 配列を指定の個数分生成する
-function array_fix_count($arr,$max) {
-    $n = count($arr);
-    if($n < $max) $arr += array_fill($n,$max - $n,NULL);     // filter要素までを補填
-    return $arr;
+function array_alternative($arr,$max = 0, $b = []) {
+    $n = count($b);
+    if($max === 0) $max = $n;
+    else if($n < $max) $b += array_fill($n,$max - $n,NULL);
+    else $b = array_slice($b,0,$max);
+    foreach($b as $key => $val) {
+        if(empty($a[$key])) $a[$key] = $val;
+    }
+    return $a;
 }
 //==============================================================================
 // 拡張子をとりだす
@@ -285,11 +290,11 @@ function pseudo_markdown($atext, $md_class = '') {
                     $col = mb_substr($col,1);
                 } else $style = '';
                 // maybe additional calss and colspan/rowspan
-                preg_match('/^([@\^]+){0,1}(?:\.(\w+)){0,1}(?:#(\d+)){0,1}?\s/',$col,$m);
+                preg_match('/^([@\^]+){0,1}(?:\.(\w+)){0,1}(?:#(\d+)){0,1}?/',$col,$m);
                 $bind = $cls = '';
                 switch(count($m)) {
                 case 4: $style .= ($m[3]==='') ? '':"width:{$m[3]}px;";
-                case 3: $cls  = ($m[2]==='') ? '': " class='{$m[3]}'";
+                case 3: $cls  = ($m[2]==='') ? '': " class='{$m[2]}'";
                 case 2: $len = strlen($m[1]);
                         if($len === 0) $bind = '';
                         else {
@@ -339,7 +344,7 @@ function pseudo_markdown($atext, $md_class = '') {
             },$atext);
     // CLASS/ID attributed SPAN/P replacement
     $atext = preg_replace_callback(
-        '/\s\.\.(?:(\w+)){0,1}(?:#(\w+)){0,1}(:){0,1}{([^}]*?)}/',
+        '/\s\.\.(?:(\w+)){0,1}(?:#(\w+)){0,1}(:){0,1}\[([^\]]*?)\]/',
         function ($m) {
             $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
             $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";

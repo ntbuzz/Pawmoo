@@ -158,7 +158,7 @@ if(strcasecmp($appname,$controller) === 0) {
 } else {
     App::ChangeMethod($controller,$method,FALSE);     // メソッドの書換えはリダイレクトしない
 }
-App::$ActionMethod= $ContAction;    // アクションメソッド名
+App::$ActionMethod= $method;    // アクションメソッド名
 //=================================
 // デバッグ用の情報ダンプ
 debug_log(DBMSG_SYSTEM, [

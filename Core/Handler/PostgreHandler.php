@@ -38,7 +38,7 @@ public function doQuery($sql) {
 		debug_log(-99,[
 			"ERROR:" => pg_result_error($res1),
 			"SQL:" => $sql,
-			"CONT:" => $this->LastCond,
+			"COND:" => $this->LastCond,
 			"BUILD:" => $this->LastBuild,
 		]);
 		die('Postgres QUERY失敗' . pg_last_error());

@@ -36,6 +36,7 @@ class AppView extends AppObject {
             'markdown'  => 'cmd_markdown',
             'recordset' => 'cmd_recordset',
             'tabset'    => 'cmd_tabset',
+            'dialog'    => 'cmd_dialog',
             'php'       => 'cmd_php',
         ],
         '*'    => 'sec_comment',
@@ -411,6 +412,7 @@ public function ViewTemplate($name,$vars = []) {
     private function gen_Attrs($attrs,$vars) {
         $attr = "";
         if($attrs !== array()) {
+            ksort($attrs);
             foreach($attrs as $name => $val) {
                 if(is_array($val)) $val = implode('',$val);
                 $attr .= (is_numeric($name)) ? " {$val}" : " {$name}=\"{$val}\"";
@@ -628,6 +630,24 @@ public function ViewTemplate($name,$vars = []) {
             }
         }
         echo "</{$tag}>\n";
+    } 
+    //--------------------------------------------------------------------------
+    //  +dialog = floatWindow + dl
+    //  +dialog.class#id => [
+    //      dt-Title
+    //      [ DD-Section ] 
+    // ]
+    private function cmd_dialog($tag,$attrs,$subsec,$sec,$vars,$text) {
+        if(is_array($subsec)) {
+            $mycls = (isset($attrs['class']))? $attrs['class'] :'';
+            $attrs['class'] = rtrim("floatWindow {$mycls}");
+            $attr = $this->gen_Attrs($attrs,$vars);
+            echo "<div{$attr}>\n";
+            echo "<dl><dt>{$text}</dt>\n";
+            echo "<dd>\n";
+            $this->sectionAnalyze($subsec,$vars);
+            echo "</dd></dl></div>\n";
+        }
     } 
     //--------------------------------------------------------------------------
     //  select OUTPUT

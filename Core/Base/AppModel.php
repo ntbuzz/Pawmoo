@@ -199,8 +199,8 @@ public function GetValueList() {
 //==============================================================================
 // フィールドの読み込み (JOIN無し)
 // 結果：   フィールドデータ
-public function getRecordField($key,$field) {
-    $this->getRecordByKey($key);                // レコードデータを読み込む
+public function getRecordField($key,$value,$field) {
+    $this->getRecordBy($key,$value);                // レコードデータを読み込む
     return $this->fields[$field];               // フィールド値を返す
 }
 //==============================================================================
