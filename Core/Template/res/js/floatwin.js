@@ -69,7 +69,6 @@ selector.each(function () {
         // サイズ属性があればウィンドウサイズを指定する
         if (self.is('[size]')) {
             var sz = self.attr("size").split(',');
-            alert(objDump(sz));
             self.css({
                 "width": sz[0] + "px",
                 "height": sz[1] + "px",
