@@ -208,7 +208,7 @@ protected function sql_safequote(&$value) {
 							$child = $reduce_array($val);
 							if(!empty($child)) $merge_wd($child);
 						} else if($val!=='') $wd[] = $val;
-					} else if(is_array($val)) {
+					} else if(is_array($val) && ($key==='AND'||$key==='OR')) {
 							$child = $reduce_array($val);
 							if(count($child)===1) $merge_wd($child);
 							else $wd[$key] = $child;
