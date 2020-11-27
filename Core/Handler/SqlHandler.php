@@ -18,7 +18,6 @@ abstract class SQLHandler {	// extends SqlCreator {
 	protected $LastCond;	// for DEBUG
 	protected $LastBuild;	// for DEBUG
 	private $LastSQL;		// Last Query WHERE term
-	const AND_OR = [ 'AND' => TRUE, 'OR' => TRUE ];
 //==============================================================================
 //	abstruct method
 	abstract protected function Connect();
@@ -216,10 +215,11 @@ protected function sql_safequote(&$value) {
 				$array_item_shurink = function($opr,$val) use(&$array_map_shurink) {
 					return (is_array($val)) ? $array_map_shurink($opr,$val) : $val;
 				};
+				$AND_OR = [ 'AND' => TRUE, 'OR' => TRUE ];
 				$wd = [];
 				foreach($arr as $key => $val) {
 					$child = $array_item_shurink((is_numeric($key))?$opr:$key,$val);
-					if(is_numeric($key) || (isset(self::AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
+					if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
 						$array_merged($opr,$wd,$child);
 					} else {
 						$kk = $array_key_unique($key,$wd);
