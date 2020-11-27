@@ -18,6 +18,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	protected $LastCond;	// for DEBUG
 	protected $LastBuild;	// for DEBUG
 	private $LastSQL;		// Last Query WHERE term
+	const AND_OR = [ 'AND' => TRUE, 'OR' => TRUE ];
 //==============================================================================
 //	abstruct method
 	abstract protected function Connect();
@@ -193,9 +194,8 @@ protected function sql_safequote(&$value) {
 //==============================================================================
 // Re-Build Condition ARRAY, Create SQL-WHERE statement.
 	private function sql_makeWHERE($cond) {
-		$AND_OR = [ 'AND' => TRUE, 'OR' => TRUE ];
 		$re_build_array = function($cond) {
-			$array_map_shurink = function($opr,$arr) use(&$array_map_shurink,&$AND_OR) {
+			$array_map_shurink = function($opr,$arr) use(&$array_map_shurink) {
 				$array_key_unique = function($key,&$arr) {
 					$wkey = $key;
 					for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}:{$n}";
@@ -219,7 +219,7 @@ protected function sql_safequote(&$value) {
 				$wd = [];
 				foreach($arr as $key => $val) {
 					$child = $array_item_shurink((is_numeric($key))?$opr:$key,$val);
-					if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
+					if(is_numeric($key) || (isset(self::AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
 						$array_merged($opr,$wd,$child);
 					} else {
 						$kk = $array_key_unique($key,$wd);
