@@ -87,7 +87,7 @@ selector.each(function () {
             }
             if (y < 0) {
                 y = 5;
-                self.width($(window).innerHeight() - 20 );
+                self.height($(window).innerHeight() - 20 );
             }
             self.css({'left': x + 'px','top': y + 'px'});
         };

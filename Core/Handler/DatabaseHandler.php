@@ -5,6 +5,7 @@
  */
 define('SORTBY_ASCEND', 0);
 define('SORTBY_DESCEND', 1);
+define('AND_OR',['AND'=>TRUE,'OR'=>TRUE]);
 
 require_once('Core/Handler/SqlHandler.php');
 // 各種データベースへのアクセスハンドラ

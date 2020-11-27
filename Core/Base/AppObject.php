@@ -59,8 +59,8 @@ class AppObject {
     }
 //==============================================================================
 //	setup objerct property
-    protected function setProperty($database) {
-        foreach($database as $key => $val) {
+    protected function setProperty($props) {
+        foreach($props as $key => $val) {
             $this->$key = $val;
         }
     }

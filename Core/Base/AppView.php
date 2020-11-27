@@ -36,6 +36,7 @@ class AppView extends AppObject {
             'markdown'  => 'cmd_markdown',
             'recordset' => 'cmd_recordset',
             'tabset'    => 'cmd_tabset',
+            'floatwin'  => 'cmd_floatwin',
             'php'       => 'cmd_php',
         ],
         '*'    => 'sec_comment',
@@ -411,6 +412,7 @@ public function ViewTemplate($name,$vars = []) {
     private function gen_Attrs($attrs,$vars) {
         $attr = "";
         if($attrs !== array()) {
+            ksort($attrs);
             foreach($attrs as $name => $val) {
                 if(is_array($val)) $val = implode('',$val);
                 $attr .= (is_numeric($name)) ? " {$val}" : " {$name}=\"{$val}\"";
@@ -630,6 +632,30 @@ public function ViewTemplate($name,$vars = []) {
         echo "</{$tag}>\n";
     } 
     //--------------------------------------------------------------------------
+    //  +floatwin = floatWindow + dl
+    //  +floatwin.class#id => [
+    //      dt-Title
+    //      [ DD-Section ] 
+    // ]
+    private function cmd_floatwin($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $mycls = (isset($attrs['class']))? $attrs['class'] :'';
+        $attrs['class'] = rtrim("floatWindow {$mycls}");
+        $attr = $this->gen_Attrs($attrs,$vars);
+        echo "<div{$attr}>\n";
+        // pick-up #init section
+        foreach($subsec as $key => $val) {
+            if(strpos($key,'#init')!==FALSE) {
+                unset($subsec[$key]);
+                $this->sectionAnalyze([$key => $val],$vars);
+                break;
+            }
+        }
+        echo "<dl><dt>{$text}</dt>\n";
+        echo "<dd>\n";
+        $this->sectionAnalyze($subsec,$vars);
+        echo "</dd></dl></div>\n";
+    } 
+    //--------------------------------------------------------------------------
     //  select OUTPUT
     // +select => [
     //    selected_key = > [
@@ -820,7 +846,7 @@ public function ViewTemplate($name,$vars = []) {
             }
         }
         // allow multi attribute, and separater not space
-        foreach(['data-element' => '{}', 'name' => '[]', 'id' => '##', 'class' => '..'] as $key => $seps) {
+        foreach(['data-element' => '{}', 'value' => '()', 'name' => '[]', 'id' => '##', 'class' => '..'] as $key => $seps) {
             list($sep,$tsep) = str_split($seps);
             $n = strrpos($tag,$sep);
             while( $n !== FALSE) {

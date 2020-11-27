@@ -197,10 +197,17 @@ public function GetValueList() {
     debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $valueLists]);
 }
 //==============================================================================
+//   指定フィールドの値一覧を取得する
+// 結果：  リレーション先の選択リスト = Select
+public function GetFieldValues($field) {
+    $this->Select[$field] = $this->dbDriver->getValueLists(NULL,$field,$field);
+    debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $this->Select]);
+}
+//==============================================================================
 // フィールドの読み込み (JOIN無し)
 // 結果：   フィールドデータ
-public function getRecordField($key,$field) {
-    $this->getRecordByKey($key);                // レコードデータを読み込む
+public function getRecordField($key,$value,$field) {
+    $this->getRecordBy($key,$value);                // レコードデータを読み込む
     return $this->fields[$field];               // フィールド値を返す
 }
 //==============================================================================

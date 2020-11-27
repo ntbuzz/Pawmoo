@@ -4,26 +4,25 @@
  *  coreLibs: Common Library for Core/Base Class
  */
 //==============================================================================
-// REQUEST_URI を分解しルーティングに必要なアプリ名、コントローラー名を抽出する
+// Extract the application,controller,method and parameters from REQUEST_URI
 function get_routing_params($dir) {
-    $root = basename(dirname($dir));        // FWフォルダ名
+    $root = basename(dirname($dir));        // Framework Folder
     $vv = $_SERVER['REQUEST_URI'];
     list($requrl,$q_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
-    $param = trim(urldecode($requrl),'/');  // 先頭と末尾の / を除去
-//    $args = array_filter(explode('/', $param), function($vv) { return !empty($vv); });
+    $param = trim(urldecode($requrl),'/'); 
     $args = explode('/', $param);
-    $appname = array_shift($args);          // 先頭の要素を取り出す
-    if($appname === $root) {                // URIがFWフォルダ名から始まる
-        $appname = array_shift($args);      // アプリ名を取り直す
-        $fwroot = "/{$root}/";              // FWから始まるURI
+    $appname = array_shift($args);          // first item in PATH
+    if($appname === $root) {                // is same of framework folder?
+        $appname = array_shift($args);      // retrieve application name
+        $fwroot = "/{$root}/";              // URI is begin of frameowrkfolder name
     } else {
-        $fwroot = "/";                      // アプリ名から始まるURI
+        $fwroot = "/";                      // URI is begin of Application name
     }
-    if(is_numeric($appname)) {              // アプリ名が数字でないことを確認
-        array_unshift($args,$appname);      // 数字はアプリ名でないので配列に戻す
+    if(is_numeric($appname)) {              // is NUMERIC BEGIN?
+        array_unshift($args,$appname);      // appname will be must not a numeric.
         $appname = '';
     }
-    $app_uri = [ $fwroot, "{$fwroot}{$appname}/" ];      // URIセットを生成
+    $app_uri = [ $fwroot, "{$fwroot}{$appname}/" ];
     debug_log(-999, [
         'URI' => $_SERVER['REQUEST_URI'],
         "app_uri"=> $app_uri,
@@ -31,24 +30,24 @@ function get_routing_params($dir) {
         "dir"=> $dir,
         "root"=> $root,
     ]);
-    // コントローラー名以降のパラメータを分解する
+    // extract after Controoler path
     $params = array();
     for($n=0;$n < count($args);$n++) {
         if(is_numeric($args[$n]) || strpos($args[$n],'.') != FALSE) {
-            $params = array_slice($args,$n);    // パラメータを取り出す
-            array_splice($args,$n);             // 取り出したパラメータを削除
+            $params = array_slice($args,$n);
+            array_splice($args,$n);
             break;
         }
     }
-    if(count($args) < 2)    $args += array_fill(count($args),2-count($args),NULL);     // filter要素までを補填
+    if(count($args) < 2) $args += array_fill(count($args),2-count($args),NULL);
     list($controller,$method) = $args;
-    $filters = array_splice($args,2);             // 取り出したパラメータを削除
-    if(empty($controller)) $controller = $appname; // コントローラが空ならアプリ名と同じにする
+    $filters = array_splice($args,2);
+    if(empty($controller)) $controller = $appname; // empty controller will be same of appname
     $module = array(
-        ucfirst(strtolower($controller)),    // コントローラー名キャメルケースに変換
-        ucfirst(strtolower($method)),        // メソッドもキャメルケースに変換
-        $filters,                             // フィルター
-        $params                              // パラメータ
+        ucfirst(strtolower($controller)),
+        ucfirst(strtolower($method)),
+        $filters,
+        $params
     );
     $ret = [$appname,$app_uri,$module,$q_str];
     debug_log(-999, [
@@ -91,23 +90,22 @@ function page_response($app_page,...$msg_array) {
     $app_root = App::Get_AppRoot();
     foreach($folders as $file) {
         $page_file = "{$file}{$app_page}";
-        if(file_exists($page_file)) {                // レイアウトファイルが見つかった
+        if(file_exists($page_file)) {
             require_once($page_file);
             exit;
         }
     }
 }
 //==============================================================================
-// コントローラーが存在するかチェックする
+// check exist of CONTOLLER folder
 function is_extst_module($appname,$modname,$classname) {
-    if($modname == NULL) return FALSE;      // そもそも名前が無い
-    // ファイルが存在するかチェック
+    if($modname == NULL) return FALSE;
     $modtop = getcwd() . "/" . "app/{$appname}/modules/{$modname}";
     $reqfile = "{$modtop}/{$modname}{$classname}.php";
-    return file_exists($reqfile);           // ファイルが存在するか
+    return file_exists($reqfile);
 }
 //==============================================================================
-// 指定フォルダ内のフォルダ名リストを取得する
+// get file lists in FOLDER
 function get_folder_lists($dirtop) {
     $drc=dir($dirtop);
     $folders = array();
@@ -123,15 +121,13 @@ function get_folder_lists($dirtop) {
     return $folders;
 }
 //==============================================================================
-// ミリセカンド取得
+// millisecond, UNIX TIME
 function get_UnixTime_MillSecond(){
-    //microtimeを.で分割
     $arrTime = explode('.',microtime(true));
-    //時＋ミリ秒
     return date('H:i:s', $arrTime[0]) . '.' .$arrTime[1];
 }
 //==============================================================================
-// フォルダ内のPHPファイルを探査する
+// get PHP extention file list.
 function get_php_files($dirtop) {
     $files = array();
     if(file_exists($dirtop)) {
@@ -150,7 +146,7 @@ function get_php_files($dirtop) {
     return $files;
 }
 //==============================================================================
-// 配列をフラットな配列に変換する
+// convert nexting array to flat array
 function array_flat_reduce($arr) {
     $wx = [];
     $reduce_array = function ($arr) use(&$reduce_array,&$wx) {
@@ -170,9 +166,8 @@ function array_flat_reduce($arr) {
     return $wx;
 }
 //==============================================================================
-// 配列からURIを生成する、要素内に配列があるときにも対応する
+// Generate URI from array, even when there is an array in the element
 function array_to_URI($arr) {
-    // 無名関数を定義して配列内の探索を行う
     $array_builder = function ($lst) {
         $ret = [];
         foreach($lst as $val) {
@@ -185,7 +180,7 @@ function array_to_URI($arr) {
     return implode('/',$ret);
 }
 //==============================================================================
-// 配列の値をキー値で連結
+// Concatenate array values by key value
 function array_concat_keys($arr,$keys) {
     if(is_scalar($keys)) return $keys;
     $ss = ''; $trim_sep = ' ';
@@ -197,19 +192,18 @@ function array_concat_keys($arr,$keys) {
     return trim($ss,$trim_sep);
 }
 //==============================================================================
-// テキストを分割して空白を除去した配列を返す
+// The result of splitting the text and returning an array with whitespace removed
 function trim_explode($sep, $str) {
     return array_map(function($v) { return trim($v); },explode($sep,$str));
 }
-
 //==============================================================================
-// ファイルパスを / で終わるようにする
+// Make the file path end with /
 function path_complete($path) {
-    if(mb_substr($path,-1) !== '/') $path .= '/';     // 最後は /で終わらせる
+    if(mb_substr($path,-1) !== '/') $path .= '/';
     return $path;
 }
 //==============================================================================
-// 文字コード変換
+// Character code-set change
 function SysCharset($str) {
     return (OS_CODEPAGE == 'SJIS') ?
             mb_convert_encoding($str,"UTF-8","sjis-win") : $str;
@@ -219,7 +213,7 @@ function LocalCharset($str) {
             mb_convert_encoding($str,"sjis-win","UTF-8") : $str;
 }
 //==============================================================================
-// 重複文字列の除去
+// Removes the character string for duplicate judgment
 function tag_body_name($key) {
     $n = strrpos($key,':');
     if($n !== FALSE) {
@@ -245,7 +239,7 @@ function keystr_opr($str) {
     return array($str,'');
 }
 //==============================================================================
-// array_key_exists の再帰呼出し
+// Recursive call to array_key_exists
 function array_key_exists_recursive($key,$arr) {
     foreach($arr as $kk => $vv) {
         if($kk === $key) return TRUE;
