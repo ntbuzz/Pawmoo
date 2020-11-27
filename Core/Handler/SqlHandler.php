@@ -53,6 +53,7 @@ public function fetchDB() {
 //==============================================================================
 //	getValueLists: list-colum name, value-colums
 public function getValueLists($table,$ref,$id) {
+	if(empty($table)) $table = $this->table;
 	$sql = $this->sql_QueryValues($table,$ref,$id);
 	$this->doQuery($sql);
 	$values = array();
@@ -193,31 +194,40 @@ protected function sql_safequote(&$value) {
 // Re-Build Condition ARRAY, Create SQL-WHERE statement.
 	private function sql_makeWHERE($cond) {
 		$re_build_array = function($cond) {
-			$reduce_array = function($arr) use(&$reduce_array) {
-				$wd = [];
-				$merge_wd = function($child) use(&$wd) {
-					foreach($child as $kk => $vv) {
-						$wkey = $kk;
-						for($n=1;array_key_exists($kk,$wd); $n++) $kk = "{$wkey}:{$n}";
-						$wd[$kk] =$vv;
-					}
+			$array_map_shurink = function($opr,$arr) use(&$array_map_shurink) {
+				$array_key_unique = function($key,&$arr) {
+					$wkey = $key;
+					for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}:{$n}";
+					return $key;
 				};
+				$array_merged = function($opr,&$arr,$val) use(&$array_key_unique,&$array_merged) {
+					if(is_array($val)) {
+						foreach($val as $kk => $vv) {
+							if($opr === $kk) {
+								$array_merged($opr,$arr,$vv);
+							} else {
+								$k = $array_key_unique($kk,$arr);
+								$arr[$k] = $vv;
+							}
+						}
+					} else $arr[] = $val;
+				};
+				$array_item_shurink = function($opr,$val) use(&$array_map_shurink) {
+					return (is_array($val)) ? $array_map_shurink($opr,$val) : $val;
+				};
+				$wd = [];
 				foreach($arr as $key => $val) {
-					if(is_numeric($key) || $key==='') {
-						if(is_array($val)) {
-							$child = $reduce_array($val);
-							if(!empty($child)) $merge_wd($child);
-						} else if($val!=='') $wd[] = $val;
-					} else if(is_array($val) && ($key==='AND'||$key==='OR')) {
-							$child = $reduce_array($val);
-							if(count($child)===1) $merge_wd($child);
-							else $wd[$key] = $child;
+					$child = $array_item_shurink((is_numeric($key))?$opr:$key,$val);
+					if(is_numeric($key) || (isset(AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
+						$array_merged($opr,$wd,$child);
 					} else {
-						$wd[$key] = $val;
+						$kk = $array_key_unique($key,$wd);
+						$wd[$kk] = $child;
 					}
 				}
 				return $wd;
 			};
+/*
 			$sort_array = function($arr) use(&$sort_array) {
 				$wd = array_filter($arr, function($vv) {return is_scalar($vv);});
 				foreach($arr as $key => $val) {
@@ -225,7 +235,9 @@ protected function sql_safequote(&$value) {
 				}
 				return $wd;
 			};
-			return $sort_array($reduce_array($cond));
+			return $sort_array($array_map_shurink('AND',$cond));
+*/
+			return $array_map_shurink('AND',$cond);
 		};
 		if($cond ===NULL) return $this->LastSQL;
 		$this->LastCond = $cond;

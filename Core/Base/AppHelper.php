@@ -233,15 +233,6 @@ public function Form($act, $attr) {
 public function Select($key,$name) {
 	debug_log(DBMSG_VIEW, $this->MyModel->Select);
 	echo $this->Select_str($key,$name);
-/*
-	$dat = $this->MyModel->RecData[$key];
-	echo "<SELECT name='{$name}'>";
-	foreach($this->MyModel->Select[$key] as $ttl => $id) {
-		$sel = ($id == $dat) ? " selected" : "";
-		echo "<OPTION value='{$id}'{$sel}>{$ttl}</option>\n";
-	}
-	echo "</SELECT>\n";
-*/
 }
 //==============================================================================
 // SELECTタグの生成

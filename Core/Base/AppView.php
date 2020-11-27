@@ -36,7 +36,7 @@ class AppView extends AppObject {
             'markdown'  => 'cmd_markdown',
             'recordset' => 'cmd_recordset',
             'tabset'    => 'cmd_tabset',
-            'dialog'    => 'cmd_dialog',
+            'floatwin'  => 'cmd_floatwin',
             'php'       => 'cmd_php',
         ],
         '*'    => 'sec_comment',
@@ -632,12 +632,12 @@ public function ViewTemplate($name,$vars = []) {
         echo "</{$tag}>\n";
     } 
     //--------------------------------------------------------------------------
-    //  +dialog = floatWindow + dl
-    //  +dialog.class#id => [
+    //  +floatwin = floatWindow + dl
+    //  +floatwin.class#id => [
     //      dt-Title
     //      [ DD-Section ] 
     // ]
-    private function cmd_dialog($tag,$attrs,$subsec,$sec,$vars,$text) {
+    private function cmd_floatwin($tag,$attrs,$subsec,$sec,$vars,$text) {
         $mycls = (isset($attrs['class']))? $attrs['class'] :'';
         $attrs['class'] = rtrim("floatWindow {$mycls}");
         $attr = $this->gen_Attrs($attrs,$vars);
@@ -647,6 +647,7 @@ public function ViewTemplate($name,$vars = []) {
             if(strpos($key,'#init')!==FALSE) {
                 unset($subsec[$key]);
                 $this->sectionAnalyze([$key => $val],$vars);
+                break;
             }
         }
         echo "<dl><dt>{$text}</dt>\n";

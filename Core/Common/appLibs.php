@@ -28,7 +28,7 @@ function array_first_item($arr) {
 }
 //==============================================================================
 // 配列を指定の個数分生成する
-function array_alternative($arr,$max = 0, $b = []) {
+function array_alternative($a,$max = 0, $b = []) {
     $n = count($b);
     if($max === 0) $max = $n;
     else if($n < $max) $b += array_fill($n,$max - $n,NULL);
@@ -290,7 +290,7 @@ function pseudo_markdown($atext, $md_class = '') {
                     $col = mb_substr($col,1);
                 } else $style = '';
                 // maybe additional calss and colspan/rowspan
-                preg_match('/^([@\^]+){0,1}(?:\.(\w+)){0,1}(?:#(\d+)){0,1}?/',$col,$m);
+                preg_match('/^([@\^]+){0,1}(?:\.(\w+)){0,1}(?:#(\d+)){0,1}/',$col,$m);
                 $bind = $cls = '';
                 switch(count($m)) {
                 case 4: $style .= ($m[3]==='') ? '':"width:{$m[3]}px;";
@@ -327,7 +327,7 @@ function pseudo_markdown($atext, $md_class = '') {
     //---------------------------------------------------------------------------
     // NL change <br> tag in DIV indent class
     $atext = preg_replace_callback(
-            '/\n\.\.\.(?:(\w+)){0,1}\{(.+?)\n\}\.\.\./s',
+            '/\.\.\.(?:(\w+)){0,1}\{(.+?)\n\}\.\.\./s',
              function ($m) {
                 $txt = nl2br($m[2]);
                 $cls = ($m[1]==='')?'indent':$m[1];
@@ -344,7 +344,7 @@ function pseudo_markdown($atext, $md_class = '') {
             },$atext);
     // CLASS/ID attributed SPAN/P replacement
     $atext = preg_replace_callback(
-        '/\s\.\.(?:(\w+)){0,1}(?:#(\w+)){0,1}(:){0,1}\[([^\]]*?)\]/',
+        '/\.\.(?:(\w+)){0,1}(?:#(\w+)){0,1}(:){0,1}\[([^\]]*?)\]/',
         function ($m) {
             $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
             $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
