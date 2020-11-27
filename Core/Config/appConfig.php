@@ -25,10 +25,11 @@ const IgnoreFiles =[
 if(php_sapi_name() === 'cli') {
 	global $argv;
 	define('CLI_DEBUG',TRUE);
-	define('CLI_ARGV',$argv);
 } else {
 	define('CLI_DEBUG',FALSE);
 }
+//	define('CLI_ARGV',$argv);
+const CLI_ARGV = array();
 // argument of MySession
 define('S_ENV',TRUE);		// App::$EnvData
 define('S_REQ',FALSE);		// App::$ReqData
