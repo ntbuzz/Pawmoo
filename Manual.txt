@@ -916,9 +916,10 @@ Rapid Development Web Application Platform by Section Template
       ] ]
     ]
 
-    data#init セクションを使用しない場合、専用コマンドを使うと定義を簡素化できます。
+    このセクション定義には専用のセクションコマンドが用意されているので、専用コマンドを使うと
+    dl タグを省略でき記述を簡素化できます。
 
-    +dialog#＜要素ID＞ => [
+    +floatwin#＜要素ID＞ => [
       size => "幅,高さ,最小幅,最小高さ"　　　　// 指定しない場合はデフォルトサイズ
       data#init => [ value => ＜ウィンドウに表示する初期データ＞ ]  // Drag&Dropウィンドウの時に使う
       ウィンドウのタイトル
