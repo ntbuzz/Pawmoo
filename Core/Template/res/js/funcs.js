@@ -57,7 +57,7 @@ class Locations {
 //        alert(objDump(path) + "\n" + n+"\n"+this.query);
         return this.trunc_path(n, e);
     }
-}
+};
 //====================================================
 // for DEBUG dump Object
 var objDump = function(obj, rIndent) {

@@ -167,13 +167,13 @@ $(function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
 //        alert(self.attr('class'));
         $(window).on("load resize",function () {
-            wsize = self.parent().innerWidth();
-            wleft = self.parent().offset().left;
-            hsize = self.parent().height();
+//            wsize = self.parent().innerWidth();
+//            wleft = self.parent().offset().left;
+            hsize = self.parent().innerHeight();
             htop = self.offset().top;
             spc = self.outerHeight() - self.height();
             self.css({
-                'width': wsize - wleft + "px",
+                'width': '100%',    // wsize - wleft + "px",
                 'height': hsize - htop - spc + "px",
                 'overflow-y':"auto"
             });
