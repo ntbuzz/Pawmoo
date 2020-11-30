@@ -173,7 +173,8 @@ $(function () {
             htop = self.offset().top;
             spc = self.outerHeight() - self.height();
             self.css({
-                'width': '100%',    // wsize - wleft + "px",
+                'width': '100%',
+//                'width': wsize - wleft + "px",
                 'height': hsize - htop - spc + "px",
                 'overflow-y':"auto"
             });

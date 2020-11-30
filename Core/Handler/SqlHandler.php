@@ -210,7 +210,7 @@ protected function sql_safequote(&$value) {
 								$arr[$k] = $vv;
 							}
 						}
-					} else $arr[] = $val;
+					} else if(!empty($val)) $arr[] = $val;
 				};
 				$array_item_shurink = function($opr,$val) use(&$array_map_shurink) {
 					return (is_array($val)) ? $array_map_shurink($opr,$val) : $val;
