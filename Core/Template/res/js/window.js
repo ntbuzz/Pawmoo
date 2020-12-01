@@ -91,10 +91,11 @@
             self.find("*").each(function () {
                 var nm = $(this).attr('name');
                 if (nm) {
-                    if ($(this).prop("tagName") == 'TEXTAREA') {
+//                    if ($(this).prop("tagName") == 'TEXTAREA') {
 //                        alert(nm);
-                        setobj[nm] = "\n" + $(this).val() + "\n";
-                    } else setobj[nm] = $(this).val();
+//                        setobj[nm] = $(this).val();
+//                    } else setobj[nm] = $(this).val();
+                    setobj[nm] = $(this).val();
                 }
             });
             callback(setobj);

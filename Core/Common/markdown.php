@@ -6,7 +6,6 @@ function pseudo_markdown($atext, $md_class = '') {
     if(empty($md_class)) $md_class = 'easy_markdown';
     $replace_defs = [
         '/\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'    => '<a href="\\2">\\1</a>',
-        "/^(---|___|\*\*\*)$/m"     => "<hr>",       // <HR>
         "/\s\*\*(.+?)\*\*\s/" => '<strong>\\1</strong>',  // BOLD
         "/\s__(.+?)__\s/"     => '<em>\\1</em>',   // BOLD
         "/\s--(.+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
@@ -130,28 +129,15 @@ function pseudo_markdown($atext, $md_class = '') {
         '/^(#{1,6})(?:\.(\w+)){0,1} (.+?)$/m' => function($m) {
             $n = strlen($m[1]);
             $cls = ($m[2]==='')?'':" class='{$m[2]}'";
-            return "<h{$n}{$cls}>{$m[3]}</h{$n}>\n";
+            return "<h{$n}{$cls}>{$m[3]}</h{$n}>";
         },
-//------- ...{ TEXT }... NL change <br> tag in div-indent class
-        '/\.\.\.(?:(\w+)){0,1}\{\n(.+?)\n\}\.\.\.\n/s' => function ($m) {
-            $txt = nl2br(trim($m[2]));
-            $cls = ($m[1]==='')?'indent':$m[1];
-            return "<div class='$cls'>{$txt}</div>";
-        },
+        '/^(?:---|___|\*\*\*)$/m'     => function($m) { return "<hr>"; },
 //------- pre tag with class
-        '/(```|~~~|\^\^\^)(?:(\w+)){0,1}(.+?)\n\1/s' => function ($m) {
+        '/(?:^|\n)(```|~~~|\^\^\^)(?:(\w+)){0,1}(.+?)\n\1/s' => function ($m) {
             $class = [ '```' => 'code','~~~' => 'indent','^^^' => 'indent'];
-            $txt = rtrim(str_replace(["<br>\n","<br />\n"],"\n", "{$m[3]}\n"));
+            $txt = $m[3];
             $cls = ($m[2]==='')?$class[$m[1]]:$m[2];
-            return "<pre class='$cls'>{$txt}</pre>";
-        },
-//------- ..class#id{ TEXT } CLASS/ID attributed SPAN/P replacement
-        '/\.\.(?:(\w+)){0,1}(?:#(\w+)){0,1}(:){0,1}\{([^\}]*?)\}/' => function ($m) {
-            $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
-            $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
-            $tag = ($m[3]==='') ? 'span' : 'p';
-            $txt = $m[4];
-            return "<{$tag}{$cls}{$ids}>{$txt}</{$tag}>";
+            return "\n<pre class='$cls'>{$txt}</pre>";
         },
 //------- ![alt-text](URL) IMAGE TAG /multi-pattern replace
         '/!\[([^:\]]+)(?::(\d+,\d+)){0,1}\]\(([!:]){0,1}([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/' => function ($m) {
@@ -168,41 +154,64 @@ function pseudo_markdown($atext, $md_class = '') {
             }
             return "<img src='{$src}' alt='{$alt}'{$sz} />";
         },
-//------- CHECKBOX MARK
-        '/\[([^\]]*?)\]\{([^}]+?)\}/' => function ($m) {
+//------- ..class#id{ TEXT } CLASS/ID attributed SPAN/P replacement
+        '/\s\.\.(?:(\w+)){0,1}(?:#(\w+)){0,1}(:){0,1}\{([^\}]*?[^\\\\])\}\s/s' => function ($m) {
+            $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
+            $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
+            $tag = ($m[3]==='') ? 'span' : 'p';
+            $txt = $m[4];
+            return "<{$tag}{$cls}{$ids}>{$txt}</{$tag}>";
+        },
+//------- ...:{ TEXT }... NL change <br> tag in div-indent class
+        '/\s\.\.\.(?:(\w+)){0,1}(!){0,1}\{\n(.+?)\n\}\.\.\.\n/s' => function ($m) {
+            if($m[2]==='!') {
+                $txt = nl2br($m[3]);
+                // restore tag end after NL
+                $txt = rtrim(str_replace("><br>\n",">\n",str_replace("<br />","<br>","{$txt}\n")));
+            } else $txt = trim($m[3]);
+            $cls = ($m[1]==='')?'indent':$m[1];
+            return "\n<div class='$cls'>{$txt}</div>";
+        },
+//------- [check]{text} CHECKBOX MARK
+        '/\[([^\]]*?)\]\{([^}]*?[^\\\\])\}/' => function ($m) {
             $chek = (in_array(strtolower($m[1]),['','0','f','false']))?'[ ]':'<b>[X]</b>';
             return " {$chek} {$m[2]}";
         },
 //------- FORM parts
-//  radio       => ^.class#id[name]@{checkitem:item1,item2,item3}
-//  checkbox    => ^.class#id[name]:{item1:checked}
+//  radio       => ^.class#id[name]@{checkitem:val1=item1:val2=item2:val3=item3}
+//  checkbox    => ^.class#id[name]:{val1=item1:checked}
 //  textarea    => ^.class#id[name]!{text-value:col,row}
 //  textbox     => ^.class#id[name]={text-value:size}
-        '/\^(?:\.(\w+)){0,1}(?:#(\w+)){0,1}\[(\w+){0,1}\]([@:!=])\{([^}]+?)\}/' => function ($m) {
+        '/(\s)\^(?:\.(\w+)){0,1}(?:#(\w+)){0,1}\[(\w+){0,1}\]([@:!=])\{(.*?[^\\\\])\}/s' => function ($m) {
             $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea'];
-            $cls = (empty($m[1])) ? '':" class='{$m[1]}'";
-            $ids = (empty($m[2])) ? '':" id='{$m[2]}'";
-            $nam = (empty($m[3])) ? '':" name='{$m[3]}'";
-            $typ = $type[$m[4]];
-            $tag = "<input{$cls}{$ids}{$nam} type='{$typ}'";
-            $val = $m[5];
-            switch($m[4]) {
+            $attrs = ['type', 'class','id','name'];
+            $attr = ''; $spc = $m[1]; $kind = $m[5]; $val = $m[6];
+            foreach($attrs as $n => $key) {
+                $vv = ($n===0) ? $type[$kind] : $m[$n+1];
+                $attr .= (empty($vv)) ? '':" {$key}='{$vv}'";
+            }
+            $tag = "<input{$attr}";
+            switch($kind) {
             case '@':   // radio
                     $vv = explode(':',$val);
+                    $checked = array_shift($vv);
                     $radio = '';
-                    if(count($vv)===2) {
-                        $items = explode(',',$vv[1]); 
-                        foreach($items as $item) {
-                            $chk = ($item === $vv[0]) ? ' checked':'';
-                            $radio .= "{$tag}{$chk}>{$item} ";
+                    foreach($vv as $itemval) {
+                        if(empty($itemval)) {
+                            $radio .= '<br>';
+                        } else {
+                            $item = explode('=',$itemval); 
+                            $chk = ($checked === $item[0]) ? ' checked':'';
+                            $radio .= "{$tag}{$chk} value='{$item[0]}'>{$item[1]} ";
                         }
                     }
-                    $tag = $radio;
+                    $tag = "{$spc}{$radio}";
                     break;
             case ':':   // checkbox
                     $vv = explode(':',$val);
-                    $chk = (empty($vv[1])) ? '' : ' checked';
-                    $tag .= "{$chk}>{$vv[0]}";
+                    $chk = (in_array(strtolower($vv[1]),['','0','f','false']))?'':' checked';
+                    $item = explode('=',$vv[0]); 
+                    $tag = "{$spc}{$tag}{$chk} value='{$item[0]}'>{$item[1]} ";
                     break;
             case '!':   // text area
                     $vv = explode(':',$val);
@@ -210,79 +219,19 @@ function pseudo_markdown($atext, $md_class = '') {
                         $size = explode(',',$vv[1]); 
                         $sz = " cols='{$size[0]}' rows='{$size[1]}'";
                     } else $sz = '';
-                    $tag = "<textarea{$cls}{$ids}{$nam}{$sz}>{$vv[0]}</textarea>";
+                    // restore if ...{ TEXT }... mark converted.
+                    $txt = rtrim(str_replace(["<br>\n","<br />\n"],"\n", "{$vv[0]}\n"));
+                    $tag = "{$spc}<textarea{$attr}{$sz}>{$txt}</textarea>";
                     break;
             case '=':   // text
                     $vv = explode(':',$val);
                     $sz = (empty($vv[1])) ? '' : " size='{$vv[1]}'";
-                    $tag .= "{$sz} value='{$vv[0]}'>";
+                    $tag = "{$spc}{$tag}{$sz} value='{$vv[0]}'>";
                     break;
             }
             return $tag;
         },
     ],$atext);
-/*
-    //---------------------------------------------------------------------------
-    // HEAD(#) TAG
-    $atext = preg_replace_callback(
-        "/^(#{1,6})(?:\.(\w+)){0,1} (.+?)$/m",
-         function ($m) {
-            $n = strlen($m[1]);
-            $cls = ($m[2]==='')?'':" class='{$m[2]}'";
-            return "<h{$n}{$cls}>{$m[3]}</h{$n}>\n";
-        },$atext);
-    //---------------------------------------------------------------------------
-    // NL change <br> tag in DIV indent class
-    $atext = preg_replace_callback(
-            '/\.\.\.(?:(\w+)){0,1}\{(.+?)\n\}\.\.\./s',
-             function ($m) {
-                $txt = nl2br($m[2]);
-                $cls = ($m[1]==='')?'indent':$m[1];
-                return "<div class='$cls'>{$txt}</div>";
-            },$atext);
-    $atext = preg_replace_callback(
-            '/\n(```|~~~|\^\^\^)(?:(\w+)){0,1}\n(.+?)\n\1/s',
-             function ($m) {
-                $class = [ '```' => 'code','~~~' => 'indent','^^^' => 'indent'];
-                $txt = $m[3];
-                $cls = ($m[2]==='')?$class[$m[1]]:$m[2];
-                return "<pre class='$cls'>{$txt}</pre>";
-            },$atext);
-    // CLASS/ID attributed SPAN/P replacement
-    $atext = preg_replace_callback(
-        '/\.\.(?:(\w+)){0,1}(?:#(\w+)){0,1}(:){0,1}\{([^\}]*?)\}/',
-        function ($m) {
-            $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
-            $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
-            $tag = ($m[3]==='') ? 'span' : 'p';
-            $txt = $m[4];
-            return "<{$tag}{$cls}{$ids}>{$txt}</{$tag}>";
-        },$atext);
-    // IMAGE TAG /multi-pattern replace
-    $atext = preg_replace_callback(
-        '/!\[([^:\]]+)(?::(\d+,\d+)){0,1}\]\(([!:]){0,1}([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/',
-        function ($m) {
-            $alt = $m[1];
-            if($m[2]==='') $sz = '';
-            else {
-                $wh = explode(',',$m[2]);
-                $sz = " width='{$wh[0]}' height='{$wh[1]}'";
-            }
-            switch($m[3]) {
-            case '!': $src = App::Get_AppRoot()."images/{$m[4]}"; break;
-            case ':': $src = "/images/{$m[4]}";break;
-            default: $src = $m[4];
-            }
-            return "<img src='{$src}' alt='{$alt}'{$sz} />";
-        },$atext);
-    // CHECKBOX MARK
-    $atext = preg_replace_callback(
-        '/\[([^\]]*?)\]\{([^}]+?)\}/',
-            function ($m) {
-            $chek = (in_array(strtolower($m[1]),['','0','f','false']))?'[ ]':'<b>[X]</b>';
-            return " {$chek} {$m[2]}";
-        },$atext);
-*/
     // replace other PATTERN values
     $replace_keys   = array_keys($replace_defs);
     $replace_values = array_values($replace_defs);
