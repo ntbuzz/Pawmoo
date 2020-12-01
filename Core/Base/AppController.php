@@ -19,6 +19,7 @@ class AppController extends AppObject {
 		$view = "{$this->ModuleName}View";		// ローカルビューが存在するなら使う
 		if(!class_exists($view)) $view = 'AppView';	// クラスがなければ基底クラスで代用
 		$this->View = new $view($this);			// ビュークラス
+		$this->Helper = $this->View->Helper;		// ヘルパークラスへのショートカット
 		if(empty(App::$Filter)) App::$Filter = $this->defaultFilter;	// フィルタが無ければデフォルトをセット
 		// filter of '*Action' method
 		$map_conv = function($nm) { return (substr_compare($nm,'Action',-6) === 0) ? substr($nm,0,-6):''; };
@@ -104,14 +105,14 @@ public function LogoutAction() {
 }
 //==============================================================================
 // View Helperクラスへの値セット
-public function ViewSet($arr) {
-	$this->View->Helper->SetData($arr);
+public function SetHelperProps($arr) {
+	$this->Helper->setProperty($arr);
 }
 //==============================================================================
 // View HelperクラスへのPOST変数セット
 public function ImportHelpProperty(...$keys) {
 	foreach($keys as $key) {
-		$this->View->Helper->$key = MySession::$ReqData[$key];
+		$this->Helper->$key = MySession::$ReqData[$key];
 	}
 }
 //==============================================================================

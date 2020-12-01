@@ -25,6 +25,7 @@ require_once('AppDebug.php');
 require_once('Config/appConfig.php');
 require_once('Common/coreLibs.php');
 require_once('Common/appLibs.php');
+require_once('Common/markdown.php');
 // オートローダーの初期化前に必要、または命名規則から外れたクラス
 require_once('Class/session.php');
 require_once('Class/fileclass.php');

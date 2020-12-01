@@ -487,7 +487,7 @@ Rapid Development Web Application Platform by Section Template
 
 □ 簡易マークダウン記法
 本フレームワークではセクションテンプレートおよびAPIでマークダウンもどきの記法ができるようになっています。
-基本的な構文は一般的なマークダウン記法に準じていますが、テーブル書式やコード書式など独自の拡張仕様になっています。
+基本的な構文は一般的なマークダウン記法に準じていますが、テーブルやコード、フォーム部品など独自の拡張仕様になっています。
 
 マークダウン変換したタグは<div class="easy_markdown">...</div> ブロック要素になります。
 クラス名を変更するには pseudo_markdown() 関数の第2引数にクラス名文字列を指定してください。
@@ -499,6 +499,7 @@ Rapid Development Web Application Platform by Section Template
 
   [テキスト](URL)             // ハイパーリンク
   ![ALTテキスト](URL)         // URLへの画像リンク
+                              以下は独自仕様
                               URLの先頭文字に : または ! を付加すると特定のパスを指定できる
                               :　トップフォルダ
                               ! アプリトップフォルダ
@@ -524,6 +525,14 @@ Rapid Development Web Application Platform by Section Template
   1. アイテム1               // 番号リスト(OL-LI)
   1. アイテム2
 
+ > 引用                     // 引用 (blockquote)
+ >> 引用ネスト
+
+  行末の空白2個              // 改行 <br>
+    または 全角空白1個
+
+ここから以下は独自仕様のマークダウン構文です。
+
  |: ヘッダ標準 |:< ヘッダ左寄せ |:> ヘッダ右寄せ |:= ヘッダ中央 |   // テーブル(ヘッダ行:TH)
  | セル標準    |>  右寄せ       |<左寄せ         |=    中央     |   // セル(データ行:TD)
  .テーブルクラス名        // テーブルクラス(md_tbl)に追加するクラス名(省略可)
@@ -535,16 +544,13 @@ Rapid Development Web Application Platform by Section Template
 |=^^^ データ |            // TDタグを中央寄せにして３行分(^の数だけ)を連結(ROWSPAN=3)します
 |:=#80 データ |           // THタグを中央寄せにして列幅を 80px(style=width:80px;)にします。
 
- > 引用                     // 引用 (blockquote)
- >> 引用ネスト
-
-  ..クラス名#ID[ テキスト ]   // クラス名、ID名を指定した SPAN タグ、クラス名、＃ID名は省略可能
-                                テキストの [ ] の前に：をつけると P タグを使用する
-                                ..abc:[テキスト]     =>   <p class="abc">テキスト</p>
+  ..クラス名#ID{ テキスト }   // クラス名、ID名を指定した SPAN タグ、クラス名、＃ID名は省略可能。前後に空白が必要。
+                                テキストの { } の前に：をつけると P タグを使用する
+                                ..abc:{テキスト}     =>   <p class="abc">テキスト</p>
 
   ...クラス名{                  // div class=クラス名、クラス名を省略すると "indent" クラスになります
-    テキスト
-  }...
+    テキスト                    // テキスト内の改行を <br> タグに自動変換するには波括弧の前に ! を付けます。
+  }...                          // ex.  ...!{ 改行→<br>タグ自動変換 }
 
   ```クラス名                   // pre class="クラス名"、クラス名を省略すると "code" クラスになります
   source-code
@@ -555,9 +561,12 @@ Rapid Development Web Application Platform by Section Template
   [チェック有無]{ラベル名}  // チェック有無が FALSE(空文字、0、f、false)であれば空白ブラケット
                             // それ以外なら [X] で表示する
 
-  行末の空白2個              // 改行 <br>
-    または 全角空白1個
-
+  フォーム部品
+  ^.class#id[name]@{checkval:val1=item1:val2=item2::val3=item3}    // radio ボタン checkval=val の item にチェックをつける、空項目は改行(<br>)を挿入
+  ^.class#id[name]:{val1=item1:checked}             // checkbox ボタン :checked が FALSE 判定でなければチェックをつける
+  ^.class#id[name]={textvalue:size}                 // text ボックス
+  ^.class#id[name]!{textvalue:col,row}              // textarea
+    item や textvalue に '}' が含まれるときはエスケープ '\}' します。
 
 ■ スタイル/スクリプト テンプレート (template.mss)
   テンプレートファイル名は固定ファイル名とします。テンプレート内にはスタイル・スクリプトのセクションを定義します。
@@ -834,6 +843,7 @@ Rapid Development Web Application Platform by Section Template
     ViewAction()                  // レコード表示
     MakepdfAction()               // PDFを作成する
     UpdateAction()                // レコード更新
+    SetHelperProps$data)                // ヘルパープロパティ変数のセット
 
     モジュールによっては[find]や[page]メソッドを呼び出されては困る、という場合は
     $disableAction で呼出を禁止するアクションを配列で記述します。
@@ -872,7 +882,6 @@ Rapid Development Web Application Platform by Section Template
   ヘルパークラスにはプロパティ変数がありません。
   ・クラスメソッド
     ViewTemplate($name)         // 親のレイアウトテンプレート処理を呼び出す
-    SetData($data)              // ヘルパープロパティ変数のセット
     Resource ($res)             // リソースの出力
     ALink ($lnk,$txt)           // ハイパーリンクの生成, 言語IDを参照するには$txtを＃文字で始める
                                 // $lnk を / で始めるとフレームワークのTOP、:で始めるとサイトのTOPへリンクする
@@ -916,9 +925,10 @@ Rapid Development Web Application Platform by Section Template
       ] ]
     ]
 
-    data#init セクションを使用しない場合、専用コマンドを使うと定義を簡素化できます。
+    このセクション定義には専用のセクションコマンドが用意されているので、専用コマンドを使うと
+    dl タグを省略でき記述を簡素化できます。
 
-    +dialog#＜要素ID＞ => [
+    +floatwin#＜要素ID＞ => [
       size => "幅,高さ,最小幅,最小高さ"　　　　// 指定しない場合はデフォルトサイズ
       data#init => [ value => ＜ウィンドウに表示する初期データ＞ ]  // Drag&Dropウィンドウの時に使う
       ウィンドウのタイトル
@@ -1014,9 +1024,9 @@ Rapid Development Web Application Platform by Section Template
   Javascriptで使用できるプロトタイプ関数の一覧です。
 
 ・フレームワークのパス関連クラス
-    Locations.query
-    Locations.last_path
-    Locations.fw_fullpath             http:// で始まるフルパス変換
+    Locations.query()
+    Locations.last_path()
+    Locations.fw_fullpath()             http:// で始まるフルパス変換
     Locations.set_query(string)       クエリ文字列の設定
     Locations.href_controller(array)  コントローラーパス以降を配列値で置換したURL
     Locations.href_action(array)      アクションパス以降を配列値で置換したURL

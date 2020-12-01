@@ -30,13 +30,6 @@ public function Runtime() {
 	debug_run_time(-1);
 }
 //==============================================================================
-// プロパティ変数のセット
-public function SetData($data) {
-	foreach($data as $key => $val) {
-		$this->$key = $val;
-	}
-}
-//==============================================================================
 // リソースの出力
 public function Resource($res) {
 	list($filename,$ext) = extract_base_name($res);
