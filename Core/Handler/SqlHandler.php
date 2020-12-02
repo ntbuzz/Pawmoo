@@ -265,14 +265,20 @@ protected function sql_safequote(&$value) {
 				} else $op = 'LIKE';
 				return [$v,$op];
 			};
-
+			// multi-column LIKE op
 			$like_object = function($key,$val,$table) use(&$like_opstr) {
-				$opk = "{$table}.\"{$key}\"";
-				$cmp = array_map(function($v) use(&$opk,&$like_opstr) {
-						list($v,$opx) = $like_opstr($v);
-						return "({$opk} {$opx} '%{$v}%')";
-					},$val);
-				return implode('OR',$cmp);
+				$expr = [];
+				foreach(trim_explode('+',$key) as $cmp) {
+					$cmp = $this->fieldAlias->get_lang_alias($cmp);
+					$opk = "{$table}.\"{$cmp}\"";
+					$cmp = array_map(function($v) use(&$opk,&$like_opstr) {
+							list($v,$opx) = $like_opstr($v);
+							return "({$opk} {$opx} '%{$v}%')";
+						},$val);
+					$expr[] = implode('OR',$cmp);
+				}
+				$opp = implode('OR',$expr);
+				return (count($expr)===1) ? $opp : "({$opp})";
 			};
 			// multi-columns f1+f2+f3...  OP val
 			$multi_field = function($key,$op,$table,$val) {
@@ -325,7 +331,8 @@ protected function sql_safequote(&$value) {
 					if(array_key_exists($op,$in_op)) {
 						$cmp = implode(',',array_map(function($v) { return "'{$v}'";},$val));
 						$opx = $in_op[$op];
-						$opp = "({$table}.\"{$key}\" {$opx} ({$cmp}))";
+//						$opp = "({$table}.\"{$key}\" {$opx} ({$cmp}))";
+						$opp = $multi_field($key,$opx,$table,"({$cmp})");
 					} else {	// LIKE [ array ]
 						$opp = $like_object($key,$val,$table);
 					}

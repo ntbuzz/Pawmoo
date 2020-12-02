@@ -102,7 +102,7 @@ function debug_log($lvl,...$items) {
                     if(empty($obj)) {
                         $dmp_msg .= "{$msg} : NULL\n";
                     } else if(is_scalar($obj)) {
-                        $obj = control_escape($obj);
+//                        $obj = control_escape($obj);
                         $dmp_msg .= "{$msg} : {$obj}\n";
                     } else if(is_array($obj)) {
                         $dmp_msg .= "===== {$msg} =====\n";

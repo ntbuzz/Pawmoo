@@ -568,6 +568,12 @@ Rapid Development Web Application Platform by Section Template
   ^.class#id[name]!{textvalue:col,row}              // textarea
     item や textvalue に '}' が含まれるときはエスケープ '\}' します。
 
+  定義リスト(DL)
+  :タイトル(DT)
+  本文(DD)
+  \n\n                              // 連続した改行２個で終了
+
+
 ■ スタイル/スクリプト テンプレート (template.mss)
   テンプレートファイル名は固定ファイル名とします。テンプレート内にはスタイル・スクリプトのセクションを定義します。
     Stylesheet => []                 スタイルシートのテンプレートセクション

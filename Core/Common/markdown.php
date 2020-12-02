@@ -18,6 +18,15 @@ function pseudo_markdown($atext, $md_class = '') {
     $atext = preg_replace_callback($p, function($matches) {
                 return str_replace(['\<','\>','<','>',"\r"],['&lt;','&gt;','&lt;','&gt;',''],$matches[0]);}
             ,$atext);
+    // DL processing
+    $atext = preg_replace_callback('/\n(:.*?)\n\n/s',function($m) {
+        $dtdd = array_map(function($v) {
+            preg_match('/^(.*?)(?=[ ,\n]+)(.*)$/s',$v,$match);
+            $dd = $match[2];
+            return "<dt>{$match[1]}</dt><dd>{$dd}</dd>";
+        }, array_filter(explode(':',$m[1]),function($v) {return strlen($v)>0;}));
+        return "<dl class='dl_list'>".implode("\n",$dtdd)."</dl>";
+    }, $atext);
     // ul/ol/blockquote processing
     $p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)\n{2}/s';
     $atext = preg_replace_callback($p,function($matches) {
@@ -124,6 +133,17 @@ function pseudo_markdown($atext, $md_class = '') {
 
 //------------------------------------------------------------------------------
 // multi pattern replace
+    $item_array = function($delimit,$str,$max=0,$b=[]) {
+        $a = explode($delimit,$str);
+        $n = count($b);
+        if($max === 0) $max = $n;
+        else if($n < $max) $b += array_fill($n,$max - $n,NULL);
+        else $b = array_slice($b,0,$max);
+        foreach($b as $key => $val) {
+            if(empty($a[$key])) $a[$key] = $val;
+        }
+        return $a;
+    };
     $atext = preg_replace_callback_array([
 //------- HEAD(#) TAG
         '/^(#{1,6})(?:\.(\w+)){0,1} (.+?)$/m' => function($m) {
@@ -140,12 +160,12 @@ function pseudo_markdown($atext, $md_class = '') {
             return "\n<pre class='$cls'>{$txt}</pre>";
         },
 //------- ![alt-text](URL) IMAGE TAG /multi-pattern replace
-        '/!\[([^:\]]+)(?::(\d+,\d+)){0,1}\]\(([!:]){0,1}([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/' => function ($m) {
+        '/!\[([^:\]]+)(?::(\d+,\d+)){0,1}\]\(([!:]){0,1}([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/' => function ($m) use(&$item_array) {
             $alt = $m[1];
             if($m[2]==='') $sz = '';
             else {
-                $wh = explode(',',$m[2]);
-                $sz = " width='{$wh[0]}' height='{$wh[1]}'";
+                list($wd,$ht) = $item_array(',',$m[2],2);
+                $sz = " width='{$wd}' height='{$ht}'";
             }
             switch($m[3]) {
             case '!': $src = App::Get_AppRoot()."images/{$m[4]}"; break;
@@ -155,7 +175,7 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<img src='{$src}' alt='{$alt}'{$sz} />";
         },
 //------- ..class#id{ TEXT } CLASS/ID attributed SPAN/P replacement
-        '/\s\.\.(?:(\w+)){0,1}(?:#(\w+)){0,1}(:){0,1}\{([^\}]*?[^\\\\])\}\s/s' => function ($m) {
+        '/\s\.\.(?:(\w+)){0,1}(?:#(\w+)){0,1}(:){0,1}\{([^\}]*?[^\\\\]|)\}\s/s' => function ($m) {
             $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
             $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
             $tag = ($m[3]==='') ? 'span' : 'p';
@@ -173,16 +193,16 @@ function pseudo_markdown($atext, $md_class = '') {
             return "\n<div class='$cls'>{$txt}</div>";
         },
 //------- [check]{text} CHECKBOX MARK
-        '/\[([^\]]*?)\]\{([^}]*?[^\\\\])\}/' => function ($m) {
+        '/\[([^\]]*?)\]\{([^}]*?[^\\\\]|)\}/' => function ($m) {
             $chek = (in_array(strtolower($m[1]),['','0','f','false']))?'[ ]':'<b>[X]</b>';
             return " {$chek} {$m[2]}";
         },
 //------- FORM parts
-//  radio       => ^.class#id[name]@{checkitem:val1=item1:val2=item2:val3=item3}
-//  checkbox    => ^.class#id[name]:{val1=item1:checked}
+//  radio       => ^.class#id[name]@{checkitem:item1=val1,item2=val2,...}
+//  checkbox    => ^.class#id[name]:{item1=val1:checked,item2=val2:checked,...}
 //  textarea    => ^.class#id[name]!{text-value:col,row}
 //  textbox     => ^.class#id[name]={text-value:size}
-        '/(\s)\^(?:\.(\w+)){0,1}(?:#(\w+)){0,1}\[(\w+){0,1}\]([@:!=])\{(.*?[^\\\\])\}/s' => function ($m) {
+        '/(\s)\^(?:\.(\w+)){0,1}(?:#(\w+)){0,1}\[(\w+){0,1}\]([@:!=])\{([^\}]*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
             $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea'];
             $attrs = ['type', 'class','id','name'];
             $attr = ''; $spc = $m[1]; $kind = $m[5]; $val = $m[6];
@@ -193,25 +213,33 @@ function pseudo_markdown($atext, $md_class = '') {
             $tag = "<input{$attr}";
             switch($kind) {
             case '@':   // radio
-                    $vv = explode(':',$val);
-                    $checked = array_shift($vv);
-                    $radio = '';
-                    foreach($vv as $itemval) {
+                    list($check_val,$radio_items) = $item_array(':',$val,2);
+                    $radio = ''; $cnt = 0;
+                    foreach(explode(',',$radio_items) as $itemval) {
                         if(empty($itemval)) {
                             $radio .= '<br>';
                         } else {
-                            $item = explode('=',$itemval); 
-                            $chk = ($checked === $item[0]) ? ' checked':'';
-                            $radio .= "{$tag}{$chk} value='{$item[0]}'>{$item[1]} ";
+                            list($radio_text,$radio_val) = $item_array('=',$itemval,2); 
+                            if($radio_val===NULL) $radio_val = $cnt++;
+                            $chk = ($check_val === $radio_val) ? ' checked':'';
+                            $radio .= "{$tag}{$chk} value='{$radio_val}'>{$radio_text} ";
                         }
                     }
                     $tag = "{$spc}{$radio}";
                     break;
             case ':':   // checkbox
-                    $vv = explode(':',$val);
-                    $chk = (in_array(strtolower($vv[1]),['','0','f','false']))?'':' checked';
-                    $item = explode('=',$vv[0]); 
-                    $tag = "{$spc}{$tag}{$chk} value='{$item[0]}'>{$item[1]} ";
+                    $checkbox = '';
+                    foreach(explode(',',$val) as $itemval) {
+                        if(empty($itemval)) {
+                            $checkbox .= '<br>';
+                        } else {
+                            list($check_item,$checked) = $item_array(':',$itemval,2); 
+                            list($check_text,$check_val) = $item_array('=',$check_item,2); 
+                            $chk = (in_array($checked,['','0','f','false']))?'':' checked';
+                            $checkbox .= "{$tag}{$chk} value='{$check_val}'>{$check_text} ";
+                        }
+                    }
+                    $tag = "{$spc}{$checkbox}";
                     break;
             case '!':   // text area
                     $vv = explode(':',$val);

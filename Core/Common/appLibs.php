@@ -172,6 +172,15 @@ function text_line_split($del,$txt,$trim = FALSE) {
 }
 //==============================================================================
 // array value concatinate to TEXT
+function array_reduce_recursive($array,$callback, $init='') {
+    foreach($array as $key => $val) {
+        if(is_array($val)) $init = array_reduce_recursive($val,$callback, $init);
+        else $init .= $callback($key,$val);
+    }
+    return $init;
+}
+//==============================================================================
+// array value concatinate to TEXT
 function array_to_text($array,$sep = "\n", $in_key = TRUE) {
     $dump_text = function ($indent, $items)  use (&$dump_text,&$sep,&$in_key)  {
         $txt = ''; $spc = str_repeat(' ', $indent);
