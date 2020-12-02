@@ -202,7 +202,7 @@ function pseudo_markdown($atext, $md_class = '') {
 //  checkbox    => ^.class#id[name]:{item1=val1:checked,item2=val2:checked,...}
 //  textarea    => ^.class#id[name]!{text-value:col,row}
 //  textbox     => ^.class#id[name]={text-value:size}
-        '/(\s)\^(?:\.(\w+)){0,1}(?:#(\w+)){0,1}\[(\w+){0,1}\]([@:!=])\{([^\}]*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
+        '/(\s)\^(?:\.(\w+)){0,1}(?:#(\w+)){0,1}\[(\w+){0,1}\]([@:!=])\{(.*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
             $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea'];
             $attrs = ['type', 'class','id','name'];
             $attr = ''; $spc = $m[1]; $kind = $m[5]; $val = $m[6];
