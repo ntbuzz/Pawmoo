@@ -119,13 +119,13 @@ public function ImportHelpProperty(...$keys) {
 // 自動ページネーション
 public function AutoPaging($cond, $max_count = 100) {
 	// 数字パラメータのみを抽出して数値変換する
-	$Params = array_map(function($v) {return (empty($v)) ? 0 : intval($v);}, 
-			array_values(array_filter(App::$Params, function($vv) { return empty($vv) || is_numeric($vv);})));
-	list($num,$size) = $Params;
+//	$Params = array_map(function($v) {return (empty($v)) ? 0 : intval($v);}, 
+//			array_values(array_filter(App::$Params, function($vv) { return empty($vv) || is_numeric($vv);})));
+	list($num,$size) = App::$Params;
 	$cnt = $this->Model->getCount($cond);
 	if($num > 0) {
 		if($size === 0) {
-			$size = (array_key_exists('PageSize',MySession::$EnvData)) ? intval(MySession::$EnvData['PageSize']):0;
+			$size = (array_key_exists('PageSize',MySession::$EnvData)) ? MySession::$EnvData['PageSize']:0;
 			if($size === 0) $size = $max_count;
 			if($cnt < $max_count) $size = 0;
 		}
@@ -138,7 +138,7 @@ public function AutoPaging($cond, $max_count = 100) {
 	if($size > 0) {
 		MySession::$EnvData['PageSize'] = $size;		// 新しいページサイズに置換える
 		$this->Model->SetPage($size,$num);
-		debug_log(DBMSG_SYSTEM, ["Param"  => $Params]);
+		debug_log(DBMSG_SYSTEM, ["Param"  => App::$Params]);
 	}
 }
 //==============================================================================

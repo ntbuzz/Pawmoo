@@ -32,11 +32,12 @@ class App {
 
         static::$Filters= $filters;
         static::$Filter = empty($filters) ? '': $filters[0];
-        static::$Params = $params;
    		// 0 〜 9 の不足する要素を補填する
         $k = count($params);
+		$params += array_fill($k, 10 - $k, '');
+
         static::$ParamCount = $k;
-		static::$Params += array_fill($k, 10 - $k, '');
+        static::$Params = array_intval_recursive($params);
         static::$SysVAR = array(
             'SERVER' => $_SERVER['SERVER_NAME'],
             'REFERER' => static::$Referer,
@@ -51,7 +52,7 @@ class App {
             'copytight' => COPYTIGHT,
             'current_version' => CURRENT_VERSION,  // framework version
         );
-        static::$Query = $query;
+        static::$Query = array_intval_recursive($query);
         // メソッドの書き換えによるアドレスバー操作用
         static::$ReLocate = FALSE;        // URLの書き換え
         static::$execURI = array(

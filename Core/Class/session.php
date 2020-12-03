@@ -32,6 +32,8 @@ static function InitSession($appname = 'default') {
 		if(array_key_exists($key,$bool_value)) $val = $bool_value[$key];
 		if(ctype_alnum(str_replace(['-','_'],'', $key))) static::$ReqData[$key] = $val;
 	}
+	static::$ReqData = array_intval_recursive(static::$ReqData);
+	static::$EnvData = array_intval_recursive(static::$EnvData);
 }
 //==============================================================================
 // セッションに保存する
