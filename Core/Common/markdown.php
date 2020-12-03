@@ -183,7 +183,7 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<{$tag}{$cls}{$ids}>{$txt}</{$tag}>";
         },
 //------- ...:{ TEXT }... NL change <br> tag in div-indent class
-        '/\s\.\.\.(?:(\w+)){0,1}(!){0,1}\{\n(.+?)\n\}\.\.\.\n/s' => function ($m) {
+        '/\s\.\.\.(?:(\w+)){0,1}(!){0,1}\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
             if($m[2]==='!') {
                 $txt = nl2br($m[3]);
                 // restore tag end after NL
