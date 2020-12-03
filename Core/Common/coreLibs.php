@@ -31,14 +31,10 @@ function get_routing_params($dir) {
         "root"=> $root,
     ]);
     // extract after Controoler path
-    $params = array();
-    for($n=0;$n < count($args);$n++) {
-        if(is_numeric($args[$n]) || strpos($args[$n],'.') != FALSE) {
-            $params = array_slice($args,$n);
-            array_splice($args,$n);
-            break;
-        }
-    }
+    for($n=0;$n < count($args) && !is_numeric($args[$n]) && strpos($args[$n],'.') === FALSE;$n++) ;
+    $params = array_slice($args,$n);
+    array_splice($args,$n);
+
     if(count($args) < 2) $args += array_fill(count($args),2-count($args),NULL);
     list($controller,$method) = $args;
     $filters = array_splice($args,2);
@@ -144,6 +140,15 @@ function get_php_files($dirtop) {
         $drc->close();
     }
     return $files;
+}
+//==============================================================================
+// convert to num STRING to INTEGER
+function array_intval_recursive($arr) {
+    if(is_scalar($arr)) return (empty($arr) || is_numeric($arr))?intval($arr):$arr;
+    return array_map(function($v) {
+        if(is_array($v)) return array_intval_recursive($v);
+        return (empty($v) || is_numeric($v))?intval($v):$v;
+    },$arr);
 }
 //==============================================================================
 // convert nexting array to flat array
