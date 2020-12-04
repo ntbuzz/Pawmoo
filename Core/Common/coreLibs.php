@@ -1,4 +1,6 @@
 <?php
+// coreLibs depend on appLibs functions.
+require_once('appLibs.php');
 /* -------------------------------------------------------------
  * Object Oriented PHP MVC Framework
  *  coreLibs: Common Library for Core/Base Class

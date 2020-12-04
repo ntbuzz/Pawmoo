@@ -4,10 +4,15 @@
  */
 class ClassLoader {
     const CLASSMAP = [
-
+        'FlatFolder' => 'fileclass',
+        'SectionParser' => 'Parser',
+        'MySession' => 'session',
     ];
     private static $LoadDirs = [];
     private static function loadClass($className) {
+        if(array_key_exists($className,self::CLASSMAP)) {
+            $className = self::CLASSMAP[$className];
+        }
         foreach(static::$LoadDirs as $directory) {
             $file_name = "{$directory}/{$className}.php";
             if(is_file($file_name)) {

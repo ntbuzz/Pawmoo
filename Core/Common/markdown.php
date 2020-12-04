@@ -1,10 +1,10 @@
 <?php
 //==============================================================================
-// ARRAY first key , before PHP 7.3
+// Replace callback Array , before PHP 7
 if (!function_exists('preg_replace_callback_array')) {
     function preg_replace_callback_array(array $arr,$atext) {
-        foreach($arr as $key => $callback) {
-            $atext = preg_replace_callback($key, $callback, $atext);
+        foreach($arr as $pattern => $callback) {
+            $atext = preg_replace_callback($pattern, $callback, $atext);
         }
         return $atext;
     }
