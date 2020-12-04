@@ -1,5 +1,15 @@
 <?php
 //==============================================================================
+// ARRAY first key , before PHP 7.3
+if (!function_exists('preg_replace_callback_array')) {
+    function preg_replace_callback_array(array $arr,$atext) {
+        foreach($arr as $key => $callback) {
+            $atext = preg_replace_callback($p, $callback,$atext);
+        }
+        return $atext;
+    }
+}
+//==============================================================================
 // Like a MarkDown Description
 // Markdown syntax is the original syntax other than the general one.
 function pseudo_markdown($atext, $md_class = '') {

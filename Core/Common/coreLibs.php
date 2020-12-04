@@ -50,6 +50,7 @@ function get_routing_path($root) {
     ]);
     return $ret;
 }
+/*
 function get_routing_params($dir) {
     $root = basename(dirname($dir));        // Framework Folder
     $vv = $_SERVER['REQUEST_URI'];
@@ -86,6 +87,7 @@ function get_routing_params($dir) {
     $ret = [$appname,$app_uri,$module,$q_str];
     return $ret;
 }
+*/
 //==============================================================================
 // Output 404 ERROR PAGE
 // enabled of PHP VARIABLE:

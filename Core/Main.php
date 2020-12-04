@@ -52,7 +52,7 @@ if(CLI_DEBUG) {
 $redirect = false;      // Redirect flag
 $root = basename(dirname(__DIR__));        // Framework Folder
 // REQUEST_URIを分解
-list($appname,$app_uri,$module,$q_str) = get_routing_path($root);//get_routing_params(__DIR__);
+list($appname,$app_uri,$module,$q_str) = get_routing_path($root);
 list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filters,$params) = $module;
 
