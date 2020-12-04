@@ -40,7 +40,18 @@
 	padding-left:20px;	/* 上下 左右 */
 	margin-bottom:10px;
 }
-
+/*	DL style
+*/
+.easy_markdown .dl_list dt {
+	margin-top: 5px;
+	padding-left:0em;
+}
+.easy_markdown .dl_list dt:before {
+    content: "・";
+}
+.easy_markdown .dl_list dd {
+	padding-left:1.8em;
+}
 /*	UL/OL style
 */
 .easy_markdown .ol_list,

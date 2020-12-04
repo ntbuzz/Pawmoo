@@ -83,8 +83,11 @@ function debug_log($lvl,...$items) {
                     $dmp .= "array(" . count($val) . ")\n";
                     $dmp .= $dump_object($val,$indent+1);
                 } else if(is_scalar($val)) {
-                    $val = control_escape($val);
-                    $dmp .= "'{$val}'\n";
+                    if(is_int($val)) $dmp .= "{$val}\n";
+                    else {
+                        $val = control_escape($val);
+                        $dmp .= "'{$val}'\n";
+                    }
                 }
             }
             return $dmp;
@@ -102,7 +105,7 @@ function debug_log($lvl,...$items) {
                     if(empty($obj)) {
                         $dmp_msg .= "{$msg} : NULL\n";
                     } else if(is_scalar($obj)) {
-                        $obj = control_escape($obj);
+//                        $obj = control_escape($obj);
                         $dmp_msg .= "{$msg} : {$obj}\n";
                     } else if(is_array($obj)) {
                         $dmp_msg .= "===== {$msg} =====\n";

@@ -19,6 +19,7 @@
         $(e).scrollTop(0);
     };
     // 親要素の高さに調整する
+/*
     $.fn.adjustHeight = function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
         $(window).on("load resize",function () {
@@ -39,6 +40,7 @@
         });
         $(window).resize();
     };
+*/
     // CSS の padding 値を取得する
     $.fn.paddingWidth = function() {
         var widths = {
@@ -150,17 +152,15 @@
 // セレクタを使う
 $(function () {
     // スティッキー動作設定
-    var selector = $(".fixedsticky");
+    var selector = $(".stickyBar");
     selector.each(function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
-        var ref = self.attr("data-element");  // 紐付けるID
-        if (ref != "") {
-            // 指定要素 e のスクロールに追従する
-            $(ref).on("scroll", function () {
-                var top = $(ref).scrollTop();
-                self.css("top", top + "px");
-            });
-        }
+        var stickyWiin = self.parent();
+        // 親要素 のスクロールに追従する
+        stickyWiin.on("scroll", function () {
+            var top = stickyWiin.scrollTop();
+            self.css("top", top + "px");
+        });
     });
     // ウィンドウ高さ調整
     var selector = $(".fitWindow");

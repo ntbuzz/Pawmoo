@@ -1,8 +1,8 @@
 <?php
 /* -------------------------------------------------------------
- * WaffleMap Object-orientation PHP mini_framework
+ * Object-orientation PHP mini_framework
  *   Main: routing and redirection process
- *      method naming
+ *      method naming basic rule.
  *      void = camel case (first upper is 'PUBLIC')
  *          PascalCase      Public method/function, void function
  *              PublicMethod
@@ -50,11 +50,17 @@ if(CLI_DEBUG) {
 }
 
 $redirect = false;      // Redirect flag
-
+$root = basename(dirname(__DIR__));        // Framework Folder
 // REQUEST_URIを分解
-list($appname,$app_uri,$module,$q_str) = get_routing_params(__DIR__);
+list($appname,$app_uri,$module,$q_str) = get_routing_path($root);//get_routing_params(__DIR__);
 list($fwroot,$approot) = $app_uri;
-list($controller,$method,$filter,$params) = $module;
+list($controller,$method,$filters,$params) = $module;
+
+if(strpos($method,'.')!==FALSE) {
+    list($method,$filter) = extract_base_name($method);
+    $method = ucfirst(strtolower($method));
+} else $filter = empty($filters) ? '': $filters[0];
+       
 parse_str($q_str, $query);
 if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
 
@@ -77,12 +83,12 @@ MySession::InitSession($appname);
 if(!is_extst_module($appname,$controller,'Controller')) {
     // if BAD controller name, try DEFAULT CONTROLLER and shift follows
     $cont = (DEFAULT_CONTROLLER === '') ? $appname : DEFAULT_CONTROLLER;
-    array_unshift($params,$filter);
+    array_unshift($filters,strtolower($method));    // move method to 0filters
     $module[0] = ucfirst(strtolower($cont));
     $module[1] = $controller;
-    $module[2] = strtolower($method);
-    $module[3] = $params;
-    list($controller,$method,$filter) = $module;
+    $module[2] = $filters;
+//    $module[3] = $params;
+    list($controller,$method) = $module;
     // RE-TRY DEFAULT CONTROLLER,if FAILED,then NOT FOUND
     if(!is_extst_module($appname,$controller,'Controller')) {
         error_response('page-404.php',$appname,$app_uri,$module);
@@ -105,12 +111,6 @@ if($redirect) {
         header("Location:{$requrl}");
     }
     exit;
-}
-// 拡張子を考慮する
-if(mb_strpos($method,'.') !== FALSE) {  // have a extension
-    list($method,$filter) = extract_base_name($method);
-    $module[1] = $method;
-    $module[2] = $filter;
 }
 // アプリ固有クラスをオートロードできるようにする
 require_once('Class/ClassLoader.php');
@@ -168,7 +168,7 @@ debug_log(DBMSG_SYSTEM, [
         "Controller"=> $controller,
         "Class"     => $ContClass,
         "Method"    => $method,
-        "Filter"    => $filter,
+        "Filters"   => $filters,
         "URI"       => $requrl,
         "QUERY"     => $q_str,
         "Controller"=> App::$Controller,
@@ -192,7 +192,6 @@ debug_log(DBMSG_SYSTEM, [
     ],
     "ReqCont" => $ReqCont,
     "Location" => App::Get_RelocateURL(),
-
 ]);
 
 debug_run_start();

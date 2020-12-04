@@ -5,6 +5,51 @@
  */
 //==============================================================================
 // Extract the application,controller,method and parameters from REQUEST_URI
+function get_routing_path($root) {
+    $vv = $_SERVER['REQUEST_URI'];
+    list($requrl,$q_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
+    $argv = explode('/', trim($requrl,'/'));
+    if($root === $argv[0]) {
+        array_shift($argv);      // retrieve application name
+        $fwroot = "/{$root}/";              // URI is begin of frameowrkfolder name
+    } else $fwroot = "/";                   // URI is begin of Application name
+    // separate app/cont/method/filters and params
+    $args=[];
+    for($n=0;$n < count($argv) && !is_numeric($argv[$n]) && strpos($argv[$n],'.') === FALSE;$n++) $args[] = $argv[$n];
+    while(count($args) < 3) $args[] = NULL;
+    $pp = array_slice($argv,$n);
+
+    list($appname,$controller,$method) = $args;
+    $filters = array_splice($args,3);
+    if(empty($controller)) $controller = $appname; // empty controller will be same of appname
+    $filename = '';
+    $params = array_filter($pp,function($v) use(&$filename) {
+        if(strpos($v,'.')===FALSE) return TRUE;
+        $filename = $v;return FALSE;});
+    if(!empty($filename)) {
+        array_unshift($filters,$method);      // appname will be must not a numeric.
+        $method = $filename;
+    } else $method = ucfirst(strtolower($method));
+    $app_uri = [ $fwroot, "{$fwroot}{$appname}/" ];
+    $module = array(
+        ucfirst(strtolower($controller)),
+        $method,
+        $filters,
+        array_intval_recursive($params),
+    );
+    $ret = [$appname,$app_uri,$module,$q_str];
+    debug_log(-999, [
+        'フレームワーク情報' => [
+            "SERVER" => $_SERVER['REQUEST_URI'],
+            "app_uri"=> $app_uri,
+            "appname"=> $appname,
+            "Module"=> $module,
+            "query"=> $q_str,
+        ],
+        "RET" => $ret,
+    ]);
+    return $ret;
+}
 function get_routing_params($dir) {
     $root = basename(dirname($dir));        // Framework Folder
     $vv = $_SERVER['REQUEST_URI'];
@@ -23,22 +68,11 @@ function get_routing_params($dir) {
         $appname = '';
     }
     $app_uri = [ $fwroot, "{$fwroot}{$appname}/" ];
-    debug_log(-999, [
-        'URI' => $_SERVER['REQUEST_URI'],
-        "app_uri"=> $app_uri,
-        "args"=> $args,
-        "dir"=> $dir,
-        "root"=> $root,
-    ]);
     // extract after Controoler path
-    $params = array();
-    for($n=0;$n < count($args);$n++) {
-        if(is_numeric($args[$n]) || strpos($args[$n],'.') != FALSE) {
-            $params = array_slice($args,$n);
-            array_splice($args,$n);
-            break;
-        }
-    }
+    for($n=0;$n < count($args) && !is_numeric($args[$n]) && strpos($args[$n],'.') === FALSE;$n++) ;
+    $params = array_intval_recursive(array_slice($args,$n));
+    array_splice($args,$n);
+
     if(count($args) < 2) $args += array_fill(count($args),2-count($args),NULL);
     list($controller,$method) = $args;
     $filters = array_splice($args,2);
@@ -50,16 +84,6 @@ function get_routing_params($dir) {
         $params
     );
     $ret = [$appname,$app_uri,$module,$q_str];
-    debug_log(-999, [
-        'フレームワーク情報' => [
-            "SERVER" => $_SERVER['REQUEST_URI'],
-            "app_uri"=> $app_uri,
-            "appname"=> $appname,
-            "Module"=> $module,
-            "query"=> $q_str,
-        ],
-        "RET" => $ret,
-    ]);
     return $ret;
 }
 //==============================================================================
@@ -144,6 +168,15 @@ function get_php_files($dirtop) {
         $drc->close();
     }
     return $files;
+}
+//==============================================================================
+// convert to num STRING to INTEGER
+function array_intval_recursive($arr) {
+    if(is_scalar($arr)) return (empty($arr) || is_numeric($arr))?intval($arr):$arr;
+    return array_map(function($v) {
+        if(is_array($v)) return array_intval_recursive($v);
+        return (empty($v) || is_numeric($v))?intval($v):$v;
+    },$arr);
 }
 //==============================================================================
 // convert nexting array to flat array

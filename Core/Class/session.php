@@ -17,7 +17,7 @@ class MySession {
 //==============================================================================
 // static クラスにおける初期化処理
 static function InitSession($appname = 'default') {
-	$session_id = "_minimvc_waffle_map_{$appname}";
+	$session_id = SESSION_PREFIX . "_{$appname}";
 	static::$MY_SESSION_ID = $session_id;
 	// セッションキーがあれば読み込む
 	static::$EnvData = (array_key_exists($session_id,$_SESSION)) ? $_SESSION[$session_id] : [];
@@ -32,6 +32,8 @@ static function InitSession($appname = 'default') {
 		if(array_key_exists($key,$bool_value)) $val = $bool_value[$key];
 		if(ctype_alnum(str_replace(['-','_'],'', $key))) static::$ReqData[$key] = $val;
 	}
+	static::$ReqData = array_intval_recursive(static::$ReqData);
+	static::$EnvData = array_intval_recursive(static::$EnvData);
 }
 //==============================================================================
 // セッションに保存する

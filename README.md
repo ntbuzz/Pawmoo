@@ -1,4 +1,4 @@
-# Rawdst - Rapid Web Application Development BY Section Template
+## Pawmoo
 
 This repository is a personal PHP framework experiment site.  
   
@@ -31,13 +31,9 @@ Detail specification is [Here](../../wiki/Home)
 ]
 *Comment => [ 'What about arrays?' ]
 -body => [ bgcolor => white ]     // HTML tag output
-+jquery =>                      // JQuery function definition
-~
-  $(".contents-view").adjustHeight();
-~
 .appWindow => [                  // Tag name omitted is DIV tag section
-  '.split-pane fixed-left' => [
-    '.split-pane-component sitemap#left-component' => [
+  .split-pane.fixed-left => [
+    .split-pane-component.sitemap#left-component => [
       @TreeMenu
     ]
     .split-pane-divider#v-divider => []
@@ -45,7 +41,7 @@ Detail specification is [Here](../../wiki/Home)
       // Fix at the top
       @Toolbar
       // A block that scrolls #ContentBody (contents-view)
-      '.split-pane-component contents-view' =>
+      .split-pane-component.contents-view.fitWindow =>
          // Area to display content
          #ContentBody => [
            &DocIndex

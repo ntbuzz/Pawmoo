@@ -172,6 +172,15 @@ function text_line_split($del,$txt,$trim = FALSE) {
 }
 //==============================================================================
 // array value concatinate to TEXT
+function array_reduce_recursive($array,$callback, $init='') {
+    foreach($array as $key => $val) {
+        if(is_array($val)) $init = array_reduce_recursive($val,$callback, $init);
+        else $init .= $callback($key,$val);
+    }
+    return $init;
+}
+//==============================================================================
+// array value concatinate to TEXT
 function array_to_text($array,$sep = "\n", $in_key = TRUE) {
     $dump_text = function ($indent, $items)  use (&$dump_text,&$sep,&$in_key)  {
         $txt = ''; $spc = str_repeat(' ', $indent);
@@ -241,7 +250,7 @@ function mark_active_words($atext,$word,$class) {
 // password encryption
 function passwd_encrypt($str) {
     $method_name = 'AES-256-CBC';
-    $key_string = '_minimvc_waffle_map';
+    $key_string = SESSION_PREFIX;
     $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method_name));
     return openssl_encrypt($str,$method_name,$key_string,0,$iv);
 }
