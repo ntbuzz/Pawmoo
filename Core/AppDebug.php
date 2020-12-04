@@ -83,8 +83,11 @@ function debug_log($lvl,...$items) {
                     $dmp .= "array(" . count($val) . ")\n";
                     $dmp .= $dump_object($val,$indent+1);
                 } else if(is_scalar($val)) {
-                    $val = control_escape($val);
-                    $dmp .= "'{$val}'\n";
+                    if(is_int($val)) $dmp .= "{$val}\n";
+                    else {
+                        $val = control_escape($val);
+                        $dmp .= "'{$val}'\n";
+                    }
                 }
             }
             return $dmp;

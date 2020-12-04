@@ -30,14 +30,19 @@ class App {
         static::$DocRoot = (empty($_SERVER['DOCUMENT_ROOT'])) ? '' : $_SERVER['DOCUMENT_ROOT'];
         static::$Referer = (empty($_SERVER['HTTP_REFERER'])) ? '' : $_SERVER['HTTP_REFERER'];
 
+        if(strpos($method,'.')!==FALSE) {
+            list($method,$filter) = extract_base_name($method);
+            $method = ucfirst(strtolower($method));
+        } else $filter = empty($filters) ? '': $filters[0];
+        
         static::$Filters= $filters;
-        static::$Filter = empty($filters) ? '': $filters[0];
+        static::$Filter = $filter;
    		// 0 〜 9 の不足する要素を補填する
         $k = count($params);
 		$params += array_fill($k, 10 - $k, '');
 
         static::$ParamCount = $k;
-        static::$Params = array_intval_recursive($params);
+        static::$Params = $params;  //array_intval_recursive($params);
         static::$SysVAR = array(
             'SERVER' => $_SERVER['SERVER_NAME'],
             'REFERER' => static::$Referer,
@@ -60,7 +65,7 @@ class App {
             'controller' => $controller,
             'method' => $method,
             'filter' => $filters,
-            'params' => $params,
+            'params' => static::$Params,
             );
             // リクエスト情報を記憶
         MySession::$EnvData['sysVAR'] = static::$SysVAR;
@@ -88,7 +93,7 @@ public static function Get_RelocateURL() {
         $q = http_build_query(static::$Query);
         $url = "{$url}?{$q}";
     }
-    debug_log(DBMSG_SYSTEM, ["RE-LOCATE-JMP" => static::$execURI,$url]);
+    debug_log(DBMSG_SYSTEM, ["RE-LOCATE-JMP" => static::$execURI,'URI'=>$url]);
     return "/{$url}";
 }
 //==============================================================================

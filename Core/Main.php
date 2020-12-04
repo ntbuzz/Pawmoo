@@ -1,8 +1,8 @@
 <?php
 /* -------------------------------------------------------------
- * WaffleMap Object-orientation PHP mini_framework
+ * Object-orientation PHP mini_framework
  *   Main: routing and redirection process
- *      method naming
+ *      method naming basic rule.
  *      void = camel case (first upper is 'PUBLIC')
  *          PascalCase      Public method/function, void function
  *              PublicMethod
@@ -50,12 +50,17 @@ if(CLI_DEBUG) {
 }
 
 $redirect = false;      // Redirect flag
-
+$root = basename(dirname(__DIR__));        // Framework Folder
 // REQUEST_URIを分解
-list($appname,$app_uri,$module,$q_str) = get_routing_params(__DIR__);
+list($appname,$app_uri,$module,$q_str) = get_routing_path($root);//get_routing_params(__DIR__);
 list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filters,$params) = $module;
 
+if(strpos($method,'.')!==FALSE) {
+    list($method,$filter) = extract_base_name($method);
+    $method = ucfirst(strtolower($method));
+} else $filter = empty($filters) ? '': $filters[0];
+       
 parse_str($q_str, $query);
 if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
 
@@ -187,7 +192,6 @@ debug_log(DBMSG_SYSTEM, [
     ],
     "ReqCont" => $ReqCont,
     "Location" => App::Get_RelocateURL(),
-
 ]);
 
 debug_run_start();

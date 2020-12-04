@@ -19,6 +19,7 @@
         $(e).scrollTop(0);
     };
     // 親要素の高さに調整する
+/*
     $.fn.adjustHeight = function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
         $(window).on("load resize",function () {
@@ -39,6 +40,7 @@
         });
         $(window).resize();
     };
+*/
     // CSS の padding 値を取得する
     $.fn.paddingWidth = function() {
         var widths = {

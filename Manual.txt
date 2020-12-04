@@ -1,8 +1,7 @@
-***  Radweapst 使い方説明書
-Rapid Development Web Application Platform by Section Template
+***  Pawmoo 使い方説明書
 
  1. はじめに
-  Radweapst は Controller-View-Model のようなWEBアプリケーションを素早く作成するための
+  Pawmoo は Controller-View-Model のようなWEBアプリケーションを素早く作成するための
   オブジェクト指向型のミニ・フレームワークです。
   M-V-Cに相当する各ファイルを「モジュール」というフォルダ単位で管理できるので
   ファイル間の見通しが良く、機能追加や修正の際にも修正漏れやバグ発生を抑えられます。
@@ -21,7 +20,7 @@ Rapid Development Web Application Platform by Section Template
   容易になります。
 
   リクエストURIとモジュールの関係(ルーティング)
-    http://localhost/radweapst/help/index/view/100/20
+    http://localhost/pawmoo/help/index/view/100/20
     ~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~ ~~~~~ ~~~~ ~~~~~~
       フレームワークフォルダ   ↑ 　↑  　↑　　↑
       　　　　　　　　　　　　 │ 　│  　│   メソッドへのパラメータ
@@ -31,7 +30,7 @@ Rapid Development Web Application Platform by Section Template
 
 1.2 フォルダ構成
 
-(radweapst)         フレームワーク本体
+(pawmoo)         フレームワーク本体
   ├ app
   │  ├─ (アプリ1)
   │  │   ├── Config            アプリケーション設定ファイルフォルダ
@@ -105,7 +104,7 @@ Rapid Development Web Application Platform by Section Template
 
 1.4 フレームワーク・クラス
 
-  WaffleではMVCに相当する基底クラスオブジェクトを継承し機能を実装します。
+  PawmooではMVCに相当する基底クラスオブジェクトを継承し機能を実装します。
   アプリケーションによっては基底クラスのメソッドで不足する機能を、
   app拡張クラスフォルダ(app/extends)に、独自の継承クラスを作り込むことで、
   特定アプリ専用の基底クラスに拡張することができます。
@@ -198,6 +197,64 @@ Rapid Development Web Application Platform by Section Template
     ・スキーマ定義の言語フラグをOFF(百位の値を使用しない)
     ・モデルクラスの ClassInit() メソッド内で AliasMode = FALSE とする
     ・テーブルスイッチを使わずに DataTable プロパティでテーブルを支持する
+
+1.6 ルーティング
+  アプリケーションのURIはすべてフレームワークの inde.php へアクセスするように
+  .htaccess または web.config の　mod_rewrite でURIの書き換えを行います。
+
+  リクエストされたURIは次のように分解し、モジュールコントローラのメソッドを起動します。
+  リクエストURIとモジュールの関係(ルーティング)
+
+    http://localhost/pawmoo/help/index/view/filter/100/20
+    ~~~~~~~~~~~~~~~~~~~~~~~ ~~~~ ~~~~~ ~~~~ ~~~~~~ ~~~~~~
+    フレームワークフォルダ   ↑  　↑   ↑　　↑　  ↑
+    　　　　　　　　　　　　 │  　│ 　│    │    メソッドへのパラメータ
+    　　　　　　　　　　　　 │  　│ 　│    メソッドのフィルタ処理パラメータ(複数指定可)
+　　  　　　　　　　　　　　 │  　│   アクションメソッド名
+　　　  　　　　　　　　　　 │    モジュール名(コントローラー)
+　　　　　　　　　　　　　　アプリ名
+
+     フィルタパラメータ以降のデータは App クラスに格納されます。
+
+      App::$Filter       フィルタパス配列の先頭、またはファイルダイレクト時の拡張子
+      App::$Filters[]    フィルタパス配列
+      App::$Params[]     数値パラメータパスの配列
+
+    上記のURIでは以下のようになります。
+      アプリ名: Help
+      コントローラー: IndexController
+      メソッド: ViewAction
+      フィルター: filter
+      フィルター配列: [ filter ]
+      パラメータ: [ 100, 20 ]
+
+    アクションメソッド名から数値パスが始まるまでの間をメソッドフィルタ配列として扱います。
+
+1.6.1 ファイルダイレクトURI
+      URIをファイル名まで指定されたときには、ファイル名部分がメソッド名になり拡張子はフィルタに格納します。
+      パス上のメソッド名以降はフィルタ配列にシフトされます。
+
+       http://localhost/help/index/view/param/1/2/3/list.html
+                                                    ^^^^^^^^^
+      上記のURIが与えられると以下のようにルーティングします。
+
+      アプリ名: help
+      コントローラー: Index
+      メソッド: ListAction
+      フィルター: html
+      フィルター配列: [ view, param ]
+      パラメータ: [ 1, 2, 3 ]
+
+    コントローラーが省略された場合、アプリ名をコントローラー名に設定します。
+
+      http://localhost/help/index.php
+                          ^^^^^^^^^^
+      アプリ名: help
+      コントローラー: HelpController
+      メソッド: IndexAction
+      フィルター: php
+      フィルター配列: [ ]
+      パラメータ: [ ]
 
 2. クラス詳細
 
@@ -912,7 +969,7 @@ Rapid Development Web Application Platform by Section Template
 
 3.0 コントロール・ライブラリ
 
-  Waffleはアプリケーションの構築に役立つプリミティブなコントロールコンポーネントが
+  Pawmooはアプリケーションの構築に役立つプリミティブなコントロールコンポーネントが
   テンプレートやリソースに組み込んであります。
   これらは「セクションフォーマット」とJavascriptライブラリで提供されます。
   HTMLタグを直接記述すればセクション形式を使わなくてもすみますが、可読性が落ちるので
@@ -989,15 +1046,12 @@ Rapid Development Web Application Platform by Section Template
           ...
       };
 
-■ fixedstickyクラス
-  固定メニューを表示するクラスを定義します。
-  data-class または data-id で指定した親要素のスクロールにあわせて
-  表示位置がトップに固定されるようにします。
-  CSSの"position: sticky" がうまく動作しない時に使用してください。
+■ stickyBar/fitWindowクラス
+  stickyBarクラスは position:sticky CSS が正しく動作しない(IE用)ときに指定します。
+  このクラスを持つブロックは親ブロックの TOP に固定されます。
 
-      <div class='fixedsticky' data-element="selector">
-        selector 要素のスクロールに合わせて固定表示される
-      </dev>
+  fitWindowクラスはウィンドウの高さを親ウィンドウの幅と高さに合わせます。
+  width:100%; の指定でスクロール領域がブラウザのウィンドウ外にはみ出てしまう現象を回避できます。
 
 ◆ ライブラリ関数
   コアシステムに組み込んである、アプリケーションから利用できるライブラリ関数一覧です。
@@ -1045,10 +1099,10 @@ Rapid Development Web Application Platform by Section Template
 
   スクロールを固定する
   position:sticky; が動作しないときに使います
-    (セレクタ).stickyOn(親オブジェクト);
+    (廃止予定) (セレクタ).stickyOn(親オブジェクト); => stickyBar クラスへ移行
   
-    (セレクタ).adjustHeight();          親要素の高さに調整する
-    (セレクタ).adjustWidth();           親要素の幅に調整する
+    (廃止予定) (セレクタ).adjustHeight();          親要素の高さに調整する => fitWindowクラスへ移行
+    (廃止予定) (セレクタ).adjustWidth();           親要素の幅に調整する   => fitWindowクラスへ移行
 
   フローティングウィンドウを開く
     (セレクタ).floatWindow(タイトル, JSON, コールバック関数);
