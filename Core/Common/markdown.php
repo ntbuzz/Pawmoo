@@ -4,7 +4,7 @@
 if (!function_exists('preg_replace_callback_array')) {
     function preg_replace_callback_array(array $arr,$atext) {
         foreach($arr as $key => $callback) {
-            $atext = preg_replace_callback($p, $callback,$atext);
+            $atext = preg_replace_callback($key, $callback, $atext);
         }
         return $atext;
     }
