@@ -18,7 +18,8 @@ class App {
     public static $ParamCount;      // 引数の数
     public static $Controller;      // 実行コントローラ名
     public static $ActionMethod;    // 呼出しメソッド名
-    private static $ReLocate;        // URLの書き換え
+    public static $MethodExtention; // ファイルダイレクトURIの拡張子部分
+    private static $ReLocate;       // URLの書き換え
     private static $execURI;
 //==============================================================================
 // 静的クラスでのシステム変数初期化
@@ -31,12 +32,13 @@ class App {
         static::$Referer = (empty($_SERVER['HTTP_REFERER'])) ? '' : $_SERVER['HTTP_REFERER'];
 
         if(strpos($method,'.')!==FALSE) {
-            list($method,$filter) = extract_base_name($method);
+            list($method,static::$MethodExtention) = extract_base_name($method);
             $method = ucfirst(strtolower($method));
-        } else $filter = empty($filters) ? '': $filters[0];
-        
+        } else {
+            static::$MethodExtention = FALSE;
+        }
         static::$Filters= $filters;
-        static::$Filter = $filter;
+        static::$Filter = empty($filters) ? '': $filters[0];
    		// 0 〜 9 の不足する要素を補填する
         $k = count($params);
 		$params += array_fill($k, 10 - $k, '');

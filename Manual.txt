@@ -216,14 +216,16 @@
 
      フィルタパラメータ以降のデータは App クラスに格納されます。
 
-      App::$Filter       フィルタパス配列の先頭、またはファイルダイレクト時の拡張子
-      App::$Filters[]    フィルタパス配列
-      App::$Params[]     数値パラメータパスの配列
+      App::$MethodExtention  ファイルダイレクト時の拡張子 (※後述)
+      App::$Filter           フィルタパス配列の先頭
+      App::$Filters[]        フィルタパス配列
+      App::$Params[]         数値パラメータパスの配列
 
     上記のURIでは以下のようになります。
       アプリ名: Help
       コントローラー: IndexController
       メソッド: ViewAction
+      拡張子: NULL
       フィルター: filter
       フィルター配列: [ filter ]
       パラメータ: [ 100, 20 ]
@@ -231,7 +233,7 @@
     アクションメソッド名から数値パスが始まるまでの間をメソッドフィルタ配列として扱います。
 
 1.6.1 ファイルダイレクトURI
-      URIをファイル名まで指定されたときには、ファイル名部分がメソッド名になり拡張子はフィルタに格納します。
+      URIをファイル名まで指定されたときには、ファイル名部分がメソッド名になり拡張子は MethodExtention 変数に格納します。
       パス上のメソッド名以降はフィルタ配列にシフトされます。
 
        http://localhost/help/index/view/param/1/2/3/list.html
@@ -241,7 +243,8 @@
       アプリ名: help
       コントローラー: Index
       メソッド: List
-      フィルター: html
+      拡張子: html
+      フィルター: view
       フィルター配列: [ view, param ]
       パラメータ: [ 1, 2, 3 ]
 
@@ -252,7 +255,8 @@
       アプリ名: help
       コントローラー: Help
       メソッド: Index
-      フィルター: php
+      拡張子: php
+      フィルター: NULL
       フィルター配列: [ ]
       パラメータ: [ ]
 
@@ -510,6 +514,11 @@
       Title1 => [ Section ]               テンプレート内の tabset.css を読み込むことでタブコントロール表示する
       ...                                 タブ切替え時に独自の処理が不要なら、テンプレートの tabset.js を読み込む
   ]
+  +floatwin.class#id => [                 floatWindow ブロックの簡易記述構文
+      dt-Title                            dl タグを記述しないで
+      [ DD-Section ] 
+  ]
+
  }
 
   特定の変数やデータにより、タグ出力を切替えるにはスイッチセクション(?記号)を使います。
@@ -1101,7 +1110,7 @@
   position:sticky; が動作しないときに使います
     (廃止予定) (セレクタ).stickyOn(親オブジェクト); => stickyBar クラスへ移行
   
-    (廃止予定) (セレクタ).adjustHeight();          親要素の高さに調整する => fitWindowクラスへ移行
+    (セレクタ).adjustHeight();          親要素の高さに調整する => fitWindowクラスへ移行
     (廃止予定) (セレクタ).adjustWidth();           親要素の幅に調整する   => fitWindowクラスへ移行
 
   フローティングウィンドウを開く
