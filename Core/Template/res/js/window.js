@@ -19,6 +19,17 @@
         $(e).scrollTop(0);
     };
     // 親要素の高さに調整する
+    $.fn.adjustWindow = function () {
+        var self = $(this); // jQueryオブジェクトを変数に代入しておく
+        var hsize = self.parent().height();
+        var htop = self.offset().top;
+        var spc = self.outerHeight() - self.height();
+        self.css({
+            'width': '100%',
+            'height': hsize - htop - spc + "px",
+            'overflow-y':"auto"
+        });
+    };
 /*
     $.fn.adjustHeight = function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
@@ -170,7 +181,7 @@ $(function () {
         $(window).on("load resize",function () {
 //            wsize = self.parent().innerWidth();
 //            wleft = self.parent().offset().left;
-            hsize = self.parent().innerHeight();
+            hsize = self.parent().height();
             htop = self.offset().top;
             spc = self.outerHeight() - self.height();
             self.css({

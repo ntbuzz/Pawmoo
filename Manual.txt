@@ -240,7 +240,7 @@
 
       アプリ名: help
       コントローラー: Index
-      メソッド: ListAction
+      メソッド: List
       フィルター: html
       フィルター配列: [ view, param ]
       パラメータ: [ 1, 2, 3 ]
@@ -250,8 +250,8 @@
       http://localhost/help/index.php
                           ^^^^^^^^^^
       アプリ名: help
-      コントローラー: HelpController
-      メソッド: IndexAction
+      コントローラー: Help
+      メソッド: Index
       フィルター: php
       フィルター配列: [ ]
       パラメータ: [ ]

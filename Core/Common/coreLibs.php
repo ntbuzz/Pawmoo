@@ -23,7 +23,7 @@ function get_routing_path($root) {
 
     list($appname,$controller,$method) = $args;
     $filters = array_splice($args,3);
-    if(empty($controller)) $controller = $appname; // empty controller will be same of appname
+//    if(empty($controller)) $controller = $appname; // empty controller will be same of appname
     $filename = '';
     $params = array_filter($pp,function($v) use(&$filename) {
         if(strpos($v,'.')===FALSE) return TRUE;

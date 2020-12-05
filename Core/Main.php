@@ -20,7 +20,6 @@
  */
 // デバッグ用のクラス
 require_once('AppDebug.php');
-
 // このファイルが依存している関数定義ファイル
 require_once('Config/appConfig.php');
 require_once('Common/coreLibs.php');
@@ -49,12 +48,13 @@ $root = basename(dirname(__DIR__));        // Framework Folder
 list($appname,$app_uri,$module,$q_str) = get_routing_path($root);
 list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filters,$params) = $module;
+debug_dump(["MODULE" => $module]);
 
 if(strpos($method,'.')!==FALSE) {
     list($method,$filter) = extract_base_name($method);
     $method = ucfirst(strtolower($method));
 } else $filter = empty($filters) ? '': $filters[0];
-       
+
 parse_str($q_str, $query);
 if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
 
