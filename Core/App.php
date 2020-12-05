@@ -32,14 +32,6 @@ class App {
         static::$Referer = (empty($_SERVER['HTTP_REFERER'])) ? '' : $_SERVER['HTTP_REFERER'];
 
         if(strpos($method,'.')!==FALSE) {
-<<<<<<< HEAD
-            list($method,$filter) = extract_base_name($method);
-            $method = ucfirst(strtolower($method));
-        } else $filter = empty($filters) ? '': $filters[0];
-        
-        static::$Filters= $filters;
-        static::$Filter = $filter;
-=======
             list($method,static::$MethodExtention) = extract_base_name($method);
             $method = ucfirst(strtolower($method));
         } else {
@@ -47,7 +39,6 @@ class App {
         }
         static::$Filters= $filters;
         static::$Filter = empty($filters) ? '': $filters[0];
->>>>>>> aeec72f71877ddf2b9db8b8e9c967247f152ec6f
    		// 0 〜 9 の不足する要素を補填する
         $k = count($params);
 		$params += array_fill($k, 10 - $k, '');

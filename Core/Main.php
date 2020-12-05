@@ -45,26 +45,15 @@ if(CLI_DEBUG) {
 $redirect = false;      // Redirect flag
 $root = basename(dirname(__DIR__));        // Framework Folder
 // REQUEST_URIを分解
-<<<<<<< HEAD
-list($appname,$app_uri,$module,$q_str) = get_routing_path($root);//get_routing_params(__DIR__);
-list($fwroot,$approot) = $app_uri;
-list($controller,$method,$filters,$params) = $module;
-=======
 list($appname,$app_uri,$module,$q_str) = get_routing_path($root);
 list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filters,$params) = $module;
 debug_dump(["MODULE" => $module]);
->>>>>>> aeec72f71877ddf2b9db8b8e9c967247f152ec6f
 
 if(strpos($method,'.')!==FALSE) {
     list($method,$filter) = extract_base_name($method);
     $method = ucfirst(strtolower($method));
 } else $filter = empty($filters) ? '': $filters[0];
-<<<<<<< HEAD
-       
-=======
-
->>>>>>> aeec72f71877ddf2b9db8b8e9c967247f152ec6f
 parse_str($q_str, $query);
 if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
 

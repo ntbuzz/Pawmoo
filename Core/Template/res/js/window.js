@@ -19,8 +19,6 @@
         $(e).scrollTop(0);
     };
     // 親要素の高さに調整する
-<<<<<<< HEAD
-=======
     $.fn.adjustWindow = function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
         var hsize = self.parent().height();
@@ -32,7 +30,6 @@
             'overflow-y':"auto"
         });
     };
->>>>>>> aeec72f71877ddf2b9db8b8e9c967247f152ec6f
 /*
     $.fn.adjustHeight = function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
