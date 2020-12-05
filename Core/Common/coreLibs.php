@@ -1,4 +1,6 @@
 <?php
+// coreLibs depend on appLibs functions.
+require_once('appLibs.php');
 /* -------------------------------------------------------------
  * Object Oriented PHP MVC Framework
  *  coreLibs: Common Library for Core/Base Class
@@ -21,7 +23,11 @@ function get_routing_path($root) {
 
     list($appname,$controller,$method) = $args;
     $filters = array_splice($args,3);
+<<<<<<< HEAD
     if(empty($controller)) $controller = $appname; // empty controller will be same of appname
+=======
+//    if(empty($controller)) $controller = $appname; // empty controller will be same of appname
+>>>>>>> aeec72f71877ddf2b9db8b8e9c967247f152ec6f
     $filename = '';
     $params = array_filter($pp,function($v) use(&$filename) {
         if(strpos($v,'.')===FALSE) return TRUE;
@@ -50,6 +56,10 @@ function get_routing_path($root) {
     ]);
     return $ret;
 }
+<<<<<<< HEAD
+=======
+/*
+>>>>>>> aeec72f71877ddf2b9db8b8e9c967247f152ec6f
 function get_routing_params($dir) {
     $root = basename(dirname($dir));        // Framework Folder
     $vv = $_SERVER['REQUEST_URI'];
@@ -86,6 +96,7 @@ function get_routing_params($dir) {
     $ret = [$appname,$app_uri,$module,$q_str];
     return $ret;
 }
+*/
 //==============================================================================
 // Output 404 ERROR PAGE
 // enabled of PHP VARIABLE:

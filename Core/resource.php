@@ -21,9 +21,9 @@
 // デバッグ用のクラス
 require_once('AppDebug.php');
 // このファイルが依存している関数定義ファイル
+// オートローダーは使わないので必要なものは全てrequireする
 require_once('Config/appConfig.php');
 require_once('Common/coreLibs.php');
-require_once('Common/appLibs.php');
 require_once('Class/session.php');
 require_once('Base/AppStyle.php');
 require_once('Base/LangUI.php');           // static class

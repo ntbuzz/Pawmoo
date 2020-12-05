@@ -1,4 +1,6 @@
 <?php
+// separated from appLibs, require in here.
+require_once('markdown.php');
 //==============================================================================
 // ARRAY first key , before PHP 7.3
 if (!function_exists('array_key_first')) {

@@ -20,17 +20,9 @@
  */
 // デバッグ用のクラス
 require_once('AppDebug.php');
-
 // このファイルが依存している関数定義ファイル
 require_once('Config/appConfig.php');
 require_once('Common/coreLibs.php');
-require_once('Common/appLibs.php');
-require_once('Common/markdown.php');
-// オートローダーの初期化前に必要、または命名規則から外れたクラス
-require_once('Class/session.php');
-require_once('Class/fileclass.php');
-require_once('Class/Parser.php');
-require_once('Base/LangUI.php');
 // 以下のクラスはオートロードできるが速度低下を防ぐためここでは使わない
 require_once('App.php');
 require_once('Base/AppObject.php');
@@ -39,6 +31,7 @@ require_once('Base/AppModel.php');
 require_once('Base/AppFilesModel.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
+require_once('Base/LangUI.php');
 
 // Setup TIMEZONE
 date_default_timezone_set(TIME_ZONE);
@@ -52,15 +45,26 @@ if(CLI_DEBUG) {
 $redirect = false;      // Redirect flag
 $root = basename(dirname(__DIR__));        // Framework Folder
 // REQUEST_URIを分解
+<<<<<<< HEAD
 list($appname,$app_uri,$module,$q_str) = get_routing_path($root);//get_routing_params(__DIR__);
 list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filters,$params) = $module;
+=======
+list($appname,$app_uri,$module,$q_str) = get_routing_path($root);
+list($fwroot,$approot) = $app_uri;
+list($controller,$method,$filters,$params) = $module;
+debug_dump(["MODULE" => $module]);
+>>>>>>> aeec72f71877ddf2b9db8b8e9c967247f152ec6f
 
 if(strpos($method,'.')!==FALSE) {
     list($method,$filter) = extract_base_name($method);
     $method = ucfirst(strtolower($method));
 } else $filter = empty($filters) ? '': $filters[0];
+<<<<<<< HEAD
        
+=======
+
+>>>>>>> aeec72f71877ddf2b9db8b8e9c967247f152ec6f
 parse_str($q_str, $query);
 if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
 
@@ -78,7 +82,6 @@ if($controller === 'Error') {       // ERROR PAGE
 require_once("app/{$appname}/Config/config.php");
 // Check URI-Redirect direction
 if(!defined('FORCE_REDIRECT')) define('FORCE_REDIRECT', FALSE);
-MySession::InitSession($appname);
 
 if(!is_extst_module($appname,$controller,'Controller')) {
     // if BAD controller name, try DEFAULT CONTROLLER and shift follows
@@ -115,6 +118,8 @@ if($redirect) {
 // アプリ固有クラスをオートロードできるようにする
 require_once('Class/ClassLoader.php');
 ClassLoader::Setup($appname,$controller);
+// セッションを初期化する
+MySession::InitSession($appname);
 // アプリケーション変数を初期化する
 App::__Init($appname,$app_uri,$module,$query,$requrl);
 App::$Controller  = $controller;    // コントローラー名
