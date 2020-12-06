@@ -628,7 +628,7 @@
                             // それ以外なら [X] で表示する
 
   フォーム部品
-  ^.class#id[name]@{checkval:val1=item1:val2=item2::val3=item3}    // radio ボタン checkval=val の item にチェックをつける、空項目は改行(<br>)を挿入
+  ^.class#id[name]@{checkval:val1=item1,val2=item2,,val3=item3}    // radio ボタン checkval=val の item にチェックをつける、空項目は改行(<br>)を挿入
   ^.class#id[name]:{val1=item1:checked}             // checkbox ボタン :checked が FALSE 判定でなければチェックをつける
   ^.class#id[name]={textvalue:size}                 // text ボックス
   ^.class#id[name]!{textvalue:col,row}              // textarea

@@ -3,7 +3,7 @@
  * Object Oriented PHP MVC Framework
  *  appConfig: Framework Configuration
  */
-define('CURRENT_VERSION','0.36.0 2020-12-03');
+define('CURRENT_VERSION','0.36.2 2020-12-06');
 define('COPYTIGHT','Copyright (c) 2017 - 2020 by nTak');
 define('PLATFORM_NAME','pawmoo');
 define('SESSION_PREFIX','_minimvc_pawmoo_maps');
