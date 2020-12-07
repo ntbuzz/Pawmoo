@@ -1,7 +1,7 @@
 <?php
 /* -------------------------------------------------------------
- * PHPフレームワーク
- *  AppStyle:   css, js ファイルの結合出力を可能にする
+ * Object Oriented PHP MVC Framework
+ *  AppStyle:   css, js joined by template
  */
 require_once('Core/Class/Parser.php');
 
@@ -42,29 +42,29 @@ class AppStyle {
         ],
         '*'  => 'do_comment',
     );
-    private $ModuleName;        // モジュール名 or Res
-    private $Template;          // ContentList のテンプレート
-    private $Folders;           // ファイル探索フォルダ
-    private $Filetype;          // サブフォルダ css/js
-    private $do_min;            // コンパクト出力するかどうかのフラグ
-    private $do_msg;            // インポートメッセージ出力のフラグ
-    private $do_com;            // コメントの除去
-    private $repVARS;           // 置換文字列
+    private $ModuleName;        // Module Name or Res
+    private $Template;          // Content Template
+    private $Folders;           // Search Folder List
+    private $Filetype;          // File Type css/js
+    private $do_min;            // Do it Compact mode output
+    private $do_msg;            // Echo import messagte
+    private $do_com;            // Delete Comment Line
+    private $repVARS;           // Replace Variable
 //==============================================================================
-// コンストラクタ
+// Constructor
     function __construct($appname, $app_uri, $modname, $filename, $ext) {
-        // モジュール名(res)は共通URIモジュールとして扱う
+        // Module(res) will be Common URI Modele
         $this->ModuleName = ($modname == 'Res') ? '' : $modname;  
         $this->Template = self::ContentList[$ext];
         $fldr = $this->Template['folder'];
         $this->Filetype = $fldr;
         $this->Folders = array(
-            'モジュール固有' => "app/{$appname}/modules/{$this->ModuleName}/res",
-            'アプリ共通' => "app/{$appname}/View/res",      // App共通のレイアウトテンプレートを探す
-            'Libs' => "Core/Template/res",                  // ライブラリのテンプレートを探す
+            "{$modname}固有" => "app/{$appname}/modules/{$this->ModuleName}/res",
+            "{$appname}共通" => "app/{$appname}/View/res",
+            'Libs' => "Core/Template/res",
         );
-        if(empty($this->ModuleName)) {   // リソースフォルダならモジュール固有を削除
-            unset($this->Folders['モジュール固有']);
+        if(empty($this->ModuleName)) {
+            shift($this->Folders);          // remove top eelment (Module Unique resource)
         }
         list($sysRoot,$appRoot) = $app_uri;
         $myVARS = array(
@@ -77,15 +77,14 @@ class AppStyle {
             'extension' => $ext,
         );
         if(isset(MySession::$EnvData['sysVAR'])) {
-            $sess = MySession::$EnvData['sysVAR'];              // セッションに記憶してあるシステム変数
-            $this->repVARS = array_merge($sess, $myVARS);       // システム変数とパラメータをマージしておく
+            $sess = MySession::$EnvData['sysVAR'];             // Session Variable
+            $this->repVARS = array_merge($sess, $myVARS);
         } else {
-            $this->repVARS = $myVARS;       // パラメータのみセット
+            $this->repVARS = $myVARS;
         }
     }
 //==============================================================================
-// テンプレートファイルがビュークラスフォルダに存在しなければ共通のテンプレートを探す
-// appname/modules/{module}/Layout/{name}
+// Search resource Folder, Module, Application, Framework
     private function get_exists_files($name) {
         $arr = array();
         foreach($this->Folders as $key => $file) {
@@ -97,23 +96,22 @@ class AppStyle {
         return $arr;
     }
 //==============================================================================
-//　ヘッダ出力
+// Content Header Output
 public function ViewHeader() {
 	if(CLI_DEBUG) return;
     header("Content-Type: {$this->Template['head']};");
 }
 //==============================================================================
-//　レイアウトテンプレート処理
+//　Style Template Output
 public function ViewStyle($file_name) {
-    // スタイルシートが存在するフォルダのみをリストアップする
     $temlatelist = $this->get_exists_files('template.mss');
     list($filename,$ext) = extract_base_name($file_name);
-    $this->do_min = ($ext == 'min');           // コメント削除出力か
-    $this->do_msg = TRUE ;                     // インポートコメント表示設定
-    $this->do_com = TRUE ;                     // コメント表示設定
-    // テンプレートセクション処理
+    $this->do_min = ($ext == 'min');           // Is Compact Output?
+    $this->do_msg = TRUE ;                     // Is Import Message?
+    $this->do_com = TRUE ;                     // Is Comment Output?
+    // Processing Template Style
     if($this->section_styles($temlatelist, $filename) === FALSE) {
-        // テンプレートセクションに指定ファイル名が見つからないときは実ファイルを探索する
+        // not found in Template, then Real File Target Search.
         foreach($this->Folders as $key => $file) {
             $fn ="{$file}/{$this->Filetype}/{$filename}{$this->Template['extention']}";
             if(file_exists($fn)) {
@@ -125,27 +123,27 @@ public function ViewStyle($file_name) {
     }
 }
 //==============================================================================
-//　セクションスタイルテンプレート処理
-//  $templist   テンプレートフォルダのリスト
-//  $secname    セクション名
+//　Section Style Template Porcessing
+//  $templist   List of Template Folders
+//  $secname    Target SECTION name
     private function section_styles($tmplist, $secname) {
         $secType = $this->Template['section'];        // stylesheet/javascript
-        foreach($tmplist as $category => $file) {     // テンプレートリストから探索する
+        foreach($tmplist as $category => $file) {
             $parser = new SectionParser($file);
             $SecTemplate = array_change_key_case( $parser->getSectionDef(), CASE_LOWER);
             unset($parser);         // 解放
-            if(array_key_exists($secType,$SecTemplate)) {   // stylesheet or javascript
-                $secData = $SecTemplate[$secType];      // css/jsテンプレートセクションを取得
+            if(array_key_exists($secType,$SecTemplate)) {
+                $secData = $SecTemplate[$secType];
                 $secParam = array($secname,$secData,$tmplist);
                 // テンプレート外のコマンドを処理
                 foreach($SecTemplate as $key => $val) { 
-                    $this->function_Dispath($secParam, $key, $val); // 戻り値は無視してOK
+                    $this->function_Dispath($secParam, $key, $val);
                 }
                 // セクション外のコマンドを処理
                 foreach($secData as $key => $val) {
-                    $this->function_Dispath($secParam, $key, $val); // 戻り値は無視してOK
+                    $this->function_Dispath($secParam, $key, $val);
                 }
-                if(array_key_exists($secname,$secData)) {   // filename セクションがあるか
+                if(array_key_exists($secname,$secData)) {
                     $this->sectionDispath($secParam,$secData[$secname]);
                     return TRUE;
                 }
@@ -205,7 +203,7 @@ public function ViewStyle($file_name) {
         }
     }
 //------------------------------------------------------------------------------
-// * comment コマンド
+// * comment Command
     private function do_comment($sec) {
         $vv = $this->expand_Strings($sec,$this->repVARS);
         $vv = trim(substr($vv,1));
@@ -215,19 +213,19 @@ public function ViewStyle($file_name) {
 // cmd_XXXXX メソッドにはパラメータが渡ってくる
 // cmd_XXXX($tag, $param, $sec)
 //------------------------------------------------------------------------------
-// * charset コマンド
+// * charset Command
     private function cmd_charset($secParam, $param,$sec) {
         echo "@charset \"{$sec}\"\n";
     }
 //------------------------------------------------------------------------------
-// compact/comment/message コマンド
+// compact/comment/message Command
 // パラメータはプロパティ変数名
     private function cmd_modeset($secParam, $param,$sec) {
         $val = strtolower($sec);                        // 設定値を取り出す
         $this->$param = self::BoolConst[$val];            // 指定プロパティ変数にセット
     }
 //------------------------------------------------------------------------------
-// jquery コマンド
+// jquery Command
 // +jquery => [ files , ... ] or jquery => scalar
     private function cmd_jquery($secParam, $param,$sec) {
         if($this->Filetype == 'js') {
@@ -238,14 +236,14 @@ public function ViewStyle($file_name) {
         }
     }
 //------------------------------------------------------------------------------
-// import コマンド
+// import Command
 // +import => [ files , ... ] or import => scalar
     private function cmd_import($secParam, $param,$sec) {
         list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
         $this->filesImport($tmplist,$sec);
     }
 //------------------------------------------------------------------------------
-// section コマンド
+// section Command
 // +section => [ files , ... ] or section => scalar
     private function cmd_section($secParam, $param,$sec) {
         $secval = (is_array($sec)) ? $sec : array($sec);    // 配列要素に統一
@@ -255,20 +253,33 @@ public function ViewStyle($file_name) {
                 if(!DEBUGGER) continue;   // デバッグモードでなければスキップ
                 $vsec = substr($vsec,1);
             }
-            $force_parent = $vsec[0] == '^';
-            if($force_parent) $vsec = substr($vsec,1);
-            // 処理中のセクション名と同じか強制親セクション
-            $secmsg = (($vsec == $secname) || $force_parent) ? "parent::{$vsec}" : $vsec;
-            if($this->do_msg) echo "/* subsection: {$secmsg} in {$secname} */\n";
-            if($force_parent) {         // Libsテンプレート指定
-                // Libs フォルダだけを指定する
+            $force_parent = TRUE;
+            switch($vsec[0]) {
+            case '^':                   // force Freamework Template
+                $vsec = substr($vsec,1);
+                $before = $tmplist;     // change before list
                 $tmplist = array( 'Libs' => $tmplist['Libs']);
-                $this->section_styles($tmplist, $vsec);     // Libsセクションを処理する
-            } else if($vsec === $secname || !array_key_exists($vsec, $secData) ) {
-                // 現セクションと同名か自セクションに要素がなければ親を呼び出す
-                array_shift($tmplist);      // 先頭は自身のテンプレートがあるフォルダ
-                $this->section_styles($tmplist, $vsec);     // 親のセクションを処理する
-            } else {    // 自セクションに指定のセクションがある
+            debug_log(-999,["Libs::{$vsec}:{$secname}"=>['BEFORE'=>$before,'AFTER'=>$tmplist]]);
+                break;
+            case '!':               // force parent Template
+                $vsec = substr($vsec,1);
+                $before = $tmplist;     // change before list
+                array_shift($tmplist);  // remove top element
+            debug_log(-999,["Parent::{$vsec}:{$secname}"=>['BEFORE'=>$before,'AFTER'=>$tmplist]]);
+                break;
+            default:
+                $before = $tmplist;     // change before list
+                if($vsec === $secname || !array_key_exists($vsec, $secData) ) {
+                    array_shift($tmplist);  // remove top element
+                } else $force_parent = FALSE;
+            debug_log(-999,["tmplist-{$vsec}:{$secname}"=>['BEFORE'=>$before,'AFTER'=>$tmplist]]);
+            }
+            list($key,$item) = array_first_item($tmplist);
+            $secmsg = ($force_parent) ? "Invoke {$key}:{$vsec}" : "Subsection: {$vsec}";
+            if($this->do_msg) echo "/* {$secmsg} in {$secname} */\n";
+            if($force_parent) {
+                $this->section_styles($tmplist, $vsec);     // Parent Section
+            } else {      // exists SECTION in SELF template 
                 $this->sectionDispath($secParam,$secData[$vsec]);
             }
         }
