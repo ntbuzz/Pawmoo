@@ -78,7 +78,7 @@ function debug_log($lvl,...$items) {
             foreach($obj as $key => $val) {
                 $dmp .= str_repeat(' ',$indent*2) . "[{$key}] = ";
                 if(empty($val)) {
-                    $dmp .= "NULL\n";
+                    $dmp .= (is_int($val)) ? "0\n" : "NULL\n";
                 } else if(is_array($val)) {
                     $dmp .= "array(" . count($val) . ")\n";
                     $dmp .= $dump_object($val,$indent+1);
