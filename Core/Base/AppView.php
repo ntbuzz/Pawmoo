@@ -694,13 +694,13 @@ public function ViewTemplate($name,$vars = []) {
         if(is_array($subsec)) {
             echo "<div{$attr}>\n";
             // create tabset
-            echo "<ul class='tabmenu'>\n";
+            echo "<div class='tabPanel'><ul class='tabmenu'>\n";
             foreach($subsec as $key => $val) {
                 list($tag,$attrs) = $this->tag_Separate($key);
                 $attr = $this->gen_Attrs($attrs,$vars);
                 echo "<li{$attr}>{$tag}</li>\n";
             }
-            echo "</ul>\n";
+            echo "</ul></div>\n";
             // create tab-contents block
             echo "<ul class='tabcontents'>\n";
             foreach($subsec as $key => $val) {

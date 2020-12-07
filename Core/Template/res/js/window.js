@@ -13,45 +13,28 @@
         var self = this; // jQueryオブジェクトを変数に代入しておく
         $(e).on("scroll", function () {
             var top = $(e).scrollTop();
-            self.css("position", "relative");
-            self.css("top", top + "px");
+            self.css({
+                'position': 'relative',
+                'top': top + 'px',
+                'z-index': 99
+            });
         });
         $(e).scrollTop(0);
     };
     // 親要素の高さに調整する
     $.fn.adjustWindow = function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
-        var hsize = self.parent().height();
-        var htop = self.offset().top;
-        var spc = self.outerHeight() - self.height();
-        self.css({
-            'width': '100%',
-            'height': hsize - htop - spc + "px",
-            'overflow-y':"auto"
+        $(window).on("load resize", function () {
+            var hsize = self.parent().height();
+            var htop = self.offset().top;
+            var spc = self.outerHeight() - self.height();
+            self.css({
+                'width': '100%',
+                'height': hsize - htop - spc + "px",
+                'overflow-y': "auto"
+            });
         });
     };
-/*
-    $.fn.adjustHeight = function () {
-        var self = $(this); // jQueryオブジェクトを変数に代入しておく
-        $(window).on("load resize",function () {
-            hsize = self.parent().height();
-            htop = self.offset().top;
-            spc = self.outerHeight() - self.height();
-            self.css("height", hsize - htop - spc + "px");
-        });
-        $(window).resize();
-    };
-    // 親要素の幅に調整する
-    $.fn.adjustWidth = function () {
-        var self = this; // jQueryオブジェクトを変数に代入しておく
-        $(window).on("load resize",function () {
-            wsize = self.parent().innerWidth();
-            wleft = self.parent().offset().left;
-            self.css("width", wsize - wleft + "px");
-        });
-        $(window).resize();
-    };
-*/
     // CSS の padding 値を取得する
     $.fn.paddingWidth = function() {
         var widths = {
@@ -166,31 +149,17 @@ $(function () {
     var selector = $(".stickyBar");
     selector.each(function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
-        var stickyWiin = self.parent();
+        var stickyWin = self.parent();
         // 親要素 のスクロールに追従する
-        stickyWiin.on("scroll", function () {
-            var top = stickyWiin.scrollTop();
+        stickyWin.on("scroll", function () {
+            var top = stickyWin.scrollTop();
             self.css("top", top + "px");
         });
     });
     // ウィンドウ高さ調整
     var selector = $(".fitWindow");
     selector.each(function () {
-        var self = $(this); // jQueryオブジェクトを変数に代入しておく
-//        alert(self.attr('class'));
-        $(window).on("load resize",function () {
-//            wsize = self.parent().innerWidth();
-//            wleft = self.parent().offset().left;
-            hsize = self.parent().height();
-            htop = self.offset().top;
-            spc = self.outerHeight() - self.height();
-            self.css({
-                'width': '100%',
-//                'width': wsize - wleft + "px",
-                'height': hsize - htop - spc + "px",
-                'overflow-y':"auto"
-            });
-        });
+        $(this).adjustWindow(); // jQueryオブジェクトを変数に代入しておく
     });
     $(window).resize();
     // マークダウン外部リンク
