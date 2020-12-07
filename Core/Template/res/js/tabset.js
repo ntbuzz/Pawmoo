@@ -11,4 +11,5 @@ $(document).on('click','.tabControll>.tabPanel>.tabmenu>li',function () {
 	cont.eq(index).css('display','block');
 	menu.removeClass('selected');
 	$(this).addClass('selected');
+	control.parents().scrollTop(0);
 });

@@ -19,7 +19,7 @@
                 'z-index': 99
             });
         });
-        $(e).scrollTop(0);
+//        $(e).scrollTop(0);
     };
     // 親要素の高さに調整する
     $.fn.adjustWindow = function () {

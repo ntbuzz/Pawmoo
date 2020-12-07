@@ -23,6 +23,9 @@ public function SetupAlias($alias,$binds) {
 	$this->lang_alias = $alias;
 	$this->bind_columns = $binds;
 }
+public function GetAlias() {
+	return [ 'Locale' => $this->lang_alias,'Bind' => $this->bind_columns];
+}
 //==============================================================================
 // fetchDB: レコードを取得して言語エイリアスとカラム連結を適用する
 public function exists_locale($field_name) {
