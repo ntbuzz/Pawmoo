@@ -185,7 +185,7 @@ public function GetValueList() {
             foreach($val as $kk => $ref) {
                 list($table,$id,$fn) = explode('.', $ref);
                 $key_name = "{$base}_{$kk}";
-                $valueLists[$key_name] = $this->dbDriver->getValueLists($table,$kk,$fn);
+                $valueLists[$key_name] = $this->dbDriver->getValueLists($table,$fn,$id);
             }
         } else {
             list($table,$fn, $ref) = explode('.', $val);
