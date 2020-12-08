@@ -299,7 +299,7 @@ protected function sql_safequote(&$value) {
 						if(in_array($key,$and_or_op)) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
-							if(!empty($opp)) $opp = "({$opp})";
+//							if(!empty($opp)) $opp = "({$opp})";
 							if($key === 'NOT') $opp = "(NOT {$opp})";
 						} else { // LIKE [ array ]
 							$opp = $like_object($key,$val,$table);

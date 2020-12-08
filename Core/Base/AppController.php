@@ -191,8 +191,9 @@ public function MakepdfAction() {
 // 更新
 public function UpdateAction() {
 	$num = App::$Params[0];
+	MySession::setVariables(TRUE,['RecordNo' => $num]);
 	$this->Model->UpdateRecord($num,MySession::$ReqData);
-	header('Location:' . App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/' . $num );
+	header('Location:' . App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/');
 }
 
 //==============================================================================

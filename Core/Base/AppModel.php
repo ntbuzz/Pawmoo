@@ -85,7 +85,7 @@ public function RelationSetup() {
                     if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $ref_name = $lang_ref;
                 }
                 $sub_rel[$refer] = "{$link}.{$ref_name}";
-                $this->FieldSchema[$key_name] = NULL;//$key;
+                $this->FieldSchema[$key_name] = NULL;   // $key; import MUST!
             }
             $this->Relations[$key] =  $sub_rel;
         } else {
@@ -99,6 +99,12 @@ public function RelationSetup() {
         }
     }
     $this->dbDriver->setupRelations($this->Relations);
+    debug_log(DBMSG_MODEL,[
+        "Header" => $this->HeaderSchema,
+        "Field" => $this->FieldSchema, 
+        "Relation" => $this->Relations, 
+        "Locale-Bind" => $this->dbDriver->fieldAlias->GetAlias(),
+    ]);
 }
 //==============================================================================
 // スキーマを分解してヘッダー情報を生成
@@ -131,13 +137,13 @@ public function RelationSetup() {
                 }
             }
         }
-        debug_log(DBMSG_MODEL,[
-            "Header" => $header, 
-            "Field" => $field, 
-            "Relation" => $relation, 
-            "locale" => $locale,
-            "bind" => $bind,
-        ]);
+//        debug_log(DBMSG_MODEL,[
+//            "Header" => $header, 
+//            "Field" => $field, 
+//            "Relation" => $relation, 
+//            "locale" => $locale,
+//            "bind" => $bind,
+//        ]);
         $this->HeaderSchema = $header;
         $this->FieldSchema = $field;
         $this->Relations = $relation;
@@ -185,7 +191,7 @@ public function GetValueList() {
             foreach($val as $kk => $ref) {
                 list($table,$id,$fn) = explode('.', $ref);
                 $key_name = "{$base}_{$kk}";
-                $valueLists[$key_name] = $this->dbDriver->getValueLists($table,$kk,$fn);
+                $valueLists[$key_name] = $this->dbDriver->getValueLists($table,$fn,$id);
             }
         } else {
             list($table,$fn, $ref) = explode('.', $val);

@@ -145,9 +145,10 @@ public function MakePageLinks() {
 	protected function putTableHeader() {
 		echo '<tr>';
 		foreach($this->MyModel->HeaderSchema as $key => $val) {
-			list($alias,$align,$flag) = $val;
+			list($alias,$align,$flag,$wd) = $val;
 			$tsort = ($flag==2) ? '' : ' class="sorter-false"';
-			echo "<th${tsort}>{$alias}</th>";
+			$style = ($wd==0) ? '' : " style='width:{$wd}px;'";
+			echo "<th${tsort}{$style}>{$alias}</th>";
 		}
 		echo "</tr>\n";
 	}

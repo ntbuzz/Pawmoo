@@ -41,7 +41,7 @@ class App {
         static::$Filter = empty($filters) ? '': $filters[0];
    		// 0 〜 9 の不足する要素を補填する
         $k = count($params);
-		$params += array_fill($k, 10 - $k, '');
+		$params += array_fill($k, 10 - $k, 0);
 
         static::$ParamCount = $k;
         static::$Params = $params;  //array_intval_recursive($params);
@@ -97,6 +97,11 @@ public static function Get_RelocateURL() {
     }
     debug_log(DBMSG_SYSTEM, ["RE-LOCATE-JMP" => static::$execURI,'URI'=>$url]);
     return "/{$url}";
+}
+//==============================================================================
+// パラメータのリセット
+public static function ParamReset() { 
+    static::$Params = array_fill(0, 10, 0);
 }
 //==============================================================================
 // アプリケーションフォルダパスを取得

@@ -37,6 +37,7 @@ class AppView extends AppObject {
             'recordset' => 'cmd_recordset',
             'tabset'    => 'cmd_tabset',
             'floatwin'  => 'cmd_floatwin',
+            'textbox'   => 'cmd_textbox',
             'php'       => 'cmd_php',
         ],
         '*'    => 'sec_comment',
@@ -188,7 +189,11 @@ public function ViewTemplate($name,$vars = []) {
                 break;
             case '%': if(substr($var,-1) === '%') {     // is parameter number
                     $var = trim($var,'%');
-                    $val = App::$Params[$var];          // get value from Params[] property
+                    if(is_numeric($var)) $val = App::$Params[intval($var)];          // get value from Params[] property
+                    else {
+                        $n = strpos('abcdefghijklmnopqrstuvwxyz',$var);
+                        $val = App::$Filters[$n];
+                    }
                 }
                 break;
             case '$': if(substr($var,-1) === '$') {
@@ -694,13 +699,13 @@ public function ViewTemplate($name,$vars = []) {
         if(is_array($subsec)) {
             echo "<div{$attr}>\n";
             // create tabset
-            echo "<ul class='tabmenu'>\n";
+            echo "<div class='tabPanel'><ul class='tabmenu'>\n";
             foreach($subsec as $key => $val) {
                 list($tag,$attrs) = $this->tag_Separate($key);
                 $attr = $this->gen_Attrs($attrs,$vars);
                 echo "<li{$attr}>{$tag}</li>\n";
             }
-            echo "</ul>\n";
+            echo "</ul></div>\n";
             // create tab-contents block
             echo "<ul class='tabcontents'>\n";
             foreach($subsec as $key => $val) {
@@ -748,6 +753,14 @@ public function ViewTemplate($name,$vars = []) {
             }
             echo "</TABLE>";
         }
+    }
+    //--------------------------------------------------------------------------
+    //  INPUT TEXT OUTPUT
+    // +textbox[name]:size => [  value    ]
+    // ]
+    private function cmd_textbox($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $attr = $this->gen_Attrs($attrs,$vars);
+        echo "<INPUT TYPE='text'{$attr} value='{$text}'>\n";
     }
     //--------------------------------------------------------------------------
     //  INPUT RADIO OUTPUT
@@ -846,7 +859,7 @@ public function ViewTemplate($name,$vars = []) {
             }
         }
         // allow multi attribute, and separater not space
-        foreach(['data-element' => '{}', 'value' => '()', 'name' => '[]', 'id' => '##', 'class' => '..'] as $key => $seps) {
+        foreach(['data-element' => '{}', 'value' => '()', 'name' => '[]', 'size' => '::', 'id' => '##', 'class' => '..'] as $key => $seps) {
             list($sep,$tsep) = str_split($seps);
             $n = strrpos($tag,$sep);
             while( $n !== FALSE) {
