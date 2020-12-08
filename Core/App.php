@@ -99,6 +99,11 @@ public static function Get_RelocateURL() {
     return "/{$url}";
 }
 //==============================================================================
+// パラメータのリセット
+public static function ParamReset() { 
+    static::$Params = array_fill(0, 10, 0);
+}
+//==============================================================================
 // アプリケーションフォルダパスを取得
 public static function Get_AppPath($path) {
     $appname = static::$AppName;

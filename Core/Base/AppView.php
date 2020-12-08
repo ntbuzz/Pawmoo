@@ -37,6 +37,7 @@ class AppView extends AppObject {
             'recordset' => 'cmd_recordset',
             'tabset'    => 'cmd_tabset',
             'floatwin'  => 'cmd_floatwin',
+            'textbox'   => 'cmd_textbox',
             'php'       => 'cmd_php',
         ],
         '*'    => 'sec_comment',
@@ -750,6 +751,14 @@ public function ViewTemplate($name,$vars = []) {
         }
     }
     //--------------------------------------------------------------------------
+    //  INPUT TEXT OUTPUT
+    // +textbox[name]:size => [  value    ]
+    // ]
+    private function cmd_textbox($tag,$attrs,$subsec,$sec,$vars,$text) {
+        $attr = $this->gen_Attrs($attrs,$vars);
+        echo "<INPUT TYPE='text'{$attr} value='{$text}'>\n";
+    }
+    //--------------------------------------------------------------------------
     //  INPUT RADIO OUTPUT
     // +radio[name] => [
     //    select_option_value = > [
@@ -786,6 +795,7 @@ public function ViewTemplate($name,$vars = []) {
     //      name2 => [ @VALUE2 => TEXT [ ${@published} => 't' ] ]
     //  ]
     private function cmd_checkbox($tag,$attrs,$subsec,$sec,$vars,$text) {
+        debug_log(99,["CHECK"=>$attrs,"SUB"=>$subsec]);
         $attr = $this->gen_Attrs($attrs,$vars);
         $tags = "<INPUT TYPE='checkbox'{$attr}";
         if(is_array($sec)) {
@@ -846,7 +856,7 @@ public function ViewTemplate($name,$vars = []) {
             }
         }
         // allow multi attribute, and separater not space
-        foreach(['data-element' => '{}', 'value' => '()', 'name' => '[]', 'id' => '##', 'class' => '..'] as $key => $seps) {
+        foreach(['data-element' => '{}', 'value' => '()', 'name' => '[]', 'size' => '::', 'id' => '##', 'class' => '..'] as $key => $seps) {
             list($sep,$tsep) = str_split($seps);
             $n = strrpos($tag,$sep);
             while( $n !== FALSE) {
