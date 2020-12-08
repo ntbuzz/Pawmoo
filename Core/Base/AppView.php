@@ -189,7 +189,11 @@ public function ViewTemplate($name,$vars = []) {
                 break;
             case '%': if(substr($var,-1) === '%') {     // is parameter number
                     $var = trim($var,'%');
-                    $val = App::$Params[$var];          // get value from Params[] property
+                    if(is_numeric($var)) $val = App::$Params[intval($var)];          // get value from Params[] property
+                    else {
+                        $n = strpos('abcdefghijklmnopqrstuvwxyz',$var);
+                        $val = App::$Filters[$n];
+                    }
                 }
                 break;
             case '$': if(substr($var,-1) === '$') {
