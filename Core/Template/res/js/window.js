@@ -87,11 +87,12 @@
             self.find("*").each(function () {
                 var nm = $(this).attr('name');
                 if (nm) {
-//                    if ($(this).prop("tagName") == 'TEXTAREA') {
-//                        alert(nm);
-//                        setobj[nm] = $(this).val();
-//                    } else setobj[nm] = $(this).val();
-                    setobj[nm] = $(this).val();
+                    var tt = $(this).attr('type');
+                    if (tt == 'checkbox' || tt == 'radio') {
+                        if($(this).is(':checked')) setobj[nm] = $(this).val();
+                    } else {
+                        setobj[nm] = $(this).val();
+                    }
                 }
             });
             callback(setobj);
