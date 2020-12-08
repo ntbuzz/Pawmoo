@@ -206,9 +206,10 @@ public function ViewTemplate($name,$vars = []) {
                     preg_match($p,$var,$m);
                     list($match,$var,$mem) = $m;
                     if(isset($this->Model->$var)) { // exist Property?
-                        if(!empty($mem) && isset($this->Model->$var[$mem]))
-                            $val = $this->Model->$var[$mem];
-                        else $val = $this->Model->$var;
+                        $val = $this->Model->$var;
+                        if(!empty($mem) && isset($val[$mem])) {
+                            $val = $val[$mem];
+                        }
                     }
                     break;
             case "'": if(substr($var,-1) === "'") {     // check end-char

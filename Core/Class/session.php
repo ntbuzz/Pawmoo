@@ -79,21 +79,23 @@ static function getVariables($tt,...$arr) {
 }
 //==============================================================================
 // ENV(tt=TRUE) または REQ(tt=FALSE) 変数に値をセット
-// ENV変数を取り出す
+// 冗長だが PHP5.6 でも動作する方法をとる
 static function setVariables($tt,$arr) {
-	$varData = ($tt) ? 'EnvData' : 'ReqData';
-	$result = [];
 	foreach($arr as $key => $val) {
-		static::$$varData[$key] = $val;
+		if($tt) static::$EnvData[$key] = $val;
+		else static::$ReqData[$key] = $val;
 	}
 }
 //==============================================================================
 // setVariables と同じだが、未定義キーだけを値セットする
+// 冗長だが PHP5.6 でも動作する方法をとる
 static function set_if_empty($tt,$arr) {
-	$varData = ($tt) ? 'EnvData' : 'ReqData';
-	$result = [];
 	foreach($arr as $key => $val) {
-		if(!array_key_exists($key,static::$$varData)) static::$$varData[$key] = $val;
+		if($tt) {
+			if(!array_key_exists($key,static::$EnvData)) static::$EnvData[$key] = $val;
+		} else {
+			if(!array_key_exists($key,static::$ReqData)) static::$ReqData[$key] = $val;
+		}
 	}
 }
 //==============================================================================

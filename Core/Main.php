@@ -149,7 +149,7 @@ if(!$controllerInstance->is_enable_action($method)) {
     }
 }
 if(strcasecmp($appname,$controller) === 0) {
-    App::ChangeMethod('',$method,TRUE);     // コントローラーを隠す
+    App::ChangeMethod('',$method);     // コントローラーを隠す
 } else {
     App::ChangeMethod($controller,$method,FALSE);     // メソッドの書換えはリダイレクトしない
 }
