@@ -795,7 +795,6 @@ public function ViewTemplate($name,$vars = []) {
     //      name2 => [ @VALUE2 => TEXT [ ${@published} => 't' ] ]
     //  ]
     private function cmd_checkbox($tag,$attrs,$subsec,$sec,$vars,$text) {
-        debug_log(99,["CHECK"=>$attrs,"SUB"=>$subsec]);
         $attr = $this->gen_Attrs($attrs,$vars);
         $tags = "<INPUT TYPE='checkbox'{$attr}";
         if(is_array($sec)) {
