@@ -240,7 +240,7 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
     // 取得フィールドリストを生成する
     $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
-        return in_array($vv,$filter) || ($vv === NULL); // orgがNULLならバインド名を必ず含める
+        return in_array($vv,$filter,true) || ($vv === NULL); // orgがNULLならバインド名を必ず含める
     });
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];

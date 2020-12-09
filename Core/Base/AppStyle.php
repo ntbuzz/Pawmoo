@@ -64,7 +64,7 @@ class AppStyle {
             'Libs' => "Core/Template/res",
         );
         if(empty($this->ModuleName)) {
-            shift($this->Folders);          // remove top eelment (Module Unique resource)
+            array_shift($this->Folders);          // remove top eelment (Module Unique resource)
         }
         list($sysRoot,$appRoot) = $app_uri;
         $myVARS = array(

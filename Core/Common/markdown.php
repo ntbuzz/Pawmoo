@@ -204,7 +204,7 @@ function pseudo_markdown($atext, $md_class = '') {
         },
 //------- [check]{text} CHECKBOX MARK
         '/\[([^\]]*?)\]\{([^}]*?[^\\\\]|)\}/' => function ($m) {
-            $chek = (in_array(strtolower($m[1]),['','0','f','false']))?'[ ]':'<b>[X]</b>';
+            $chek = (is_bool_false($m[1])) ? '[ ]':'<b>[X]</b>';
             return " {$chek} {$m[2]}";
         },
 //------- FORM parts
@@ -245,7 +245,7 @@ function pseudo_markdown($atext, $md_class = '') {
                         } else {
                             list($check_item,$checked) = $item_array(':',$itemval,2); 
                             list($check_text,$check_val) = $item_array('=',$check_item,2); 
-                            $chk = (in_array($checked,['','0','f','false']))?'':' checked';
+                            $chk = (is_bool_false($checked)) ? '' : ' checked';
                             $checkbox .= "{$tag}{$chk} value='{$check_val}'>{$check_text} ";
                         }
                     }

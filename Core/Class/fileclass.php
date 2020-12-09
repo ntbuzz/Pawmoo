@@ -80,7 +80,7 @@ public function GetAttribute($path) {
 		$files = array();
 		while(false !== ($fl=$drc->read())) {
 			$sysfl = SysCharset($fl);		// Windows対策
-			if(! in_array($sysfl,IgnoreFiles,FALSE)) {
+			if(! in_array($sysfl,IgnoreFiles,true)) {
 				$lfl = "{$top}{$fl}";				// Windows(SJIS)対策
 				$syslfl = SysCharset($lfl);		// Windows対策
 				$ext = substr($sysfl,strrpos($sysfl,'.') + 1);    // 拡張子を確認
@@ -107,7 +107,7 @@ public function GetFiles($dirtop,$lvl) {
 	$files = array('FILE' => array(), 'DIR' => array() );
 	while(false !== ($fl=$drc->read())) {
 		$sysfl = SysCharset($fl);			// Windows 対策
-		if(! in_array($sysfl,IgnoreFiles,FALSE)) {
+		if(! in_array($sysfl,IgnoreFiles,true)) {
 			$lfl = "{$top}{$fl}";				// Windows(SJIS)対策
 			$syslfl = SysCharset($lfl);		// Windows対策
 			$ext = substr($sysfl,strrpos($sysfl,'.') + 1);    // 拡張子を確認

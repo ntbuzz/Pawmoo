@@ -138,7 +138,7 @@ function get_folder_lists($dirtop) {
     $drc=dir($dirtop);
     $folders = array();
 	while(false !== ($fl=$drc->read())) {
-        if(! in_array($fl,IgnoreFiles,FALSE)) {
+        if(! in_array($fl,IgnoreFiles,true)) {
             $path = "{$dirtop}{$fl}";
             if(is_dir($path)) {
                 $folders[] = $fl;
@@ -161,7 +161,7 @@ function get_php_files($dirtop) {
     if(file_exists($dirtop)) {
         $drc=dir($dirtop);
         while(false !== ($fl=$drc->read())) {
-            if(! in_array($fl,IgnoreFiles,FALSE)) {
+            if(! in_array($fl,IgnoreFiles,true)) {
                 $path = "{$dirtop}{$fl}";
                 $ext = substr($fl,strrpos($fl,'.') + 1);    // 拡張子を確認
                 if(!is_dir($path) && ($ext == 'php')) {
@@ -257,6 +257,13 @@ function tag_body_name($key) {
         $dd = substr($key,$n+1);
         if(is_numeric($dd)) $key = substr($key,0,$n);
     }
+    return $key;
+}
+//==============================================================================
+// array-key duplicate avoidance
+function array_key_unique($key,&$arr) {
+    $wkey = $key;
+    for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}:{$n}";
     return $key;
 }
 //==============================================================================

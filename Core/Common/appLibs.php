@@ -173,6 +173,15 @@ function text_line_split($del,$txt,$trim = FALSE) {
     return $array;
 }
 //==============================================================================
+// judgement boolean FALSE
+function is_bool_false($bool) {
+    $bool = trim($bool,"'");
+    foreach(['','0','f','false',0,NULL] as $val) {
+        if($bool === $val) return TRUE;
+    }
+    return FALSE;
+}
+//==============================================================================
 // array value concatinate to TEXT
 function array_reduce_recursive($array,$callback, $init='') {
     foreach($array as $key => $val) {

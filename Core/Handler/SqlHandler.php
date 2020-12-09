@@ -195,18 +195,13 @@ protected function sql_safequote(&$value) {
 	private function sql_makeWHERE($cond) {
 		$re_build_array = function($cond) {
 			$array_map_shurink = function($opr,$arr) use(&$array_map_shurink) {
-				$array_key_unique = function($key,&$arr) {
-					$wkey = $key;
-					for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}:{$n}";
-					return $key;
-				};
-				$array_merged = function($opr,&$arr,$val) use(&$array_key_unique,&$array_merged) {
+				$array_merged = function($opr,&$arr,$val) use(&$array_merged) {
 					if(is_array($val)) {
 						foreach($val as $kk => $vv) {
 							if($opr === $kk) {
 								$array_merged($opr,$arr,$vv);
 							} else {
-								$k = $array_key_unique($kk,$arr);
+								$k = array_key_unique($kk,$arr);
 								$arr[$k] = $vv;
 							}
 						}
@@ -222,7 +217,7 @@ protected function sql_safequote(&$value) {
 					if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
 						$array_merged($opr,$wd,$child);
 					} else {
-						$kk = $array_key_unique($key,$wd);
+						$kk = array_key_unique($key,$wd);
 						$wd[$kk] = $child;
 					}
 				}
@@ -296,7 +291,7 @@ protected function sql_safequote(&$value) {
 				list($key,$op) = keystr_opr($key);
 				if(empty($op) || $op === '%') {			// non-exist op or LIKE-op(%)
 					if(is_array($val)) {
-						if(in_array($key,$and_or_op)) {
+						if(in_array($key,$and_or_op,true)) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
 //							if(!empty($opp)) $opp = "({$opp})";

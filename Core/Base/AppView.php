@@ -334,13 +334,11 @@ public function ViewTemplate($name,$vars = []) {
             $ret = $if_selector($val,$key);
             if(is_array($ret)) {
                 foreach($ret as $kk => $vv) {
-                    if(isset($wd[$kk])) {
-                        if(is_numeric($kk)) $wd[] = $vv;
-                        else {
-                            for($dd=0;isset($wd[$ks="{$kk}:{$dup}"]);++$dd) ;
-                            $wd[$ks] = $vv;
-                        }
-                    } else $wd[$kk] = $vv;
+                    if(is_numeric($kk)) $wd[] = $vv;
+                    else {
+                        $kk = array_key_unique($kk,$wd);
+                        $wd[$kk] = $vv;
+                    }
                 }
             } else $wd[$key] = $ret;
         }
@@ -377,7 +375,7 @@ public function ViewTemplate($name,$vars = []) {
                 echo "{$sec}\n";
                 return;
             }
-            $key = $sec; $sec = [];
+//            $key = $sec; $sec = [];
         } else { // delete duplicate to avoid key-name
             $key = tag_body_name($key);
         }
@@ -421,6 +419,7 @@ public function ViewTemplate($name,$vars = []) {
             ksort($attrs);
             foreach($attrs as $name => $val) {
                 if(is_array($val)) $val = implode('',$val);
+                $val = $this->expand_Strings($val,$vars);
                 $attr .= (is_numeric($name)) ? " {$val}" : " {$name}=\"{$val}\"";
             }
         }
@@ -687,6 +686,21 @@ public function ViewTemplate($name,$vars = []) {
         }
     }
     //--------------------------------------------------------------------------
+    private function expand_key_section($sec,$vars) {
+        if(is_array($sec)) {
+            $newsec = [];
+            foreach($sec as $key => $val) {
+                if(is_numeric($key)) $newsec[] = $val;
+                else {
+                    $key = $this->expand_Strings($key,$vars);
+                    $newsec[$key] = $val;
+                }
+            }
+            return $newsec;
+        }
+        return $sec;
+    }
+    //--------------------------------------------------------------------------
     // +tabset.classname => [
     //      Menu1.selected => [ Contents1 ]
     //      Menu2 => [ Contents2 ]
@@ -698,6 +712,7 @@ public function ViewTemplate($name,$vars = []) {
         $attrs['class'] = rtrim("tabControll {$mycls}");
         $attr = $this->gen_Attrs($attrs,$vars);
         if(is_array($subsec)) {
+            $subsec = $this->expand_key_section($subsec,$vars);
             echo "<div{$attr}>\n";
             // create tabset
             echo "<div class='tabPanel'><ul class='tabmenu'>\n";
@@ -888,7 +903,7 @@ public function ViewTemplate($name,$vars = []) {
         $secList = [];
         list($tag,$attrList) = $this->tag_Separate($tag);
         if(is_array($sec)) {
-            $sec = $this->expand_SectionVar($sec,$vars);
+//            $sec = $this->expand_SectionVar($sec,$vars);
             foreach($sec as $key => $val) {
                 if(is_numeric($key)) {
                     // if $val will be ARRAY,SECTION-COMMAND, then SET SUB-SECTION
