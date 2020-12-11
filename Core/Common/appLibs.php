@@ -2,43 +2,11 @@
 // separated from appLibs, require in here.
 require_once('markdown.php');
 //==============================================================================
-// ARRAY first key , before PHP 7.3
-if (!function_exists('array_key_first')) {
-    function array_key_first(array $arr) {
-        foreach($arr as $key => $unused) {
-            return $key;
-        }
-        return NULL;
-    }
-}
-//==============================================================================
 // Divid by INTEGER, before PHP 7.0
 if (!function_exists('intdiv')) {
     function intdiv($var,$base) {
         return ($var - ($var % $base)) / $base;
     }
-}
-//==============================================================================
-// first key-value pair for associative arrays
-function array_first_item($arr) {
-    if(!empty($arr)) {
-        foreach($arr as $key => $val) {
-            return [$key,$val];
-        }
-    }
-    return ['',''];
-}
-//==============================================================================
-//  To compensate array, fixed count
-function array_alternative($a,$max = 0, $b = []) {
-    $n = count($b);
-    if($max === 0) $max = $n;
-    else if($n < $max) $b += array_fill($n,$max - $n,NULL);
-    else $b = array_slice($b,0,$max);
-    foreach($b as $key => $val) {
-        if(empty($a[$key])) $a[$key] = $val;
-    }
-    return $a;
 }
 //==============================================================================
 // get file extention, return string is ".ext"
@@ -116,28 +84,6 @@ function byte_format($size){
 	$num = round($num,1);
 	return ($over) ? $num . $units[$max_digit] : $num . $units[$digits];
 }
-
-//==============================================================================
-// strpos for array version
-function instr_array($str,$hayz) {
-    foreach($hays as $val) {
-        if(strpos($str,val) !== false) return TRUE;
-    }
-    return FALSE;
-}
-//==============================================================================
-// Array depth calculation, short priority 1-row version
-function array_depth($a, $c = 0) {
-    return (is_array($a) && count($a))
-          ? max(array_map("array_depth", $a, array_fill(0, count($a), ++$c)))
-          : $c;
-  }
-//==============================================================================
-// alternative array_merge(), Overwrite existing index elements
-function array_override($a, $b) {
-    foreach($b as $key => $val) $a[$key] = $val;
-    return $a;
-  }
 //==============================================================================
 // Convert text to HTML
 function text_to_html($atext) {
@@ -162,42 +108,13 @@ function control_escape($a) {
     return str_replace(["\r\n", "\r", "\n","\t"],["\\r\\n","\\r","\\n","\\t"], $a);
 }
 //==============================================================================
-// text line split by NL char, and trim-space each line
-function text_line_split($del,$txt,$trim = FALSE) {
-    $array = array_values(
-            array_filter(
-                array_map(function($a) {return trim(preg_replace('/\s+/', ' ', str_replace('　',' ',$a)));},
-                    explode($del, $txt)
-            ), ($trim) ? 'strlen' : function($a) { return TRUE;}
-        ));
-    return $array;
-}
-//==============================================================================
-// array value concatinate to TEXT
-function array_reduce_recursive($array,$callback, $init='') {
-    foreach($array as $key => $val) {
-        if(is_array($val)) $init = array_reduce_recursive($val,$callback, $init);
-        else $init .= $callback($key,$val);
+// judgement boolean FALSE
+function is_bool_false($bool) {
+    $bool = trim($bool,"'");
+    foreach(['','0','f','false',0,NULL] as $val) {
+        if($bool === $val) return TRUE;
     }
-    return $init;
-}
-//==============================================================================
-// array value concatinate to TEXT
-function array_to_text($array,$sep = "\n", $in_key = TRUE) {
-    $dump_text = function ($indent, $items)  use (&$dump_text,&$sep,&$in_key)  {
-        $txt = ''; $spc = str_repeat(' ', $indent);
-        foreach($items as $key => $val) {
-            if(is_array($val)) {
-                $txt .= $dump_text($indent+2, $val);
-            } else if(is_numeric($key) || $in_key === FALSE) {
-                $txt .= "{$spc}{$val}{$sep}";
-            } else {
-                $txt .= "{$spc}{$key}={$val}{$sep}" ;
-            }
-        }
-        return trim($txt,$sep);
-    };
-    return (is_array($array)) ? $dump_text(0,$array) : $array;
+    return FALSE;
 }
 //==============================================================================
 // check for protocol
@@ -217,14 +134,15 @@ function get_protocol($href) {
 // !:...    https://SERVER/...
 function make_hyperlink($lnk,$modname) {
     if(get_protocol($lnk) === NULL) {
-		if($lnk[0] === ':') {
+        $id_char = mb_substr($lnk,0,1);
+		if($id_char === ':') {
             $lnk[0] = '/';
-        } else if($lnk[0] === '/') {
+        } else if($id_char === '/') {
 			$lnk = App::Get_SysRoot("{$lnk}");
         } else {
             $prf = mb_substr($lnk,0,2);
             $ref = mb_substr($lnk,2);
-            if($lnk[0] === '!') {
+            if($id_char === '!') {
                 $protocols = [ '!!' => 'https://', '!:' => ' http://' ];
                 if(array_key_exists($prf,$protocols)) {
                     $lnk = $protocols[$prf] . App::$SysVAR['SERVER'] . $ref;

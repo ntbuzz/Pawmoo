@@ -3,7 +3,7 @@
  * Object Oriented PHP MVC Framework
  *  AppView:    View Template processing Engine.
  *              Handle of *.php, *.inc. *.tpl
- *              Having Chile Class AppHelper for HTML output
+ *              Having Child Class AppHelper for Detail HTML output
  */
 class AppView extends AppObject {
     protected $Layout;
@@ -17,6 +17,9 @@ class AppView extends AppObject {
         '<'    => 'sec_html',
         '@'    => 'sec_import',
         '&'    => 'sec_helper',
+        '*'    => 'sec_comment',
+        '%'    => 'sec_link',
+        '-'    => 'sec_singletag',
         '+'    => [
             'setvar'    => 'cmd_setvar',
             'include'   => 'cmd_include',
@@ -40,9 +43,6 @@ class AppView extends AppObject {
             'textbox'   => 'cmd_textbox',
             'php'       => 'cmd_php',
         ],
-        '*'    => 'sec_comment',
-        '%'    => 'sec_link',
-        '-'    => 'sec_singletag',
     );
     //==========================================================================
     // Constructor: Import Model Class by Owner Class, Create Helper
@@ -112,7 +112,7 @@ public function ViewTemplate($name,$vars = []) {
         switch($ix) {   //   [ .tpl, .php, .inc, .twg ]
         case 0:         // '.tpl'   div Section
             $parser = new SectionParser($tmplate);
-            $divSection = $parser->getSectionDef();
+            $divSection = $parser->getSectionDef(true);
             $this->inlineSection = [];         // Clear Inline-Section in this TEMPLATE
             debug_log(DBMSG_VIEW,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
             $this->sectionAnalyze($divSection,$vars);
@@ -201,7 +201,7 @@ public function ViewTemplate($name,$vars = []) {
                     $val = App::$SysVAR[$var];          // SysVAR[] property
                 }
                 break;
-            case ':': 
+            case ':':
                    	$p = '/:(\w+)(?:\[(\w+)\])*/';
                     preg_match($p,$var,$m);
                     list($match,$var,$mem) = $m;
@@ -243,55 +243,17 @@ public function ViewTemplate($name,$vars = []) {
         return $exvar;
     }
 //==============================================================================
-//  EXPAND SECTION variable
-    private function expand_SectionVar($vv,$vars) {
+//  EXPAND SECTION variable, $all = TRUE will recursive expand
+    private function expand_SectionVar($vv,$vars,$all = FALSE) {
         if(is_scalar($vv)) return $this->expand_Strings($vv,$vars);
         $new_vv = [];
         foreach($vv as $kk => $nm) {
             $new_kk = $this->expand_Strings($kk,$vars);
             if(is_scalar($nm)) $nm = $this->expand_Strings($nm,$vars);
+            else if(is_array($nm) && $all) $nm = $this->expand_SectionVar($nm,$vars,TRUE);   // EXPAND CHILD
             $new_vv[$new_kk] = $nm;
         }
         return $new_vv;
-    }
-//==============================================================================
-//  EXPAND SECTION at RECURSIVE
-    private function expand_Recursive($vv,$vars) {
-        if(is_scalar($vv)) return $this->expand_Strings($vv,$vars);
-        $new_vv = [];
-        foreach($vv as $kk => $nm) {
-            $new_kk = $this->expand_Strings($kk,$vars);
-            $nm = $this->expand_Recursive($nm,$vars);   // EXPAND CHILD
-            $new_vv[$new_kk] = $nm;
-        }
-        return $new_vv;
-    }
-//==============================================================================
-// TAG section direct OUTPUT
-    private function directOutput($beg_tag, $end_tag,$sec,$vars) {
-        echo "{$beg_tag}\n";
-        if(is_array($sec)) {
-            $sec = $this->expand_Recursive($sec,$vars);
-            foreach($sec as $vv) echo "{$vv}\n";
-        } else echo "{$sec}\n";
-        echo "{$end_tag}";
-    }
-//==============================================================================
-// like array_merge()
-    private function my_array_Merge($arr1,$arr2) {
-        foreach($arr2 as $key => $val) {
-            if($key[0] === '+') {
-                $var = substr($key,1);                            // except '+' charactor
-                if(isset($arr1[$var])) {
-                    $arr1[$var] = array_merge($val,$arr1[$var]);
-                } else {
-                    $arr1[$var] = $val . $arr1[$var];
-                }
-            } else {
-                $arr1[$key] = $val;
-            }
-        }
-        return $arr1;
     }
 //******************************************************************************
 // NEW processing Template-Engine
@@ -301,115 +263,139 @@ public function ViewTemplate($name,$vars = []) {
         if(is_scalar($arr)) return $arr;
         // analyze IF-SELECTOR and EXPAND KEY
         $if_selector = function($sec,$key) use(&$vars) {
-                if(substr($key,0,2)==='?&') {
-                    $tag = mb_substr($key,2);
-                    $sec = $this->expand_Recursive($sec,$vars);
-                    if(method_exists($this->Helper,$tag)) {
-                        return $this->Helper->$tag($sec);
-                    }
-                    echo "Helper Method:'{$tag}' not found. Please Create this method.\n";
-                    return [];
+            if($key[0]==='&') {
+                $tag = mb_substr($key,1);
+                $sec = $this->expand_SectionVar($sec,$vars,TRUE);
+                if(method_exists($this->Helper,$tag)) {
+                    return $this->Helper->$tag($sec);
                 }
-                if(substr($key,0,1)==='?') {
-                    $cmp_val = str_replace(["\n","\r"],'',$this->expand_Strings(mb_substr($key,1),$vars));
-                    foreach($sec as $check => $value) {
-                        if($check === '') $result = empty($cmp_val);            // is_empty ?
-                        else if($check === '*') $result = !empty($cmp_val);     // is_notempty ?
-                        else {
-                            $chk_arr = explode('|',$check);
-                            $result = FALSE;
-                            foreach($chk_arr as $cmp_chk) {
-                                $result = fnmatch($cmp_chk,$cmp_val);       // compare wild-char
-                                if($result) break;
-                            }
-                        }
-                        if($result) return $value;
+                echo "Helper Method:'{$tag}' not found. Please Create this method.\n";
+                return [];
+            }
+            $key = $this->expand_Strings($key,$vars);
+            $cmp_val = str_replace(["\n","\r"],'',$key);
+            foreach($sec as $check => $value) {
+                if($check === '') $result = empty($cmp_val);            // is_empty ?
+                else if($check === '*') $result = !empty($cmp_val);     // is_notempty ?
+                else {
+                    $chk_arr = explode('|',$check);
+                    $result = FALSE;
+                    foreach($chk_arr as $cmp_chk) {
+                        $result = fnmatch($cmp_chk,$cmp_val);       // compare wild-char
+                        if($result) break;
                     }
-                    return [];
                 }
-                return [$key => $sec];
+                if($result) return $value;
+            }
+            return [];
         };
         $wd = [];       // re-build array
         foreach($arr as $key => $val) {
-            $ret = $if_selector($val,$key);
-            if(is_array($ret)) {
+            if($key[0]==='?') {
+                $ret = $if_selector($val,mb_substr($key,1));
+                if(is_scalar($ret)) $ret = [$key => $ret];
                 foreach($ret as $kk => $vv) {
-                    if(isset($wd[$kk])) {
-                        if(is_numeric($kk)) $wd[] = $vv;
-                        else {
-                            for($dd=0;isset($wd[$ks="{$kk}:{$dup}"]);++$dd) ;
-                            $wd[$ks] = $vv;
-                        }
-                    } else $wd[$kk] = $vv;
+                    if(is_numeric($kk)) $wd[] = $vv;
+                    else {
+                        $kk = array_key_unique($kk,$wd);
+                        $wd[$kk] = $vv;
+                    }
                 }
-            } else $wd[$key] = $ret;
+            } else $wd[$key] = $val;
         }
         return $wd;
     }
 //==============================================================================
-// Analyzed Section, and Dispatch Command method
+// Analyzed Token-Section NEW VERSION
     private function sectionAnalyze($divSection,$vars) {
         if(is_scalar($divSection)) {
             echo $divSection;
+            echo "DIE!!!!!!!!!!!!\n";
             return;
         }
-        foreach($divSection as $key => $sec) {
-            // analyze IF-SELECTOR and EXPAND KEY
-            $vv = $this->array_if_selector($sec, $vars);
-            if(strlen($key) > 2 && $key[0] === '$' && $key[1] !== '{') {  // set Local Variable
-                $nm = mb_substr($key,1);      // 先頭文字を削除
-                $vars[$nm] = $this->expand_SectionVar($vv,$vars);
-            } else
-                $this->sectionDispath($key,$vv,$vars);
+        debug_log(-999,['VARS'=>$vars]);
+        foreach($divSection as $token => $sec) {
+            $sec = $this->array_if_selector($sec, $vars);
+            if(is_numeric($token)) {
+                if(is_array($sec)) $this->sectionAnalyze($sec,$vars);
+                else echo $sec;
+            } else {
+                list($tag,$attrs) = $this->tag_Separate($token,$vars);
+                switch(is_tag_identifier($tag)) {
+                case 0: break;
+                case 1:         // tag-section
+                        list($attrs,$innerText,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
+                        $attr = $this->gen_Attrs($attrs,$vars);
+                        if($subsec === [])  echo "<{$tag}{$attr}>{$innerText}</{$tag}>\n";
+                        else {
+                            echo "<{$tag}{$attr}>{$innerText}\n";
+                            $this->sectionAnalyze($subsec,$vars);
+                            echo "</{$tag}>\n";
+                        }
+                        break;
+                case 2:         // command-token
+                        $top_char = mb_substr($tag,0,1);
+                        $tag = mb_substr($tag,1);
+                        $func = self::FunctionList[$top_char];
+                        if(is_array($func)) {
+                            $cmd = $func[$tag];
+                            if(array_key_exists($tag,$func) && (method_exists($this, $cmd))) {
+                                $this->$cmd($tag,$attrs,$sec,$vars);
+                            } else echo "***NOT FOUND({$cmd}): {$cmd}({$tag},\$attrs,\$sec,\$vars) IN {$this->currentTemplate}\n";
+                        } else if(method_exists($this, $func)) {
+                            $this->$func($tag,$attrs,$sec,$vars);
+                        } else echo "CALL: {$func}({$tag},{$sec},vars)\n";
+                }
+            }
         }
     }
+    //==========================================================================
+    // TAG string SEPARATE
+    private function tag_Separate($tag,$vars) {
+        $tag = $this->expand_Strings(tag_body_name($tag),$vars);
+        $attrList = [];
+        // allow multi attribute, and separater not space
+        foreach(['data-element' => '{}', 'value' => '()', 'name' => '[]', 'size' => '::', 'id' => '##', 'class' => '..'] as $key => $seps) {
+            list($sep,$tsep) = str_split($seps);
+            $n = strrpos($tag,$sep);
+            while( $n !== FALSE) {
+                $m = strrpos($tag,$tsep);
+                $str = ($m === FALSE || $m === $n) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
+                $tag = mb_strcut($tag,0,$n);
+                if(!empty($str)) $attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} {$attrList[$key]}" : $str;
+                $n = strrpos($tag,$sep);
+            }
+		}
+        if(empty($tag)) $tag = 'div';
+        return array($tag,$attrList);
+    }
 //==============================================================================
-// key command analyze and extract ATTRIBUTE, SUB-SECTION, INNER-TEXT for Command
-// key => sec (vars)
-    private function sectionDispath($key,$sec,$vars) {
-        $num_key = is_numeric($key);
-        if($num_key) {  // numeric element will recursive process
-            if(is_array($sec)) {
-                $this->sectionAnalyze($sec,$vars);
-                return;
-            }
-            if($this->is_section_tag($sec,$sec) === FALSE) {
-                echo "{$sec}\n";
-                return;
-            }
-            $key = $sec; $sec = [];
-        } else { // delete duplicate to avoid key-name
-            $key = tag_body_name($key);
-        }
-        $key = $this->expand_Strings($key,$vars);        
-        $top_char = mb_substr($key,0,1);
-        if(array_key_exists($top_char,self::FunctionList)) {
-            $kkey = mb_substr($key,1);
-            if($top_char === $kkey[0]) {    // dual command charctor will output 1 charactor
-                echo $kkey; return;
-            }
-            $func = self::FunctionList[$top_char];
-            list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($key,$sec,$vars);
-            if(is_array($func)) {
-                $cmd = $func[$tag];
-                if(array_key_exists($tag,$func) && (method_exists($this, $cmd))) {
-                    $this->$cmd($tag,$attrs,$subsec,$sec,$vars,$text);
-                } else echo "***NOT FOUND({$cmd}): {$cmd}({$tag},\$attrs,\$sec,\$vars) IN {$this->currentTemplate}\n";
-            } else if(method_exists($this, $func)) {
-                if(is_array($sec)) $sec = $this->expand_SectionVar($sec,$vars);
-                $this->$func($tag,$attrs,$subsec,$sec,$vars,$text);
-            } else echo "CALL: {$func}({$kkey},{$sec},vars)\n";
+// Analyzed Section, and Dispatch Command method
+    private function subsec_separate($section,$attrList,$vars) {
+        $subsec = [];
+        if(is_scalar($section)) {
+            $innerText = $this->expand_Strings($section,$vars);
         } else {
-            list($tag,$text,$attrs,$subsec) = $this->tag_attr_Section($key,$sec,$vars);
-            $attr = $this->gen_Attrs($attrs,$vars);
-            if(is_array($sec)) {
-                echo "<{$tag}{$attr}>{$text}";
-                $this->sectionAnalyze($subsec,$vars);
-                echo "</{$tag}>\n";
-            } else {
-                echo "<{$tag}{$attr}>{$text}</{$tag}>\n";
+            $innerText = '';
+            if(!empty($section)) {
+                foreach($section as $token => $sec) {
+                    $token = $this->expand_Strings($token,$vars);
+                    if(is_scalar($sec)) $sec = $this->expand_Strings($sec,$vars);
+                    if (ctype_alpha($token)) {      // attr-name
+                        if(!empty($sec)) $attrList[$token] = $sec;
+                    } else if(is_numeric($token)) {
+                        if(is_tag_identifier($sec)===2) {   // not a command-token
+                            $subsec[$sec] = [];
+                        } else if(is_scalar($sec)) {
+                            $innerText .= $sec;
+                        } else $subsec[] = $sec;
+                    } else {
+                        $subsec[$token] = $sec;
+                    }
+                }
             }
         }
+        return [$attrList,$innerText,$subsec];
     }
     // *************************************************************************
     // SECTION-TAG PROCESSIOG
@@ -420,54 +406,67 @@ public function ViewTemplate($name,$vars = []) {
         if($attrs !== array()) {
             ksort($attrs);
             foreach($attrs as $name => $val) {
-                if(is_array($val)) $val = implode('',$val);
-                $attr .= (is_numeric($name)) ? " {$val}" : " {$name}=\"{$val}\"";
+                $str = (is_array($val)) ? implode("\n",$val) :$val;
+                $str = $this->expand_Strings($str,$vars);
+                if(!empty($str)) $attr .= (is_numeric($name)) ? " {$str}" : " {$name}=\"{$str}\"";
             }
         }
         return $attr;
     }
     //==========================================================================
     // DIRECT HTML TAG
-    private function sec_html($tag,$attrs,$subsec,$sec,$vars,$text) {
+    //  <html>, <h1> => innerText or [ innerText ]
+    private function sec_html($tag,$attrs,$sec,$vars) {
+        list($attrs,$innerText,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
+        $tag = trim($tag,'<>');
         $attr = $this->gen_Attrs($attrs,$vars);
-        echo (empty($text)) ? "<{$tag}{$attr}>\n" : "<{$tag}{$attr}>{$text}</{$tag}>\n" ;
+        echo (empty($innerText)) ? "<{$tag}{$attr} />\n" : "<{$tag}{$attr}>{$innerText}</{$tag}>\n" ;
     }
     //==========================================================================
     // HTML Comment TAG
-    private function sec_comment($tag,$attrs,$subsec,$sec,$vars,$text) {
-        echo "<!-- $tag" . (empty($sec) ? " " : "\n");
-        foreach($sec as $kk => $vv) echo "{$vv}\n";
-        echo "-->\n";
+    // *Comment, * => [ array-text ]
+    private function sec_comment($tag,$attrs,$sec,$vars) {
+        $txt = array_to_text($sec,'');
+        echo "<!-- {$tag}{$txt} -->\n";
     }
     //==========================================================================
     // IMPORT external TEMPLATE, or INLINE SECTION
-    private function sec_import($tag,$attrs,$subsec,$sec,$vars,$text) {
+    // @Template, @Template => [ argument => value ... ]
+    private function sec_import($tag,$attrs,$sec,$vars) {
+        if(!empty($sec)) {      // set import argument
+            foreach($sec as $key => $subsec) {
+                if(mb_substr($key,0,1)==='$') $key = mb_substr($key,1);     // allow $var = value
+                $vars[$key] = $this->expand_SectionVar($subsec,$vars,TRUE); // EXPAND CHILD
+            }
+        }
         $is_inline = ($tag[0] === '.');
         if($is_inline) $tag = substr($tag,1);
-        $mergevars = (is_array($sec)) ? array_merge($vars, $sec) : $vars;
         if($is_inline && array_key_exists($tag,$this->inlineSection)) {
-            $this->sectionAnalyze($this->inlineSection[$tag],$mergevars);
+            $this->sectionAnalyze($this->inlineSection[$tag],$vars);
         } else {
-            $this->ViewTemplate($tag,$mergevars);
+            $this->ViewTemplate($tag,$vars);
         }
     }
     //==========================================================================
-    //  single tag for attribute only
-    private function sec_singletag($tag,$attrs,$subsec,$sec,$vars,$text) {
-        $attr = $this->gen_Attrs($attrs,$vars);
+    //  single tag for attribute only (for <meta>)
+    //  -tag => [ common-attr => value [ additional-attr => value ... ] ]
+    private function sec_singletag($tag,$attrs,$sec,$vars) {
+        list($attrs,$innerText,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
         if(!empty($subsec)) {  // have repeat-section
-            foreach($subsec as $kk => $vv) {
-                list($tt,$txt,$at,$sub) = $this->tag_attr_Section($kk,$vv,$vars);
+            foreach($subsec as $vv) {
+                list($at,$txt,$sub) = $this->subsec_separate($vv,$attrs,$vars);
                 $atr = $this->gen_Attrs($at,$vars);
-                echo "<{$tag}{$attr}{$atr}>\n";
+                echo "<{$tag}{$atr}>\n";
             }
         } else {
+            $attr = $this->gen_Attrs($attrs,$vars);
             echo "<{$tag}{$attr}>\n";
         }
     }
     //==========================================================================
     // ALink Hyperlink
-    private function sec_link($tag,$attrs,$subsec,$sec,$vars,$text) {
+    //  %link => [ A-Text => URL ... ], %A-Text => URL
+    private function sec_link($tag,$attrs,$sec,$vars) {
         if($tag === 'link') {
             if(is_array($sec)) {
                 foreach($sec as $kk => $vv) $this->Helper->ALink($vv,$kk);
@@ -478,9 +477,10 @@ public function ViewTemplate($name,$vars = []) {
     }
     //==========================================================================
     // CALL Helper-Method
-    private function sec_helper($tag,$attrs,$subsec,$sec,$vars,$text) {
+    //  &Helper-Method, &Helper-Method => [ argument => value ... ] in Helper refer $arg['argument']
+    private function sec_helper($tag,$attrs,$sec,$vars) {
         // EXPAND CHILD for Helper-Method
-        $sec = $this->expand_Recursive($sec,$vars);
+        $sec = $this->expand_SectionVar($sec,$vars,TRUE);
         if(method_exists($this->Helper,$tag)) {
             $this->Helper->$tag($sec);
         } else if(method_exists('App',$tag)) {
@@ -489,56 +489,67 @@ public function ViewTemplate($name,$vars = []) {
             echo "Helper Method:'{$tag}' not found. Please Create this method.\n";
         }
     }
+    //==============================================================================
+    // TAG section direct OUTPUT for +jquery,+script,*style
+    private function directOutput($beg_tag, $end_tag,$sec,$vars) {
+        $txt = $this->expand_Strings(((is_array($sec)) ? array_to_text($sec) : $sec),$vars);
+        echo "{$beg_tag}\n{$txt}\n{$end_tag}\n";
+    }
     //--------------------------------------------------------------------------
     // cmd_xxxx method
     //--------------------------------------------------------------------------
     //  iinclude external file, for CSS/JS/...
-    private function cmd_include($tag,$attrs,$subsec,$sec,$vars,$text) {
-        $sec = $this->expand_Recursive($sec,$vars);   // EXPAND CHILD
-        App::WebInclude($sec);
+    //  +include => [ inlclude-filename ... ]
+    private function cmd_include($tag,$attrs,$sec,$vars) {
+        $wsec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
+        App::WebInclude($wsec);
     }
     //--------------------------------------------------------------------------
     //  SET GLOBAL VARIABLE
-    private function cmd_setvar($tag,$attrs,$subsec,$sec,$vars,$text) {
-        $sec = $this->expand_Recursive($sec,$vars);   // EXPAND CHILD
-        $this->env_vars = $this->my_array_Merge($sec,$this->env_vars);
+    //  +setvar => [ varname => value ... ]
+    private function cmd_setvar($tag,$attrs,$sec,$vars) {
+        foreach($sec as $key => $sec) {
+            if(mb_substr($key,0,1)==='$') $key = mb_substr($key,1);             // allow '$' prefix
+            $this->env_vars[$key] = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
+        }
     }
     //--------------------------------------------------------------------------
     //  output JQuery function
-    private function cmd_jquery($tag,$attrs,$subsec,$sec,$vars,$text) {
+    //  +jquery => value (allow array)
+    private function cmd_jquery($tag,$attrs,$sec,$vars) {
         $this->directOutput("<script type='text/javascript'>\n$(function() {", "});\n</script>",$sec,$vars);
     }
     //--------------------------------------------------------------------------
     //  javascript output
-    private function cmd_script($tag,$attrs,$subsec,$sec,$vars,$text) {
+    //  +script => value (allow array)
+    private function cmd_script($tag,$attrs,$sec,$vars) {
         $this->directOutput("<script type='text/javascript'>", "</script>",$sec,$vars);
     }
     //--------------------------------------------------------------------------
     //  output STYLE tag
-    private function cmd_style($tag,$attrs,$subsec,$sec,$vars,$text) {
+    //  +style =>  value (allow array)
+    private function cmd_style($tag,$attrs,$sec,$vars) {
         $this->directOutput('<style type="text/css">', "</style>",$sec,$vars);
     }
     //--------------------------------------------------------------------------
     //  output IMAGE-TAG
-    private function cmd_image($tag,$attrs,$subsec,$sec,$vars,$text) {
-        if(is_array($sec)) { // 連想キーが無いスカラー値のみ抽出
-            $sec = $this->expand_SectionVar($sec,$vars);
-            foreach($sec as $key => $val) {
-                if(is_numeric($key) && is_scalar($val)) $src = $val;
-            }
-        } else $src = $sec;
+    // +img => URL , +img => [ attribule => value URL ]
+    private function cmd_image($tag,$attrs,$sec,$vars) {
+        list($attrs,$src,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
         $attr = $this->gen_Attrs($attrs,$vars);
         $src = make_hyperlink($src,$this->ModuleName);
         echo "<img src='{$src}'{$attr} />";
     }
     //--------------------------------------------------------------------------
     //  echo string
-    private function cmd_echo($tag,$attrs,$subsec,$sec,$vars,$text) {
-        $this->directOutput('', '',$text,$vars);
+    //  +echo => value, echo => [ value-list ]
+    private function cmd_echo($tag,$attrs,$sec,$vars) {
+        $this->directOutput('', '',$sec,$vars);
     }
     //--------------------------------------------------------------------------
-    //  PHP eval, Danger Section!
-    private function cmd_php($tag,$attrs,$subsec,$sec,$vars,$text) {
+    //  PHP eval for DEBUG, Danger Section!
+    //  +php => php-command
+    private function cmd_php($tag,$attrs,$sec,$vars) {
         $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
         $atext = $this->expand_Strings($atext,$vars);
         $Helper = $this->Helper;
@@ -549,36 +560,38 @@ public function ViewTemplate($name,$vars = []) {
         eval($atext);
     }
     //--------------------------------------------------------------------------
-    //  Define INLINE Section, for use after section
-    private function cmd_inline($tag,$attrs,$subsec,$sec,$vars,$text) {
+    //  Define INLINE Section, for use after import Template
+    //  +inline.SecName => value  ( use import for @.SecName )
+    private function cmd_inline($tag,$attrs,$sec,$vars) {
         $name = $attrs['class'];
         $this->inlineSection[$name] = $sec;
     }
     //--------------------------------------------------------------------------
     // MARKDOWN OUTPUT
-    //  if Associative ARRAY, KEY-NAME use to MARKDOWN Class
-    private function cmd_markdown($tag,$attrs,$subsec,$sec,$vars,$text) {
+    //  +markdown.classname => markdown-text
+    private function cmd_markdown($tag,$attrs,$sec,$vars) {
         $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
         $atext = $this->expand_Strings($atext,$vars);
         if(is_array($sec)) $atext = "\n{$atext}\n\n";
         $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
         $mtext = pseudo_markdown( $atext,$cls);
+//        $mtext = $this->expand_Strings($mtext,$vars);
         echo $mtext;
     }
     //--------------------------------------------------------------------------
-    // repeat Recode Data List (fetch Multi Record set)
-    // $sec variable expand on repeat RecData
-    private function cmd_recordset($tag,$attrs,$subsec,$sec,$vars,$text) {
+    // repeat Model property data, default is 'Records', otherwise 'name' attribute
+    //  +recordset => [ section ], +recoedset[propname] => [ section ]
+    private function cmd_recordset($tag,$attrs,$sec,$vars) {
         $save_data = $this->Model->RecData;         // backup RecData
         $props = 'Records';
         if(isset($attrs['name'])) {
-            $nm = mb_substr($attrs['name'],1);     // except ':' char
+            $nm = $attrs['name'];
+            if($nm[0]===':') $nm = mb_substr($nm,1);     // allow old-style begin ':' char
             if(isset($this->Model->$nm)) $props = $nm;
         }
         foreach($this->Model->$props as $records) {
             $this->Model->RecData = $records;    // replace RecData
-            $v_sec = $this->expand_SectionVar($sec,$vars);
-            $this->sectionAnalyze($v_sec,$vars);
+            $this->sectionAnalyze($sec,$vars);
         }
         $this->Model->RecData = $save_data;         // restore RecData
     }
@@ -587,16 +600,14 @@ public function ViewTemplate($name,$vars = []) {
     // +ul => [
     //   { li.class#id => } [   ]
     // ]
-    private function cmd_list($tag,$attrs,$subsec,$sec,$vars,$text) {
+    private function cmd_list($tag,$attrs,$sec,$vars) {
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<{$tag}{$attr}>\n";
-        // リスト要素の出力
-        foreach($subsec as $kk => $vv) {
-            // $key と $sec をタグと属性に分解する
-            list($s_tag,$s_text,$s_attr,$s_sec) = $this->tag_attr_Section($kk,$vv,$vars);
-            $attr = $this->gen_Attrs($s_attr,$vars);
-            $s_text = $this->expand_Strings($s_text,$vars);   // 変数置換を行う
-            if(!empty($s_sec)) {  // サブセクションがあればセクション処理
+        foreach($sec as $li_token => $li_sec) {
+            list($s_tag,$s_attrs) = $this->tag_Separate($li_token,$vars);
+            list($s_attrs,$s_text,$s_sec) = $this->subsec_separate($li_sec,$s_attrs,$vars);
+            $attr = $this->gen_Attrs($s_attrs,$vars);
+            if(!empty($s_sec)) {  // list have a subsection ?
                 echo "<li{$attr}>{$s_text}\n";
                 $this->sectionAnalyze($s_sec,$vars);
                 echo "</li>\n";
@@ -609,310 +620,236 @@ public function ViewTemplate($name,$vars = []) {
     //--------------------------------------------------------------------------
     //  dl List OUTPUT
     // +dl => [
-    //    [ DT-Text 
+    //    [ DT-Text
     //      { DD-ATTR => } [ SECTION ]
     //    ]
+    //     ...
     // ]
-    private function cmd_dl($tag,$attrs,$subsec,$sec,$vars,$text) {
+    private function cmd_dl($tag,$attrs,$sec,$vars) {
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<{$tag}{$attr}>\n";
-        // DTのリスト要素の出力
-        foreach($subsec as $kk => $vv) {
-            // $key と $sec をタグと属性に分解する
-            list($dt_tag,$dt_text,$dt_attrs,$dd_sec) = $this->tag_attr_Section($kk,$vv,$vars);
+        foreach($sec as $dt_token => $dt_sec) {
+            list($dt_tag,$dt_attrs) = $this->tag_Separate($dt_token,$vars);
+            list($dt_attrs,$dt_text,$dd_sec) = $this->subsec_separate($dt_sec,$dt_attrs,$vars);
             $attr = $this->gen_Attrs($dt_attrs,$vars);
-            $dt_text = $this->expand_Strings($dt_text,$vars);   // 変数置換を行う
             echo "<dt{$attr}>{$dt_text}</dt>\n";
-            if(!empty($dd_sec)) {  // DDセクションがあれば処理
-                foreach($dd_sec as $dd_key => $dd_sub) {
-                    list($dd_tag,$dd_text,$dd_attrs,$dd_child) = $this->tag_attr_Section($dd_key,$dd_sub,$vars);
+            if(!empty($dd_sec)) {  // dd tag have a subsection ?
+                foreach($dd_sec as $dd_token => $dd_sub) {
+                    list($dd_tag,$dd_attrs) = $this->tag_Separate($dd_token,$vars);
+                    list($dd_attrs,$dd_text,$dd_child) = $this->subsec_separate($dd_sub,$dd_attrs,$vars);
                     $dd_attr = $this->gen_Attrs($dd_attrs,$vars);
                     echo "<dd{$dd_attr}>{$dd_text}\n";
                     $this->sectionAnalyze($dd_child,$vars);
                     echo "</dd>\n";
                 }
-            } else {
-                echo "<dd></dd>\n";
-            }
+            } else echo "<dd></dd>\n";
         }
         echo "</{$tag}>\n";
-    } 
+    }
     //--------------------------------------------------------------------------
     //  +floatwin = floatWindow + dl
     //  +floatwin.class#id => [
-    //      dt-Title
-    //      [ DD-Section ] 
+    //      value => "BUTTIONS"
+    //      dt-Title-Text
+    //      token => [ DD-Section ]
     // ]
-    private function cmd_floatwin($tag,$attrs,$subsec,$sec,$vars,$text) {
+    private function cmd_floatwin($tag,$attrs,$sec,$vars) {
+        list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         $mycls = (isset($attrs['class']))? $attrs['class'] :'';
         $attrs['class'] = rtrim("floatWindow {$mycls}");
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<div{$attr}>\n";
         // pick-up #init section
-        foreach($subsec as $key => $val) {
+        foreach($sec as $key => $val) {
             if(strpos($key,'#init')!==FALSE) {
-                unset($subsec[$key]);
+                unset($sec[$key]);
                 $this->sectionAnalyze([$key => $val],$vars);
                 break;
             }
         }
         echo "<dl><dt>{$text}</dt>\n";
         echo "<dd>\n";
-        $this->sectionAnalyze($subsec,$vars);
+        $this->sectionAnalyze($sec,$vars);
         echo "</dd></dl></div>\n";
-    } 
+    }
     //--------------------------------------------------------------------------
     //  select OUTPUT
-    // +select => [
-    //    selected_key = > [
+    // +select => [ selected_key = > [
     //      option_text => value
     //      ...
-    //    ]
-    // ]
-    private function cmd_select($tag,$attrs,$subsec,$sec,$vars,$text) {
-        if(is_array($subsec)) {
-            $attr = $this->gen_Attrs($attrs,$vars);
-            echo "<{$tag}{$attr}>\n";
-            list($opt_key, $opt_val) = array_first_item($subsec);
-            $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
-            $opt_val = $this->expand_SectionVar($opt_val,$vars);
-            if(is_array($opt_val)) {
-                $opt_val = array_flat_reduce($opt_val);
-                foreach($opt_val as $opt => $val) {
-                    $sel = ($val == $sel_item) ? ' selected':'';
-                    echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
+    //  ] ]
+    private function cmd_select($tag,$attrs,$sec,$vars) {
+        if(!is_array($sec)) return;     // not allow scalar value
+        $attr = $this->gen_Attrs($attrs,$vars);
+        echo "<{$tag}{$attr}>\n";
+        list($opt_key, $opt_val) = array_first_item($sec);
+        $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
+        $opt_val = $this->expand_SectionVar($opt_val,$vars);
+        if(is_array($opt_val)) {
+            $opt_val = array_flat_reduce($opt_val);
+            foreach($opt_val as $opt => $val) {
+                $sel = ($val == $sel_item) ? ' selected':'';
+                echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
+            }
+        } else echo "<OPTION value='{$opt_val}'>{$opt_val}</OPTION>\n";
+        echo "</{$tag}>\n";
+    }
+    //--------------------------------------------------------------------------
+    private function expand_key_section($sec,$vars) {
+        if(is_array($sec)) {
+            $newsec = [];
+            foreach($sec as $key => $val) {
+                if(is_numeric($key)) $newsec[] = $val;
+                else {
+                    $key = $this->expand_Strings($key,$vars);
+                    $newsec[$key] = $val;
                 }
-            } else echo "<OPTION value='{$opt_val}'>{$opt_val}</OPTION>\n";
-            echo "</{$tag}>\n";
+            }
+            return $newsec;
         }
+        return $sec;
     }
     //--------------------------------------------------------------------------
     // +tabset.classname => [
     //      Menu1.selected => [ Contents1 ]
-    //      Menu2 => [ Contents2 ]
-    //      Menu3 => [ Contents3 ]
-    //      Menu4 => [ Contents4 ]
+    //      Menu2 => [ Contents2 ] ...
     //  ]
-    private function cmd_tabset($tag,$attrs,$subsec,$sec,$vars,$text) {
+    private function cmd_tabset($tag,$attrs,$sec,$vars) {
+        if(!is_array($sec)) return;     // not allow scalar value
+
         $mycls = (isset($attrs['class']))? $attrs['class'] :'';
         $attrs['class'] = rtrim("tabControll {$mycls}");
         $attr = $this->gen_Attrs($attrs,$vars);
-        if(is_array($subsec)) {
-            echo "<div{$attr}>\n";
-            // create tabset
-            echo "<div class='tabPanel'><ul class='tabmenu'>\n";
-            foreach($subsec as $key => $val) {
-                list($tag,$attrs) = $this->tag_Separate($key);
-                $attr = $this->gen_Attrs($attrs,$vars);
-                echo "<li{$attr}>{$tag}</li>\n";
-            }
-            echo "</ul></div>\n";
-            // create tab-contents block
-            echo "<ul class='tabcontents'>\n";
-            foreach($subsec as $key => $val) {
-                list($tag,$attrs) = $this->tag_Separate($key);
-                if(array_key_exists('class',$attrs)) {
-                    if(!preg_match('/hide|selected/', $attrs['class'])) {
-                        $attrs['class'] .= ' hide';
-                    }
-                } else $attrs['class'] = 'hide';
-                $attr = $this->gen_Attrs($attrs,$vars);
-                echo "<li{$attr}>";
-                $this->sectionAnalyze($val,$vars);
-                echo "</li>\n";
-            }
-            echo "</ul>\n";
-            echo "</div>";
+        echo "<div{$attr}>\n";
+        // create tabset
+        echo "<div class='tabPanel'><ul class='tabmenu'>\n";
+        $tabs = array_keys($sec);
+        foreach($tabs as $key_val) {
+            list($tag,$attrs) = $this->tag_Separate($key_val,$vars);
+            $attr = $this->gen_Attrs($attrs,$vars);
+            echo "<li{$attr}>{$tag}</li>\n";
         }
+        echo "</ul></div>\n";
+        // create tab-contents block
+        echo "<ul class='tabcontents'>\n";
+        foreach($sec as $key => $val) {
+            list($tag,$attrs) = $this->tag_Separate($key,$vars);
+            if(array_key_exists('class',$attrs)) {
+                if(!preg_match('/hide|selected/', $attrs['class'])) {
+                    $attrs['class'] .= ' hide';
+                }
+            } else $attrs['class'] = 'hide';
+            $attr = $this->gen_Attrs($attrs,$vars);
+            echo "<li{$attr}>";
+            $this->sectionAnalyze($val,$vars);
+            echo "</li>\n";
+        }
+        echo "</ul>\n";
+        echo "</div>";
     }
     //--------------------------------------------------------------------------
     //  TABLE OUTPUT
     // +table => [
     //    [  th=>[ TH-CELL ] .td_attr=>[ TD-CELL ]  [ TD-CELL ] ]
     // ]
-    private function cmd_table($tag,$attrs,$subsec,$sec,$vars,$text) {
+    private function cmd_table($tag,$attrs,$sec,$vars) {
+        if(!is_array($sec)) return;     // not allow scalar value
         $attr = $this->gen_Attrs($attrs,$vars);
-        if(is_array($subsec)) {
-            echo "<TABLE{$attr}>\n";
-            foreach($subsec as $key => $val) {
-                if(!is_numeric($key)) {
-                    list($key,$attrs) = $this->tag_Separate($key);
-                    $tr_attr = $this->gen_Attrs($attrs,$vars);
-                    echo "<TR{$tr_attr}>";
-                } else echo "<TR>";
-                if(is_array($val)) {
-                    foreach($val as $td_key => $td_val) {
-                        list($td_key,$td_text,$td_attrs,$td_sec) = $this->tag_attr_Section($td_key,$td_val,$vars);
-                        $td_attr = $this->gen_Attrs($td_attrs,$vars);
-                        if($td_key === 'div') $td_key='td';     // omitted TAG is DIV tag setting
-                        echo "<{$td_key}{$td_attr}>{$td_text}";
-                        $this->sectionAnalyze($td_sec,$vars);
-                        echo "</{$td_key}>";
-                    }
+        echo "<TABLE{$attr}>\n";
+        foreach($sec as $key => $val) {
+            if(!is_numeric($key)) {
+                list($key,$attrs) = $this->tag_Separate($key,$vars);
+                $tr_attr = $this->gen_Attrs($attrs,$vars);
+                echo "<TR{$tr_attr}>";
+            } else echo "<TR>";
+            if(is_array($val)) {
+                foreach($val as $td_key => $td_val) {
+                    list($tag,$attrs) = $this->tag_Separate($td_key,$vars);
+                    list($attrs,$innerText,$sec) = $this->subsec_separate($td_val,$attrs,$vars);
+                    $td_attr = $this->gen_Attrs($attrs,$vars);
+                    if(is_numeric($tag) || $tag === 'div') $tag='td';     // omitted TAG is DIV tag setting
+                    echo "<{$tag}{$td_attr}>{$innerText}";
+                    $this->sectionAnalyze($sec,$vars);
+                    echo "</{$tag}>";
                 }
-                echo "</TR>\n";
             }
-            echo "</TABLE>";
+            echo "</TR>\n";
         }
+        echo "</TABLE>";
     }
     //--------------------------------------------------------------------------
     //  INPUT TEXT OUTPUT
-    // +textbox[name]:size => [  value    ]
-    // ]
-    private function cmd_textbox($tag,$attrs,$subsec,$sec,$vars,$text) {
+    // +textbox[name]:size => [  attribute => value value    ]
+    private function cmd_textbox($tag,$attrs,$sec,$vars) {
+        list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
+        $attrs['value'] = $innerText;
         $attr = $this->gen_Attrs($attrs,$vars);
-        echo "<INPUT TYPE='text'{$attr} value='{$text}'>\n";
+        echo "<INPUT TYPE='text'{$attr}'>\n";
     }
     //--------------------------------------------------------------------------
     //  INPUT RADIO OUTPUT
-    // +radio[name] => [
-    //    select_option_value = > [
+    // +radio[name] => [  select_option_value = > [
     //      option_text => option_value
     //      ...
-    //    ]
-    // ]
-    private function cmd_radio($tag,$attrs,$subsec,$sec,$vars,$text) {
-        if(is_array($subsec)) {
-            $subsec = $this->expand_Recursive($subsec,$vars);   // EXPAND ALL-CHILD
-            $attr = $this->gen_Attrs($attrs,$vars);
-            $tags = "<INPUT TYPE='radio'{$attr}";
-            list($opt_key, $opt_val) = array_first_item($subsec);
-            $sel_item = (is_numeric($opt_key)) ? '' : $opt_key;
-            $opt_val = $this->expand_SectionVar($opt_val,$vars);
-            if(is_array($opt_val)) {
-                $opt_val = array_flat_reduce($opt_val);
-                foreach($opt_val as $opt => $val) {
-                    $sel = ($val == $sel_item) ? ' checked':'';
-                    echo "{$tags} value='{$val}'{$sel}>{$opt}\n";
-                }
-            } else echo "{$tags} value='{$opt_val}'>{$opt_val}\n";
-        }
+    //  ] ]
+    private function cmd_radio($tag,$attrs,$sec,$vars) {
+        if(!is_array($sec)) return;     // not allow scalar value
+        $attr = $this->gen_Attrs($attrs,$vars);
+        $tags = "<INPUT TYPE='radio'{$attr}";
+        $sec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND ALL-CHILD
+        list($opt_key, $opt_val) = array_first_item($sec);
+        $sel_item = (is_numeric($opt_key)) ? '' : $opt_key;
+        if(is_array($opt_val)) {
+            $opt_val = array_flat_reduce($opt_val);
+            foreach($opt_val as $opt => $val) {
+                $sel = ($val == $sel_item) ? ' checked':'';
+                echo "{$tags} value='{$val}'{$sel}>{$opt}\n";
+            }
+        } else echo "{$tags} value='{$opt_val}'>{$opt_val}\n";
     }
     //--------------------------------------------------------------------------
     //  INPUT CHECKBOX OUTPUT
     // FORMAT-I
-    //  +checkbox[name] => [ 
+    //  +checkbox[name] => [
     //        @Value => TEXT  [ ${@published} => 't' ]
     //  ]
     //  FORMAT-II
-    //  +checkbox => [ 
+    //  +checkbox => [
     //      name1 => [ @VALUE1 => TEXT [ ${@published} => 't' ] ]
     //      name2 => [ @VALUE2 => TEXT [ ${@published} => 't' ] ]
     //  ]
-    private function cmd_checkbox($tag,$attrs,$subsec,$sec,$vars,$text) {
+    private function cmd_checkbox($tag,$attrs,$sec,$vars) {
+        if(!is_array($sec)) return;     // not allow scalar value
+        $sec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND ALL-CHILD
+        $check_item = function($arr) use(&$vars) {
+            $check_func=function($if) {return ($if) ? ' checked':'';};
+            $checked = $txt = $value = '';
+            foreach($arr as $key => $val) {
+                if(is_numeric($key)) {
+                    if(is_array($val)) {
+                        list($cmp1, $cmp2) = array_first_item($val);
+                        $checked = $check_func($cmp1 === $cmp2);
+                    } else $checked = $check_func(!empty($val));
+                } else if($key[0]==='@') {
+                    $value = mb_substr($key,1);
+                    $txt = $val;
+                }
+            }
+            return " value='{$value}'{$checked}>{$txt}";
+        };
         $attr = $this->gen_Attrs($attrs,$vars);
         $tags = "<INPUT TYPE='checkbox'{$attr}";
-        if(is_array($sec)) {
-            $sec = $this->expand_Recursive($sec,$vars);   // EXPAND ALL-CHILD
-            $check_item = function($arr) use(&$vars) {
-                $check_func=function($if) {return ($if) ? ' checked':'';};
-                $checked = $txt = $value = '';
-                foreach($arr as $key => $val) {
-                    if(is_numeric($key)) {
-                        if(is_array($val)) {
-                            list($cmp1, $cmp2) = array_first_item($val);
-                            $checked = $check_func($cmp1 === $cmp2);
-                        } else $checked = $check_func(!empty($val));
-                    } else if($key[0]==='@') {
-                        $value = mb_substr($key,1);
-                        $txt = $val;
-                    }
-                }
-                return " value='{$value}'{$checked}>{$txt}";
-            };
-            $attr = $this->gen_Attrs($attrs,$vars);
-            if(array_key_exists('name',$attrs)) {   // FORMAT-I
-                $item = $check_item($sec);
-                echo "{$tags}{$item}\n";
-            } else {            // FORMAT-II
-                foreach($sec as $key => $val) {
-                    if(!is_numeric($key)) {
-                        $item = $check_item($val);
-                        echo "{$tags} name='{$key}'{$item}\n";
-                    }
-                }
-            }
-        }
-    }
-    //==========================================================================
-    // TAG string SEPARATE
-    private function tag_Separate($tag) {
-        $attrList = [];
-        if (is_numeric($tag)) return ['div',$attrList];
-        if($tag[0]==='\\') $tag = mb_substr($tag,1);
-        $tag = tag_body_name( $tag );       // delete dup-escapt char ':'
-        $top_ch = mb_substr($tag,0,1);
-        if(strpos(SECTION_TOKEN,$top_ch) !== FALSE) {
-            if($top_ch === '<') {
-                $tags = explode(' ',trim($tag,'<>'));
-                $tag = array_shift($tags);
-                foreach($tags as $val) {
-                    $attr = explode('=',trim($val));
-                    if(count($attr) === 2) {
-                        $attrList[$attr[0]] = trim($attr[1],"\"'");
-                    } else {
-                        $attrList[] = trim($val,"\"'");
-                    }
-                }
-            } else {
-                $tag = mb_substr($tag,1);
-                if($top_ch === '*') return [$tag,''];
-            }
-        }
-        // allow multi attribute, and separater not space
-        foreach(['data-element' => '{}', 'value' => '()', 'name' => '[]', 'size' => '::', 'id' => '##', 'class' => '..'] as $key => $seps) {
-            list($sep,$tsep) = str_split($seps);
-            $n = strrpos($tag,$sep);
-            while( $n !== FALSE) {
-                $m = strrpos($tag,$tsep);
-                $str = ($m === FALSE || $m === $n) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
-                $tag = mb_strcut($tag,0,$n);
-                $attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} {$attrList[$key]}" : $str;
-                $n = strrpos($tag,$sep);
-            }
-		}
-        if(empty($tag)) $tag = 'div';
-        return array($tag,$attrList);
-    }
-    //==========================================================================
-    // Check $key will be SECTION.
-    private function is_section_tag($key,$val) {
-        if(is_array($val)) return TRUE;
-        if(strlen($key) <= 1) return FALSE;
-        return (strpos(SECTION_TOKEN.'.#\\',$key[0]) !== FALSE);
-    }
-    //==========================================================================
-    // TAG SEPARATE,naked TAG, attribute list in $tag and $sec, sub-section array, and inner-text
-    private function tag_attr_Section($tag,$sec,$vars) {
-        $innerText = '';
-        $secList = [];
-        list($tag,$attrList) = $this->tag_Separate($tag);
-        if(is_array($sec)) {
-            $sec = $this->expand_SectionVar($sec,$vars);
+        if(array_key_exists('name',$attrs)) {   // FORMAT-I
+            $item = $check_item($sec);
+            echo "{$tags}{$item}\n";
+        } else {            // FORMAT-II
             foreach($sec as $key => $val) {
-                if(is_numeric($key)) {
-                    // if $val will be ARRAY,SECTION-COMMAND, then SET SUB-SECTION
-                    if($this->is_section_tag($val,$val)) {
-                        if(isset($secList[$key])) $secList[] = $val;
-                        else $secList[$key] = $val;
-                    } else {
-                        $innerText .= $val;
-                    }
-                } else if($key[0]==='!') {      // FORCE tag attribute
-                    $key = mb_substr($key,1);
-                    $attrList[$key] = $val;     // allow ARRAY attribute
-                } else {
-                    list($vv,$attrs) = $this->tag_Separate($key);
-                    // if $val is ARRAY,or $key is SECTION-COMMAND, and $key have ATTRIBUTE, then SET SUB-SECTION
-                    if(!empty($attrs) || $this->is_section_tag($key,$val)) $secList[$key] = $val;
-                    else $attrList[$key] = $val;
+                if(!is_numeric($key)) {
+                    $item = $check_item($val);
+                    echo "{$tags} name='{$key}'{$item}\n";
                 }
             }
-        } else {
-            $innerText .= $sec;     // scalar is innertext
         }
-        $innerText = implode( "\n" ,text_line_split("\n",$this->expand_Strings($innerText,$vars),TRUE));
-        return array($tag,$innerText,$attrList,$secList);
     }
 
 }

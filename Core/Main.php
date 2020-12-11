@@ -151,7 +151,7 @@ if(!$controllerInstance->is_enable_action($method)) {
 if(strcasecmp($appname,$controller) === 0) {
     App::ChangeMethod('',$method);     // コントローラーを隠す
 } else {
-    App::ChangeMethod($controller,$method,FALSE);     // メソッドの書換えはリダイレクトしない
+    App::ChangeMethod($controller,$method);     // メソッドの書換えはリダイレクトしない
 }
 App::$ActionMethod= $method;    // アクションメソッド名
 //=================================

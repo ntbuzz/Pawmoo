@@ -86,7 +86,7 @@ private function Connect($layout) {
 	foreach( $layoutObj->getFields() as $fieldObj ) {
 		// タイプが「日付」「タイムスタンプ」のみを記憶
 		$typ = $fieldObj->getResult();
-		if(in_array($typ,['date','timestamp'])) {
+		if(in_array($typ,['date','timestamp'],true)) {
 			$this->fmtconv[$fieldObj->getName()] = $typ;
 		}
     }

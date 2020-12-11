@@ -195,18 +195,13 @@ protected function sql_safequote(&$value) {
 	private function sql_makeWHERE($cond) {
 		$re_build_array = function($cond) {
 			$array_map_shurink = function($opr,$arr) use(&$array_map_shurink) {
-				$array_key_unique = function($key,&$arr) {
-					$wkey = $key;
-					for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}:{$n}";
-					return $key;
-				};
-				$array_merged = function($opr,&$arr,$val) use(&$array_key_unique,&$array_merged) {
+				$array_merged = function($opr,&$arr,$val) use(&$array_merged) {
 					if(is_array($val)) {
 						foreach($val as $kk => $vv) {
 							if($opr === $kk) {
 								$array_merged($opr,$arr,$vv);
 							} else {
-								$k = $array_key_unique($kk,$arr);
+								$k = array_key_unique($kk,$arr);
 								$arr[$k] = $vv;
 							}
 						}
@@ -222,7 +217,7 @@ protected function sql_safequote(&$value) {
 					if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
 						$array_merged($opr,$wd,$child);
 					} else {
-						$kk = $array_key_unique($key,$wd);
+						$kk = array_key_unique($key,$wd);
 						$wd[$kk] = $child;
 					}
 				}
@@ -268,7 +263,7 @@ protected function sql_safequote(&$value) {
 			// multi-column LIKE op
 			$like_object = function($key,$val,$table) use(&$like_opstr) {
 				$expr = [];
-				foreach(trim_explode('+',$key) as $cmp) {
+				foreach(string_to_array('+',$key) as $cmp) {
 					$cmp = $this->fieldAlias->get_lang_alias($cmp);
 					$opk = "{$table}.\"{$cmp}\"";
 					$cmp = array_map(function($v) use(&$opk,&$like_opstr) {
@@ -283,7 +278,7 @@ protected function sql_safequote(&$value) {
 			// multi-columns f1+f2+f3...  OP val
 			$multi_field = function($key,$op,$table,$val) {
 				$expr = [];
-				foreach(trim_explode('+',$key) as $cmp) {
+				foreach(string_to_array('+',$key) as $cmp) {
 					$cmp = $this->fieldAlias->get_lang_alias($cmp);
 					$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
 				}
@@ -296,7 +291,7 @@ protected function sql_safequote(&$value) {
 				list($key,$op) = keystr_opr($key);
 				if(empty($op) || $op === '%') {			// non-exist op or LIKE-op(%)
 					if(is_array($val)) {
-						if(in_array($key,$and_or_op)) {
+						if(in_array($key,$and_or_op,true)) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
 //							if(!empty($opp)) $opp = "({$opp})";
@@ -307,7 +302,7 @@ protected function sql_safequote(&$value) {
 					} else { // not have op code
 						if(mb_strpos($val,'...') !== FALSE) {
 							$op = 'BETWEEN';
-							list($from,$to) = trim_explode('...',$val);
+							list($from,$to) = string_to_array('...',$val);
 							$val = "'{$from}' AND '{$to}'";
 						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';

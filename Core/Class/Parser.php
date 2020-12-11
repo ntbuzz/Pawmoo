@@ -44,15 +44,15 @@ EOS;
             else if($token == '/*') $incomm = TRUE;        // ブロック・コメントの開始
             else if( !$incomm && strlen($token)) {          // ブロック・コメント内でなく、トークンが空でなければ処理
                 $wrapstr = $token[0] . mb_substr($token,-1);     // 先頭文字と最終文字を取り出す
-                if ( in_array($wrapstr, self::WORDSTRING)) {
+                if ( in_array($wrapstr, self::WORDSTRING,true)) {
                     $token = ($wrapstr==='""') ?
-                            implode( "\n" , text_line_split("\n",trim($token, $wrapstr),FALSE)):
+                            implode( "\n" , text_line_array("\n",trim($token, $wrapstr),FALSE)):
                             trim( $token, $wrapstr );
                 } else if($token !== '=>') {
                     $md = explode('=>',trim($token));
                     if(count($md)===2) {
                         foreach(array_map(function($a) { $aa = $a[0] . mb_substr($a,-1);     // 先頭文字と最終文字を取り出す
-                                    if(in_array($aa, self::WORDSTRING)) $a = trim($a, $aa );
+                                    if(in_array($aa, self::WORDSTRING,true)) $a = trim($a, $aa );
                                     return $a;
                                 },array_filter([$md[0],'=>',$md[1]],'strlen')) as $vv) {
                             $this->wordlist[] = $vv;
@@ -81,30 +81,27 @@ EOS;
     }
 //==============================================================================
 //  単語リストからセクション配列を作成し、配列要素を返す
-    function getSectionDef() {
+    function getSectionDef($is_TAG) {
         $arr = array();
         while($this->wpos < $this->wend) {
             $wd = $this->nextToken(0);              // トークンの取り出し
             if($wd == ']') return $arr;            // セクション終了なら生成した配列を返す
             if($wd == '[') {                       // セクション開始
                 do {
-                    $arr[] = $this->getSectionDef();    // セクション配列をとりだし、セクション配列に追加する
+                    $arr[] = $this->getSectionDef($is_TAG);    // セクション配列をとりだし、セクション配列に追加する
                     $wd = $this->nextToken(1);          // 次のトークン
                 } while( $wd == '[');                  // さらにセクション要素が続く間繰り返す
                 if($wd == ']') return $arr;            // セクション終了なら配列を返す
             }
             $nw = $this->getToken($this->wpos);         // トークンの先読み
             if($nw == '=>') {                          // 連想配列要素なら
-                $wkey = $wd;
-                for($n=1; array_key_exists($wkey,$arr); $n++) {     // 重複しないよう副文字を追加する
-                    $wkey = "{$wd}:{$n}";
-                }
+                $wkey = array_key_unique($wd,$arr);
                 $this->wpos++;
                 $nw = $this->nextToken(2);              // 次のトークン
                 if($nw == '[]') {                      // 空要素なら特別処理
                     $arr[$wkey] = [];                   // 再帰呼出しを省略
                 } else if($nw == '[') {                // セクション開始なら
-                    $arr[$wkey] = $this->getSectionDef();   // 再帰呼び出しでセクション要素を連想配列に代入
+                    $arr[$wkey] = $this->getSectionDef($is_TAG);   // 再帰呼び出しでセクション要素を連想配列に代入
                     $wd = $this->getToken($this->wpos);     // トークンの先読み
                     if($wd == ']') {                       // 終了トークンなら
                         $this->wpos++;                      // 次の単語に移動し、配列を返す
@@ -113,10 +110,13 @@ EOS;
                 } else {
                     $arr[$wkey] = $nw;                  // トークンを連想配列に代入
                 }
-            } else if(strpos(SINGLE_TOKEN,$wd[0]) !== FALSE) {
-                    $arr[$wd] = '';
             } else {
-                $arr[] = $wd;                           // キー名が指定されていないものはスカラー要素
+                switch(is_tag_identifier($wd)) {
+                case 1: if($is_TAG===FALSE) { $arr[] = $wd; break; }
+                case 3:
+                case 2: $arr[$wd] = ''; break;
+                case 0: $arr[] = $wd; break;
+                }
             }
         }
         return $arr;

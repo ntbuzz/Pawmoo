@@ -95,7 +95,7 @@ public static function LangDebug() {
         $fullpath = static::$LangDir . "{$lang_file}.lng";
         if(file_exists($fullpath)) {
             $parser = new SectionParser($fullpath);
-            $section = $parser->getSectionDef();
+            $section = $parser->getSectionDef(false);
             $import = [];           // インポートリスト
             $values = [];           // ロケール定義
             foreach($section as $key => $val) {

@@ -1,0 +1,55 @@
+画面レイアウトテンプレート構文
+
+section:
+    token
+
+token:
+    tag-token           have array or scalar
+    command-token       habe array or scalar
+    set-variable        have array or scalar
+    text                numeric-key scalar
+
+set-variable:
+    $name => value
+    $name => [
+        value
+        ...
+    ]
+
+tag-token:
+    tag_identifier => value
+    tag_identifier => [
+        attr-name => value          スカラー
+        attr-name => [              配列
+            value
+            ....
+        ]
+        innerText                   連想キーなしのスカラー値
+        [ section ]                 連想キーなしの配列はサブセクション(テキストにするか？)
+        token => value
+        token => [ section ]
+    ]
+tag-identifier:
+    tag.name#name:digit[name](value){element}   tagだけを指定するときは、最後にピリオド(.)かシャープ(#)を付ける
+
+command-token:
+    command-identifier => value
+    command-identifier => [
+        value
+        identifier => value
+        identifier => [
+            value
+            ...
+        ]
+    ]
+
+command-identifier:
+    &       Helper
+    *       Comment
+    @       Template
+    -       Single
+    +       Built-In command
+    <       HTML
+    ?       Switch SECTION
+    %       Hyper-Link
+    -       single-repeat tag (for <meta>)

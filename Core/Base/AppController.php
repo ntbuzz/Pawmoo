@@ -34,7 +34,7 @@ class AppController extends AppObject {
 							array_filter(		// *Action method pickup filter
 								array_map( $map_conv,get_class_methods($this)),'strlen'),
 								function($v) use ($except) {
-									return !in_array($v,$except);
+									return !in_array($v,$except,true);
 								});
 		$this->__InitClass();                       // クラス固有の初期化メソッド
 	}
@@ -54,7 +54,7 @@ public function __TerminateApp() {
 //==============================================================================
 // check active METHOD
 public function is_enable_action($action) {
-	if(in_array($action,$this->my_method)) return TRUE;	// exist ENABLED List
+	if(in_array($action,$this->my_method,true)) return TRUE;	// exist ENABLED List
 	return FALSE;	// diable ActionMethod
 }
 //==============================================================================

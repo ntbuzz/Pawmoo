@@ -204,22 +204,20 @@ function pseudo_markdown($atext, $md_class = '') {
         },
 //------- [check]{text} CHECKBOX MARK
         '/\[([^\]]*?)\]\{([^}]*?[^\\\\]|)\}/' => function ($m) {
-            $chek = (in_array(strtolower($m[1]),['','0','f','false']))?'[ ]':'<b>[X]</b>';
+            $chek = (is_bool_false($m[1])) ? '[ ]':'<b>[X]</b>';
             return " {$chek} {$m[2]}";
         },
 //------- FORM parts
-//  radio       => ^.class#id[name]@{checkitem:item1=val1,item2=val2,...}
-//  checkbox    => ^.class#id[name]:{item1=val1:checked,item2=val2:checked,...}
-//  textarea    => ^.class#id[name]!{text-value:col,row}
-//  textbox     => ^.class#id[name]={text-value:size}
-        '/(\s)\^(?:\.(\w+)){0,1}(?:#(\w+)){0,1}\[(\w+){0,1}\]([@:!=])\{(.*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
+//  radio       => ^[name]@{checkitem:item1=val1,item2=val2,...}
+//  checkbox    => ^[name]:{item1=val1:checked,item2=val2:checked,...}
+//  textarea    => ^[name]!{text-value:col,row}
+//  textbox     => ^[name]={text-value:size}
+        '/(\s)\^\[(\w+){0,1}\]([@:!=])\{(.*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
             $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea'];
-            $attrs = ['type', 'class','id','name'];
-            $attr = ''; $spc = $m[1]; $kind = $m[5]; $val = $m[6];
-            foreach($attrs as $n => $key) {
-                $vv = ($n===0) ? $type[$kind] : $m[$n+1];
-                $attr .= (empty($vv)) ? '':" {$key}='{$vv}'";
-            }
+            $spc = $m[1]; $kind = $m[3]; $val = $m[4];
+            $vv = $type[$kind];
+            $nm = (empty($m[2])) ? '' : " name='{$m[2]}'";
+            $attr = " type='{$vv}'{$nm}";
             $tag = "<input{$attr}";
             switch($kind) {
             case '@':   // radio
@@ -245,7 +243,7 @@ function pseudo_markdown($atext, $md_class = '') {
                         } else {
                             list($check_item,$checked) = $item_array(':',$itemval,2); 
                             list($check_text,$check_val) = $item_array('=',$check_item,2); 
-                            $chk = (in_array($checked,['','0','f','false']))?'':' checked';
+                            $chk = (is_bool_false($checked)) ? '' : ' checked';
                             $checkbox .= "{$tag}{$chk} value='{$check_val}'>{$check_text} ";
                         }
                     }

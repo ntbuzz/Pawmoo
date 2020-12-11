@@ -106,7 +106,7 @@ class AppFilesModel extends AppObject {
         $drc=dir($dirs);
         setlocale(LC_ALL,"ja_JP.UTF-8");
         while(false !== ($fl=$drc->read())) {
-            if(! in_array($fl,IgnoreFiles,FALSE)) {
+            if(! in_array($fl,IgnoreFiles,true)) {
 //                clearstatcache();
                 $lfl = "{$dirs}/{$fl}";
                 $din = pathinfo($lfl);
