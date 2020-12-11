@@ -1,4 +1,4 @@
-画面レイアウトテンプレート構文
+**** SECTION TEMPLATE SYNTAX BNF(?)
 
 section:
     token
@@ -19,18 +19,18 @@ set-variable:
 tag-token:
     tag_identifier => value
     tag_identifier => [
-        attr-name => value          スカラー
-        attr-name => [              配列
+        attr-name => value          scalar-value
+        attr-name => [              array value list
             value
             ....
         ]
-        innerText                   連想キーなしのスカラー値
-        [ section ]                 連想キーなしの配列はサブセクション(テキストにするか？)
-        token => value
-        token => [ section ]
+        innerText                   scalar value without ARRAY-KEY
+        [ section ]                 array value without ARRAY-KEY
+        section                     for sub-section
     ]
+
 tag-identifier:
-    tag.name#name:digit[name](value){element}   tagだけを指定するときは、最後にピリオド(.)かシャープ(#)を付ける
+    tag.name#name:digit[name](value){element}    Only 'tag' must be last char will priod(.)
 
 command-token:
     command-identifier => value
@@ -41,6 +41,7 @@ command-token:
             value
             ...
         ]
+        section                     for sub-section
     ]
 
 command-identifier:
