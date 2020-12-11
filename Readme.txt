@@ -3,15 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2020 by nTak
  * @license    MIT
-<<<<<<< HEAD
-<<<<<<< HEAD
- * @version 0.36.2, 2020-12-06
-=======
- * @version 0.37.0, 2020-12-08
->>>>>>> 2e709c99969e1a94d3c4a89d9ee178c9680c0383
-=======
  * @version 0.38.0, 2020-12-11
->>>>>>> 625a0608b8d33bca3028f5fd67f32c9f7e7ecae5
  * System Require: PHP 5.6 or Higher
  *
 
