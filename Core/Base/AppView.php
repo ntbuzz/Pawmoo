@@ -571,11 +571,11 @@ public function ViewTemplate($name,$vars = []) {
     //  +markdown.classname => markdown-text
     private function cmd_markdown($tag,$attrs,$sec,$vars) {
         $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
-        $atext = $this->expand_Strings($atext,$vars);
+//        $atext = $this->expand_Strings($atext,$vars);
         if(is_array($sec)) $atext = "\n{$atext}\n\n";
         $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
         $mtext = pseudo_markdown( $atext,$cls);
-//        $mtext = $this->expand_Strings($mtext,$vars);
+        $mtext = $this->expand_Strings($mtext,$vars);
         echo $mtext;
     }
     //--------------------------------------------------------------------------
@@ -597,13 +597,14 @@ public function ViewTemplate($name,$vars = []) {
     }
     //--------------------------------------------------------------------------
     //  ul/ol List OUTPUT
-    // +ul => [
+    // +ul => [ attr => value
     //   { li.class#id => } [   ]
     // ]
     private function cmd_list($tag,$attrs,$sec,$vars) {
+        list($attrs,$text,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<{$tag}{$attr}>\n";
-        foreach($sec as $li_token => $li_sec) {
+        foreach($subsec as $li_token => $li_sec) {
             list($s_tag,$s_attrs) = $this->tag_Separate($li_token,$vars);
             list($s_attrs,$s_text,$s_sec) = $this->subsec_separate($li_sec,$s_attrs,$vars);
             $attr = $this->gen_Attrs($s_attrs,$vars);
@@ -619,16 +620,17 @@ public function ViewTemplate($name,$vars = []) {
     }
     //--------------------------------------------------------------------------
     //  dl List OUTPUT
-    // +dl => [
+    // +dl => [ attr => value
     //    [ DT-Text
     //      { DD-ATTR => } [ SECTION ]
     //    ]
     //     ...
     // ]
     private function cmd_dl($tag,$attrs,$sec,$vars) {
+        list($attrs,$text,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<{$tag}{$attr}>\n";
-        foreach($sec as $dt_token => $dt_sec) {
+        foreach($subsec as $dt_token => $dt_sec) {
             list($dt_tag,$dt_attrs) = $this->tag_Separate($dt_token,$vars);
             list($dt_attrs,$dt_text,$dd_sec) = $this->subsec_separate($dt_sec,$dt_attrs,$vars);
             $attr = $this->gen_Attrs($dt_attrs,$vars);
@@ -749,11 +751,12 @@ public function ViewTemplate($name,$vars = []) {
     }
     //--------------------------------------------------------------------------
     //  TABLE OUTPUT
-    // +table => [
+    // +table => [ attr => value
     //    [  th=>[ TH-CELL ] .td_attr=>[ TD-CELL ]  [ TD-CELL ] ]
     // ]
     private function cmd_table($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
+        list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<TABLE{$attr}>\n";
         foreach($sec as $key => $val) {
