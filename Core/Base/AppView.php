@@ -3,7 +3,7 @@
  * Object Oriented PHP MVC Framework
  *  AppView:    View Template processing Engine.
  *              Handle of *.php, *.inc. *.tpl
- *              Having Chile Class AppHelper for HTML output
+ *              Having Child Class AppHelper for Detail HTML output
  */
 class AppView extends AppObject {
     protected $Layout;
@@ -317,16 +317,14 @@ public function ViewTemplate($name,$vars = []) {
         foreach($divSection as $token => $sec) {
             $sec = $this->array_if_selector($sec, $vars);
             if(is_numeric($token)) {
-                if(is_array($sec)) {
-                    debug_log(-999,['RECURSIV**************'=>$sec]);
-                    $this->sectionAnalyze($sec,$vars);
-                } else echo $sec;
+                if(is_array($sec)) $this->sectionAnalyze($sec,$vars);
+                else echo $sec;
             } else {
                 list($tag,$attrs) = $this->tag_Separate($token,$vars);
                 switch(is_tag_identifier($tag)) {
                 case 0: break;
                 case 1:         // tag-section
-                        list($attrs,$innerText,$subsec) = $this->subsectionAnalyz($sec,$attrs,$vars);
+                        list($attrs,$innerText,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
                         $attr = $this->gen_Attrs($attrs,$vars);
                         if($subsec === [])  echo "<{$tag}{$attr}>{$innerText}</{$tag}>\n";
                         else {
@@ -373,7 +371,7 @@ public function ViewTemplate($name,$vars = []) {
     }
 //==============================================================================
 // Analyzed Section, and Dispatch Command method
-    private function subsectionAnalyz($section,$attrList,$vars) {
+    private function subsec_separate($section,$attrList,$vars) {
         $subsec = [];
         if(is_scalar($section)) {
             $innerText = $this->expand_Strings($section,$vars);
@@ -419,7 +417,7 @@ public function ViewTemplate($name,$vars = []) {
     // DIRECT HTML TAG
     //  <html>, <h1> => innerText or [ innerText ]
     private function sec_html($tag,$attrs,$sec,$vars) {
-        list($attrs,$innerText,$subsec) = $this->subsectionAnalyz($sec,$attrs,$vars);
+        list($attrs,$innerText,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
         $tag = trim($tag,'<>');
         $attr = $this->gen_Attrs($attrs,$vars);
         echo (empty($innerText)) ? "<{$tag}{$attr} />\n" : "<{$tag}{$attr}>{$innerText}</{$tag}>\n" ;
@@ -453,10 +451,10 @@ public function ViewTemplate($name,$vars = []) {
     //  single tag for attribute only (for <meta>)
     //  -tag => [ common-attr => value [ additional-attr => value ... ] ]
     private function sec_singletag($tag,$attrs,$sec,$vars) {
-        list($attrs,$innerText,$subsec) = $this->subsectionAnalyz($sec,$attrs,$vars);
+        list($attrs,$innerText,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
         if(!empty($subsec)) {  // have repeat-section
             foreach($subsec as $vv) {
-                list($at,$txt,$sub) = $this->subsectionAnalyz($vv,$attrs,$vars);
+                list($at,$txt,$sub) = $this->subsec_separate($vv,$attrs,$vars);
                 $atr = $this->gen_Attrs($at,$vars);
                 echo "<{$tag}{$atr}>\n";
             }
@@ -537,7 +535,7 @@ public function ViewTemplate($name,$vars = []) {
     //  output IMAGE-TAG
     // +img => URL , +img => [ attribule => value URL ]
     private function cmd_image($tag,$attrs,$sec,$vars) {
-        list($attrs,$src,$subsec) = $this->subsectionAnalyz($sec,$attrs,$vars);
+        list($attrs,$src,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
         $attr = $this->gen_Attrs($attrs,$vars);
         $src = make_hyperlink($src,$this->ModuleName);
         echo "<img src='{$src}'{$attr} />";
@@ -607,7 +605,7 @@ public function ViewTemplate($name,$vars = []) {
         echo "<{$tag}{$attr}>\n";
         foreach($sec as $li_token => $li_sec) {
             list($s_tag,$s_attrs) = $this->tag_Separate($li_token,$vars);
-            list($s_attrs,$s_text,$s_sec) = $this->subsectionAnalyz($li_sec,$s_attrs,$vars);
+            list($s_attrs,$s_text,$s_sec) = $this->subsec_separate($li_sec,$s_attrs,$vars);
             $attr = $this->gen_Attrs($s_attrs,$vars);
             if(!empty($s_sec)) {  // list have a subsection ?
                 echo "<li{$attr}>{$s_text}\n";
@@ -625,19 +623,20 @@ public function ViewTemplate($name,$vars = []) {
     //    [ DT-Text
     //      { DD-ATTR => } [ SECTION ]
     //    ]
+    //     ...
     // ]
     private function cmd_dl($tag,$attrs,$sec,$vars) {
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<{$tag}{$attr}>\n";
         foreach($sec as $dt_token => $dt_sec) {
             list($dt_tag,$dt_attrs) = $this->tag_Separate($dt_token,$vars);
-            list($dt_attrs,$dt_text,$dd_sec) = $this->subsectionAnalyz($dt_sec,$dt_attrs,$vars);
+            list($dt_attrs,$dt_text,$dd_sec) = $this->subsec_separate($dt_sec,$dt_attrs,$vars);
             $attr = $this->gen_Attrs($dt_attrs,$vars);
             echo "<dt{$attr}>{$dt_text}</dt>\n";
             if(!empty($dd_sec)) {  // dd tag have a subsection ?
                 foreach($dd_sec as $dd_token => $dd_sub) {
                     list($dd_tag,$dd_attrs) = $this->tag_Separate($dd_token,$vars);
-                    list($dd_attrs,$dd_text,$dd_child) = $this->subsectionAnalyz($dd_sub,$dd_attrs,$vars);
+                    list($dd_attrs,$dd_text,$dd_child) = $this->subsec_separate($dd_sub,$dd_attrs,$vars);
                     $dd_attr = $this->gen_Attrs($dd_attrs,$vars);
                     echo "<dd{$dd_attr}>{$dd_text}\n";
                     $this->sectionAnalyze($dd_child,$vars);
@@ -655,7 +654,7 @@ public function ViewTemplate($name,$vars = []) {
     //      token => [ DD-Section ]
     // ]
     private function cmd_floatwin($tag,$attrs,$sec,$vars) {
-        list($attrs,$text,$sec) = $this->subsectionAnalyz($sec,$attrs,$vars);
+        list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         $mycls = (isset($attrs['class']))? $attrs['class'] :'';
         $attrs['class'] = rtrim("floatWindow {$mycls}");
         $attr = $this->gen_Attrs($attrs,$vars);
@@ -675,12 +674,10 @@ public function ViewTemplate($name,$vars = []) {
     }
     //--------------------------------------------------------------------------
     //  select OUTPUT
-    // +select => [
-    //    selected_key = > [
+    // +select => [ selected_key = > [
     //      option_text => value
     //      ...
-    //    ]
-    // ]
+    //  ] ]
     private function cmd_select($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
         $attr = $this->gen_Attrs($attrs,$vars);
@@ -715,9 +712,7 @@ public function ViewTemplate($name,$vars = []) {
     //--------------------------------------------------------------------------
     // +tabset.classname => [
     //      Menu1.selected => [ Contents1 ]
-    //      Menu2 => [ Contents2 ]
-    //      Menu3 => [ Contents3 ]
-    //      Menu4 => [ Contents4 ]
+    //      Menu2 => [ Contents2 ] ...
     //  ]
     private function cmd_tabset($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
@@ -731,7 +726,6 @@ public function ViewTemplate($name,$vars = []) {
         $tabs = array_keys($sec);
         foreach($tabs as $key_val) {
             list($tag,$attrs) = $this->tag_Separate($key_val,$vars);
-debug_log(-999,['TABSET' => $tabs,'TAG'=>$tag,'ATTR'=>$attrs]);
             $attr = $this->gen_Attrs($attrs,$vars);
             echo "<li{$attr}>{$tag}</li>\n";
         }
@@ -771,7 +765,7 @@ debug_log(-999,['TABSET' => $tabs,'TAG'=>$tag,'ATTR'=>$attrs]);
             if(is_array($val)) {
                 foreach($val as $td_key => $td_val) {
                     list($tag,$attrs) = $this->tag_Separate($td_key,$vars);
-                    list($attrs,$innerText,$sec) = $this->subsectionAnalyz($td_val,$attrs,$vars);
+                    list($attrs,$innerText,$sec) = $this->subsec_separate($td_val,$attrs,$vars);
                     $td_attr = $this->gen_Attrs($attrs,$vars);
                     if(is_numeric($tag) || $tag === 'div') $tag='td';     // omitted TAG is DIV tag setting
                     echo "<{$tag}{$td_attr}>{$innerText}";
@@ -787,19 +781,17 @@ debug_log(-999,['TABSET' => $tabs,'TAG'=>$tag,'ATTR'=>$attrs]);
     //  INPUT TEXT OUTPUT
     // +textbox[name]:size => [  attribute => value value    ]
     private function cmd_textbox($tag,$attrs,$sec,$vars) {
-        list($attrs,$innerText,$sec) = $this->subsectionAnalyz($sec,$attrs,$vars);
+        list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         $attrs['value'] = $innerText;
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<INPUT TYPE='text'{$attr}'>\n";
     }
     //--------------------------------------------------------------------------
     //  INPUT RADIO OUTPUT
-    // +radio[name] => [
-    //    select_option_value = > [
+    // +radio[name] => [  select_option_value = > [
     //      option_text => option_value
     //      ...
-    //    ]
-    // ]
+    //  ] ]
     private function cmd_radio($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
         $attr = $this->gen_Attrs($attrs,$vars);

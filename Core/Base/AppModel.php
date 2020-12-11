@@ -1,9 +1,9 @@
 <?php
 /* -------------------------------------------------------------
- * PHPフレームワーク
- *  AppModel:    データベース操作用の基底クラス
+ * Object Oriented PHP MVC Framework
+ *  AppModel:    Database IN/OUT abstraction Class
+ *              Handle of SQLite3, PostgreSQL, MariaDB
  */
-// データベースの接続情報クラス
 require_once('Core/Handler/DatabaseHandler.php');
 
 //==============================================================================
@@ -16,59 +16,52 @@ class AppModel extends AppObject {
         'Schema' => [],
         'PostRenames' => [],
     ];
-    protected $dbDriver;        // データベースドライバー
-    protected $TableHead;      // テーブルヘッダ
-    protected $fields;            // レコードフィールドの値
-//    protected $OnGetRecord;   // レコード取得時のコールバック関数
-    public $pagesize = 0;           // 1ページ当たりのレコード取得件数
-    public $page_num = 0;           // 取得ページ番号
-    public $record_max = 0;         // 総レコード数
+    protected $dbDriver;            // Database Driver
+    protected $fields;              // Record-Data all fields value
+    public $pagesize = 0;           // get record count per PAGE
+    public $page_num = 0;           // get Page Number
+    public $record_max = 0;         // Total records count
     public $AliasMode = TRUE;       // Language Alias Enable
 
-    public $RecData = NULL;          // レコードデータ(JOINなし)
-    public $Select = NULL;           // リレーション先のラベルと値の連想配列リスト
-    public $Records = NULL;          // レコード検索したレコードリスト(JOIN済)
-    public $Header = NULL;           // レコード検索したレコードの列名リスト
-    public $OnGetRecord = NULL;      // レコード取得時のコールバック1関数
-    // Schema を分解してヘッダ表示用エイリアス・属性＋参照フィールド名を記憶する
-    public $HeaderSchema = [];       // ヘッダー表示用のリスト [ field_name => [disp_name, align, sort_flag ]
-    private $FieldSchema = [];       // 取得フィールドのリスト [ref_name, org_name]
-    private $Relations = [];         // リレーション情報
-    public $DateFormat;              // 日付表示形式
+    public $RecData = NULL;          // ROW record data (no JOIN)
+    public $Select = NULL;           // Select List for relation table field
+    public $Records = NULL;          // get records lists (with JOIN field)
+    public $OnGetRecord = NULL;      // for feature FUNCTION
+    public $HeaderSchema = [];       // Display Header List [ field_name => [disp_name, align, sort_flag ]
+    private $FieldSchema = [];       // Pickup Record fields columns [ref_name, org_name]
+    private $Relations = [];         // Table Relation
+    public $DateFormat;              // Date format for Database
 //==============================================================================
-//	コンストラクタ：　テーブル名
+//	Constructor: Owner
 //==============================================================================
 	function __construct($owner) {
-	    parent::__construct($owner);                    // 継承元クラスのコンストラクターを呼ぶ
-        $this->setProperty(static::$DatabaseSchema);    // クラスプロパティを設定
+	    parent::__construct($owner);                    // call parent constructor
+        $this->setProperty(static::$DatabaseSchema);    // Set Propert from Database Schema Array
         if(isset($this->ModelTables)) {                 // Multi-Language Tabele exists
             $db_key = (array_key_exists(LangUI::$LocaleName,$this->ModelTables)) ? LangUI::$LocaleName : '*';
             $this->DataTable = $this->ModelTables[$db_key]; // DataTable SWITCH
         }
-        $this->__InitClass();                             // クラス固有の初期化メソッド
+        $this->__InitClass();
         $this->fields = [];
 	}
 //==============================================================================
-// クラス変数の初期化
+// Initializ Class Property
     protected function __InitClass() {
         $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->DataTable);        // データベースドライバー
-        $this->DateFormat = $this->dbDriver->DateStyle;         // データベースの日付書式
-        // ヘッダ表示用のスキーマ
-        $this->SchemaAnalyzer($this->Schema);
-        parent::__InitClass();                    // 継承元クラスのメソッドを呼ぶ
+        $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
+        $this->DateFormat = $this->dbDriver->DateStyle;         // Date format from DB-Driver
+        $this->SchemaAnalyzer($this->Schema);                   // Schema Initialize
+        parent::__InitClass();
     }
 //==============================================================================
-// 言語クラスの切替え
+// Switch Schema Language
 public function ResetSchema() {
     $this->SchemaAnalyzer();
-    $this->RelationSetup();				// リレーション情報を実テーブル名とロケール名に置換
+    $this->RelationSetup();
 }
 //==============================================================================
-// リレーション先のフィールド情報はインスタンスが生成された後でしか確認できない
-//
+// Table Relation setup
 public function RelationSetup() {
-    // リレーション先の情報をモデル名からテーブル名とロケール先のフィールド名に置換する
     foreach($this->Relations as $key => $rel) {
         $kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
         if(is_array($rel)) {
@@ -94,12 +87,12 @@ public function RelationSetup() {
                 $lang_ref = "{$refer}_" . LangUI::$LocaleName;
                 if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $refer = $lang_ref;
             }
-            $arr = [$this->$model->DataTable,$field,$refer]; // モデル名→テーブル名に置換
-            $this->Relations[$key] =  implode('.',$arr);            // Relations変数に書き戻す
+            $arr = [$this->$model->DataTable,$field,$refer];        // ModelName in schema convert to Table name
+            $this->Relations[$key] =  implode('.',$arr);
         }
     }
     $this->dbDriver->setupRelations($this->Relations);
-    debug_log(DBMSG_MODEL,[
+    debug_log(DBMSG_MODEL,[             // DEBUG LOG information
         "Header" => $this->HeaderSchema,
         "Field" => $this->FieldSchema, 
         "Relation" => $this->Relations, 
@@ -107,7 +100,7 @@ public function RelationSetup() {
     ]);
 }
 //==============================================================================
-// スキーマを分解してヘッダー情報を生成
+// Schema Define Analyzer
     protected function SchemaAnalyzer() {
         $header = $relation = $locale = $bind = $field = [];
         foreach($this->Schema as $key => $defs) {
@@ -117,7 +110,7 @@ public function RelationSetup() {
             list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
             if(!empty($relations)) {
                 if(substr($key,-3)==='_id' && is_scalar($relations)) $ref_key = substr($key,0,strlen($key)-3);
-                $relation[$key] = $relations;//[$relations,$accept_lang];
+                $relation[$key] = $relations;
             }
             if(!empty($binds)) {
                 $bind[$ref_key] = $binds;
@@ -126,10 +119,9 @@ public function RelationSetup() {
             $field[$ref_key] = $key;
             if($disp_head !== 0) {
                 if(empty($disp_name)) $disp_name = $ref_key;
-                else if($disp_name[0] === '.') $disp_name = $this->_(".Schema{$disp_name}");   //  Schema 構造体を参照する
+                else if($disp_name[0] === '.') $disp_name = $this->_(".Schema{$disp_name}");
                 $header[$ref_key] = [$disp_name,$disp_align,$disp_head,$width];
             }
-            // リレーションしているものはリレーション先の言語を後で調べる
             if($accept_lang) {
                 $ref_name = "{$ref_key}_" . LangUI::$LocaleName;
                 if(array_key_exists($ref_name,$this->dbDriver->columns)) {
@@ -137,23 +129,16 @@ public function RelationSetup() {
                 }
             }
         }
-//        debug_log(DBMSG_MODEL,[
-//            "Header" => $header, 
-//            "Field" => $field, 
-//            "Relation" => $relation, 
-//            "locale" => $locale,
-//            "bind" => $bind,
-//        ]);
         $this->HeaderSchema = $header;
         $this->FieldSchema = $field;
         $this->Relations = $relation;
         $this->dbDriver->fieldAlias->SetupAlias($locale,$bind);
     }
 //==============================================================================
-// ページング設定
+// Paging Parameter Setup
 public function SetPage($pagesize,$pagenum) {
-    $this->pagesize = $pagesize;            // 1ページ当たりのレコード取得件数、0 = 制限なし
-    $this->page_num = ($pagenum <= 0) ? 1 : $pagenum;            // 現在のページ番号 1から始まる
+    $this->pagesize = $pagesize;
+    $this->page_num = ($pagenum <= 0) ? 1 : $pagenum;
     $this->dbDriver->SetPaging($this->pagesize,$this->page_num);
 }
 //==============================================================================
@@ -178,14 +163,14 @@ public function getRecordBy($key,$value) {
 //          リレーション先の選択リスト = Select (Relations)
 public function GetRecord($num) {
     $this->getRecordBy($this->Primary,$num);
-    $this->RecData= $this->fields;          // レコードの生データ
+    $this->RecData= $this->fields;
 }
 //==============================================================================
 //   リレーション先のラベルと値の連想配列リスト作成
 // 結果：  リレーション先の選択リスト = Select (Relations)
 public function GetValueList() {
     $valueLists = array();
-    foreach($this->Relations as $key => $val) {     // リレーション先の値リストを取得する
+    foreach($this->Relations as $key => $val) {
         if(is_array($val)) {
             $base = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
             foreach($val as $kk => $ref) {
@@ -199,7 +184,7 @@ public function GetValueList() {
             $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn);
         }
     }
-    $this->Select= $valueLists;             // JOIN先の値リスト
+    $this->Select= $valueLists;
     debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $valueLists]);
 }
 //==============================================================================
@@ -213,8 +198,8 @@ public function GetFieldValues($field) {
 // フィールドの読み込み (JOIN無し)
 // 結果：   フィールドデータ
 public function getRecordField($key,$value,$field) {
-    $this->getRecordBy($key,$value);                // レコードデータを読み込む
-    return $this->fields[$field];               // フィールド値を返す
+    $this->getRecordBy($key,$value);
+    return $this->fields[$field];
 }
 //==============================================================================
 // レコードデータの読み込み(JOIN済レコード)
@@ -260,13 +245,12 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
         if(! empty($record) ) {
             $data[] = $record;
             $this->record_max = $this->dbDriver->recordMax;
-            $this->doEvent('OnGetRecord', $record);     // イベントコールバック
+            $this->doEvent('OnGetRecord', $record);     // for FEATURE!!!!
         } else {
             debug_log(DBMSG_MODEL, ["fields" => $fields]);
         }
     }
     $this->Records = $data;
-//    if($this->pagesize > 0 && $this->pagesize < 50)  debug_log(3, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
     debug_log(FALSE, [
         "record_max" => $this->record_max,
         "Filter" => $filter,
@@ -304,7 +288,6 @@ public function realFinder($cond,$filter=[],$sort=[]) {
         }
     }
     $this->Records = $data;
-//    if($this->pagesize > 0 && $this->pagesize < 50)  debug_log(3, [ "record_max" => $this->record_max, "RECORDS" => $this->Records]);
     debug_log(FALSE, [
         "record_max" => $this->record_max,
         "Filter" => $filter,
@@ -332,7 +315,6 @@ public function MultiDeleteRecord($cond) {
         foreach($row as $key => $val) {
             if(array_key_exists($key,$this->dbDriver->columns)) {
                 $alias = ($this->AliasMode) ? $this->dbDriver->fieldAlias->get_lang_alias($key) :$key;
-//                if(!array_key_exists($alias,$this->fields)) 
                 $this->fields[$alias] = $val;
             }
         }
