@@ -1,6 +1,7 @@
 <?php
 // coreLibs depend on appLibs functions.
 require_once('appLibs.php');
+require_once('arrayLibs.php');
 /* -------------------------------------------------------------
  * Object Oriented PHP MVC Framework
  *  coreLibs: Common Library for Core/Base Class
@@ -12,9 +13,9 @@ function get_routing_path($root) {
     list($requrl,$q_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
     $argv = explode('/', trim($requrl,'/'));
     if($root === $argv[0]) {
-        array_shift($argv);      // retrieve application name
-        $fwroot = "/{$root}/";              // URI is begin of frameowrkfolder name
-    } else $fwroot = "/";                   // URI is begin of Application name
+        array_shift($argv);         // retrieve application name
+        $fwroot = "/{$root}/";      // URI is begin of frameowrkfolder name
+    } else $fwroot = "/";           // URI is begin of Application name
     // separate app/cont/method/filters and params
     $args=[];
     for($n=0;$n < count($argv) && !is_numeric($argv[$n]) && strpos($argv[$n],'.') === FALSE;$n++) $args[] = $argv[$n];
@@ -23,7 +24,6 @@ function get_routing_path($root) {
 
     list($appname,$controller,$method) = $args;
     $filters = array_splice($args,3);
-//    if(empty($controller)) $controller = $appname; // empty controller will be same of appname
     $filename = '';
     $params = array_filter($pp,function($v) use(&$filename) {
         if(strpos($v,'.')===FALSE) return TRUE;
@@ -41,7 +41,7 @@ function get_routing_path($root) {
     );
     $ret = [$appname,$app_uri,$module,$q_str];
     debug_log(-999, [
-        'フレームワーク情報' => [
+        'Framework Information' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
             "app_uri"=> $app_uri,
             "appname"=> $appname,
@@ -52,44 +52,6 @@ function get_routing_path($root) {
     ]);
     return $ret;
 }
-/*
-function get_routing_params($dir) {
-    $root = basename(dirname($dir));        // Framework Folder
-    $vv = $_SERVER['REQUEST_URI'];
-    list($requrl,$q_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
-    $param = trim(urldecode($requrl),'/'); 
-    $args = explode('/', $param);
-    $appname = array_shift($args);          // first item in PATH
-    if($appname === $root) {                // is same of framework folder?
-        $appname = array_shift($args);      // retrieve application name
-        $fwroot = "/{$root}/";              // URI is begin of frameowrkfolder name
-    } else {
-        $fwroot = "/";                      // URI is begin of Application name
-    }
-    if(is_numeric($appname)) {              // is NUMERIC BEGIN?
-        array_unshift($args,$appname);      // appname will be must not a numeric.
-        $appname = '';
-    }
-    $app_uri = [ $fwroot, "{$fwroot}{$appname}/" ];
-    // extract after Controoler path
-    for($n=0;$n < count($args) && !is_numeric($args[$n]) && strpos($args[$n],'.') === FALSE;$n++) ;
-    $params = array_intval_recursive(array_slice($args,$n));
-    array_splice($args,$n);
-
-    if(count($args) < 2) $args += array_fill(count($args),2-count($args),NULL);
-    list($controller,$method) = $args;
-    $filters = array_splice($args,2);
-    if(empty($controller)) $controller = $appname; // empty controller will be same of appname
-    $module = array(
-        ucfirst(strtolower($controller)),
-        ucfirst(strtolower($method)),
-        $filters,
-        $params
-    );
-    $ret = [$appname,$app_uri,$module,$q_str];
-    return $ret;
-}
-*/
 //==============================================================================
 // Output 404 ERROR PAGE
 // enabled of PHP VARIABLE:
@@ -163,7 +125,7 @@ function get_php_files($dirtop) {
         while(false !== ($fl=$drc->read())) {
             if(! in_array($fl,IgnoreFiles,true)) {
                 $path = "{$dirtop}{$fl}";
-                $ext = substr($fl,strrpos($fl,'.') + 1);    // 拡張子を確認
+                $ext = substr($fl,strrpos($fl,'.') + 1);
                 if(!is_dir($path) && ($ext == 'php')) {
                     $files[] = $path;
                 }
@@ -172,66 +134,6 @@ function get_php_files($dirtop) {
         $drc->close();
     }
     return $files;
-}
-//==============================================================================
-// convert to num STRING to INTEGER
-function array_intval_recursive($arr) {
-    if(is_scalar($arr)) return (empty($arr) || is_numeric($arr))?intval($arr):$arr;
-    return array_map(function($v) {
-        if(is_array($v)) return array_intval_recursive($v);
-        return (empty($v) || is_numeric($v))?intval($v):$v;
-    },$arr);
-}
-//==============================================================================
-// convert nexting array to flat array
-function array_flat_reduce($arr) {
-    $wx = [];
-    $reduce_array = function ($arr) use(&$reduce_array,&$wx) {
-        if(is_array($arr)) {
-            foreach($arr as $key => $val) {
-                if(is_array($val)) {
-                    $reduce_array($val);
-                } else if(is_numeric($key)) {
-                    $wx[] = $val;
-                } else {
-                    $wx[$key] = $val;
-                }
-            }
-        } else $wx[] = $arr;
-    };
-    $reduce_array($arr);
-    return $wx;
-}
-//==============================================================================
-// Generate URI from array, even when there is an array in the element
-function array_to_URI($arr) {
-    $array_builder = function ($lst) {
-        $ret = [];
-        foreach($lst as $val) {
-            $uri = (is_array($val)) ? array_to_URI($val) : strtolower($val);
-            if(!empty($uri)) $ret[] = trim($uri,'/');
-        }
-        return $ret;
-    };
-    $ret = $array_builder($arr);
-    return implode('/',$ret);
-}
-//==============================================================================
-// Concatenate array values by key value
-function array_concat_keys($arr,$keys) {
-    if(is_scalar($keys)) return $keys;
-    $ss = ''; $trim_sep = ' ';
-    foreach($keys as $kk => $val) {
-        $sep = (is_numeric($kk)) ? ' ' : $kk;
-        if(strpos($trim_sep,$sep) === FALSE) $trim_sep .= $sep;
-        $ss .= $sep . $arr[$val];
-    }
-    return trim($ss,$trim_sep);
-}
-//==============================================================================
-// The result of splitting the text and returning an array with whitespace removed
-function trim_explode($sep, $str) {
-    return array_map(function($v) { return trim($v); },explode($sep,$str));
 }
 //==============================================================================
 // Make the file path end with /
@@ -260,11 +162,19 @@ function tag_body_name($key) {
     return $key;
 }
 //==============================================================================
-// array-key duplicate avoidance
-function array_key_unique($key,&$arr) {
-    $wkey = $key;
-    for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}:{$n}";
-    return $key;
+// get token type
+//  tag-token       1
+//  command-token   2
+// setvariable      3
+//  text            0   digit | alpha-numeric
+function is_tag_identifier($str) {
+    // digit or empty string is not token
+    if(empty($str) || is_array($str) || is_numeric($str)) return 0;
+    // command-token
+    if(strpos('*&@+<?%-',$str[0]) !== FALSE)     return 2;       // command-token
+    if(preg_match('/^(?:!{0,1}\w+)*(?:[\.#][\w\-\s]*)*[\w\d\]\}\)]$/',$str)) return 1;    // tag-token
+    if(preg_match('/^\$\w+$/',$str)) return 3;    // vvariable-token
+    return 0;   // text-token
 }
 //==============================================================================
 // SQL Compare operator separate
@@ -282,14 +192,4 @@ function keystr_opr($str) {
     }
     return array($str,'');
 }
-//==============================================================================
-// Recursive call to array_key_exists
-function array_key_exists_recursive($key,$arr) {
-    foreach($arr as $kk => $vv) {
-        if($kk === $key) return TRUE;
-        if(is_array($vv)) {
-            if(array_key_exists_recursive($key,$vv)) return TRUE;
-        }
-    }
-    return FALSE;
-}
+

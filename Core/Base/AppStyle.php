@@ -130,7 +130,7 @@ public function ViewStyle($file_name) {
         $secType = $this->Template['section'];        // stylesheet/javascript
         foreach($tmplist as $category => $file) {
             $parser = new SectionParser($file);
-            $SecTemplate = array_change_key_case( $parser->getSectionDef(), CASE_LOWER);
+            $SecTemplate = array_change_key_case( $parser->getSectionDef(FALSE), CASE_LOWER);
             unset($parser);         // 解放
             if(array_key_exists($secType,$SecTemplate)) {
                 $secData = $SecTemplate[$secType];
@@ -195,7 +195,7 @@ public function ViewStyle($file_name) {
                     } else echo "+++ Method Not Found({$cmd})\n";
                 } else echo "*** '{$tag}' is Feature Command...\n";
             } else if(method_exists($this, $func)) {
-                $this->$func($sec);        // ダイレクトコマンド
+                $this->$func($tag,$sec);        // ダイレクトコマンド
             } else echo "CALL: {$func}({$tag},{$sec},vars)\n";  // 未定義のコマンド
             return TRUE;    // コマンド処理を実行
         } else {
@@ -204,9 +204,8 @@ public function ViewStyle($file_name) {
     }
 //------------------------------------------------------------------------------
 // * comment Command
-    private function do_comment($sec) {
-        $vv = $this->expand_Strings($sec,$this->repVARS);
-        $vv = trim(substr($vv,1));
+    private function do_comment($tag,$sec) {
+        $vv = trim($this->expand_Strings($tag,$this->repVARS));
         echo "/* {$vv} */\n";
     }
 //------------------------------------------------------------------------------

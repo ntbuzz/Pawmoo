@@ -35,5 +35,4 @@ const CLI_ARGV = array();
 define('S_ENV',TRUE);		// App::$EnvData
 define('S_REQ',FALSE);		// App::$ReqData
 
-define('SINGLE_TOKEN','*&@-<');
 define('SECTION_TOKEN','<@&+*%-${[');

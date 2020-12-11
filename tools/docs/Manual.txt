@@ -538,16 +538,15 @@
   このヘルパーメソッドはセクションフォーマット配列を返す関数として作成してください。
 
   サブセクション内でスカラー値を持つ要素はタグ属性として処理されますが、スカラー要素を持つ場合でも
-  セクション要素として処理したいときは、先頭文字にエスケープ文字(\)を付加してください。
-  また、逆に配列要素を持つ場合でもタグ属性として処理したい場合は！文字を先頭に付加します。
-
+  セクション要素として処理したいときは、タグ名に空のクラス名('.'のみ)を付けます。
+  
   .class => [
     style => "width:100%;"        // 通常のタグ属性
-    \span => "width:100%;"        // span を属性名ではなく、span タグとして処理する
-    !style => [                   // 配列要素を持つが、タグ属性(style)として処理する
+    style => [                    // 配列要素を持つが、タグ属性(style)として処理する
       "width:100%;"               // 排列要素はすべてを連結した文字列に変換される
       "height:100%;"
     ]
+    style. => "width:100%;"       // 空のクラス名をつけるとタグトークンとして処理する
   ]
 
   .tpl はViewの中で配列に再構築してから、セクション処理によりタグ出力されます。
@@ -629,10 +628,10 @@
                             // それ以外なら [X] で表示する
 
   フォーム部品
-  ^.class#id[name]@{checkval:val1=item1,val2=item2,,val3=item3}    // radio ボタン checkval=val の item にチェックをつける、空項目は改行(<br>)を挿入
-  ^.class#id[name]:{val1=item1:checked}             // checkbox ボタン :checked が FALSE 判定でなければチェックをつける
-  ^.class#id[name]={textvalue:size}                 // text ボックス
-  ^.class#id[name]!{textvalue:col,row}              // textarea
+  ^[name]@{checkval:item1=val1,item2=val2,,item3=val3}    // radio ボタン checkval=val の item にチェックをつける、空項目は改行(<br>)を挿入
+  ^[name]:{item1=val1:checked}             // checkbox ボタン :checked が FALSE(0,NULL,'f','false')判定でなければチェックをつける
+  ^[name]={textvalue:size}                 // text ボックス
+  ^[name]!{textvalue:col,row}              // textarea
     item や textvalue に '}' が含まれるときはエスケープ '\}' します。
 
   定義リスト(DL)
@@ -1076,7 +1075,7 @@
 
 ・文字列操作
   str_fixwidth($exp,$pading,$width)    $exp を固定長に変換する
-  instr_array($str,$hayz)              $hayz 配列内に $str 文字列があるか
+  strpos_of_array($str,$hayz)              $hayz 配列内に $str 文字列があるか
   text_to_html($atext)                 テキストをHTML文字列への変換
   json_escape($a)                      JSONで使用できる文字列に変換
   pseudo_markdown($atext)              簡易マークダウン
@@ -1087,7 +1086,7 @@
 
 ・配列操作
   array_override($a, $b)                array_merge() の代替え、無名要素も上書きする
-  text_line_split($del,$txt [,$trim])   テキストを配列に変換 $trimがTRUEなら空行削除
+  text_line_array($del,$txt [,$trim])   テキストを配列に変換 $trimがTRUEなら空行削除
   array_to_text($array,$sep = "\n")     配列要素を改行テキストに変換
 
 ◆ Javascript関数

@@ -263,7 +263,7 @@ protected function sql_safequote(&$value) {
 			// multi-column LIKE op
 			$like_object = function($key,$val,$table) use(&$like_opstr) {
 				$expr = [];
-				foreach(trim_explode('+',$key) as $cmp) {
+				foreach(string_to_array('+',$key) as $cmp) {
 					$cmp = $this->fieldAlias->get_lang_alias($cmp);
 					$opk = "{$table}.\"{$cmp}\"";
 					$cmp = array_map(function($v) use(&$opk,&$like_opstr) {
@@ -278,7 +278,7 @@ protected function sql_safequote(&$value) {
 			// multi-columns f1+f2+f3...  OP val
 			$multi_field = function($key,$op,$table,$val) {
 				$expr = [];
-				foreach(trim_explode('+',$key) as $cmp) {
+				foreach(string_to_array('+',$key) as $cmp) {
 					$cmp = $this->fieldAlias->get_lang_alias($cmp);
 					$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
 				}
@@ -302,7 +302,7 @@ protected function sql_safequote(&$value) {
 					} else { // not have op code
 						if(mb_strpos($val,'...') !== FALSE) {
 							$op = 'BETWEEN';
-							list($from,$to) = trim_explode('...',$val);
+							list($from,$to) = string_to_array('...',$val);
 							$val = "'{$from}' AND '{$to}'";
 						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';
