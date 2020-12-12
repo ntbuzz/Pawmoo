@@ -137,6 +137,25 @@ public function findRecord($cond,$relations = NULL,$sort = []) {
 	$this->doQuery($sql);
 }
 //==============================================================================
+//	firstRecord(cond,relation,sort): 
+//==============================================================================
+public function firstRecord($cond,$relations = NULL,$sort) {
+	$where = $this->sql_makeWHERE($cond);
+	$sql = $this->sql_JoinTable($relations);
+	if(!empty($sort)) {
+		$orderby = "";
+		foreach($sort as $key => $val) {
+			$order = ($val === SORTBY_DESCEND) ? "desc" : "asc";
+			$orderby .=  "{$this->table}.\"{$key}\" {$order},";
+		}
+		$where .=  " ORDER BY ".trim($orderby,",");
+	}
+	$where .= " limit 1";
+	$sql .= "{$where};";
+	$this->doQuery($sql);
+	return $this->fetchDB();
+}
+//==============================================================================
 //	deleteRecord(wh): 
 public function deleteRecord($wh) {
 	$where = $this->sql_makeWHERE($wh);
