@@ -121,10 +121,10 @@ function array_key_unique($key,&$arr) {
 //==============================================================================
 // convert to num STRING to INTEGER
 function array_intval_recursive($arr) {
-    if(is_scalar($arr)) return (empty($arr) || is_numeric($arr))?intval($arr):$arr;
+    if(is_scalar($arr)) return (is_numeric($arr))?intval($arr):$arr;
     return array_map(function($v) {
         if(is_array($v)) return array_intval_recursive($v);
-        return (empty($v) || is_numeric($v))?intval($v):$v;
+        return (is_numeric($v))?intval($v):$v;
     },$arr);
 }
 //==============================================================================
