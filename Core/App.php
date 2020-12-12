@@ -77,7 +77,6 @@ class App {
 public static function ChangeMethod($module,$method,$relocate = TRUE) { 
     static::$execURI['controller'] = $module;
     static::$execURI['method'] = $method;
-    debug_log(DBMSG_SYSTEM, ["RE-LOCATE" => static::$execURI]);
     static::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================
@@ -88,14 +87,14 @@ public static function ChangeParams($params,$relocate = TRUE) {
 }
 //==============================================================================
 // メソッドの置換
-public static function Get_RelocateURL() { 
-    if(static::$ReLocate === FALSE) return NULL;
+public static function Get_RelocateURL($force=FALSE) { 
+    if(static::$ReLocate === FALSE && $force===FALSE) return NULL;
     $url = array_to_URI(static::$execURI);
     if(!empty(static::$Query)) {                  // exists QUERY strings
         $q = http_build_query(static::$Query);
         $url = "{$url}?{$q}";
     }
-    debug_log(DBMSG_SYSTEM, ["RE-LOCATE-JMP" => static::$execURI,'URI'=>$url]);
+//    debug_log(DBMSG_SYSTEM, ["RE-LOCATE-JMP" => static::$execURI,'URI'=>$url]);
     return "/{$url}";
 }
 //==============================================================================
