@@ -192,7 +192,7 @@ public function ViewTemplate($name,$vars = []) {
                     if(is_numeric($var)) $val = App::$Params[intval($var)];          // get value from Params[] property
                     else {
                         $n = strpos('abcdefghijklmnopqrstuvwxyz',$var);
-                        $val = App::$Filters[$n];
+                        $val = (isset(App::$Filters[$n])) ? App::$Filters[$n] : '';
                     }
                 }
                 break;

@@ -20,8 +20,10 @@ class AppController extends AppObject {
 		if(!class_exists($view)) $view = 'AppView';	// クラスがなければ基底クラスで代用
 		$this->View = new $view($this);			// ビュークラス
 		$this->Helper = $this->View->Helper;		// ヘルパークラスへのショートカット
-		if(empty(App::$Filter)) App::$Filter = $this->defaultFilter;	// フィルタが無ければデフォルトをセット
-		// filter of '*Action' method
+		if(empty(App::$Filter)) {
+			App::$Filters[0] = App::$Filter = $this->defaultFilter;
+		}
+			// filter of '*Action' method
 		$map_conv = function($nm) { return (substr_compare($nm,'Action',-6) === 0) ? substr($nm,0,-6):''; };
 		// mekae active method list
 		$en = $this->defaultAction;		// default Action must be ENABLED
@@ -191,9 +193,12 @@ public function MakepdfAction() {
 // 更新
 public function UpdateAction() {
 	$num = App::$Params[0];
+	$url = App::$Referer;  //MySession::getValue(true,'redirect');
 	MySession::setVariables(TRUE,['RecordNo' => $num]);
 	$this->Model->UpdateRecord($num,MySession::$ReqData);
-	header('Location:' . App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/');
+	if(empty($url)) $url = App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/'.App::$Filter;
+	header('Location:' . $url);
+//	header('Location:' . App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/'.App::$Filter);
 }
 
 //==============================================================================
