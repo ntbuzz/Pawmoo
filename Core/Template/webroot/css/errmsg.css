@@ -1,7 +1,7 @@
 
 .error_box {
     position:relative;
-    width:50%;
+    width:60%;
     height: auto;
     padding: 0 50px;
     margin: 0 auto;
@@ -9,7 +9,7 @@
 }
 .message_box {
     position:relative;
-    width:30%;
+    width:50%;
     height: auto;
     padding: 0 50px;
     margin: 0 auto;
