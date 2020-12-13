@@ -31,6 +31,7 @@ class AppModel extends AppObject {
     private $FieldSchema = [];       // Pickup Record fields columns [ref_name, org_name]
     private $Relations = [];         // Table Relation
     public $DateFormat;              // Date format for Database
+    public $SortDefault = SORTBY_ASCEND;    // findRecord Default Sort Sequence
 //==============================================================================
 //	Constructor: Owner
 //==============================================================================
@@ -228,9 +229,9 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
         return in_array($vv,$filter,true) || ($vv === NULL); // orgがNULLならバインド名を必ず含める
     });
     $data = array();
-    if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];
+    if(empty($sort)) $sort = [ $this->Primary => $SortDefault ];
     else if(is_scalar($sort)) {
-        $sort = [ $sort => SORTBY_ASCEND ];
+        $sort = [ $sort => $SortDefault ];
     }
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
@@ -268,9 +269,9 @@ public function realFinder($cond,$filter=[],$sort=[]) {
     // プライマリキーは必ず含める
     $fields_list[$this->Primary] = $this->Primary;
     $data = array();
-    if(empty($sort)) $sort = [ $this->Primary => SORTBY_ASCEND ];
+    if(empty($sort)) $sort = [ $this->Primary => $SortDefault ];
     else if(is_scalar($sort)) {
-        $sort = [ $sort => SORTBY_ASCEND ];
+        $sort = [ $sort => $SortDefault ];
     }
     // 複数条件の検索
     $this->dbDriver->findRecord($cond,NULL,$sort);
@@ -294,6 +295,22 @@ public function realFinder($cond,$filter=[],$sort=[]) {
         "FieldSchema" => $this->FieldSchema,
         "FILTER" => $fields_list,
         "RECORDS" => $this->Records,
+    ]);
+}
+//==============================================================================
+// レコードリストの読み込みJOINなし
+public function nearRecord($primary,$cond=[],$filter=[]) {
+    if(empty($filter)) $filter = $this->dbDriver->columns;
+    $data = array();
+    foreach(['>' => SORTBY_ASCEND,'<' => SORTBY_DESCEND] as $cmp => $seq) {
+        $mcond = [ $cond, $this->Primary.$cmp => $primary];
+        $fields = $this->dbDriver->firstRecord($mcond,NULL,[ $this->Primary => $seq ]);
+        $data[] = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
+    }
+    $this->nearRecords = $data;
+    debug_log(FALSE, [
+        "Filter" => $filter,
+        "RECORDS" => $this->nearRecords,
     ]);
 }
 //==============================================================================
