@@ -115,7 +115,7 @@ public function findRecord($cond,$relations = NULL,$sort = []) {
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
 	$this->doQuery("{$sql}{$where};");
 	$field = $this->fetch_array();
-	debug_log(DBMSG_HANDLER,["SQL" => "{$sql}{$where};", "DATA" => $field]);
+	debug_log(DBMSG_HANDLER,["Find" => "{$where}", "DATA" => $field]);
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	$sql = $this->sql_JoinTable($relations);
 	if(!empty($sort)) {
