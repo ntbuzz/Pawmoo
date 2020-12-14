@@ -1,7 +1,7 @@
 <?php
 /* -------------------------------------------------------------
- * PHPフレームワーク
- *  DatabaseHandler: データベースの接続情報
+ * Object Oriented PHP MVC Framework
+ *  DatabaseHandler: Database Connection Handling
  */
 define('SORTBY_ASCEND', 0);
 define('SORTBY_DESCEND', 1);
@@ -12,13 +12,14 @@ require_once('Core/Handler/SQLiteHandler.php');
 require_once('Core/Handler/PostgreHandler.php');
 require_once('Core/Handler/NullHandler.php');
 //require_once('Core/Handler/FMDBHandler.php');
+
 //==============================================================================
-// レコードフィールドの読替えクラス
+// field ALIAS and BIND-columns class
 class fieldAlias {
 	private	$lang_alias = [];
     private	$bind_columns = [];
 //==============================================================================
-// 言語エイリアスと結合カラム
+// Setup ALIAS parameter,and BIND-column parameter
 public function SetupAlias($alias,$binds) {
 	$this->lang_alias = $alias;
 	$this->bind_columns = $binds;
@@ -27,18 +28,17 @@ public function GetAlias() {
 	return [ 'Locale' => $this->lang_alias,'Bind' => $this->bind_columns];
 }
 //==============================================================================
-// fetchDB: レコードを取得して言語エイリアスとカラム連結を適用する
+// check exists Locale ALIAS field
 public function exists_locale($field_name) {
     return (array_key_exists($field_name,$this->lang_alias));
 }
 //==============================================================================
-//	言語カラムの読み替えが必要か
+//	if exists LOCALE alias, get LOCALE fields name
 public function get_lang_alias($field_name) {
-    
-    return ($this->exists_locale($field_name)) ? $this->lang_alias[$field_name] : $field_name;
+     return ($this->exists_locale($field_name)) ? $this->lang_alias[$field_name] : $field_name;
 }
 //==============================================================================
-// fetchDB: レコードを取得して言語エイリアスとカラム連結を適用する
+// ALIAS fields replace to standard field, and BIND-column to record field
 public function to_alias_field(&$row) {
     foreach($this->lang_alias as $key => $lang) {
         if(!empty($row[$lang])) $row[$key] = $row[$lang];
@@ -48,9 +48,8 @@ public function to_alias_field(&$row) {
         $row[$key] = array_concat_keys($row,$columns);
     }
 }
-
+// End-OF-CLASS
 }
-
 //==============================================================================
 // データベースの接続情報を保持するクラス
 // 全体で１度だけ呼び出す

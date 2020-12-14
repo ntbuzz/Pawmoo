@@ -41,7 +41,7 @@ selector.each(function () {
             $('.popup-BK').fadeIn('fast');
             // バルーンコンテンツの表示位置をリンク先から取得して設定
             var x = $(ref).offset().left + $(ref).width();
-            var y = $(ref).offset().top + self.paddingWidth().top;
+            var y = $(ref).offset().top + self.getPaddingBox().top;
             if ((x + self.outerWidth()) > $(window).innerWidth()) {
                 x = $(ref).offset().left - self.outerWidth(true);   // padding+margin込みの幅を差引く
             }

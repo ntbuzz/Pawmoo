@@ -36,7 +36,7 @@
         });
     };
     // CSS の padding 値を取得する
-    $.fn.paddingWidth = function() {
+    $.fn.getPaddingBox = function() {
         var widths = {
             top    : 0,
             bottom : 0,

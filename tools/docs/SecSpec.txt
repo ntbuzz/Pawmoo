@@ -54,3 +54,23 @@ command-identifier:
     ?       Switch SECTION
     %       Hyper-Link
     -       single-repeat tag (for <meta>)
+
+built-in command:
+    +setvar
+    +include
+    +echo
+    +style
+    +jquery
+    +img
+    +ul
+    +ol
+    +dl
+    +select
+    +table
+    +radio
+    +checkbox
+    +inline.SecName
+    +markdown
+    +recordset
+    +tabset
+    +floatwin

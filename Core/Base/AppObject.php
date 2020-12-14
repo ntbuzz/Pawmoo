@@ -31,7 +31,6 @@ class AppObject {
 // initialized call
 	protected function __InitClass() {
         if(method_exists($this,'ClassInit')) {
-//            if(CLI_DEBUG) echo "CALL ClassInit({$this->ClassName})\n";
             $this->ClassInit();
         }
 	}
@@ -79,7 +78,6 @@ public function __get($PropName) {
         $mod_name = $this->ModuleName;
         $cls_name = $PropName;
     } else  {
-        // クラス名を取り出す
         preg_match('/[A-Z][a-z]+?$/', $PropName, $matches);
         $cls_name = $matches[0];
         if(empty($cls_name)) {
@@ -123,8 +121,8 @@ public function __get($PropName) {
     throw new Exception("SubClass Create Error for '{$prop_name}'");
 }
 //==============================================================================
-// 言語リソース値を取り出す
-// allow_array が TRUE なら値が配列になるものを許可する
+// read LOCALE resource.
+// if allow_array will be TRUE, read the Array allowed.
 public function _($defs, $allow_array = FALSE) {
     return LangUI::get_value($this->LocalePrefix, $defs, $allow_array);
 }
@@ -133,7 +131,7 @@ protected function __($defs, $allow_array = FALSE) {
     return LangUI::get_value('core', $defs, $allow_array);
 }
 //==============================================================================
-// 言語リソース値から連想配列の要素を取り出す
+// read LOCALE resource by array item
 public function _in($arr,$defs) {
     return LangUI::get_array($arr, $this->LocalePrefix, $defs);
 }

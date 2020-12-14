@@ -24,6 +24,11 @@ function array_first_item($arr) {
     return ['',''];
 }
 //==============================================================================
+// exists item in array of KEY
+function array_item_value(&$arr,$key,$default=NULL) {
+    return (isset($arr[$key])) ? $arr[$key] : $default;
+}
+//==============================================================================
 //  To compensate array, fixed count
 function array_alternative($a,$max = 0, $b = []) {
     $n = count($b);
@@ -92,7 +97,7 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
             } else if(is_numeric($key) || $in_key === FALSE) {
                 $txt .= "{$spc}{$val}{$sep}";
             } else {
-                $txt .= "{$spc}{$key}={$val}{$sep}" ;
+                $txt .= "{$spc}[{$key}] = {$val}{$sep}" ;
             }
         }
         return trim($txt,$sep);
@@ -163,13 +168,13 @@ function array_to_URI($arr) {
 }
 //==============================================================================
 // Concatenate array values by key value
-function array_concat_keys($arr,$keys) {
+function array_concat_keys(&$arr,$keys) {
     if(is_scalar($keys)) return $keys;
-    $ss = ''; $trim_sep = ' ';
+    $ss = '';
     foreach($keys as $kk => $val) {
         $sep = (is_numeric($kk)) ? ' ' : $kk;
-        if(strpos($trim_sep,$sep) === FALSE) $trim_sep .= $sep;
-        $ss .= $sep . $arr[$val];
+        $item = (isset($arr[$val])) ? $arr[$val] : '';
+        $ss = (empty($ss)) ? $item : "{$ss}{$sep}{$item}";
     }
-    return trim($ss,$trim_sep);
+    return trim($ss);
 }
