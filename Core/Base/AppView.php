@@ -202,11 +202,13 @@ public function ViewTemplate($name,$vars = []) {
                 }
                 break;
             case ':':
-                   	$p = '/:(\w+)(?:\[(\w+)\])*/';
+                   	$p = '/(:{1,2})(\w+)(?:\[(\w+)\])*/';
                     preg_match($p,$var,$m);
-                    list($match,$var,$mem) = $m;
-                    if(isset($this->Model->$var)) { // exist Property?
-                        $val = $this->Model->$var;
+                    list($match,$cls,$var,$mem) = $m;
+                    $mem = trim($mem,"\"'");        // allow quote char
+                    $clsVar = ($cls === '::') ? $this->Helper : $this->Model;
+                    if(isset($clsVar->$var)) { // exist Property?
+                        $val = $clsVar->$var;
                         if(!empty($mem) && isset($val[$mem])) {
                             $val = $val[$mem];
                         }
@@ -374,7 +376,7 @@ public function ViewTemplate($name,$vars = []) {
     private function subsec_separate($section,$attrList,$vars) {
         $subsec = [];
         if(is_scalar($section)) {
-            $innerText = $this->expand_Strings($section,$vars);
+            $innerText = array_to_text($this->expand_Strings($section,$vars));
         } else {
             $innerText = '';
             if(!empty($section)) {

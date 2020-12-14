@@ -1,25 +1,25 @@
 <?php
 /* -------------------------------------------------------------
- * PHPフレームワーク
- * 	AppController: コントローラー処理のコアクラス
+ * Object Oriented PHP MVC Framework
+ * 	AppController: Controller Processing
  */
 class AppController extends AppObject {
-	public $defaultAction = 'List';		// デフォルトのアクション
-	public $defaultFilter = 'all';		// デフォルトのフィルタ
-	public $disableAction = [];			// 禁止する継承元のアクション
+	public $defaultAction = 'List';		// Omitted URI, Default Action 
+	public $defaultFilter = 'all';		// Default Filter
+	public $disableAction = [];			// Ban Action
 	private $my_method;					// active method list on Instance
-	protected $needLogin = FALSE;
+	protected $needLogin = FALSE;		// Login NEED flag
 //==============================================================================
-// コンストラクタでビューを生成、モデルはビュークラス内で生成する
+// constructor: create MODEL, VIEW(with HELPER)
 	function __construct($owner = NULL){
 		parent::__construct($owner);
 		$model = "{$this->ModuleName}Model";
-		if(!class_exists($model)) $model = 'AppModel';	// クラスがなければ基底クラスで代用
-		$this->Model = new $model($this);			// データアクセスモデルクラス
-		$view = "{$this->ModuleName}View";		// ローカルビューが存在するなら使う
-		if(!class_exists($view)) $view = 'AppView';	// クラスがなければ基底クラスで代用
-		$this->View = new $view($this);			// ビュークラス
-		$this->Helper = $this->View->Helper;		// ヘルパークラスへのショートカット
+		if(!class_exists($model)) $model = 'AppModel';	// file not exists, Use basic Class
+		$this->Model = new $model($this);
+		$view = "{$this->ModuleName}View";
+		if(!class_exists($view)) $view = 'AppView';		// file not exists, Use basic Class
+		$this->View = new $view($this);
+		$this->Helper = $this->View->Helper;			// Helper class short-cut
 		if(empty(App::$Filter)) {
 			App::$Filters[0] = App::$Filter = $this->defaultFilter;
 		}
@@ -38,18 +38,18 @@ class AppController extends AppObject {
 								function($v) use ($except) {
 									return !in_array($v,$except,true);
 								});
-		$this->__InitClass();                       // クラス固有の初期化メソッド
+		$this->__InitClass();
 	}
 //==============================================================================
-// クラス変数の初期化
+// Initialized Class Property
 	protected function __InitClass() {
-		// Model側の construct 中にはデッドロックが発生し、呼び出せないのでコントローラ側で処理してやる
-		$this->Model->RelationSetup();				// リレーション情報を実テーブル名とロケール名に置換
-		$this->LocalePrefix = $this->Model->LocalePrefix;	// 言語プレフィクスをオーバーライド
-		parent::__InitClass();                       // 継承元の初期化メソッド
+		// Deadlock occurs when a AppModel construtor, Controller runs on behalf of AppModel.
+		$this->Model->RelationSetup();
+		$this->LocalePrefix = $this->Model->LocalePrefix;
+		parent::__InitClass();                       // Call Initialize method chain.
 	}
 //==============================================================================
-// 後始末の処理
+// Terminated Contorller
 public function __TerminateApp() {
 	$this->View->__TerminateView();
 }
@@ -98,7 +98,7 @@ public function is_authorised() {
 	return TRUE;
 }
 //==============================================================================
-// ログアウト処理
+// Logout Processing
 public function LogoutAction() {
 	MySession::setup_Login(NULL);
 	$url = App::Get_SysRoot('index.html');
@@ -106,23 +106,32 @@ public function LogoutAction() {
 	else header("Location:{$url}");
 }
 //==============================================================================
-// View Helperクラスへの値セット
+// Set Property value on Helper Class
 public function SetHelperProps($arr) {
 	$this->Helper->setProperty($arr);
 }
 //==============================================================================
-// View HelperクラスへのPOST変数セット
-public function ImportHelpProperty(...$keys) {
-	foreach($keys as $key) {
-		$this->Helper->$key = MySession::$ReqData[$key];
+// Pre-Processing before Action method invoke
+protected function ActionPreProcess($action) {
+	return TRUE;
+}
+//==============================================================================
+// Post-Processing after Action method complete
+protected function ActionPostProcess($action) {
+	return TRUE;
+}
+//==============================================================================
+// Method Dispatcher before Pre-Process, after Post-Processing
+public function ActionDispatch($action) {
+	if($this->ActionPreProcess($action)) {
+		$method = "{$action}Action";
+		$this->$method();
+		$this->ActionPostProcess($action);
 	}
 }
 //==============================================================================
-// 自動ページネーション
+// Auto Paging.
 public function AutoPaging($cond, $max_count = 100) {
-	// 数字パラメータのみを抽出して数値変換する
-//	$Params = array_map(function($v) {return (empty($v)) ? 0 : intval($v);}, 
-//			array_values(array_filter(App::$Params, function($vv) { return empty($vv) || is_numeric($vv);})));
 	list($num,$size) = App::$Params;
 	$cnt = $this->Model->getCount($cond);
 	if($num > 0) {
@@ -138,33 +147,31 @@ public function AutoPaging($cond, $max_count = 100) {
 		}
 	}
 	if($size > 0) {
-		MySession::$EnvData['PageSize'] = $size;		// 新しいページサイズに置換える
+		MySession::$EnvData['PageSize'] = $size;		// remember in SESSION
 		$this->Model->SetPage($size,$num);
 		debug_log(DBMSG_SYSTEM, ["Param"  => App::$Params]);
 	}
 }
 //==============================================================================
-// 自動ページネーションと検索実行
+// Auto Paging, and Model Finder
 public function PagingFinder($cond, $max_count=100,$filter=[],$sort=[]) {
-//	debug_log(-11, ["cond"  => $cond, "count" => $max_count]);
 	$this->AutoPaging($cond, $max_count);
 	$this->Model->RecordFinder(NULL,$filter,$sort);
 }
 //==============================================================================
-// デフォルトの動作
+// Default List Action
 public function ListAction() {
 	$this->Model->RecordFinder([]);
 	$this->View->PutLayout();
 }
 //==============================================================================
-// ページング処理
+// Default Page Action
 public function PageAction() {
 	$this->AutoPaging([],50);
 	$this->ListAction();
 }
 //==============================================================================
-// 検索
-// find/カラム名/検索値
+// Default Find Action
 public function FindAction() {
 	if(!empty(App::$Filter) ) {
 		$row = array(App::$Filter => "=".App::$Params[0]);
@@ -175,7 +182,7 @@ public function FindAction() {
 	$this->View->PutLayout();
 }
 //==============================================================================
-// ビュー
+// Default View Action
 public function ViewAction() {
 	$num = App::$Params[0];
 	$this->Model->getRecordValue($num);
@@ -183,28 +190,21 @@ public function ViewAction() {
 	$this->View->ViewTemplate('ContentView');
 }
 //==============================================================================
-// PDFを作成する
+// Default PDF Action
 public function MakepdfAction() {
 	$num = App::$Params[0];
 	$this->Model->GetRecord($num);
 	$this->View->ViewTemplate('MakePDF');
 }
 //==============================================================================
-// 更新
+// Default Update Action
 public function UpdateAction() {
 	$num = App::$Params[0];
-	$url = App::$Referer;  //MySession::getValue(true,'redirect');
+	$url = App::$Referer;
 	MySession::setVariables(TRUE,['RecordNo' => $num]);
 	$this->Model->UpdateRecord($num,MySession::$ReqData);
 	if(empty($url)) $url = App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/'.App::$Filter;
 	header('Location:' . $url);
-//	header('Location:' . App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/'.App::$Filter);
-}
-
-//==============================================================================
-// デバッグダンプ
-public function DumpAction() {
-	debug_log(110,MySession::$ReqData);
 }
 
 }

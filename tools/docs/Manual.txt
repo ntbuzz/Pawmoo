@@ -280,6 +280,9 @@
 　コントローラーやビューからデータベース固有の処理を隠遮します。
 　データベースハンドラーはモデルクラスのメソッドに必要なインタフェースを提供し
 　データベースとの直接的なデータの入出力を担当します。
+  基底クラスのSQLでは十分な処理ができない場合、独自にSQLを生成して直接データベースドライバーの
+  SQL実行メソッドを呼び出すことも可能ですが、そのときは AppModel のメソッドは使用しないでください。
+  また AppHelper クラスも使用できなくなるので、同等のクラスを独自に実装してください。
 
   AppModel --+---- Handler
                     +-----> SQLite3
@@ -325,7 +328,7 @@
   論理式は連想配列で指定し、次のような形式になります。
 
     論理積   	AND => [ item, item,... ] | [ item, item,...]
-    論理和   	OR => [ item, item,... ]
+    論理和   	OR  => [ item, item,... ]
     否定      NOT => [ item ]
 
   item の指定はカラム名に演算子を付加した連想配列です。
@@ -394,12 +397,21 @@
       ${$filter$}      フィルタ名
       ${%a%}～{%z%}    フィルタ文字列パラメータ
       ${%0%}～{%9%}    フィルタ配列以降の数値(文字列)パラメータ
+
   ・テンプレート変数
       ${変数名}       +setvar コマンドやテンプレート引数に与えられた変数
             例: +setvar => [
                   varnamse => values
                 ]
               → ${varname}  =  "values"
+
+  ・クラスプロパティ変数
+      ${:プロパティ名}  Modelクラスのプロパティ変数
+      ${::プロパティ名} Helperクラスのプロパティ変数
+      
+      プロパティ変数が配列で特定要素を参照するときは「[キー名]」を付加する
+        ${:Select[host_id]}   $Model->Select['host_id'] 要素を参照する
+
   ・レコード変数
       ${@フィールド名}  レコードデータのフィールド値、改行を<br>変換したもの
       ${@@フィールド名} フィールド値の生データ
@@ -452,75 +464,104 @@
       ～                /(アプリルート)/～
 
 ■ 画面レイアウト テンプレート (*.tpl)
- Section = {                              *** タグ・セクションの定義 ***
+  セクションテンプレートの基本シンタックス次のようになっている。
+    トークン => [
+        キー名 => スカラー値
+        スカラーテキスト
+        トークン => [
+          サブセクション
+        ]
+    ]
+  トークンにはタグ項目とコマンド項目があり、それぞれで要素内の扱いは異なる。
+
+  タグ項目のトークン場合、スカラー値を持つキー名はトークンの追加属性として扱われる。
+  またスカラーテキストはタグのインナーテキストとして出力する。
+  サブセクションはトークンの子要素として出力する。
+  コマンド項目のトークンの場合は、コマンドへの引数として処理されるので、各々の要素については
+  コマンド定義を参照のこと。
+
+  タグトークンはタグ名(省略可)に続けて、(.)クラス名、(#)ID名をキーとした配列要素となる。
+  配列要素内には、さらに追加のタグ属性を記述できる。
+  タグ名が省略された場合は「DIV」タグが指定されたものとみなす。
+  追加属性は「属性名 => 属性値」の形式となる。
+  追加属性の中でも以下の特定属性についてはタグ項目に付加できる書式が定義してある
+    size=NN             :NN
+    name=xxxx           [xxxx]
+    value=vvvv          (vvvv)
+    data-element=yyyy   {yyyy}
+  書式順は上記の上から順に記述すること。
+  ex.
+    span.right#menu[help](click){popup} => BUTTON
+    => <SPAN class="right" id="menu" name="help" value="click" data-element="popup">BUTTON</span>
+
+  コマンド項目のトークンにはタグ生成に関連するタグコマンドと、テンプレート関連のコマンドがある。
+  テンプレートコマンド
   @XXXXX  => [ key => Value ]             外部テンプレート呼び出し、配列は変数として引き渡し、連想配列にしなければ引数なしの呼び出し
                                           ドット(.)で始まる名前はまずインラインセクション名を参照し、未定義なら外部ファイルを参照する
   &FUNCS => [ key => value ]              Helperメソッド呼び出し、連想配列にすると引数として渡すが、スカラー定義の場合は引数なしの呼び出し
-  *Comment                                コメントタグの出力
-  <HTML-TAG>                              HTMLタグとしてそのまま出力する
-  Text                                    キー名の無いスカラーテキストはそのまま出力
-  -TAGS.XXXX#DDDD => [ attr => value,.. ] クラス名、ID名以外の属性付の単独タグ出力、キー名の無いものは無視する
-  TAGS.XXXX#DDDD => [ Section ]           クラス名(XXXX)、ID名(DDDD)付のタグ出力、子要素に配列定義するとサブセクションとして処理する
+
   $varname => VALUE                       サブセクション内だけで有効なローカル変数に値を代入します
-  // 以下はタグ処理のためのコマンド
   +setvar => [ varname => value , ...]    セクション内のグローバル変数を定義します。同名の変数があると置換されます
-  +include => [ value, ... ]              JS ファイル, CSS ファイルのインクルード
-  +echo => [ value, ... ]                 value のリストをそのまま出力、キー名を指定しても無視する
-  +style => [ value, ... ]                value のリストをスタイルシートとして出力する
-  +jquery => [ value, ... ]               value のリストをJQuery関数として出力する
-  +img => [ attr => value, src ]          imageタグの簡易出力書式, class,id以外の属性を指定しない場合はスカラー値で定義できる
+  
+  タグコマンドは、HTMLタグの出力を簡略化するためのコマンドになっている。
+    <HTML-TAG>                              HTMLタグとしてそのまま出力する
+    *Comment                                コメントタグの出力
+    -TAGS.XXXX#DDDD                         単独タグ、またはタグのリピート出力
+    +include => [ value, ... ]              JS ファイル, CSS ファイルのインクルード
+    +echo => [ value, ... ]                 value のリストをそのまま出力、キー名を指定しても無視する
+    +style => [ value, ... ]                value のリストをスタイルシートとして出力する
+    +jquery => [ value, ... ]               value のリストをJQuery関数として出力する
+    +img => [ attr => value, src ]          imageタグの簡易出力書式, class,id以外の属性を指定しない場合はスカラー値で定義できる
                                           +img => src
-  +ul/ol => [ attr => value , items ]     UL/OLタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
+    +ul/ol => [ attr => value , items ]     UL/OLタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
         items :=                          リスト項目は次の要素から構成する
           list-item,                        スカラー要素：　単純リスト項目
           [ list-section ],           　    配列要素：　セクション項目
           .XXXX#DDDD => [ list-section ]    クラス名(XXXX)、ID名(DDDD)付のリストセクション項目
-  +select => [                            SELECTタグ専用のリスト出力
-    selected_key = > [                    連想キーは初期選択するアイテム名
-      option_text => value                 選択テキストと値のペアリスト
+    +select => [                            SELECTタグ専用のリスト出力
+      selected_key = > [                    連想キーは初期選択するアイテム名
+        option_text => value                 選択テキストと値のペアリスト
       ...   ]
-  +table => [                             TABLEタグ専用の出力
+    +table => [                             TABLEタグ専用の出力
         [                                 TR 配列, クラス/ID属性を使用可 (ex: .item#id => [ ... ] )
           th=>TEXT | [ TH-CELL ]          TH ヘッダセル, 要素を配列にするとセクションコマンドが使える
           .td_attr=>[ TD-CELL ] | [ TD-CELL ]  TD セル、キー名を指定するとクラス/ID属性を付加できる
         ] ... ]
-  +radio => [ attr => value , items ]     INPUT RADIOタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
+    +radio => [ attr => value , items ]     INPUT RADIOタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
         items :=                            リスト項目は次の要素から構成する
           checked-option-value =>           キー名と同じ値がデフォルト選択要素
             [ option => value ... ]           選択テキストと値のペアリスト
-  +checkbox => [  check-items ]           チェックボックス、2つのフォーマットが使用可能
+    +checkbox => [  check-items ]           チェックボックス、2つのフォーマットが使用可能
       FORMAT-I:                             単独のチェックボックスではname属性を指定する
         name=TEXT
         @Value => TEXT  [ STR => value ]   @Value=>TEXTはチェックされたときの値と表示文字、STRとvalue が等しいときはchecked
       FORMAT-II:                          複数のチェックボックスをまとめて出力するときはname属性をキーにした連想配列
         name1 => [ @value1=>TEXT [ STR1 => value1 ] ]
         name2 => [ @value2=>TEXT [ STR2 => value2 ] ]
-  +dl => [ attr => value , [ items ]  ]   DLタグ専用のリスト出力、attr => value はDLタグの属性になる
+    +dl => [ attr => value , [ items ]  ]   DLタグ専用のリスト出力、attr => value はDLタグの属性になる
       items :=                            リスト項目は次の要素から構成する
           inner-text,                       無名キースカラー要素：　DTタグのインナーテキスト
           attr => value,                    DTタグの属性
           [ list-section ],           　    無名キー配列要素：　DD要素のセクション項目
           .XXXX#DDDD => [ list-section ]    DD属性にクラス名(XXXX)、ID名(DDDD)を付けたセクション項目
-  %link => [ link_str => href, ... ]      ハイパーリンク link_str に href のリンクを設定,Helper->ALinkを呼び出す
+    %link => [ link_str => href, ... ]      ハイパーリンク link_str に href のリンクを設定,Helper->ALinkを呼び出す
                                           単独タグの場合は省略形として以下の書式も使用できる
                                           %link_str => href
-  +inline.SecName => [ ... ]              インラインのレイアウトセクション定義。テンプレート呼出しで再利用ができる
-  +markdown => Text                       Text を簡易マークダウンとして整形したものを出力する。
+    +inline.SecName => [ ... ]              インラインのレイアウトセクション定義。テンプレート呼出しで再利用ができる
+    +markdown => Text                       Text を簡易マークダウンとして整形したものを出力する。
                                           クラス属性を指定するとマークダウンのクラス名とする。
                                           Textが配列で渡された場合は、各要素を改行で結合したTextとして扱う
-  +recordset => [ Section ]               読み込んだレコードごとに Section を繰返します
+    +recordset => [ Section ]               読み込んだレコードごとに Section を繰返します
                                           name属性に：をつけるとモデルクラスのプロパティ変数で繰り返す
                                           ex. +recordset[:Outline] => [ Section ]
-  +tabset => [                            ul タグを使ったタブセットの出力
+    +tabset => [                            ul タグを使ったタブセットの出力
       Title1 => [ Section ]               テンプレート内の tabset.css を読み込むことでタブコントロール表示する
       ...                                 タブ切替え時に独自の処理が不要なら、テンプレートの tabset.js を読み込む
-  ]
-  +floatwin.class#id => [                 floatWindow ブロックの簡易記述構文
-      dt-Title                            dl タグを記述しないで
+      ]
+    +floatwin.class#id => [                 floatWindow ブロックの簡易記述構文
+      DT-Title                              dl タグを直接記述せずにすむ
       [ DD-Section ]
-  ]
-
- }
+    ]
 
   特定の変数やデータにより、タグ出力を切替えるにはスイッチセクション(?記号)を使います。
   スイッチセクション :=
@@ -907,20 +948,23 @@
   ・プロパティ変数
     $defaultAction                //  デフォルトのアクション
     $defaultFilter                //  デフォルトのフィルター
-    $disableAction                  // 禁止する継承元のアクション
+    $disableAction                // 禁止する継承元のアクション
+	* $needLogin                    // ログイン要求の有無(デフォルト:FALSE)
 
   ・クラスメソッド
-    ListAction()                  // レコードリストの一覧表示
-    FindAction()                  // 検索
-    ViewAction()                  // レコード表示
-    MakepdfAction()               // PDFを作成する
-    UpdateAction()                // レコード更新
-    SetHelperProps$data)                // ヘルパープロパティ変数のセット
+  * ActionPreProcess(action)      // アクション実行前に呼び出すメソッド、FALSEを返すとアクションをキャンセルする。
+  * ActionPostProcess(action)     // アクション実行後に呼び出すメソッド
+    SetHelperProps(array)         // ヘルパープロパティ変数のセット、テンプレートから参照できるようにする
+
+    ListAction()                  // 標準処理：レコードリストの一覧表示
+    FindAction()                  // 標準処理：検索
+    ViewAction()                  // 標準処理：レコード表示
+    MakepdfAction()               // 標準処理：PDFを作成する
+    UpdateAction()                // 標準処理：レコード更新
 
     モジュールによっては[find]や[page]メソッドを呼び出されては困る、という場合は
     $disableAction で呼出を禁止するアクションを配列で記述します。
     スカラー値を記述すると全てのアクションを禁止します。
-
     // ページングアクションを無効にする
     $disableAction = [ 'Page' ];     // 禁止するアクション
 
@@ -935,25 +979,29 @@
     $record_max;                // 総レコード数
 
   ・クラスメソッド
-    getRecordByKey($id)         // PrimaryKey でレコードを取得
-    GetRecord($num)             // アイテムの読み込み (JOIN無し)
-    getRecordField($key,$value,$field) // keyフィールドがvalueのレコードを検索しfield値を返す (JOIN無し)
-    SetPage($pagesize,$pagenum) // ページング設定
-    RecordFinder($cond [,$filter [,$sort ]]) // レコードリストの読み込み(JOIN済レコード)
-    UpdateRecord($num,$row)     // レコードの更新
+    SetPage($pagesize,$pagenum)               // ページング設定
+    getRecordByKey($id)                       // PrimaryKey でレコードを取得
+    GetRecord($num)                           // アイテムの読み込み (JOIN無し)
+    getRecordField($key,$value,$field)        // keyフィールドがvalueのレコードを検索しfield値を返す (JOIN無し)
+    RecordFinder($cond [,$filter [,$sort ]])  // レコードリストの読み込み(JOIN済レコード)
+    realFinder($cond,$filter=[],$sort=[])     // レコードリストの読み込み(JOIN済レコード)
+    nearRecord($primary,$cond=[],$filter=[])  // $primaryで指定されたキー前後のレコードを取得する
+    UpdateRecord($num,$row)                   // レコードの更新
 
 ・ビュークラス(AppView)
   ビュークラスはテンプレート処理へのI/Fを提供するクラスだが、サブクラスでメソッドを拡張することができる
   ・プロパティ変数
-  * $Layout;                          // レイアウトテンプレート名
+  * $Layout;                    // レイアウトテンプレート名
     SetLayout($layoutfile)      // デフォルトレイアウト変更
     PutLayout()                 // レイアウト出力
     ViewTemplate($name)         // レイアウトテンプレート処理
 
 ・ヘルパークラス(AppHelper)
   ヘルパークラスにはプロパティ変数がありません。
+  必要なら、setProperty(array)メソッドで動的にプロパティを定義します。
+
   ・クラスメソッド
-    ViewTemplate($name)         // 親のレイアウトテンプレート処理を呼び出す
+    ViewTemplate($name)         // 親のViewクラスにあるテンプレート処理を呼び出す
     Resource ($res)             // リソースの出力
     ALink ($lnk,$txt)           // ハイパーリンクの生成, 言語IDを参照するには$txtを＃文字で始める
                                 // $lnk を / で始めるとフレームワークのTOP、:で始めるとサイトのTOPへリンクする
@@ -1107,10 +1155,13 @@
   JQueryのプラグインとして使用できる関数
 
   スクロールを固定する
-  position:sticky; が動作しないときに使います
-    (廃止予定) (セレクタ).stickyOn(親オブジェクト); => stickyBar クラスへ移行
+  position:sticky; が動作しないときに使います。
+  stickyBar クラスを付加したときと同じですが、動的読み込みしたコンテンツに使います。
+    (セレクタ).stickyOn(親オブジェクト); => stickyBar クラスへ移行
 
-    (セレクタ).adjustHeight();          親要素の高さに調整する => fitWindowクラスへ移行
+  要素の幅・高さを最大値に調整する。
+  fitWindow クラスを付加したときと同じですが、動的読み込みしたコンテンツに使います。
+    (セレクタ).adjustWindow();          親要素の高さに調整する => fitWindowクラスへ移行
 
   フローティングウィンドウを開く
     (セレクタ).floatWindow(タイトル, JSON, コールバック関数);

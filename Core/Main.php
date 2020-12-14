@@ -18,12 +18,12 @@
  *          snake_case      Public function with return value
  *              all_public_function
  */
-// デバッグ用のクラス
+// for DEBUG utility
 require_once('AppDebug.php');
-// このファイルが依存している関数定義ファイル
+// follow is DEPEND ON this program.
 require_once('Config/appConfig.php');
 require_once('Common/coreLibs.php');
-// 以下のクラスはオートロードできるが速度低下を防ぐためここでは使わない
+// also autoload enabled, but not use for performance up
 require_once('App.php');
 require_once('Base/AppObject.php');
 require_once('Base/AppController.php');
@@ -35,7 +35,7 @@ require_once('Base/LangUI.php');
 
 // Setup TIMEZONE
 date_default_timezone_set(TIME_ZONE);
-// コマンドライン起動ならデバッグ情報を出力
+// for CLI DEBUG
 if(CLI_DEBUG) {
 	$ln = str_repeat("=", 50);
 	print_r($argv);
@@ -44,7 +44,7 @@ if(CLI_DEBUG) {
 
 $redirect = false;      // Redirect flag
 $root = basename(dirname(__DIR__));        // Framework Folder
-// REQUEST_URIを分解
+// REQUEST_URI analyze
 list($appname,$app_uri,$module,$q_str) = get_routing_path($root);
 list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filters,$params) = $module;
@@ -55,19 +55,17 @@ if(strpos($method,'.')!==FALSE) {
     $method = ucfirst(strtolower($method));
 } else $filter = empty($filters) ? '': $filters[0];
 parse_str($q_str, $query);
-if(!empty($q_str)) $q_str = "?{$q_str}";     // GETパラメータに戻す
+if(!empty($q_str)) $q_str = "?{$q_str}";
 
-// アプリ名が有効かどうか確認する
+// is enabled application name
 if(empty($appname) || !file_exists("app/$appname")) {
-//  header("Location:/index.html");exit;
-    // 404エラーページを送信する時はこっち
+    // 404 not found page
     error_response('app-404.php',$appname,$app_uri,$module);
 }
 if($controller === 'Error') {       // ERROR PAGE
     $code = $params[0];
     error_response("page-{$code}.php",$appname,$app_uri,$module);
 }
-// ここでは App クラスの準備ができていないので直接フォルダ指定する
 require_once("app/{$appname}/Config/config.php");
 // Check URI-Redirect direction
 if(!defined('FORCE_REDIRECT')) define('FORCE_REDIRECT', FALSE);
@@ -86,16 +84,14 @@ if(!is_extst_module($appname,$controller,'Controller')) {
         error_response('page-404.php',$appname,$app_uri,$module);
     }
 }
-// リダイレクトする時はコントローラーが書換わっているので調整する
+// need REDIRECT, will be Controller name changed.
 if($redirect) $module[0] = $controller;
-// ReBuild URI
 $ReqCont = [
     'root' => $approot,
     'module' => $module,
     'query' => $q_str,
 ];
 $requrl = array_to_URI($ReqCont);
-// コントローラ名やアクション名が書き換えられてリダイレクトが必要なら終了
 if($redirect) {
     if(CLI_DEBUG) {
         echo "Location:{$requrl}\n";
@@ -104,21 +100,17 @@ if($redirect) {
     }
     exit;
 }
-// アプリ固有クラスをオートロードできるようにする
 require_once('Class/ClassLoader.php');
-ClassLoader::Setup($appname,$controller);
-// セッションを初期化する
-MySession::InitSession($appname);
-// アプリケーション変数を初期化する
+ClassLoader::Setup($appname,$controller);   // AutoLoader for Application folder
+MySession::InitSession($appname);           // Session Variable SETUP
+// INITIALIZED App static class.
 App::__Init($appname,$app_uri,$module,$query,$requrl);
-App::$Controller  = $controller;    // コントローラー名
-
-// 共通サブルーチンライブラリを読み込む
+// Load Application Common library
 $libs = get_php_files(App::Get_AppPath("common/"));
 foreach($libs as $files) {
     require_once $files;
 }
-// 言語ファイルの対応
+// Locale parameter in URL query.
 if(array_key_exists('lang', $query)) {
     $lang = $query['lang'];
     MySession::set_LoginValue(['LANG' => $lang]);
@@ -127,21 +119,17 @@ if(array_key_exists('lang', $query)) {
     if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 }
 if(empty($lang)) $lang = DEFAULT_LANG;
-// コントローラ用の言語ファイルを読み込む
+// Load Common Locale tranlate parameter
 LangUI::construct($lang,App::Get_AppPath("View/lang/"),['#common',$controller]);
-// モジュールファイルを読み込む
+// Load Application MODULE files. (Controller,Model,View,Helpe)
 App::LoadModuleFiles($controller);
-
-// コントローラ/メソッドをクラス名/アクションメソッドに変換
 $ContClass = "{$controller}Controller";
-$ContAction= "{$method}Action";
-// コントローラインスタンス生成
+// Create Controller CLASS
 $controllerInstance = new $ContClass();
-// Method Existance Check
+// Method existance Check
 if(!$controllerInstance->is_enable_action($method)) {
     if(FORCE_REDIRECT || $method==='') {
-        $method = $controllerInstance->defaultAction;               // クラスのデフォルトメソッド
-        $ContAction = "{$method}Action";                            // アクション名に変換
+        $method = $controllerInstance->defaultAction;   // get DEFAULT method
     } else {
         $module[0] = $controller;       // may-be rewrited
         $module[1] = $method;           // may-be rewrited
@@ -149,11 +137,13 @@ if(!$controllerInstance->is_enable_action($method)) {
     }
 }
 if(strcasecmp($appname,$controller) === 0) {
-    App::ChangeMethod('',$method);     // コントローラーを隠す
+    App::ChangeMethod('',$method);     // hide controller in URI
 } else {
-    App::ChangeMethod($controller,$method);     // メソッドの書換えはリダイレクトしない
+    App::ChangeMethod($controller,$method);
 }
-App::$ActionMethod= $method;    // アクションメソッド名
+// remind Controller, Method name in App class
+App::$Controller  = $controller;
+App::$ActionMethod= $method;
 //=================================
 // デバッグ用の情報ダンプ
 debug_log(DBMSG_SYSTEM, [
@@ -181,7 +171,7 @@ debug_log(DBMSG_SYSTEM, [
         "appRoot"=> App::$SysVAR['APPROOT'],
         "appname"=> $appname,
         "Controller"=> $controller,
-        "Action"    => $ContAction,
+        "Action"    => $method,
         "Param"    => $params,
     ],
     "ReqCont" => $ReqCont,
@@ -189,9 +179,10 @@ debug_log(DBMSG_SYSTEM, [
 ]);
 
 debug_run_start();
-// ログイン不要または成功ならTRUEが返る
+// Login unnecessary, or Login success returned TRUE.
 if($controllerInstance->is_authorised()) {
-    $controllerInstance->$ContAction();
+    // Controller Method Dispacher
+    $controllerInstance->ActionDispatch($method);
 }
 
 debug_run_time(DBMSG_SYSTEM);
@@ -201,7 +192,7 @@ debug_log(DBMSG_SYSTEM, [
         "ENVDATA" => MySession::$EnvData,
     ]
 ]);
-// クローズメソッドを呼び出して終了
+// call OUTPUT terminate
 $controllerInstance->__TerminateApp();
-
+// Database connection closed.
 DatabaseHandler::CloseConnection();
