@@ -165,7 +165,7 @@ public static function Get_AppRoot($path = '') {
 //==============================================================================
 //  webrootファイルの読込タグ出力（単独・配列）
     public static function WebInclude($files) {
-    debug_log(DBMSG_SYSTEM, ["WebINCLUDE" => $files]);
+    debug_log(FALSE, ["WebINCLUDE" => $files]);
         if(is_array($files)) {
             foreach($files as $nm) self::includeTag($nm);
         } else self::includeTag($files);
