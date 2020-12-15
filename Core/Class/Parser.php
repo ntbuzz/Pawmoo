@@ -113,15 +113,20 @@ debug_log(-999,['PARSE' => $this->wordlist]);
                 }
             } else {
                 switch(is_tag_identifier($wd)) {
-                case 1: if($is_TAG===FALSE) { $arr[] = $wd; break; }
+                case 1: if($is_TAG===FALSE) {
+                            $arr[] = $wd;
+                            break;
+                        }
                 case 2:
-                case 3: $arr[$wd] = ''; break;
+                case 3:
+                        $arr[$wd] = '';
+                        break;
                 case 0: 
                     $arr[] = $wd; break;
                 }
             }
         }
-        return $arr;
+       return $arr;
     }
 //==============================================================================
 

@@ -113,6 +113,7 @@ public function ViewTemplate($name,$vars = []) {
         case 0:         // '.tpl'   div Section
             $parser = new SectionParser($tmplate);
             $divSection = $parser->getSectionDef(true);
+ debug_log(-999,['divSection' => $divSection]);
             $this->inlineSection = [];         // Clear Inline-Section in this TEMPLATE
             debug_log(DBMSG_VIEW,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
             $this->sectionAnalyze($divSection,$vars);
@@ -323,8 +324,8 @@ public function ViewTemplate($name,$vars = []) {
                 else echo $sec;
             } else {
                 list($tag,$attrs) = $this->tag_Separate($token,$vars);
-                switch(is_tag_identifier($tag)) {
-                case 0: break;
+                switch(is_tag_identifier($token)) {
+                case 0: if(empty($sec)) break;
                 case 1:         // tag-section
                         list($attrs,$innerText,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
                         $attr = $this->gen_Attrs($attrs,$vars);
@@ -423,7 +424,7 @@ public function ViewTemplate($name,$vars = []) {
         list($attrs,$innerText,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
         $tag = trim($tag,'<>');
         $attr = $this->gen_Attrs($attrs,$vars);
-        echo (empty($innerText)) ? "<{$tag}{$attr} />\n" : "<{$tag}{$attr}>{$innerText}</{$tag}>\n" ;
+        echo (empty($innerText)) ? "<{$tag}{$attr}>\n" : "<{$tag}{$attr}>{$innerText}</{$tag}>\n" ;
     }
     //==========================================================================
     // HTML Comment TAG
@@ -762,6 +763,8 @@ public function ViewTemplate($name,$vars = []) {
         list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<TABLE{$attr}>\n";
+        // tr loop
+debug_log(-99,['ROW'=>$sec]);
         foreach($sec as $key => $val) {
             if(!is_numeric($key)) {
                 list($key,$attrs) = $this->tag_Separate($key,$vars);
@@ -769,6 +772,7 @@ public function ViewTemplate($name,$vars = []) {
                 echo "<TR{$tr_attr}>";
             } else echo "<TR>";
             if(is_array($val)) {
+                // th,td loop
                 foreach($val as $td_key => $td_val) {
                     list($tag,$attrs) = $this->tag_Separate($td_key,$vars);
                     list($attrs,$innerText,$sec) = $this->subsec_separate($td_val,$attrs,$vars);
