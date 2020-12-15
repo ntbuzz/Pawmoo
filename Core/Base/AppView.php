@@ -315,7 +315,7 @@ public function ViewTemplate($name,$vars = []) {
             echo "DIE!!!!!!!!!!!!\n";
             return;
         }
-        debug_log(-999,['VARS'=>$vars]);
+        debug_log(-999,['SEC' =>$divSection, 'VARS'=>$vars]);
         foreach($divSection as $token => $sec) {
             $sec = $this->array_if_selector($sec, $vars);
             if(is_numeric($token)) {
@@ -397,6 +397,7 @@ public function ViewTemplate($name,$vars = []) {
                 }
             }
         }
+        $innerText = preg_replace('/\\\\(.)/','\\1',$innerText);    // escape-char to original-char
         return [$attrList,$innerText,$subsec];
     }
     // *************************************************************************
