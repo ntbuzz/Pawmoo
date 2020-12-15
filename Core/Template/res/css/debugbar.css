@@ -14,16 +14,17 @@
 }
 /* メニュー表示 */
 .debugtab ul#debugMenu {
+    bottom:0;
     min-width: 800px;
     padding-left:28px;
     user-select: none;
     overflow: hidden;
 }
 .debugtab ul#debugMenu li {
-    height:1.8em;
+    height:1.6em;
     list-style:none;
     float:left;
-    padding:0 10px 0;
+    padding:4px 10px 0;
     cursor:pointer;
     font-size:9pt;
 }

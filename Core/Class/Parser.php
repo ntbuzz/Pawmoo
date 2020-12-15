@@ -27,10 +27,9 @@ class SectionParser {
 ((?:
 "(?:[^"]|(?:\\\\)*\\")+"|
 '(?:[^']|(?:\\\\)*\\')+'|
-<(?:[^>]|(?:\\\\)*\\>)+>|
-\((?:[^\)]+|(?:\\\\)*\\\))+\)|
-{(?:[^}]|(?:\\\\)*\\})+}|
 ~(?:[^~]+|(?:\\\\)*\\~)+~|
+<(?:[^>]|(?:\\\\)*\\>)+>|
+{(?:[^}]|(?:\\\\)*\\})+}|
 (?:\/\/.*)|
 [^,\s]+
 )*)/x
@@ -45,9 +44,10 @@ EOS;
             else if( !$incomm && strlen($token)) {          // ブロック・コメント内でなく、トークンが空でなければ処理
                 $wrapstr = $token[0] . mb_substr($token,-1);     // 先頭文字と最終文字を取り出す
                 if ( in_array($wrapstr, self::WORDSTRING,true)) {
-                    $token = ($wrapstr==='""') ?
-                            implode( "\n" , text_line_array("\n",trim($token, $wrapstr),FALSE)):
-                            trim( $token, $wrapstr );
+                    $token = trim($token, $wrapstr);
+                    if($token[0]==='^') {
+                        $token = implode( "\n" , text_line_array("\n",mb_substr($token,1),TRUE));
+                    }
                 } else if($token !== '=>') {
                     $md = explode('=>',trim($token));
                     if(count($md)===2) {
@@ -66,6 +66,7 @@ EOS;
         }
         $this->wpos = 0;                        // インデクスを先頭にする
         $this->wend = count($this->wordlist);   // 要素数を数える
+debug_log(-999,['PARSE' => $this->wordlist]);
     }
 //==============================================================================
 //  トークン取り出し、インデクスを進める
@@ -113,9 +114,10 @@ EOS;
             } else {
                 switch(is_tag_identifier($wd)) {
                 case 1: if($is_TAG===FALSE) { $arr[] = $wd; break; }
-                case 3:
-                case 2: $arr[$wd] = ''; break;
-                case 0: $arr[] = $wd; break;
+                case 2:
+                case 3: $arr[$wd] = ''; break;
+                case 0: 
+                    $arr[] = $wd; break;
                 }
             }
         }
