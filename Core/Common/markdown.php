@@ -95,7 +95,8 @@ function pseudo_markdown($atext, $md_class = '') {
         return $user_func($txt);
     }, $atext);
     // TABLE processing
-    $p = '/\n(\|[\s\S]+?\|)\n(?:(?:\.(\w+)){0,1}\n|$)/s';
+//    $p = '/\n(\|[\s\S]+?\|)\n(?:(?:\.(\w+))?\n|$)/s';
+    $p = '/(?:^|\n+)(\|.+\|)(?:(?:\n\.(\w+))?\n|$)/s';
     $atext = preg_replace_callback($p,function($matches) {
         // Combine lines that do not end with '|' as multiple lines
         $txt = preg_replace('/([^|])\n+/','\\1<br>', $matches[1]);
@@ -115,7 +116,7 @@ function pseudo_markdown($atext, $md_class = '') {
                     $col = mb_substr($col,1);
                 } else $style = '';
                 // maybe additional calss and colspan/rowspan
-                preg_match('/^([@\^]+){0,1}(?:\.(\w+)){0,1}(?:#(\d+)){0,1}/',$col,$m);
+                preg_match('/^([@\^]+)?(?:\.(\w+))?(?:#(\d+))?/',$col,$m);
                 $bind = $cls = '';
                 switch(count($m)) {
                 case 4: $style .= ($m[3]==='') ? '':"width:{$m[3]}px;";
@@ -156,21 +157,21 @@ function pseudo_markdown($atext, $md_class = '') {
     };
     $atext = preg_replace_callback_array([
 //------- HEAD(#) TAG
-        '/^(#{1,6})(?:\.(\w+)){0,1} (.+?)$/m' => function($m) {
+        '/^(#{1,6})(?:\.(\w+))? (.+?)$/m' => function($m) {
             $n = strlen($m[1]);
             $cls = ($m[2]==='')?'':" class='{$m[2]}'";
             return "<h{$n}{$cls}>{$m[3]}</h{$n}>";
         },
         '/^(?:---|___|\*\*\*)$/m'     => function($m) { return "<hr>"; },
 //------- pre tag with class
-        '/(?:^|\n)(```|~~~|\^\^\^)(?:(\w+)){0,1}(.+?)\n\1/s' => function ($m) {
+        '/(?:^|\n)(```|~~~|\^\^\^)(?:(\w+))?(.+?)\n\1/s' => function ($m) {
             $class = [ '```' => 'code','~~~' => 'indent','^^^' => 'indent'];
             $txt = $m[3];
             $cls = ($m[2]==='')?$class[$m[1]]:$m[2];
             return "\n<pre class='$cls'>{$txt}</pre>";
         },
 //------- ![alt-text](URL) IMAGE TAG /multi-pattern replace
-        '/!\[([^:\]]+)(?::(\d+,\d+)){0,1}\]\(([!:]){0,1}([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/' => function ($m) use(&$item_array) {
+        '/!\[([^:\]]+)(?::(\d+,\d+))?\]\(([!:])?([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/' => function ($m) use(&$item_array) {
             $alt = $m[1];
             if($m[2]==='') $sz = '';
             else {
@@ -185,7 +186,7 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<img src='{$src}' alt='{$alt}'{$sz} />";
         },
 //------- ..class#id{ TEXT } CLASS/ID attributed SPAN/P replacement
-        '/\s\.\.(?:(\w+)){0,1}(?:#(\w+)){0,1}(:){0,1}\{([^\}]*?[^\\\\]|)\}\s/s' => function ($m) {
+        '/\s\.\.(?:(\w+))?(?:#(\w+))?(:)?\{([^\}]*?[^\\\\]|)\}\s/s' => function ($m) {
             $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
             $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
             $tag = ($m[3]==='') ? 'span' : 'p';
@@ -193,7 +194,7 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<{$tag}{$cls}{$ids}>{$txt}</{$tag}>";
         },
 //------- ...:{ TEXT }... NL change <br> tag in div-indent class
-        '/\s\.\.\.(?:(\w+)){0,1}(!){0,1}\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
+        '/\s\.\.\.(?:(\w+))?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
             if($m[2]==='!') {
                 $txt = nl2br($m[3]);
                 // restore tag end after NL
@@ -212,7 +213,7 @@ function pseudo_markdown($atext, $md_class = '') {
 //  checkbox    => ^[name]:{item1=val1:checked,item2=val2:checked,...}
 //  textarea    => ^[name]!{text-value:col,row}
 //  textbox     => ^[name]={text-value:size}
-        '/(\s)\^\[(\w+){0,1}\]([@:!=])\{(.*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
+        '/(\s)\^\[(\w+)?\]([@:!=])\{(.*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
             $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea'];
             $spc = $m[1]; $kind = $m[3]; $val = $m[4];
             $vv = $type[$kind];

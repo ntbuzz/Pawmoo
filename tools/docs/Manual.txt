@@ -476,7 +476,14 @@
   トークンにはタグ項目とコマンド項目があり、それぞれで要素内の扱いは異なる。
 
   タグ項目のトークン場合、スカラー値を持つキー名はトークンの追加属性として扱われる。
-  またスカラーテキストはタグのインナーテキストとして出力する。
+  スカラーテキストは属性指定の書式のときにトークンの属性を記述することができる。
+  書式は属性名と属性値をコロン(:)でつなげた文字列である。
+    属性名：属性値  → style:"width:100%"
+  属性書式に合致しないスカラーテキストはタグのインナーテキストとして出力する。
+  書式に合致する場合でもインナーテキストとして出力したときはコロンの前にエスケープ文字を付加する。
+      style\:"width:100%"
+  または先頭に空白文字を付加するとインナーテキストとなる。
+      ' style:"width:100%"'
   サブセクションはトークンの子要素として出力する。
   コマンド項目のトークンの場合は、コマンドへの引数として処理されるので、各々の要素については
   コマンド定義を参照のこと。
@@ -872,7 +879,7 @@
   MySession::getVariables($tt,...$arr)  // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から値を取得した配列で返す
   MySession::setVariables($tt,$arr)     // ENV(tt=TRUE) または REQ(tt=FALSE) 変数に値をセット
   MySession::set_if_empty($tt,$arr)     // setVariables と同じだが、未定義キーだけを値セットする
-  MySession::get_envIDs($names)         // ENV変数を識別子指定で取得する
+  MySession::get_varIDs($tt,$names)     // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から識別子指定で取得する
   MySession::rm_EnvData(...$arr)        // ENV変数をクリア
 
   MySession::get_LoginValue($id = NULL) // ログイン情報を取得

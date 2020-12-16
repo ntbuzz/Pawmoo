@@ -113,10 +113,9 @@ public function ViewTemplate($name,$vars = []) {
         case 0:         // '.tpl'   div Section
             $parser = new SectionParser($tmplate);
             $divSection = $parser->getSectionDef(true);
- debug_log(-999,['divSection' => $divSection]);
-            $this->inlineSection = [];         // Clear Inline-Section in this TEMPLATE
-            debug_log(DBMSG_VIEW,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
-            $this->sectionAnalyze($divSection,$vars);
+             $this->inlineSection = [];         // Clear Inline-Section in this TEMPLATE
+             debug_log(DBMSG_VIEW,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
+             $this->sectionAnalyze($divSection,$vars);
             break;
         case 1:         // 'php'     // PHP Template
             extract($vars);
@@ -203,7 +202,7 @@ public function ViewTemplate($name,$vars = []) {
                 }
                 break;
             case ':':
-                   	$p = '/(:{1,2})(\w+)(?:\[(\w+)\])*/';
+                   	$p = '/(:{1,2})(\w+)(?:\[([\w_\'"]+)\])*/';
                     preg_match($p,$var,$m);
                     list($match,$cls,$var,$mem) = $m;
                     $mem = trim($mem,"\"'");        // allow quote char
@@ -215,9 +214,10 @@ public function ViewTemplate($name,$vars = []) {
                         }
                     }
                     break;
-            case "'": if(substr($var,-1) === "'") {     // check end-char
-                    $var = trim($var,"'");
-                    $val = MySession::get_envIDs($var);// get SESSION ENV-VAR
+            case '"':
+            case "'": if(substr($var,-1) === $var[0]) {     // check end-char
+                    $var = trim($var,$var[0]);
+                    $val = MySession::get_varIDs(($var[0]==="'"),$var);// get SESSION ENV-VAR
                 }
                 break;
             default:
@@ -236,7 +236,7 @@ public function ViewTemplate($name,$vars = []) {
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
     public function expand_Strings($str,$vars) {
         if(empty($str) || is_numeric($str)) return $str;
-        $p = '/\${[^}\s]+?}|\${[#%\'\$@][^}\s]+?}/';       // PARSE variable format
+        $p = '/\${[^}\s]+?}|\${[#%\'"\$@][^}\s]+?}/';       // PARSE variable format
         preg_match_all($p, $str, $m);
         $varList = $m[0];
         if(empty($varList)) return $str;        // not use variable.
@@ -357,6 +357,7 @@ public function ViewTemplate($name,$vars = []) {
     private function tag_Separate($tag,$vars) {
         $tag = $this->expand_Strings(tag_body_name($tag),$vars);
         $attrList = [];
+        if($tag[0]==='<') return array($tag,$attrList); // html tag will be not separate
         // allow multi attribute, and separater not space
         foreach(['data-element' => '{}', 'value' => '()', 'name' => '[]', 'size' => '::', 'id' => '##', 'class' => '..'] as $key => $seps) {
             list($sep,$tsep) = str_split($seps);
@@ -365,7 +366,9 @@ public function ViewTemplate($name,$vars = []) {
                 $m = strrpos($tag,$tsep);
                 $str = ($m === FALSE || $m === $n) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
                 $tag = mb_strcut($tag,0,$n);
-                if(!empty($str)) $attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} {$attrList[$key]}" : $str;
+                if(!empty($str)) {
+                    $attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} ".$attrList[$key] : $str;
+                }
                 $n = strrpos($tag,$sep);
             }
 		}
@@ -390,7 +393,12 @@ public function ViewTemplate($name,$vars = []) {
                         if(is_tag_identifier($sec)===2) {   // not a command-token
                             $subsec[$sec] = [];
                         } else if(is_scalar($sec)) {
-                            $innerText .= $sec;
+                            // separate attribute
+                            $p = '/^([a-zA-Z]+[^\\\]):["\']?(.+)["\']?/';
+                            if(preg_match($p,$sec,$m) === 1) {
+debug_log(-999,['ATTR'=>$m]);
+                                $attrList[$m[1]] = $m[2];
+                            } else $innerText .= $sec;
                         } else $subsec[] = $sec;
                     } else {
                         $subsec[$token] = $sec;
@@ -407,7 +415,7 @@ public function ViewTemplate($name,$vars = []) {
     // Convert ATTRIBUTE-LIST ARRAY to tag attribute strings
     private function gen_Attrs($attrs,$vars) {
         $attr = "";
-        if($attrs !== array()) {
+        if(!empty($attrs)) {
             ksort($attrs);
             foreach($attrs as $name => $val) {
                 $str = (is_array($val)) ? implode("\n",$val) :$val;
@@ -764,7 +772,6 @@ public function ViewTemplate($name,$vars = []) {
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<TABLE{$attr}>\n";
         // tr loop
-debug_log(-99,['ROW'=>$sec]);
         foreach($sec as $key => $val) {
             if(!is_numeric($key)) {
                 list($key,$attrs) = $this->tag_Separate($key,$vars);
@@ -792,7 +799,7 @@ debug_log(-99,['ROW'=>$sec]);
     // +textbox[name]:size => [  attribute => value value    ]
     private function cmd_textbox($tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
-        $attrs['value'] = $innerText;
+        if(!empty($innerText)) $attrs['value'] = $innerText;
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<INPUT TYPE='text'{$attr}'>\n";
     }

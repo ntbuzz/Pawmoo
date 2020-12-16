@@ -169,10 +169,11 @@ function tag_body_name($key) {
 //  text            0   digit | alpha-numeric
 function is_tag_identifier($str) {
     // digit or empty string is not token
-    if(empty($str) || is_array($str) || ctype_alnum($str)) return 0;
-    // command-token
+    if(empty($str) || is_array($str)) return 0;
     if(strpos('*&@+<?%-',$str[0]) !== FALSE)     return 2;       // command-token
-    if(preg_match('/^(?:\w*)(?:[\.#][\w\-\s]*)*[\w\d\]\}\)]*$/',$str)) return 1;    // tag-token
+    // dirty pattern for TAG-token
+    $p = '/^(?:[a-zA-Z]*)(?:[\.#][a-zA-Z\-\s]*)+(?:\:\d+)?(?:[\{\(\[].+?[\}\)\]])*$/';
+    if(preg_match($p,$str)) return 1;
     if(preg_match('/^\$\w+$/',$str)) return 3;    // variable-token
     return 0;   // text-token
 }

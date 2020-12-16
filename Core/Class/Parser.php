@@ -27,9 +27,9 @@ class SectionParser {
 ((?:
 "(?:[^"]|(?:\\\\)*\\")+"|
 '(?:[^']|(?:\\\\)*\\')+'|
-~(?:[^~]+|(?:\\\\)*\\~)+~|
+~(?:[^~]|(?:\\\\)*\\~)+~|
 <(?:[^>]|(?:\\\\)*\\>)+>|
-{(?:[^}]|(?:\\\\)*\\})+}|
+\{(?:[^}]|(?:\\\\)*\\\})+\}|
 (?:\/\/.*)|
 [^,\s]+
 )*)/x
@@ -45,7 +45,7 @@ EOS;
                 $wrapstr = $token[0] . mb_substr($token,-1);     // 先頭文字と最終文字を取り出す
                 if ( in_array($wrapstr, self::WORDSTRING,true)) {
                     $token = trim($token, $wrapstr);
-                    if($token[0]==='^') {
+                    if(mb_substr($token,0,1)==='^') {
                         $token = implode( "\n" , text_line_array("\n",mb_substr($token,1),TRUE));
                     }
                 } else if($token !== '=>') {
