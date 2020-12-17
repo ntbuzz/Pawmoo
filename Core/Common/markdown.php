@@ -96,7 +96,7 @@ function pseudo_markdown($atext, $md_class = '') {
     }, $atext);
     // TABLE processing
 //    $p = '/\n(\|[\s\S]+?\|)\n(?:(?:\.(\w+))?\n|$)/s';
-    $p = '/(?:^|\n+)(\|.+\|)(?:(?:\n\.(\w+))?\n|$)/s';
+    $p = '/(?:^|\n)(\|.+?\|)(?:\n(?:\.(\w+))?\n|$)/s';
     $atext = preg_replace_callback($p,function($matches) {
         // Combine lines that do not end with '|' as multiple lines
         $txt = preg_replace('/([^|])\n+/','\\1<br>', $matches[1]);
@@ -204,9 +204,10 @@ function pseudo_markdown($atext, $md_class = '') {
             return "\n<div class='$cls'>{$txt}</div>";
         },
 //------- [check]{text} CHECKBOX MARK
-        '/\[([^\]]*?)\]\{([^}]*?[^\\\\]|)\}/' => function ($m) {
-            $chek = (is_bool_false($m[1])) ? '[ ]':'<b>[X]</b>';
-            return " {$chek} {$m[2]}";
+        '/\[([^\]]*?)\]\{([^\}]*?[^\\\\])\}/' => function ($m) {
+            $chk = (is_bool_false($m[1])) ? 'off':'on';
+            $chek = "<span class='checkbox-{$chk}'>{$m[2]}</span>";
+            return $chek;
         },
 //------- FORM parts
 //  radio       => ^[name]@{checkitem:item1=val1,item2=val2,...}

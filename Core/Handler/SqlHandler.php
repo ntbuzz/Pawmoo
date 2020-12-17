@@ -354,7 +354,7 @@ protected function sql_safequote(&$value) {
 					if(!is_numeric($val)) $val = "'{$val}'";
 					$opp = $multi_field($key,$op,$table,$val);
 				}
-				$opc = (empty($opc)) ? "{$opp}" : "{$opc}{$opr}{$opp}";
+				$opc = (empty($opc)) ? "{$opp}" : "({$opc}{$opr}{$opp})";
 			}
 			return (empty($opc)) ? '' : "{$opc}";	// ((count($items)===1) ? $opc : "({$opc})");
 		};

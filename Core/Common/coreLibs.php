@@ -172,7 +172,7 @@ function is_tag_identifier($str) {
     if(empty($str) || is_array($str)) return 0;
     if(strpos('*&@+<?%-',$str[0]) !== FALSE)     return 2;       // command-token
     // dirty pattern for TAG-token
-    $p = '/^(?:[a-zA-Z]*)(?:[\.#][a-zA-Z\-\s]*)+(?:\:\d+)?(?:[\{\(\[].+?[\}\)\]])*$/';
+    $p = '/^(?:[a-zA-Z_]*)(?:[\.#][a-zA-Z_\-\s]*)+(?:\:\d+)?(?:[\{\(\[].+?[\}\)\]])*$/';
     if(preg_match($p,$str)) return 1;
     if(preg_match('/^\$\w+$/',$str)) return 3;    // variable-token
     return 0;   // text-token

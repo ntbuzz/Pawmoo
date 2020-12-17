@@ -95,5 +95,19 @@
 .easy_markdown .md_tbl td {
 	border: 1px solid silver;
 	padding: 0 10px;
+	white-space: normal;
 }
+/*
+	checkbox mark
+*/
+.easy_markdown .checkbox-on:before {
+    content: url(res/img/checkbox-on.png);
+	vertical-align: middle;
+}
+.easy_markdown .checkbox-off:before {
+    content: url(res/img/checkbox-off.png);
+	vertical-align: middle;
+}
+
+
 

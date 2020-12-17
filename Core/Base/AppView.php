@@ -325,6 +325,10 @@ public function ViewTemplate($name,$vars = []) {
             } else {
                 list($tag,$attrs) = $this->tag_Separate($token,$vars);
                 switch(is_tag_identifier($token)) {
+                case 3:     // set local variable
+                        $token = mb_substr($token,1);   // delete '$' top-char
+                        $vars[$token] = $sec;
+                        break;
                 case 0: if(empty($sec)) break;
                 case 1:         // tag-section
                         list($attrs,$innerText,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
@@ -386,7 +390,7 @@ public function ViewTemplate($name,$vars = []) {
             if(!empty($section)) {
                 foreach($section as $token => $sec) {
                     $token = $this->expand_Strings($token,$vars);
-                    if(is_scalar($sec)) $sec = $this->expand_Strings($sec,$vars);
+//                    if(is_scalar($sec)) $sec = $this->expand_Strings($sec,$vars);
                     if (ctype_alpha($token)) {      // attr-name
                         if(!empty($sec)) $attrList[$token] = $sec;
                     } else if(is_numeric($token)) {
@@ -407,6 +411,7 @@ debug_log(-999,['ATTR'=>$m]);
             }
         }
         $innerText = preg_replace('/\\\\(.)/','\\1',$innerText);    // escape-char to original-char
+        $innerText = $this->expand_Strings($innerText,$vars);
         return [$attrList,$innerText,$subsec];
     }
     // *************************************************************************
@@ -583,9 +588,14 @@ debug_log(-999,['ATTR'=>$m]);
     //  +markdown.classname => markdown-text
     private function cmd_markdown($tag,$attrs,$sec,$vars) {
         $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
-//        $atext = $this->expand_Strings($atext,$vars);
         if(is_array($sec)) $atext = "\n{$atext}\n\n";
         $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
+        // pre-expand for checkbox and radio markdown 'checked'
+        $atext = preg_replace_callback('/([\[\{:,])(\$\{[^\}]+?\}/',function($m) {
+                list($pat,$prefix,$var) = $m;
+                $this->expand_Walk($var, 0, $vars);
+                return "{$prefix}{$var}";
+        },$atext);
         $mtext = pseudo_markdown( $atext,$cls);
         $mtext = $this->expand_Strings($mtext,$vars);
         echo $mtext;
@@ -771,16 +781,14 @@ debug_log(-999,['ATTR'=>$m]);
         list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<TABLE{$attr}>\n";
-        // tr loop
-        foreach($sec as $key => $val) {
+        foreach($sec as $key => $val) {        // tr loop
             if(!is_numeric($key)) {
                 list($key,$attrs) = $this->tag_Separate($key,$vars);
                 $tr_attr = $this->gen_Attrs($attrs,$vars);
                 echo "<TR{$tr_attr}>";
             } else echo "<TR>";
             if(is_array($val)) {
-                // th,td loop
-                foreach($val as $td_key => $td_val) {
+                foreach($val as $td_key => $td_val) {         // th,td loop
                     list($tag,$attrs) = $this->tag_Separate($td_key,$vars);
                     list($attrs,$innerText,$sec) = $this->subsec_separate($td_val,$attrs,$vars);
                     $td_attr = $this->gen_Attrs($attrs,$vars);
