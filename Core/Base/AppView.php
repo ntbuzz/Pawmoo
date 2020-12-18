@@ -484,13 +484,14 @@ debug_log(-999,['ATTR'=>$m]);
     // ALink Hyperlink
     //  %link => [ A-Text => URL ... ], %A-Text => URL
     private function sec_link($tag,$attrs,$sec,$vars) {
+        $sec = $this->expand_SectionVar($sec,$vars,TRUE);
         if($tag === 'link') {
             if(is_array($sec)) {
                 foreach($sec as $kk => $vv) $this->Helper->ALink($vv,$kk);
-            } else echo "{$tagname} bad argument.\n";
+            } else echo "{$tag} bad argument.\n";
         } else if(is_scalar($sec)) {
             $this->Helper->ALink($sec,$tag);
-        } else echo "tag '{$tagname}' not for feature.\n";
+        } else echo "tag '{$tag}' not for feature.\n";
     }
     //==========================================================================
     // CALL Helper-Method
