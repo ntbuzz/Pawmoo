@@ -353,10 +353,11 @@ public function ViewStyle($file_name) {
                     if(isset($this->repVARS[$var])) $val = $this->repVARS[$var];
                 }
                 break;
+            case '"':
             case "'":
-                if(mb_substr($var,-1) === "'") {
-                    $var = trim($var,"'");        // セッション変数
-                    $val = MySession::get_envIDs($var);          // EnvData[] プロパティから取得
+                if(mb_substr($var,-1) === $var[0]) {
+                    $var = trim($var,$var[0]);        // セッション変数
+                    $val = MySession::get_varIDs(($var[0]==="'"),$var);          // EnvData[] プロパティから取得
                 }
                 break;
             default:
@@ -368,7 +369,7 @@ public function ViewStyle($file_name) {
 //  文字列の変数置換を行う
 // $[@#%$]varname | ${[@#%$]varname} | {$SysVar$} | {%Params%}
     private function expand_Strings($str,$vars) {
-        $p = '/(?:\${[^}\s]+?}|\${[#%\'\$][^}\s]+?})/';          // 変数リストの配列を取得
+        $p = '/(?:\${[^}\s]+?}|\${[#%\'"\$][^}\s]+?})/';          // 変数リストの配列を取得
         preg_match_all($p, $str, $m);
         $varList = $m[0];
         if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要

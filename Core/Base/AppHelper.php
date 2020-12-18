@@ -1,8 +1,7 @@
 <?php
 /* -------------------------------------------------------------
- * PHPフレームワーク
- *  AppHelper: ビューのHTML出力を担当するクラス
- * 
+ * Object Oriented PHP MVC Framework
+ * 	 AppHelper: HTML generate for ViewTemplate
  */
 //==============================================================================
 class AppHelper  extends AppObject {
@@ -13,34 +12,32 @@ class AppHelper  extends AppObject {
 		' align="right"',		// 3 right
 	];
 //==============================================================================
-// コンストラクタ：　テーブル名
+// constructor( this_Owner_Object )
 	function __construct($owner) {
 		parent::__construct($owner);
-        $this->__InitClass();                       // クラス固有の初期化メソッド
+        $this->__InitClass();
 	}
 //==============================================================================
-// 親のビューテンプレートを呼び出す
+// Call for Owner(AppView) Template Processing Method
 public function ViewTemplate($layout) {
 	$this->AOwner->ViewTemplate($layout);
 }
 //==============================================================================
-// 実行時間を表示する
+// Runtime output
 public function Runtime() {
 	echo "<hr>\n";
 	debug_run_time(-1);
 }
 //==============================================================================
-// リソースの出力
+// Resource(.css/.js) Output (Not USE!)
 public function Resource($res) {
 	list($filename,$ext) = extract_base_name($res);
-	// モジュール名と拡張子を使いテンプレートを決定する
 	$AppStyle = new AppStyle($this->ModuleName, $ext);
-	// 結合ファイルの出力
 	$AppStyle->ViewStyle($filename);
 	unset($AppStyle);
 }
 //==============================================================================
-// リクエストコントローラ
+// check Request Controller is Me?
 public function IsRequestController($comp) {
 	$hit = (is_scalar($comp)) ? $comp === App::$Controller : in_array(App::$Controller,$comp,true);
 	echo ($hit) ? '' : ' class="closed"';
@@ -67,9 +64,9 @@ public function expand_echo($str) {
 	echo str_replace($varList,$values,$str);
 }
 //==============================================================================
-// ハイパーリンクの生成
+// Make HYPER-Link
 public function ALink($lnk,$txt,$under=false) {
-	if($txt[0] == '#') {							// LocaleIDの参照
+	if($txt[0] == '#') {
 		$txt = mb_substr($txt,1);
 		$txt = $this->_($txt);
 	}
@@ -82,23 +79,23 @@ public function ALink($lnk,$txt,$under=false) {
 	}
 }
 //==============================================================================
-// ページリンクのURL生成
+// generate Page Button LABEL Tag
 	private function get_PageButton($n, $anchor, $npage) {
 		$anchor = substr("00{$anchor}", ($anchor>=100)?-3:-2);
 		$cls = (($n == $this->MyModel->page_num) || ($n == 0) || ($n > $npage)) ? 'active' : 'jump';
-		return "<span class='{$cls}' value='{$n}'>{$anchor}</span>";	// ページサイズはセッションに記憶
+		return "<span class='{$cls}' value='{$n}'>{$anchor}</span>";
 	}
 //==============================================================================
-// ページ移動リンクのURL生成
+// Page Move up/down link
 	private function get_MoveButton($move, $anchor, $npage) {
 		$n = $this->MyModel->page_num + $move;
 		$cls = ( ($n <= 0) || ($n > $npage)) ? 'disable' : 'move';
-		return "<span class='{$cls}' value='{$n}'>{$anchor}</span>";	// ページサイズはセッションに記憶
+		return "<span class='{$cls}' value='{$n}'>{$anchor}</span>";
 	}
 //==============================================================================
-// ページリンクの一覧を出力
+// Pager Buttons
 public function MakePageLinks() {
-	if($this->MyModel->pagesize == 0) return;		// ページングを使わない
+	if($this->MyModel->pagesize == 0) return;
 	$npage = intval(($this->MyModel->record_max+$this->MyModel->pagesize-1)/$this->MyModel->pagesize);
 	$pnum = $this->MyModel->page_num;
 	$bound = 7;
@@ -112,14 +109,14 @@ public function MakePageLinks() {
 	echo "|";
 	echo $this->get_MoveButton(1,$this->__(".NextPage"),$npage);
 	echo "</span>";
-	if($npage > 1 && $begp > 1) {		// 先頭に飛ぶリンク
+	if($npage > 1 && $begp > 1) {		// Top Page-Jump
 		echo $this->get_PageButton(1,1,$npage);
 		if($begp > 2) echo '<span class="disable">…</span>';
 	}
-	for($n=$begp; $n <= $endp; $n++) {		// ページごとのリンクを作る
+	for($n=$begp; $n <= $endp; $n++) {		// each page jump button
 		echo $this->get_PageButton($n,$n,$npage);
 	}
-	if($endp < $npage) {		// 最後に飛ぶリンク
+	if($endp < $npage) {		// Jump to LAST
 		if($endp < ($npage - 1)) echo '<span class="disable">…</span>';
 		echo $this->get_PageButton($npage,$npage,$npage);
 	}
@@ -127,7 +124,7 @@ public function MakePageLinks() {
 	$total = sprintf($fmt,$this->MyModel->record_max);
 	echo "<span class='pager_message'>{$total}</span>";
 	echo "</div>\n";
-	// ページサイズの変更
+	// Change Page item Count
 	$param = (empty(App::$Filter)) ? "1/" : implode('/',App::$Filters)."/1/";
 	$href = App::Get_AppRoot($this->ModuleName)."/page/{$param}";
 	$dsp = "<span id='size_selector'>".$this->__(".Display", FALSE)."</span>";
@@ -137,11 +134,10 @@ public function MakePageLinks() {
 		echo "<OPTION value='{$val}'{$sel}>{$val}</OPTION>\n";
 	}
 	echo "</SELECT></div>\n";
-	echo "</div>";	// div.pager enf
-//		echo "<hr class='pageborder' />\n";
+	echo "</div>";
 }
 //==============================================================================
-// テーブルヘッダを出力
+// PUT TABLE List Header
 	protected function putTableHeader() {
 		echo '<tr>';
 		foreach($this->MyModel->HeaderSchema as $key => $val) {
@@ -153,7 +149,7 @@ public function MakePageLinks() {
 		echo "</tr>\n";
 	}
 //==============================================================================
-// レコードカラムを出力
+// Put Each record columns
 	protected function putColumnData($lno,$columns) {
 		echo "<tr class='item' id='".$columns[$this->MyModel->Primary]."'>";
 		foreach($this->MyModel->HeaderSchema as $key => $val) {
@@ -164,7 +160,7 @@ public function MakePageLinks() {
 		echo "</tr>\n";
 	}
 //==============================================================================
-// ヘッダー付きのテーブルリスト表示
+// Output Table List for Records
 public function MakeListTable($deftab) {
 	// デバッグ情報
 	debug_log(DBMSG_VIEW,[
@@ -190,7 +186,7 @@ public function MakeListTable($deftab) {
 	echo "</tbody></table>";
 }
 //==============================================================================
-// タブセットの生成 (UL版)
+// Put Tabset
 public function Tabset($name,$menu,$sel) {
 	echo "<ul class='{$name}'>\n";
 	$tab = $sel;
@@ -200,13 +196,13 @@ public function Tabset($name,$menu,$sel) {
 	echo "</ul>\n";
 }
 //==============================================================================
-// タブリストの生成 (UL版)
+// Muuuuuuu.....
 public function Contents_Tab($sel,$default='') {
 	$tab = $default;
 	return '<li' . (($tab == $sel) ? '' : ' class="hide"') . ">\n";
 }
 //==============================================================================
-// フォームタグの生成
+// Gen Form TAG
 // attr array
 // 'method' => 'Post'
 // 'acrion' => URI
@@ -221,7 +217,7 @@ public function Form($act, $attr) {
 	echo '<form action="' . $act . '" ' . $arg . '>';
 }
 //==============================================================================
-// SELECTタグの生成
+// Generate SELECT Tag
 //	$this->Select ($key,$name)
 //
 public function Select($key,$name) {
@@ -229,7 +225,7 @@ public function Select($key,$name) {
 	echo $this->Select_str($key,$name);
 }
 //==============================================================================
-// SELECTタグの生成
+// Create Select Tag strings
 //	$this->Select ($key,$name)
 //
 public function Select_str($key,$name) {
@@ -242,7 +238,7 @@ public function Select_str($key,$name) {
 	return "{$select}\n</SELECT>\n";
 }
 //==============================================================================
-// INPUTタグの生成
+// Generate INPUT tag
 //	$this->Input($type,$name,$attr)
 //<input type="text" id="datepicker1" name="begDate"> ～ <input type="text" id="datepicker2" name="endDate">
 //
@@ -255,9 +251,9 @@ public function Input($type,$name,$attr) {
 	echo $tag;
 }
 //==============================================================================
-// webrootファイルの読込
+// IMAGE tag generate
 public static function ImageTag($file,$attr) { 
-	$path = (($file[0] == '/') ? '/common' : App::$sysRoot) . $file;             // 固有フォルダパス
+	$path = (($file[0] == '/') ? '/common' : App::$sysRoot) . $file;
 	echo "<image src='{$path}' {$attr} />\n";
 }
 

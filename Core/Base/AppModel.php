@@ -143,14 +143,14 @@ public function SetPage($pagesize,$pagenum) {
     $this->dbDriver->SetPaging($this->pagesize,$this->page_num);
 }
 //==============================================================================
-// PrimaryKey で生レコードを取得
-// 結果：   レコードデータ = fields
+// Get ROW-RECORD by Primarykey
+// Result:   $this->fields in Column Data
 public function getRecordByKey($id) {
     return $this->getRecordBy($this->Primary,$id);
 }
 //==============================================================================
-// 指定フィールドで生レコードを取得
-// 結果：   レコードデータ = field
+// Get ROW-RECORD by Field Name
+// Result:   $this->fields in Column Data
 public function getRecordBy($key,$value) {
     if(!empty($value)) {
         $this->fields = $this->dbDriver->doQueryBy($key,$value);
@@ -158,17 +158,15 @@ public function getRecordBy($key,$value) {
     return $this->fields;
 }
 //==============================================================================
-// アイテムの読み込み (JOIN無し)
-//   リレーション先のラベルと値の連想配列リスト作成
-// 結果：   レコードデータ = RecData
-//          リレーション先の選択リスト = Select (Relations)
+// Get Record Data by primary-key without JOIN fields.
+// Result:   $this->RecData in Column Data
 public function GetRecord($num) {
     $this->getRecordBy($this->Primary,$num);
     $this->RecData= $this->fields;
 }
 //==============================================================================
-//   リレーション先のラベルと値の連想配列リスト作成
-// 結果：  リレーション先の選択リスト = Select (Relations)
+//   Get Relation Table fields data list.
+// Result:   $this->Select (Relations)
 public function GetValueList() {
     $valueLists = array();
     foreach($this->Relations as $key => $val) {
@@ -181,7 +179,6 @@ public function GetValueList() {
             }
         } else {
             list($table,$fn, $ref) = explode('.', $val);
-            // $key カラムの一覧を取得する
             $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn);
         }
     }
@@ -189,24 +186,25 @@ public function GetValueList() {
     debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $valueLists]);
 }
 //==============================================================================
-//   指定フィールドの値一覧を取得する
-// 結果：  リレーション先の選択リスト = Select
+//   Get Field Value List
+// Result:   $this->Select (Field)
 public function GetFieldValues($field) {
     $this->Select[$field] = $this->dbDriver->getValueLists(NULL,$field,$field);
     debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $this->Select]);
 }
 //==============================================================================
-// フィールドの読み込み (JOIN無し)
-// 結果：   フィールドデータ
+// Get Record Field by field-key without JOIN fields.
+// Result:   field-data
 public function getRecordField($key,$value,$field) {
     $this->getRecordBy($key,$value);
     return $this->fields[$field];
 }
 //==============================================================================
-// レコードデータの読み込み(JOIN済レコード)
+// Get Record Data by primary-key with JOIN Table.
+// Result:   $this->field
 public function getRecordValue($num) {
     if(empty($num)) {
-        $this->field = array();
+        $this->fields = array();
         return;
     }
     $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],$this->Relations);
@@ -218,22 +216,18 @@ public function getCount($cond) {
     return $this->dbDriver->getRecordCount($cond);
 }
 //==============================================================================
-// レコードリストの読み込み(JOIN済レコード)
-// 結果：   レコードデータのリスト = Records
-//          読み込んだ列名 = Header (Schema)
-//          $filter[] で指定したオリジナル列名のみを抽出
+// Get Record List by FIND-CONDITION with JOIN Table.
+// Result:   $this->Records  Find-Result List
 public function RecordFinder($cond,$filter=[],$sort=[]) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
-    // 取得フィールドリストを生成する
     $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
-        return in_array($vv,$filter,true) || ($vv === NULL); // orgがNULLならバインド名を必ず含める
+        return in_array($vv,$filter,true) || ($vv === NULL);
     });
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => $SortDefault ];
     else if(is_scalar($sort)) {
         $sort = [ $sort => $SortDefault ];
     }
-    // 複数条件の検索
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
     while (($fields = $this->dbDriver->fetchDB())) {
         unset($record);
@@ -241,7 +235,7 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
             $record[$key] = $fields[$key];
             if($val !== NULL && $key !== $val) $record[$val] = $fields[$val];
         }
-        // プライマリキーは必ず含める
+        // Must be PRIMARY-KEY
         $record[$this->Primary] = $fields[$this->Primary];
         if(! empty($record) ) {
             $data[] = $record;
@@ -261,19 +255,18 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
     ]);
 }
 //==============================================================================
-// レコードリストの読み込みJOIN/ALIASなし
+// Get Record List by FIND-CONDITION without JOIN!.
+// Result:   $this->Records  Find-Result List
 public function realFinder($cond,$filter=[],$sort=[]) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
     $fields_list =[];
     foreach($filter as $kk) $fields_list[$kk] = $kk;
-    // プライマリキーは必ず含める
     $fields_list[$this->Primary] = $this->Primary;
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => $SortDefault ];
     else if(is_scalar($sort)) {
         $sort = [ $sort => $SortDefault ];
     }
-    // 複数条件の検索
     $this->dbDriver->findRecord($cond,NULL,$sort);
     while (($fields = $this->dbDriver->fetch_array())) {
         unset($record);
@@ -283,7 +276,7 @@ public function realFinder($cond,$filter=[],$sort=[]) {
         if(! empty($record) ) {
             $data[] = $record;
             $this->record_max = $this->dbDriver->recordMax;
-            $this->doEvent('OnGetRecord', $record);     // イベントコールバック
+            $this->doEvent('OnGetRecord', $record);
         } else {
             debug_log(DBMSG_MODEL, ["fields" => $fields]);
         }
@@ -298,7 +291,8 @@ public function realFinder($cond,$filter=[],$sort=[]) {
     ]);
 }
 //==============================================================================
-// レコードリストの読み込みJOINなし
+// Get Record List by Primary-KEY before/after w/o JOIN!
+// Result:   $this->Records  Find-Result List
 public function nearRecord($primary,$cond=[],$filter=[]) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
     $data = array();
@@ -314,20 +308,19 @@ public function nearRecord($primary,$cond=[],$filter=[]) {
     ]);
 }
 //==============================================================================
-// レコードの削除
+// Delete Record(Primary-key)
 public function DeleteRecord($num) {
     $this->dbDriver->deleteRecord([$this->Primary => $num]);
 }
 //==============================================================================
-// レコードの削除
-// 検索条件がインプット
+// DELETE Records by FIND-CONDITION
 public function MultiDeleteRecord($cond) {
     $this->dbDriver->deleteRecord($cond);
 }
 //==============================================================================
-// ロケールフィールドによる置換処理
+// field-alias, field-bind processing.
     private function fieldSetup($row) {
-        unset($row[$this->Primary]);        // プライマリーキーは削除
+        unset($row[$this->Primary]);
         $this->fields = array();
         foreach($row as $key => $val) {
             if(array_key_exists($key,$this->dbDriver->columns)) {
@@ -338,13 +331,13 @@ public function MultiDeleteRecord($cond) {
         debug_log(DBMSG_MODEL,['ALIAS' => $this->fields]);
     }
 //==============================================================================
-// レコードの追加
+// Add NEW record
 public function AddRecord($row) {
     $this->fieldSetup($row);
     $this->dbDriver->insertRecord($this->fields);
 }
 //==============================================================================
-// レコードの更新
+// UPDATE Record
 public function UpdateRecord($num,$row) {
     $this->fieldSetup($row);
     $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);

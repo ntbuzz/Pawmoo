@@ -100,9 +100,9 @@ static function set_if_empty($tt,$arr) {
 }
 //==============================================================================
 // ENV変数を識別子指定で取得する
-static function get_envIDs($names) {
+static function get_varIDs($tt,$names) {
 	$vset = (mb_strpos($names,'.') !== FALSE) ? explode(".", $names) : [ $names ];
-	$nVal = static::$EnvData;
+	$nVal = ($tt) ? static::$EnvData : static::$ReqData;
 	foreach($vset as $nm) {
 		$nVal = (array_key_exists($nm,$nVal)) ? $nVal[$nm] : '';
 	}
@@ -141,7 +141,7 @@ static function setup_Login($login=NULL) {
 static function PostToEnv($keys)	=> preservReqData() , rollbackReqData(...$keys)
 static function PostVars(...$arr)	=> getVariables($tt,...$arr)
 static function EnvVars(...$arr)	=> getVariables($tt,...$arr)
-static function get_envVars($names) => get_envIDs($names)
+static function get_envVars($names) => get_varIDs($tt,$names)
 static function SetDefault($nm,$val)=> set_if_empty($tt,$arr)
 static function SetEnvVar($nm,$val) => setVariables($tt,$arr)
 static function SetPostVars($arr)  	=> setVariables($tt,$arr)
