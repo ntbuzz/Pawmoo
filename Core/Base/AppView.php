@@ -216,8 +216,9 @@ public function ViewTemplate($name,$vars = []) {
                     break;
             case '"':
             case "'": if(substr($var,-1) === $var[0]) {     // check end-char
-                    $var = trim($var,$var[0]);
-                    $val = MySession::get_varIDs(($var[0]==="'"),$var);// get SESSION ENV-VAR
+                    $tt = $var[0];
+                    $var = trim($var,$tt);
+                    $val = MySession::get_varIDs(($tt==="'"),$var);// get SESSION ENV-VAR
                 }
                 break;
             default:
