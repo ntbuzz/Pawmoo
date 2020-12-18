@@ -15,3 +15,6 @@
     margin: 0 auto;
     background-color: whitesmoke;
 }
+.message_box table th {
+    white-space: nowrap;
+}

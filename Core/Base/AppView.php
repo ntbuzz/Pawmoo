@@ -591,7 +591,7 @@ debug_log(-999,['ATTR'=>$m]);
         if(is_array($sec)) $atext = "\n{$atext}\n\n";
         $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
         // pre-expand for checkbox and radio markdown 'checked'
-        $atext = preg_replace_callback('/([\[\{:,])(\$\{[^\}]+?\}/',function($m) {
+        $atext = preg_replace_callback('/([\[\{:,])(\$\{[^\}]+?\})/',function($m) {
                 list($pat,$prefix,$var) = $m;
                 $this->expand_Walk($var, 0, $vars);
                 return "{$prefix}{$var}";
