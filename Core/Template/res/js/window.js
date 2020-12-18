@@ -150,7 +150,8 @@ $(function () {
     var selector = $(".stickyBar");
     selector.each(function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
-        var stickyWin = self.parent();
+        var stickyWin = self.closest('.fitWindow');
+        if (stickyWin.length == 0) stickyWin = self.parent();
         // 親要素 のスクロールに追従する
         stickyWin.on("scroll", function () {
             var top = stickyWin.scrollTop();
