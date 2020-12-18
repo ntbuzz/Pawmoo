@@ -202,11 +202,7 @@ public function ViewTemplate($name,$vars = []) {
                 }
                 break;
             case ':':
-<<<<<<< HEAD
-                   	$p = '/(:{1,2})(\w+)(?:\[(\w+)\])*/';
-=======
                    	$p = '/(:{1,2})(\w+)(?:\[([\w_\'"]+)\])*/';
->>>>>>> 4f91de2395d7657e22a961e2835317d3060359fc
                     preg_match($p,$var,$m);
                     list($match,$cls,$var,$mem) = $m;
                     $mem = trim($mem,"\"'");        // allow quote char
@@ -415,10 +411,7 @@ debug_log(-999,['ATTR'=>$m]);
             }
         }
         $innerText = preg_replace('/\\\\(.)/','\\1',$innerText);    // escape-char to original-char
-<<<<<<< HEAD
-=======
         $innerText = $this->expand_Strings($innerText,$vars);
->>>>>>> 4f91de2395d7657e22a961e2835317d3060359fc
         return [$attrList,$innerText,$subsec];
     }
     // *************************************************************************

@@ -27,15 +27,9 @@ class SectionParser {
 ((?:
 "(?:[^"]|(?:\\\\)*\\")+"|
 '(?:[^']|(?:\\\\)*\\')+'|
-<<<<<<< HEAD
-~(?:[^~]+|(?:\\\\)*\\~)+~|
-<(?:[^>]|(?:\\\\)*\\>)+>|
-{(?:[^}]|(?:\\\\)*\\})+}|
-=======
 ~(?:[^~]|(?:\\\\)*\\~)+~|
 <(?:[^>]|(?:\\\\)*\\>)+>|
 \{(?:[^\}]|(?:\\\\)*\\\})+\}|
->>>>>>> 4f91de2395d7657e22a961e2835317d3060359fc
 (?:\/\/.*)|
 [^,\s]+
 )*)/x
@@ -51,11 +45,7 @@ EOS;
                 $wrapstr = $token[0] . mb_substr($token,-1);     // 先頭文字と最終文字を取り出す
                 if ( in_array($wrapstr, self::WORDSTRING,true)) {
                     $token = trim($token, $wrapstr);
-<<<<<<< HEAD
-                    if($token[0]==='^') {
-=======
                     if(mb_substr($token,0,1)==='^') {
->>>>>>> 4f91de2395d7657e22a961e2835317d3060359fc
                         $token = implode( "\n" , text_line_array("\n",mb_substr($token,1),TRUE));
                     }
                 } else if($token !== '=>') {
@@ -123,11 +113,6 @@ debug_log(-999,['PARSE' => $this->wordlist]);
                 }
             } else {
                 switch(is_tag_identifier($wd)) {
-<<<<<<< HEAD
-                case 1: if($is_TAG===FALSE) { $arr[] = $wd; break; }
-                case 2:
-                case 3: $arr[$wd] = ''; break;
-=======
                 case 1: if($is_TAG===FALSE) {
                             $arr[] = $wd;
                             break;
@@ -136,7 +121,6 @@ debug_log(-999,['PARSE' => $this->wordlist]);
                 case 3:
                         $arr[$wd] = '';
                         break;
->>>>>>> 4f91de2395d7657e22a961e2835317d3060359fc
                 case 0: 
                     $arr[] = $wd; break;
                 }
