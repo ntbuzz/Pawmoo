@@ -74,7 +74,9 @@ public function ALink($lnk,$txt,$under=false) {
 	if(get_protocol($href) !== NULL) {
 		echo "<a href='{$href}' target=_blank>{$txt}</a>";
 	} else {
-		$uline = ($under) ? '' : ' class="nounder"';
+		if(is_array($under)) {
+			$uline = ' class="'.implode(' ',$under).'"';
+		} else $uline = ($under) ? '' : ' class="nounder"';
 		echo "<a{$uline} href='{$href}'>{$txt}</a>";
 	}
 }

@@ -124,6 +124,14 @@ function array_key_unique($key,&$arr) {
     return $key;
 }
 //==============================================================================
+// set value by array-key duplicate avoidance
+function set_array_key_unique(&$arr,$key,$val) {
+    $wkey = $key;
+    for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}:{$n}";
+    $arr[$key] = $val;
+    return $key;
+}
+//==============================================================================
 // convert to num STRING to INTEGER
 function array_intval_recursive($arr) {
     if(is_scalar($arr)) return (is_numeric($arr))?intval($arr):$arr;

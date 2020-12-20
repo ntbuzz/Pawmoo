@@ -216,8 +216,9 @@ public function ViewTemplate($name,$vars = []) {
                     break;
             case '"':
             case "'": if(substr($var,-1) === $var[0]) {     // check end-char
-                    $var = trim($var,$var[0]);
-                    $val = MySession::get_varIDs(($var[0]==="'"),$var);// get SESSION ENV-VAR
+                    $tt = $var[0];
+                    $var = trim($var,$tt);
+                    $val = MySession::get_varIDs(($tt==="'"),$var);// get SESSION ENV-VAR
                 }
                 break;
             default:
@@ -300,8 +301,7 @@ public function ViewTemplate($name,$vars = []) {
                 foreach($ret as $kk => $vv) {
                     if(is_numeric($kk)) $wd[] = $vv;
                     else {
-                        $kk = array_key_unique($kk,$wd);
-                        $wd[$kk] = $vv;
+                        set_array_key_unique($wd,$kk,$vv);
                     }
                 }
             } else $wd[$key] = $val;
@@ -389,23 +389,25 @@ public function ViewTemplate($name,$vars = []) {
             $innerText = '';
             if(!empty($section)) {
                 foreach($section as $token => $sec) {
-                    $token = $this->expand_Strings($token,$vars);
-//                    if(is_scalar($sec)) $sec = $this->expand_Strings($sec,$vars);
-                    if (ctype_alpha($token)) {      // attr-name
-                        if(!empty($sec)) $attrList[$token] = $sec;
-                    } else if(is_numeric($token)) {
-                        if(is_tag_identifier($sec)===2) {   // not a command-token
-                            $subsec[$sec] = [];
-                        } else if(is_scalar($sec)) {
-                            // separate attribute
-                            $p = '/^([a-zA-Z]+[^\\\]):["\']?(.+)["\']?/';
-                            if(preg_match($p,$sec,$m) === 1) {
-debug_log(-999,['ATTR'=>$m]);
-                                $attrList[$m[1]] = $m[2];
-                            } else $innerText .= $sec;
+                    if(is_numeric($token)) {
+                        if(is_scalar($sec)) {
+                            if(is_tag_identifier($sec)===2) {   // command-token @Template, etc...
+                                set_array_key_unique($subsec,$sec,[]);
+                            } else {
+                                // separate attribute
+                                $p = '/^([a-zA-Z]+[^\\\]):["\']?(.+)["\']?/';
+                                if(preg_match($p,$sec,$m) === 1) {
+                                    $attrList[$m[1]] = $m[2];
+                                } else $innerText .= $sec;
+                            }
                         } else $subsec[] = $sec;
                     } else {
-                        $subsec[$token] = $sec;
+                        $token = $this->expand_Strings(tag_body_name($token),$vars);
+                        if (ctype_alpha($token)) {      // attr-name
+                            if(!empty($sec)) $attrList[$token] = $sec;
+                        } else {
+                            set_array_key_unique($subsec,$token,$sec);
+                        }
                     }
                 }
             }
@@ -625,6 +627,7 @@ debug_log(-999,['ATTR'=>$m]);
     // ]
     private function cmd_list($tag,$attrs,$sec,$vars) {
         list($attrs,$text,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
+debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<{$tag}{$attr}>\n";
         foreach($subsec as $li_token => $li_sec) {
@@ -718,21 +721,6 @@ debug_log(-999,['ATTR'=>$m]);
             }
         } else echo "<OPTION value='{$opt_val}'>{$opt_val}</OPTION>\n";
         echo "</{$tag}>\n";
-    }
-    //--------------------------------------------------------------------------
-    private function expand_key_section($sec,$vars) {
-        if(is_array($sec)) {
-            $newsec = [];
-            foreach($sec as $key => $val) {
-                if(is_numeric($key)) $newsec[] = $val;
-                else {
-                    $key = $this->expand_Strings($key,$vars);
-                    $newsec[$key] = $val;
-                }
-            }
-            return $newsec;
-        }
-        return $sec;
     }
     //--------------------------------------------------------------------------
     // +tabset.classname => [

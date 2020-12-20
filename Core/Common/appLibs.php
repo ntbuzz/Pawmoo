@@ -60,6 +60,11 @@ function str_fixwidth($exp,$pad,$w) {
     return substr("{$exp}{$pp}",0,$w);
 }
 //==============================================================================
+// string length limitation
+function strlen_limit($str,$maxlen) {
+    return (mb_strlen($str) > $maxlen) ? mb_substr($str,0,$maxlen)."..." : $str;
+}
+//==============================================================================
 // Check the existence of the destination folder and move the file
 function file_move($src,$dest){
     list($path,$fn) = extract_path_filename($dest);
