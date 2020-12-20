@@ -220,8 +220,7 @@ protected function sql_safequote(&$value) {
 							if($opr === $kk) {
 								$array_merged($opr,$arr,$vv);
 							} else {
-								$k = array_key_unique($kk,$arr);
-								$arr[$k] = $vv;
+								set_array_key_unique($arr,$kk,$vv);
 							}
 						}
 					} else if(!empty($val)) $arr[] = $val;
@@ -236,8 +235,7 @@ protected function sql_safequote(&$value) {
 					if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
 						$array_merged($opr,$wd,$child);
 					} else {
-						$kk = array_key_unique($key,$wd);
-						$wd[$kk] = $child;
+						set_array_key_unique($wd,$key,$child);
 					}
 				}
 				return $wd;
