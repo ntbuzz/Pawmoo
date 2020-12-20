@@ -1,4 +1,4 @@
-**** SECTION TEMPLATE SYNTAX BNF(?)
+**** SECTION template syntax BNF(?)
 
 section:
     token
@@ -19,6 +19,7 @@ set-variable:
 tag-token:
     tag_identifier => value
     tag_identifier => [
+    	attr-name:attr-value		scalar value in ':' separated
         attr-name => value          scalar-value
         attr-name => [              array value list
             value
@@ -29,10 +30,13 @@ tag-token:
         section                     for sub-section
     ]
 
+attr-name:
+    Alphabet Only character string.
+
 tag-identifier:
     tag.name#name:digit[name](value){element}    Only 'tag' must be last char will priod(.)
 
-command-token:
+command-token:                      Elements are interpreted differently for each command.
     command-identifier => value
     command-identifier => [
         value
@@ -53,7 +57,7 @@ command-identifier:
     <       HTML
     ?       Switch SECTION
     %       Hyper-Link
-    -       single-repeat tag (for <meta>)
+    -       single-repeat tag (for <meta>,etc...)
 
 built-in command:
     +setvar
