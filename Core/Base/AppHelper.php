@@ -71,14 +71,13 @@ public function ALink($lnk,$txt,$under=false) {
 		$txt = $this->_($txt);
 	}
 	$href = make_hyperlink($lnk,$this->ModuleName);
-	if(get_protocol($href) !== NULL) {
-		echo "<a href='{$href}' target=_blank>{$txt}</a>";
-	} else {
-		if(is_array($under)) {
-			$uline = ' class="'.implode(' ',$under).'"';
-		} else $uline = ($under) ? '' : ' class="nounder"';
-		echo "<a{$uline} href='{$href}'>{$txt}</a>";
-	}
+	if(is_array($under)) {
+		$uline = ' class="'.implode(' ',$under).'"';
+	} else if(is_string($under)) {
+		$uline = (empty($under)) ? '' : " class='{$under}'";
+	} else $uline = ($under) ? '' : ' class="nounder"';
+	$target = (get_protocol($href) !== NULL) ? ' target=_blank':'';
+	echo "<a{$uline} href='{$href}'{$target}>{$txt}</a>";
 }
 //==============================================================================
 // generate Page Button LABEL Tag

@@ -24,25 +24,15 @@ Detail specification is [Here](../../wiki/Home)
 
 ```
 // Section layout definition
-@Header => [// @ ViewTemplate () call
-    PageTitle => $ {#TITLE} // Arguments set to variables
-    AdditionHeader =>
-        ./css/common.css // Combined output
-        ./js/common.js // Combined output
-    ]
-]
-*Comment => [ 'What about arrays?' ]
+@Header                           // call other template
 -body => [ bgcolor => white ]     // HTML tag output
-.appWindow => [                  // Tag name omitted is DIV tag section
+.appWindow => [                   // Tag name omitted is DIV tag section
   .split-pane.fixed-left => [
     .split-pane-component.sitemap#left-component => [
       @TreeMenu
     ]
     .split-pane-divider#v-divider => []
     .split-pane-component#right-component => [
-      // Fix at the top
-      @Toolbar
-      // A block that scrolls #ContentBody (contents-view)
       .split-pane-component.contents-view.fitWindow =>
          // Area to display content
          #ContentBody => [
@@ -52,4 +42,28 @@ Detail specification is [Here](../../wiki/Home)
     ]
   ]
 ]
+```
+Rewriting the above section in HTML would be messy as follows:
+```
+<?php 
+  // Section layout definition
+  require('Header.php'); 
+?>
+<body bgcolor='white'>
+<div class="appWindow">
+  <div class="split-pane fixed-left">
+    <div class="split-pane-component sitemap" id="left-component">
+      <?php require('TreeMenu.php'); ?>
+    </div>
+    <div class="split-pane-divider" id="v-divider"></div>
+    <div class="split-pane-component" id="right-component">
+      <div class="split-pane-component contents-view fitWindow">
+        <div id="ContentBody">
+          <?php $Helper->DocIndex(); ?>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
 ```

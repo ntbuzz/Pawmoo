@@ -673,6 +673,8 @@
   ```
       クラス名には標準スタイルに「code, indent, quote」が定義済です。
       pre要素の「```」の代わりに「~~~」または「^^^」が使用でき、その場合の省略クラス名は indent です。
+      'code'クラスが指定されたとき、source-codeのHTML特殊文字はエンティティ変換されHTMLタグが無効化されます。
+      'indent', 'quote' その他のクラスの場合、HTMLタグが有効になります。
 
   [チェック有無]{ラベル名}  // チェック有無が FALSE(空文字、0、f、false)であれば空白ブラケット
                             // それ以外なら [X] で表示する
@@ -683,6 +685,7 @@
   ^[name]={textvalue:size}                 // text ボックス
   ^[name]!{textvalue:col,row}              // textarea
     item や textvalue に '}' が含まれるときはエスケープ '\}' します。
+    textareaのインナーテキストは<BR>タグが除去され、その他のHTML特殊文字はエンティティ変換されます。
 
   定義リスト(DL)
   :タイトル(DT)
