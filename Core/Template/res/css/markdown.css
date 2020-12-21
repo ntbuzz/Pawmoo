@@ -5,8 +5,8 @@
 }
 .easy_markdown a.externalLink {
   display: inline-block;
-  padding-right: 20px;
-  background: url(res/img/icon_external.png) no-repeat right center;
+  padding-right: 14px;
+  background: url(res/img/icon_external12.png) no-repeat right center;
 }
 
 /* CODE viewing 

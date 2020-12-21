@@ -224,9 +224,9 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
         return in_array($vv,$filter,true) || ($vv === NULL);
     });
     $data = array();
-    if(empty($sort)) $sort = [ $this->Primary => $SortDefault ];
+    if(empty($sort)) $sort = [ $this->Primary => $this->SortDefault ];
     else if(is_scalar($sort)) {
-        $sort = [ $sort => $SortDefault ];
+        $sort = [ $sort => $this->SortDefault ];
     }
     $this->dbDriver->findRecord($cond,$this->Relations,$sort);
     while (($fields = $this->dbDriver->fetchDB())) {

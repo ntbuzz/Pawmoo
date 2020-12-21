@@ -23,20 +23,29 @@ function pseudo_markdown($atext, $md_class = '') {
         "/\s_(.+?)_\s/"     => '<span style="text-decoration:underline;">\\1</span>',     // UNDERLINE
         "/(?: {2}$|　$)/m"   => '<br>',        // newline
     ];
-    // escape the characters to be excluded, and Windows(CR-LF) style change to UNIX(LF) style.
-    $p = '/\s[ \-\=]>\s|\\\[<>]+\s|\\\<[^>\r\n]*?>|\r\n/';
-    $atext = preg_replace_callback($p, function($matches) {
-                return str_replace(['\<','\>','<','>',"\r"],['&lt;','&gt;','&lt;','&gt;',''],$matches[0]);}
-            ,$atext);
-    // DL processing
-    $atext = preg_replace_callback('/\n(:.*?)\n\n/s',function($m) {
-        $dtdd = array_map(function($v) {
-            preg_match('/^(.*?)(?=[ ,\n]+)(.*)$/s',$v,$match);
-            $dd = $match[2];
-            return "<dt>{$match[1]}</dt><dd>{$dd}</dd>";
-        }, array_filter(explode(':',$m[1]),function($v) {return strlen($v)>0;}));
-        return "<dl class='dl_list'>".implode("\n",$dtdd)."</dl>";
-    }, $atext);
+    // The one to be converted with the highest priority.
+    // <PRE>,CR-LF, \<TAG>, and <DL> tag
+    $atext = preg_replace_callback_array([
+        // pre tag with class
+        '/(?:^|\n)(```|~~~|\^\^\^)(?:(\w+))?(.+?)\n\1/s' => function ($m) {
+            $class = [ '```' => 'code','~~~' => 'indent','^^^' => 'indent'];
+            $cls = ($m[2]==='')?$class[$m[1]]:$m[2];
+            $txt = ($cls==='code') ? htmlspecialchars($m[3]) : $m[3];
+            return "\n<pre class='$cls'>{$txt}</pre>";
+        },
+        // escape the characters to be excluded, and Windows(CR-LF) style change to UNIX(LF) style.
+        '/\s[ \-\=]>\s|\\\[<>]+\s|\\\<[^>\r\n]*?>|\r\n/' => function($m) {
+            return str_replace(['\<','\>','<','>',"\r"],['&lt;','&gt;','&lt;','&gt;',''],$m[0]);
+        },
+        // DL processing
+        '/\n(:.*?)\n\n/s' => function($m) {
+            $dtdd = array_map(function($v) {
+                preg_match('/^(.*?)(?=[ ,\n]+)(.*)$/s',$v,$match);
+                $dd = $match[2];
+                return "<dt>{$match[1]}</dt><dd>{$dd}</dd>";
+            }, array_filter(explode(':',$m[1]),function($v) {return strlen($v)>0;}));
+            return "<dl class='dl_list'>".implode("\n",$dtdd)."</dl>";
+        }],$atext);
     // ul/ol/blockquote processing
     $p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)\n{2}/s';
     $atext = preg_replace_callback($p,function($matches) {
@@ -163,13 +172,6 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<h{$n}{$cls}>{$m[3]}</h{$n}>";
         },
         '/^(?:---|___|\*\*\*)$/m'     => function($m) { return "<hr>"; },
-//------- pre tag with class
-        '/(?:^|\n)(```|~~~|\^\^\^)(?:(\w+))?(.+?)\n\1/s' => function ($m) {
-            $class = [ '```' => 'code','~~~' => 'indent','^^^' => 'indent'];
-            $txt = $m[3];
-            $cls = ($m[2]==='')?$class[$m[1]]:$m[2];
-            return "\n<pre class='$cls'>{$txt}</pre>";
-        },
 //------- ![alt-text](URL) IMAGE TAG /multi-pattern replace
         '/!\[([^:\]]+)(?::(\d+,\d+))?\]\(([!:])?([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/' => function ($m) use(&$item_array) {
             $alt = $m[1];
@@ -197,8 +199,8 @@ function pseudo_markdown($atext, $md_class = '') {
         '/\s\.\.\.(?:(\w+))?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
             if($m[2]==='!') {
                 $txt = nl2br($m[3]);
-                // restore tag end after NL
-                $txt = rtrim(str_replace("><br>\n",">\n",str_replace("<br />","<br>","{$txt}\n")));
+                // restore HTML-tag(</h1>) after <BR>
+                $txt = rtrim(preg_replace('/(<\/h\d>)(?:<br>|<br \/>)\n/i',"\\1\n","{$txt}\n"));
             } else $txt = trim($m[3]);
             $cls = ($m[1]==='')?'indent':$m[1];
             return "\n<div class='$cls'>{$txt}</div>";
@@ -258,7 +260,9 @@ function pseudo_markdown($atext, $md_class = '') {
                         $sz = " cols='{$size[0]}' rows='{$size[1]}'";
                     } else $sz = '';
                     // restore if ...{ TEXT }... mark converted.
-                    $txt = rtrim(str_replace(["<br>\n","<br />\n"],"\n", "{$vv[0]}\n"));
+//                    $txt = rtrim(str_replace(["<BR>\n","<br>\n","<BR />\n","<br />\n"],"\n", "{$vv[0]}\n"));
+                    $txt = rtrim(preg_replace('/(?:<br>|<br \/>)\n/i',"\n","{$vv[0]}\n"));
+                    $txt = htmlspecialchars($txt);
                     $tag = "{$spc}<textarea{$attr}{$sz}>{$txt}</textarea>";
                     break;
             case '=':   // text

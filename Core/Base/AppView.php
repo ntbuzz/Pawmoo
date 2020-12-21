@@ -487,12 +487,13 @@ public function ViewTemplate($name,$vars = []) {
     //  %link => [ A-Text => URL ... ], %A-Text => URL
     private function sec_link($tag,$attrs,$sec,$vars) {
         $sec = $this->expand_SectionVar($sec,$vars,TRUE);
+        $cls = (isset($attrs['class'])) ? $attrs['class'] : false;
         if($tag === 'link') {
             if(is_array($sec)) {
-                foreach($sec as $kk => $vv) $this->Helper->ALink($vv,$kk);
+                foreach($sec as $kk => $vv) $this->Helper->ALink($vv,$kk,$cls);
             } else echo "{$tag} bad argument.\n";
         } else if(is_scalar($sec)) {
-            $this->Helper->ALink($sec,$tag);
+            $this->Helper->ALink($sec,$tag,$cls);
         } else echo "tag '{$tag}' not for feature.\n";
     }
     //==========================================================================
