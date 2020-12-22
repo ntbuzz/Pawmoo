@@ -49,32 +49,190 @@ command-token:                      Elements are interpreted differently for eac
     ]
 
 command-identifier:
-    &       Helper
+    <       HTML tag direct
     *       Comment
-    @       Template
-    -       Single
-    +       Built-In command
-    <       HTML
-    ?       Switch SECTION
-    %       Hyper-Link
+    @       Template file import
+    &       Helper method call
     -       single-repeat tag (for <meta>,etc...)
+    %       Hyper-Link
+    ?       Switch SECTION
+    +       Built-In command
 
-built-in command:
-    +setvar
-    +include
-    +echo
-    +style
-    +jquery
-    +img
-    +ul
-    +ol
-    +dl
-    +select
-    +table
-    +radio
-    +checkbox
-    +inline.SecName
-    +markdown
-    +recordset
-    +tabset
-    +floatwin
+Switch SECTION:
+    ?"Judgment-value" => [  
+        ''   => [ Section ]            // Execute when empty value
+        '*'  => [ Section ]            // Execute when contains some value
+        Compare-String => [ Section ]  // Execute when equal to
+    ]
+    ?&Helper-Method                    // Helper method must return the SECTION format.
+
+HTML tag direct:
+    <HTML text >                       // normal HTML definition.
+
+Comment:
+    *message
+    * => [                             // Array elements will be concatenate strings.
+        message
+        ...
+    ]
+
+Template file:
+    @Template                           // no enviroment variable
+    @Template  => [                     // argument will be Local Variable.
+        key => Value                    // The template variable that references Value is ${key}.
+    ]
+    @.Template                          // inline-template or external template, inline-template defined by +inline command.
+
+Helper Method Call:
+    &MethodName                         // no argument
+    &MethoName => [                     // argument will be key-array
+        key => value                    // To refer 'value', $argv['key']
+    ]
+
+Single-Repeat Tag:
+    -tag_identifier                     // HTML single Tag output, ex. <BR>,...
+    -tag_identifier => [                // 
+        common-attribute                // The same attribute for each element.
+        [ additinal-attribute ]         // Attributes specific to repeat tags.
+        ...
+    ]
+
+Hyper-Link:
+    %link => [                          // array will be multi HyperLink elements.
+        innerText => URL
+        ...
+    ]
+    %innerText => URL
+
+### Built-In command specification.
+
++setvar                             // Set Variable in Template GLOBAL
+    +setvar => [
+        varname => value            // Template GLOBAL variable that references Value is ${varname}.
+        ...
+        ]
+
++include                            // Include JS and CSS files
+    +include => [
+        filename                    // Include tags are automatically identified by extension.
+        ...
+    ]
+
++echo                               // echo messages.
+    +echo => Message
+    +echo => [                      // The array outputs only the values concatenated.
+        Message
+        ...
+    ]
+
++style                              // output <style>...</style>
+    +style => [
+        value                       // The elements values will be concatenated strings.
+        ...
+    ]
+
++jquery                             // Output JQuery function
+    +jquery => [                    // <script> $(function() { ... }); </script>
+        value
+        ...
+    ]
+
++img                                // Image Tag output,allowed to add tag attributes to the command name.
+    +img => URL                     // ex:  +img.class#id => URL
+    +img => [
+        attribule => value          // When the attribute is not included in the tag.
+        URL
+    ]
+
++ul/ol                              // UL/OL tag dedicated list output
+    +ul/ol => [
+        attr => value               // ul/ol tag attribute
+        list-text                   // scalar: <li> list-text </li>
+        .XXX#DDD => [               // LI tag with attributem, it can be omitted.
+            section                 // LI tag inner section.
+        ]
+        ...
+    ]
+
++dl                                 // DL list of tag-only output
+    +dl => [
+        attr => value               // dl tag attribute
+        [   dt-texxt                // scalar: DT tag innerText
+            dt-attr => value        // DT tag attribute
+            .XXX#DDD => [           // DD tag with class/id attribute, it can be omitted.
+                dd-attr => value    // DD tag attribute
+                [ section  ]        // DD section
+            ] 
+        ]
+    ]
+
++select                             // Output dedicated to SELECT tag  
+    +select => [
+        selected_key = > [          // default selected item value
+            option_text => value    // option tag text,and value
+            ...
+        ]
+    ]
+
++table                              // Output dedicated to TABLE tag 
+    +table => [
+        .XXX#DDD => [               // TR tag with attribute
+            th => TEXT              // TH cell, TEXT willbe innerText
+            th => [ section ]       // TH cell with section
+            [ section ]             // empty key will be TD cell secion
+            .td_attr => [ section ] // or attribute only too.
+        ]
+        ...                         // repeat TR section
+    ]
+
++radio                              // INPUT RADIO tag dedicated list output
+    +radio[name] => [               // radio button group-name
+        attr => value               // other attribute
+        checked-value => [          // same value as checked-value is checked.
+            text => value           // radio button with text displayed.
+            ...
+        ]
+    ]
+
++checkbox                           // INPUT CHECKBOX tag dedicated list output,allow in two-fomart
+    FORMAT-I:                       // tag with name attribute,or name attribute element
+    +checkbox[name] => [
+        { name=TEXT }               // if tag identigier name attribute nothing.
+        @Value => TEXT              // display checkbox TEXT,and when checked-value Value
+        [ STR => value ]            // compare STR and value, same as CHECKED
+    ]
+    FORMAT-II:                      // tag without name attribute, name is elements key
+    +checkbox => [
+        name1 => [                  // first checkbox-item, Other attributes are the same as FORMAT-I.
+            @Value1=>TEXT
+            [ STR1 => value1 ]
+        ]
+        name2 => ...                // seconde element, ...
+    ]
+
++inline                             // Inline layout section definition. Can be reused by calling a template
+    +inline.SecName => [            // Secname will be Template Name, using as @.SecName
+        section
+    ]
+
++markdown                           // Text Outputs a formatted Text as a simple markdown. (*)
+    +markdown => Text               // Convert to Markdown text to HTML
+    +markdown.my_markdown => Text   // with markdown block class is 'my_markdown'
+
++recordset                          // Repeat Section for each record read
+    +recordset => [ Section ]       // repeat each $Records[] in Model class, record data will be $RecData
+    +recordset[:PropName] => [      // repeat as Model class property 'PropName'
+        Section                     //   for example, [:Select] is $Model->Select throw in $RecData
+    ]
+
++tabset                             // Tabset output using <ul> tag 
+    +tabset => [
+        Title1 => [ Section ]      // Title1 will be selection Tab text, and Section is TabContents
+        ...                        // this command need 'tabset.js', or implement yourself.
+    ]
+
++floatwin                          // for floatWindow simple description command
+    +floatwin.class#id => [
+        Window-Title               // Tilte bar text
+        [ Section ]                // Window Contents
+    ]
