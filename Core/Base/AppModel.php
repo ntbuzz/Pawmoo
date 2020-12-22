@@ -158,10 +158,13 @@ public function getRecordBy($key,$value) {
     return $this->fields;
 }
 //==============================================================================
-// Get Record Data by primary-key without JOIN fields.
+// Get Record Data by primary-key,and JOIN data by $join is TRUE.
 // Result:   $this->RecData in Column Data
-public function GetRecord($num) {
-    $this->getRecordBy($this->Primary,$num);
+public function GetRecord($num,$join=FALSE) {
+    if($join) {
+        if(empty($num)) $this->fields = array();
+        else $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],$this->Relations);
+    } else $this->getRecordBy($this->Primary,$num);
     $this->RecData= $this->fields;
 }
 //==============================================================================
@@ -199,17 +202,7 @@ public function getRecordField($key,$value,$field) {
     $this->getRecordBy($key,$value);
     return $this->fields[$field];
 }
-//==============================================================================
-// Get Record Data by primary-key with JOIN Table.
-// Result:   $this->field
-public function getRecordValue($num) {
-    if(empty($num)) {
-        $this->fields = array();
-        return;
-    }
-    $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],$this->Relations);
-    $this->RecData = $this->fields;
-}
+
 //==============================================================================
 // 条件に一致するレコード数を検索する
 public function getCount($cond) {
@@ -255,9 +248,9 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
     ]);
 }
 //==============================================================================
-// Get Record List by FIND-CONDITION without JOIN!.
+// Get Raw Record List by FIND-CONDITION without JOIN!.
 // Result:   $this->Records  Find-Result List
-public function realFinder($cond,$filter=[],$sort=[]) {
+public function RawRecordFinder($cond,$filter=[],$sort=[]) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
     $fields_list =[];
     foreach($filter as $kk) $fields_list[$kk] = $kk;
@@ -318,29 +311,49 @@ public function MultiDeleteRecord($cond) {
     $this->dbDriver->deleteRecord($cond);
 }
 //==============================================================================
+// VALIDATION of write data
+public function is_valid(&$row) {
+    return TRUE;
+}
+//==============================================================================
 // field-alias, field-bind processing.
-    private function fieldSetup($row) {
-        unset($row[$this->Primary]);
+    private function field_alias_bind($row) {
         $this->fields = array();
         foreach($row as $key => $val) {
-            if(array_key_exists($key,$this->dbDriver->columns)) {
-                $alias = ($this->AliasMode) ? $this->dbDriver->fieldAlias->get_lang_alias($key) :$key;
-                $this->fields[$alias] = $val;
-            }
+            $alias = ($this->AliasMode) ? $this->dbDriver->fieldAlias->get_lang_alias($key) :$key;
+            $this->fields[$alias] = $val;
         }
         debug_log(DBMSG_MODEL,['ALIAS' => $this->fields]);
     }
 //==============================================================================
+// pickup on exist database field
+    private function field_pickup($row) {
+        $data = array();
+        foreach($row as $key => $val) {
+            if(array_key_exists($key,$this->dbDriver->columns)) {
+                $data[$key] = $val;
+            }
+        }
+        unset($data[$this->Primary]);
+        return $data;
+    }
+//==============================================================================
 // Add NEW record
 public function AddRecord($row) {
-    $this->fieldSetup($row);
-    $this->dbDriver->insertRecord($this->fields);
+    $data = $this->field_pickup($row);
+    if($this->is_valid($data)) {
+        $this->field_alias_bind($data);
+        $this->dbDriver->insertRecord($this->fields);
+    }
 }
 //==============================================================================
 // UPDATE Record
 public function UpdateRecord($num,$row) {
-    $this->fieldSetup($row);
-    $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
+    $data = $this->field_pickup($row);
+    if($this->is_valid($data)) {
+        $this->field_alias_bind($row);
+        $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
+    }
 }
 
 }
