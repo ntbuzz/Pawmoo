@@ -599,8 +599,6 @@
     style. => "width:100%;"       // 空のクラス名をつけるとタグトークンとして処理する
   ]
 
-  .tpl はViewの中で配列に再構築してから、セクション処理によりタグ出力されます。
-
 □ 簡易マークダウン記法
 本フレームワークではセクションテンプレートおよびAPIでマークダウンもどきの記法ができるようになっています。
 基本的な構文は一般的なマークダウン記法に準じていますが、テーブルやコード、フォーム部品など独自の拡張仕様になっています。
@@ -967,11 +965,15 @@
   * ActionPreProcess(action)      // アクション実行前に呼び出すメソッド、FALSEを返すとアクションをキャンセルする。
   * ActionPostProcess(action)     // アクション実行後に呼び出すメソッド
     SetHelperProps(array)         // ヘルパープロパティ変数のセット、テンプレートから参照できるようにする
-
+    is_authorised()               // ログイン処理、$needLogin = FALSE なら常にTRUEを返す
+    LogoutAction()                // セッション変数からログイン情報を削除
+    AutoPaging($cond, $max_count) // Model クラスへのページング設定
+    PagingFinder($cond,$max_count,$filter,$sort) // AutoPagingとRecordFinder()の連続呼び出し
     ListAction()                  // 標準処理：レコードリストの一覧表示
+    PageAction()                  // 標準処理：ページング付きレコードリストの一覧表示
     FindAction()                  // 標準処理：検索
     ViewAction()                  // 標準処理：レコード表示
-    MakepdfAction()               // 標準処理：PDFを作成する
+    AddAction()                   // 標準処理：レコード追加
     UpdateAction()                // 標準処理：レコード更新
 
     モジュールによっては[find]や[page]メソッドを呼び出されては困る、という場合は
@@ -984,21 +986,36 @@
   ・プロパティ変数
     $DatabaseSchema             // クラス・プロパティ変数連想配列として定義する(static)
   * $dbDriver;                  // データベースドライバー
-  * $TableHead;                 // テーブルヘッダ
   * $fields;                    // レコードフィールドの値
     $pagesize;                  // ページャーの表示単位
     $page_num;                  // 表示するページ番号
     $record_max;                // 総レコード数
+    $AliasMode;                 // 言語エイリアスモード TRUE=有効,FALSE=無効
+    $RecData;                   // レコードデータ（JOINなし)
+    $Select;                    // リレーション先の値リスト
+    $Records;                   // 検索結果のレコードリスト(JOIN有)
+    $HeaderSchema;              // $DatabaseSchema で定義したレコードヘッダー [ field_name => [disp_name, align, sort_flag, disp_width ]
+    $DateFormat;                // 日付書式 YYYY-MM-DD, YYYY/MM/DD, ...
+    $SortDefault;               // 検索時のソート順(デフォルト昇順)
 
   ・クラスメソッド
     SetPage($pagesize,$pagenum)               // ページング設定
-    getRecordByKey($id)                       // PrimaryKey でレコードを取得
-    GetRecord($num)                           // アイテムの読み込み (JOIN無し)
+    getRecordByKey($id)                       // PrimaryKey = $id のレコードを取得 $fields に格納しリターン値で返す
+    getRecordBy($key,$value)                  // $key フィールドが $value のレコードを取得(JOIN無し) $fields に格納
+    GetRecord($num,$join=FALSE)               // $num キーレコードデータを $fields, $RecData に格納、$join が TRUEならJOIN有効
     getRecordField($key,$value,$field)        // keyフィールドがvalueのレコードを検索しfield値を返す (JOIN無し)
+    getCount($cond)                           // レコード数の検索
+    GetFieldValues($field)                    // $field で指定された列の値リストを $Select 配列に格納
+    GetValueList()                            // Relations の参照テーブルの値リストを $Select 配列に格納
     RecordFinder($cond [,$filter [,$sort ]])  // レコードリストの読み込み(JOIN済レコード)
-    realFinder($cond,$filter=[],$sort=[])     // レコードリストの読み込み(JOIN済レコード)
+    RawRecordFinder($cond,$filte,$sort)       // RecordFinder() のJOIN無し版
     nearRecord($primary,$cond=[],$filter=[])  // $primaryで指定されたキー前後のレコードを取得する
+    DeleteRecord($num)                        // $num キーレコードの削除
+    MultiDeleteRecord($cond)                  // 条件指定のレコード削除
+    is_valid(&$row)                           // フィールドデータの検証、戻り値 TRUE=データ有効、FALSE=データ無効
+    AddRecord($row)                           // レコード追加
     UpdateRecord($num,$row)                   // レコードの更新
+
 
 ・ビュークラス(AppView)
   ビュークラスはテンプレート処理へのI/Fを提供するクラスだが、サブクラスでメソッドを拡張することができる

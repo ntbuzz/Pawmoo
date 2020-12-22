@@ -14,7 +14,7 @@ You will need the app repository and vendor libraries to run as an application.
 
 ```
 - app             Application Repository
-- vendor          JQuery, and other javascript Library
+- vendor          JQuery, and other javascript/PHP Library
 ```
 
 ### SECTION template SAMPLE
@@ -25,7 +25,7 @@ Detail specification is [Here](../../wiki/Home)
 ```
 // Section layout definition
 @Header                           // call other template
--body => [ bgcolor => white ]     // HTML tag output
+<body bgcolor='white'>            // HTML tag output
 .appWindow => [                   // Tag name omitted is DIV tag section
   .split-pane.fixed-left => [
     .split-pane-component.sitemap#left-component => [
@@ -42,6 +42,7 @@ Detail specification is [Here](../../wiki/Home)
     ]
   ]
 ]
+</body>
 ```
 Rewriting the above section in HTML would be messy as follows:
 ```

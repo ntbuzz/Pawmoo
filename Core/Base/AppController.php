@@ -185,16 +185,18 @@ public function FindAction() {
 // Default View Action
 public function ViewAction() {
 	$num = App::$Params[0];
-	$this->Model->getRecordValue($num);
+	$this->Model->GetRecord($num,TRUE);
 	$this->Model->GetValueList();
 	$this->View->ViewTemplate('ContentView');
 }
 //==============================================================================
-// Default PDF Action
-public function MakepdfAction() {
-	$num = App::$Params[0];
-	$this->Model->GetRecord($num);
-	$this->View->ViewTemplate('MakePDF');
+// Default Add Record Action
+public function AddAction() {
+	$url = App::$Referer;
+	$this->Model->AddRecord(MySession::$ReqData);
+	if(empty($url)) $url = App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/'.App::$Filter;
+	header('Location:' . $url);
+//	echo App::$Referer;
 }
 //==============================================================================
 // Default Update Action
@@ -205,6 +207,14 @@ public function UpdateAction() {
 	$this->Model->UpdateRecord($num,MySession::$ReqData);
 	if(empty($url)) $url = App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/'.App::$Filter;
 	header('Location:' . $url);
+//	echo App::$Referer;
+}
+//==============================================================================
+// Default PDF Convert Action
+public function MakepdfAction() {
+	$num = App::$Params[0];
+	$this->Model->GetRecord($num);
+	$this->View->ViewTemplate('MakePDF');
 }
 
 }
