@@ -594,12 +594,19 @@ public function ViewTemplate($name,$vars = []) {
         $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
         if(is_array($sec)) $atext = "\n{$atext}\n\n";
         $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
-        // pre-expand for checkbox and radio markdown 'checked'
-        $atext = preg_replace_callback('/([\[\{:,])(\$\{[^\}]+?\})/',function($m) {
-                list($pat,$prefix,$var) = $m;
-                $this->expand_Walk($var, 0, $vars);
-                return "{$prefix}{$var}";
-        },$atext);
+        // pre-expand for checkbox and radio/select markdown
+        $atext = preg_replace_callback('/(\[[^]]*?\]\{(?:\$\{[^\}]+?\}|[^}])+?\}|\^\[[^]]*?\][%@:]\{(?:\$\{[^\}]+?\}|[^}])+?\})/',
+            function($m) use(&$vars) {
+                list($pat,$var) = $m;
+                $var = preg_replace_callback('/(\$\{[^\}]+?\})/',
+                    function($mm) use(&$vars) {
+                        $vv = $mm[1];
+                        $this->expand_Walk($vv,0,$vars);
+                        if(is_array($vv)) $vv = array_key_value($vv);
+                        return $vv;
+                    },$var);
+                return $var;
+            },$atext);
         $mtext = pseudo_markdown( $atext,$cls);
         $mtext = $this->expand_Strings($mtext,$vars);
         echo $mtext;

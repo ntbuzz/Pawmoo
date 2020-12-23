@@ -114,7 +114,7 @@ Hyper-Link:
 
 +include                            // Include JS and CSS files
     +include => [
-        filename                    // Include tags are automatically identified by extension.
+        filename                    // Include tags are automatically identified by extension(js/css/ico).
         ...
     ]
 

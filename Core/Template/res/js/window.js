@@ -58,7 +58,7 @@
     // フローティングウィンドウを開く、execButtonがクリックされたらコールバックする
     $.fn.floatWindow = function (ttl, obj, callback) {
         var self = this;
-        if (ttl.length) self.find('dt').text(ttl);
+        if (ttl != null && ttl.length) self.find('dt').text(ttl);
         if (typeof obj == 'object') {
             $.each(obj, function (key, value) {
                 var target = self.find('[name="' + key + '"]');

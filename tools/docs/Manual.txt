@@ -682,6 +682,7 @@
   ^[name]:{item1=val1:checked}             // checkbox ボタン :checked が FALSE(0,NULL,'f','false')判定でなければチェックをつける
   ^[name]={textvalue:size}                 // text ボックス
   ^[name]!{textvalue:col,row}              // textarea
+  ^[name]%{selectval:option1=val1,...}     // select
     item や textvalue に '}' が含まれるときはエスケープ '\}' します。
     textareaのインナーテキストは<BR>タグが除去され、その他のHTML特殊文字はエンティティ変換されます。
 
