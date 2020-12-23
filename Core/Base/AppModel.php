@@ -351,7 +351,7 @@ public function AddRecord($row) {
 public function UpdateRecord($num,$row) {
     $data = $this->field_pickup($row);
     if($this->is_valid($data)) {
-        $this->field_alias_bind($row);
+        $this->field_alias_bind($data);
         $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
     }
 }

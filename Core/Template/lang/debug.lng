@@ -26,8 +26,8 @@
         Category => [
             -104 => System
             -103 => Locale
-            -102 => AppView
-            -101 => AppModel
+            -102 => View
+            -101 => Model
             -100 => Handler
         ]
     ]

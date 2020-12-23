@@ -216,14 +216,28 @@ function pseudo_markdown($atext, $md_class = '') {
 //  checkbox    => ^[name]:{item1=val1:checked,item2=val2:checked,...}
 //  textarea    => ^[name]!{text-value:col,row}
 //  textbox     => ^[name]={text-value:size}
-        '/(\s)\^\[(\w+)?\]([@:!=])\{(.*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
-            $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea'];
+//  select      => ^[name]%{select-val:option1=val1,option2=val2,...}
+        '/(\s)\^\[(\w+)?\]([@:!=%])\{(.*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
+            $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea','%' => 'select'];
             $spc = $m[1]; $kind = $m[3]; $val = $m[4];
             $vv = $type[$kind];
             $nm = (empty($m[2])) ? '' : " name='{$m[2]}'";
             $attr = " type='{$vv}'{$nm}";
             $tag = "<input{$attr}";
             switch($kind) {
+            case '%':   // select
+                    list($sel_val,$opt_items) = $item_array(':',$val,2);
+                    $opt_list = ''; $cnt = 0;
+                    foreach(explode(',',$opt_items) as $itemval) {
+                        if(!empty($itemval)) {
+                            list($opt_text,$opt_val) = $item_array('=',$itemval,2); 
+                            if($opt_val===NULL) $opt_val = $cnt++;
+                            $sel = ($sel_val === $opt_val) ? ' selected':'';
+                            $opt_list .= "<option value='{$opt_val}'>{$opt_text}</option>\n";
+                        }
+                    }
+                    $tag = "{$spc}<select${nm}>{$opt_list}</select>\n";
+                    break;
             case '@':   // radio
                     list($check_val,$radio_items) = $item_array(':',$val,2);
                     $radio = ''; $cnt = 0;
