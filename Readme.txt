@@ -1,5 +1,5 @@
  * -------------------------------------------------------------
- * Pawmoo - Object Oriented MVC Web Application Platform with Section View Template
+ * Pawmoo - Object Oriented Web Application Platform with Section View Template
  * 
  * @copyright  Copyright (c) 2017 - 2020 by nTak
  * @license    MIT
@@ -42,6 +42,12 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 履歴
+【0.43.0】2020/12/25
+    ○改善
+    ・フィールド変数にTRUE/FALSEの代替参照機能を追加
+    ・SQLにIS NULL演算子をサポート
+    ・SELECTマークダウンのバグ修正
+
 【0.42.0】2020/12/23
     ○改善
     ・マークダウンにSELECTタグを追加
