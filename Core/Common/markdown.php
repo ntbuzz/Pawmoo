@@ -233,10 +233,10 @@ function pseudo_markdown($atext, $md_class = '') {
                             list($opt_text,$opt_val) = $item_array('=',$itemval,2); 
                             if($opt_val===NULL) $opt_val = $cnt++;
                             $sel = ($sel_val === $opt_val) ? ' selected':'';
-                            $opt_list .= "<option value='{$opt_val}'>{$opt_text}</option>\n";
+                            $opt_list .= "<option value='{$opt_val}'{$sel}>{$opt_text}</option>\n";
                         }
                     }
-                    $tag = "{$spc}<select${nm}>{$opt_list}</select>\n";
+                    $tag = "{$spc}<select{$nm}>{$opt_list}</select>\n";
                     break;
             case '@':   // radio
                     list($check_val,$radio_items) = $item_array(':',$val,2);

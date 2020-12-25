@@ -349,7 +349,12 @@ protected function sql_safequote(&$value) {
 						$opp = $like_object($key,$val,$table);
 					}
 				} else {
-					if(!is_numeric($val)) $val = "'{$val}'";
+					if($val === NULL) {
+						$in_op = [ '=' => 'IS', '==' => 'IS', '<>' => 'IS NOT', '!=' => 'IS NOT'];
+						if(!array_key_exists($op,$in_op)) $op = '==';
+						$op = $in_op[$op];
+						$val = 'NULL';
+					} else if(!is_numeric($val)) $val = "'{$val}'";
 					$opp = $multi_field($key,$op,$table,$val);
 				}
 				$opc = (empty($opc)) ? "{$opp}" : "({$opc}{$opr}{$opp})";

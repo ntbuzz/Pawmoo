@@ -1,0 +1,115 @@
+# Original Markdown Syntax
+  
+You can use your own markdown notation with section templates and APIs.
+The basic syntax follows the general Markdown notation, but it is a unique extension of the table, code, form parts, etc.
+
+The markdown converted tag is a \<div class = "easy_markdown"\> ... \</div\> block element.
+
+To change the class name, specify the class name string in the second argument of the pseudo_markdown () function.
+
+If you change the class name, the display will be corrupted unless you define your own style.
+Import "markdown.css" when using standard style.
+
+If you want to escape markdown or HTML tag characters. Prepend a backslash (\).
+
+## Basic syntax
+
+[Text](URL)         // Hyperlink  
+![ALT-text](URL)    // Image link to URL
+                       The following are original specifications
+                       You can specify a specific path by adding: or! To the first character of the URL.
+                        : Framework Top folder
+                        ! Framework Application top folder
+                         You can specify the width and height by following: immediately after the ALT text.
+                          ![ALT-Text:image-width,image-Height](URL)
+
+--- | ___ | ***             // Horizon <hr>
+
+# Headline                  | heading1 \<h1>|
+## Headline                 | heading2 \<h2>|
+### Headline                | heading3 \<h3>|
+#### Headline               | heading4 \<h4>|
+##### Headline              | heading5 \<h5>|
+###### Headline             | heading6 \<h6>|
+
+**Emphasis**              // Emphasis (strong)
+__Emphasis__              // Emphasis (em)
+ *Italic*                 // Italic (font-style: italic)
+--Cancellationline--      // Cancellation line (del)
+ _Underline_              // Underline (text-decolration: underline)
+
+-- Item 1                   // List (UL-LI)
+-- Item 2
+
+1. Item 1                  // Number list (OL-LI)
+1. Item 2
+
+> Quote                    // Quote (blockquote)
+>> Quote nesting
+
+Two blanks at the end of the line, Line break <br>   
+Or one double-byte space.
+
+## Extended syntax
+  
+**From here on, the following is a proprietary markdown syntax.**
+
+### Table
+
+|: Header   |:< Left-justified |:> Right-justified |:= Center |   // Table (header row: TH)
+| Data Cell |>  Right Aligned  |< Left Aligned     |= Center  |   // Cell (Data Row: TD)
+.Table class name                            // Class name to be added to the table class (md_tbl) (optional)
+
+Immediately after the attribute character in the table cell, ^, @ and. If you continue with, you can add multiple matrices (rowspan / colspan) and class name attributes.  
+Also, if you specify #numerical value, you can specify the column width (width) with the style attribute, so you can save the trouble of creating a class that specifies the column width.  
+
+|:.abc data |        // Immerse the class name abc in the TH tag
+|=@@@  Data |        // Center the TD tag and concatenate 3 columns (as many as @) (COLSPAN = 3)
+|=^^^  Data |        // Center the TD tag and concatenate 3 rows (as many as ^) (ROWSPAN = 3)
+|:=#80 Data |        // Center the TH tag and set the column width to 80px (style = width: 80px;).
+
+### Element
+
+..ClassName#ID{text}       // Class name, SPAN tag with ID name specified, class name, ID name can be omitted. Space is required before and after.
+                             Use P tag with ':' in front of {} in text
+                             ..abc:{text} => <p class="abc"> text </p>
+
+### Block
+
+...ClassName{             // div class=ClassName, if you omit the class name, it will be "indent" class
+Text                      // Add! Before the curly braces to automatically convert line breaks in the text to <br> tags.
+}...                     // ex. ...!{ Line break Text  → <br> Tag automatic conversion}
+
+### Code
+
+```ClassName              // pre class="ClassName ", if you omit the class name, it will be "code" class.
+  source-code
+```                      // pre-terminate
+
+"Code, indent, quote" is defined in the standard style for the class name.  
+You can use "~~~" or "^^^" instead of "```" in the pre element, in which case the abbreviated class name is indent.
+  
+### Checkbox view
+
+[Checked]{Labelname}      // Blank bracket if checked is FALSE (empty string, 0, f, false)
+                          // Otherwise, display with [X]
+
+
+### Form parts
+
+^[name]@{checkval:item1=val1,item2=val2,, item3=val3} // Radio item, checkval = val, insert line break (<br>) for empty item
+^[name]:{item1=val1:checked}           // Ceckbox Item: Check if checked is not FALSE judgment
+^[name]={textvalue:size}               // Text box
+^[name]!{textvalue:col,row}            // Textarea
+^[name]%{selectval:option1=val1,...}   // select
+
+Escape'\}' if item or textvalue contains'}'.  
+
+### Define List
+
+:Title1 (DT)
+Body1 (DD)
+:Title2 (DT)
+Body2 (DD)
+\n\n                                           // End with two consecutive line breaks
+

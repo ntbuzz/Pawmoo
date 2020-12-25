@@ -143,7 +143,7 @@ if(strcasecmp($appname,$controller) === 0) {
 }
 // remind Controller, Method name in App class
 App::$Controller  = $controller;
-App::$ActionMethod= $method;
+App::$Method= $method;
 //=================================
 // デバッグ用の情報ダンプ
 debug_log(DBMSG_SYSTEM, [
@@ -156,7 +156,7 @@ debug_log(DBMSG_SYSTEM, [
         "URI"       => $requrl,
         "QUERY"     => $q_str,
         "Controller"=> App::$Controller,
-        "Action"    => App::$ActionMethod,
+        "Action"    => App::$Method,
     ],
     "QUERY" => App::$Query,
     "SESSION" => [
