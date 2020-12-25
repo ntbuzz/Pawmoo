@@ -169,7 +169,7 @@ public function ViewTemplate($name,$vars = []) {
                 // @field-name=compare-value!TRUE-VALUE:FALSE-VALUE
                 $p = '/(@{1,2})([\w_]+)(?:=([^:!]+))?(?:!([^:\n]*))?(?:\:([^\n]+))?/';
                 preg_match($p,$var,$m);
-                debug_log(-99,[ "PREG" => $m]);
+                debug_log(-999,[ "PREG" => $m]);
                 $get_field_data = function($nm) {
                     return (mb_substr($nm,0,1)==='@') ? $this->Model->RecData[mb_substr($nm,1)]:$nm;
                 };
