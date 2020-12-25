@@ -115,7 +115,7 @@ function control_escape($a) {
 //==============================================================================
 // judgement boolean FALSE
 function is_bool_false($bool) {
-    $bool = trim($bool,"'");
+    $bool = strtolower(trim($bool,"'"));
     foreach(['','0','f','false',0,NULL] as $val) {
         if($bool === $val) return TRUE;
     }
@@ -131,12 +131,12 @@ function get_protocol($href) {
 //==============================================================================
 // Generate HYPER_LINK string
 //  http〜  Direct URL
-// :...     /...
-// /..     sysRoot/...
-// ./...    appRoot/modname/...
-// ...      appRoot/...
-// !!...    http://SERVER/...
-// !:...    https://SERVER/...
+// :xxx     /xxx
+// /xxx     sysRoot/xxx
+// ./xxx    appRoot/modname/xxx
+// xxx      appRoot/xxx
+// !!xxx    http://SERVER/xxx
+// !:xxx    https://SERVER/xxx
 function make_hyperlink($lnk,$modname) {
     if(get_protocol($lnk) === NULL) {
         $id_char = mb_substr($lnk,0,1);

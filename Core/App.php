@@ -17,7 +17,7 @@ class App {
     public static $Params;          // メソッドの数値パラメータ配列
     public static $ParamCount;      // 引数の数
     public static $Controller;      // 実行コントローラ名
-    public static $ActionMethod;    // 呼出しメソッド名
+    public static $Method;    // 呼出しメソッド名
     public static $MethodExtention; // ファイルダイレクトURIの拡張子部分
     private static $ReLocate;       // URLの書き換え
     private static $execURI;

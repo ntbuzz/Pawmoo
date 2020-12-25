@@ -71,7 +71,7 @@ public function __get($PropName) {
     $class_list = array(
         'Class'     => 0,
         'Model'     => 1,
-        'Helper'    => 2,
+//        'Helper'    => 2,
         'Controller'=> 2,
     );
     if(array_key_exists($PropName,$class_list)) {
