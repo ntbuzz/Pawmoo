@@ -164,17 +164,29 @@ public function ViewTemplate($name,$vars = []) {
             $var = mb_substr($val,1);
             $var = trim($var,'{}');                 // triming of delimitter { }
             switch($var[0]) {
-            case '@': $var = mb_substr($var,1);     // refer to RECORD DATA
-                list($val,$alt) = (mb_strpos($var,':') !== FALSE) ? explode(':',$var) : [$var,''];
-                $is_row = ($var[0] === '@');            // is RAW DATA
-                if($is_row) $var = mb_substr($var,1);   // clip first @ char
-                $val = $this->Model->RecData[$var];     // get FIELD DATA
-                if(empty($val) && !empty($alt)) {       // FILED is EMPTY and ALTERNATIVE exist
-                    $val = ($alt[0] === "'") ? trim($alt,"'")       // is CONSTANT
-                                             : $this->Model->RecData[$alt]; // alternate FIELD
+            case '@':
+                // field value, or alternate field or strings
+                // @field-name=compare-value!TRUE-VALUE:FALSE-VALUE
+                $p = '/(@{1,2})([\w_]+)(?:=([^:!]+))?(?:!([^:\n]*))?(?:\:([^\n]+))?/';
+                preg_match($p,$var,$m);
+                debug_log(-999,[ "PREG" => $m]);
+                $get_field_data = function($nm) {
+                    return (mb_substr($nm,0,1)==='@') ? $this->Model->RecData[mb_substr($nm,1)]:$nm;
+                };
+                list($pat,$raw,$fn) = $m;
+                $var = $this->Model->RecData[$fn];     // get FIELD DATA
+                if(count($m) !== 3) {
+                    list(,,,$cmp,$val_true) = $m;
+                    $val_true  = (empty($val_true) && !empty($cmp)) ? $var : $get_field_data($val_true);
+                    $val_false = (count($m)===6 && !empty($m[5]))   ? $get_field_data($m[5]) : $var;
+                    if(empty($cmp)) {          // compare empty,then empty or bool_false
+                        $var = (empty($val_true)) ?
+                            ( (empty($var)) ? $val_false : $var ) :
+                            ( (is_bool_false($var)) ? $val_false : $val_true );
+                    } else $var = fnmatch($cmp,$var) ? $val_true : $val_false;       // compare wild-char
                 }
-                // not RAW will be HTML convert
-                if($is_row === FALSE) $val = str_replace("\n",'',text_to_html($val));
+                if($raw==='@') $var = str_replace("\n",'',text_to_html($var));
+                $val = $var;
                 break;
             case '#': $var = mb_substr($var,1);     // Language refer
                 if($var[0]==='@') {                 // AUTO Transfer
@@ -595,7 +607,7 @@ public function ViewTemplate($name,$vars = []) {
         if(is_array($sec)) $atext = "\n{$atext}\n\n";
         $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
         // pre-expand for checkbox and radio/select markdown
-        $atext = preg_replace_callback('/(\[[^]]*?\]\{(?:\$\{[^\}]+?\}|[^}])+?\}|\^\[[^]]*?\][%@:]\{(?:\$\{[^\}]+?\}|[^}])+?\})/',
+        $atext = preg_replace_callback('/(\[[^\]]*?\]\{(?:\$\{[^\}]+?\}|[^\}])+?\}|\^\[[^\]]*?\][%@:]\{(?:\$\{[^\}]+?\}|[^\}])+?\})/',
             function($m) use(&$vars) {
                 list($pat,$var) = $m;
                 $var = preg_replace_callback('/(\$\{[^\}]+?\})/',
