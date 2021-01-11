@@ -226,11 +226,17 @@ public function ViewTemplate($name,$vars = []) {
                         }
                     }
                     break;
-            case '"':
-            case "'": if(substr($var,-1) === $var[0]) {     // check end-char
+            case '^':       // both ENV or REQ VAR
+            case '"':       // REQ-VAR
+            case "'":       // ENV-VAR
+                if(substr($var,-1) === $var[0]) {     // check end-char
                     $tt = $var[0];
                     $var = trim($var,$tt);
-                    $val = MySession::get_varIDs(($tt==="'"),$var);// get SESSION ENV-VAR
+                    if($tt === '^') {
+                        $val = MySession::get_varIDs(true,$var);
+                        if(!empty($val)) break;
+                    }
+                    $val = MySession::get_varIDs(($tt==="'"),$var);// get SESSION ENV or REQUEST
                 }
                 break;
             default:
