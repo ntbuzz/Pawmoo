@@ -11,6 +11,9 @@
 }
 .tabControll>.tabPanel {
     width:100%;
+    height:1.5em;
+    border-bottom:1px solid gray;
+    background-color:white;
 }
 .tabControll>.tabPanel >ul.tabmenu {
     float:left;

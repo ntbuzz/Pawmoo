@@ -167,7 +167,7 @@ public function ViewTemplate($name,$vars = []) {
             case '@':
                 // field value, or alternate field or strings
                 // @field-name=compare-value!TRUE-VALUE:FALSE-VALUE
-                $p = '/(@{1,2})([\w_]+)(?:=([^:!]+))?(?:!([^:\n]*))?(?:\:([^\n]+))?/';
+                $p = '/(@{1,2})([^=!:\}]+)(?:=([^:!]+))?(?:!([^:\n]*))?(?:\:([^\n]+))?/';
                 preg_match($p,$var,$m);
                 debug_log(-999,[ "PREG" => $m]);
                 $get_field_data = function($nm) {
@@ -213,7 +213,7 @@ public function ViewTemplate($name,$vars = []) {
                     $val = App::$SysVAR[$var];          // SysVAR[] property
                 }
                 break;
-            case ':':
+            case ':':                                   // Class Property
                    	$p = '/(:{1,2})(\w+)(?:\[([\w_\'"]+)\])*/';
                     preg_match($p,$var,$m);
                     list($match,$cls,$var,$mem) = $m;
