@@ -353,11 +353,17 @@ public function ViewStyle($file_name) {
                     if(isset($this->repVARS[$var])) $val = $this->repVARS[$var];
                 }
                 break;
-            case '"':
-            case "'":
-                if(mb_substr($var,-1) === $var[0]) {
-                    $var = trim($var,$var[0]);        // セッション変数
-                    $val = MySession::get_varIDs(($var[0]==="'"),$var);          // EnvData[] プロパティから取得
+            case '^':       // ENV or REQ VAR
+            case '"':       // REQ-VAR
+            case "'":       // ENV-VAR
+                if(substr($var,-1) === $var[0]) {     // check end-char
+                    $tt = $var[0];
+                    $var = trim($var,$tt);
+                    if($tt === '^') {                   // ENV/REQ both check
+                        $val = MySession::get_varIDs(true,$var);
+                        if(!empty($val)) break;
+                    }
+                    $val = MySession::get_varIDs(($tt==="'"),$var);// get SESSION ENV or REQUEST
                 }
                 break;
             default:

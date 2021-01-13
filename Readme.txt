@@ -1,9 +1,9 @@
  * -------------------------------------------------------------
  * Pawmoo - Object Oriented Web Application Platform with Section View Template
  * 
- * @copyright  Copyright (c) 2017 - 2020 by nTak
+ * @copyright  Copyright (c) 2017 - 2021 by nTak
  * @license    MIT
- * @version 0.42.0, 2020-12-23
+ * @version 0.44.0, 2021-01-13
  * System Require: PHP 5.6 or Higher
  *
 
@@ -42,6 +42,14 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 履歴
+<<<<<<< HEAD
+=======
+【0.44.0】2021/01/13
+    ○改善
+    ・テンプレート変数にマルチバイト文字を許可
+    ・タブセットのタブメニューを固定(sticky)するJQueryプラグインを追加
+
+>>>>>>> 565034cca05e05e90f5dd8b0aaad125030023576
 【0.43.0】2020/12/25
     ○改善
     ・フィールド変数にTRUE/FALSEの代替参照機能を追加

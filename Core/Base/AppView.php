@@ -167,7 +167,11 @@ public function ViewTemplate($name,$vars = []) {
             case '@':
                 // field value, or alternate field or strings
                 // @field-name=compare-value!TRUE-VALUE:FALSE-VALUE
+<<<<<<< HEAD
                 $p = '/(@{1,2})([\w_]+)(?:=([^:!]+))?(?:!([^:\n]*))?(?:\:([^\n]+))?/';
+=======
+                $p = '/(@{1,2})([^=!:\}]+)(?:=([^:!]+))?(?:!([^:\n]*))?(?:\:([^\n]+))?/';
+>>>>>>> 565034cca05e05e90f5dd8b0aaad125030023576
                 preg_match($p,$var,$m);
                 debug_log(-999,[ "PREG" => $m]);
                 $get_field_data = function($nm) {
@@ -213,7 +217,7 @@ public function ViewTemplate($name,$vars = []) {
                     $val = App::$SysVAR[$var];          // SysVAR[] property
                 }
                 break;
-            case ':':
+            case ':':                                   // Class Property
                    	$p = '/(:{1,2})(\w+)(?:\[([\w_\'"]+)\])*/';
                     preg_match($p,$var,$m);
                     list($match,$cls,$var,$mem) = $m;
@@ -226,11 +230,17 @@ public function ViewTemplate($name,$vars = []) {
                         }
                     }
                     break;
-            case '"':
-            case "'": if(substr($var,-1) === $var[0]) {     // check end-char
+            case '^':       // both ENV or REQ VAR
+            case '"':       // REQ-VAR
+            case "'":       // ENV-VAR
+                if(substr($var,-1) === $var[0]) {     // check end-char
                     $tt = $var[0];
                     $var = trim($var,$tt);
-                    $val = MySession::get_varIDs(($tt==="'"),$var);// get SESSION ENV-VAR
+                    if($tt === '^') {
+                        $val = MySession::get_varIDs(true,$var);
+                        if(!empty($val)) break;
+                    }
+                    $val = MySession::get_varIDs(($tt==="'"),$var);// get SESSION ENV or REQUEST
                 }
                 break;
             default:
