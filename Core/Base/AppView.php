@@ -167,11 +167,7 @@ public function ViewTemplate($name,$vars = []) {
             case '@':
                 // field value, or alternate field or strings
                 // @field-name=compare-value!TRUE-VALUE:FALSE-VALUE
-<<<<<<< HEAD
-                $p = '/(@{1,2})([\w_]+)(?:=([^:!]+))?(?:!([^:\n]*))?(?:\:([^\n]+))?/';
-=======
                 $p = '/(@{1,2})([^=!:\}]+)(?:=([^:!]+))?(?:!([^:\n]*))?(?:\:([^\n]+))?/';
->>>>>>> 565034cca05e05e90f5dd8b0aaad125030023576
                 preg_match($p,$var,$m);
                 debug_log(-999,[ "PREG" => $m]);
                 $get_field_data = function($nm) {
