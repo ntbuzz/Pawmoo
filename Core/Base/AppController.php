@@ -213,7 +213,7 @@ public function UpdateAction() {
 // Default PDF Convert Action
 public function MakepdfAction() {
 	$num = App::$Params[0];
-	$this->Model->GetRecord($num);
+	$this->Model->GetRecord($num,TRUE);
 	$this->View->ViewTemplate('MakePDF');
 }
 

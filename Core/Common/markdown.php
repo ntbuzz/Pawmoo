@@ -110,41 +110,42 @@ function pseudo_markdown($atext, $md_class = '') {
         // Combine lines that do not end with '|' as multiple lines
         $txt = preg_replace('/([^|])\n+/','\\1<br>', $matches[1]);
         $tbl_class = (empty($matches[2])) ? '':" {$matches[2]}";
+        $col_row_span = function($key,$str) {
+            $span_attr = ['@'=>'colspan','^'=>'rowspan'];
+            $binds = '';
+            if(!empty($str)) {
+                $bval = $span_attr[$key];
+                $ll = str_replace($key,$str);
+                if(empty($ll)) $clen = substr_count($str,$key);
+                else $clen = intval($ll);
+                if($clen > 0) $bind = " {$bval}='{$clen}'";
+            }
+            return $bind;
+        };
         $arr = array_map(function($str) {
             $cols = explode("|", trim($str,"|"));
-            $ln = "";
+            $ln = '';
             $tags = [ '<' => 'left','>' => 'right','=' => 'center'];
             foreach($cols as $col) {
-                if($col[0]===':') {     // TH cell
-                    $col = mb_substr($col,1);
-                    $tag = 'th';
-                } else $tag = 'td';
-                if(array_key_exists($col[0],$tags)) {
-                    $ali = $tags[$col[0]];
-                    $style = "text-align:{$ali};";
-                    $col = mb_substr($col,1);
-                } else $style = '';
                 // maybe additional calss and colspan/rowspan
-                preg_match('/^([@\^]+)?(?:\.(\w+))?(?:#(\d+))?/',$col,$m);
-                $bind = $cls = '';
+                preg_match('/^(:)?([<>=])?(?:(@\d+|@+)|(\^\d+|\^*))*(?:\.(\w+))?(?:#(\d+))?/',$col,$m);
+                $style = $attrs = '';
+                $tag = 'td';
                 switch(count($m)) {
-                case 4: $style .= ($m[3]==='') ? '':"width:{$m[3]}px;";
-                case 3: $cls  = ($m[2]==='') ? '': " class='{$m[2]}'";
-                case 2: $len = strlen($m[1]);
-                        if($len === 0) $bind = '';
-                        else {
-                            $binds = [];
-                            foreach(['@'=>'colspan','^'=>'rowspan'] as $bkey => $bval) {
-                                $clen = substr_count($m[1],$bkey);
-                                if($clen !== 0) $binds[] = " {$bval}='{$clen}'";
-                            }
-                            $bind = implode($binds);
+                case 7: $style .= ($m[6]==='') ? '':"width:{$m[6]}px;";
+                case 6: $attrs .= ($m[5]==='') ? '': " class='{$m[5]}'";
+                case 5: $attrs .= $col_row_span('^',$m[4]);
+                case 4: $attrs .= $col_row_span('@',$m[3]);
+                case 3: if(!empty($m[2])) {
+                            $ali = $tags[$m[2]];
+                            $style .= "text-align:{$ali};";
                         }
-                        $col = mb_substr($col,strlen($m[0]));
+                case 2: if(!empty($m[1])) $tag = 'th';
+                        $col = mb_substr($col,strlen($m[0]));   // for all case
                         break;
                 }
-                $vars = (empty($style)) ? '' : " style='{$style}'";
-                $ln .= "<{$tag}{$cls}{$bind}{$vars}>{$col}</{$tag}>";
+                if(!empty($style)) $style =" style='{$style}'";
+                $ln .= "<{$tag}{$attrs}{$style}>{$col}</{$tag}>";
             }
             return "<tr>{$ln}</tr>";
         },explode("\n", $txt));
@@ -188,7 +189,7 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<img src='{$src}' alt='{$alt}'{$sz} />";
         },
 //------- ..class#id{ TEXT } CLASS/ID attributed SPAN/P replacement
-        '/\s\.\.(?:(\w+))?(?:#(\w+))?(:)?\{([^\}]*?[^\\\\]|)\}\s/s' => function ($m) {
+        '/\s\.\.(?:(\w+))?(?:#(\w+))?(:)?\{(.+?)\}\s/s' => function ($m) {
             $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
             $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
             $tag = ($m[3]==='') ? 'span' : 'p';
