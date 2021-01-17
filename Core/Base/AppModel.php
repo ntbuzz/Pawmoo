@@ -84,7 +84,8 @@ public function RelationSetup() {
             $this->Relations[$key] =  $sub_rel;
         } else {
             list($model,$field,$refer) = explode('.', "{$rel}...");
-            if($this->$model->dbDriver->fieldAlias->exists_locale($key)) {
+//    debug_log(DBMSG_MODEL,['KEY'=>$key, 'MODEL'=>$model,'FIELD'=>$field,'REF'=>$refer]);
+            if($this->$model->dbDriver->fieldAlias->exists_locale($refer)) {
                 $lang_ref = "{$refer}_" . LangUI::$LocaleName;
                 if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $refer = $lang_ref;
             }
