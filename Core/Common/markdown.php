@@ -122,7 +122,7 @@ function pseudo_markdown($atext, $md_class = '') {
             }
             return $bind;
         };
-        $arr = array_map(function($str) {
+        $arr = array_map(function($str) use(&$col_row_span) {
             $cols = explode("|", trim($str,"|"));
             $ln = '';
             $tags = [ '<' => 'left','>' => 'right','=' => 'center'];
