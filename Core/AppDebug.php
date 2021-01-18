@@ -46,7 +46,7 @@ function debug_run_time($lvl) {
 //==========================================================================
 // ログの表示
 function debug_dump(...$items) {
-    if(CLI_DEBUG) debug_log(-99,$items);
+    if(CLI_DEBUG) debug_log(-98,$items);
 }
 function log_reset($lvl) {
     global $debug_log_str;
@@ -133,5 +133,5 @@ function debug_log($lvl,...$items) {
             else $debug_log_str[$lvl] = $dmp_info;
         }
     }
-    if(abs($lvl) > 1000) exit;
+    if(abs($lvl) === 99) exit;
 }

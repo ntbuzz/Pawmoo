@@ -48,7 +48,6 @@ $root = basename(dirname(__DIR__));        // Framework Folder
 list($appname,$app_uri,$module,$q_str) = get_routing_path($root);
 list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filters,$params) = $module;
-debug_dump(["MODULE" => $module]);
 
 if(strpos($method,'.')!==FALSE) {
     list($method,$filter) = extract_base_name($method);
