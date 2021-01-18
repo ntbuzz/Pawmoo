@@ -13,7 +13,7 @@ if (!function_exists('intdiv')) {
 function extract_extension($fn) {
     $nn = strrpos($fn,'.');
     return ($nn === FALSE) ? '' :
-            substr($fn,$nn+1);
+            strtolower(substr($fn,$nn+1));
 }
 //==============================================================================
 // extract file name, returned file array [ filename, extention ]

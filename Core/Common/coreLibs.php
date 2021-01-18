@@ -10,7 +10,7 @@ require_once('arrayLibs.php');
 // Extract the application,controller,method and parameters from REQUEST_URI
 function get_routing_path($root) {
     $vv = $_SERVER['REQUEST_URI'];
-    list($requrl,$q_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
+    list($requrl,$q_str) = (mb_strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
     $argv = explode('/', trim($requrl,'/'));
     if($root === $argv[0]) {
         array_shift($argv);         // retrieve application name
@@ -21,13 +21,23 @@ function get_routing_path($root) {
     for($n=0;$n < count($argv) && !is_numeric($argv[$n]) && strpos($argv[$n],'.') === FALSE;$n++) $args[] = $argv[$n];
     while(count($args) < 3) $args[] = NULL;
     $pp = array_slice($argv,$n);
-
     list($appname,$controller,$method) = $args;
     $filters = array_splice($args,3);
     $filename = '';
+/*
     $params = array_filter($pp,function($v) use(&$filename) {
         if(strpos($v,'.')===FALSE) return TRUE;
         $filename = $v;return FALSE;});
+*/
+    $params = array_filter($pp,
+        function($v) use(&$filename) {
+            $ext = extract_extension($v);
+            if(in_array($ext,['html','htm','php','cgi','js','css','inc'])) {
+                $filename = $v;
+                return FALSE;
+            }
+            return TRUE;
+        });
     if(!empty($filename)) {
         array_unshift($filters,$method);      // appname will be must not a numeric.
         $method = $filename;

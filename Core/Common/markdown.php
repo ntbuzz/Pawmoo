@@ -128,7 +128,7 @@ function pseudo_markdown($atext, $md_class = '') {
             $tags = [ '<' => 'left','>' => 'right','=' => 'center'];
             foreach($cols as $col) {
                 // maybe additional calss and colspan/rowspan
-                preg_match('/^(:)?([<>=])?(?:(@\d+|@+)|(\^\d+|\^*))*(?:\.(\w+))?(?:#(\d+))?/',$col,$m);
+                preg_match('/^(:)?([<>=])?(?:(@\d+|@+)|(\^\d+|\^+))*(?:\.(\w+))?(?:#(\d+))?/',$col,$m);
                 $style = $attrs = '';
                 $tag = 'td';
                 switch(count($m)) {

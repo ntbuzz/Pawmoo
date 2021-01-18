@@ -68,6 +68,7 @@ public function RelationSetup() {
         if(is_array($rel)) {
             $sub_rel = [];
             list($db,$ref_list) = array_first_item($rel);
+            if(is_scalar($ref_list)) $ref_list = [$ref_list];
             if(is_numeric($db)) continue;
             list($model,$field) = explode('.', "{$db}.");
             $link = $this->$model->DataTable.".{$field}";
