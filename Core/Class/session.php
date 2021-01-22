@@ -5,10 +5,12 @@
  */
 //セッションの有効期限を5分に設定
 $session_time = (60 * 60);			// SESSION KEEP 60-min
-ini_set('session.gc_divisor',1);
-ini_set('session.gc_maxlifetime',$session_time);
 if(CLI_DEBUG) $_SESSION = [];
-else session_start();
+else {
+	ini_set('session.gc_divisor',1);
+	ini_set('session.gc_maxlifetime',$session_time);
+	session_start();
+}
 
 class MySession {
 	public static $EnvData;
