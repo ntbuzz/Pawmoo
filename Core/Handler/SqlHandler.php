@@ -174,7 +174,12 @@ public function deleteRecord($wh) {
 //==============================================================================
 //
 	private function sql_GetRecordByKey($key,$val) {
-		return "SELECT * FROM {$this->table} WHERE \"{$key}\"='{$val}';";
+		if(is_array($key)) {
+			$expr = [];
+			foreach(array_combine($key,$val) as $k => $v) $expr[] = "(\"{$k}\"='{$v}')";
+			$sql = implode(' AND ',$expr);
+		} else $sql = "\"{$key}\"='{$val}'";
+		return "SELECT * FROM {$this->table} WHERE {$sql};";
 	}
 //==============================================================================
 // escape to single-quote(')

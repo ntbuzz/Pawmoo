@@ -178,6 +178,7 @@ debug_log(DBMSG_SYSTEM, [
 ]);
 
 debug_run_start();
+LockDB::LockStart();
 // Login unnecessary, or Login success returned TRUE.
 if($controllerInstance->is_authorised()) {
     // Controller Method Dispacher
@@ -194,4 +195,5 @@ debug_log(DBMSG_SYSTEM, [
 // call OUTPUT terminate
 $controllerInstance->__TerminateApp();
 // Database connection closed.
+LockDB::LockEnd();
 DatabaseHandler::CloseConnection();
