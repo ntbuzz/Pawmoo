@@ -115,7 +115,7 @@ function pseudo_markdown($atext, $md_class = '') {
             $binds = '';
             if(!empty($str)) {
                 $bval = $span_attr[$key];
-                $ll = str_replace($key,$str);
+                $ll = str_replace($key,'',$str);
                 if(empty($ll)) $clen = substr_count($str,$key);
                 else $clen = intval($ll);
                 if($clen > 0) $bind = " {$bval}='{$clen}'";
