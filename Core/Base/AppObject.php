@@ -97,7 +97,7 @@ public function __get($PropName) {
     }
     $fldr = array(
         ["Class"],
-        ["Models","modules/{$mod_name}"],
+        ["Models","Models/Misc","modules/{$mod_name}"],
         ["modules/{$mod_name}"],
     );
     $path_list = $fldr[$class_list[$cls_name]];
