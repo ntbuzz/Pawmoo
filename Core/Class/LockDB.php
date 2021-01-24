@@ -10,9 +10,9 @@ class LockDB {
     private static $owner;                  // ロックオーナー
 //---------------------------------------------------------------------------------------------
 static public function LockStart($owner = NULL) {
-    if(defined(LOCK_RECORD) && file_exists(LOCK_RECORD)) {
+    if(defined(LOCK_DB) && file_exists(LOCK_DB)) {
         static::$owner = $owner;
-        static::$dbb = new SQLite3(LOCK_RECORD);
+        static::$dbb = new SQLite3(LOCK_DB);
         //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
     	$sql = "PRAGMA table_info({$this->table});";
     	$rows = static::$dbb->query($sql);
@@ -21,6 +21,14 @@ static public function LockStart($owner = NULL) {
 	    	static::$columns[$row['name']] = $row['name'];
 	    }
     } else static::$dbb = NULL;
+}
+//---------------------------------------------------------------------------------------------
+static public function SetOwner($owner) {
+    static::$owner = $owner;
+}
+//---------------------------------------------------------------------------------------------
+static public function GetOwner() {
+    return static::$owner;
 }
 //---------------------------------------------------------------------------------------------
 static public function LockEnd() {
@@ -33,6 +41,7 @@ static public function LockEnd() {
 //  $limit  Lockの有効期間
 //  ロックできたらTRUE,失敗なら FALSE を返す
 static public function Locked($table,$pkey,$limit) {
+    if(static::$dbb === NULL) return;
     $where = "WHERE (table='{$table}') AND (row={$pkey})";
     $sql = "SELECT * FROM '{static::$table}' {$where};";
     $rows = static::$dbb->query($sql);
@@ -50,6 +59,7 @@ static public function Locked($table,$pkey,$limit) {
 }
 //---------------------------------------------------------------------------------------------
 static public function UnLocke($table,$pkey) {
+    if(static::$dbb === NULL) return;
     $where = "WHERE (table='{$table}') AND (row={$pkey})";
     $sql = "SELECT * FROM '{static::$table}' {$where};";
     $rows = static::$dbb->query($sql);

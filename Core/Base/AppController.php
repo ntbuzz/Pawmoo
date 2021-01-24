@@ -88,6 +88,7 @@ public function is_authorised() {
 				$this->Model->ResetSchema();
 				debug_log(DBMSG_SYSTEM,['Language SWITCH'=>$lang]);
 			}
+			LockDB::SetOwner($userid);
 		}
 		debug_log(FALSE, [
 			"SESSION" => $_SESSION,
