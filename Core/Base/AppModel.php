@@ -66,9 +66,11 @@ public function RelationSetup() {
     // extract DataTable or Alternate DataView
     $model_view = function($db) {
         list($model,$field,$refer) = explode('.', "{$db}...");
-        if(preg_match('/(\w+)(?:\[(\d+)\]/',$model,$m)===1) {
+        if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
             $model = $m[1];
-            $table = $this->$model->DataView[$m[2]];        // View Element Index
+            $table = (is_array($this->$model->DataView))
+                        ? $this->$model->DataView[$m[2]]            // View Element Index
+                        : $this->$model->DataTable;                 // illegal define
         } else $table = $this->$model->DataTable;
         return [$model,$table,$field,$refer];
     };
