@@ -122,11 +122,12 @@ function is_bool_false($bool) {
     return FALSE;
 }
 //==============================================================================
-// check for protocol
+// check for protocol or label or query
 function get_protocol($href) {
-    $n = strpos($href,':');
-    if($n === FALSE) return NULL;
-    return ($n > 3) ? mb_substr($href,0,$n) : NULL;
+    foreach(['http://','https://','ftp://','file://','#','?'] as $pp) {
+        if(mb_substr($href,0,strlen($pp))===$pp) return $pp;
+    }
+    return NULL;
 }
 //==============================================================================
 // Generate HYPER_LINK string
@@ -140,7 +141,7 @@ function get_protocol($href) {
 function make_hyperlink($lnk,$modname) {
     if(get_protocol($lnk) === NULL) {
         $id_char = mb_substr($lnk,0,1);
-		if($id_char === ':') {
+        if($id_char === ':') {
             $lnk[0] = '/';
         } else if($id_char === '/') {
 			$lnk = App::Get_SysRoot("{$lnk}");
