@@ -10,7 +10,7 @@ class LockDB {
     private static $owner;                  // ロックオーナー
 //---------------------------------------------------------------------------------------------
 static public function LockStart($owner = NULL) {
-    if(defined(LOCK_DB) && file_exists(LOCK_DB)) {
+    if(defined('LOCK_DB') && file_exists(LOCK_DB)) {
         static::$owner = $owner;
         static::$dbb = new SQLite3(LOCK_DB);
         //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
