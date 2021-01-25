@@ -39,7 +39,7 @@ class App {
         }
         static::$Filters= $filters;
         static::$Filter = empty($filters) ? '': $filters[0];
-   		// 0 〜 9 の不足する要素を補填する
+   		// 0 ～ 9 の不足する要素を補填する
         $k = count($params);
 		$params += array_fill($k, 10 - $k, 0);
 

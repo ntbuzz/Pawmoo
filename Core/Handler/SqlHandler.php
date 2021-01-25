@@ -100,6 +100,7 @@ public function getRecordValue($cond,$relations) {
 	$sql = $this->sql_JoinTable($relations);
 	$where .= ($this->handler == 'SQLite') ? " limit 0,1" : " offset 0 limit 1";
 	$sql .= "{$where};";
+	debug_log(DBMSG_HANDLER,[ "RecVal-SQL" => $sql]);
 	$this->doQuery($sql);
 	return $this->fetchDB();
 }
@@ -163,7 +164,7 @@ public function deleteRecord($wh) {
 	$this->doQuery($sql);
 }
 //==============================================================================
-// Common SQL(SELECT 〜 WHERE 〜) generate
+// Common SQL(SELECT ～ WHERE ～) generate
 // SQlite3, PostgreSQL, mariaDB unique SQL command(update, insert, replace) will be generate instance class
 //==============================================================================
 // get value lists

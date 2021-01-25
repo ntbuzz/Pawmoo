@@ -130,7 +130,7 @@ function get_protocol($href) {
 }
 //==============================================================================
 // Generate HYPER_LINK string
-//  http〜  Direct URL
+//  http～  Direct URL
 // :xxx     /xxx
 // /xxx     sysRoot/xxx
 // ./xxx    appRoot/modname/xxx
