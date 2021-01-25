@@ -63,6 +63,15 @@ public function ResetSchema() {
 //==============================================================================
 // Table Relation setup
 public function RelationSetup() {
+    // extract DataTable or Alternate DataView
+    $model_view = function($db) {
+        list($model,$field,$refer) = explode('.', "{$db}...");
+        if(preg_match('/(\w+)(?:\[(\d+)\]/',$model,$m)===1) {
+            $model = $m[1];
+            $table = $this->$model->DataView[$m[2]];        // View Element Index
+        } else $table = $this->$model->DataTable;
+        return [$model,$table,$field,$refer];
+    };
     foreach($this->Relations as $key => $rel) {
         $kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
         if(is_array($rel)) {
@@ -70,8 +79,8 @@ public function RelationSetup() {
             list($db,$ref_list) = array_first_item($rel);
             if(is_scalar($ref_list)) $ref_list = [$ref_list];
             if(is_numeric($db)) continue;
-            list($model,$field) = explode('.', "{$db}.");
-            $link = $this->$model->DataTable.".{$field}";
+            list($model,$table,$field) = $model_view($db);
+            $link = "{$table}.{$field}";
             foreach($ref_list as $refer) {
                 $key_name = "{$kk}_{$refer}";
                 $ref_name = $refer;
@@ -84,13 +93,12 @@ public function RelationSetup() {
             }
             $this->Relations[$key] =  $sub_rel;
         } else {
-            list($model,$field,$refer) = explode('.', "{$rel}...");
-//    debug_log(DBMSG_MODEL,['KEY'=>$key, 'MODEL'=>$model,'FIELD'=>$field,'REF'=>$refer]);
+            list($model,$table,$field,$refer) = $model_view($rel);
             if($this->$model->dbDriver->fieldAlias->exists_locale($refer)) {
                 $lang_ref = "{$refer}_" . LangUI::$LocaleName;
                 if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $refer = $lang_ref;
             }
-            $arr = [$this->$model->DataTable,$field,$refer];        // ModelName in schema convert to Table name
+            $arr = [$table,$field,$refer];        // ModelName in schema convert to Table name
             $this->Relations[$key] =  implode('.',$arr);
         }
     }
