@@ -144,7 +144,7 @@ if(strcasecmp($appname,$controller) === 0) {
 App::$Controller  = $controller;
 App::$Method= $method;
 //=================================
-// デバッグ用の情報ダンプ
+// Debugging Message
 debug_log(DBMSG_SYSTEM, [
     '#DebugInfo' => [
         "Application"=> $appname,
@@ -181,6 +181,7 @@ debug_run_start();
 LockDB::LockStart();
 // Login unnecessary, or Login success returned TRUE.
 if($controllerInstance->is_authorised()) {
+    debug_log(DBMSG_SYSTEM, [ 'LockDB' => LockDB::GetOwner()]);
     // Controller Method Dispacher
     $controllerInstance->ActionDispatch($method);
 }

@@ -78,7 +78,7 @@ public function __get($PropName) {
         $mod_name = $this->ModuleName;
         $cls_name = $PropName;
     } else  {
-        preg_match('/[A-Z][a-z]+?$/', $PropName, $matches);
+        preg_match('/[A-Z][a-z0-9]+?$/', $PropName, $matches);
         $cls_name = $matches[0];
         if(empty($cls_name)) {
             throw new Exception("Bad name request for SubClass '{$PropName}'");
