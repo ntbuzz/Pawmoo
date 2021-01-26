@@ -124,7 +124,7 @@ function is_bool_false($bool) {
 //==============================================================================
 // check for protocol or label or query
 function get_protocol($href) {
-    foreach(['http://','https://','ftp://','file://','#','?'] as $pp) {
+    foreach(['http://','https://','ftp://','file://'] as $pp) {
         if(mb_substr($href,0,strlen($pp))===$pp) return $pp;
     }
     return NULL;
@@ -140,24 +140,28 @@ function get_protocol($href) {
 // !:xxx    https://SERVER/xxx
 function make_hyperlink($lnk,$modname) {
     if(get_protocol($lnk) === NULL) {
-        $id_char = mb_substr($lnk,0,1);
-        if($id_char === ':') {
-            $lnk[0] = '/';
-        } else if($id_char === '/') {
-			$lnk = App::Get_SysRoot("{$lnk}");
-        } else {
+        // check on TOP-CHAR
+        switch(mb_substr($lnk,0,1)) {
+        case '#':
+        case '?': break;        // label or query
+        case ':': $lnk[0] = '/'; break;
+        case '/': $lnk = App::Get_SysRoot($lnk); break;
+        case '!':
+            $protocols = [ '!!' => 'https://', '!:' => ' http://' ];
             $prf = mb_substr($lnk,0,2);
             $ref = mb_substr($lnk,2);
-            if($id_char === '!') {
-                $protocols = [ '!!' => 'https://', '!:' => ' http://' ];
-                if(array_key_exists($prf,$protocols)) {
-                    $lnk = $protocols[$prf] . App::$SysVAR['SERVER'] . $ref;
-                } else $lnk = $ref;
-            } else if($prf === './') {
+            if(array_key_exists($prf,$protocols)) {
+                $lnk = $protocols[$prf] . App::$SysVAR['SERVER'] . $ref;
+            } else $lnk = $ref;
+            break;
+        default:
+            if(mb_substr($lnk,0,2) === './') {
                 $lnk = substr_replace($lnk, strtolower($modname), 0, 1);
                 $lnk = App::Get_AppRoot($lnk);
-            } else  $lnk = App::Get_AppRoot($lnk);
-		}
+            } else  {
+                $lnk = App::Get_AppRoot($lnk);
+            }
+        }
     }
     return $lnk;
 }
