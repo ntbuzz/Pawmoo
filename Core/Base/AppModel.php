@@ -223,7 +223,7 @@ public function getCount($cond) {
 //==============================================================================
 // Get Record List by FIND-CONDITION with JOIN Table.
 // Result:   $this->Records  Find-Result List
-public function RecordFinder($cond,$filter=[],$sort=[]) {
+public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
     $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
         return in_array($vv,$filter,true) || ($vv === NULL);
@@ -262,11 +262,10 @@ public function RecordFinder($cond,$filter=[],$sort=[]) {
 //==============================================================================
 // Get Raw Record List by FIND-CONDITION without JOIN!.
 // Result:   $this->Records  Find-Result List
-public function RawRecordFinder($cond,$filter=[],$sort=[]) {
+public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
-    $fields_list =[];
-    foreach($filter as $kk) $fields_list[$kk] = $kk;
-    $fields_list[$this->Primary] = $this->Primary;
+    $fields_list = array_combine($filter,$filter);
+    $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => $SortDefault ];
     else if(is_scalar($sort)) {
@@ -296,18 +295,43 @@ public function RawRecordFinder($cond,$filter=[],$sort=[]) {
     ]);
 }
 //==============================================================================
-// Get Record List by Primary-KEY before/after w/o JOIN!
-// Result:   $this->Records  Find-Result List
-public function nearRecord($primary,$cond=[],$filter=[]) {
+// Get First Record by condition w/o JOIN!
+// Result:   $this->RecData
+public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
-    $data = array();
-    foreach(['>' => SORTBY_ASCEND,'<' => SORTBY_DESCEND] as $cmp => $seq) {
-        $mcond = [ $cond, $this->Primary.$cmp => $primary];
-        $fields = $this->dbDriver->firstRecord($mcond,NULL,[ $this->Primary => $seq ]);
-        $data[] = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
+    $fields_list = array_combine($filter,$filter);
+    $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
+    $fields = $this->dbDriver->firstRecord($cond,NULL,$sort);
+    $this->RecData = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
+    debug_log(DBMSG_MODEL, [
+        "Filter" => $filter,
+        "RECORDS" => $this->RecData,
+    ]);
+}
+//==============================================================================
+// Get Prev/Next Record List by FIND-CONDITION without JOIN!.
+// Result:   $this->nearRecords  Find-Result List
+public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
+    if(empty($filter)) $filter = $this->dbDriver->columns;
+    if(empty($sort)) $sort = [ $this->Primary => $SortDefault ];
+    else if(is_scalar($sort)) $sort = [ $sort => $SortDefault ];
+    $this->dbDriver->findRecord($cond,NULL,$sort);
+    $r_prev = $r_next = NULL;
+    $prev = true;
+    while (($fields = $this->dbDriver->fetch_array())) {
+        $data = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
+        $row_id = $fields[$this->Primary];
+        if( $row_id === $primary) {
+            $prev = false;
+        } else if($prev) {
+            $r_prev = $data;
+        } else {
+            $r_next = $data;
+            break;
+        }
     }
-    $this->nearRecords = $data;
-    debug_log(FALSE, [
+    $this->nearRecords = [ $r_next, $r_prev];
+    debug_log(DBMSG_MODEL, [
         "Filter" => $filter,
         "RECORDS" => $this->nearRecords,
     ]);

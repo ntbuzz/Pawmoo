@@ -221,7 +221,7 @@ public function ViewTemplate($name,$vars = []) {
                     $clsVar = ($cls === '::') ? $this->Helper : $this->Model;
                     if(isset($clsVar->$var)) { // exist Property?
                         $val = $clsVar->$var;
-                        if(!empty($mem) && isset($val[$mem])) {
+                        if(isset($val[$mem])) {
                             $val = $val[$mem];
                         }
                     }
@@ -345,7 +345,7 @@ public function ViewTemplate($name,$vars = []) {
                 switch(is_tag_identifier($token)) {
                 case 3:     // set local variable
                         $token = mb_substr($token,1);   // delete '$' top-char
-                        $vars[$token] = $sec;
+                        $vars[$token] = $this->expand_SectionVar($sec,$vars,TRUE);
                         break;
                 case 0: if(empty($sec)) break;
                 case 1:         // tag-section

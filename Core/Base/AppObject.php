@@ -68,26 +68,24 @@ class AppObject {
 public function __get($PropName) {
     if($this->autoload === FALSE) return NULL;
     if(isset($this->$PropName)) return $this->$PropName;
-    $class_list = array(
-        'Class'     => 0,
-        'Model'     => 1,
-//        'Helper'    => 2,
-        'Controller'=> 2,
+    $class_load = array(
+        'Class'     => [ -5, ['Class'] ],
+        'Model'     => [ -5, ['Models','Models/Misc','modules/'] ],
+        'Controller'=> [-10, ['modules/'] ],
     );
-    if(array_key_exists($PropName,$class_list)) {
+    if(array_key_exists($PropName,$class_load)) {
         $mod_name = $this->ModuleName;
         $cls_name = $PropName;
     } else  {
-        preg_match('/[A-Z][a-z0-9]+?$/', $PropName, $matches);
-        $cls_name = $matches[0];
-        if(empty($cls_name)) {
-            throw new Exception("Bad name request for SubClass '{$PropName}'");
-        }
-        if(array_key_exists($cls_name,$class_list)) {
-            $mod_name = str_replace($cls_name,'',$PropName);
-        } else {
-            $mod_name = $PropName;
-            $cls_name = 'Model';
+        $mod_name = $PropName;
+        $cls_name = 'Model';
+        foreach($class_load as $c_name => $defs) {
+            list($len,$path_list) = $defs;
+            if($c_name === substr($PropName,$len)) {
+                $mod_name = substr($PropName,0,$len);
+                $cls_name = $c_name;
+                break;
+            }
         }
     }
     $prop_name = "{$mod_name}{$cls_name}";
@@ -95,13 +93,9 @@ public function __get($PropName) {
         $this->$PropName = new $prop_name($this);
         return $this->$PropName;
     }
-    $fldr = array(
-        ["Class"],
-        ["Models","Models/Misc","modules/{$mod_name}"],
-        ["modules/{$mod_name}"],
-    );
-    $path_list = $fldr[$class_list[$cls_name]];
+    list($len,$path_list) = $class_load[$cls_name];
     foreach($path_list as $path) {
+        if($path === 'modules/') $path .= $mod_name;
         $modfile = App::Get_AppPath("{$path}/{$prop_name}.php");
         if(file_exists($modfile)) {
             if($cls_name === 'Controller') {
