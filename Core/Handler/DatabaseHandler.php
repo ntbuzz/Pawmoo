@@ -59,19 +59,23 @@ class DatabaseHandler {
         'SQLite' => [
             'datasource' => 'Database/SQLite3',
             'callback' => 'SQLiteDatabase',
+            'offset' => false,
         ],
         // PostgreSQLデータベースへの接続情報
         'Postgre' => [
             'datasource' => 'Database/Postgres',
             'callback' => 'PgDatabase',
+            'offset' => TRUE,
         ],
         // MariaDB(MySQL)データベースへの接続情報
         'MySQL' => [
             'datasource' => 'Database/MariaDB',
             'callback' => 'MySQLDatabase',
+            'offset' => false,
         ],
     ];
     private static $dbHandle = [];
+    public static $have_offset = TRUE;
 //==============================================================================
 // データベースへ接続してハンドルを返す
 public static function get_database_handle($handler) {
@@ -81,6 +85,7 @@ public static function get_database_handle($handler) {
     if(array_key_exists($handler,static::DatabaseSpec)) {
         $defs = static::DatabaseSpec[$handler];
         $func = $defs['callback'];      // 呼び出し関数
+        static::$have_offset = $defs['offset'];     // DBMS has OFFSET command?
         static::$dbHandle[$handler] = static::$func(DatabaseParameter[$handler],'open');
         return static::$dbHandle[$handler];
     }
