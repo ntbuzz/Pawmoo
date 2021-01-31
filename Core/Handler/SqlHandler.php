@@ -8,6 +8,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	protected	$table;		// connect table
 	protected $dbb;  	    // DB handle
 	protected $rows;
+	protected $is_offset;	// OFFSET support?
 	public $columns;        // record column data
 	public	$recordId;		// dummy
 	private	$startrec;		// start record number
@@ -31,6 +32,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 function __construct($table,$handler) {
 		$this->table = $table;
 		$this->dbb = DatabaseHandler::get_database_handle($handler);
+		$this->is_offset = DatabaseHandler::$have_offset;
 		$this->Connect();
 		debug_log(FALSE,["Columns List" => $this->columns]);
 		$this->handler = $handler;
@@ -98,7 +100,7 @@ public function getRecordCount($cond) {
 public function getRecordValue($cond,$relations) {
 	$where = $this->sql_makeWHERE($cond);		// 検索条件
 	$sql = $this->sql_JoinTable($relations);
-	$where .= ($this->handler == 'SQLite') ? " limit 0,1" : " offset 0 limit 1";
+	$where .= ($this->is_offset) ? " offset 0 limit 1" : " limit 0,1";
 	$sql .= "{$where};";
 	debug_log(DBMSG_HANDLER,[ "RecVal-SQL" => $sql]);
 	$this->doQuery($sql);
@@ -128,10 +130,10 @@ public function findRecord($cond,$relations = NULL,$sort = []) {
 		$where .=  " ORDER BY ".trim($orderby,",");
 	}
 	if($this->limitrec > 0) {
-		if($this->handler == 'SQLite') {
-			$where .= " limit {$this->startrec},{$this->limitrec}";
-		} else {
+		if($this->is_offset) {
 			$where .= " offset {$this->startrec} limit {$this->limitrec}";
+		} else {
+			$where .= " limit {$this->startrec},{$this->limitrec}";
 		}
 	}
 	$sql .= "{$where};";
