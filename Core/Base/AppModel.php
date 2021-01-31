@@ -21,6 +21,7 @@ class AppModel extends AppObject {
     public $pagesize = 0;           // get record count per PAGE
     public $page_num = 0;           // get Page Number
     public $record_max = 0;         // Total records count
+    public $row_number = 0;         // near record in target record row
     public $AliasMode = TRUE;       // Language Alias Enable
 
     public $RecData = NULL;          // ROW record data (no JOIN)
@@ -318,19 +319,23 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
     $this->dbDriver->findRecord($cond,NULL,$sort);
     $r_prev = $r_next = NULL;
     $prev = true;
+    $row_num = 0;
     while (($fields = $this->dbDriver->fetch_array())) {
         $data = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
         $row_id = $fields[$this->Primary];
         if( $row_id === $primary) {
             $prev = false;
         } else if($prev) {
+            ++$row_num;
             $r_prev = $data;
         } else {
             $r_next = $data;
             break;
         }
     }
-    $this->nearRecords = [ $r_next, $r_prev];
+    $this->row_number = $row_num;
+    $this->record_max = $this->dbDriver->recordMax;
+    $this->nearRecords = [$r_prev, $r_next ];
     debug_log(DBMSG_MODEL, [
         "Filter" => $filter,
         "RECORDS" => $this->nearRecords,
