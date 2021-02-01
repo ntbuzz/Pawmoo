@@ -214,16 +214,14 @@ public function ViewTemplate($name,$vars = []) {
                 }
                 break;
             case ':':                                   // Class Property
-                   	$p = '/(:{1,2})(\w+)(?:\[([\w_\'"]+)\])*/';
+                   	$p = '/(:{1,2})(\w+)(?:\[([\w_\.\'"]+)\])?/';
                     preg_match($p,$var,$m);
+                    $m[] = NULL;    // add NULL element for list()
                     list($match,$cls,$var,$mem) = $m;
                     $mem = trim($mem,"\"'");        // allow quote char
                     $clsVar = ($cls === '::') ? $this->Helper : $this->Model;
                     if(isset($clsVar->$var)) { // exist Property?
-                        $val = $clsVar->$var;
-                        if(isset($val[$mem])) {
-                            $val = $val[$mem];
-                        }
+                        $val = array_member_value($clsVar->$var,$mem);
                     }
                     break;
             case '^':       // both ENV or REQ VAR
