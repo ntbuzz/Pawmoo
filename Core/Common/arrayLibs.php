@@ -191,3 +191,13 @@ function array_concat_keys(&$arr,$keys) {
     }
     return trim($ss);
 }
+//==============================================================================
+// get array element by structured-name
+function array_member_value($nVal,$names) {
+    if(empty($names)) return $nVal;
+    $vset = (mb_strpos($names,'.') !== FALSE) ? explode('.',$names):[$names];
+    foreach($vset as $nm) {
+        $nVal = (array_key_exists($nm,$nVal)) ? $nVal[$nm] : '';
+    }
+    return $nVal;
+}

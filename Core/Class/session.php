@@ -103,11 +103,7 @@ static function set_if_empty($tt,$arr) {
 //==============================================================================
 // ENV変数を識別子指定で取得する
 static function get_varIDs($tt,$names) {
-	$vset = (mb_strpos($names,'.') !== FALSE) ? explode(".", $names) : [ $names ];
-	$nVal = ($tt) ? static::$EnvData : static::$ReqData;
-	foreach($vset as $nm) {
-		$nVal = (array_key_exists($nm,$nVal)) ? $nVal[$nm] : '';
-	}
+	$nVal = array_member_value(($tt)?static::$EnvData:static::$ReqData, $names);
 	return (is_array($nVal)) ? array_to_text($nVal,',') : $nVal;
 }
 //==============================================================================

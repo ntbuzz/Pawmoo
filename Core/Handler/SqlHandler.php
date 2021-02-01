@@ -5,23 +5,25 @@
  */
 //==============================================================================
 abstract class SQLHandler {	// extends SqlCreator {
-	protected	$table;		// connect table
+	public  $DateStyle = 'Y-m-d';	// Date format
+	public	$recordId;		// dummy for FMDB
+	public	$table;			// connect table
+	public	$columns;       // record column data
+	public	$raw_table;		// target real table for INSERT/UPDATE
+	public 	$raw_columns;   // target real column
 	protected $dbb;  	    // DB handle
 	protected $rows;
 	protected $is_offset;	// OFFSET support?
-	public $columns;        // record column data
-	public	$recordId;		// dummy
 	private	$startrec;		// start record number
 	private	$limitrec;		// get record count
 	private $handler;		// Databas Handler Name
-	public  $DateStyle = 'Y-m-d';	// Date format
 	private $relations;		// relation tables
+	private $LastSQL;		// Last Query WHERE term
 	protected $LastCond;	// for DEBUG
 	protected $LastBuild;	// for DEBUG
-	private $LastSQL;		// Last Query WHERE term
 //==============================================================================
 //	abstruct method
-	abstract protected function Connect();
+	abstract protected function Connect($table);
 	abstract protected function doQuery($sql);
 	abstract protected function fetch_array();
 	abstract protected function getLastError();
@@ -30,10 +32,13 @@ abstract class SQLHandler {	// extends SqlCreator {
 //	Constructor( table name, DB Handler)
 //==============================================================================
 function __construct($table,$handler) {
-		$this->table = $table;
+		list($this->raw_table,$this->table) = (is_array($table))?$table:[$table,$table];
 		$this->dbb = DatabaseHandler::get_database_handle($handler);
 		$this->is_offset = DatabaseHandler::$have_offset;
-		$this->Connect();
+		$this->columns = $this->Connect($this->table);		// view-table column for Get-Record
+		$this->raw_columns = ($this->raw_table === $this->table) ?
+							$this->columns :
+							$this->Connect($this->raw_table);	// write-table  column for Insert/Update
 		debug_log(FALSE,["Columns List" => $this->columns]);
 		$this->handler = $handler;
 		$this->fieldAlias = new fieldAlias();
@@ -50,7 +55,7 @@ public function fetchDB() {
 	if($row = $this->fetch_array()) {
 		$this->fieldAlias->to_alias_field($row);
 	}
-	return $row;
+	return ($row === FALSE) ? [] : $row;
 }
 //==============================================================================
 //	getValueLists: list-colum name, value-colums
@@ -161,8 +166,8 @@ public function firstRecord($cond,$relations = NULL,$sort) {
 //==============================================================================
 //	deleteRecord(wh): 
 public function deleteRecord($wh) {
-	$where = $this->sql_makeWHERE($wh);
-	$sql = "DELETE FROM {$this->table}{$where};";
+	$where = $this->sql_makeWHERE($wh,$this->raw_table);	// delete by real-table
+	$sql = "DELETE FROM {$this->raw_table}{$where};";
 	$this->doQuery($sql);
 }
 //==============================================================================
@@ -219,7 +224,8 @@ protected function sql_safequote(&$value) {
 	}
 //==============================================================================
 // Re-Build Condition ARRAY, Create SQL-WHERE statement.
-	private function sql_makeWHERE($cond) {
+	private function sql_makeWHERE($cond,$target_table=NULL) {
+		if($target_table === NULL) $target_table = $this->table;
 		$re_build_array = function($cond) {
 			$array_map_shurink = function($opr,$arr) use(&$array_map_shurink) {
 				$array_merged = function($opr,&$arr,$val) use(&$array_merged) {
@@ -263,7 +269,7 @@ protected function sql_safequote(&$value) {
 		if($cond ===NULL) return $this->LastSQL;
 		$this->LastCond = $cond;
 		$this->LastBuild= $new_cond = $re_build_array($cond);
-		$sql = $this->makeExpr($new_cond);
+		$sql = $this->makeExpr($new_cond,$target_table);
 		if(strlen($sql)) $sql = ' WHERE '.$sql;
 		debug_log(DBMSG_HANDLER,['COND-INPUT'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);
 		return ($this->LastSQL = $sql);
@@ -275,7 +281,7 @@ protected function sql_safequote(&$value) {
 //   	OR => [ itenm, item,... ] |
 //   	NOT => [ itenm ] |
 //		fieldkey => findvalue
-	private function makeExpr($cond) {
+	private function makeExpr($cond,$target_table) {
 		$dump_object = function ($opr,$items,$table)  use (&$dump_object)  {
 			// LIKE operation build
 			$like_opstr = function($v) {
@@ -369,7 +375,7 @@ protected function sql_safequote(&$value) {
 			}
 			return (empty($opc)) ? '' : "{$opc}";	// ((count($items)===1) ? $opc : "({$opc})");
 		};
-		$sql = $dump_object('AND',$cond,$this->table);
+		$sql = $dump_object('AND',$cond,$target_table);
 		return $sql;
 	}
 
