@@ -118,7 +118,7 @@ public function RelationSetup() {
     protected function SchemaAnalyzer() {
         $header = $relation = $locale = $bind = $field = [];
         foreach($this->Schema as $key => $defs) {
-            array_push($defs,0,NULL,NULL,NULL,NULL);
+            array_push($defs,0,NULL,NULL);
             $ref_key = $key;
             list($disp_name,$disp_flag,$width,$relations,$binds) = $defs;
             list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
