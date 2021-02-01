@@ -213,9 +213,8 @@ public function GetFieldValues($field) {
 // Result:   field-data
 public function getRecordField($key,$value,$field) {
     $this->getRecordBy($key,$value);
-    return $this->fields[$field];
+    return (array_key_exists($field,$this->fields)) ? $this->fields[$field] : NULL;
 }
-
 //==============================================================================
 // 条件に一致するレコード数を検索する
 public function getCount($cond) {
@@ -310,21 +309,27 @@ public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
     ]);
 }
 //==============================================================================
-// Get Prev/Next Record List by FIND-CONDITION without JOIN!.
-// Result:   $this->nearRecords  Find-Result List
+// Get Record with Prev/Next Record List by FIND-CONDITION without JOIN!.
+// Result:   $this->NearData  Find-Result List
 public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
+    $fields_list = array_combine($filter,$filter);
+    foreach($this->FieldSchema as $key => $val) $fields_list[$key] = $val;
+    $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     if(empty($sort)) $sort = [ $this->Primary => $SortDefault ];
     else if(is_scalar($sort)) $sort = [ $sort => $SortDefault ];
-    $this->dbDriver->findRecord($cond,NULL,$sort);
-    $r_prev = $r_next = NULL;
+    $this->dbDriver->findRecord($cond,$this->Relations,$sort);
+    $r_prev = $r_next = $r_self = NULL;
     $prev = true;
     $row_num = 0;
-    while (($fields = $this->dbDriver->fetch_array())) {
-        $data = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
+    $primary = intval($primary);
+    while (($fields = $this->dbDriver->fetchDB())) {
+        $data = [];
+        foreach($fields_list as $key => $val) $data[$key] = $fields[$key];
         $row_id = $fields[$this->Primary];
-        if( $row_id === $primary) {
+        if( intval($row_id) === $primary) {
             $prev = false;
+            $r_self = $data;
         } else if($prev) {
             ++$row_num;
             $r_prev = $data;
@@ -335,10 +340,12 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
     }
     $this->row_number = $row_num;
     $this->record_max = $this->dbDriver->recordMax;
-    $this->nearRecords = [$r_prev, $r_next ];
+    $this->NearData = [$r_prev, $r_next ];
+    $this->RecData = $r_self;
     debug_log(DBMSG_MODEL, [
         "Filter" => $filter,
-        "RECORDS" => $this->nearRecords,
+        "RECDATA" => $this->RecData,
+        "RECORDS" => $this->NearData,
     ]);
 }
 //==============================================================================
@@ -367,11 +374,11 @@ public function is_valid(&$row) {
         debug_log(DBMSG_MODEL,['ALIAS' => $this->fields]);
     }
 //==============================================================================
-// pickup on exist database field
+// pickup on exist edit table database field
     private function field_pickup($row) {
         $data = array();
         foreach($row as $key => $val) {
-            if(array_key_exists($key,$this->dbDriver->columns)) {
+            if(array_key_exists($key,$this->dbDriver->raw_columns)) {
                 $data[$key] = $val;
             }
         }

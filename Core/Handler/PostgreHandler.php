@@ -13,20 +13,21 @@ class PostgreHandler extends SQLHandler {
 	}
 //==============================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
-protected function Connect() {
+protected function Connect($table) {
 	// テーブル属性を取得
-	$sql = "SELECT * FROM information_schema.columns WHERE table_name = '{$this->table}' ORDER BY ordinal_position;";
+	$sql = "SELECT * FROM information_schema.columns WHERE table_name = '{$table}' ORDER BY ordinal_position;";
 	$result = pg_query($this->dbb, $sql);
 	if(!$result) {
 		die('Postgres QUERY失敗' . pg_last_error());
 	}
-	$this->columns = array();
+	$columns = array();
 	while ($row = pg_fetch_array($result,NULL,PGSQL_ASSOC)) {
 		if(!$row) {
 			die('Postgres QUERY失敗' . pg_last_error());
 		}
-		$this->columns[$row['column_name']] = $row['column_name'];
+		$columns[$row['column_name']] = $row['column_name'];
 	}
+	return $columns;
 }
 //==============================================================================
 //	doQuery: 	SQLを発行する
@@ -59,7 +60,7 @@ public function getLastError() {
 //	INSERT or UPDATE
 // INSERT INTO test_table (id, name) VALUES (val_id, val_name)
 // ON CONFLICT (id) DO UPDATE SET name = val_name；
-// pg_update($this->dbb,$this->table,$row,$wh);
+// pg_update($this->dbb,$this->raw_table,$row,$wh);
 //==============================================================================
 public function updateRecord($wh,$row) {
 	$this->sql_safequote($row);
@@ -69,7 +70,7 @@ public function updateRecord($wh,$row) {
 		$row[$key] = str_replace('\\', '\\\\', $val);
 	}
 	// PostgreSQLのデータ型に変換
-	$aa = pg_convert($this->dbb,$this->table,$row);
+	$aa = pg_convert($this->dbb,$this->raw_table,$row);
 	if($aa === FALSE) {
 		$res1 = pg_get_result($this->dbb);
 		debug_log(-99,[
@@ -89,14 +90,14 @@ public function updateRecord($wh,$row) {
 		$sep = ",";
 	}
 	// UPSERT 文を生成
-	$sql = "INSERT INTO \"{$this->table}\" ({$kstr}) VALUES ({$vstr}) ON CONFLICT ({$primary}) DO UPDATE {$set};";
+	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) ON CONFLICT ({$primary}) DO UPDATE {$set};";
 	$res = $this->doQuery($sql);
 }
 //==============================================================================
 //	INSERT
 // INSERT INTO test_table (id, name) VALUES (val_id, val_name)
 // ON CONFLICT (id) DO UPDATE SET name = val_name；
-// pg_update($this->dbb,$this->table,$row,$wh);
+// pg_update($this->dbb,$this->raw_table,$row,$wh);
 //==============================================================================
 public function insertRecord($row) {
 	$this->sql_safequote($row);
@@ -105,13 +106,13 @@ public function insertRecord($row) {
 //		$row[$key] = str_replace('\\', '\\\\', $val);
 //	}
 	// PostgreSQLのデータ型に変換
-	$aa = pg_convert($this->dbb,$this->table,$row);
+	$aa = pg_convert($this->dbb,$this->raw_table,$row);
 	if($aa === FALSE) {
 		$res1 = pg_get_result($this->dbb);
 		debug_log(-99,[
 			"ERROR:" => pg_result_error($res1),
 			"DBB" => $this->dbb,
-			"TABLE" => $this->table,
+			"TABLE" => $this->raw_table,
 			"ROW" => $row
 		]);
 		die('Postgres CONVERT失敗' . pg_last_error());
@@ -124,7 +125,7 @@ public function insertRecord($row) {
 		$sep = ",";
 	}
 	// UPSERT 文を生成
-	$sql = "INSERT INTO \"{$this->table}\" ({$kstr}) VALUES ({$vstr});";
+	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr});";
 	$res = $this->doQuery($sql);
 }
 

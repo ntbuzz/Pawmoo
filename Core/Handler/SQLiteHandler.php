@@ -14,14 +14,15 @@ class SQLiteHandler extends SQLHandler {
 	}
 //==============================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
-protected function Connect() {
+protected function Connect($table) {
 	// テーブル属性を取得
-	$sql = "PRAGMA table_info({$this->table});";
+	$sql = "PRAGMA table_info({$table});";
 	$rows = $this->dbb->query($sql);
-	$this->columns = array();
+	$columns = array();
 	while ($row = $rows->fetchArray(SQLITE3_ASSOC)) {
-		$this->columns[$row['name']] = $row['name'];
+		$columns[$row['name']] = $row['name'];
 	}
+	return $columns;
 }
 //==============================================================================
 //	doQuery: 	SQLを発行する
@@ -50,7 +51,7 @@ public function insertRecord($row) {
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
 	$vstr = "'" . implode("','", $row) . "'";
 
-	$sql = "INSERT INTO {$this->table} ({$kstr}) VALUES ({$vstr});";
+	$sql = "INSERT INTO {$this->raw_table} ({$kstr}) VALUES ({$vstr});";
 	error_reporting(E_ERROR);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
@@ -71,7 +72,7 @@ public function updateRecord($wh,$row) {
 		$sep = ", ";
 	}
 	// UPSERT 文を生成
-	$sql = "UPDATE \"{$this->table}\"{$set}{$where};";
+	$sql = "UPDATE \"{$this->raw_table}\"{$set}{$where};";
 	error_reporting(E_ALL);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
