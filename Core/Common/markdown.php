@@ -112,7 +112,7 @@ function pseudo_markdown($atext, $md_class = '') {
         $tbl_class = (empty($matches[2])) ? '':" {$matches[2]}";
         $col_row_span = function($key,$str) {
             $span_attr = ['@'=>'colspan','^'=>'rowspan'];
-            $binds = '';
+            $bind = '';
             if(!empty($str)) {
                 $bval = $span_attr[$key];
                 $ll = str_replace($key,'',$str);
