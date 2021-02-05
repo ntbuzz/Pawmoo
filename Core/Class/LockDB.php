@@ -13,7 +13,7 @@ static public function LockStart($owner = NULL) {
     if(defined('LOCK_DB') && file_exists(LOCK_DB)) {
         static::$owner = $owner;
         static::$dbb = new SQLite3(LOCK_DB);
-        $lock_tbl = LOCK_TABLE;
+        $lock_tbl = self::LOCK_TABLE;
         //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
     	$sql = "PRAGMA table_info({$lock_tbl});";
     	$rows = static::$dbb->query($sql);
@@ -43,7 +43,7 @@ static public function LockEnd() {
 //  ロックできたらTRUE,失敗なら FALSE を返す
 static public function Locked($table,$pkey,$limit) {
     if(static::$dbb === NULL) return;
-    $lock_tbl = LOCK_TABLE;
+    $lock_tbl = self::LOCK_TABLE;
     $where = "WHERE (table='{$table}') AND (row={$pkey})";
     $sql = "SELECT * FROM '{$lock_tbl}' {$where};";
     $rows = static::$dbb->query($sql);

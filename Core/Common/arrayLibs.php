@@ -187,7 +187,8 @@ function array_concat_keys(&$arr,$keys) {
     foreach($keys as $kk => $val) {
         $sep = (is_numeric($kk)) ? ' ' : $kk;
         $item = (isset($arr[$val])) ? $arr[$val] : '';
-        $ss = (empty($ss)) ? $item : "{$ss}{$sep}{$item}";
+//        $ss = (empty($ss)) ? $item : "{$ss}{$sep}{$item}";
+        $ss = "{$ss}{$sep}{$item}";
     }
     return trim($ss);
 }

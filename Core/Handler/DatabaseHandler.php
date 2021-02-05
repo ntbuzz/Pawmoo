@@ -33,6 +33,28 @@ public function exists_locale($field_name) {
     return (array_key_exists($field_name,$this->lang_alias));
 }
 //==============================================================================
+// check exists Locale BINF field
+public function get_bind_ifexists($fields) {
+    foreach($this->bind_columns as $key => $columns) {
+        if(count($columns) === count($fields)) {
+            $match = TRUE;
+            foreach($columns as $fn ) {
+                if(!in_array($fn,$fields)) {
+                    $match = FALSE;
+                    break;
+                }
+            }
+            if($match) return $key;
+        }
+    }
+    return FALSE;
+}
+//==============================================================================
+// ALIAS fields replace to standard field, and BIND-column to record field
+public function get_bind_key($row,$key) {
+    return array_concat_keys($row,$this->bind_columns[$key]);
+}
+//==============================================================================
 //	if exists LOCALE alias, get LOCALE fields name
 public function get_lang_alias($field_name) {
      return ($this->exists_locale($field_name)) ? $this->lang_alias[$field_name] : $field_name;

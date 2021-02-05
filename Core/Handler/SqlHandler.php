@@ -55,7 +55,44 @@ public function fetchDB() {
 	if($row = $this->fetch_array()) {
 		$this->fieldAlias->to_alias_field($row);
 	}
-	return ($row === FALSE) ? [] : $row;
+	return $row;
+}
+//==============================================================================
+//	getValueLists: list-colum name, value-colums
+public function getValueLists_callback($callback) {
+    foreach($this->relations as $key => $val) {
+		list($nm,$rel) = array_first_item($val);		// because each element will be same table,id
+		list($tbl,$id) = explode('.',$rel);
+		// re-build $val array
+		array_walk($val,function(&$v,$k){list($t,$id,$fn) = explode('.', $v);$v=$fn;});
+		$vv = [];
+		foreach($val as $alias => $fn) $vv[] = "\"{$fn}\" as $alias";
+		$ref_list = implode(',',$vv);
+		$sql = "SELECT \"{$id}\",{$ref_list} FROM {$tbl} ORDER BY \"{$id}\";";
+		$keys = array_keys($val);
+		$bind = $this->fieldAlias->get_bind_ifexists($keys);
+//debug_dump(['VAL'=>$val,'LIST'=>$ref_list,'BIND'=>$bind,'SQL'=>$sql]);
+		$values = [];
+		$this->doQuery($sql);
+		while ($row = $this->fetch_array()) {	// other table refer is not bind!
+			if($bind===FALSE) {
+				foreach($val as $nm => $ref_fn) {
+					$key = $row[$nm];
+					if(!empty($key)) $values[$nm][$key] = $row[$id];
+				}
+			} else {
+				$key = $this->fieldAlias->get_bind_key($row,$bind);
+				if(!empty($key)) $values[$bind][$key] = $row[$id];
+			}
+		}
+		if($bind===FALSE) {
+			foreach($val as $nm => $ref_fn) {
+				$callback($nm,$values[$nm]);
+			}
+		} else {
+			$callback($bind,$values[$bind]);
+		}
+    }
 }
 //==============================================================================
 //	getValueLists: list-colum name, value-colums
@@ -64,7 +101,9 @@ public function getValueLists($table,$ref,$id) {
 	$sql = $this->sql_QueryValues($table,$ref,$id);
 	$this->doQuery($sql);
 	$values = array();
+	debug_log(-9,["VALUE-LIST" => [$table,$ref,$id,$sql,'REL'=>$this->relations,'ALIAS'=>$this->fieldAlias->GetAlias()]]);
 	while ($row = $this->fetch_array()) {	// other table refer is not bind!
+//		debug_log(-9,["Row" => $row]);
 		$key = $row[$ref];
 		if(!empty($key)) $values[$key] = $row[$id];
 	}
@@ -99,17 +138,18 @@ public function getRecordCount($cond) {
 	return ($field) ? $field["total"] : 0;
 }
 //==============================================================================
-//	getRecordValue($cond,$relations) 
+//	getRecordValue($cond,$use_relations) 
 //	find $cond match record
 //==============================================================================
-public function getRecordValue($cond,$relations) {
+public function getRecordValue($cond,$use_relations) {
 	$where = $this->sql_makeWHERE($cond);		// 検索条件
-	$sql = $this->sql_JoinTable($relations);
+	$sql = $this->sql_JoinTable($use_relations);
 	$where .= ($this->is_offset) ? " offset 0 limit 1" : " limit 0,1";
 	$sql .= "{$where};";
 	debug_log(DBMSG_HANDLER,[ "RecVal-SQL" => $sql]);
 	$this->doQuery($sql);
-	return $this->fetchDB();
+	$row = $this->fetchDB();
+	return ($row === FALSE) ? []:$row;
 }
 //==============================================================================
 //	findRecord(cond): 
@@ -118,14 +158,14 @@ public function getRecordValue($cond,$relations) {
 // pgSQL: SELECT *, count('No') over() as full_count FROM public.mydb offset 10 limit 50;
 // SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
 //==============================================================================
-public function findRecord($cond,$relations = NULL,$sort = []) {
+public function findRecord($cond,$use_relations = FALSE,$sort = []) {
 	$where = $this->sql_makeWHERE($cond);
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
 	$this->doQuery("{$sql}{$where};");
 	$field = $this->fetch_array();
 	debug_log(DBMSG_HANDLER,["Find" => "{$where}", "DATA" => $field]);
 	$this->recordMax = ($field) ? $field["total"] : 0;
-	$sql = $this->sql_JoinTable($relations);
+	$sql = $this->sql_JoinTable($use_relations);
 	if(!empty($sort)) {
 		$orderby = "";
 		foreach($sort as $key => $val) {
@@ -145,11 +185,11 @@ public function findRecord($cond,$relations = NULL,$sort = []) {
 	$this->doQuery($sql);
 }
 //==============================================================================
-//	firstRecord(cond,relation,sort): 
+//	firstRecord(cond,use-relation,sort): 
 //==============================================================================
-public function firstRecord($cond,$relations = NULL,$sort) {
+public function firstRecord($cond,$use_relations = FALSE,$sort) {
 	$where = $this->sql_makeWHERE($cond);
-	$sql = $this->sql_JoinTable($relations);
+	$sql = $this->sql_JoinTable($use_relations);
 	if(!empty($sort)) {
 		$orderby = "";
 		foreach($sort as $key => $val) {
@@ -161,7 +201,8 @@ public function firstRecord($cond,$relations = NULL,$sort) {
 	$where .= " limit 1";
 	$sql .= "{$where};";
 	$this->doQuery($sql);
-	return $this->fetchDB();
+	$row = $this->fetchDB();
+	return ($row === FALSE) ? []:$row;
 }
 //==============================================================================
 //	deleteRecord(wh): 
@@ -199,25 +240,22 @@ protected function sql_safequote(&$value) {
 }
 //==============================================================================
 // generate JOIN token
-	private function sql_JoinTable($Relations) {
+// relation table
+//  [id] = [
+//		[alias] = table.id.name
+//		....
+//	]
+	private function sql_JoinTable($use_relations) {
 		$sql = "SELECT {$this->table}.*";
 		$frm = " FROM {$this->table}";
 		$jstr = '';
-		if(!empty($Relations)) {
-			foreach($Relations as $key => $val) {
-				$kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
-				$alias= "\"{$key}\"";
-				if(is_array($val)) {
-					foreach($val as $refer => $lnk) {
-						list($table,$fn,$ref) = explode('.', $lnk);
-						$sql .= ",{$table}.\"{$ref}\" AS \"{$kk}_{$refer}\"";
-					}
-					$jstr .= " LEFT JOIN {$table} ON {$this->table}.{$alias} = {$table}.\"{$fn}\"";
-				} else {
-					list($table,$fn, $ref) = explode('.', $val);
-					$sql .= ",{$table}.\"{$ref}\" AS \"{$kk}\"";
-					$jstr .= " LEFT JOIN {$table} ON {$this->table}.{$alias} = {$table}.\"{$fn}\"";
+		if($use_relations) {
+			foreach($this->relations as $key => $val) {
+				foreach($val as $alias => $lnk) {
+					list($table,$fn,$ref) = explode('.', $lnk);
+					$sql .= ",{$table}.\"{$ref}\" AS \"{$alias}\"";
 				}
+				$jstr .= " LEFT JOIN {$table} ON {$this->table}.\"{$key}\" = {$table}.\"{$fn}\"";
 			}
 		}
 		return "{$sql}{$frm}{$jstr}";
@@ -254,16 +292,6 @@ protected function sql_safequote(&$value) {
 				}
 				return $wd;
 			};
-/*
-			$sort_array = function($arr) use(&$sort_array) {
-				$wd = array_filter($arr, function($vv) {return is_scalar($vv);});
-				foreach($arr as $key => $val) {
-					if(is_array($val)) $wd[$key] = $sort_array($val);
-				}
-				return $wd;
-			};
-			return $sort_array($array_map_shurink('AND',$cond));
-*/
 			return $array_map_shurink('AND',$cond);
 		};
 		if($cond ===NULL) return $this->LastSQL;
@@ -344,10 +372,9 @@ protected function sql_safequote(&$value) {
 						$opp = $multi_field($key,$op,$table,$val);
 					}
 				} else if($op === '@') {	// SUBQUERY op
-					// check exists relations
-					if(array_key_exists($key,$this->relations)) {
+					if(array_key_exists($key,$this->relations)) {		// check exists relations
 						$rel = $this->relations[$key];
-						if(is_array($rel)) list($nm,$rel) = array_first_item($rel);
+						list($nm,$rel) = array_first_item($rel);		// because each element will be same table,id
 						list($tbl,$fn) = explode('.',$rel);
 						$ops = $dump_object('AND',$val,$tbl);
 						$opp = "({$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE {$ops}))";

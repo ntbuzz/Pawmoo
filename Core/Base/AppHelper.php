@@ -4,6 +4,18 @@
  * 	 AppHelper: HTML generate for ViewTemplate
  */
 //==============================================================================
+class RecordColumns {
+	public $Primary;			// Primary-Key Values
+	//==============================================================================
+	// extract column name, value set
+	public function SetColumns($primary,$data) {
+		$this->Primary = $data[$primary];
+		foreach($data as $key => $val) {
+			$this->$key = $val;
+		}
+	}
+}
+//==============================================================================
 class AppHelper  extends AppObject {
 	const AttrAlign = [
 		'',						// 0
@@ -52,16 +64,22 @@ public function expand_var($str,$vars=[]) {
 // expand LOCALE varible in $str, after echo string
 // format {#locale-id}
 public function expand_echo($str) {
+	echo $this->expand_locale($str);
+}
+//==============================================================================
+// expand LOCALE varible in $str
+// format {#locale-id}
+public function expand_locale($str) {
 	$p = '/\{#[^}\s]+?}/';
 	preg_match_all($p,$str,$m);
 	$varList = $m[0];
-	if(empty($varList)) { echo $str; return; }
+	if(empty($varList)) return $str;
 	$varList = array_unique($varList);
 	$values = array_map(function($v) {
 			$v = trim($v,'#{}');
 			return $this->_($v);
 		},$varList);
-	echo str_replace($varList,$values,$str);
+	return str_replace($varList,$values,$str);
 }
 //==============================================================================
 // Make HYPER-Link
@@ -152,11 +170,12 @@ public function MakePageLinks() {
 //==============================================================================
 // Put Each record columns
 	protected function putColumnData($lno,$columns) {
-		echo "<tr class='item' id='".$columns[$this->MyModel->Primary]."'>";
+		echo "<tr class='item' id='{$columns->Primary}'>";
 		foreach($this->MyModel->HeaderSchema as $key => $val) {
-			list($alias,$align,$flag) = $val;
+			list($alias,$align,$flag,$c_wd) = $val;
+			$style = ($c_wd > 0) ? " style='max-width:{$c_wd}px;'":'';
 			$pos = self::AttrAlign[$align];
-			echo "<td nowrap{$pos}>". $columns[$key]."</td>";
+			echo "<td{$pos}{$style}>{$columns->$key}</td>";
 		}
 		echo "</tr>\n";
 	}
@@ -177,12 +196,14 @@ public function MakeListTable($deftab) {
 		$tab = $deftab;
 		$tbl = '_TableList';
 	}
-	echo "<table id='{$tbl}' class='tablesorter {$tab}'>\n<thead>";
+	echo "<table id='{$tbl}' class='tablesorter {$tab}'>\n<thead>\n";
 	$this->putTableHeader($tab);
 	echo "</thead>\n<tbody>\n";
+	$col = new RecordColumns();
 	$lno = ($this->MyModel->page_num-1)*$this->MyModel->pagesize + 1;
 	foreach($this->MyModel->Records as $columns) {
-		$this->putColumnData($lno++, $columns);
+		$col->SetColumns($this->MyModel->Primary,$columns);
+		$this->putColumnData($lno++, $col);
 	}
 	echo "</tbody></table>";
 }

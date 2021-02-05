@@ -71,47 +71,47 @@ public function RelationSetup() {
             $model = $m[1];
             $table = (is_array($this->$model->DataView))
                         ? $this->$model->DataView[$m[2]]            // View Element Index
-                        : $this->$model->DataTable;                 // illegal define
-        } else $table = $this->$model->DataTable;
+                        : $this->$model->dbDriver->table;                 // illegal define
+        } else $table = $this->$model->dbDriver->table;
         return [$model,$table,$field,$refer];
     };
+    $new_Relations = [];
     foreach($this->Relations as $key => $rel) {
-        $kk = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
-        if(is_array($rel)) {
-            $sub_rel = [];
+        $base_name = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
+        $rel_array = is_array($rel);
+        if($rel_array) {
             list($db,$ref_list) = array_first_item($rel);
-            if(is_scalar($ref_list)) $ref_list = [$ref_list];
             if(is_numeric($db)) continue;
             list($model,$table,$field) = $model_view($db);
             $link = "{$table}.{$field}";
-            foreach($ref_list as $refer) {
-                $key_name = "{$kk}_{$refer}";
-                $ref_name = $refer;
-                if($this->$model->dbDriver->fieldAlias->exists_locale($ref_name)) {
-                    $lang_ref = "{$ref_name}_" . LangUI::$LocaleName;
-                    if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $ref_name = $lang_ref;
-                }
-                $sub_rel[$refer] = "{$link}.{$ref_name}";
-                $this->FieldSchema[$key_name] = NULL;   // $key; import MUST!
-            }
-            $this->Relations[$key] =  $sub_rel;
+            if(is_scalar($ref_list)) $ref_list = [$ref_list];    // force array
         } else {
             list($model,$table,$field,$refer) = $model_view($rel);
-            if($this->$model->dbDriver->fieldAlias->exists_locale($refer)) {
-                $lang_ref = "{$refer}_" . LangUI::$LocaleName;
-                if(array_key_exists($lang_ref,$this->$model->dbDriver->columns)) $refer = $lang_ref;
-            }
-            $arr = [$table,$field,$refer];        // ModelName in schema convert to Table name
-            $this->Relations[$key] =  implode('.',$arr);
+            $link = "{$table}.{$field}";
+            $ref_list = [ $refer ];
         }
+        $sub_rel = [];
+        foreach($ref_list as $refer) {
+            $alias_name = ($rel_array) ? "{$base_name}_{$refer}" : $base_name;
+            $this->FieldSchema[$alias_name] = NULL;   // $key; import MUST!
+            // locale if exist in relation-db
+            if($this->$model->dbDriver->fieldAlias->exists_locale($refer)) {
+                $ref_name = "{$refer}_" . LangUI::$LocaleName;
+            } else $ref_name = $refer;
+            $sub_rel[$alias_name] = "{$link}.{$ref_name}";
+        }
+        $new_Relations[$key] =  $sub_rel;
     }
-    $this->dbDriver->setupRelations($this->Relations);
+    $this->dbDriver->setupRelations($new_Relations);
     debug_log(DBMSG_MODEL,[             // DEBUG LOG information
+        "Schema" => $this->Schema,
         "Header" => $this->HeaderSchema,
         "Field" => $this->FieldSchema, 
-        "Relation" => $this->Relations, 
+        "Def-Relation" => $this->Relations, 
+        "JOIN-definition" => $new_Relations,
         "Locale-Bind" => $this->dbDriver->fieldAlias->GetAlias(),
     ]);
+//    $this->Relations = $new_Relations;
 }
 //==============================================================================
 // Schema Define Analyzer
@@ -166,7 +166,8 @@ public function getRecordByKey($id) {
 // Result:   $this->fields in Column Data
 public function getRecordBy($key,$value) {
     if(!empty($value)) {
-        $this->fields = $this->dbDriver->doQueryBy($key,$value);
+        $row = $this->dbDriver->doQueryBy($key,$value);
+        $this->fields = ($row === FALSE) ? [] : $row;
     } else $this->fields = array();
     return $this->fields;
 }
@@ -176,7 +177,7 @@ public function getRecordBy($key,$value) {
 public function GetRecord($num,$join=FALSE) {
     if($join) {
         if(empty($num)) $this->fields = array();
-        else $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],$this->Relations);
+        else $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],TRUE);
     } else $this->getRecordBy($this->Primary,$num);
     $this->RecData= $this->fields;
 }
@@ -185,19 +186,9 @@ public function GetRecord($num,$join=FALSE) {
 // Result:   $this->Select (Relations)
 public function GetValueList() {
     $valueLists = array();
-    foreach($this->Relations as $key => $val) {
-        if(is_array($val)) {
-            $base = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
-            foreach($val as $kk => $ref) {
-                list($table,$id,$fn) = explode('.', $ref);
-                $key_name = "{$base}_{$kk}";
-                $valueLists[$key_name] = $this->dbDriver->getValueLists($table,$fn,$id);
-            }
-        } else {
-            list($table,$fn, $ref) = explode('.', $val);
-            $valueLists[$key] = $this->dbDriver->getValueLists($table,$ref,$fn);
-        }
-    }
+    $this->dbDriver->getValueLists_callback(function($key,$val_list) use (&$valueLists) {
+        $valueLists[$key] = $val_list;
+    });
     $this->Select= $valueLists;
     debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $valueLists]);
 }
@@ -233,7 +224,7 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
     else if(is_scalar($sort)) {
         $sort = [ $sort => $this->SortDefault ];
     }
-    $this->dbDriver->findRecord($cond,$this->Relations,$sort);
+    $this->dbDriver->findRecord($cond,TRUE,$sort);
     while (($fields = $this->dbDriver->fetchDB())) {
         unset($record);
         foreach($fields_list as $key => $val) {
@@ -301,7 +292,7 @@ public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
     $fields_list = array_combine($filter,$filter);
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
-    $fields = $this->dbDriver->firstRecord($cond,NULL,$sort);
+    $fields = $this->dbDriver->firstRecord($cond,FALSE,$sort);
     $this->RecData = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
     debug_log(DBMSG_MODEL, [
         "Filter" => $filter,
@@ -318,7 +309,7 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     if(empty($sort)) $sort = [ $this->Primary => $SortDefault ];
     else if(is_scalar($sort)) $sort = [ $sort => $SortDefault ];
-    $this->dbDriver->findRecord($cond,$this->Relations,$sort);
+    $this->dbDriver->findRecord($cond,TRUE,$sort);
     $r_prev = $r_next = $r_self = NULL;
     $prev = true;
     $row_num = 0;

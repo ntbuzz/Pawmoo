@@ -76,7 +76,7 @@ public function updateRecord($wh,$row) {
 		debug_log(-99,[
 			"ERROR:" => pg_result_error($res1),
 			"DBB" => $this->dbb,
-			"TABLE" => $this->table,
+			"TABLE" => $this->raw_table,
 			"ROW" => $row
 		]);
 		die('Postgres CONVERT失敗' . pg_last_error());
