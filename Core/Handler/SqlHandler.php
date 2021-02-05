@@ -47,7 +47,7 @@ function __construct($table,$handler) {
 // setupRelations: relation table reminder
 public function setupRelations($relations) {
 	$this->relations = $relations;
-	debug_log(DBMSG_HANDLER,["RELATIONS" => $this->relations]);
+//	debug_log(DBMSG_HANDLER,["RELATIONS" => $this->relations]);
 }
 //==============================================================================
 // fetchDB: get record data , and replace alias and bind column
@@ -146,7 +146,7 @@ public function getRecordValue($cond,$use_relations) {
 	$sql = $this->sql_JoinTable($use_relations);
 	$where .= ($this->is_offset) ? " offset 0 limit 1" : " limit 0,1";
 	$sql .= "{$where};";
-	debug_log(DBMSG_HANDLER,[ "RecVal-SQL" => $sql]);
+//	debug_log(DBMSG_HANDLER,[ "RecVal-SQL" => $sql]);
 	$this->doQuery($sql);
 	$row = $this->fetchDB();
 	return ($row === FALSE) ? []:$row;

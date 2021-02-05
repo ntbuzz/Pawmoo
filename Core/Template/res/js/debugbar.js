@@ -6,7 +6,7 @@
             $('.debugBK').css('display','block');           // クローズ判定領域を有効
             $('#debugMenu li').removeClass('selected');       // select状態を解除
             $('.dbcontent li').css('display','none');       // コンテンツを一旦すべて非表示にする
-            $('.debugBar').animate({'width':'1200px'},500);
+            $('.debugBar').animate({'width':'900px'},500);
         };
     });
     // クリックしたときのファンクション
