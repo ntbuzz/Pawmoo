@@ -27,15 +27,13 @@ You will need the app repository and vendor libraries to run as an application.
 ## Installation
 
 1. clone this repository.
-1. create 'vendor' directory, and download JQuery Library store.
+1. create 'vendor' and 'app' directory, and download JQuery Library.
 1. setup 3rd vendor libray. if you need.
-1. create 'app' folder, for web-apprication.
-1. copy 'tools/app' template files into 'app' folder,and rename folder to 'sample'.
+1. if you need sample application,copy 'tools/app' files into 'app' folder,and rename 'sample'.
 1. create Database by SQLite or PostgresQL, use DB-Tools(pgAdmin4,etc...)
-1. edit app/sample/Config/config.php (your create database name)
-1. Create Application Controller-Module.(see template 'Index' module)
-1. and any module implemented.
-1. adjusted .htaccess or web.config for your Web-Server.
+1. edit app/sample/Config/config.php (you created database name)
+1. Create/Modify Application Module. (see 'sample/modules/Index' module)
+1. adjusted '.htaccess' or 'web.config' for your Web-Server.
 
 ### SECTION template SAMPLE
 
