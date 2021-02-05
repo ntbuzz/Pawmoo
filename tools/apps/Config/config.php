@@ -15,9 +15,6 @@ define('PG_DB',  'pg_database');
 //--------------------------------------------
 // MySQLのサーバー定義
 define('MYSQL_DB',  'pcmanager');
-//--------------------------------------------
-// FileMakerのサーバー定義
-define('HOST_SPEC','http://192.168.1.1/');
 
 const DatabaseParameter  = [
 	'Postgre' =>  array(
@@ -39,14 +36,7 @@ const DatabaseParameter  = [
 		'host' => 'localhost',
 		'database' => MYSQL_DB,
 		'login' => 'root',
-		'password' => 'superman',
-		'encoding' => 'utf8'
-	),
-	'Filemaker' => array(
-		'host' => HOST_SPEC,
-		'database' => '',
-		'login' => 'admin',
-		'password' => 'kiwi',
+		'password' => 'root',
 		'encoding' => 'utf8'
 	),
 	'Folder' => array(

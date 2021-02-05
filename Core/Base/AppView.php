@@ -237,6 +237,15 @@ public function ViewTemplate($name,$vars = []) {
                     $val = MySession::get_varIDs(($tt==="'"),$var);// get SESSION ENV or REQUEST
                 }
                 break;
+            case '&':       // Helper Method CALL
+                   	$p = '/&(\w+)(?:\(([^\)]+)\))?/';
+                    preg_match($p,$var,$m);
+                    $var = $m[1];
+                    $arg = (count($m)===3) ? $m[2]:NULL;
+                    if(method_exists($this->Helper,$var)) {
+                        $val = $this->Helper-$var($arg);
+                    } else $val = "NOT-FOUND({$var})";
+                    break;
             default:
                 if(isset($vars[$var])) {            // is LOCAL VAR-SET?
                     $val = $vars[$var];
@@ -253,9 +262,9 @@ public function ViewTemplate($name,$vars = []) {
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
     public function expand_Strings($str,$vars) {
         if(empty($str) || is_numeric($str)) return $str;
-        $p = '/\${[^}\s]+?}|\${[#%\'"\$@][^}\s]+?}/';       // PARSE variable format
+        $p = '/\${[^}\s]+?}|\${[#%\'"\$@&][^}\s]+?}/';       // PARSE variable format
         preg_match_all($p, $str, $m);
-        $varList = $m[0];
+        $varList = $m[0]; 
         if(empty($varList)) return $str;        // not use variable.
         $values = $varList = array_unique($varList);
         array_walk($values, array($this, 'expand_Walk'), $vars);

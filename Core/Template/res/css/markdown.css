@@ -84,17 +84,18 @@
 .easy_markdown .md_tbl {
 	padding:0 5px;
 	border-collapse: collapse;
-	border:1px solid silver;
+	border:1px solid gray;
 }
 .easy_markdown .md_tbl th {
 	text-align: center;
-	background-color: #eee;
-	border: 1px solid silver;
-	padding: 0 10px;
+	background-color: #ddd;
+	border: 1px solid gray;
+	padding: 2px 10px;
+	position: static;		/* for IE-BUG! */
 }
 .easy_markdown .md_tbl td {
-	border: 1px solid silver;
-	padding: 0 10px;
+	border: 1px solid gray;
+	padding: 2px 10px;
 	white-space: normal;
 }
 /*
