@@ -17,6 +17,12 @@ You will need the app repository and vendor libraries to run as an application.
 - vendor          JQuery, and other javascript/PHP Library
 ```
 
+## System Requiorement
+
++ PHP-5.6 or Higher.
++ Apache 2.4 Web Server or IIS 7.0
++ SQLite3 or PostgreSQL9.6 or MariaDB 5.5, and each Admin Tools
+
 ### SECTION template SAMPLE
 
 Detail specification is [Here](../../wiki/Home)
