@@ -15,12 +15,13 @@ body {
 	box-sizing: border-box;
     z-index:111;
     width:100%;
-    height:55px;
-    padding-left:50px;
-    background-color:silver;
+    background-color:whitesmoke;
 }
-.blogHeader>h1 {
+.blogHeader>h1.logo-head {
     font-size:24pt;
+    height:90px;
+    padding-left:200px; /* ロゴイメージの分スペースを空ける */
+    background: url(/res/images/pawmoo.png) no-repeat left;
 }
 .blogHeader .right_item {
     float:right;
