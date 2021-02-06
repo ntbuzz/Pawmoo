@@ -45,3 +45,18 @@
     PassError => 'PASSWORD Missing'
     UnknownUser => "Unknown USER"
 ]
+
+SW開発 => [
+    .ja => [
+        PawmooHelp  => ヘルプアプリ
+        PC管理      => PC管理アプリ
+        ブログ      => ブログアプリ
+        Video管理   => ビデオ管理アプリ
+    ]
+    .en => [
+        PawmooHelp  => "Pawmoo Help App"
+        PC管理      => "PC-Manage App"
+        ブログ      => "BLOG App"
+        Video管理   => "Video-Manage App"
+    ]
+]

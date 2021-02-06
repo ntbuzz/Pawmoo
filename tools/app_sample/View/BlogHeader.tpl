@@ -6,8 +6,7 @@
 		location.href = url;
 	});
 ~
-
-h1. => [ %${#.BLOGTITLE} => /sample/${$controller$}/ ]
+h1.logo-head => [ %${#.BLOGTITLE} => /sample/${$controller$}/ ]
 
 // 言語スイッチ
 .lang-switch => [
