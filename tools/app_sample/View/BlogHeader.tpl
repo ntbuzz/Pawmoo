@@ -20,7 +20,7 @@ h1.logo-head => [ %${#.BLOGTITLE} => /sample/${$controller$}/ ]
 	]
 	?${'Login.LANG'} => [
 	'en*' => [ %link => [ 日本語 => "?lang=ja" ] ]
-	'ja*' => [ %link => [ Englisth => "?lang=en" ] ]
+	'|ja*' => [ %link => [ Englisth => "?lang=en" ] ]
 	]
 ]
 

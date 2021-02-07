@@ -61,10 +61,11 @@ public function BlogTOC() {
 }
 //==============================================================================
 public function BlogWALK() {
+    $_ = function($v) { return $this->_($v); };
     echo "<br><hr>\n";
     $th_width = " style='width:80px;'";
     echo "<table class='prev_next'>";
-    echo "<tr><th{$th_width}>前の記事：</th>";
+    echo "<tr><th{$th_width}>{$_('.PREV')}</th>";
     $text_align = ['left','right'];
     foreach($this->MyModel->NearData as $id => $val) {
         $cls = $text_align[$id];
@@ -76,7 +77,7 @@ public function BlogWALK() {
         }
         echo "</td>";
     }
-    echo "<th{$th_width}>：次の記事</th></tr>";
+    echo "<th{$th_width}>{$_('.NEXT')}</th></tr>";
     echo "</table>";
 }
 
