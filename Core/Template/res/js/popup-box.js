@@ -73,11 +73,13 @@ selector.each(function () {
             $(message_id).fadeIn('fast');
             self.css('user-select', 'none');    // テキスト選択不可
             $(document).mousemove(function (e) {
+                var new_width = Math.floor(e.pageX - self.offset().left-12);
+                var new_height= Math.floor(e.pageY - self.offset().top-12);
                 self.css({
-                    width: (e.pageX - self.offset().left-12) + "px",
-                    height: (e.pageY - self.offset().top-12) + "px"
+                    width: new_width + "px",
+                    height: new_height + "px"
                 });
-                var txt = self.width() + " x " + self.height();
+                var txt = new_width + " x " + new_height;
                 $(message_id).text(txt);
             }).mouseup(function (e) {
                 self.css('user-select', '');    // テキスト選択可能
