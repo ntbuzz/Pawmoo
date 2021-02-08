@@ -82,7 +82,8 @@ public function getValueLists_callback($callback) {
 				}
 			} else {
 				$key = $this->fieldAlias->get_bind_key($row,$bind);
-				if(!empty($key)) $values[$bind][$key] = $row[$id];
+//				if(!empty($key)) 
+				$values[$bind][$key] = $row[$id];
 			}
 		}
 		if($bind===FALSE) {
