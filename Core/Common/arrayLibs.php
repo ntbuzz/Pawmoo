@@ -197,7 +197,9 @@ function array_member_value($nVal,$names) {
     if(empty($names)) return $nVal;
     $vset = (mb_strpos($names,'.') !== FALSE) ? explode('.',$names):[$names];
     foreach($vset as $nm) {
-        $nVal = (array_key_exists($nm,$nVal)) ? $nVal[$nm] : '';
+        if(is_array($nVal) && array_key_exists($nm,$nVal)) {
+            $nVal = $nVal[$nm];
+        } else return NULL;
     }
     return $nVal;
 }
