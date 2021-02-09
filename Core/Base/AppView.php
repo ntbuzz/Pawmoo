@@ -96,9 +96,8 @@ public function __TerminateView() {
             debug_log(DBMSG_VIEW,"RedirectURL: {$url}");
             echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";
         }
-        if(DEBUGGER) {
-            $this->ViewTemplate('debugbar');
-        }
+        if( is_bool_false(MySession::get_paramIDs('debugger'))) return;
+        $this->ViewTemplate('debugbar');
     }
 }
 //==============================================================================
@@ -243,7 +242,7 @@ public function ViewTemplate($name,$vars = []) {
                     $var = $m[1];
                     $arg = (count($m)===3) ? $m[2]:NULL;
                     if(method_exists($this->Helper,$var)) {
-                        $val = $this->Helper-$var($arg);
+                        $val = $this->Helper->$var($arg);
                     } else $val = "NOT-FOUND({$var})";
                     break;
             default:
@@ -741,6 +740,7 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
     //  ] ]
     private function cmd_select($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
+        list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<{$tag}{$attr}>\n";
         list($opt_key, $opt_val) = array_first_item($sec);

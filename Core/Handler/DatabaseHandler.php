@@ -33,7 +33,7 @@ public function exists_locale($field_name) {
     return (array_key_exists($field_name,$this->lang_alias));
 }
 //==============================================================================
-// check exists Locale BINF field
+// check exists Locale BIND field
 public function get_bind_ifexists($fields) {
     foreach($this->bind_columns as $key => $columns) {
         if(count($columns) === count($fields)) {
@@ -50,7 +50,7 @@ public function get_bind_ifexists($fields) {
     return FALSE;
 }
 //==============================================================================
-// ALIAS fields replace to standard field, and BIND-column to record field
+// Concatenate BIND-column in record field
 public function get_bind_key($row,$key) {
     return array_concat_keys($row,$this->bind_columns[$key]);
 }

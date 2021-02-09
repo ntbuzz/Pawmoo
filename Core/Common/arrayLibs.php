@@ -187,8 +187,7 @@ function array_concat_keys(&$arr,$keys) {
     foreach($keys as $kk => $val) {
         $sep = (is_numeric($kk)) ? ' ' : $kk;
         $item = (isset($arr[$val])) ? $arr[$val] : '';
-//        $ss = (empty($ss)) ? $item : "{$ss}{$sep}{$item}";
-        $ss = "{$ss}{$sep}{$item}";
+        if(!empty($item)) $ss = "{$ss}{$sep}{$item}";
     }
     return trim($ss);
 }
@@ -198,7 +197,9 @@ function array_member_value($nVal,$names) {
     if(empty($names)) return $nVal;
     $vset = (mb_strpos($names,'.') !== FALSE) ? explode('.',$names):[$names];
     foreach($vset as $nm) {
-        $nVal = (array_key_exists($nm,$nVal)) ? $nVal[$nm] : '';
+        if(is_array($nVal) && array_key_exists($nm,$nVal)) {
+            $nVal = $nVal[$nm];
+        } else return NULL;
     }
     return $nVal;
 }

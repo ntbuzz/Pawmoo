@@ -11,20 +11,21 @@ else {
 	ini_set('session.gc_maxlifetime',$session_time);
 	session_start();
 }
-
+define('PARAMS_NAME','AppData');
 class MySession {
 	public static $EnvData;
 	public static $ReqData;
 	public static $MY_SESSION_ID;
 //==============================================================================
 // static クラスにおける初期化処理
-static function InitSession($appname = 'default') {
+static function InitSession($appname = 'default',$unset_param = FALSE) {
 	$session_id = SESSION_PREFIX . "_{$appname}";
+//	unset($_SESSION[$session_id]);
 	static::$MY_SESSION_ID = $session_id;
 	// セッションキーがあれば読み込む
 	static::$EnvData = (array_key_exists($session_id,$_SESSION)) ? $_SESSION[$session_id] : [];
 	// for Login skip on CLI debug.php processing
-	if(DEBUGGER && CLI_DEBUG) {
+	if(CLI_DEBUG) {
 		static::$EnvData['Login'] = ['username' => 'ntak'];
 	}
 	// overwrite real POST/GET variables
@@ -36,6 +37,7 @@ static function InitSession($appname = 'default') {
 	}
 	static::$ReqData = array_intval_recursive(static::$ReqData);
 	static::$EnvData = array_intval_recursive(static::$EnvData);
+	if($unset_param) unset(static::$EnvData[PARAMS_NAME]);             // Delete Style Parameter for AppStyle
 }
 //==============================================================================
 // セッションに保存する
@@ -105,6 +107,22 @@ static function set_if_empty($tt,$arr) {
 static function get_varIDs($tt,$names) {
 	$nVal = array_member_value(($tt)?static::$EnvData:static::$ReqData, $names);
 	return (is_array($nVal)) ? array_to_text($nVal,',') : $nVal;
+}
+//==============================================================================
+// ENV変数にアプリケーションパラメータを識別子指定で値を設定する
+static function set_paramIDs($names,$val) {
+    $mem_arr = explode('.',PARAMS_NAME.".{$names}");
+    $ee = &static::$EnvData;
+    foreach($mem_arr as $key) {
+        if(!isset($ee[$key])) $ee[$key] = [];
+        $ee = &$ee[$key];
+    }
+    $ee = $val;
+}
+//==============================================================================
+// ENV変数からアプリケーションパラメータを識別子指定で値を取得
+static function get_paramIDs($names) {
+	return static::get_varIDs(TRUE,PARAMS_NAME.".{$names}");
 }
 //==============================================================================
 // ENV変数をクリア

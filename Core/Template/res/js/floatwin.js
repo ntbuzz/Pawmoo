@@ -120,12 +120,14 @@ selector.each(function () {
             .data("clickPointY", e.pageY);
         $(message_id).fadeIn('fast');
         self.css('user-select', 'none');    // テキスト選択不可
-        $(document).mousemove( function(e) {
+        $(document).mousemove(function (e) {
+            var new_width = Math.floor(e.pageX - self.offset().left + 6);
+            var new_height= Math.floor(e.pageY - self.offset().top + 6);
             self.css({
-                width: (e.pageX - self.offset().left + 6) + "px",
-                height: (e.pageY - self.offset().top + 6) + "px"
+                width: new_width + "px",
+                height: new_height + "px"
             });
-            var txt = self.width() + " x " + self.height();
+            var txt = new_width + " x " + new_height;
             $(message_id).text(txt);
         }).mouseup(function (e) {
             $(message_id).fadeOut('fast');
