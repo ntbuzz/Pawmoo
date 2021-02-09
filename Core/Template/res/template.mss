@@ -12,11 +12,8 @@ Stylesheet => [
             markdown.css        // markdown sttle
             pagerstyle.css      // pager button
             popup.css           // balloon/popupbox/dialog
+            @debugger:debugbar.css   // use DEBUGGER,if AppData['debugger'] in SESSION is not FLASE
         ]
-        +section => @debugbar        // active on DEBUGGER flag is ON
-    ]
-    debugbar => [
-        +import => debugbar.css
     ]
 ]
 // =====================================================
@@ -30,14 +27,11 @@ Javascript => [
             context.js              // context menu popup
             floatwin.js             // inner window 
             pagerscript.js          // pager button
+            @debugger:debugbar.js   // use DEBUGGER,if AppData['debugger'] in SESSION is not FLASE
         ]
         +import => [
             funcs.js                // common function/prototype
             window.js               // JQuery-Plugins
         ]
-        +section => @debugbar       // active on DEBUGGER flag is ON
-    ]
-    debugbar => [
-        +jquery => debugbar.js
     ]
 ]

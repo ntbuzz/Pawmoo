@@ -101,7 +101,9 @@ if($redirect) {
 }
 require_once('Class/ClassLoader.php');
 ClassLoader::Setup($appname,$controller);   // AutoLoader for Application folder
-MySession::InitSession($appname);           // Session Variable SETUP
+MySession::InitSession($appname,TRUE);         // Session Variable SETUP
+MySession::set_paramIDs('debugger',DEBUGGER);  // SET DEBUGGER
+
 // INITIALIZED App static class.
 App::__Init($appname,$app_uri,$module,$query,$requrl);
 // Load Application Common library
@@ -146,6 +148,7 @@ App::$Method= $method;
 //=================================
 // Debugging Message
 debug_log(DBMSG_SYSTEM, [
+//debug_log(9, [
     '#DebugInfo' => [
         "Application"=> $appname,
         "Controller"=> $controller,

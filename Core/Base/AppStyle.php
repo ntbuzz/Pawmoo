@@ -248,10 +248,6 @@ public function ViewStyle($file_name) {
         $secval = (is_array($sec)) ? $sec : array($sec);    // 配列要素に統一
         list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
         foreach($secval as $vsec) {
-            if($vsec[0] == '@') {
-                if(!DEBUGGER) continue;   // デバッグモードでなければスキップ
-                $vsec = substr($vsec,1);
-            }
             $force_parent = TRUE;
             switch($vsec[0]) {
             case '^':                   // force Freamework Template
@@ -287,7 +283,14 @@ public function ViewStyle($file_name) {
 // ファイルのインポート処理
     private function filesImport($tmplist, $sec) {
         $files = (is_array($sec)) ? $sec : array($sec);
-        foreach($files as $vv) {
+        foreach($files as $key=>$vv) {
+            if(empty($vv)) {
+                preg_match('/(?:@(\w+):)?(.+)/',$key,$m);
+                list($tmp,$vars,$vv) = $m;
+                $test_value = MySession::get_paramIDs($vars);
+debug_log(9,['NAME'=>$vars,'VAL'=>$test_value]);
+                if(is_bool_false($test_value)) continue;
+            }
             if(get_protocol($vv) !== NULL) {    // IMPORT from INTERNET URL
                 list($filename,$v_str) = (strpos($vv,';')!==FALSE)?explode(';',$vv):[$vv,''];  // 置換文字列
                 parse_str($v_str, $vars);

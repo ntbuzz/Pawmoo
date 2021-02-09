@@ -96,9 +96,8 @@ public function __TerminateView() {
             debug_log(DBMSG_VIEW,"RedirectURL: {$url}");
             echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";
         }
-        if(DEBUGGER) {
-            $this->ViewTemplate('debugbar');
-        }
+        if( is_bool_false(MySession::get_paramIDs('debugger'))) return;
+        $this->ViewTemplate('debugbar');
     }
 }
 //==============================================================================
