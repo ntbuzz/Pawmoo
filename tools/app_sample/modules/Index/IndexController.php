@@ -7,6 +7,7 @@ class IndexController extends AppController {
 //==============================================================================
 //	クラス初期化処理
 	protected function ClassInit() {
+		MySession::set_paramIDs('admin',1);  // SET DEBUGGER
 	}
 //==============================================================================
 // デフォルトの動作
