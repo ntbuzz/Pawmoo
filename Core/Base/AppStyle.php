@@ -50,6 +50,7 @@ class AppStyle {
     private $do_msg;            // Echo import messagte
     private $do_com;            // Delete Comment Line
     private $repVARS;           // Replace Variable
+    private $importFiles;       // import-DEBUG
 //==============================================================================
 // Constructor
     function __construct($appname, $app_uri, $modname, $filename, $ext) {
@@ -109,6 +110,7 @@ public function ViewStyle($file_name) {
     $this->do_min = ($ext == 'min');           // Is Compact Output?
     $this->do_msg = TRUE ;                     // Is Import Message?
     $this->do_com = TRUE ;                     // Is Comment Output?
+    $this->importFiles = [];
     // Processing Template Style
     if($this->section_styles($temlatelist, $filename) === FALSE) {
         // not found in Template, then Real File Target Search.
@@ -120,6 +122,13 @@ public function ViewStyle($file_name) {
                 $this->outputContents($content);
             }
         }
+    }
+    sort($this->importFiles);
+    $res = array_filter(array_count_values($this->importFiles).function($v) {return --$v;});
+    if(!empty($res)) {
+        echo "/* === duplicate-import files. ===\n";
+        foreach($res as $ff) echo "{$ff}\n";
+        echo "*/\n";
     }
 }
 //==============================================================================
@@ -288,7 +297,6 @@ public function ViewStyle($file_name) {
                 preg_match('/(?:@(\w+):)?(.+)/',$key,$m);
                 list($tmp,$vars,$vv) = $m;
                 $test_value = MySession::get_paramIDs($vars);
-debug_log(9,['NAME'=>$vars,'VAL'=>$test_value]);
                 if(is_bool_false($test_value)) continue;
             }
             if(get_protocol($vv) !== NULL) {    // IMPORT from INTERNET URL
@@ -301,6 +309,7 @@ debug_log(9,['NAME'=>$vars,'VAL'=>$test_value]);
                 if(!empty($replace_keys)) $content = str_replace($replace_keys,$replace_values, $content);
                 echo "{$content}\n";
                 $imported = TRUE;
+                array_push($this->importFiles,$vv); // for-DEBUG
                 continue;
             }
             list($filename,$v_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];  // クエリ文字列を変数セットとして扱う
@@ -317,6 +326,7 @@ debug_log(9,['NAME'=>$vars,'VAL'=>$test_value]);
                     if($this->do_msg) echo "/* import({$filename}) in {$key} */\n";
                     $this->outputContents($content);
                     $imported = TRUE;
+                    array_push($this->importFiles,$fn); // for-DEBUG
                     break;
                 }
             }

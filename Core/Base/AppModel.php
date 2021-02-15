@@ -321,9 +321,10 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
         if( intval($row_id) === $primary) {
             $prev = false;
             $r_self = $data;
-        } else if($prev) {
             ++$row_num;
+        } else if($prev) {
             $r_prev = $data;
+            ++$row_num;
         } else {
             $r_next = $data;
             break;
