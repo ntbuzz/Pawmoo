@@ -93,7 +93,7 @@ public function is_authorised() {
 		debug_log(FALSE, [
 			"SESSION" => $_SESSION,
 			"ENVDATA" => MySession::$EnvData,
-			"POSTENV" => MySession::$ReqData,
+//			"POSTENV" => MySession::$ReqData,	use for Login DEBUG
 		]);
 	};
 	return TRUE;

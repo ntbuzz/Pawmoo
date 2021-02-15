@@ -23,7 +23,8 @@ var Locations = function (url) {
         this.array = this.array.slice(3);
         this.url = this.array.join("/") + "/";
     }
-    this.is_app = (this.array[0] == "${$appName$}");
+    var cont = "${$controller$}".toLowerCase();
+    if (this.arrayu[1] != cont) this.array.splice(1, 0, cont);      // controller name compensate
 };
 Locations.prototype.query = function () { return (this.qstr == "") ? "" : "?" + this.qstr; };
 Locations.prototype.last_path = function () { return this.array[this.array.length - 2]; };
@@ -41,8 +42,7 @@ Locations.prototype.fw_fullpath = function () {
     return this.base + path;
 };
 Locations.prototype.set_query = function (q) { this.qstr = q; };
-Locations.prototype.trunc_path = function (ix, e) {
-    var n = (this.is_app) ? ix : ix + 1;
+Locations.prototype.trunc_path = function (n, e) {
     for (var i = 0; i < e.length; i++) this.array[n + i] = e[i];
     n = n + e.length;
     return "/" + this.array.slice(0, n).join("/") + this.query();
@@ -54,60 +54,9 @@ Locations.prototype.href_param = function (e) { return this.trunc_path(4, e); };
 Locations.prototype.href_number = function (e) {
     var path = this.array;
     for (var n = path.length; (n > 1) && (!isNaN(path[n - 1])); --n);
-    if (!this.is_app) --n;
-    //        alert(objDump(path) + "\n" + n+"\n"+this.query());
+//  alert(objDump(path) + "\n" + n+"\n"+this.query());
     return this.trunc_path(n, e);
 };
-/*
-class Locations {
-    constructor(url = location.href) {
-        var path = url.replace(/%3F/g, '?').split('?');
-        this.url = path[0];
-        this.qstr = (path.length == 1) ? '' : path[1];
-        this.base = location.origin;
-        this.array = this.url.replace(/^[\/]+|[\/]+$/g, '').split('/');
-        if (this.array[0] == "http:" || this.array[0] == "https:") {
-            this.base = this.array.slice(0, 3).join("/");
-            this.array = this.array.slice(3);
-            this.url = this.array.join("/") + "/";
-        }
-        this.is_app = (this.array[0] == "${$appName$}")
-    }
-    get query() { return (this.qstr == "") ? "" : "?" + this.qstr; }
-    get last_path() { return this.array[this.array.length - 2]; }
-    get fw_fullpath() {
-        this.type = "./:".indexOf(this.url.charAt(0))+1;
-        var path = (this.type == 0) ? this.url : this.url.slice(1);
-        switch (this.type) {
-            case 1:
-                if (path.charAt(0) == '/') path = path.slice(1);
-                else this.type = 0;
-            case 0: path = "${$APPROOT$}" + path; break;
-            case 2: path = "${$SYSROOT$}" + path; break;
-            case 3: path = "/" + path; break;
-        }
-        return this.base + path;
-    }
-    set_query(q) { this.qstr = q; }
-    trunc_path(ix, e) {
-        var n = (this.is_app) ? ix : ix + 1;
-        for (var i = 0; i < e.length; i++) this.array[n + i] = e[i];
-        n = n + e.length;
-        return "/" + this.array.slice(0, n).join("/")+this.query;
-    }
-    href_controller(e) { return this.trunc_path(1, e); }
-    href_action(e) { return this.trunc_path(2, e); }
-    href_filter(e) { return this.trunc_path(3, e); }
-    href_param(e) { return this.trunc_path(4, e); }
-    href_number(e) {
-        var path = this.array;
-        for (var n = path.length; (n > 1) && (!isNaN(path[n-1])); --n) ;
-        if (!this.is_app) --n;
-//        alert(objDump(path) + "\n" + n+"\n"+this.query);
-        return this.trunc_path(n, e);
-    }
-};
-*/
 //====================================================
 // for DEBUG dump Object
 var objDump = function(obj, rIndent) {
