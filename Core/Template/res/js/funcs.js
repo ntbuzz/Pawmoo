@@ -24,7 +24,7 @@ var Locations = function (url) {
         this.url = this.array.join("/") + "/";
     }
     var cont = "${$controller$}".toLowerCase();
-    if (this.arrayu[1] != cont) this.array.splice(1, 0, cont);      // controller name compensate
+    if (this.array[1] != cont) this.array.splice(1, 0, cont);      // controller name compensate
 };
 Locations.prototype.query = function () { return (this.qstr == "") ? "" : "?" + this.qstr; };
 Locations.prototype.last_path = function () { return this.array[this.array.length - 2]; };
