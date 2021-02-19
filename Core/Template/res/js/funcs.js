@@ -80,3 +80,6 @@ var objDump = function(obj, rIndent) {
      result = String(result);
      return result;
 };
+function DebugSlider() {
+    if (typeof LoadDebugBar == "function") LoadDebugBar();
+}

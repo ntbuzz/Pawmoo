@@ -27,7 +27,7 @@ function pseudo_markdown($atext, $md_class = '') {
     // <PRE>,CR-LF, \<TAG>, and <DL> tag
     $atext = preg_replace_callback_array([
         // pre tag with class
-        '/(?:^|\n)(```|~~~|\^\^\^)(?:(\w+))?(.+?)\n\1/s' => function ($m) {
+        '/(?:^|\n)(```|~~~|\^\^\^)(?:([\-\w]+))?(.+?)\n\1/s' => function ($m) {
             $class = [ '```' => 'code','~~~' => 'indent','^^^' => 'indent'];
             $cls = ($m[2]==='')?$class[$m[1]]:$m[2];
             $txt = ($cls==='code') ? htmlspecialchars($m[3]) : $m[3];
@@ -104,8 +104,7 @@ function pseudo_markdown($atext, $md_class = '') {
         return $user_func($txt);
     }, $atext);
     // TABLE processing
-//    $p = '/\n(\|[\s\S]+?\|)\n(?:(?:\.(\w+))?\n|$)/s';
-    $p = '/(?:^|\n)(\|.+?\|)(?:\n(?:\.(\w+))?\n|$)/s';
+    $p = '/(?:^|\n)(\|.+?\|)(?:\n(?:\.([\-\w]+))?\n|$)/s';
     $atext = preg_replace_callback($p,function($matches) {
         // Combine lines that do not end with '|' as multiple lines
         $txt = preg_replace('/([^|])\n+/','\\1<br>', $matches[1]);
@@ -128,11 +127,12 @@ function pseudo_markdown($atext, $md_class = '') {
             $tags = [ '<' => 'left','>' => 'right','=' => 'center'];
             foreach($cols as $col) {
                 // maybe additional calss and colspan/rowspan
-                preg_match('/^(:)?([<>=])?(?:(@\d+|@+)|(\^\d+|\^+))*(?:\.(\w+))?(?:#(\d+))?/',$col,$m);
+                preg_match('/^(:)?([<>=])?(?:(@\d+|@+)|(\^\d+|\^+))*(?:\.([\-\w]+))?(?:#(\d+%?))?/',$col,$m);
                 $style = $attrs = '';
                 $tag = 'td';
                 switch(count($m)) {
-                case 7: $style .= ($m[6]==='') ? '':"width:{$m[6]}px;";
+                case 7: $wd = (substr($m[6],-1)==='%') ? $m[6] : "{$wd}px";
+                        $style .= ($m[6]==='') ? '':"width:{$m[6]};";
                 case 6: $attrs .= ($m[5]==='') ? '': " class='{$m[5]}'";
                 case 5: $attrs .= $col_row_span('^',$m[4]);
                 case 4: $attrs .= $col_row_span('@',$m[3]);
@@ -167,7 +167,7 @@ function pseudo_markdown($atext, $md_class = '') {
     };
     $atext = preg_replace_callback_array([
 //------- HEAD(#) TAG
-        '/^(#{1,6})(?:\.(\w+))? (.+?)$/m' => function($m) {
+        '/^(#{1,6})(?:\.([\-\w]+))? (.+?)$/m' => function($m) {
             $n = strlen($m[1]);
             $cls = ($m[2]==='')?'':" class='{$m[2]}'";
             return "<h{$n}{$cls}>{$m[3]}</h{$n}>";
@@ -189,7 +189,7 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<img src='{$src}' alt='{$alt}'{$sz} />";
         },
 //------- ..class#id{ TEXT } CLASS/ID attributed SPAN/P replacement
-        '/\s\.\.(?:(\w+))?(?:#(\w+))?(:)?\{(.+?)\}\s/s' => function ($m) {
+        '/\s\.\.(?:([\-\w]+))?(?:#([\-\w]+))?(:)?\{(.+?)\}\s/s' => function ($m) {
             $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
             $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
             $tag = ($m[3]==='') ? 'span' : 'p';
@@ -197,7 +197,7 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<{$tag}{$cls}{$ids}>{$txt}</{$tag}>";
         },
 //------- ...:{ TEXT }... NL change <br> tag in div-indent class
-        '/\s\.\.\.(?:(\w+))?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
+        '/\s\.\.\.(?:([\-\w]+))?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
             if($m[2]==='!') {
                 $txt = nl2br($m[3]);
                 // restore HTML-tag(</h1>) after <BR>
@@ -218,7 +218,7 @@ function pseudo_markdown($atext, $md_class = '') {
 //  textarea    => ^[name]!{text-value:col,row}
 //  textbox     => ^[name]={text-value:size}
 //  select      => ^[name]%{select-val:option1=val1,option2=val2,...}
-        '/(\s)\^\[(\w+)?\]([@:!=%])\{(.*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
+        '/(\s)\^\[([\-\w]+)?\]([@:!=%])\{(.*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
             $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea','%' => 'select'];
             $spc = $m[1]; $kind = $m[3]; $val = $m[4];
             $vv = $type[$kind];

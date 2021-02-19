@@ -58,6 +58,7 @@ function array_depth($a, $c = 0) {
 //==============================================================================
 // alternative array_merge(), Overwrite existing index elements
 function array_override($a, $b) {
+    if(empty($b)) return $a;
     foreach($b as $key => $val) $a[$key] = $val;
     return $a;
   }

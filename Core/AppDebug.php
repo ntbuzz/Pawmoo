@@ -5,25 +5,26 @@
  */
 if(!defined('DEBUG_LEVEL')) define('DEBUG_LEVEL', 10);
 
-define('DBMSG_SYSTEM',  -104);      // for Main, App, Controller
-define('DBMSG_LOCALE',  -103);      // for LangUI
-define('DBMSG_VIEW',    -102);      // for View, Helper
-define('DBMSG_MODEL',   -101);      // for Model
-define('DBMSG_HANDLER', -100);      // for DB-Handler
+define('DBMSG_SYSTEM',  -105);      // for Main, App, Controller
+define('DBMSG_LOCALE',  -104);      // for LangUI
+define('DBMSG_VIEW',    -103);      // for View, Helper
+define('DBMSG_MODEL',   -102);      // for Model
+define('DBMSG_HANDLER', -101);      // for DB-Handler
+define('DBMSG_RESOURCE',-100);      // for Style/Script
 define('DBMSG_LEVEL',   -100);      // logging level
 
 const EMPTY_MSG = " EMPTY\n";
 /*
     アプリケーションデバッグ情報
 */
-//==============================================================================
-//  デバッグログ出力
 $debug_log_str = [];
 $debug_run_time = 0;
+//==============================================================================
+//  デバッグログ出力
 function get_debug_logs() {
-    global $debug_log_str;
-    ksort($debug_log_str);
-    return $debug_log_str;
+    $current_log = MySession::get_paramIDs('debuglog');
+    if($current_log !== NULL) ksort($current_log);
+    return $current_log;
 }
 //==========================================================================
 // 実行時間測定開始
@@ -51,6 +52,7 @@ function debug_dump(...$items) {
 function log_reset($lvl) {
     global $debug_log_str;
     unset($debug_log_str[$lvl]);
+    MySession::set_paramIDs("debuglog.{$lvl}",NULL);
 }
 //==========================================================================
 // ログの記録または表示
@@ -105,7 +107,6 @@ function debug_log($lvl,...$items) {
                     if(empty($obj)) {
                         $dmp_msg .= "{$msg} : NULL\n";
                     } else if(is_scalar($obj)) {
-//                        $obj = control_escape($obj);
                         $dmp_msg .= "{$msg} : {$obj}\n";
                     } else if(is_array($obj)) {
                         $dmp_msg .= "===== {$msg} =====\n";
@@ -123,14 +124,12 @@ function debug_log($lvl,...$items) {
     global $debug_log_str;
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
-        if(!CLI_DEBUG) {
-            $dmp_info = htmlspecialchars($dmp_info);
-            $dmp_info = "<pre>\n{$dmp_info}\n</pre>\n";
-        }
         if($lvl < 0 && $lvl > DBMSG_LEVEL) echo "{$dmp_info}\n";
         else {
-            if(isset($debug_log_str[$lvl])) $debug_log_str[$lvl] .= $dmp_info;
-            else $debug_log_str[$lvl] = $dmp_info;
+            $c_info = $debug_log_str[$lvl];
+            if(!empty($c_info)) $dmp_info = "{$c_info}{$dmp_info}";
+            MySession::set_paramIDs("debuglog.{$lvl}",$dmp_info);
+            $debug_log_str[$lvl] = $dmp_info;
         }
     }
     if(abs($lvl) === 99) exit;

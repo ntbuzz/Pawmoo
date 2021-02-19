@@ -87,6 +87,7 @@ public static function LangDebug() {
 //==============================================================================
 //  言語ファイルの読み込み
     private static function LoadLang($lang_file) {
+        if(empty($lang_file)) return;
         $is_global = ($lang_file[0] == '#');
         if($is_global) {
             $lang_file = mb_substr($lang_file,1);
@@ -169,7 +170,7 @@ public static function get_value($mod, $id, $allow = FALSE) {
             return $arr;        // スカラー値はそのまま返す
         };
     //-----------------------------------------
-    if($id[0] == '.') {        // 相対検索ならモジュール名を使う
+    if($id[0] === '.') {        // 相対検索ならモジュール名を使う
         $lst = explode('.', "{$mod}{$id}");
         if( ($a=$array_finder($lst,static::$STRINGS,$allow)) !== FALSE) {
             return $a;

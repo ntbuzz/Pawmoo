@@ -4,11 +4,12 @@
     Level => [
         APP
         Category => [
-            -104 => システム
-            -103 => 言語
-            -102 => ビュー
-            -101 => モデル
-            -100 => ハンドラー
+            -105 => システム
+            -104 => 言語
+            -103 => ビュー
+            -102 => モデル
+            -101 => ハンドラー
+            -100 => リソース
         ]
     ]
     DebugInfo => デバッグ情報
@@ -24,11 +25,12 @@
     Level => [
         App
         Category => [
-            -104 => System
-            -103 => Locale
-            -102 => View
-            -101 => Model
-            -100 => Handler
+            -105 => System
+            -104 => Locale
+            -103 => View
+            -102 => Model
+            -101 => Handler
+            -100 => Resource
         ]
     ]
     DebugInfo => "Debug Info"

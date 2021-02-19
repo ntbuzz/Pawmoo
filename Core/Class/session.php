@@ -19,6 +19,7 @@ class MySession {
 //==============================================================================
 // static クラスにおける初期化処理
 static function InitSession($appname = 'default',$unset_param = FALSE) {
+	$appname = strtolower($appname);
 	$session_id = SESSION_PREFIX . "_{$appname}";
 //	unset($_SESSION[$session_id]);
 	static::$MY_SESSION_ID = $session_id;
@@ -122,7 +123,8 @@ static function set_paramIDs($names,$val) {
 //==============================================================================
 // ENV変数からアプリケーションパラメータを識別子指定で値を取得
 static function get_paramIDs($names) {
-	return static::get_varIDs(TRUE,PARAMS_NAME.".{$names}");
+	$nVal = array_member_value(static::$EnvData, PARAMS_NAME.".{$names}");
+	return $nVal;
 }
 //==============================================================================
 // ENV変数をクリア

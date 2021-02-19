@@ -9,6 +9,10 @@ class AppController extends AppObject {
 	public $disableAction = [];			// Ban Action
 	private $my_method;					// active method list on Instance
 	protected $needLogin = FALSE;		// Login NEED flag
+	protected $aliasAction = [			// Action Method Alias
+//			'List' => 'View',			// ListAction called ViewAction
+//			'View' => 'List',			// ViewAction called ListAction
+	];
 //==============================================================================
 // constructor: create MODEL, VIEW(with HELPER)
 	function __construct($owner = NULL){
@@ -56,7 +60,8 @@ public function __TerminateApp() {
 //==============================================================================
 // check active METHOD
 public function is_enable_action($action) {
-	if(in_array($action,$this->my_method,true)) return TRUE;	// exist ENABLED List
+	if(	array_key_exists($action,$this->aliasAction) ||		// exists Alias Action
+		in_array($action,$this->my_method,true)) return TRUE;	// exist ENABLED List
 	return FALSE;	// diable ActionMethod
 }
 //==============================================================================
@@ -125,6 +130,9 @@ protected function ActionPostProcess($action) {
 // Method Dispatcher before Pre-Process, after Post-Processing
 public function ActionDispatch($action) {
 	if($this->ActionPreProcess($action)) {
+		if(array_key_exists($action,$this->aliasAction)) {
+			$action = $this->aliasAction[$action];
+		}
 		$method = "{$action}Action";
 		$this->$method();
 		$this->ActionPostProcess($action);
@@ -185,6 +193,14 @@ public function FindAction() {
 //==============================================================================
 // Default View Action
 public function ViewAction() {
+	$num = App::$Params[0];
+	$this->Model->GetRecord($num,TRUE);
+	$this->Model->GetValueList();
+	$this->View->PutLayout('ContentView');
+}
+//==============================================================================
+// Default Item View Action
+public function ItemAction() {
 	$num = App::$Params[0];
 	$this->Model->GetRecord($num,TRUE);
 	$this->Model->GetValueList();

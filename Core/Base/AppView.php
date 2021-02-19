@@ -213,7 +213,7 @@ public function ViewTemplate($name,$vars = []) {
                 }
                 break;
             case ':':                                   // Class Property
-                   	$p = '/(:{1,2})(\w+)(?:\[([\w_\.\'"]+)\])?/';
+                   	$p = '/(:{1,2})(\w+)(?:\[([\w\.\'"]+)\])?/';
                     preg_match($p,$var,$m);
                     $m[] = NULL;    // add NULL element for list()
                     list($match,$cls,$var,$mem) = $m;

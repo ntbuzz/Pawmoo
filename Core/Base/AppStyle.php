@@ -124,11 +124,9 @@ public function ViewStyle($file_name) {
         }
     }
     sort($this->importFiles);
-    $res = array_filter(array_count_values($this->importFiles).function($v) {return --$v;});
+    $res = array_filter(array_count_values($this->importFiles), function($v) {return --$v;});
     if(!empty($res)) {
-        echo "/* === duplicate-import files. ===\n";
-        foreach($res as $ff) echo "{$ff}\n";
-        echo "*/\n";
+        debug_log(DBMSG_RESOURCE,['duplicate-import files'=>$res]);
     }
 }
 //==============================================================================
@@ -201,11 +199,11 @@ public function ViewStyle($file_name) {
                     list($cmd,$param) = (is_array($def_func)) ? $def_func:[$def_func,'']; 
                     if((method_exists($this, $cmd))) {
                         $this->$cmd($secParam,$param,$sec);
-                    } else echo "+++ Method Not Found({$cmd})\n";
-                } else echo "*** '{$tag}' is Feature Command...\n";
+                    } else debug_log(DBMSG_RESOURCE,['+++ Method Not Found'=>$cmd]);
+                } else debug_log(DBMSG_RESOURCE,['*** In Feature Command...'=>$tag]);
             } else if(method_exists($this, $func)) {
                 $this->$func($tag,$sec);        // ダイレクトコマンド
-            } else echo "CALL: {$func}({$tag},{$sec},vars)\n";  // 未定義のコマンド
+            } else debug_log(DBMSG_RESOURCE,["Undefined Func CALL:{$func}"=>[$tag,$sec]]);  // 未定義のコマンド
             return TRUE;    // コマンド処理を実行
         } else {
             return FALSE;   // コマンド処理ではない
@@ -263,20 +261,20 @@ public function ViewStyle($file_name) {
                 $vsec = substr($vsec,1);
                 $before = $tmplist;     // change before list
                 $tmplist = array( 'Libs' => $tmplist['Libs']);
-            debug_log(-999,["Libs::{$vsec}:{$secname}"=>['BEFORE'=>$before,'AFTER'=>$tmplist]]);
+//            debug_log(-999,["Libs::{$vsec}:{$secname}"=>['BEFORE'=>$before,'AFTER'=>$tmplist]]);
                 break;
             case '!':               // force parent Template
                 $vsec = substr($vsec,1);
                 $before = $tmplist;     // change before list
                 array_shift($tmplist);  // remove top element
-            debug_log(-999,["Parent::{$vsec}:{$secname}"=>['BEFORE'=>$before,'AFTER'=>$tmplist]]);
+//            debug_log(-999,["Parent::{$vsec}:{$secname}"=>['BEFORE'=>$before,'AFTER'=>$tmplist]]);
                 break;
             default:
                 $before = $tmplist;     // change before list
                 if($vsec === $secname || !array_key_exists($vsec, $secData) ) {
                     array_shift($tmplist);  // remove top element
                 } else $force_parent = FALSE;
-            debug_log(-999,["tmplist-{$vsec}:{$secname}"=>['BEFORE'=>$before,'AFTER'=>$tmplist]]);
+//              debug_log(-999,["tmplist-{$vsec}:{$secname}"=>['BEFORE'=>$before,'AFTER'=>$tmplist]]);
             }
             list($key,$item) = array_first_item($tmplist);
             $secmsg = ($force_parent) ? "Invoke {$key}:{$vsec}" : "Subsection: {$vsec}";
@@ -331,7 +329,8 @@ public function ViewStyle($file_name) {
                 }
             }
             if(!$imported) {
-                echo "/* NOT FOUND:= {$filename} */\n";
+                echo "/* NOT FOUND {$filename} */\n";
+                debug_log(DBMSG_RESOURCE,['LIST'=>$tmplist,'NOT FOUND'=>$filename]);
             }
         }
     }

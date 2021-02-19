@@ -2,6 +2,25 @@
 //=========================================================
 // JQueryプラグインを定義する
 (function ($) {
+    // 指定要素に読み込んだHTMLを書き込む
+    $.fn.LoadContents = function (url, callback=null) {
+        var self = this; // jQueryオブジェクトを変数に代入しておく
+        $('body').css('cursor', 'wait');
+        $.post(url,
+            function(data){
+                //リクエストが成功した際に実行する関数
+                self.html(data);
+                DebugSlider();
+                $('body').css('cursor', 'default');
+                if(callback!=null) callback(true);
+            })
+            .fail(function() {
+                DebugSlider();
+                $('body').css('cursor', 'default');
+                alert( "error:"+url );
+                if(callback!=null) callback(false);
+            });
+    };
     // 指定要素 e のスクロールに追従する
     $.fn.busy_icon = function (disp) {
         var self = this; // jQueryオブジェクトを変数に代入しておく

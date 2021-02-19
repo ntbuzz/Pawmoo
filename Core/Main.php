@@ -190,12 +190,10 @@ if($controllerInstance->is_authorised()) {
 }
 
 debug_run_time(DBMSG_SYSTEM);
-MySession::CloseSession();
 debug_log(DBMSG_SYSTEM, [
-    "#SessionClose" => [
-        "ENVDATA" => MySession::$EnvData,
-    ]
+    "#SessionClose" => MySession::$EnvData,
 ]);
+MySession::CloseSession();
 // call OUTPUT terminate
 $controllerInstance->__TerminateApp();
 // Database connection closed.
