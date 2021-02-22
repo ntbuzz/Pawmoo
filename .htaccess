@@ -1,7 +1,7 @@
 DirectoryIndex index.php
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteBase /pawmoo/
+RewriteBase /pawmoo_dev/
 
 # 外部ライブラリ
 RewriteRule ^(css|js|images)/(.*)$       vendor/webroot/$1/$2 [END]
