@@ -14,6 +14,11 @@ define('DBMSG_RESOURCE',-100);      // for Style/Script
 define('DBMSG_LEVEL',   -100);      // logging level
 
 const EMPTY_MSG = " EMPTY\n";
+const EXCLUSION = [
+    'debuglog' => 1,
+    'password' => 1,
+    'passwd' => 1,
+];
 /*
     アプリケーションデバッグ情報
 */
@@ -78,6 +83,7 @@ function debug_log($lvl,...$items) {
         $dump_object = function ($obj,$indent) use (&$dump_object) {
             $dmp = "";
             foreach($obj as $key => $val) {
+                if(array_key_exists($key,EXCLUSION)) continue;      // not dump element check
                 $dmp .= str_repeat(' ',$indent*2) . "[{$key}] = ";
                 if(empty($val)) {
                     $dmp .= (is_int($val)) ? "0\n" : "NULL\n";
@@ -126,8 +132,7 @@ function debug_log($lvl,...$items) {
     if(!empty($dmp_info)) {
         if($lvl < 0 && $lvl > DBMSG_LEVEL) echo "{$dmp_info}\n";
         else {
-            $c_info = $debug_log_str[$lvl];
-            if(!empty($c_info)) $dmp_info = "{$c_info}{$dmp_info}";
+            if(isset($debug_log_str[$lvl])) $dmp_info = $debug_log_str[$lvl] . $dmp_info;
             MySession::set_paramIDs("debuglog.{$lvl}",$dmp_info);
             $debug_log_str[$lvl] = $dmp_info;
         }

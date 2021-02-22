@@ -164,7 +164,7 @@ debug_log(DBMSG_SYSTEM, [
     "SESSION" => [
         "SESSION_ID"=> MySession::$MY_SESSION_ID,
         "ENV"       => MySession::$EnvData,
-//        "REQUEST"   => MySession::$ReqData,   Hide-Login Password
+        "POST"      => MySession::$ReqData,   // Hide debuglog,password
     ],
     '#PathInfo' => [
         "REFERER" => $_SERVER['HTTP_REFERER'],

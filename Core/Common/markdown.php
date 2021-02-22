@@ -131,8 +131,8 @@ function pseudo_markdown($atext, $md_class = '') {
                 $style = $attrs = '';
                 $tag = 'td';
                 switch(count($m)) {
-                case 7: $wd = (substr($m[6],-1)==='%') ? $m[6] : "{$wd}px";
-                        $style .= ($m[6]==='') ? '':"width:{$m[6]};";
+                case 7: $wd = (substr($m[6],-1)==='%') ? $m[6] : "{$m[6]}px";
+                        $style .= ($m[6]==='') ? '':"width:{$wd};";
                 case 6: $attrs .= ($m[5]==='') ? '': " class='{$m[5]}'";
                 case 5: $attrs .= $col_row_span('^',$m[4]);
                 case 4: $attrs .= $col_row_span('@',$m[3]);

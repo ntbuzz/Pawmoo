@@ -32,7 +32,7 @@ static function InitSession($appname = 'default',$unset_param = FALSE) {
 	// overwrite real POST/GET variables
 	static::$ReqData = [];
 	$bool_value = [ 'on' => TRUE,'off' => FALSE,'t' => TRUE,'f' => FALSE,'1' => TRUE,'0' => FALSE];
-	foreach($_REQUEST as $key => $val) {
+	foreach($_POST as $key => $val) {		// GET parameter will be check query
 		if(array_key_exists($key,$bool_value)) $val = $bool_value[$key];
 		if(ctype_alnum(str_replace(['-','_'],'', $key))) static::$ReqData[$key] = $val;
 	}

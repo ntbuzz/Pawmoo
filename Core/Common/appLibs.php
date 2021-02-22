@@ -163,7 +163,7 @@ function make_hyperlink($lnk,$modname) {
             }
         }
     }
-    return $lnk;
+    return trim($lnk);
 }
 //==============================================================================
 // MARKING WORD by SPAN CLASS
