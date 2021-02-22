@@ -11,12 +11,10 @@
 	$_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'ja;en;ja';		// 言語受け入れリスト
 	$_SERVER['HTTP_REFERER'] = "localhost";
 	$_SERVER['SERVER_PORT'] = '';
-//	print_r($_SERVER);
+
 	$uri = $_SERVER['REQUEST_URI'];
 	list($url,$q_str) = (strpos($uri,'?')!==FALSE)?explode('?',$uri):[$uri,''];
 	parse_str($q_str, $query);
-//	$query['begDate'] = '';
-//	$query['endDate'] = '';
 	$_REQUEST =  $query;
 
 	require_once('index.php');		// リソース呼出しとの振分けも行う
