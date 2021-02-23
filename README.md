@@ -31,8 +31,7 @@ You will need the app repository and vendor libraries to run as an application.
     vendor/webroot/js/jquery-3.2.1.min.js  
     vendor/webroot/js/jquery-ui-1.12.1/jquery-ui.min.js  
     vendor/webroot/js/jquery-ui-1.12.1/jquery-ui.min.css  
-1. create 'app' directory and copy sample application,  
-    'tools/app_sample' copy to 'app/sample'.  
+1. tools/app_sample already copied to app directory.
 1. adjusted '.htaccess' or 'web.config' for your Web-Server.
 1. Open Browser, Typical URL is http://localhost/sample/index/
 
