@@ -101,6 +101,11 @@ selector.each(function () {
         $(window).resize();
         return false;
     });
+    // フォーム内のINPUTでENTERが押下されたときの処理
+    $(id + " input").keypress(function (e) {
+        if (e.key === 'Enter') $('.execButton').click();
+//        if (e.key === 'Escape') $('.cancel').click(); // ESCAPEキーは発火しない？
+    });
     // タイトルバーのドラッグ
     $(id+" dl dt").mousedown( function(e) {
         self.data("clickPointX", e.pageX - self.offset().left)

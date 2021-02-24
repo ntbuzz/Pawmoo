@@ -3,7 +3,8 @@
 // JQueryプラグインを定義する
 (function ($) {
     // 指定要素に読み込んだHTMLを書き込む
-    $.fn.LoadContents = function (url, callback=null) {
+    $.fn.LoadContents = function (url, callback) {
+        if (callback === undefined) callback = null;    // IE11で引数省略の不具合対応
         var self = this; // jQueryオブジェクトを変数に代入しておく
         $('body').css('cursor', 'wait');
         $.post(url,
