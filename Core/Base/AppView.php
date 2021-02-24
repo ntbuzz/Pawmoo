@@ -419,9 +419,9 @@ public function ViewTemplate($name,$vars = []) {
                                 set_array_key_unique($subsec,$sec,[]);
                             } else {
                                 // separate attribute
-                                $p = '/^([a-zA-Z]+[^\\\]):["\']?(.+)["\']?/';
+                                $p = '/^([a-zA-Z]+[^\\\]):(.+)$/';
                                 if(preg_match($p,$sec,$m) === 1) {
-                                    $attrList[$m[1]] = $m[2];
+                                    $attrList[$m[1]] = trim($m[2],"\"'");   // quote-char trim
                                 } else $innerText .= $sec;
                             }
                         } else $subsec[] = $sec;

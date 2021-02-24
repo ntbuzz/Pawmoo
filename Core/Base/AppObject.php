@@ -70,7 +70,7 @@ public function __get($PropName) {
     if(isset($this->$PropName)) return $this->$PropName;
     $class_load = array(
         'Class'     => [ -5, ['Class'] ],
-        'Model'     => [ -5, ['Models','Models/Misc','modules/'] ],
+        'Model'     => [ -5, ['Models','modules/','Models/Asst','Models/Misc'] ],
         'Controller'=> [-10, ['modules/'] ],
     );
     if(array_key_exists($PropName,$class_load)) {
