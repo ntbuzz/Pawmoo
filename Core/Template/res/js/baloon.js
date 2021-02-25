@@ -47,7 +47,7 @@ selector.each(function () {
                 },
                 outRangeX: function () {
                     if ((this.left + this.width) <= $(window).width()) return false;
-                    this.left = target.left - this.width + (target.width/2);
+                    this.left = target.left - this.width + target.width;
                     return true;
                 },
                 outRangeY: function () {

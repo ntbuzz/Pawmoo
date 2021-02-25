@@ -181,11 +181,10 @@
 /* ヘルプアイコン */
 span.help_icon {
     position:absolute;
-    float:top;
-    margin-top:0px;
+    top:4px;
     width:17px;
     height:15px;
-    background: url(res/img/pop_help.png) no-repeat left top;
+    background: url(res/img/pop_help_c.png) no-repeat left bottom;
 }
 /*==============================================================================
 インフォボックス

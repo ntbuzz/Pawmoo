@@ -106,7 +106,7 @@ public function RelationSetup() {
     debug_log(DBMSG_MODEL,[             // DEBUG LOG information
 //        "Schema" => $this->Schema,
         "Header" => $this->HeaderSchema,
-        "Field" => $this->FieldSchema, 
+//        "Field" => $this->FieldSchema, 
 //        "Def-Relation" => $this->Relations, 
         "JOIN-definition" => $new_Relations,
         "Locale-Bind" => $this->dbDriver->fieldAlias->GetAlias(),

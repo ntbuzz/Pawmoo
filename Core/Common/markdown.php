@@ -283,7 +283,7 @@ function pseudo_markdown($atext, $md_class = '') {
             case '=':   // text
                     $vv = explode(':',$val);
                     $sz = (empty($vv[1])) ? '' : " size='{$vv[1]}'";
-                    $tag = "{$spc}{$tag}{$sz} value='{$vv[0]}'>";
+                    $tag = "{$spc}{$tag}{$sz} value='{$vv[0]}' />";
                     break;
             }
             return $tag;

@@ -2,10 +2,10 @@
 /* -------------------------------------------------------------
  * PHPフレームワーク
  *  AppFilesModel: ファイル構造をデータベース代わりにアクセスするモデル
- *  これは暫定実装で、最終的には fileclass をベースにする
+ *  このクラスは廃止。
  */
 
-class AppFilesModel extends AppObject {
+class XAppFilesModel extends AppObject {
     protected static $DatabaseSchema = [];
     public $TopFolder;		// フォルダトップ
     public $SubFolder;		// 付加文字列
@@ -132,7 +132,7 @@ class AppFilesModel extends AppObject {
     }
 //==============================================================================
 // ZIPファイルの作成
-    public function Make_ZipFile($filepath,$zipname) {
+    protected function Make_ZipFile($filepath,$zipname) {
 	    // Zipクラスロード
         $zip = new ZipArchive();
 		// Zipファイル一時保存ディレクトリ
@@ -171,5 +171,33 @@ class AppFilesModel extends AppObject {
         // 作成したZIPファイルを返す
         return $zipFilePath;
     }
+//==============================================================================
+// ZIPダウンロード
+    private function ZipDownload($srcname,$zipName) {
+        $zipArchive = $this->Make_ZipFile($srcname,$zipName);
+        // ストリームに出力
+        header('Content-Type: application/zip: name="'.LocalCharset($zipName).'"');
+        header('Content-Disposition: attachment: filename="'.LocalCharset($zipName).'"');
+        header('Content-Length: '.filesize($zipArchive));
+        readfile($zipArchive);
+        unlink($zipArchive);
+    }
+//==============================================================================
+// 単独ファイルのZIPダウンロード
+public function DownloadFile($path,$filename) {
+    list($basename,$ext) = extract_base_name($filename);
+    $zipName = "{$basename}.zip";
+    $srcname = "{$path}/{$filename}";
+    $this->ZipDownload($srcname,$zipName);
+}
+//==============================================================================
+// フォルダ内のファイル一括ZIP
+public function DownloadFolder($path,$prefix='') {
+    list($base,$folder) = extract_path_filename($path);
+    $zipName = "{$prefix}{$folder}.zip";
+    $this->ZipDownload($path,$zipName);
+}
+
+
 
 }

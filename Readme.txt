@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2021 by nTak
  * @license    MIT
- * @version 0.48.0, 2021-02-22
+ * @version 0.49.0, 2021-02-25
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,12 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 履歴
+【0.49.0】2021/02/25
+    ○改善
+    ・AppFilesModel クラスを廃止 (FlatFolderクラスへ移行)
+    ・テンプレート内のmarkdownテキストボックス不具合修正
+    ・バルーンヘルプアイコンを変更
+
 【0.48.0】2021/02/22
     ○改善
     ・POST変数のダンプを特定要素(debuglog,password)の除外を条件に復活
