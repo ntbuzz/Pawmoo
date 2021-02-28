@@ -23,6 +23,7 @@
     SEND    => 送信
     PassError => パスワードが違います
     UnknownUser => 不明なユーザー
+    SelectMe => 【選択してください】
 ]
 .en => [
     // for Pager Buttons
@@ -44,6 +45,7 @@
     SEND    => Send
     PassError => 'PASSWORD Missing'
     UnknownUser => "Unknown USER"
+    SelectMe => "[Select Item]"
 ]
 
 SW開発 => [

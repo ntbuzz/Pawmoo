@@ -2,6 +2,12 @@
 //=========================================================
 // JQueryプラグインを定義する
 (function ($) {
+    // 連動セレクトタグ
+    $.fn.ChainSelect = function (selObj,val) {
+        var id = this.attr('id');
+        var sel_chain = new SelectChain(id,selObj);
+        sel_chain.Select(val);
+    };
     // 指定要素に読み込んだHTMLを書き込む
     $.fn.LoadContents = function (url, callback) {
         if (callback === undefined) callback = null;    // IE11で引数省略の不具合対応

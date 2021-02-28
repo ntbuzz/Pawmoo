@@ -250,7 +250,7 @@ protected function sql_safequote(&$value) {
 		$sql = "SELECT {$this->table}.*";
 		$frm = " FROM {$this->table}";
 		$jstr = '';
-		if($use_relations) {
+		if($use_relations && !empty($this->relations)) {
 			foreach($this->relations as $key => $val) {
 				foreach($val as $alias => $lnk) {
 					list($table,$fn,$ref) = explode('.', $lnk);

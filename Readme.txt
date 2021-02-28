@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2021 by nTak
  * @license    MIT
- * @version 0.49.0, 2021-02-25
+ * @version 0.50.0, 2021-02-28
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,13 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 履歴
+【0.50.0】2021/02/28
+    ○改善
+    ・Selctionスキーマと、JQueryプラグインのChainSelection()を追加
+    ・値一覧をJOIN定義での自動取得からSelectionスキーマの指定値のみ取得に変更
+    ・ヘルパーにChainSlection用のオブジェクトテーブル生成メソッドを追加
+    ・もろもろのバグを修正
+
 【0.49.0】2021/02/25
     ○改善
     ・AppFilesModel クラスを廃止 (FlatFolderクラスへ移行)
