@@ -28,7 +28,7 @@ require_once('App.php');
 require_once('Base/AppObject.php');
 require_once('Base/AppController.php');
 require_once('Base/AppModel.php');
-require_once('Base/AppFilesModel.php');
+//require_once('Base/AppFilesModel.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
 require_once('Base/LangUI.php');

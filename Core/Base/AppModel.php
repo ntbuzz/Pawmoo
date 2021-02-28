@@ -62,10 +62,8 @@ public function ResetSchema() {
     $this->RelationSetup();
 }
 //==============================================================================
-// Table Relation setup
-public function RelationSetup() {
-    // extract DataTable or Alternate DataView
-    $model_view = function($db) {
+// extract DataTable or Alternate DataView
+    private function model_view($db) {
         list($model,$field,$refer) = explode('.', "{$db}...");
         if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
             $model = $m[1];
@@ -74,7 +72,10 @@ public function RelationSetup() {
                         : $this->$model->dbDriver->table;                 // illegal define
         } else $table = $this->$model->dbDriver->table;
         return [$model,$table,$field,$refer];
-    };
+    }
+//==============================================================================
+// Table Relation setup
+public function RelationSetup($debug_log = DBMSG_MODEL) {
     $new_Relations = [];
     foreach($this->Relations as $key => $rel) {
         $base_name = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
@@ -82,11 +83,11 @@ public function RelationSetup() {
         if($rel_array) {
             list($db,$ref_list) = array_first_item($rel);
             if(is_numeric($db)) continue;
-            list($model,$table,$field) = $model_view($db);
+            list($model,$table,$field) = $this->model_view($db);
             $link = "{$table}.{$field}";
             if(is_scalar($ref_list)) $ref_list = [$ref_list];    // force array
         } else {
-            list($model,$table,$field,$refer) = $model_view($rel);
+            list($model,$table,$field,$refer) = $this->model_view($rel);
             $link = "{$table}.{$field}";
             $ref_list = [ $refer ];
         }
@@ -103,15 +104,49 @@ public function RelationSetup() {
         $new_Relations[$key] =  $sub_rel;
     }
     $this->dbDriver->setupRelations($new_Relations);
-    debug_log(DBMSG_MODEL,[             // DEBUG LOG information
+    $this->SelectionSetup();
+    debug_log($debug_log,[             // DEBUG LOG information
 //        "Schema" => $this->Schema,
         "Header" => $this->HeaderSchema,
-        "Field" => $this->FieldSchema, 
+//        "Field" => $this->FieldSchema, 
 //        "Def-Relation" => $this->Relations, 
         "JOIN-definition" => $new_Relations,
         "Locale-Bind" => $this->dbDriver->fieldAlias->GetAlias(),
+        "SELECTDEFS" => $this->Selection,
     ]);
 //    $this->Relations = $new_Relations;
+}
+//==============================================================================
+// Selection Table Relation setup
+//   Selection => [
+//      'os_select'      => [ 'Os.id' => [ 'name', 'os_id' ] ],
+//      'os_select_id'   => [ 'Os.id' => 'name.os_id'  ],
+//       'lisece_select' => [ 'id','license','operating_system_id' ],
+//   ]
+public function SelectionSetup() {
+    $new_Selection = [];
+    if(isset($this->Selection)) {
+    foreach($this->Selection as $key_name => $seldef) {
+        $lnk = [];
+        if(is_scalar($seldef)) $lnk[0] = $seldef;
+        else {
+            list($model,$ref_list) = array_first_item($seldef);
+            if($model === 0) {
+                $lnk[0] = $seldef;
+            } else {
+                list($model,$table,$field) = $this->model_view($model);
+                if(is_scalar($ref_list)) {
+                    $lnk = [ $model => "{$field}.{$ref_list}"] ;
+                } else {
+                    array_unshift($ref_list,$field);
+                    $lnk[$model] = $ref_list;
+                }
+            }
+        }
+        $new_Selection[$key_name] =  $lnk;
+    }
+    }
+    $this->Selection = $new_Selection;
 }
 //==============================================================================
 // Schema Define Analyzer
@@ -123,7 +158,10 @@ public function RelationSetup() {
             list($disp_name,$disp_flag,$width,$relations,$binds) = $defs;
             list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
             if(!empty($relations)) {
-                if(substr($key,-3)==='_id' && is_scalar($relations)) $ref_key = substr($key,0,strlen($key)-3);
+                if(substr($key,-3)==='_id' && is_scalar($relations)) {
+                    $ref_key = substr($key,0,strlen($key)-3);
+                    $field[$key] = $key;        // setup name before _id cut-out
+                }
                 $relation[$key] = $relations;
             }
             if(!empty($binds)) {
@@ -184,13 +222,56 @@ public function GetRecord($num,$join=FALSE) {
 //==============================================================================
 //   Get Relation Table fields data list.
 // Result:   $this->Select (Relations)
+/*
 public function GetValueList() {
     $valueLists = array();
     $this->dbDriver->getValueLists_callback(function($key,$val_list) use (&$valueLists) {
         $valueLists[$key] = $val_list;
     });
     $this->Select= $valueLists;
-    debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $valueLists]);
+    debug_log(DBMSG_MODEL, [ "SELECT_LIST" => $this->Select]);
+}
+*/
+//==============================================================================
+//   Get Relation Table fields data list.
+// Result:   $this->Select (Relations)
+public function GetValueList() {
+    $valueLists = array();
+    $filter_rec = function($record,$filter) {
+        $new = [];
+        foreach($filter as $key) $new[$key] = $record[$key];
+        return $new;
+    };
+    foreach($this->Selection as $key_name => $seldef) {
+        list($model,$ref_list) = array_first_item($seldef);
+        if(is_numeric($model)) {        // self list
+            $this->RecordFinder([],$ref_list,NULL,$filter_rec);
+            $valueLists[$key_name] = $this->Records;
+        } else if(is_array($ref_list)) {
+            $this->$model->RawRecordFinder([],$ref_list,NULL,$filter_rec);
+            $valueLists[$key_name] = $this->$model->Records;
+        } else {
+            $ref_list = explode('.', $ref_list);
+            $postfix = (count($ref_list) > 2);      // append to keyname_field
+            $ref_list = array_filter( $ref_list, "strlen" ) ;
+            $new_rec = [];
+            $this->$model->RecordFinder([],$ref_list,NULL,function($record,$filter) use(&$new_rec) {
+                $id = array_shift($filter);
+                foreach($filter as $key) {
+                    $rec_key = $record[$key];
+                    if(!empty($rec_key)) $new_rec[$key][$rec_key] = $record[$id];
+                }
+                return [];
+            });
+            array_shift($ref_list);     // remove relation-id
+            foreach($ref_list as $key) {
+                $key_set = ($postfix) ? "{$key_name}_{$key}" : $key_name;
+                $valueLists[$key_set] = $new_rec[$key];
+            }
+        }
+    }
+    $this->Select= $valueLists;
+    debug_log(DBMSG_MODEL, [ "SELECT_LIST" => $this->Select]);
 }
 //==============================================================================
 //   Get Field Value List
@@ -214,7 +295,7 @@ public function getCount($cond) {
 //==============================================================================
 // Get Record List by FIND-CONDITION with JOIN Table.
 // Result:   $this->Records  Find-Result List
-public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
+public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
     $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
         return in_array($vv,$filter,true) || ($vv === NULL);
@@ -234,9 +315,9 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
         // Must be PRIMARY-KEY
         $record[$this->Primary] = $fields[$this->Primary];
         if(! empty($record) ) {
+            if($callback !== NULL) $record = $callback($record,$filter);
             $data[] = $record;
             $this->record_max = $this->dbDriver->recordMax;
-            $this->doEvent('OnGetRecord', $record);     // for FEATURE!!!!
         } else {
             debug_log(DBMSG_MODEL, ["fields" => $fields]);
         }
@@ -253,14 +334,14 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
 //==============================================================================
 // Get Raw Record List by FIND-CONDITION without JOIN!.
 // Result:   $this->Records  Find-Result List
-public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
+public function RawRecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
     $fields_list = array_combine($filter,$filter);
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     $data = array();
-    if(empty($sort)) $sort = [ $this->Primary => $SortDefault ];
+    if(empty($sort)) $sort = [ $this->Primary => $this->SortDefault ];
     else if(is_scalar($sort)) {
-        $sort = [ $sort => $SortDefault ];
+        $sort = [ $sort => $this->SortDefault ];
     }
     $this->dbDriver->findRecord($cond,NULL,$sort);
     while (($fields = $this->dbDriver->fetch_array())) {
@@ -269,9 +350,9 @@ public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
             $record[$key] = $fields[$key];
         }
         if(! empty($record) ) {
+            if($callback !== NULL) $record = $callback($record,$filter);
             $data[] = $record;
             $this->record_max = $this->dbDriver->recordMax;
-            $this->doEvent('OnGetRecord', $record);
         } else {
             debug_log(DBMSG_MODEL, ["fields" => $fields]);
         }
@@ -307,8 +388,8 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
     $fields_list = array_combine($filter,$filter);
     foreach($this->FieldSchema as $key => $val) $fields_list[$key] = $val;
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
-    if(empty($sort)) $sort = [ $this->Primary => $SortDefault ];
-    else if(is_scalar($sort)) $sort = [ $sort => $SortDefault ];
+    if(empty($sort)) $sort = [ $this->Primary => $this->SortDefault ];
+    else if(is_scalar($sort)) $sort = [ $sort => $this->SortDefault ];
     $this->dbDriver->findRecord($cond,TRUE,$sort);
     $r_prev = $r_next = $r_self = NULL;
     $prev = true;

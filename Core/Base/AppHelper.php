@@ -224,6 +224,23 @@ public function Contents_Tab($sel,$default='') {
 	return '<li' . (($tab == $sel) ? '' : ' class="hide"') . ">\n";
 }
 //==============================================================================
+// ChainSelect Object-List
+public function SelectObject($keyset) {
+	if(is_scalar($keyset)) $keyset = explode(',',$keyset);
+	$str = '';
+	foreach($keyset as $key) {
+		$str .= "'{$key}': [\n";
+    	foreach($this->MyModel->Select[$key] as $valset) {
+			$new_map = array_map(function($v) {
+				return (is_numeric($v)) ? $v :"'{$v}'";
+			},$valset);
+			$str .= "[".implode(',',$new_map) ."],\n";
+		}
+		$str .= "],\n";
+	}
+	return $str;
+}
+//==============================================================================
 // Gen Form TAG
 // attr array
 // 'method' => 'Post'

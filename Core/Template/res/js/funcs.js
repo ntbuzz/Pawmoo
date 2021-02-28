@@ -57,6 +57,60 @@ Locations.prototype.href_number = function (e) {
 //  alert(objDump(path) + "\n" + n+"\n"+this.query());
     return this.trunc_path(n, e);
 };
+//===============================================
+// ネスティッド SELECT
+// IEのために class でなく prototype ベースで実装
+function SelectChain(mytag,selObj) {
+    var myobj = $('#'+mytag);
+    var sub = myobj.attr('data-element');
+    this.my_obj = myobj;
+    this.select_tag = (mytag in selObj) ? selObj[mytag] :[];  // array-list
+    this.tag_id = mytag;
+    this.Child_tag = ( sub === undefined) ? null : new SelectChain(sub,selObj);
+};
+SelectChain.prototype = {
+    // Make Self OPTION List
+    selfList: function (val,grp) {
+        var self = this;
+        self.my_obj.empty();
+        self.my_obj.append('<option>${#core.SelectMe}</option>');
+        for (var i = 0; i < self.select_tag.length; i++) {
+            var value = self.select_tag[i];
+            if(value[2] == grp) {
+                var sel = (value[0] === val) ? ' selected' : '';
+                self.my_obj.append('<option value="' + value[0] + '"' + sel+'>' + value[1] + '</option>');
+            }
+        }
+    },
+    // Recursive OPTION List
+    defaultList: function(val,grp) {
+        var self = this;
+        self.selfList(val, grp);
+        if(self.Child_tag !== null) self.Child_tag.defaultList(0,val);
+    },
+    // Display List Group
+    myGroup: function (val) {
+        var self = this;
+        for (var i = 0; i < self.select_tag.length; i++) {
+            var value = self.select_tag[i];
+            if (val === value[0]) return value[2];
+        }
+        return 0;
+    },
+    // Selected List & OnChange Event set
+    Select: function (val) {
+        var self = this;
+        if(self.Child_tag !== null) val = self.Child_tag.Select(val);
+        var grp = self.myGroup(val);
+        self.selfList(val, grp);
+        self.my_obj.off().change(function() {
+            var my_val = $(this).val();
+            self.SelectValue = my_val;
+            if(self.Child_tag !== null) self.Child_tag.defaultList(0,my_val);
+        });
+        return grp;
+    }
+};
 //====================================================
 // for DEBUG dump Object
 var objDump = function(obj, rIndent) {

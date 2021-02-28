@@ -40,7 +40,7 @@ class AppObject {
     protected function setEvent($event,$Instance,$method) {
         list($class,$ev) = explode('.',$event);
         if(empty($ev)) {
-            $this->$event = array($Instance,$method);
+            $this->$event = [$Instance,$method];
         } else {
             $this->$class->setEvent($ev,$Instance,$method);
         }
@@ -107,6 +107,10 @@ public function __get($PropName) {
             } else {
                 require_once($modfile);
                 $this->$PropName = new $prop_name($this);
+                // maybe Model Class reuired Relation Setup
+                if(method_exists($this->$PropName,'RelationSetup')) {
+                    $this->$PropName->RelationSetup(FALSE);
+                }
                 return $this->$PropName;
             }
         }

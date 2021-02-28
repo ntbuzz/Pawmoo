@@ -619,7 +619,7 @@ public function ViewTemplate($name,$vars = []) {
         if(is_array($sec)) $atext = "\n{$atext}\n\n";
         $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
         // pre-expand for checkbox and radio/select markdown
-        $atext = preg_replace_callback('/(\[[^\]]*?\]\{(?:\$\{[^\}]+?\}|[^\}])+?\}|\^\[[^\]]*?\][%@:]\{(?:\$\{[^\}]+?\}|[^\}])+?\})/',
+        $atext = preg_replace_callback('/(\[[^\]]*?\]\{(?:\$\{[^\}]+?\}|[^\}])+?\}|\^\[[^\]]*?\][%@:=]\{(?:\$\{[^\}]+?\}|[^\}])+?\})/',
             function($m) use(&$vars) {
                 list($pat,$var) = $m;
                 $var = preg_replace_callback('/(\$\{[^\}]+?\})/',

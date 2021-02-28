@@ -66,6 +66,7 @@ class AppStyle {
         );
         if(empty($this->ModuleName)) {
             array_shift($this->Folders);          // remove top eelment (Module Unique resource)
+            if($appname === 'res')  $this->Folders = ['Libs' => "Core/Template/res"];
         }
         list($sysRoot,$appRoot) = $app_uri;
         $myVARS = array(
@@ -99,7 +100,10 @@ class AppStyle {
 //==============================================================================
 // Content Header Output
 public function ViewHeader() {
-	if(CLI_DEBUG) return;
+	if(CLI_DEBUG) {
+    echo("Content-Type: {$this->Template['head']};");
+        return;
+    }
     header("Content-Type: {$this->Template['head']};");
 }
 //==============================================================================
