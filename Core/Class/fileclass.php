@@ -18,7 +18,7 @@ public function SetRoot($root) {
 //==============================================================================
 // トップフォルダに指定されたフォルダのファイル一覧を取得する
 //	$this->Files[] の連想配列に格納
-public function GetSubFolder($home) {
+public function GetSubFolder() {
 	$this->get_FolderLists($this->TopFolder);
 }
 //==============================================================================
