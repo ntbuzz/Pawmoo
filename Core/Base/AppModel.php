@@ -181,38 +181,6 @@ public function SelectionSetup() {
     $this->Selection = $new_Selection;
 }
 //==============================================================================
-// Selection Table Relation setup
-//   Selection => [
-//      'os_select'      => [ 'Os.id' => [ 'name', 'os_id' ] ],
-//      'os_select_id'   => [ 'Os.id' => 'name.os_id'  ],
-//       'lisece_select' => [ 'id','license','operating_system_id' ],
-//   ]
-public function SelectionSetup() {
-    $new_Selection = [];
-    if(isset($this->Selection)) {
-    foreach($this->Selection as $key_name => $seldef) {
-        $lnk = [];
-        if(is_scalar($seldef)) $lnk[0] = $seldef;
-        else {
-            list($model,$ref_list) = array_first_item($seldef);
-            if($model === 0) {
-                $lnk[0] = $seldef;
-            } else {
-                list($model,$table,$field) = $this->model_view($model);
-                if(is_scalar($ref_list)) {
-                    $lnk = [ $model => "{$field}.{$ref_list}"] ;
-                } else {
-                    array_unshift($ref_list,$field);
-                    $lnk[$model] = $ref_list;
-                }
-            }
-        }
-        $new_Selection[$key_name] =  $lnk;
-    }
-    }
-    $this->Selection = $new_Selection;
-}
-//==============================================================================
 // Schema Define Analyzer
     protected function SchemaAnalyzer() {
         $header = $relation = $locale = $bind = $field = [];
