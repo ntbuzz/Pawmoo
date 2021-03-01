@@ -258,10 +258,7 @@ protected function sql_safequote(&$value) {
 		$frm = " FROM {$this->table}";
 		$jstr = '';
 		if($use_relations && !empty($this->relations)) {
-<<<<<<< HEAD
-=======
 			$join = [];
->>>>>>> b567dd24848f54126dc8beb9a4192024c2371351
 			foreach($this->relations as $key => $val) {
 				foreach($val as $alias => $lnk) {
 					if(is_array($lnk)) {

@@ -74,11 +74,7 @@ public function ResetSchema() {
         return [$model,$table,$field,$refer];
     }
 //==============================================================================
-<<<<<<< HEAD
-// Table Relation setup
-=======
 // Table Relation setup DBMSG_MODEL
->>>>>>> b567dd24848f54126dc8beb9a4192024c2371351
 public function RelationSetup($debug_log = DBMSG_MODEL) {
     $new_Relations = [];
     foreach($this->Relations as $key => $rel) {
@@ -114,10 +110,6 @@ public function RelationSetup($debug_log = DBMSG_MODEL) {
 //        "Schema" => $this->Schema,
         "Header" => $this->HeaderSchema,
 //        "Field" => $this->FieldSchema, 
-<<<<<<< HEAD
-//        "Def-Relation" => $this->Relations, 
-=======
->>>>>>> b567dd24848f54126dc8beb9a4192024c2371351
         "JOIN-definition" => $new_Relations,
         "Locale-Bind" => $this->dbDriver->fieldAlias->GetAlias(),
         "SELECTDEFS" => $this->Selection,
@@ -315,14 +307,6 @@ public function GetValueList() {
         return $new;
     };
     foreach($this->Selection as $key_name => $seldef) {
-<<<<<<< HEAD
-        list($model,$ref_list) = array_first_item($seldef);
-        if(is_numeric($model)) {        // self list
-            $this->RecordFinder([],$ref_list,NULL,$filter_rec);
-            $valueLists[$key_name] = $this->Records;
-        } else if(is_array($ref_list)) {
-            $this->$model->RawRecordFinder([],$ref_list,NULL,$filter_rec);
-=======
         list($target,$cond) = $seldef;
         list($model,$ref_list) = array_first_item($target);
         if(is_numeric($model)) {        // self list
@@ -330,27 +314,18 @@ public function GetValueList() {
             $valueLists[$key_name] = $this->Records;
         } else if(is_array($ref_list)) {
             $this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
->>>>>>> b567dd24848f54126dc8beb9a4192024c2371351
             $valueLists[$key_name] = $this->$model->Records;
         } else {
             $ref_list = explode('.', $ref_list);
             $postfix = (count($ref_list) > 2);      // append to keyname_field
             $ref_list = array_filter( $ref_list, "strlen" ) ;
             $new_rec = [];
-<<<<<<< HEAD
-            $this->$model->RecordFinder([],$ref_list,NULL,function($record,$filter) use(&$new_rec) {
-                $id = array_shift($filter);
-                foreach($filter as $key) {
-                    $rec_key = $record[$key];
-                    if(!empty($rec_key)) $new_rec[$key][$rec_key] = $record[$id];
-=======
             $this->$model->RecordFinder($cond,$ref_list,NULL,function($record,$filter) use(&$new_rec) {
                 $id = array_shift($filter);
                 foreach($filter as $key) {
                     $rec_key = $record[$key];
 //                    if(!empty($rec_key)) 
                     $new_rec[$key][$rec_key] = $record[$id];
->>>>>>> b567dd24848f54126dc8beb9a4192024c2371351
                 }
                 return [];
             });
