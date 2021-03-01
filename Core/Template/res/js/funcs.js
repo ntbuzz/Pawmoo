@@ -62,10 +62,12 @@ Locations.prototype.href_number = function (e) {
 // IEのために class でなく prototype ベースで実装
 function SelectChain(mytag,selObj) {
     var myobj = $('#'+mytag);
+    var ref = myobj.attr('class');
+    if (ref === undefined) ref = mytag;
     var sub = myobj.attr('data-element');
     this.my_obj = myobj;
-    this.select_tag = (mytag in selObj) ? selObj[mytag] :[];  // array-list
-    this.tag_id = mytag;
+    this.select_tag = (ref in selObj) ? selObj[ref] :[];  // array-list
+    this.tag_id = ref;
     this.Child_tag = ( sub === undefined) ? null : new SelectChain(sub,selObj);
 };
 SelectChain.prototype = {
@@ -73,7 +75,7 @@ SelectChain.prototype = {
     selfList: function (val,grp) {
         var self = this;
         self.my_obj.empty();
-        self.my_obj.append('<option>${#core.SelectMe}</option>');
+        self.my_obj.append('<option value="0">${#core.SelectMe}</option>');
         for (var i = 0; i < self.select_tag.length; i++) {
             var value = self.select_tag[i];
             if(value[2] == grp) {

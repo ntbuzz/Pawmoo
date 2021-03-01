@@ -234,6 +234,7 @@ public function SelectObject($keyset) {
 			$new_map = array_map(function($v) {
 				return (is_numeric($v)) ? $v :"'{$v}'";
 			},$valset);
+			if(count($new_map)===2) $new_map[] = 0;
 			$str .= "[".implode(',',$new_map) ."],\n";
 		}
 		$str .= "],\n";
