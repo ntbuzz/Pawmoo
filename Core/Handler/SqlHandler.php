@@ -17,7 +17,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private	$startrec;		// start record number
 	private	$limitrec;		// get record count
 	private $handler;		// Databas Handler Name
-	private $relations;		// relation tables
+	public $relations;		// relation tables
 	private $LastSQL;		// Last Query WHERE term
 	protected $LastCond;	// for DEBUG
 	protected $LastBuild;	// for DEBUG
@@ -58,6 +58,12 @@ public function fetchDB() {
 	return $row;
 }
 //==============================================================================
+// fetchDB: get record data , and replace alias and bind column
+public function execSQL($sql) {
+	debug_log(DBMSG_HANDLER,['SQL' => $sql]);
+	$this->doQuery($sql);
+}
+//==============================================================================
 //	getValueLists: list-colum name, value-colums
 public function getValueLists_callback($callback) {
     foreach($this->relations as $key => $val) {
@@ -73,7 +79,7 @@ public function getValueLists_callback($callback) {
 		$bind = $this->fieldAlias->get_bind_ifexists($keys);
 //debug_dump(['VAL'=>$val,'LIST'=>$ref_list,'BIND'=>$bind,'SQL'=>$sql]);
 		$values = [];
-		$this->doQuery($sql);
+		$this->execSQL($sql);
 		while ($row = $this->fetch_array()) {	// other table refer is not bind!
 			if($bind===FALSE) {
 				foreach($val as $nm => $ref_fn) {
@@ -100,7 +106,7 @@ public function getValueLists_callback($callback) {
 public function getValueLists($table,$ref,$id) {
 	if(empty($table)) $table = $this->table;
 	$sql = $this->sql_QueryValues($table,$ref,$id);
-	$this->doQuery($sql);
+	$this->execSQL($sql);
 	$values = array();
 	debug_log(9,["VALUE-LIST" => [$table,$ref,$id,$sql,'REL'=>$this->relations,'ALIAS'=>$this->fieldAlias->GetAlias()]]);
 	while ($row = $this->fetch_array()) {	// other table refer is not bind!
@@ -115,7 +121,7 @@ public function getValueLists($table,$ref,$id) {
 //	doQueryBy: query by KEY-NAME
 public function doQueryBy($key,$val) {
 	$sql = $this->sql_GetRecordByKey($key,$val);
-	$this->doQuery($sql);
+	$this->execSQL($sql);
 	return $this->fetchDB();
 }
 //==============================================================================
@@ -134,7 +140,7 @@ public function SetPaging($pagesize, $pagenum) {
 public function getRecordCount($cond) {
 	$where = $this->sql_makeWHERE($cond);	// 検索条件
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
-	$this->doQuery("{$sql}{$where};");
+	$this->execSQL("{$sql}{$where};");
 	$field = $this->fetch_array();
 	return ($field) ? $field["total"] : 0;
 }
@@ -148,7 +154,7 @@ public function getRecordValue($cond,$use_relations) {
 	$where .= ($this->is_offset) ? " offset 0 limit 1" : " limit 0,1";
 	$sql .= "{$where};";
 //	debug_log(DBMSG_HANDLER,[ "RecVal-SQL" => $sql]);
-	$this->doQuery($sql);
+	$this->execSQL($sql);
 	$row = $this->fetchDB();
 	return ($row === FALSE) ? []:$row;
 }
@@ -162,7 +168,7 @@ public function getRecordValue($cond,$use_relations) {
 public function findRecord($cond,$use_relations = FALSE,$sort = []) {
 	$where = $this->sql_makeWHERE($cond);
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
-	$this->doQuery("{$sql}{$where};");
+	$this->execSQL("{$sql}{$where};");
 	$field = $this->fetch_array();
 	debug_log(DBMSG_HANDLER,["Find" => "{$where}", "DATA" => $field]);
 	$this->recordMax = ($field) ? $field["total"] : 0;
@@ -183,7 +189,7 @@ public function findRecord($cond,$use_relations = FALSE,$sort = []) {
 		}
 	}
 	$sql .= "{$where};";
-	$this->doQuery($sql);
+	$this->execSQL($sql);
 }
 //==============================================================================
 //	firstRecord(cond,use-relation,sort): 
@@ -201,7 +207,7 @@ public function firstRecord($cond,$use_relations = FALSE,$sort) {
 	}
 	$where .= " limit 1";
 	$sql .= "{$where};";
-	$this->doQuery($sql);
+	$this->execSQL($sql);
 	$row = $this->fetchDB();
 	return ($row === FALSE) ? []:$row;
 }
@@ -210,7 +216,7 @@ public function firstRecord($cond,$use_relations = FALSE,$sort) {
 public function deleteRecord($wh) {
 	$where = $this->sql_makeWHERE($wh,$this->raw_table);	// delete by real-table
 	$sql = "DELETE FROM {$this->raw_table}{$where};";
-	$this->doQuery($sql);
+	$this->execSQL($sql);
 }
 //==============================================================================
 // Common SQL(SELECT ～ WHERE ～) generate
@@ -244,6 +250,7 @@ protected function sql_safequote(&$value) {
 // relation table
 //  [id] = [
 //		[alias] = table.id.name
+//		[alias] = [ table, ref_fn, rel_id, ref_id  ]	sub-relations
 //		....
 //	]
 	private function sql_JoinTable($use_relations) {
@@ -251,13 +258,21 @@ protected function sql_safequote(&$value) {
 		$frm = " FROM {$this->table}";
 		$jstr = '';
 		if($use_relations && !empty($this->relations)) {
+			$join = [];
 			foreach($this->relations as $key => $val) {
 				foreach($val as $alias => $lnk) {
-					list($table,$fn,$ref) = explode('.', $lnk);
-					$sql .= ",{$table}.\"{$ref}\" AS \"{$alias}\"";
+					if(is_array($lnk)) {
+						list($tt,$ref,$id,$rel) = $lnk;
+						$sql .= ",{$ref} AS \"{$alias}\"";
+						$join[$tt] = "{$id} = {$rel}";
+					} else {
+						list($table,$fn,$ref) = explode('.', $lnk);
+						$sql .= ",{$table}.\"{$ref}\" AS \"{$alias}\"";
+						$join[$table] = "{$this->table}.\"{$key}\" = {$table}.\"{$fn}\"";
+					}
 				}
-				$jstr .= " LEFT JOIN {$table} ON {$this->table}.\"{$key}\" = {$table}.\"{$fn}\"";
 			}
+			foreach($join as $table => $val) $jstr .= " LEFT JOIN {$table} ON {$val}";
 		}
 		return "{$sql}{$frm}{$jstr}";
 	}
