@@ -74,7 +74,11 @@ public function ResetSchema() {
         return [$model,$table,$field,$refer];
     }
 //==============================================================================
+<<<<<<< HEAD
 // Table Relation setup
+=======
+// Table Relation setup DBMSG_MODEL
+>>>>>>> b567dd24848f54126dc8beb9a4192024c2371351
 public function RelationSetup($debug_log = DBMSG_MODEL) {
     $new_Relations = [];
     foreach($this->Relations as $key => $rel) {
@@ -93,13 +97,14 @@ public function RelationSetup($debug_log = DBMSG_MODEL) {
         }
         $sub_rel = [];
         foreach($ref_list as $refer) {
+            $sub_ref = $this->$model->JoinDefinition($table,$refer);
             $alias_name = ($rel_array) ? "{$base_name}_{$refer}" : $base_name;
             $this->FieldSchema[$alias_name] = NULL;   // $key; import MUST!
             // locale if exist in relation-db
             if($this->$model->dbDriver->fieldAlias->exists_locale($refer)) {
                 $ref_name = "{$refer}_" . LangUI::$LocaleName;
             } else $ref_name = $refer;
-            $sub_rel[$alias_name] = "{$link}.{$ref_name}";
+            $sub_rel[$alias_name] = (is_array($sub_ref)) ? $sub_ref : "{$link}.{$ref_name}";
         }
         $new_Relations[$key] =  $sub_rel;
     }
@@ -109,12 +114,79 @@ public function RelationSetup($debug_log = DBMSG_MODEL) {
 //        "Schema" => $this->Schema,
         "Header" => $this->HeaderSchema,
 //        "Field" => $this->FieldSchema, 
+<<<<<<< HEAD
 //        "Def-Relation" => $this->Relations, 
+=======
+>>>>>>> b567dd24848f54126dc8beb9a4192024c2371351
         "JOIN-definition" => $new_Relations,
         "Locale-Bind" => $this->dbDriver->fieldAlias->GetAlias(),
         "SELECTDEFS" => $this->Selection,
     ]);
-//    $this->Relations = $new_Relations;
+}
+//==============================================================================
+// nested relation model
+protected function JoinDefinition($table,$field) {
+    if(is_array($this->dbDriver->relations)) {
+        foreach($this->dbDriver->relations as $key => $refs) {
+            if(array_key_exists($field,$refs)) {
+                $lnk = explode('.',$refs[$field]);
+                return [
+                    $lnk[0],                        // table
+                    "{$lnk[0]}.\"{$lnk[2]}\"",      // table."ref"
+                    "{$table}.\"{$key}\"",          // rel_table.id
+                    "{$lnk[0]}.\"{$lnk[1]}\"",      // table.id
+                ];
+            }
+        }
+    }
+    return $field;
+}
+//==============================================================================
+// Selection Table Relation setup
+//   Selection => [
+//      'os_select'      => [ 'Os.id' => [ 'name', 'os_id' ] ,[ cond ] ],
+//      'os_select_id'   => [ 'Os.id' => 'name.os_id' ,[ cond ] ],
+//       'lisece_select' => [ 'id','license','operating_system_id',[ cond ] ],
+//   ]
+public function SelectionSetup() {
+    $new_Selection = [];
+    if(isset($this->Selection)) {
+        $separate_rel_cond = function($defs) {
+            $rel = $cond = [];
+            foreach($defs as $key => $val) {
+                if(is_int($key)) {
+                    if(is_array($val)) $cond = $val;
+                    else $rel[] = $val;
+                } else {
+                    $rel[$key] = $val;
+                }
+            }
+            return [$rel,$cond];
+        };
+        foreach($this->Selection as $key_name => $seldef) {
+            $lnk = [];
+            if(is_scalar($seldef)) {
+                $lnk[0] = $seldef;
+                $cond = [];
+            } else {
+                list($target,$cond) = $separate_rel_cond($seldef);
+                list($model,$ref_list) = array_first_item($target);
+                if($model === 0) {
+                    $lnk[0] = $target;
+                } else {
+                    list($model,$table,$field) = $this->model_view($model);
+                    if(is_scalar($ref_list)) {
+                        $lnk = [ $model => "{$field}.{$ref_list}"] ;
+                    } else {
+                        array_unshift($ref_list,$field);
+                        $lnk[$model] = $ref_list;
+                    }
+                }
+            }
+            $new_Selection[$key_name] =  [$lnk,$cond];
+        }
+    }
+    $this->Selection = $new_Selection;
 }
 //==============================================================================
 // Selection Table Relation setup
@@ -243,23 +315,42 @@ public function GetValueList() {
         return $new;
     };
     foreach($this->Selection as $key_name => $seldef) {
+<<<<<<< HEAD
         list($model,$ref_list) = array_first_item($seldef);
         if(is_numeric($model)) {        // self list
             $this->RecordFinder([],$ref_list,NULL,$filter_rec);
             $valueLists[$key_name] = $this->Records;
         } else if(is_array($ref_list)) {
             $this->$model->RawRecordFinder([],$ref_list,NULL,$filter_rec);
+=======
+        list($target,$cond) = $seldef;
+        list($model,$ref_list) = array_first_item($target);
+        if(is_numeric($model)) {        // self list
+            $this->RecordFinder($cond,$ref_list,NULL,$filter_rec);
+            $valueLists[$key_name] = $this->Records;
+        } else if(is_array($ref_list)) {
+            $this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
+>>>>>>> b567dd24848f54126dc8beb9a4192024c2371351
             $valueLists[$key_name] = $this->$model->Records;
         } else {
             $ref_list = explode('.', $ref_list);
             $postfix = (count($ref_list) > 2);      // append to keyname_field
             $ref_list = array_filter( $ref_list, "strlen" ) ;
             $new_rec = [];
+<<<<<<< HEAD
             $this->$model->RecordFinder([],$ref_list,NULL,function($record,$filter) use(&$new_rec) {
                 $id = array_shift($filter);
                 foreach($filter as $key) {
                     $rec_key = $record[$key];
                     if(!empty($rec_key)) $new_rec[$key][$rec_key] = $record[$id];
+=======
+            $this->$model->RecordFinder($cond,$ref_list,NULL,function($record,$filter) use(&$new_rec) {
+                $id = array_shift($filter);
+                foreach($filter as $key) {
+                    $rec_key = $record[$key];
+//                    if(!empty($rec_key)) 
+                    $new_rec[$key][$rec_key] = $record[$id];
+>>>>>>> b567dd24848f54126dc8beb9a4192024c2371351
                 }
                 return [];
             });
