@@ -55,6 +55,7 @@ class App {
             'controller' => $controller,  //ucfirst($uri_array[2]),
             'method' => $method,  //ucfirst($uri_array[3]),
             'filter' => static::$Filter,  // ucfirst(static::$Filter),
+            'params' => static::$Params,
             'platform' => PLATFORM_NAME,
             'copytight' => COPYTIGHT,
             'current_version' => CURRENT_VERSION,  // framework version
@@ -69,7 +70,7 @@ class App {
             'filter' => $filters,
             'params' => static::$Params,
             );
-            // リクエスト情報を記憶
+        // リクエスト情報を記憶
         MySession::$EnvData['sysVAR'] = static::$SysVAR;
     }
 //==============================================================================

@@ -51,12 +51,14 @@ class AppStyle {
     private $do_com;            // Delete Comment Line
     private $repVARS;           // Replace Variable
     private $importFiles;       // import-DEBUG
+    private $myname;
 //==============================================================================
 // Constructor
     function __construct($appname, $app_uri, $modname, $filename, $ext) {
         // Module(res) will be Common URI Modele
         $this->ModuleName = ($modname == 'Res') ? '' : $modname;  
         $this->Template = self::ContentList[$ext];
+        $this->myname = "{$filename}{$ext}";
         $fldr = $this->Template['folder'];
         $this->Filetype = $fldr;
         $this->Folders = array(
@@ -322,11 +324,18 @@ public function ViewStyle($file_name) {
                 list($path,$tmp) = extract_path_filename($file);
                 $fn ="{$path}{$this->Filetype}/{$filename}";
                 if(file_exists($fn)) {
-                    // @charset を削除して読み込む
-                    $content = preg_replace('/(@charset.*;)/','/* $1 */',trim(file_get_contents($fn)) );
-                    $content = $this->expand_Strings($content,$vars);
-                    if($this->do_msg) echo "/* import({$filename}) in {$key} */\n";
-                    $this->outputContents($content);
+                    list($name,$ext) = extract_base_name($fn);
+                    if($ext === 'php') {        // PHPファイルをインポートする
+                        $self_name = $this->myname; // 処理中のファイル名を渡す
+                        $extention = $this->Template['extention'];  // 拡張子
+                        require($fn);           // PHPファイルを読み込む
+                    } else {
+                        // @charset を削除して読み込む
+                        $content = preg_replace('/(@charset.*;)/','/* $1 */',trim(file_get_contents($fn)) );
+                        $content = $this->expand_Strings($content,$vars);
+                        if($this->do_msg) echo "/* import({$filename}) in {$key} */\n";
+                        $this->outputContents($content);
+                    }
                     $imported = TRUE;
                     array_push($this->importFiles,$fn); // for-DEBUG
                     break;

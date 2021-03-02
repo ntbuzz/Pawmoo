@@ -8,6 +8,7 @@ Stylesheet => [
             blogstyle.css
             tabmenu.css
             tabset.css
+            test.php
         ]
         +section => ^common       // 上位のセクションを呼出す
     ]
@@ -18,6 +19,7 @@ Javascript => [
         +jquery => [
             blogscript.js
             tabset.js
+            test.php
         ]
         +section => ^common       // 上位のセクションを呼出す
     ]
