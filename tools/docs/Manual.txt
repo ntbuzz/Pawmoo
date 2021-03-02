@@ -371,15 +371,17 @@
                       ex. 'name_id' => ..., [ 'NameModel.id' => ['firstName','lastName'] ]
                           NameModel.firstName => name_firstName
                           NameModel.lastName  => name_lastName
+                      取得先のフィールドが別のテーブルへのリレーションになっている場合は、
+                      他のフィールドでも同じテーブルをJOIN定義してあると、エラーになります。
   カラム連結          複数のカラムを連結した仮想カラムを生成します。
                       ex. 'name_id' => ..., [ 'fullName' => ['firstName','lastName'] ]
                       firstName と lastName カラムを連結して fullName カラムを生成して代入します。
 
   セレクトタグのためのセレクションスキーマ定義は次のようになります。
   'Selection' => [
-      セレクション名    => [ Modelキー => [ フィールドリスト ] ],   // ChainSelect()用の選択リスト
-      セレクション名    => [ フィールドリスト ],                    // ChainSelect()用の自モデルの選択リスト
-      セレクション名    => [ Modelキー => フィールド名  ],          // [表示テキスト] = 選択値 のリスト
+      セレクション名    => [ Modelキー => [ フィールドリスト ], [絞込み条件] ],   // ChainSelect()用の選択リスト
+      セレクション名    => [ フィールドリスト, [絞込み条件] ],                    // ChainSelect()用の自モデルの選択リスト
+      セレクション名    => [ Modelキー => フィールド名, [絞込み条件] ],          // [表示テキスト] = 選択値 のリスト
   ],
   フィールドリスト：　フィールド名のカンマリスト            [ 'id', 'name' , ... ]
   フィールド名：　フィールド名をピリオドで連結した文字列    'name.type'
@@ -394,7 +396,21 @@
   ex.     'table' => [ 'Table.id' => 'name'   ]         Select['table'] にnameの値リスト
           'table' => [ 'Table.id' => '.name'  ]         Select['table_name'] にnameの値リスト
   セレクションスキーマは値リストを全レコードを読み込んで取得するので、
-  大容量のテーブルを参照することは避けてください。
+  大容量のテーブルを参照するときは「必ず[絞り込み条件]を指定」するようにしてください。
+  Modelキーの参照フィールドが、さらに別テーブルへJOIN定義されていた場合、JOIN先のの値を
+  参照したい場合は、フィールドのJOIN別名を指定します。JOIN先ではなく単純にフィールド値を
+  参照するときには、フィールド名を指定します。
+  ex.   OsModel: スキーマ定義
+          'family_id' => 'Family.id.name'
+        PcModel: セレクション定義
+          'os_id' => [ 'Os.id' => [ 'name', 'family' ] ]
+
+        PcModel は os_id を元に OsModel の id に一致する nameフィールドと、
+        さらにfamily_idに一致する FamilyModel の name フィールドを取得し、
+        次のフィールド要素に代入されます。
+          os_name
+          os_family
+        'family_id' を指定した場合、OsModelのフィールド値を格納します。
 
 2.2.2  条件句の指定方法（SQL限定)
   モデルクラスの各メソッドで使用する、レコード検索における条件句には論理式が使用できます。
@@ -1334,5 +1350,24 @@
         ],
         ...
     トップレベルとなるセレクト名の親IDは省略、または0を入れておきます。
-    ここで指定する「セレクト名」はSELECTタグにつけるID名と同じ名前にします。
+    ここで指定する「セレクト名」はSELECTタグにつけるCLASS名と同じ名前にします。
+    例： OS名とライセンスキーを連動させるセレクトテーブル
+      var objList = {
+          'os-select': [
+              [  1, "Windows"        ],   // レベル0
+              [  2, "MacOS"  ],
+              [  3, "Linux", ],
+          ],
+          'license-select': [
+              [ 10, "Productkey-1", 1],   // レベル1
+              [ 11, "Productkey-2", 1],
+              [ 12, "Productkey-3", 2],
+              [ 15, "MIT-License",  3],
+          ]
+      };
+      $('#top-level').ChainSelect(objList,10);  // 初期値を '10' で初期化
 
+      SELECTタグは次のように記述します。OPTION要素はセレクトテーブルから追加されるので記述不要です。
+      
+	        OS名:      <select class="os-select" id="top-level" name="os_id" data-ekenebt="next-level"></select>
+	    プロダクトキー: <select class="license-select" id="next-level" name="license_id"></select>

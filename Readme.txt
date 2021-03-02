@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2021 by nTak
  * @license    MIT
- * @version 0.50.0, 2021-02-28
+ * @version 0.51.0, 2021-03-02
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,12 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 履歴
+【0.51.0】2021/03/02
+    ○改善
+    ・JOIN定義に参照先モデルのJOINフィールドを参照可能に変更
+    ・ClassLoaderとAppObjectのオートロードの分担を明確に分けて整理
+    ・ChainSelectが複数使用できない不具合で仕様を少し変更
+
 【0.50.0】2021/02/28
     ○改善
     ・Selctionスキーマと、JQueryプラグインのChainSelection()を追加

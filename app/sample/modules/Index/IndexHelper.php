@@ -8,7 +8,7 @@ class IndexHelper extends blogHelper {
 //==============================================================================
 public function BlogHeading() {
     $body = $this->MyModel->RecData;
-    $select= $this->Select_str('category_id','category_id');
+    $select= $this->Select_str('category','category_id');
     $itemdate = (empty($body['edit_date'])) ? $body['post_date']: "{$body['post_date']} 更新:{$body['edit_date']}";
     // ブログのタイトルとリード文
     $body_header = (empty($body['preface']))?'':pseudo_markdown($body['preface']);
@@ -42,6 +42,8 @@ EOF;
             $hastitle = (empty($contents['title'])) ? '':"<a name='para-{$contents['id']}'></a><h4>■ {$contents['title']}</h3>";
             $txtcol = (empty($contents['title'])) ? ' style="color:black;"':"";
             $body_contents = pseudo_markdown($contents['contents']);
+            $body_contents = $this->expand_var($body_contents);
+
             $atext = <<<EOF
     <div class='blog_content' id={$contents['id']}>
         {$hastitle}
@@ -55,6 +57,13 @@ EOF;
     echo "<br><hr>";
     echo $this->_('.Category') . $this->MyModel->RecData['category'];
     $this->BlogWALK();
+}
+//==============================================================================
+function ChainSelect() {
+    return <<<EOS
+好きなアプリ： <select class="top-select" id="fav-list" data-element="fav-name"></select>
+    <select class="sub-select" id="fav-name"></select>
+EOS;
 }
 
 }

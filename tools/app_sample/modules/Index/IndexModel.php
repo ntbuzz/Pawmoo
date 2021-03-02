@@ -23,6 +23,9 @@ class IndexModel extends AppModel {
             'preface'   => ['',100],
         ],
         'PostRenames' => [],
+        'Selection' => [
+            'category'    => [ 'Category.id' => 'title' ],     // 'id' は自動追加, 定数つき
+        ],
     ];
 //==============================================================================
 // 記事のIDからセクションデータとパラグラフデータを読み込む

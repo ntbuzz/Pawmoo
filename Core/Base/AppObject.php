@@ -64,23 +64,21 @@ class AppObject {
         }
     }
 //==============================================================================
-// dynamic construct OBJECT CLass
+// dynamic construct OBJECT Class for 'modules'
 public function __get($PropName) {
     if($this->autoload === FALSE) return NULL;
     if(isset($this->$PropName)) return $this->$PropName;
-    $class_load = array(
-        'Class'     => [ -5, ['Class'] ],
-        'Model'     => [ -5, ['Models','modules/','Models/Asst','Models/Misc'] ],
-        'Controller'=> [-10, ['modules/'] ],
-    );
-    if(array_key_exists($PropName,$class_load)) {
+    $class_names = [
+        'Model'         =>  -5,
+        'Controller'    => -10,
+    ];
+    if(array_key_exists($PropName,$class_names)) {
         $mod_name = $this->ModuleName;
         $cls_name = $PropName;
     } else  {
         $mod_name = $PropName;
         $cls_name = 'Model';
-        foreach($class_load as $c_name => $defs) {
-            list($len,$path_list) = $defs;
+        foreach($class_names as $c_name => $len) {
             if($c_name === substr($PropName,$len)) {
                 $mod_name = substr($PropName,0,$len);
                 $cls_name = $c_name;
@@ -88,34 +86,32 @@ public function __get($PropName) {
             }
         }
     }
+    // already class file loaded?
     $prop_name = "{$mod_name}{$cls_name}";
     if(class_exists($prop_name)) {
         $this->$PropName = new $prop_name($this);
         return $this->$PropName;
     }
-    list($len,$path_list) = $class_load[$cls_name];
-    foreach($path_list as $path) {
-        if($path === 'modules/') $path .= $mod_name;
-        $modfile = App::Get_AppPath("{$path}/{$prop_name}.php");
-        if(file_exists($modfile)) {
-            if($cls_name === 'Controller') {
-                App::LoadModuleFiles($mod_name);    // Load on Controller + Model + Helper
-                if(class_exists($prop_name)) {      // is SUCCESS?
-                    $this->$PropName = new $prop_name($this);
-                    return $this->$PropName;
-                }
-            } else {
-                require_once($modfile);
+    // app/modules/* path search
+    $modfile = App::Get_AppPath("modules/{$mod_name}/{$prop_name}.php");
+    if(file_exists($modfile)) {
+        if($cls_name === 'Controller') {
+            App::LoadModuleFiles($mod_name);    // Load on Controller,Model,Helper
+            if(class_exists($prop_name)) {      // is SUCCESS?
+                // Controller create with Model,View.Helper
                 $this->$PropName = new $prop_name($this);
-                // maybe Model Class reuired Relation Setup
-                if(method_exists($this->$PropName,'RelationSetup')) {
-                    $this->$PropName->RelationSetup(FALSE);
-                }
                 return $this->$PropName;
             }
+        } else {
+            require_once($modfile);
+            $this->$PropName = new $prop_name($this);
+            // RelationSetup called for Model, instead of Controller
+            if(method_exists($this->$PropName,'RelationSetup')) {
+                $this->$PropName->RelationSetup(FALSE);
+            }
+            return $this->$PropName;
         }
     }
-    // not found class file
     throw new Exception("SubClass Create Error for '{$prop_name}'");
 }
 //==============================================================================
