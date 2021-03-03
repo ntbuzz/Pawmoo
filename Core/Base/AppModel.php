@@ -45,13 +45,16 @@ class AppModel extends AppObject {
             $this->DataTable = $this->ModelTables[$db_key]; // DataTable SWITCH
         }
         $this->fields = [];
+        $driver = $this->Handler . 'Handler';
+        $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
+        $this->DateFormat = $this->dbDriver->DateStyle;         // Date format from DB-Driver
 	}
 //==============================================================================
 // Initializ Class Property
     protected function class_initialize() {
-        $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
-        $this->DateFormat = $this->dbDriver->DateStyle;         // Date format from DB-Driver
+//        $driver = $this->Handler . 'Handler';
+//        $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
+//        $this->DateFormat = $this->dbDriver->DateStyle;         // Date format from DB-Driver
         $this->ResetSchema();                   // Schema Initialize
         parent::class_initialize();
     }

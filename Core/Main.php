@@ -127,7 +127,9 @@ LangUI::construct($lang,App::Get_AppPath("View/lang/"),['#common',$controller]);
 App::LoadModuleFiles($controller);
 $ContClass = "{$controller}Controller";
 // Create Controller CLASS
-$controllerInstance = new $ContClass();
+//$controllerInstance = new $ContClass();
+$controllerInstance = ClassManager::NewClass($ContClass,NULL);
+
 // Method existance Check
 if(!$controllerInstance->is_enable_action($method)) {
     if(FORCE_REDIRECT || $method==='') {
@@ -189,12 +191,11 @@ if($controllerInstance->is_authorised()) {
     // Controller Method Dispacher
     $controllerInstance->ActionDispatch($method);
 }
-
-debug_run_time(DBMSG_SYSTEM);
 debug_log(DBMSG_SYSTEM, [
     "#SessionClose" => MySession::$EnvData,
     "CLASS-MANAGER" => ClassManager::DumpObject(),
 ]);
+debug_run_time(DBMSG_SYSTEM);
 MySession::CloseSession();
 // call OUTPUT terminate
 $controllerInstance->__TerminateApp();

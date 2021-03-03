@@ -18,6 +18,7 @@ public static function NewClass($class_name,$owner) {
     if(method_exists($obj,'class_startup')) {
         $obj->class_startup();
     }
+    static::$ObjectList[$class_name][0] = 0;
     return $obj;
 }
 //==============================================================================
@@ -31,7 +32,7 @@ public static function DumpObject() {
     foreach(static::$ObjectList as $key => $val) {
         list($state,$obj,$cnt) = $val;
         $kk = substr("{$key}{$padding}",0,16);
-        $dmp .= "  {$kk} = [ {$state}, {$obj->ModuleName}, {$cnt} ]\n";
+        $dmp .= "  {$kk} = [ {$state}, '{$obj->ModuleName}', {$cnt} ]\n";
     }
     return $dmp;
 }

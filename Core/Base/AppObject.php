@@ -114,9 +114,9 @@ public function __get($PropName) {
 //            $this->$PropName = new $prop_name($this);
             $this->$PropName = ClassManager::NewClass($prop_name,$this);
             // RelationSetup called for Model, instead of Controller
-            if(method_exists($this->$PropName,'RelationSetup')) {
-                $this->$PropName->RelationSetup(FALSE);
-            }
+//            if(method_exists($this->$PropName,'RelationSetup')) {
+//                $this->$PropName->RelationSetup(FALSE);
+//            }
             return $this->$PropName;
         }
     }
