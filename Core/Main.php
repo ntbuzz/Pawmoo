@@ -32,6 +32,7 @@ require_once('Base/AppModel.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
 require_once('Base/LangUI.php');
+require_once('Class/ClassManager.php');
 
 // Setup TIMEZONE
 date_default_timezone_set(TIME_ZONE);
@@ -192,6 +193,7 @@ if($controllerInstance->is_authorised()) {
 debug_run_time(DBMSG_SYSTEM);
 debug_log(DBMSG_SYSTEM, [
     "#SessionClose" => MySession::$EnvData,
+    "CLASS-MANAGER" => ClassManager::DumpObject(),
 ]);
 MySession::CloseSession();
 // call OUTPUT terminate

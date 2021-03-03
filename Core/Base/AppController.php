@@ -19,10 +19,12 @@ class AppController extends AppObject {
 		parent::__construct($owner);
 		$model = "{$this->ModuleName}Model";
 		if(!class_exists($model)) $model = 'AppModel';	// file not exists, Use basic Class
-		$this->Model = new $model($this);
+//		$this->Model = new $model($this);
+		$this->Model = ClassManager::NewClass($model,$this);
 		$view = "{$this->ModuleName}View";
 		if(!class_exists($view)) $view = 'AppView';		// file not exists, Use basic Class
-		$this->View = new $view($this);
+//		$this->View = new $view($this);
+		$this->View = ClassManager::NewClass($view,$this);
 		$this->Helper = $this->View->Helper;			// Helper class short-cut
 		if(empty(App::$Filter)) {
 			App::$Filters[0] = App::$Filter = $this->defaultFilter;
@@ -42,15 +44,13 @@ class AppController extends AppObject {
 								function($v) use ($except) {
 									return !in_array($v,$except,true);
 								});
-		$this->__InitClass();
 	}
 //==============================================================================
 // Initialized Class Property
-	protected function __InitClass() {
+	protected function class_initialize() {
 		// Deadlock occurs when a AppModel construtor, Controller runs on behalf of AppModel.
-		$this->Model->RelationSetup();
 		$this->LocalePrefix = $this->Model->LocalePrefix;
-		parent::__InitClass();                       // Call Initialize method chain.
+		parent::class_initialize();                       // Call Initialize method chain.
 	}
 //==============================================================================
 // Terminated Contorller
@@ -130,6 +130,7 @@ protected function ActionPostProcess($action) {
 // Method Dispatcher before Pre-Process, after Post-Processing
 public function ActionDispatch($action) {
 	if($this->ActionPreProcess($action)) {
+		$this->Model->RelationSetup();
 		if(array_key_exists($action,$this->aliasAction)) {
 			$action = $this->aliasAction[$action];
 		}

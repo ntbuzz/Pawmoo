@@ -14,7 +14,7 @@ class AppObject {
     protected $autoload = TRUE; // autoload on __get() magic method
 //==============================================================================
 //	constructor( object owner )
-	function __construct($owner) {
+	function __construct($owner = NULL) {
         $this->AOwner = $owner;
         $this->ClassName = get_class($this);
         $this->ModuleName = preg_replace("/[A-Z][a-z]+?$/",'',$this->ClassName);
@@ -28,8 +28,13 @@ class AppObject {
 	function __destruct() {
     }
 //==============================================================================
+//	Class-Initialize after __construct()
+	public function class_startup() {
+        $this->class_initialize();
+	}
+//==============================================================================
 // initialized call
-	protected function __InitClass() {
+	protected function class_initialize() {
         if(method_exists($this,'ClassInit')) {
             $this->ClassInit();
         }
@@ -89,7 +94,8 @@ public function __get($PropName) {
     // already class file loaded?
     $prop_name = "{$mod_name}{$cls_name}";
     if(class_exists($prop_name)) {
-        $this->$PropName = new $prop_name($this);
+//        $this->$PropName = new $prop_name($this);
+        $this->$PropName = ClassManager::NewClass($prop_name,$this);
         return $this->$PropName;
     }
     // app/modules/* path search
@@ -99,12 +105,14 @@ public function __get($PropName) {
             App::LoadModuleFiles($mod_name);    // Load on Controller,Model,Helper
             if(class_exists($prop_name)) {      // is SUCCESS?
                 // Controller create with Model,View.Helper
-                $this->$PropName = new $prop_name($this);
+//                $this->$PropName = new $prop_name($this);
+                $this->$PropName = ClassManager::NewClass($prop_name,$this);
                 return $this->$PropName;
             }
         } else {
             require_once($modfile);
-            $this->$PropName = new $prop_name($this);
+//            $this->$PropName = new $prop_name($this);
+            $this->$PropName = ClassManager::NewClass($prop_name,$this);
             // RelationSetup called for Model, instead of Controller
             if(method_exists($this->$PropName,'RelationSetup')) {
                 $this->$PropName->RelationSetup(FALSE);

@@ -37,10 +37,10 @@ public function doQuery($sql) {
 	if(!$this->rows) {
 		$res1 = pg_get_result($this->dbb);
 		debug_log(-99,[
-			"ERROR:" => pg_result_error($res1),
-			"SQL:" => $sql,
-			"COND:" => $this->LastCond,
-			"BUILD:" => $this->LastBuild,
+			"ERROR" => pg_result_error($res1),
+			"SQL" => $sql,
+			"COND" => $this->LastCond,
+			"BUILD" => $this->LastBuild,
 		]);
 		die('Postgres QUERY失敗' . pg_last_error());
 	}

@@ -25,10 +25,11 @@ class AppHelper  extends AppObject {
 	];
 //==============================================================================
 // constructor( this_Owner_Object )
+/*
 	function __construct($owner) {
 		parent::__construct($owner);
-        $this->__InitClass();
 	}
+*/
 //==============================================================================
 // Call for Owner(AppView) Template Processing Method
 public function ViewTemplate($layout) {

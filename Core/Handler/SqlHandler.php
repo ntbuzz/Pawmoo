@@ -170,7 +170,7 @@ public function findRecord($cond,$use_relations = FALSE,$sort = []) {
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
 	$this->execSQL("{$sql}{$where};");
 	$field = $this->fetch_array();
-	debug_log(DBMSG_HANDLER,["Find" => "{$where}", "DATA" => $field]);
+//	debug_log(DBMSG_HANDLER,["Find" => "{$where}", "DATA" => $field]);
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	$sql = $this->sql_JoinTable($use_relations);
 	if(!empty($sort)) {
@@ -250,7 +250,7 @@ protected function sql_safequote(&$value) {
 // relation table
 //  [id] = [
 //		[alias] = table.id.name
-//		[alias] = [ table, ref_fn, rel_id, ref_id  ]	sub-relations
+//		[alias] = [ ref_table, ref_name, rel_id, ref_id  ]	sub-relations
 //		....
 //	]
 	private function sql_JoinTable($use_relations) {

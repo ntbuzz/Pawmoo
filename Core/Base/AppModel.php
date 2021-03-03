@@ -29,10 +29,11 @@ class AppModel extends AppObject {
     public $Records = NULL;          // get records lists (with JOIN field)
     public $OnGetRecord = NULL;      // for feature FUNCTION
     public $HeaderSchema = [];       // Display Header List [ field_name => [disp_name, align, sort_flag ]
-    private $FieldSchema = [];       // Pickup Record fields columns [ref_name, org_name]
-    private $Relations = [];         // Table Relation
     public $DateFormat;              // Date format for Database
     public $SortDefault = SORTBY_ASCEND;    // findRecord Default Sort Sequence
+    private $FieldSchema = [];       // Pickup Record fields columns [ref_name, org_name]
+    private $Relations = [];         // Table Relation
+    private $SelectionDef = [];      // Selection JOIN list
 //==============================================================================
 //	Constructor: Owner
 //==============================================================================
@@ -43,17 +44,16 @@ class AppModel extends AppObject {
             $db_key = (array_key_exists(LangUI::$LocaleName,$this->ModelTables)) ? LangUI::$LocaleName : '*';
             $this->DataTable = $this->ModelTables[$db_key]; // DataTable SWITCH
         }
-        $this->__InitClass();
         $this->fields = [];
 	}
 //==============================================================================
 // Initializ Class Property
-    protected function __InitClass() {
+    protected function class_initialize() {
         $driver = $this->Handler . 'Handler';
         $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
         $this->DateFormat = $this->dbDriver->DateStyle;         // Date format from DB-Driver
-        $this->SchemaAnalyzer($this->Schema);                   // Schema Initialize
-        parent::__InitClass();
+        $this->ResetSchema();                   // Schema Initialize
+        parent::class_initialize();
     }
 //==============================================================================
 // Switch Schema Language
@@ -80,7 +80,7 @@ public function RelationSetup($debug_log = DBMSG_MODEL) {
     foreach($this->Relations as $key => $rel) {
         $base_name = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
         $rel_array = is_array($rel);
-        if($rel_array) {
+        if($rel_array) {            // multi-column refer
             list($db,$ref_list) = array_first_item($rel);
             if(is_numeric($db)) continue;
             list($model,$table,$field) = $this->model_view($db);
@@ -112,7 +112,7 @@ public function RelationSetup($debug_log = DBMSG_MODEL) {
 //        "Field" => $this->FieldSchema, 
         "JOIN-definition" => $new_Relations,
         "Locale-Bind" => $this->dbDriver->fieldAlias->GetAlias(),
-        "SELECTDEFS" => $this->Selection,
+        "SELECTDEFS" => $this->SelectionDef,
     ]);
 }
 //==============================================================================
@@ -178,7 +178,7 @@ public function SelectionSetup() {
             $new_Selection[$key_name] =  [$lnk,$cond];
         }
     }
-    $this->Selection = $new_Selection;
+    $this->SelectionDef = $new_Selection;
 }
 //==============================================================================
 // Schema Define Analyzer
@@ -254,19 +254,6 @@ public function GetRecord($num,$join=FALSE) {
 //==============================================================================
 //   Get Relation Table fields data list.
 // Result:   $this->Select (Relations)
-/*
-public function GetValueList() {
-    $valueLists = array();
-    $this->dbDriver->getValueLists_callback(function($key,$val_list) use (&$valueLists) {
-        $valueLists[$key] = $val_list;
-    });
-    $this->Select= $valueLists;
-    debug_log(DBMSG_MODEL, [ "SELECT_LIST" => $this->Select]);
-}
-*/
-//==============================================================================
-//   Get Relation Table fields data list.
-// Result:   $this->Select (Relations)
 public function GetValueList() {
     $valueLists = array();
     $filter_rec = function($record,$filter) {
@@ -274,10 +261,10 @@ public function GetValueList() {
         foreach($filter as $key) $new[$key] = $record[$key];
         return $new;
     };
-    foreach($this->Selection as $key_name => $seldef) {
+    foreach($this->SelectionDef as $key_name => $seldef) {
         list($target,$cond) = $seldef;
         list($model,$ref_list) = array_first_item($target);
-        if(is_numeric($model)) {        // self list
+        if(is_int($model)) {        // self list
             $this->RecordFinder($cond,$ref_list,NULL,$filter_rec);
             $valueLists[$key_name] = $this->Records;
         } else if(is_array($ref_list)) {
