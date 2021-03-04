@@ -132,13 +132,13 @@ function debug_log($lvl,...$items) {
                 }
             }
         }
-        return $dmp_msg;
+        return "{$dmp_msg}\n";
     };
     global $debug_log_str;
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
         if($lvl < 0 && $lvl > DBMSG_LEVEL) {
-            if($lvl === -99) echo "<pre>\n{$dmp_info}\n</pre>\n";
+            if($lvl === -99) die("<pre>\n{$dmp_info}\n</pre>\n");
             else echo "{$dmp_info}\n";
         } else {
             if(isset($debug_log_str[$lvl])) $dmp_info = $debug_log_str[$lvl] . $dmp_info;
@@ -146,5 +146,4 @@ function debug_log($lvl,...$items) {
             $debug_log_str[$lvl] = $dmp_info;
         }
     }
-    if(abs($lvl) === 99) exit;
 }

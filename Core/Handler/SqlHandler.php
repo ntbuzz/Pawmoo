@@ -53,53 +53,23 @@ public function setupRelations($relations) {
 // fetchDB: get record data , and replace alias and bind column
 public function fetchDB() {
 	if($row = $this->fetch_array()) {
-		$this->fieldAlias->to_alias_field($row);
+		$this->fieldAlias->to_alias_bind($row);
 	}
 	return $row;
 }
 //==============================================================================
 // fetchDB: get record data , and replace alias and bind column
-public function execSQL($sql) {
-	debug_log(DBMSG_HANDLER,['SQL' => $sql]);
-	$this->doQuery($sql);
+public function fetch_locale() {
+	if($row = $this->fetch_array()) {
+		$this->fieldAlias->to_lang_alias($row);
+	}
+	return $row;
 }
 //==============================================================================
-//	getValueLists: list-colum name, value-colums
-public function getValueLists_callback($callback) {
-    foreach($this->relations as $key => $val) {
-		list($nm,$rel) = array_first_item($val);		// because each element will be same table,id
-		list($tbl,$id) = explode('.',$rel);
-		// re-build $val array
-		array_walk($val,function(&$v,$k){list($t,$id,$fn) = explode('.', $v);$v=$fn;});
-		$vv = [];
-		foreach($val as $alias => $fn) $vv[] = "\"{$fn}\" as $alias";
-		$ref_list = implode(',',$vv);
-		$sql = "SELECT \"{$id}\",{$ref_list} FROM {$tbl} ORDER BY \"{$id}\";";
-		$keys = array_keys($val);
-		$bind = $this->fieldAlias->get_bind_ifexists($keys);
-//debug_dump(['VAL'=>$val,'LIST'=>$ref_list,'BIND'=>$bind,'SQL'=>$sql]);
-		$values = [];
-		$this->execSQL($sql);
-		while ($row = $this->fetch_array()) {	// other table refer is not bind!
-			if($bind===FALSE) {
-				foreach($val as $nm => $ref_fn) {
-					$key = $row[$nm];
-					if(!empty($key)) $values[$nm][$key] = $row[$id];
-				}
-			} else {
-				$key = $this->fieldAlias->get_bind_key($row,$bind);
-//				if(!empty($key)) 
-				$values[$bind][$key] = $row[$id];
-			}
-		}
-		if($bind===FALSE) {
-			foreach($val as $nm => $ref_fn) {
-				$callback($nm,$values[$nm]);
-			}
-		} else {
-			$callback($bind,$values[$bind]);
-		}
-    }
+// fetchDB: get record data , and replace alias and bind column
+public function execSQL($sql,$logs = TRUE) {
+	if($logs) debug_log(DBMSG_HANDLER,['SQL' => $sql]);
+	$this->doQuery($sql);
 }
 //==============================================================================
 //	getValueLists: list-colum name, value-colums
@@ -110,7 +80,6 @@ public function getValueLists($table,$ref,$id) {
 	$values = array();
 	debug_log(9,["VALUE-LIST" => [$table,$ref,$id,$sql,'REL'=>$this->relations,'ALIAS'=>$this->fieldAlias->GetAlias()]]);
 	while ($row = $this->fetch_array()) {	// other table refer is not bind!
-//		debug_log(-9,["Row" => $row]);
 		$key = $row[$ref];
 		if(!empty($key)) $values[$key] = $row[$id];
 	}
@@ -153,7 +122,6 @@ public function getRecordValue($cond,$use_relations) {
 	$sql = $this->sql_JoinTable($use_relations);
 	$where .= ($this->is_offset) ? " offset 0 limit 1" : " limit 0,1";
 	$sql .= "{$where};";
-//	debug_log(DBMSG_HANDLER,[ "RecVal-SQL" => $sql]);
 	$this->execSQL($sql);
 	$row = $this->fetchDB();
 	return ($row === FALSE) ? []:$row;
@@ -168,9 +136,8 @@ public function getRecordValue($cond,$use_relations) {
 public function findRecord($cond,$use_relations = FALSE,$sort = []) {
 	$where = $this->sql_makeWHERE($cond);
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
-	$this->execSQL("{$sql}{$where};");
+	$this->execSQL("{$sql}{$where};",FALSE);		// No Logging
 	$field = $this->fetch_array();
-//	debug_log(DBMSG_HANDLER,["Find" => "{$where}", "DATA" => $field]);
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	$sql = $this->sql_JoinTable($use_relations);
 	if(!empty($sort)) {
@@ -241,9 +208,6 @@ public function deleteRecord($wh) {
 // escape to single-quote(')
 protected function sql_safequote(&$value) {
 	array_walk($value,function(&$v,$k){$v=str_replace("'","''",$v);});
-//	foreach($value as $key => $val) {
-//		$value[$key] = str_replace("'","''",$val);
-//	}
 }
 //==============================================================================
 // generate JOIN token
@@ -369,7 +333,6 @@ protected function sql_safequote(&$value) {
 						if(in_array($key,$and_or_op,true)) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
-//							if(!empty($opp)) $opp = "({$opp})";
 							if($key === 'NOT') $opp = "(NOT {$opp})";
 						} else { // LIKE [ array ]
 							$opp = $like_object($key,$val,$table);
@@ -400,7 +363,6 @@ protected function sql_safequote(&$value) {
 					if(array_key_exists($op,$in_op)) {
 						$cmp = implode(',',array_map(function($v) { return "'{$v}'";},$val));
 						$opx = $in_op[$op];
-//						$opp = "({$table}.\"{$key}\" {$opx} ({$cmp}))";
 						$opp = $multi_field($key,$opx,$table,"({$cmp})");
 					} else {	// LIKE [ array ]
 						$opp = $like_object($key,$val,$table);
