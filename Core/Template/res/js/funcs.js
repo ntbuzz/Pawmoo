@@ -60,7 +60,7 @@ Locations.prototype.href_number = function (e) {
 //===============================================
 // ネスティッド SELECT
 // IEのために class でなく prototype ベースで実装
-function SelectChain(mytag,selObj) {
+function SelectChain(mytag,selObj,callback) {
     var myobj = $('#'+mytag);
     var ref = myobj.attr('class');
     if (ref === undefined) ref = mytag;
@@ -68,7 +68,10 @@ function SelectChain(mytag,selObj) {
     this.my_obj = myobj;
     this.select_tag = (ref in selObj) ? selObj[ref] :[];  // array-list
     this.tag_id = ref;
-    this.Child_tag = ( sub === undefined) ? null : new SelectChain(sub,selObj);
+    this.Child_tag = (sub === undefined) ? null : new SelectChain(sub, selObj, callback);
+    if (this.Child_tag === null) {
+        this.callback_func = (callback === undefined) ? null : callback;
+    } else this.callback_func = null;   // セレクト中途ではコールバックしない
 };
 SelectChain.prototype = {
     // Make Self OPTION List
@@ -108,7 +111,11 @@ SelectChain.prototype = {
         self.my_obj.off().change(function() {
             var my_val = $(this).val();
             self.SelectValue = my_val;
-            if(self.Child_tag !== null) self.Child_tag.defaultList(0,my_val);
+            if (self.Child_tag !== null) self.Child_tag.defaultList(0, my_val);
+            else if (self.callback_func !== null) {
+                // 最後のセレクトイベントでコールバック関数を呼ぶ
+                self.callback_func(my_val);
+            }
         });
         return grp;
     }
