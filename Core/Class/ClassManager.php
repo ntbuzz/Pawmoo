@@ -5,20 +5,21 @@
 class ClassManager {
     private static $ObjectList = [];  // [ 'ClassName' => [ state, Object, count ] ]
 //==============================================================================
-public static function NewClass($class_name,$owner) {
-    if(array_key_exists($class_name,static::$ObjectList)) {
-        list($state,$obj,$cnt) = static::$ObjectList[$class_name];
-        static::$ObjectList[$class_name][2]++;
+public static function Create($module_name,$class_name,$owner) {
+    if(array_key_exists($module_name,static::$ObjectList)) {
+        list($state,$obj,$cnt) = static::$ObjectList[$module_name];
+        ++$cnt;
+        if($state !== 0 && $cnt>2) die("Conflict '{$module_name}' Create during initializing @ {$this->ModuleName}.\n");
+        static::$ObjectList[$module_name][2] = $cnt;
         return $obj;
     }
 //    if($class_name === 'IndexModel') echo "INDEX: @ {$owner->ClassName}\n";
     $obj = new $class_name($owner);
-//echo gettype($obj)."<br>\n";
-    static::$ObjectList[$class_name] = [ 1, $obj,1];
+    static::$ObjectList[$module_name] = [ 1, $obj, 1];
     if(method_exists($obj,'class_startup')) {
         $obj->class_startup();
     }
-    static::$ObjectList[$class_name][0] = 0;
+    static::$ObjectList[$module_name][0] = 0;
     return $obj;
 }
 //==============================================================================

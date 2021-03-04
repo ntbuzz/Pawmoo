@@ -128,7 +128,7 @@ App::LoadModuleFiles($controller);
 $ContClass = "{$controller}Controller";
 // Create Controller CLASS
 //$controllerInstance = new $ContClass();
-$controllerInstance = ClassManager::NewClass($ContClass,NULL);
+$controllerInstance = ClassManager::Create($ContClass,$ContClass,NULL);
 
 // Method existance Check
 if(!$controllerInstance->is_enable_action($method)) {

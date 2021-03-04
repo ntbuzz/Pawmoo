@@ -51,8 +51,8 @@ class AppView extends AppObject {
         parent::__construct($owner);
         $this->Model = $owner->Model;       // import Owner Property
         $helper = "{$this->ModuleName}Helper";
-        if(! class_exists($helper)) $helper = 'AppHelper';
-        $this->Helper = new $helper($this);
+        $helper_class = (class_exists($helper)) ? $helper:'AppHelper';
+		$this->Helper = ClassManager::Create($helper,$helper_class,$this);
         $this->Helper->MyModel = $this->Model;
     }
     //==========================================================================

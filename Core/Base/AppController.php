@@ -18,13 +18,11 @@ class AppController extends AppObject {
 	function __construct($owner = NULL){
 		parent::__construct($owner);
 		$model = "{$this->ModuleName}Model";
-		if(!class_exists($model)) $model = 'AppModel';	// file not exists, Use basic Class
-//		$this->Model = new $model($this);
-		$this->Model = ClassManager::NewClass($model,$this);
+		$model_class = (class_exists($model)) ? $model : 'AppModel';	// file not exists, Use basic Class
+		$this->Model = ClassManager::Create($model,$model_class,$this);
 		$view = "{$this->ModuleName}View";
-		if(!class_exists($view)) $view = 'AppView';		// file not exists, Use basic Class
-//		$this->View = new $view($this);
-		$this->View = ClassManager::NewClass($view,$this);
+		$view_class = (class_exists($view)) ? $view : 'AppView';		// file not exists, Use basic Class
+		$this->View = ClassManager::Create($view,$view_class,$this);
 		$this->Helper = $this->View->Helper;			// Helper class short-cut
 		if(empty(App::$Filter)) {
 			App::$Filters[0] = App::$Filter = $this->defaultFilter;
@@ -130,7 +128,6 @@ protected function ActionPostProcess($action) {
 // Method Dispatcher before Pre-Process, after Post-Processing
 public function ActionDispatch($action) {
 	if($this->ActionPreProcess($action)) {
-		$this->Model->RelationSetup();
 		if(array_key_exists($action,$this->aliasAction)) {
 			$action = $this->aliasAction[$action];
 		}

@@ -94,8 +94,7 @@ public function __get($PropName) {
     // already class file loaded?
     $prop_name = "{$mod_name}{$cls_name}";
     if(class_exists($prop_name)) {
-//        $this->$PropName = new $prop_name($this);
-        $this->$PropName = ClassManager::NewClass($prop_name,$this);
+        $this->$PropName = ClassManager::Create($prop_name,$prop_name,$this);
         return $this->$PropName;
     }
     // app/modules/* path search
@@ -105,18 +104,12 @@ public function __get($PropName) {
             App::LoadModuleFiles($mod_name);    // Load on Controller,Model,Helper
             if(class_exists($prop_name)) {      // is SUCCESS?
                 // Controller create with Model,View.Helper
-//                $this->$PropName = new $prop_name($this);
-                $this->$PropName = ClassManager::NewClass($prop_name,$this);
+                $this->$PropName = ClassManager::Create($prop_name,$prop_name,$this);
                 return $this->$PropName;
             }
         } else {
             require_once($modfile);
-//            $this->$PropName = new $prop_name($this);
-            $this->$PropName = ClassManager::NewClass($prop_name,$this);
-            // RelationSetup called for Model, instead of Controller
-//            if(method_exists($this->$PropName,'RelationSetup')) {
-//                $this->$PropName->RelationSetup(FALSE);
-//            }
+            $this->$PropName = ClassManager::Create($prop_name,$prop_name,$this);
             return $this->$PropName;
         }
     }
