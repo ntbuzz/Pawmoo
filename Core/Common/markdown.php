@@ -218,7 +218,8 @@ function pseudo_markdown($atext, $md_class = '') {
 //  textarea    => ^[name]!{text-value:col,row}
 //  textbox     => ^[name]={text-value:size}
 //  select      => ^[name]%{select-val:option1=val1,option2=val2,...}
-        '/(\s)\^\[([\-\w]+)?\]([@:!=%])\{(.*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
+//        '/(\s)\^\[([\-\w]+)?\]([@:!=%])\{(.*?[^\\\\]|)\}/s' => function ($m) use(&$item_array) {
+        '/(\s)\^\[([\-\w]+)?\]([@:!=%])\{((?:\$\{[^\}]+?\}|[^\}])+?)\}/s' => function ($m) use(&$item_array) {
             $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea','%' => 'select'];
             $spc = $m[1]; $kind = $m[3]; $val = $m[4];
             $vv = $type[$kind];
