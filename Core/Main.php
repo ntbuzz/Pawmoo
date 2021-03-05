@@ -188,7 +188,7 @@ if($controllerInstance->is_authorised()) {
     $controllerInstance->ActionDispatch($method);
 }
 debug_log(DBMSG_SYSTEM, [
-    "#SessionClose" => MySession::$EnvData,
+//    "#SessionClose" => MySession::$EnvData,
     "CLASS-MANAGER" => ClassManager::DumpObject(),
 ]);
 debug_run_time(DBMSG_SYSTEM);
