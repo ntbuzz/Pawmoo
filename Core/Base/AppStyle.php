@@ -267,20 +267,17 @@ public function ViewStyle($file_name) {
                 $vsec = substr($vsec,1);
                 $before = $tmplist;     // change before list
                 $tmplist = array( 'Libs' => $tmplist['Libs']);
-//            debug_log(-999,["Libs::{$vsec}:{$secname}"=>['BEFORE'=>$before,'AFTER'=>$tmplist]]);
                 break;
             case '!':               // force parent Template
                 $vsec = substr($vsec,1);
                 $before = $tmplist;     // change before list
                 array_shift($tmplist);  // remove top element
-//            debug_log(-999,["Parent::{$vsec}:{$secname}"=>['BEFORE'=>$before,'AFTER'=>$tmplist]]);
                 break;
             default:
                 $before = $tmplist;     // change before list
                 if($vsec === $secname || !array_key_exists($vsec, $secData) ) {
                     array_shift($tmplist);  // remove top element
                 } else $force_parent = FALSE;
-//              debug_log(-999,["tmplist-{$vsec}:{$secname}"=>['BEFORE'=>$before,'AFTER'=>$tmplist]]);
             }
             list($key,$item) = array_first_item($tmplist);
             $secmsg = ($force_parent) ? "Invoke {$key}:{$vsec}" : "Subsection: {$vsec}";
