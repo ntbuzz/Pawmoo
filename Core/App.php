@@ -56,9 +56,7 @@ class App {
             'method' => $method,  //ucfirst($uri_array[3]),
             'filter' => static::$Filter,  // ucfirst(static::$Filter),
             'params' => static::$Params,
-            'platform' => PLATFORM_NAME,
-            'copytight' => COPYTIGHT,
-            'current_version' => CURRENT_VERSION,  // framework version
+
         );
         static::$Query = array_intval_recursive($query);
         // メソッドの書き換えによるアドレスバー操作用

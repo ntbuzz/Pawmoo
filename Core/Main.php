@@ -104,7 +104,11 @@ require_once('Class/ClassLoader.php');
 ClassLoader::Setup($appname,$controller);   // AutoLoader for Application folder
 MySession::InitSession($appname,TRUE);         // Session Variable SETUP
 MySession::set_paramIDs('debugger',DEBUGGER);  // SET DEBUGGER
-
+MySession::set_paramIDs('sysinfo',[
+    'platform'  => PLATFORM_NAME,
+    'copyright' => COPYTIGHT,
+    'version'   => CURRENT_VERSION,  // framework version
+]);
 // INITIALIZED App static class.
 App::__Init($appname,$app_uri,$module,$query,$requrl);
 // Load Application Common library
