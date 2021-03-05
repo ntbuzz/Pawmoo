@@ -65,9 +65,16 @@ public function ResetSchema() {
         $this->ModuleName => [
 //              "Header"    => $this->HeaderSchema,
 //              "Field"     => $this->FieldSchema, 
-            "JOIN-Defs"     => $this->dbDriver->relations,
+            "Join-Defs"     => $this->dbDriver->relations,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
-            "SELECTDEFS"    => $this->SelectionDef,
+            "Select-Defs"   => $this->SelectionDef,
+        ]
+    ]);
+    debug_dump([             // DEBUG LOG information
+        $this->ModuleName => [
+            "Join-Defs"     => $this->dbDriver->relations,
+            "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
+            "Select-Defs"   => $this->SelectionDef,
         ]
     ]);
 }
@@ -130,10 +137,17 @@ public function ResetSchema() {
                 if(array_key_exists($field,$refs)) {
                     $lnk = explode('.',$refs[$field]);
                     return [
-                        $lnk[0],                        // table
+                        $lnk[0],        // table
+                        $lnk[2],        //   ref_name
+                        $table,         // rel_table
+//                        "{$table}.\"{$key}\"={$lnk[0]}.\"{$lnk[1]}\"",      // (ref.) id = table.id
+                        $key,           //    rel_filed
+                        $lnk[1],        //    table_filed
+/*
                         "{$lnk[0]}.\"{$lnk[2]}\"",      // table."ref"
                         "{$table}.\"{$key}\"",          // rel_table.id
                         "{$lnk[0]}.\"{$lnk[1]}\"",      // table.id
+*/
                     ];
                 }
             }
@@ -149,7 +163,12 @@ public function ResetSchema() {
             $rel_array = is_array($rel);
             if($rel_array) {            // multi-column refer
                 list($db,$ref_list) = array_first_item($rel);
-                if(is_numeric($db)) continue;
+                if(is_numeric($db)) {       // maybe 'Model.id.Field'
+                    if(!is_scalar($ref_list)) continue;
+                    list($d,$f,$r) = explode('.', "{$ref_list}...");
+                    $db = "{$d}.{$f}";
+                    $ref_list = $r;
+                }
                 list($model,$table,$field) = $this->model_view($db);
                 $link = "{$table}.{$field}";
                 if(is_scalar($ref_list)) $ref_list = [$ref_list];    // force array

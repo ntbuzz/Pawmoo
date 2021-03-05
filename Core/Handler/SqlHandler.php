@@ -225,15 +225,16 @@ protected function sql_safequote(&$value) {
 			$join = [];
 			foreach($this->relations as $key => $val) {
 				foreach($val as $alias => $lnk) {
-					if(is_array($lnk)) {
-						list($tt,$ref,$id,$rel) = $lnk;
-						$sql .= ",{$ref} AS \"{$alias}\"";
-						$join[$tt] = "{$id} = {$rel}";
+					if(is_array($lnk)) {	// [ refer]
+						list($table,$ref,$rel_tbl,$rel_fn,$tbl_rel) = $lnk;
+						$rel = "{$rel_tbl}.\"{$rel_fn}\"={$table}.\"{$tbl_rel}\"";
+						if(isset($join[$table])) unset($join[$table]);	// duplicate-refer
 					} else {
 						list($table,$fn,$ref) = explode('.', $lnk);
-						$sql .= ",{$table}.\"{$ref}\" AS \"{$alias}\"";
-						$join[$table] = "{$this->table}.\"{$key}\" = {$table}.\"{$fn}\"";
+						$rel = "{$this->table}.\"{$key}\"={$table}.\"{$fn}\"";
 					}
+					$sql .= ",{$table}.\"{$ref}\" AS \"{$alias}\"";
+					$join[$table] = $rel;
 				}
 			}
 			foreach($join as $table => $val) $jstr .= " LEFT JOIN {$table} ON {$val}";
