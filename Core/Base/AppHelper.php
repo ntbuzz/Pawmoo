@@ -262,7 +262,7 @@ public function Form($act, $attr) {
 //	$this->Select ($key,$name)
 //
 public function Select($key,$name) {
-	debug_log(DBMSG_VIEW, $this->MyModel->Select);
+//	debug_log(DBMSG_VIEW, $this->MyModel->Select);
 	echo $this->Select_str($key,$name);
 }
 //==============================================================================

@@ -113,8 +113,9 @@ SelectChain.prototype = {
             self.SelectValue = my_val;
             if (self.Child_tag !== null) self.Child_tag.defaultList(0, my_val);
             else if (self.callback_func !== null) {
-                // 最後のセレクトイベントでコールバック関数を呼ぶ
-                self.callback_func(my_val);
+                // 最後のセレクトイベントでコールバック関数を呼ぶ、テキストも渡す
+                var my_txt = $(this).children(':selected').text();
+                self.callback_func(my_val,my_txt);
             }
         });
         return grp;

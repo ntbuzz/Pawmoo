@@ -59,7 +59,9 @@ var objList = {
         [ 26, "Office365",  	5],
     ],
 };
-$('#fav-list').ChainSelect(objList,10);
+$('#fav-list').ChainSelect(objList,10,function(v,t) {
+	alert("「"+t+"」("+v+") を選びました！");
+});
 ~
 
 // #popup-dialog のマウスオーバーバルーンヘルプ
