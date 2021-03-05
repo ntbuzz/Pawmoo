@@ -3,37 +3,37 @@
  * AppObjectClassの管理
  */
 class ClassManager {
-    private static $ObjectList = [];  // [ 'ClassName' => [ state, Object, count ] ]
+    private static $ObjectList = [];  // [ 'ClassName' => [ state, ini_cnt, ref_count, owner, Object] ]
 //==============================================================================
 public static function Create($module_name,$class_name,$owner) {
     if(array_key_exists($module_name,static::$ObjectList)) {
-        list($state,$obj,$cnt) = static::$ObjectList[$module_name];
-        ++$cnt;
-        if($state !== 0 && $cnt>2) die("Conflict '{$module_name}' Create during initializing @ {$this->ModuleName}.\n");
-        static::$ObjectList[$module_name][2] = $cnt;
+        list($state,$ini,$cnt,$om,$obj) = static::$ObjectList[$module_name];
+        if($state !== 0) {
+            if(++$ini > 2 ) die("Conflict '{$module_name}' Create during initializing @ {$this->ClassName}.\n");
+        } else $ini = 0;
+        static::$ObjectList[$module_name] = [ $state,$ini,++$cnt,$om,$obj];
         return $obj;
     }
-//    if($class_name === 'IndexModel') echo "INDEX: @ {$owner->ClassName}\n";
     $obj = new $class_name($owner);
-    static::$ObjectList[$module_name] = [ 1, $obj, 1];
+    $om = ($owner === NULL) ? '(Main)' :$owner->ClassName;
+    static::$ObjectList[$module_name] = [ 1, 1, 1,$om, $obj];
     if(method_exists($obj,'class_startup')) {
         $obj->class_startup();
     }
-    static::$ObjectList[$module_name][0] = 0;
+    static::$ObjectList[$module_name][0] = 0;   // state off
+    static::$ObjectList[$module_name][1] = 0;   // count of during initializ
     return $obj;
 }
 //==============================================================================
-public static function getObjectList() {
-    return static::$ObjectList;
-}
-//==============================================================================
+// Dump ObjectList
 public static function DumpObject() {
-    $dmp = "\n";
+    $dmp = "[ STATE, INI, REF, OWNER ]\n";
     $padding = str_repeat(" ", 16);
+//    ksort(static::$ObjectList);
     foreach(static::$ObjectList as $key => $val) {
-        list($state,$obj,$cnt) = $val;
+        list($state,$ini,$cnt,$om) = $val;
         $kk = substr("{$key}{$padding}",0,16);
-        $dmp .= "  {$kk} = [ {$state}, '{$obj->ModuleName}', {$cnt} ]\n";
+        $dmp .= "  {$kk} = [ {$state}, {$ini}, {$cnt}, {$om} ]\n";
     }
     return $dmp;
 }
