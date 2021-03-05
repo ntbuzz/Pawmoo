@@ -152,35 +152,27 @@ App::$Method= $method;
 // Debugging Message
 debug_log(DBMSG_SYSTEM, [
 //debug_log(9, [
-    '#DebugInfo' => [
-        "Application"=> $appname,
-        "Controller"=> $controller,
-        "Class"     => $ContClass,
-        "Method"    => $method,
-        "Filters"   => $filters,
-        "URI"       => $requrl,
-        "QUERY"     => $q_str,
-        "Controller"=> App::$Controller,
-        "Action"    => App::$Method,
-    ],
-    "QUERY" => App::$Query,
-    "SESSION" => [
-        "SESSION_ID"=> MySession::$MY_SESSION_ID,
-        "ENV"       => MySession::$EnvData,
-        "POST"      => MySession::$ReqData,   // Hide debuglog,password
-    ],
     '#PathInfo' => [
-        "REFERER" => $_SERVER['HTTP_REFERER'],
-        "SERVER" => $_SERVER['REQUEST_URI'],
-        "sysRoot"=> App::$SysVAR['SYSROOT'],
-        "appRoot"=> App::$SysVAR['APPROOT'],
-        "appname"=> $appname,
-        "Controller"=> $controller,
-        "Action"    => $method,
-        "Param"    => $params,
+        'SERVER'    => $_SERVER['SERVER_NAME'],
+        "DOCROOT"   => App::$DocRoot,
+        "REQ_URI"   => $_SERVER['REQUEST_URI'],
+        "REFERER"   => App::$Referer,
+        "QUERY"     => App::$Query,
     ],
-    "ReqCont" => $ReqCont,
-    "Location" => App::Get_RelocateURL(),
+    '#DebugInfo' => [
+        "AppName"       => App::$AppName,
+        "Class"         => $ContClass,
+        "Controller"    => App::$Controller,
+        "Action"        => App::$Method,
+        "Filters"       => App::$Filters,
+//        "Param"         => App::$Params,
+        "Re-Location" => App::Get_RelocateURL(),
+    ],
+    "SESSION Variables" => [
+        "SESSION_ID"=> MySession::$MY_SESSION_ID,
+        "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
+        "POST"      => MySession::$ReqData,     // Hide debuglog,password
+    ],
 ]);
 
 debug_run_start();

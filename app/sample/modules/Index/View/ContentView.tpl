@@ -30,7 +30,7 @@
 	]
 	p#move-top => ▲
 ]
-
+// select.php リソースを使うときはここのスクリプトを削除する
 +jquery => ~
 var objList = {
     'top-select': [

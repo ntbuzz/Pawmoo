@@ -17,9 +17,9 @@ Stylesheet => [
 Javascript => [
     common => [
         +jquery => [
+//          select.php            // SELECTテーブルをPHPで生成する
             blogscript.js
             tabset.js
-            test.php
         ]
         +section => ^common       // 上位のセクションを呼出す
     ]
