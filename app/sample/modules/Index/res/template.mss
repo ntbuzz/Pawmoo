@@ -8,7 +8,6 @@ Stylesheet => [
             blogstyle.css
             tabmenu.css
             tabset.css
-            test.php
         ]
         +section => ^common       // 上位のセクションを呼出す
     ]
