@@ -12,6 +12,7 @@ define('DBMSG_MODEL',   -102);      // for Model
 define('DBMSG_HANDLER', -101);      // for DB-Handler
 define('DBMSG_RESOURCE',-100);      // for Style/Script
 define('DBMSG_LEVEL',   -100);      // logging level
+define('DBMSG_DIE',     -99);       // die message
 
 const EMPTY_MSG = " EMPTY\n";
 const EXCLUSION = [

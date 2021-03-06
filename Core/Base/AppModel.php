@@ -484,6 +484,8 @@ public function AddRecord($row) {
     if($this->is_valid($data)) {
         $this->field_alias_bind($data);
         $this->dbDriver->insertRecord($this->fields);
+    } else {
+    debug_log(DBMSG_MODEL,['VALID-ERROR'=>$data]);
     }
 }
 //==============================================================================
@@ -493,6 +495,9 @@ public function UpdateRecord($num,$row) {
     if($this->is_valid($data)) {
         $this->field_alias_bind($data);
         $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
+        debug_log(-1,['VALID'=>$data, $this->Primary => $num, $this->fields]);
+    } else {
+    debug_log(DBMSG_MODEL,['VALID-ERROR'=>$data]);
     }
 }
 
