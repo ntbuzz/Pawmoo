@@ -194,13 +194,13 @@ span.help_icon {
     position:fixed;
     display:none;
     min-width:100px;
-    min-height:150px;
+    min-height:20px;
     font-size:10pt;
     color:black;
     padding:10px 20px;
     border: 1px solid gray;
     border-radius:3px;
-    background: whitesmoke;
+    background: #E3F1C7;
     border-radius:8px;
     box-shadow: 5px 5px silver;
     overflow:hidden;

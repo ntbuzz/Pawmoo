@@ -51,18 +51,17 @@ class AppView extends AppObject {
         parent::__construct($owner);
         $this->Model = $owner->Model;       // import Owner Property
         $helper = "{$this->ModuleName}Helper";
-        if(! class_exists($helper)) $helper = 'AppHelper';
-        $this->Helper = new $helper($this);
+        $helper_class = (class_exists($helper)) ? $helper:'AppHelper';
+		$this->Helper = ClassManager::Create($helper,$helper_class,$this);
         $this->Helper->MyModel = $this->Model;
-        $this->__InitClass();
     }
     //==========================================================================
     // Class Initialized
-    protected function __InitClass() {
+    protected function class_initialize() {
         $this->Layout = 'Layout';
         $this->rep_array = array_merge(App::$SysVAR, App::$Params);   // Import SYSTEM VARIABLE
         $this->env_vars = [];
-        parent::__InitClass();                    // CALL Parent Method
+        parent::class_initialize();                    // CALL Parent Method
     }
 //==============================================================================
 // Output Default LAYOUT name.

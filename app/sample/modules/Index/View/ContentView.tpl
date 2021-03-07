@@ -30,7 +30,7 @@
 	]
 	p#move-top => ▲
 ]
-
+// select.php リソースを使うときはここのスクリプトを削除する
 +jquery => ~
 var objList = {
     'top-select': [
@@ -59,7 +59,21 @@ var objList = {
         [ 26, "Office365",  	5],
     ],
 };
-$('#fav-list').ChainSelect(objList,10);
+$('#fav-list').ChainSelect(objList,10,function(v,t) {
+	alert("「"+t+"」("+v+") を選びました！");
+});
+
+$("#dialog-demo").click(function () {
+	$.dialogBox("ダイアログタイトル","標準の [Yes/No] ダイアログです。<br>気に入らないときは自分で実装しましょう" ,
+		function (result) {
+		if (result) { // OK のときの処理
+			alert('そうですか、\n頑張って作ってください...');
+		} else {
+			alert('わかりました、\n標準のものを使うんですね');
+		}
+	});
+});
+
 ~
 
 // #popup-dialog のマウスオーバーバルーンヘルプ

@@ -36,11 +36,11 @@ public function doQuery($sql) {
 	$this->rows = pg_query($this->dbb, $sql);
 	if(!$this->rows) {
 		$res1 = pg_get_result($this->dbb);
-		debug_log(-99,[
-			"ERROR:" => pg_result_error($res1),
-			"SQL:" => $sql,
-			"COND:" => $this->LastCond,
-			"BUILD:" => $this->LastBuild,
+		debug_log(DBMSG_DIE,[
+			"ERROR" => pg_result_error($res1),
+			"SQL" => $sql,
+			"COND" => $this->LastCond,
+			"BUILD" => $this->LastBuild,
 		]);
 		die('Postgres QUERY失敗' . pg_last_error());
 	}
@@ -73,7 +73,7 @@ public function updateRecord($wh,$row) {
 	$aa = pg_convert($this->dbb,$this->raw_table,$row);
 	if($aa === FALSE) {
 		$res1 = pg_get_result($this->dbb);
-		debug_log(-99,[
+		debug_log(DBMSG_DIE,[
 			"ERROR:" => pg_result_error($res1),
 			"DBB" => $this->dbb,
 			"TABLE" => $this->raw_table,
@@ -109,7 +109,7 @@ public function insertRecord($row) {
 	$aa = pg_convert($this->dbb,$this->raw_table,$row);
 	if($aa === FALSE) {
 		$res1 = pg_get_result($this->dbb);
-		debug_log(-99,[
+		debug_log(DBMSG_DIE,[
 			"ERROR:" => pg_result_error($res1),
 			"DBB" => $this->dbb,
 			"TABLE" => $this->raw_table,

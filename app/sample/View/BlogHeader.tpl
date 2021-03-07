@@ -23,5 +23,14 @@ h1.logo-head => [ %${#.BLOGTITLE} => /sample/${$controller$}/ ]
 	'|ja*' => [ %link => [ Englisth => "?lang=en" ] ]
 	]
 ]
+// 本体は Footer.tpl に定義
+span.button#about_info => [ 
+	style => [
+		position:fixed;
+		top:60px;
+		left:185px;
+	]
+	"About"
+]
 
 ]

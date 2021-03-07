@@ -32,6 +32,7 @@ require_once('Base/AppModel.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
 require_once('Base/LangUI.php');
+require_once('Class/ClassManager.php');
 
 // Setup TIMEZONE
 date_default_timezone_set(TIME_ZONE);
@@ -103,7 +104,11 @@ require_once('Class/ClassLoader.php');
 ClassLoader::Setup($appname,$controller);   // AutoLoader for Application folder
 MySession::InitSession($appname,TRUE);         // Session Variable SETUP
 MySession::set_paramIDs('debugger',DEBUGGER);  // SET DEBUGGER
-
+MySession::set_paramIDs('sysinfo',[
+    'platform'  => PLATFORM_NAME,
+    'copyright' => COPYTIGHT,
+    'version'   => CURRENT_VERSION,  // framework version
+]);
 // INITIALIZED App static class.
 App::__Init($appname,$app_uri,$module,$query,$requrl);
 // Load Application Common library
@@ -126,7 +131,9 @@ LangUI::construct($lang,App::Get_AppPath("View/lang/"),['#common',$controller]);
 App::LoadModuleFiles($controller);
 $ContClass = "{$controller}Controller";
 // Create Controller CLASS
-$controllerInstance = new $ContClass();
+//$controllerInstance = new $ContClass();
+$controllerInstance = ClassManager::Create($ContClass,$ContClass,NULL);
+
 // Method existance Check
 if(!$controllerInstance->is_enable_action($method)) {
     if(FORCE_REDIRECT || $method==='') {
@@ -149,35 +156,27 @@ App::$Method= $method;
 // Debugging Message
 debug_log(DBMSG_SYSTEM, [
 //debug_log(9, [
-    '#DebugInfo' => [
-        "Application"=> $appname,
-        "Controller"=> $controller,
-        "Class"     => $ContClass,
-        "Method"    => $method,
-        "Filters"   => $filters,
-        "URI"       => $requrl,
-        "QUERY"     => $q_str,
-        "Controller"=> App::$Controller,
-        "Action"    => App::$Method,
-    ],
-    "QUERY" => App::$Query,
-    "SESSION" => [
-        "SESSION_ID"=> MySession::$MY_SESSION_ID,
-        "ENV"       => MySession::$EnvData,
-        "POST"      => MySession::$ReqData,   // Hide debuglog,password
-    ],
     '#PathInfo' => [
-        "REFERER" => $_SERVER['HTTP_REFERER'],
-        "SERVER" => $_SERVER['REQUEST_URI'],
-        "sysRoot"=> App::$SysVAR['SYSROOT'],
-        "appRoot"=> App::$SysVAR['APPROOT'],
-        "appname"=> $appname,
-        "Controller"=> $controller,
-        "Action"    => $method,
-        "Param"    => $params,
+        'SERVER'    => $_SERVER['SERVER_NAME'],
+        "DOCROOT"   => App::$DocRoot,
+        "REQ_URI"   => $_SERVER['REQUEST_URI'],
+        "REFERER"   => App::$Referer,
+        "QUERY"     => App::$Query,
     ],
-    "ReqCont" => $ReqCont,
-    "Location" => App::Get_RelocateURL(),
+    '#DebugInfo' => [
+        "AppName"       => App::$AppName,
+        "Class"         => $ContClass,
+        "Controller"    => App::$Controller,
+        "Action"        => App::$Method,
+        "Filters"       => App::$Filters,
+//        "Param"         => App::$Params,
+        "Re-Location" => App::Get_RelocateURL(),
+    ],
+    "SESSION Variables" => [
+        "SESSION_ID"=> MySession::$MY_SESSION_ID,
+        "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
+        "POST"      => MySession::$ReqData,     // Hide debuglog,password
+    ],
 ]);
 
 debug_run_start();
@@ -188,11 +187,11 @@ if($controllerInstance->is_authorised()) {
     // Controller Method Dispacher
     $controllerInstance->ActionDispatch($method);
 }
-
-debug_run_time(DBMSG_SYSTEM);
 debug_log(DBMSG_SYSTEM, [
-    "#SessionClose" => MySession::$EnvData,
+//    "#SessionClose" => MySession::$EnvData,
+    "CLASS-MANAGER" => ClassManager::DumpObject(),
 ]);
+debug_run_time(DBMSG_SYSTEM);
 MySession::CloseSession();
 // call OUTPUT terminate
 $controllerInstance->__TerminateApp();

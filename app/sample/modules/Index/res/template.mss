@@ -16,6 +16,7 @@ Stylesheet => [
 Javascript => [
     common => [
         +jquery => [
+//          select.php            // SELECTテーブルをPHPで生成する
             blogscript.js
             tabset.js
         ]

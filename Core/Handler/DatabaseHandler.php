@@ -61,7 +61,22 @@ public function get_lang_alias($field_name) {
 }
 //==============================================================================
 // ALIAS fields replace to standard field, and BIND-column to record field
-public function to_alias_field(&$row) {
+public function to_lang_alias(&$row) {
+    foreach($this->lang_alias as $key => $lang) {
+        if(!empty($row[$lang])) $row[$key] = $row[$lang];
+        unset($row[$lang]);
+    }
+}
+//==============================================================================
+// ALIAS fields replace to standard field, and BIND-column to record field
+public function to_bind_field(&$row) {
+    foreach($this->bind_columns as $key => $columns) {
+        $row[$key] = array_concat_keys($row,$columns);
+    }
+}
+//==============================================================================
+// ALIAS fields replace to standard field, and BIND-column to record field
+public function to_alias_bind(&$row) {
     foreach($this->lang_alias as $key => $lang) {
         if(!empty($row[$lang])) $row[$key] = $row[$lang];
         unset($row[$lang]);

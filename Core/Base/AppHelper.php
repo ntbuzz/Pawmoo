@@ -25,10 +25,11 @@ class AppHelper  extends AppObject {
 	];
 //==============================================================================
 // constructor( this_Owner_Object )
+/*
 	function __construct($owner) {
 		parent::__construct($owner);
-        $this->__InitClass();
 	}
+*/
 //==============================================================================
 // Call for Owner(AppView) Template Processing Method
 public function ViewTemplate($layout) {
@@ -260,19 +261,19 @@ public function Form($act, $attr) {
 // Generate SELECT Tag
 //	$this->Select ($key,$name)
 //
-public function Select($key,$name) {
-	debug_log(DBMSG_VIEW, $this->MyModel->Select);
-	echo $this->Select_str($key,$name);
+public function Select($key,$name,$id=0) {
+//	debug_log(DBMSG_VIEW, $this->MyModel->Select);
+	echo $this->Select_str($key,$name,$id);
 }
 //==============================================================================
 // Create Select Tag strings
 //	$this->Select ($key,$name)
 //
-public function Select_str($key,$name) {
-    $dat = $this->MyModel->RecData[$key];
+public function Select_str($key,$name,$dat) {
+//    $dat = $this->MyModel->RecData[$key];
     $select = "<SELECT name='{$name}'>";
     foreach($this->MyModel->Select[$key] as $ttl => $id) {
-        $sel = ($id === $dat) ? " selected" : "";
+        $sel = ($id == $dat) ? " selected" : "";	// digit-str or int
         $select .= "<OPTION value='{$id}'{$sel}>{$ttl}</option>\n";
     }
 	return "{$select}\n</SELECT>\n";

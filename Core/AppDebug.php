@@ -12,6 +12,7 @@ define('DBMSG_MODEL',   -102);      // for Model
 define('DBMSG_HANDLER', -101);      // for DB-Handler
 define('DBMSG_RESOURCE',-100);      // for Style/Script
 define('DBMSG_LEVEL',   -100);      // logging level
+define('DBMSG_DIE',     -99);       // die message
 
 const EMPTY_MSG = " EMPTY\n";
 const EXCLUSION = [
@@ -54,6 +55,9 @@ function debug_run_time($lvl) {
 function debug_dump(...$items) {
     if(CLI_DEBUG) debug_log(-98,$items);
 }
+function debug(...$items) {
+    debug_log(-98,$items);
+}
 function log_reset($lvl) {
     global $debug_log_str;
     unset($debug_log_str[$lvl]);
@@ -85,7 +89,9 @@ function debug_log($lvl,...$items) {
             foreach($obj as $key => $val) {
                 if(array_key_exists($key,EXCLUSION)) continue;      // not dump element check
                 $dmp .= str_repeat(' ',$indent*2) . "[{$key}] = ";
-                if(empty($val)) {
+                if(gettype($val)==='object') {
+                    $dmp .= "[{$val->ClassName}]\n"; // print_r($val,true);
+                } else if(empty($val)) {
                     $dmp .= (is_int($val)) ? "0\n" : "NULL\n";
                 } else if(is_array($val)) {
                     $dmp .= "array(" . count($val) . ")\n";
@@ -110,7 +116,9 @@ function debug_log($lvl,...$items) {
                         $msg[0] = '.';
                         $msg = LangUI::get_value('debug',$msg);
                     }
-                    if(empty($obj)) {
+                    if(gettype($obj)==='object') {
+                        $dmp_msg .= "{$msg} : Class[{$obj->ClassName}]\n";// . print_r($obj,true);
+                    } else if(empty($obj)) {
                         $dmp_msg .= "{$msg} : NULL\n";
                     } else if(is_scalar($obj)) {
                         $dmp_msg .= "{$msg} : {$obj}\n";
@@ -125,17 +133,18 @@ function debug_log($lvl,...$items) {
                 }
             }
         }
-        return $dmp_msg;
+        return "{$dmp_msg}\n";
     };
     global $debug_log_str;
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
-        if($lvl < 0 && $lvl > DBMSG_LEVEL) echo "{$dmp_info}\n";
-        else {
+        if($lvl < 0 && $lvl > DBMSG_LEVEL) {
+            if($lvl === -99) die("<pre>\n{$dmp_info}\n</pre>\n");
+            else echo "{$dmp_info}\n";
+        } else {
             if(isset($debug_log_str[$lvl])) $dmp_info = $debug_log_str[$lvl] . $dmp_info;
             MySession::set_paramIDs("debuglog.{$lvl}",$dmp_info);
             $debug_log_str[$lvl] = $dmp_info;
         }
     }
-    if(abs($lvl) === 99) exit;
 }

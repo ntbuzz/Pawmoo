@@ -7,8 +7,6 @@
 class App {
     public static $SysVAR;        // URIROOT, WEBROOT, URI, QUERY 変数
     public static $AppName;         // アプリケーション名
-    private static $appRoot;        // アプリケーションのルートパス
-    private static $sysRoot;        // フレームワークのルートパス、／で終る
     public static $DocRoot;         // DOCUMENT_ROOT 変数
     public static $Referer;         // HTTP_REFERER 変数
     public static $Query;           // urlのクエリー文字列の連想配列
@@ -19,6 +17,8 @@ class App {
     public static $Controller;      // 実行コントローラ名
     public static $Method;    // 呼出しメソッド名
     public static $MethodExtention; // ファイルダイレクトURIの拡張子部分
+    private static $appRoot;        // アプリケーションのルートパス
+    private static $sysRoot;        // フレームワークのルートパス、／で終る
     private static $ReLocate;       // URLの書き換え
     private static $execURI;
 //==============================================================================
@@ -41,7 +41,7 @@ class App {
         static::$Filter = empty($filters) ? '': $filters[0];
    		// 0 ～ 9 の不足する要素を補填する
         $k = count($params);
-		$params += array_fill($k, 10 - $k, 0);
+		$params = $params + array_fill($k, 10 - $k, 0);
 
         static::$ParamCount = $k;
         static::$Params = $params;  //array_intval_recursive($params);
@@ -55,9 +55,8 @@ class App {
             'controller' => $controller,  //ucfirst($uri_array[2]),
             'method' => $method,  //ucfirst($uri_array[3]),
             'filter' => static::$Filter,  // ucfirst(static::$Filter),
-            'platform' => PLATFORM_NAME,
-            'copytight' => COPYTIGHT,
-            'current_version' => CURRENT_VERSION,  // framework version
+            'params' => static::$Params,
+
         );
         static::$Query = array_intval_recursive($query);
         // メソッドの書き換えによるアドレスバー操作用
@@ -69,7 +68,7 @@ class App {
             'filter' => $filters,
             'params' => static::$Params,
             );
-            // リクエスト情報を記憶
+        // リクエスト情報を記憶
         MySession::$EnvData['sysVAR'] = static::$SysVAR;
     }
 //==============================================================================
