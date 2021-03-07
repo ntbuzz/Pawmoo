@@ -8,7 +8,6 @@ class IndexHelper extends blogHelper {
 //==============================================================================
 public function BlogHeading() {
     $body = $this->MyModel->RecData;
-    $select= $this->Select_str('category','category_id');
     $itemdate = (empty($body['edit_date'])) ? $body['post_date']: "{$body['post_date']} 更新:{$body['edit_date']}";
     // ブログのタイトルとリード文
     $body_header = (empty($body['preface']))?'':pseudo_markdown($body['preface']);
