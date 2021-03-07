@@ -21,7 +21,7 @@ public function TitleList() {
 //==============================================================================
 public function CategorySelect() {
     $this->MyModel->GetValueList();
-    echo $this->Select_str('category','category_id');
+    echo $this->Select_str('category','category_id',$this->MyModel->RecData['category_id']);
 }
 //==============================================================================
 public function BlogTOC() {
