@@ -154,8 +154,7 @@ App::$Controller  = $controller;
 App::$Method= $method;
 //=================================
 // Debugging Message
-debug_log(DBMSG_SYSTEM, [
-//debug_log(9, [
+debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
     '#PathInfo' => [
         'SERVER'    => $_SERVER['SERVER_NAME'],
         "DOCROOT"   => App::$DocRoot,
@@ -183,15 +182,15 @@ debug_run_start();
 LockDB::LockStart();
 // Login unnecessary, or Login success returned TRUE.
 if($controllerInstance->is_authorised()) {
-    debug_log(DBMSG_SYSTEM, [ 'LockDB' => LockDB::GetOwner()]);
+    debug_log(DBMSG_CLI|DBMSG_NOLOG, [ 'LockDB' => LockDB::GetOwner()]);
     // Controller Method Dispacher
     $controllerInstance->ActionDispatch($method);
 }
-debug_log(DBMSG_SYSTEM, [
+debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
 //    "#SessionClose" => MySession::$EnvData,
     "CLASS-MANAGER" => ClassManager::DumpObject(),
 ]);
-debug_run_time(DBMSG_SYSTEM);
+debug_run_time(DBMSG_CLI|DBMSG_SYSTEM);
 MySession::CloseSession();
 // call OUTPUT terminate
 $controllerInstance->__TerminateApp();

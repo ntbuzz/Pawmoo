@@ -5,14 +5,17 @@
  */
 if(!defined('DEBUG_LEVEL')) define('DEBUG_LEVEL', 10);
 
-define('DBMSG_SYSTEM',  -105);      // for Main, App, Controller
-define('DBMSG_LOCALE',  -104);      // for LangUI
-define('DBMSG_VIEW',    -103);      // for View, Helper
-define('DBMSG_MODEL',   -102);      // for Model
-define('DBMSG_HANDLER', -101);      // for DB-Handler
-define('DBMSG_RESOURCE',-100);      // for Style/Script
-define('DBMSG_LEVEL',   -100);      // logging level
-define('DBMSG_DIE',     -99);       // die message
+define('DBMSG_SYSTEM',  105);      // for Main, App, Controller
+define('DBMSG_LOCALE',  104);      // for LangUI
+define('DBMSG_VIEW',    103);      // for View, Helper
+define('DBMSG_MODEL',   102);      // for Model
+define('DBMSG_HANDLER', 101);      // for DB-Handler
+define('DBMSG_RESOURCE',100);      // for Style/Script
+define('DBMSG_LEVEL',   100);      // logging level
+define('DBMSG_DUMP',     -1);      // DUMP ONLY
+define('DBMSG_NOLOG',    -2);      // CLI dump ONLY
+define('DBMSG_DIE',      -3);      // die message
+define('DBMSG_CLI',     256);      // CLI BIT Mask for CLI_DEBUG
 
 const EMPTY_MSG = " EMPTY\n";
 const EXCLUSION = [
@@ -51,22 +54,40 @@ function debug_run_time($lvl) {
     ]);
 }
 //==========================================================================
-// ログの表示
-function debug_dump(...$items) {
-    if(CLI_DEBUG) debug_log(-98,$items);
+// ログレベルの分解
+function sep_level($lvl) {
+    if($lvl === FALSE) return FALSE;
+    $mod = ($lvl % DBMSG_CLI);
+    $cli = ($lvl - $mod)/DBMSG_CLI;
+    if($mod < DBMSG_DIE) return FALSE;          // Invalid LEVEL
+    if($mod >= DBMSG_LEVEL) $mod = -$mod;       // SystemLog
+    else if($mod > DEBUG_LEVEL) return FALSE;   // out of LEVEL
+    return [$cli,$mod];
 }
-function debug(...$items) {
-    debug_log(-98,$items);
-}
+//==========================================================================
+// ログリセット
 function log_reset($lvl) {
     global $debug_log_str;
+    $logging = sep_level($lvl);
+    if($logging === FALSE) return;
+    list($cli,$lvl) = $logging;
+    if($lvl === DMBSG_DUMP || $lvl === DMBSG_NOLOG || $lvl === DBMSG_DIE) return;      // no-logging level
     unset($debug_log_str[$lvl]);
     MySession::set_paramIDs("debuglog.{$lvl}",NULL);
 }
 //==========================================================================
+// コマンドラインログの表示
+function debug_dump(...$items) {
+    debug_log(DBMSG_NOLOG,$items);
+}
+//==========================================================================
 // ログの記録または表示
 function debug_log($lvl,...$items) {
-    if($lvl === FALSE || $lvl < DBMSG_SYSTEM || $lvl > DEBUG_LEVEL) return;
+    if(!CLI_DEBUG && ($lvl === DBMSG_NOLOG)) return;    // WEB request && NOLOG will be RETURN
+//echo "DUMP({$lvl})\n";
+    $logging = sep_level($lvl);
+    if($logging === FALSE) return;
+    list($cli,$lvl) = $logging;
     // バックトレースから呼び出し元の情報を取得
     $dump_log_info = function($items) {
         $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
@@ -138,10 +159,15 @@ function debug_log($lvl,...$items) {
     global $debug_log_str;
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
-        if($lvl < 0 && $lvl > DBMSG_LEVEL) {
-            if($lvl === -99) die("<pre>\n{$dmp_info}\n</pre>\n");
-            else echo "{$dmp_info}\n";
+        if($lvl === DBMSG_DIE) die("<pre>\n{$dmp_info}\n</pre>\n");
+        if($lvl === DBMSG_DUMP) {               // Anytime DUMP for WEB
+            echo "<pre>\n{$dmp_info}\n</pre>\n";
+        } else if($lvl === DBMSG_NOLOG) {      // Anytime DUMP for CLI
+            echo "{$dmp_info}\n";
+        } else if(CLI_DEBUG) {
+            if($cli !== 0) echo "{$dmp_info}\n";    // dump on CLI Running and CLI_MODE
         } else {
+            // WEB Access logging $lvl, donot worry CLI_MODE
             if(isset($debug_log_str[$lvl])) $dmp_info = $debug_log_str[$lvl] . $dmp_info;
             MySession::set_paramIDs("debuglog.{$lvl}",$dmp_info);
             $debug_log_str[$lvl] = $dmp_info;

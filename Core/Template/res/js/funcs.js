@@ -118,6 +118,7 @@ SelectChain.prototype = {
                 self.callback_func(my_val,my_txt);
             }
         });
+        if (self.Child_tag === null) self.my_obj.change();
         return grp;
     }
 };
