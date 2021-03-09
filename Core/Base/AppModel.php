@@ -140,14 +140,8 @@ public function ResetSchema() {
                         $lnk[0],        // table
                         $lnk[2],        //   ref_name
                         $table,         // rel_table
-//                        "{$table}.\"{$key}\"={$lnk[0]}.\"{$lnk[1]}\"",      // (ref.) id = table.id
                         $key,           //    rel_filed
                         $lnk[1],        //    table_filed
-/*
-                        "{$lnk[0]}.\"{$lnk[2]}\"",      // table."ref"
-                        "{$table}.\"{$key}\"",          // rel_table.id
-                        "{$lnk[0]}.\"{$lnk[1]}\"",      // table.id
-*/
                     ];
                 }
             }
@@ -279,7 +273,7 @@ public function GetValueList() {
     };
     $set_sort_value = function($key,&$values) use(&$valueLists) {
         $valueLists[$key] = $values;
-        ksort($valueLists[$key]);       // sort VALUE-LIST
+        ksort($valueLists[$key],SORT_FLAG_CASE|SORT_STRING);       // sort VALUE-LIST ignore-case
     };
     foreach($this->SelectionDef as $key_name => $seldef) {
         list($target,$cond) = $seldef;
