@@ -140,14 +140,8 @@ public function ResetSchema() {
                         $lnk[0],        // table
                         $lnk[2],        //   ref_name
                         $table,         // rel_table
-//                        "{$table}.\"{$key}\"={$lnk[0]}.\"{$lnk[1]}\"",      // (ref.) id = table.id
                         $key,           //    rel_filed
                         $lnk[1],        //    table_filed
-/*
-                        "{$lnk[0]}.\"{$lnk[2]}\"",      // table."ref"
-                        "{$table}.\"{$key}\"",          // rel_table.id
-                        "{$lnk[0]}.\"{$lnk[1]}\"",      // table.id
-*/
                     ];
                 }
             }
@@ -277,15 +271,19 @@ public function GetValueList() {
         foreach($filter as $key) $new[$key] = $record[$key];
         return $new;
     };
+    $set_sort_value = function($key,&$values) use(&$valueLists) {
+        $valueLists[$key] = $values;
+        ksort($valueLists[$key],SORT_FLAG_CASE|SORT_STRING);       // sort VALUE-LIST ignore-case
+    };
     foreach($this->SelectionDef as $key_name => $seldef) {
         list($target,$cond) = $seldef;
         list($model,$ref_list) = array_first_item($target);
         if(is_int($model)) {        // self list
             $this->RecordFinder($cond,$ref_list,NULL,$filter_rec);
-            $valueLists[$key_name] = $this->Records;
+            $set_sort_value($key_name,$this->Records);
         } else if(is_array($ref_list)) {
             $this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
-            $valueLists[$key_name] = $this->$model->Records;
+            $set_sort_value($key_name,$this->$model->Records);
         } else {
             $ref_list = explode('.', $ref_list);
             $postfix = (count($ref_list) > 2);      // append to keyname_field
@@ -303,7 +301,7 @@ public function GetValueList() {
             array_shift($ref_list);     // remove relation-id
             foreach($ref_list as $key) {
                 $key_set = ($postfix) ? "{$key_name}_{$key}" : $key_name;
-                $valueLists[$key_set] = $new_rec[$key];
+                $set_sort_value($key_set,$new_rec[$key]);
             }
         }
     }
@@ -485,7 +483,7 @@ public function AddRecord($row) {
         $this->field_alias_bind($data);
         $this->dbDriver->insertRecord($this->fields);
     } else {
-    debug_log(DBMSG_MODEL,['VALID-ERROR'=>$data]);
+        debug_log(DBMSG_MODEL,['VALID-ERROR'=>$data]);
     }
 }
 //==============================================================================
@@ -495,9 +493,8 @@ public function UpdateRecord($num,$row) {
     if($this->is_valid($data)) {
         $this->field_alias_bind($data);
         $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
-        debug_log(-1,['VALID'=>$data, $this->Primary => $num, $this->fields]);
     } else {
-    debug_log(DBMSG_MODEL,['VALID-ERROR'=>$data]);
+        debug_log(DBMSG_MODEL,['VALID-ERROR'=>$data]);
     }
 }
 

@@ -258,19 +258,14 @@ public function Form($act, $attr) {
 	echo '<form action="' . $act . '" ' . $arg . '>';
 }
 //==============================================================================
-// Generate SELECT Tag
-//	$this->Select ($key,$name)
-//
-public function Select($key,$name,$id=0) {
-//	debug_log(DBMSG_VIEW, $this->MyModel->Select);
-	echo $this->Select_str($key,$name,$id);
+// Generate SELECT Tag & ECHO
+public function Select($key,$name) {
+	echo $this->Select_str($key,$name);
 }
 //==============================================================================
 // Create Select Tag strings
-//	$this->Select ($key,$name)
-//
-public function Select_str($key,$name,$dat) {
-//    $dat = $this->MyModel->RecData[$key];
+public function Select_str($key,$name) {
+    $dat = intval($this->MyModel->RecData[$name]);	// NULL is ZERO(0)
     $select = "<SELECT name='{$name}'>";
     foreach($this->MyModel->Select[$key] as $ttl => $id) {
         $sel = ($id == $dat) ? " selected" : "";	// digit-str or int

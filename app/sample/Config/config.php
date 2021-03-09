@@ -36,8 +36,8 @@ const DatabaseParameter  = [
 	'MySQL' => array(
 		'host' => 'localhost',
 		'database' => MYSQL_DB,
-		'login' => 'root',
-		'password' => 'superman',
+		'login' => 'admin',
+		'password' => 'admin',
 		'encoding' => 'utf8'
 	),
 ];
