@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2021 by nTak
  * @license    MIT
- * @version 0.52.0, 2021-03-03
+ * @version 0.53.0, 2021-03-09
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,11 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 履歴
+【0.53.0】2021/03/09
+    ・サンプルアプリにChainSlect, Dialogを登録
+    ・重複しているtools/app_sampleを削除
+    ・ChainSelect()のセレクトでコールバックを初期化時は実行しないように
+
 【0.52.0】2021/03/03
     ○改善
     ・リソースインポートにPHPファイルを利用可能にした
