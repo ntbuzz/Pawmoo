@@ -1,6 +1,8 @@
 // stylesheeet/javascript Template
 //
 @message => yes
+@comment => off
+@compact => on
 // =====================================================
 // stylesheet SECTION
 Stylesheet => [

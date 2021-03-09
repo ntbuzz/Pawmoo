@@ -68,6 +68,7 @@ function SelectChain(mytag,selObj,callback) {
     this.my_obj = myobj;
     this.select_tag = (ref in selObj) ? selObj[ref] :[];  // array-list
     this.tag_id = ref;
+    this.tag_avtive = false;
     this.Child_tag = (sub === undefined) ? null : new SelectChain(sub, selObj, callback);
     if (this.Child_tag === null) {
         this.callback_func = (callback === undefined) ? null : callback;
@@ -111,6 +112,7 @@ SelectChain.prototype = {
         self.my_obj.off().change(function() {
             var my_val = $(this).val();
             self.SelectValue = my_val;
+            self.tag_avtive = true;
             if (self.Child_tag !== null) self.Child_tag.defaultList(0, my_val);
             else if (self.callback_func !== null) {
                 // 最後のセレクトイベントでコールバック関数を呼ぶ、テキストも渡す
@@ -118,7 +120,7 @@ SelectChain.prototype = {
                 self.callback_func(my_val,my_txt);
             }
         });
-        if (self.Child_tag === null) self.my_obj.change();
+        if (self.Child_tag === null && self.tag_avtive) self.my_obj.change();
         return grp;
     }
 };
