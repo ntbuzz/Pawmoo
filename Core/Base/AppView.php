@@ -761,7 +761,6 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
     //  ]
     private function cmd_tabset($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
-
         $mycls = (isset($attrs['class']))? $attrs['class'] :'';
         $attrs['class'] = rtrim("tabControll {$mycls}");
         $attr = $this->gen_Attrs($attrs,$vars);
@@ -779,13 +778,15 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         echo "<ul class='tabcontents'>\n";
         foreach($sec as $key => $val) {
             list($tag,$attrs) = $this->tag_Separate($key,$vars);
+            if(is_array($val)) list($attrs,$text,$val) = $this->subsec_separate($val,$attrs,$vars);
+            else $text = '';
             if(array_key_exists('class',$attrs)) {
                 if(!preg_match('/hide|selected/', $attrs['class'])) {
                     $attrs['class'] .= ' hide';
                 }
             } else $attrs['class'] = 'hide';
             $attr = $this->gen_Attrs($attrs,$vars);
-            echo "<li{$attr}>";
+            echo "<li{$attr}>{$text}";
             $this->sectionAnalyze($val,$vars);
             echo "</li>\n";
         }
