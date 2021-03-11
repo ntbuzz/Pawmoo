@@ -120,6 +120,7 @@ public static function get_database_handle($handler) {
         return static::$dbHandle[$handler];
     }
     if(array_key_exists($handler,static::DatabaseSpec)) {
+        debug_log(DBMSG_HANDLER,['HANDLER' => $handler, 'DATABASE' => DatabaseParameter[$handler]['database']]);
         $defs = static::DatabaseSpec[$handler];
         $func = $defs['callback'];      // 呼び出し関数
         static::$have_offset = $defs['offset'];     // DBMS has OFFSET command?

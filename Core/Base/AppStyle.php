@@ -368,7 +368,8 @@ public function ViewStyle($file_name) {
             switch($var[0]) {
             case '#':
                 $var = mb_substr($var,1);     // 言語ファイルの参照
-                $val = LangUI::get_value('resource', $var);
+                $prefix = ($var[0]==='.') ? $this->ModuleName : 'resource';
+                $val = LangUI::get_value($prefix, $var);
                 break;
             case '$': if(substr($var,-1) === '$') {     // 末尾文字を確かめる
                     $var = trim($var,'$');              // システム変数値

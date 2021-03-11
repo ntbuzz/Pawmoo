@@ -71,19 +71,19 @@ function log_reset($lvl) {
     $logging = sep_level($lvl);
     if($logging === FALSE) return;
     list($cli,$lvl) = $logging;
-    if($lvl === DMBSG_DUMP || $lvl === DMBSG_NOLOG || $lvl === DBMSG_DIE) return;      // no-logging level
+    if(in_array($lvl,[DBMSG_DUMP, DBMSG_NOLOG, DBMSG_DIE, DBMSG_CLI])) return;      // no-logging level
     unset($debug_log_str[$lvl]);
     MySession::set_paramIDs("debuglog.{$lvl}",NULL);
 }
 //==========================================================================
 // コマンドラインログの表示
 function debug_dump(...$items) {
-    debug_log(DBMSG_NOLOG,$items);
+    debug_log(DBMSG_CLI,$items);
 }
 //==========================================================================
 // ログの記録または表示
 function debug_log($lvl,...$items) {
-    if(!CLI_DEBUG && ($lvl === DBMSG_NOLOG)) return;    // WEB request && NOLOG will be RETURN
+    if(!CLI_DEBUG && ($lvl === DBMSG_CLI)) return;    // WEB request && NOLOG will be RETURN
 //echo "DUMP({$lvl})\n";
     $logging = sep_level($lvl);
     if($logging === FALSE) return;

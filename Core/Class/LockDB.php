@@ -2,6 +2,7 @@
 /*
     レコードロックが必要なアプリケーションで使用する
     データベースは SQLite3 の app/config/lock.db 固定
+    コアシステムとは独立しているのでSQLを直接扱う
 */
 class LockDB {
     const LOCK_TABLE = 'table_lock';
@@ -42,7 +43,7 @@ static public function LockEnd() {
 //  $limit  Lockの有効期間
 //  ロックできたらTRUE,失敗なら FALSE を返す
 static public function Locked($table,$pkey,$limit) {
-    if(static::$dbb === NULL) return;
+    if(static::$dbb === NULL || static::$owner === NULL) return FALSE;
     $lock_tbl = self::LOCK_TABLE;
     $where = "WHERE (table='{$table}') AND (row={$pkey})";
     $sql = "SELECT * FROM '{$lock_tbl}' {$where};";
@@ -61,7 +62,7 @@ static public function Locked($table,$pkey,$limit) {
 }
 //---------------------------------------------------------------------------------------------
 static public function UnLocke($table,$pkey) {
-    if(static::$dbb === NULL) return;
+    if(static::$dbb === NULL || static::$owner === NULL) return FALSE;
     $where = "WHERE (table='{$table}') AND (row={$pkey})";
     $sql = "SELECT * FROM '{$lock_tbl}' {$where};";
     $rows = static::$dbb->query($sql);

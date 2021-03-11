@@ -349,8 +349,8 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
         }
         // Must be PRIMARY-KEY
         $record[$this->Primary] = $fields[$this->Primary];
+        if($callback !== NULL) $record = $callback($record,$filter);
         if(! empty($record) ) {
-            if($callback !== NULL) $record = $callback($record,$filter);
             $data[] = $record;
             $this->record_max = $this->dbDriver->recordMax;
         } else {
@@ -358,13 +358,14 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
         }
     }
     $this->Records = $data;
-//    debug_log(FALSE, [
-//        "record_max" => $this->record_max,
-//        "Filter" => $filter,
+    debug_log(DBMSG_CLI, ['DATA'=>$data]);
+    debug_log(FALSE, [
+        "record_max" => $this->record_max,
+        "Filter" => $filter,
 //        "FieldSchema" => $this->FieldSchema,
-//        "FILTER" => $fields_list,
-//        "RECORDS" => $this->Records,
-//    ]);
+        "COND" => $cond,
+        "RECORDS" => $this->Records,
+    ]);
 }
 //==============================================================================
 // Get Raw Record List by FIND-CONDITION without JOIN!.

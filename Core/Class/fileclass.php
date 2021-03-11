@@ -54,8 +54,11 @@ public function GetAttribute($path) {
 public function MoveFile($fromfile,$tofile) {
 	$srcname = LocalCharset($fromfile);		// 移動元ファイルパス
 	$tagname = LocalCharset($tofile);		// 移動先ファイルパス
-	file_move($srcname, $tagname);			// ファイル移動、移動先のフォルダがなければ作成
-	echo $fromname . ' を移動しました';
+	if(file_move($srcname, $tagname)) {		// ファイル移動、移動先のフォルダがなければ作成
+		echo "{$srcname} を\n{$tagname} へ移動しました\n";
+	} else {
+		echo "{$srcname} の移動に失敗しました\n";
+	}
 }
 //==============================================================================
 // フォルダ内の全ファイル移動
