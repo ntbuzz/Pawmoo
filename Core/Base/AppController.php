@@ -78,11 +78,12 @@ public function is_authorised() {
 			if($this->Login->error_type === NULL) {		// NO-POST LOGIN
 				$userid = MySession::get_LoginValue($login_key);    // already Login check, IN SESSION
 				$data = $this->Login->is_validUser($userid);		// is_enabled account
-				if($data !== NULL) return TRUE;		// login OK
 			}
-			$msg = $this->__('.Login');
-			$err_msg = $this->Login->error_type;
-			page_response('app-999.php',$msg,$msg,$err_msg);     // LOGIN PAGE Response
+			if($data === NULL) {
+				$msg = $this->__('.Login');
+				$err_msg = $this->Login->error_type;
+				page_response('app-999.php',$msg,$msg,$err_msg);     // LOGIN PAGE Response
+			}
 		} else {
 			list($userid,$lang) = $data;
 			if(!empty($lang)) {
@@ -91,13 +92,8 @@ public function is_authorised() {
 				$this->Model->ResetSchema();
 				debug_log(DBMSG_SYSTEM,['Language SWITCH'=>$lang]);
 			}
-			LockDB::SetOwner($userid);
 		}
-		debug_log(FALSE, [
-			"SESSION" => $_SESSION,
-			"ENVDATA" => MySession::$EnvData,
-//			"POSTENV" => MySession::$ReqData,	use for Login DEBUG
-		]);
+		LockDB::SetOwner($userid);
 	};
 	return TRUE;
 }
