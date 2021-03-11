@@ -92,9 +92,10 @@ function page_response($app_page,...$msg_array) {
         $page_file = "{$file}{$app_page}";
         if(file_exists($page_file)) {
             require_once($page_file);
-            exit;
+            break;
         }
     }
+    exit;
 }
 //==============================================================================
 // check exist of CONTOLLER folder
