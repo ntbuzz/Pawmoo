@@ -68,7 +68,7 @@ function strlen_limit($str,$maxlen) {
 // Check the existence of the destination folder and move the file
 function file_move($src,$dest){
     list($path,$fn) = extract_path_filename($dest);
-    if(!file_exists($path)) mkdir($path);
+    if(!file_exists($path)) mkdir($path,0777,true);     // recursive mkdir
     return rename($src,$dest);
 }
 //==============================================================================
