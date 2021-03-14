@@ -61,17 +61,10 @@ public function ResetSchema() {
     $this->SchemaAnalyzer();
     $this->RelationSetup();
     $this->SelectionSetup();
-    debug_log(DBMSG_MODEL,[             // DEBUG LOG information
+    debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
-//              "Header"    => $this->HeaderSchema,
-//              "Field"     => $this->FieldSchema, 
-            "Join-Defs"     => $this->dbDriver->relations,
-            "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
-            "Select-Defs"   => $this->SelectionDef,
-        ]
-    ]);
-    debug_dump([             // DEBUG LOG information
-        $this->ModuleName => [
+            "Header"    => $this->HeaderSchema,
+            "Field"     => $this->FieldSchema, 
             "Join-Defs"     => $this->dbDriver->relations,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
             "Select-Defs"   => $this->SelectionDef,
@@ -405,16 +398,18 @@ public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
 }
 //==============================================================================
 // Get Record with Prev/Next Record List by FIND-CONDITION without JOIN!.
-// Result:   $this->NearData  Find-Result List
+// Result:   $this->NearData  Find-Result List by $filter field only
+//           $this->RecData   $primary Record Data by all fields
 public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
     if(empty($filter)) $filter = $this->dbDriver->columns;
-    $fields_list = array_combine($filter,$filter);
-    foreach($this->FieldSchema as $key => $val) $fields_list[$key] = $val;
-    $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
+    $fields_list = [$this->Primary => $this->Primary];  // must be include Primary-Key
+    foreach($filter as $key) {
+        if(array_key_exists($key,$this->FieldSchema)) $fields_list[$key] = $this->FieldSchema[$key];
+    }
     if(empty($sort)) $sort = [ $this->Primary => $this->SortDefault ];
     else if(is_scalar($sort)) $sort = [ $sort => $this->SortDefault ];
     $this->dbDriver->findRecord($cond,TRUE,$sort);
-    $r_prev = $r_next = $r_self = NULL;
+    $r_prev = $r_next = NULL;
     $prev = true;
     $row_num = 0;
     $primary = intval($primary);
@@ -424,7 +419,7 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
         $row_id = $fields[$this->Primary];
         if( intval($row_id) === $primary) {
             $prev = false;
-            $r_self = $data;
+            $this->RecData = $fields;   // all-fields in 
             ++$row_num;
         } else if($prev) {
             $r_prev = $data;
@@ -437,7 +432,6 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
     $this->row_number = $row_num;
     $this->record_max = $this->dbDriver->recordMax;
     $this->NearData = [$r_prev, $r_next ];
-    $this->RecData = $r_self;
 }
 //==============================================================================
 // Delete Record(Primary-key)
