@@ -31,7 +31,7 @@ class IndexModel extends AppModel {
 // 記事のIDからセクションデータとパラグラフデータを読み込む
 //==============================================================================
 function ReadContents($id) {
-    $this->RecData = $this->getRecordByKey($id);
+    $this->NearRecordFinder($id,[], ['id','title'],['post_date'=>SORTBY_DESCEND]);
     $this->GetValueList();
     // セクションを読み込む
     $this->Section->RecordFinder(['blog_id=' => $id],NULL,'seq_no');
@@ -46,7 +46,7 @@ function ReadContents($id) {
         $section[] = $sec_item;
     };
     $this->BlogContents = $section;
-    debug_log(1,['BlogData'=>$this->RecData,'Section'=>$this->Records,'Para'=>$this->BlogContents,"SELECT"=>$this->Select]);
+    debug_log(1,['BlogData'=>$this->RecData,'Near'=>$this->NearData,'Section'=>$this->Records,'Para'=>$this->BlogContents,"SELECT"=>$this->Select]);
 }
 //==============================================================================
 // 月間ブログをリストする

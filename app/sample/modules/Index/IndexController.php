@@ -22,7 +22,6 @@ public function ViewAction() {
 	$num = App::$Params[0];
 	$this->Model->BlogMonth(NULL);		// 公開しているだけにするなら条件を指定
 	$this->Model->ReadContents($num);
-	$this->Model->NearRecordFinder($num,NULL, ['id','title'],['post_date'=>SORTBY_DESCEND]);
 	$this->View->PutLayout('ContentView');
 }
 
