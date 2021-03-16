@@ -61,6 +61,11 @@ public function MoveFile($fromfile,$tofile) {
 	}
 }
 //==============================================================================
+// トップフォルダの下へ移動
+public function FileMoveTo($fromfile,$tofile) {
+	return $this->MoveFile($fromfile,"{$this->TopFolder}{$tofile}");
+}
+//==============================================================================
 // フォルダ内の全ファイル移動
 public function MoveAllFiles($fromdir,$todir) {
 	$this->get_FolderLists($fromdir);			// 移動元のファイルリスト
