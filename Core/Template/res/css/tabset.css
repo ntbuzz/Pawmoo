@@ -50,6 +50,6 @@
     border: 1px dotted gray;
 }
 
-.tabControll>ul.tabcontents>li{padding:0;}
-.tabControll>ul.tabcontents>.hide {display:none;}
+.tabControll>ul.tabcontents>li {padding:0;display:none;}
+.tabControll>ul.tabcontents>li.selected {display:block;}
 

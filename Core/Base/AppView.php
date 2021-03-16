@@ -780,11 +780,6 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
             list($tag,$attrs) = $this->tag_Separate($key,$vars);
             if(is_array($val)) list($attrs,$text,$val) = $this->subsec_separate($val,$attrs,$vars);
             else $text = '';
-            if(array_key_exists('class',$attrs)) {
-                if(!preg_match('/hide|selected/', $attrs['class'])) {
-                    $attrs['class'] .= ' hide';
-                }
-            } else $attrs['class'] = 'hide';
             $attr = $this->gen_Attrs($attrs,$vars);
             echo "<li{$attr}>{$text}";
             $this->sectionAnalyze($val,$vars);
