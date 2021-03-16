@@ -37,7 +37,10 @@ public function is_validLogin($values) {
     $Login = [];
     foreach($values as $key => $val) {
         // FORM POST name, renamed to Database column name
-        $xkey = (isset($this->PostRenames[$key])) ? $xkey = $this->PostRenames[$key] : $key;
+        $xkey = $this->get_post_field($key);
+//        if(isset($this->PostRenames) && array_key_exists($key,$this->PostRenames))
+//            $key = $this->PostRenames[$key];
+//        else $xkey = $key;
         if(array_key_exists($xkey,$this->Schema)) {     // pickup exists field name
             list($disp,$flag) = $this->Schema[$xkey];   // need encrypt password
             $dval = ($flag === 1) ? passwd_encrypt($val) : $val;

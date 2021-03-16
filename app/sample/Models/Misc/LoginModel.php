@@ -18,7 +18,6 @@ class LoginModel extends LoginClass {
             'lastlogin' => ['',0],
             'created'   => ['',0],
         ],
-        'PostRenames' => [],
     ];
 
     public function defaultUser() {

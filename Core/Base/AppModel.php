@@ -15,6 +15,7 @@ class AppModel extends AppObject {
         'LoginID' => '',
         'Schema' => [],
         'PostRenames' => [],
+        'Selection' => [],
     ];
     protected $dbDriver;            // Database Driver
     protected $fields;              // Record-Data all fields value
@@ -39,7 +40,8 @@ class AppModel extends AppObject {
 //==============================================================================
 	function __construct($owner) {
 	    parent::__construct($owner);                    // call parent constructor
-        $this->setProperty(static::$DatabaseSchema);    // Set Propert from Database Schema Array
+        $this->setProperty(self::$DatabaseSchema);      // Set Default Database Schema Property
+        $this->setProperty(static::$DatabaseSchema);    // Set Instance Property from Database Schema Array
         if(isset($this->ModelTables)) {                 // Multi-Language Tabele exists
             $db_key = (array_key_exists(LangUI::$LocaleName,$this->ModelTables)) ? LangUI::$LocaleName : '*';
             $this->DataTable = $this->ModelTables[$db_key]; // DataTable SWITCH
@@ -183,41 +185,39 @@ public function ResetSchema() {
 // Selection Table Relation setup
     private function SelectionSetup() {
         $new_Selection = [];
-        if(isset($this->Selection)) {
-            $separate_rel_cond = function($defs) {
-                $rel = $cond = [];
-                foreach($defs as $key => $val) {
-                    if(is_int($key)) {
-                        if(is_array($val)) $cond = $val;
-                        else $rel[] = $val;
-                    } else {
-                        $rel[$key] = $val;
-                    }
-                }
-                return [$rel,$cond];
-            };
-            foreach($this->Selection as $key_name => $seldef) {
-                $lnk = [];
-                if(is_scalar($seldef)) {
-                    $lnk[0] = $seldef;
-                    $cond = [];
+        $separate_rel_cond = function($defs) {
+            $rel = $cond = [];
+            foreach($defs as $key => $val) {
+                if(is_int($key)) {
+                    if(is_array($val)) $cond = $val;
+                    else $rel[] = $val;
                 } else {
-                    list($target,$cond) = $separate_rel_cond($seldef);
-                    list($model,$ref_list) = array_first_item($target);
-                    if($model === 0) {
-                        $lnk[0] = $target;
+                    $rel[$key] = $val;
+                }
+            }
+            return [$rel,$cond];
+        };
+        foreach($this->Selection as $key_name => $seldef) {
+            $lnk = [];
+            if(is_scalar($seldef)) {
+                $lnk[0] = $seldef;
+                $cond = [];
+            } else {
+                list($target,$cond) = $separate_rel_cond($seldef);
+                list($model,$ref_list) = array_first_item($target);
+                if($model === 0) {
+                    $lnk[0] = $target;
+                } else {
+                    list($model,$table,$field) = $this->model_view($model);
+                    if(is_scalar($ref_list)) {
+                        $lnk = [ $model => "{$field}.{$ref_list}"] ;
                     } else {
-                        list($model,$table,$field) = $this->model_view($model);
-                        if(is_scalar($ref_list)) {
-                            $lnk = [ $model => "{$field}.{$ref_list}"] ;
-                        } else {
-                            array_unshift($ref_list,$field);
-                            $lnk[$model] = $ref_list;
-                        }
+                        array_unshift($ref_list,$field);
+                        $lnk[$model] = $ref_list;
                     }
                 }
-                $new_Selection[$key_name] =  [$lnk,$cond];
             }
+            $new_Selection[$key_name] =  [$lnk,$cond];
         }
         $this->SelectionDef = $new_Selection;
     }
@@ -352,7 +352,7 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
     }
     $this->Records = $data;
     debug_log(DBMSG_CLI, ['DATA'=>$data]);
-    debug_log(FALSE, [
+    debug_log(9, [
         "record_max" => $this->record_max,
         "Filter" => $filter,
 //        "FieldSchema" => $this->FieldSchema,
@@ -459,12 +459,20 @@ public function is_valid(&$row) {
         debug_log(DBMSG_MODEL,['ALIAS' => $this->fields]);
     }
 //==============================================================================
+// POST-name convert to Real field name by PostRenames[]
+public function get_post_field($key) {
+    return (array_key_exists($key,$this->PostRenames))
+            ? $this->PostRenames[$key]
+            : $key;
+}
+//==============================================================================
 // pickup on exist edit table database field
     private function field_pickup($row) {
         $data = array();
         foreach($row as $key => $val) {
-            if(array_key_exists($key,$this->dbDriver->raw_columns)) {
-                $data[$key] = $val;
+            $xkey = $this->get_post_field($key);
+            if(array_key_exists($xkey,$this->dbDriver->raw_columns)) {
+                $data[$xkey] = $val;
             }
         }
         unset($data[$this->Primary]);
@@ -485,6 +493,7 @@ public function AddRecord($row) {
 // UPDATE Record
 public function UpdateRecord($num,$row) {
     $data = $this->field_pickup($row);
+//    debug_log(DBMSG_DUMP,[$row,$data]);     // for DEBUG
     if($this->is_valid($data)) {
         $this->field_alias_bind($data);
         $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);

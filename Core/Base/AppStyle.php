@@ -227,7 +227,7 @@ public function ViewStyle($file_name) {
 //------------------------------------------------------------------------------
 // * charset Command
     private function cmd_charset($secParam, $param,$sec) {
-        echo "@charset \"{$sec}\"\n";
+        echo "@charset \"{$sec}\";\n";
     }
 //------------------------------------------------------------------------------
 // compact/comment/message Command

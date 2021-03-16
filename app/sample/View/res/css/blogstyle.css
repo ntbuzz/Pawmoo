@@ -8,6 +8,9 @@ body {
     overflow:hidden;
     font-size:12pt;
 }
+.disable {
+    background-color: #dddddd;
+}
 /*
     ブログメイン：記事一覧スタイル
 */

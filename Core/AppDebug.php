@@ -83,8 +83,8 @@ function debug_dump(...$items) {
 //==========================================================================
 // ログの記録または表示
 function debug_log($lvl,...$items) {
-    if(!CLI_DEBUG && ($lvl === DBMSG_CLI)) return;    // WEB request && NOLOG will be RETURN
-//echo "DUMP({$lvl})\n";
+    if( (defined('CLI_SUPPRESS') && CLI_DEBUG)
+        || (!CLI_DEBUG && ($lvl === DBMSG_CLI)) ) return;    // WEB request && NOLOG will be RETURN
     $logging = sep_level($lvl);
     if($logging === FALSE) return;
     list($cli,$lvl) = $logging;
