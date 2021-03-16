@@ -15,7 +15,6 @@ class SectionModel extends AppModel {
             'title'     => ['',100],
             'contents'  => ['',100],
         ],
-        'PostRenames' => [],
     ];
 //==============================================================================
 // DELETE Records by FIND-CONDITION

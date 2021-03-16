@@ -27,24 +27,26 @@ public function BlogBody() {
     // 本文のセクション
     foreach($Contents as $sec_data) {
         $section = $sec_data['sec'];
+        $disable  = ($section['published'] === 't') ? '' : ' disable';
         $hastitle = (empty($section['title'])) ? '':"<h3>{$section['title']}</h3>";
         $txtcol = (empty($section['title'])) ? ' style="color:black;"':"";
         $body_contents = pseudo_markdown($section['contents']);
         $atext = <<<EOF
 <a name="sec-{$section['id']}"></a>
-<div class='blog_section' id={$section['id']}>
+<div class='blog_section{$disable}' id={$section['id']}>
     {$hastitle}
     {$body_contents}
 EOF;
         echo $atext;
         foreach($sec_data['paragraph'] as $contents) {
+            $disable  = ($contents['published'] === 't') ? '' : ' disable';
             $hastitle = (empty($contents['title'])) ? '':"<a name='para-{$contents['id']}'></a><h4>■ {$contents['title']}</h3>";
             $txtcol = (empty($contents['title'])) ? ' style="color:black;"':"";
             $body_contents = pseudo_markdown($contents['contents']);
             $body_contents = $this->expand_var($body_contents);
 
             $atext = <<<EOF
-    <div class='blog_content' id={$contents['id']}>
+    <div class='blog_content{$disable}' id={$contents['id']}>
         {$hastitle}
         {$body_contents}
     </div>

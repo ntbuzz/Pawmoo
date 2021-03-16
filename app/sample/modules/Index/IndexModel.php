@@ -22,7 +22,6 @@ class IndexModel extends AppModel {
             'summary'   => ['',100],
             'preface'   => ['',100],
         ],
-        'PostRenames' => [],
         'Selection' => [
             'category'     => [ 'Category.id' => 'title' ],     // 'id' は自動追加, 定数つき
         ],

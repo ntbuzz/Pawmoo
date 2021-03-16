@@ -15,7 +15,6 @@ class ParagraphModel extends AppModel {
             'title'     => ['',100],
             'contents'  => ['',100],
         ],
-        'PostRenames' => [],
     ];
 //==============================================================================
 
