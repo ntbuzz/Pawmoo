@@ -24,6 +24,12 @@
     PassError => パスワードが違います
     UnknownUser => 不明なユーザー
     SelectMe => 【選択してください】
+    Uploading => ファイルをアップロード中...
+    RestFiiles => "残り: "
+    Confirm => " を中止しますか"
+    CancelTitle => "送信を中止します"
+    AbortDone => アップロード中断しました.
+    Abort => 中止
 ]
 .en => [
     // for Pager Buttons
@@ -46,6 +52,12 @@
     PassError => 'PASSWORD Missing'
     UnknownUser => "Unknown USER"
     SelectMe => "[Select Item]"
+    Uploading => "Now Uploading..."
+    RestFiiles => "Rest Files: "
+    Confirm => " is Abort?"
+    CancelTitle => "Send Canceled"
+    AbortDone => "Upload ABORTED!"
+    Abort => ABORT
 ]
 
 SW開発 => [

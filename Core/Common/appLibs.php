@@ -69,7 +69,10 @@ function strlen_limit($str,$maxlen) {
 function file_move($src,$dest){
     list($path,$fn) = extract_path_filename($dest);
     if(!file_exists($path)) mkdir($path,0777,true);     // recursive mkdir
-    return rename($src,$dest);
+    if(rename($src,$dest)) {
+        chmod($dest,0664);      // permission change
+        return true;
+    } else return false;
 }
 //==============================================================================
 // convert file size string

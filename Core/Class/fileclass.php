@@ -166,6 +166,14 @@ public function DeleteAllFiles($topdir) {
 		// 作成したZIPファイルを返す
 		return $zipFilePath;
 	}
+//==============================================================================
+// ファイルをZIPでダウンロード
+public function ZipDownFile($path,$filename) {
+}
+//==============================================================================
+// フォルダをZIPでダウンロード
+public function ZipDownFolder($path) {
+}
 
 
 }
