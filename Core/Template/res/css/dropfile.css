@@ -46,7 +46,7 @@
 	border-top:1px dashed black;
 	border-right:1px dashed black;
 	border-bottom:1px dashed black;
-	font-size:6pt;
+	font-size:10pt;
     font-weight:bold;
 	cursor: pointer;
 	color: red;
@@ -63,7 +63,9 @@
 .progress-panel {
 	width:90%;
 	height:16px;
-	border:1px dashed black;
+	border-top:1px dashed black;
+	border-left:1px dashed black;
+	border-bottom:1px dashed black;
 	text-align:right;
 	padding:5px;
     margin:4px 0 4px 0;
@@ -103,3 +105,7 @@
 .progress-panel.complete .progress-gain {display: none;}
 /* エラー状態 */
 .progress-panel.error { background-color:#C00000; color:white;border-radius: 5px;}
+/* ドラッグ中の枠 */
+.drag-over {
+    border: 2px solid #0B85A1;
+}

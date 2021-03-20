@@ -28,7 +28,7 @@
     RestFiiles => "残り: "
     Confirm => " を中止しますか"
     CancelTitle => "送信を中止します"
-    AbortDone => アップロード中断しました.
+    AbortDone => "送信完了しました."
     Abort => 中止
 ]
 .en => [
@@ -55,8 +55,8 @@
     Uploading => "Now Uploading..."
     RestFiiles => "Rest Files: "
     Confirm => " is Abort?"
-    CancelTitle => "Send Canceled"
-    AbortDone => "Upload ABORTED!"
+    CancelTitle => "Send Cancele"
+    AbortDone => "SEND Complete."
     Abort => ABORT
 ]
 
