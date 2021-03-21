@@ -247,12 +247,13 @@ public function getRecordBy($key,$value) {
 //==============================================================================
 // Get Record Data by primary-key,and JOIN data by $join is TRUE.
 // Result:   $this->RecData in Column Data
-public function GetRecord($num,$join=FALSE) {
+public function GetRecord($num,$join=FALSE,$values=FALSE) {
     if($join) {
         if(empty($num)) $this->fields = array();
         else $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],TRUE);
     } else $this->getRecordBy($this->Primary,$num);
     $this->RecData= $this->fields;
+    if($values) $this->GetValueList();
 }
 //==============================================================================
 //   Get Relation Table fields data list.
