@@ -51,7 +51,7 @@ public function LoadContents($fname) {
 // ファイルの属性を取得
 public function GetAttribute($path) {
 	$din = pathinfo(LocalCharset($path));
-	return make_attr_array($path,$din);
+	return $this->make_attr_array($path,$din);
 }
 //==============================================================================
 // ファイル移動
@@ -113,7 +113,7 @@ public function DeleteAllFiles($topdir) {
                 if(is_dir($lfl)) {
                     $this->Folder[] = SysCharset($din["basename"]);
                 } else if(file_exists ($lfl)) {
-                    $this->Files[] = make_attr_array($lfl,$din);
+                    $this->Files[] = $this->make_attr_array($lfl,$din);
                 } else {
                     echo "fail:" .$lfl;
                 }
