@@ -14,6 +14,7 @@ RewriteRule ^res/(css|js|images)/(.*)$   Core/Template/webroot/$1/$2 [END]
 RewriteRule ^([^/]+)/.*/css/img/(.*)$ app/$1/webroot/cssimg/$2 [END]
 RewriteRule ^([^/]+)/(css|js|images)/(.*)$   app/$1/webroot/$2/$3 [END]
 RewriteRule ^([^/]+)/.*/images/(.*)$  app/$1/webroot/images/$2 [END]
+RewriteRule ^([^/]+)/files/(.*)$  app/$1/upload_files/$2 [END]
 
 # 実体があるかもしれないファイルは条件判定
 RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-f

@@ -26,36 +26,37 @@ var Locations = function (url) {
     var cont = "${$controller$}".toLowerCase();
     if (this.array[1] != cont) this.array.splice(1, 0, cont);      // controller name compensate
 };
-Locations.prototype.query = function () { return (this.qstr == "") ? "" : "?" + this.qstr; };
-Locations.prototype.last_path = function () { return this.array[this.array.length - 2]; };
-Locations.prototype.fw_fullpath = function () {
-    this.type = "./:".indexOf(this.url.charAt(0)) + 1;
-    var path = (this.type == 0) ? this.url : this.url.slice(1);
-    switch (this.type) {
-        case 1:
-            if (path.charAt(0) == '/') path = path.slice(1);
-            else this.type = 0;
-        case 0: path = "${$APPROOT$}" + path; break;
-        case 2: path = "${$SYSROOT$}" + path; break;
-        case 3: path = "/" + path; break;
-    }
-    return this.base + path;
-};
-Locations.prototype.set_query = function (q) { this.qstr = q; };
-Locations.prototype.trunc_path = function (n, e) {
-    for (var i = 0; i < e.length; i++) this.array[n + i] = e[i];
-    n = n + e.length;
-    return "/" + this.array.slice(0, n).join("/") + this.query();
-};
-Locations.prototype.href_controller = function (e) { return this.trunc_path(1, e); };
-Locations.prototype.href_action = function (e) { return this.trunc_path(2, e); };
-Locations.prototype.href_filter = function (e) { return this.trunc_path(3, e); };
-Locations.prototype.href_param = function (e) { return this.trunc_path(4, e); };
-Locations.prototype.href_number = function (e) {
-    var path = this.array;
-    for (var n = path.length; (n > 1) && (!isNaN(path[n - 1])); --n);
-//  alert(objDump(path) + "\n" + n+"\n"+this.query());
-    return this.trunc_path(n, e);
+Locations.prototype = {
+    query: function () { return (this.qstr == "") ? "" : "?" + this.qstr; },
+    set_query: function (q) { this.qstr = q; },
+    last_path: function () { return this.array[this.array.length - 2]; },
+    fw_fullpath: function () {
+        this.type = "./:".indexOf(this.url.charAt(0)) + 1;
+        var path = (this.type == 0) ? this.url : this.url.slice(1);
+        switch (this.type) {
+            case 1:
+                if (path.charAt(0) == '/') path = path.slice(1);
+                else this.type = 0;
+            case 0: path = "${$APPROOT$}" + path; break;
+            case 2: path = "${$SYSROOT$}" + path; break;
+            case 3: path = "/" + path; break;
+        }
+        return this.base + path;
+    },
+    trunc_path: function (n, e) {
+        for (var i = 0; i < e.length; i++) this.array[n + i] = e[i];
+        n = n + e.length;
+        return "/" + this.array.slice(0, n).join("/") + this.query();
+    },
+    href_controller: function (e) { return this.trunc_path(1, e); },
+    href_action: function (e) { return this.trunc_path(2, e); },
+    href_filter: function (e) { return this.trunc_path(3, e); },
+    href_param: function (e) { return this.trunc_path(4, e); },
+    href_number: function (e) {
+        var path = this.array;
+        for (var n = path.length; (n > 1) && (!isNaN(path[n - 1])); --n);
+        return this.trunc_path(n, e);
+    },
 };
 //===============================================
 // ネスティッド SELECT

@@ -1,0 +1,111 @@
+/*
+    ファイルアップロードダイアログのクラス定義
+*/
+.progress-BK {
+    z-index:9910;
+    position:fixed;
+    display:none;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;/*for old Safari*/
+    height:100vh;
+    background-color:rgba(200,200,200,0.75);
+}
+.progress-dialog {
+    z-index:1;
+    position: absolute;
+    display:block;
+    width:400px;
+    top:25%;
+    left:0;
+    right:0;
+    padding:10px;
+    margin-left: auto;
+    margin-right: auto;
+    border:2px solid black;
+    border-radius: 20px;     /* CSS3 */
+    background-color:white;
+	box-shadow: 1px 1px 2px gray;
+}
+.buttonBar {
+    text-align:center;
+    width:100%;
+    height:auto;
+    left:0;
+    bottom:2px;
+}
+.progress-Bar {
+    width:100%;
+    display:flex;
+    align-items: center;
+}
+.cancel-button {
+    width:14px;
+    height:16px;
+	border-top:1px dashed black;
+	border-right:1px dashed black;
+	border-bottom:1px dashed black;
+	font-size:10pt;
+    font-weight:bold;
+	cursor: pointer;
+	color: red;
+	text-align:center;
+    align-items: center;
+	padding:5px 0;
+	border-radius: 0 4px 4px 0;
+    background: linear-gradient(#aaa,#FFF, #aaa);
+}
+.cancel-button:hover {
+	color: blue;
+    background: linear-gradient(#FFF,#aaa, #FFF);
+}
+.progress-panel {
+	width:90%;
+	height:16px;
+	border-top:1px dashed black;
+	border-left:1px dashed black;
+	border-bottom:1px dashed black;
+	text-align:right;
+	padding:5px;
+    margin:4px 0 4px 0;
+	border-radius: 5px 0 0 5px;
+    color:gray;
+}
+.progress-panel .progress-gain {
+	position:absolute;
+	top:0;
+	left:0;
+    width:0;
+	height: 100%;
+	text-align:right;
+	color:blue;
+	background-color: rgba(150,180,255,0.75);
+    border-radius: 6px;     /* CSS3 */
+}
+.progress-panel .left {
+	position: absolute;
+	left:0;
+    font-size: 8pt;
+	font-weight:bold;
+    color:inherit;
+    text-align: bottom;
+    padding-left:10px;
+}
+.progress-panel .right {
+	position: absolute;
+	right:10px;
+    font-size: 8pt;
+	font-weight:bold;
+    color:inherit;
+    text-align: bottom;
+}
+/* 送信完了状態 */
+.progress-panel.complete { background-color:lightskyblue; color:black; 	border-radius: 5px;}
+.progress-panel.complete .progress-gain {display: none;}
+/* エラー状態 */
+.progress-panel.error { background-color:#C00000; color:white;border-radius: 5px;}
+/* ドラッグ中の枠 */
+.drag-over {
+    border: 2px solid #0B85A1;
+}

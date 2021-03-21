@@ -1121,6 +1121,7 @@
     PageAction()                  // 標準処理：ページング付きレコードリストの一覧表示
     FindAction()                  // 標準処理：検索
     ViewAction()                  // 標準処理：レコード表示
+    ContentsAction()              // 標準処理：ajax等で画面の一部を読み込む、テンプレートは"フィルタ名＋Parts"
     AddAction()                   // 標準処理：レコード追加
     UpdateAction()                // 標準処理：レコード更新
 

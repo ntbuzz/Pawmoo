@@ -13,11 +13,12 @@ define('TIME_ZONE','Asia/Tokyo');
 if (PHP_OS == "Linux") {
 	define("OSDEP","UNIX");
 	define("ZIPTEMP","/tmp/");
+	define('OS_CODEPAGE','UTF8');
 } else {
 	define("OSDEP","WIN");
 	define("ZIPTEMP","C:/tmp/");
+	define('OS_CODEPAGE','SJIS');
 }
-define('OS_CODEPAGE','UTF8');
 
 const IgnoreFiles =[
 		".","..","Thumbs.db","web.config","desktop.ini","files.txt",

@@ -36,18 +36,22 @@ public function LoadContents($fname) {
 	return FALSE;
 }
 //==============================================================================
+// ファイルの属性を生成
+	private function make_attr_array($path,&$din) {
+		return array(
+			'fullname' => SysCharset($path),
+			'filename' => SysCharset($din["basename"]),
+			'name' => SysCharset($din["filename"]),
+			'size' => round(filesize($path)/1024),
+			'date' => date("Y-m-d H:i:s",filemtime($path)),
+			'ext' => empty($din["extension"]) ? "" : SysCharset($din["extension"])
+		);
+	}
+//==============================================================================
 // ファイルの属性を取得
 public function GetAttribute($path) {
 	$din = pathinfo(LocalCharset($path));
-	$arrts = array(
-		'fullname' => SysCharset($path),
-		'filename' => SysCharset($din["basename"]),
-		'name' => SysCharset($din["filename"]),
-		'size' => round(filesize($path)/1024),
-		'date' => date("Y-m-d H:i:s",filemtime($path)),
-		'ext' => empty($din["extension"]) ? "" : SysCharset($din["extension"])
-	);
-	return $attrs;
+	return $this->make_attr_array($path,$din);
 }
 //==============================================================================
 // ファイル移動
@@ -59,6 +63,11 @@ public function MoveFile($fromfile,$tofile) {
 	} else {
 		echo "{$srcname} の移動に失敗しました\n";
 	}
+}
+//==============================================================================
+// トップフォルダの下へ移動
+public function FileMoveTo($fromfile,$tofile) {
+	return $this->MoveFile($fromfile,"{$this->TopFolder}{$tofile}");
 }
 //==============================================================================
 // フォルダ内の全ファイル移動
@@ -104,15 +113,7 @@ public function DeleteAllFiles($topdir) {
                 if(is_dir($lfl)) {
                     $this->Folder[] = SysCharset($din["basename"]);
                 } else if(file_exists ($lfl)) {
-                // ファイル名
-                    $this->Files[] = array(
-                        'fullname' => SysCharset($lfl),
-                        'filename' => SysCharset($din["basename"]),
-                        'name' => SysCharset($din["filename"]),
-                        'size' => round(filesize($lfl)/1024),
-                        'date' => date("Y-m-d H:i:s",filemtime($lfl)),
-                        'ext' => empty($din["extension"]) ? "" : SysCharset($din["extension"])
-                    );
+                    $this->Files[] = $this->make_attr_array($lfl,$din);
                 } else {
                     echo "fail:" .$lfl;
                 }
@@ -161,6 +162,14 @@ public function DeleteAllFiles($topdir) {
 		// 作成したZIPファイルを返す
 		return $zipFilePath;
 	}
+//==============================================================================
+// ファイルをZIPでダウンロード
+public function ZipDownFile($path,$filename) {
+}
+//==============================================================================
+// フォルダをZIPでダウンロード
+public function ZipDownFolder($path) {
+}
 
 
 }

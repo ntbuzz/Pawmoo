@@ -188,24 +188,31 @@ public function FindAction() {
 // Default View Action
 public function ViewAction() {
 	$num = App::$Params[0];
-	$this->Model->GetRecord($num,TRUE);
-	$this->Model->GetValueList();
+	$this->Model->GetRecord($num,TRUE,TRUE);
 	$this->View->PutLayout('ContentView');
 }
 //==============================================================================
 // Default Item View Action
 public function ItemAction() {
 	$num = App::$Params[0];
-	$this->Model->GetRecord($num,TRUE);
-	$this->Model->GetValueList();
+	$this->Model->GetRecord($num,TRUE,TRUE);
 	$this->View->ViewTemplate('ContentView');
+}
+//==============================================================================
+// Contents Template Action in AJAX access for like a SPA
+// app/(cont)/contents/(templatename)/(rec-number)
+public function ContentsAction() {
+	$num = App::$Params[0];
+	$template = ucfirst(strtolower(App::$Filter));
+	if($nm > 0) $this->Model->GetRecord($num,TRUE,TRUE);
+	$this->View->ViewTemplate("{$template}Parts");
 }
 //==============================================================================
 // Default Add Record Action
 public function AddAction() {
 	$url = App::$Referer;
 	$this->Model->AddRecord(MySession::$ReqData);
-	if(empty($url)) $url = App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/'.App::$Filter;
+	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
 	header('Location:' . $url);
 //	echo App::$Referer;
 }
@@ -216,7 +223,7 @@ public function UpdateAction() {
 	$url = App::$Referer;
 	MySession::setVariables(TRUE,['RecordNo' => $num]);
 	$this->Model->UpdateRecord($num,MySession::$ReqData);
-	if(empty($url)) $url = App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/'.App::$Filter;
+	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
 	header('Location:' . $url);
 //	echo App::$Referer;
 }

@@ -108,6 +108,14 @@ public static function Get_AppPath($path) {
     return "app/{$appname}/{$path}";
 }
 //==============================================================================
+// アプリケーションドキュメントフォルダ
+public static function Get_DocPath($path) {
+    $docroot = dirname(__DIR__);        // Framework Folder
+    $appname = static::$AppName;
+    if(!empty($path)) $path = "{$path}/";
+    return  "{$docroot}/app/{$appname}/upload_files/{$path}";
+}
+//==============================================================================
 // appコントローラと付属モジュールファイルの読込
 public static function LoadModuleFiles($controller) {  
     // モジュールファイルを読み込む
@@ -127,15 +135,15 @@ public static function LoadModuleFiles($controller) {
 }
 //==============================================================================
 // フレームワークのトップパスに付加パスを付けた文字列
-public static function Get_SysRoot($path = '') {  
+public static function Get_SysRoot($path = '',$lower = FALSE) { 
     if(mb_substr($path,0,1) === '/') $path = mb_substr($path,1);
-    return static::$sysRoot . strtolower($path);
+    return static::$sysRoot . (($lower)?strtolower($path):$path);
 }
 //==============================================================================
 // アプリケーションのトップパスに付加パスを付けた文字列
-public static function Get_AppRoot($path = '') {  
+public static function Get_AppRoot($path = '',$lower = FALSE) {  
     if(mb_substr($path,0,1) === '/') $path = mb_substr($path,1);
-    return static::$appRoot . strtolower($path);
+    return static::$appRoot . (($lower)?strtolower($path):$path);
 }
 //==============================================================================
 // cdd/js/icoファイルの読込タグ出力（単独）
