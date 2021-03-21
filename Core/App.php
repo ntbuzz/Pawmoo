@@ -108,6 +108,13 @@ public static function Get_AppPath($path) {
     return "app/{$appname}/{$path}";
 }
 //==============================================================================
+// アプリケーションドキュメントフォルダ
+public static function Get_DocPath($path) {
+    $docroot = dirname(__DIR__);        // Framework Folder
+    $appname = static::$AppName;
+    return  "{$docroot}/app/{$appname}/upload_files/{$path}/";
+}
+//==============================================================================
 // appコントローラと付属モジュールファイルの読込
 public static function LoadModuleFiles($controller) {  
     // モジュールファイルを読み込む
