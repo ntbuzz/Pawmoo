@@ -166,7 +166,7 @@ function make_hyperlink($lnk,$modname) {
             }
         }
     }
-    return trim($lnk);
+    return str_replace(['"',  "'"], ['%22','%27'], trim($lnk));
 }
 //==============================================================================
 // MARKING WORD by SPAN CLASS
