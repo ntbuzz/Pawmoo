@@ -146,7 +146,7 @@ public function MakePageLinks() {
 	echo "</div>\n";
 	// Change Page item Count
 	$param = (empty(App::$Filter)) ? "1/" : implode('/',App::$Filters)."/1/";
-	$href = App::Get_AppRoot($this->ModuleName)."/page/{$param}";
+	$href = App::Get_AppRoot($this->ModuleName,TRUE)."/page/{$param}";
 	$dsp = "<span id='size_selector'>".$this->__(".Display", FALSE)."</span>";
 	echo "<div class='rightalign'>{$dsp}<SELECT id='pagesize'>";
 	foreach(array(5,10,15,20,25,50,100) as $val) {
@@ -250,7 +250,7 @@ public function SelectObject($keyset) {
 // 'id' => identifir
 //
 public function Form($act, $attr) {
-	if ($act[0] !== '/') $act = App::Get_AppRoot($act);
+	if ($act[0] !== '/') $act = App::Get_AppRoot($act,TRUE);
 	$arg = '';
 	foreach($attr as $key => $val) {
 			$arg .= $key .'="' . $val . '"';

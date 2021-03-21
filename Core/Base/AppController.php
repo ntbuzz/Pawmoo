@@ -212,7 +212,7 @@ public function ContentsAction() {
 public function AddAction() {
 	$url = App::$Referer;
 	$this->Model->AddRecord(MySession::$ReqData);
-	if(empty($url)) $url = App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/'.App::$Filter;
+	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
 	header('Location:' . $url);
 //	echo App::$Referer;
 }
@@ -223,7 +223,7 @@ public function UpdateAction() {
 	$url = App::$Referer;
 	MySession::setVariables(TRUE,['RecordNo' => $num]);
 	$this->Model->UpdateRecord($num,MySession::$ReqData);
-	if(empty($url)) $url = App::Get_AppRoot(strtolower($this->ModuleName)) . '/list/'.App::$Filter;
+	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
 	header('Location:' . $url);
 //	echo App::$Referer;
 }
