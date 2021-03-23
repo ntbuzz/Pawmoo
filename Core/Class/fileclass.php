@@ -37,12 +37,8 @@ public function LoadContents($fname) {
 }
 //==============================================================================
 // ファイルの属性を生成
-<<<<<<< HEAD
-	private function make_attr_array($path,&$din) {
-=======
 	private function make_attr_array($path) {
 		$din = pathinfo($path);
->>>>>>> dev/master
 		return array(
 			'fullname' => SysCharset($path),
 			'filename' => SysCharset($din["basename"]),
@@ -55,13 +51,8 @@ public function LoadContents($fname) {
 //==============================================================================
 // ファイルの属性を取得
 public function GetAttribute($path) {
-<<<<<<< HEAD
-	$din = pathinfo(LocalCharset($path));
-	return $this->make_attr_array($path,$din);
-=======
 	$path = LocalCharset($path);
 	return $this->make_attr_array($path);
->>>>>>> dev/master
 }
 //==============================================================================
 // ファイル移動
@@ -131,11 +122,7 @@ public function DeleteAllFiles($topdir) {
                 if(is_dir($lfl)) {
                     $this->Folder[] = SysCharset($din["basename"]);
                 } else if(file_exists ($lfl)) {
-<<<<<<< HEAD
-                    $this->Files[] = $this->make_attr_array($lfl,$din);
-=======
                     $this->Files[] = $this->make_attr_array($lfl);
->>>>>>> dev/master
                 } else {
                     echo "fail:" .$lfl;
                 }
@@ -186,13 +173,6 @@ public function DeleteAllFiles($topdir) {
 	}
 //==============================================================================
 // ファイルをZIPでダウンロード
-<<<<<<< HEAD
-public function ZipDownFile($path,$filename) {
-}
-//==============================================================================
-// フォルダをZIPでダウンロード
-public function ZipDownFolder($path) {
-=======
 	private function ZipResponse($srcname,$zipName) {
 		$zipName = "{$zipName}.zip";
 		$zipArchive = $this->Make_ZipFile($srcname,$zipName);
@@ -214,7 +194,6 @@ public function ZipDownloadFile($path,$filename) {
 // フォルダをZIPでダウンロード
 public function ZipDownloadFolder($path,$zipName) {
 	$this->ZipResponse($path,$zipName);
->>>>>>> dev/master
 }
 
 

@@ -17,11 +17,7 @@ if (PHP_OS == "Linux") {
 } else {
 	define("OSDEP","WIN");
 	define("ZIPTEMP","C:/tmp/");
-<<<<<<< HEAD
-	define('OS_CODEPAGE','SJIS');
-=======
 //	define('OS_CODEPAGE','SJIS');
->>>>>>> dev/master
 }
 
 const IgnoreFiles =[

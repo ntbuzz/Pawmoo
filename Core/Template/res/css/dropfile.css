@@ -24,11 +24,7 @@
     margin-left: auto;
     margin-right: auto;
     border:2px solid black;
-<<<<<<< HEAD
-    border-radius: 20px;     /* CSS3 */
-=======
     border-radius: 15px;     /* CSS3 */
->>>>>>> dev/master
     background-color:white;
 	box-shadow: 1px 1px 2px gray;
 }
@@ -45,13 +41,8 @@
     align-items: center;
 }
 .cancel-button {
-<<<<<<< HEAD
-    width:14px;
-    height:16px;
-=======
     width:16px;
     height:24px;
->>>>>>> dev/master
 	border-top:1px dashed black;
 	border-right:1px dashed black;
 	border-bottom:1px dashed black;
@@ -61,11 +52,7 @@
 	color: red;
 	text-align:center;
     align-items: center;
-<<<<<<< HEAD
-	padding:5px 0;
-=======
 	padding:0;
->>>>>>> dev/master
 	border-radius: 0 4px 4px 0;
     background: linear-gradient(#aaa,#FFF, #aaa);
 }
@@ -74,29 +61,17 @@
     background: linear-gradient(#FFF,#aaa, #FFF);
 }
 .progress-panel {
-<<<<<<< HEAD
-	width:90%;
-	height:16px;
-=======
 	width:95%;
 	height:24px;
->>>>>>> dev/master
 	border-top:1px dashed black;
 	border-left:1px dashed black;
 	border-bottom:1px dashed black;
 	text-align:right;
-<<<<<<< HEAD
-	padding:5px;
-    margin:4px 0 4px 0;
-	border-radius: 5px 0 0 5px;
-    color:gray;
-=======
 	padding:0;
     margin:4px 0 4px 0;
 	border-radius: 5px 0 0 5px;
     color:gray;
     overflow:hidden;
->>>>>>> dev/master
 }
 .progress-panel .progress-gain {
 	position:absolute;
@@ -111,40 +86,25 @@
 }
 .progress-panel .left {
 	position: absolute;
-<<<<<<< HEAD
-=======
     width:80%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;    
->>>>>>> dev/master
 	left:0;
     font-size: 8pt;
 	font-weight:bold;
     color:inherit;
-<<<<<<< HEAD
-    text-align: bottom;
-    padding-left:10px;
-}
-.progress-panel .right {
-	position: absolute;
-	right:10px;
-=======
     padding-left:5px;
     text-align:left;
 }
 .progress-panel .right {
 	position: absolute;
 	right:5px;
->>>>>>> dev/master
     font-size: 8pt;
 	font-weight:bold;
     color:inherit;
     text-align: bottom;
-<<<<<<< HEAD
-=======
     white-space: nowrap;
->>>>>>> dev/master
 }
 /* 送信完了状態 */
 .progress-panel.complete { background-color:lightskyblue; color:black; 	border-radius: 5px;}
@@ -153,9 +113,5 @@
 .progress-panel.error { background-color:#C00000; color:white;border-radius: 5px;}
 /* ドラッグ中の枠 */
 .drag-over {
-<<<<<<< HEAD
-    border: 2px solid #0B85A1;
-=======
     border: 2px solid #0B85A1 !important;
->>>>>>> dev/master
 }
