@@ -1,12 +1,11 @@
 //===============================================
 // アップロード処理のプログレスバーチェイン
-function ProgressBar(child, f, callback) {
+// FormData(fmd) の中に複数のfileが定義可能
+function ProgressBar(child, fmd, callback) {
     var self = this;
     self.finishCallback = callback;
     self.child_link = child;
     self.Aborted = false;
-    self.Form = new FormData();
-    self.Form.append('file', f);
     self.jqxhr = null;
     self.progress_Bar = $('<div class="progress-Bar"></div>');
     self.progressPanel = $('<div class="progress-panel"></div>').appendTo(self.progress_Bar);
@@ -15,13 +14,14 @@ function ProgressBar(child, f, callback) {
     self.FileSize = $('<span class="filesize right"></span>').appendTo(self.progressPanel);
     self.gainBar = $('<div class="progress-gain"></div>').appendTo(self.progressPanel);
     self.Cancel.click(function () {
-        if (confirm(f.name + "${#core.Confirm}")) {
+        if (confirm(fmd.get('name') + "${#core.Confirm}")) {
             self.Abort(false);
         }
     });
     // ファイル情報を表示
-    if (f.size>0) {
-        for (i = 0, sz = f.size; sz > 1024; i += 3, sz /= 1024) ;
+    sz = fmd.get('size');
+    if (sz>0) {
+        for (i = 0; sz > 1024; i += 3, sz /= 1024) ;
         szStr = sz.toFixed(2) +" B  KB MB GB TB PB".substr(i,3);
         if (i >= 9 && sz > 1.0) {
             szStr = "Size Over > 1.0 GB";
@@ -32,7 +32,7 @@ function ProgressBar(child, f, callback) {
         self.Aborted = true;
     }
     self.FileSize.html(szStr);
-    self.FileName.html(f.name);
+    self.FileName.html(fmd.get('name'));
     // 完了処理
     self.Finished = function (aborted) {
         self.Cancel.css('display','none');
@@ -47,6 +47,7 @@ function ProgressBar(child, f, callback) {
         if (propagate && self.child_link != null) self.child_link.Abort(true);
     }
     self.AjaxStart = function (url) {
+        self.progress_Bar.css('display', 'flex');
         if (self.child_link != null) self.child_link.AjaxStart(url);
         if (self.Aborted) {
             self.Finished(true);    // ERROR または ABORT
@@ -59,7 +60,7 @@ function ProgressBar(child, f, callback) {
             contentType: false,
             processData: false,
             cache: false,
-            data: self.Form,
+            data: fmd,
             xhr: function () {
                 var xhrobj = $.ajaxSettings.xhr();
                 if (xhrobj.upload) {
@@ -71,7 +72,7 @@ function ProgressBar(child, f, callback) {
                 return xhrobj;
             },
             success: function (data) {
-//                alert(data);
+                alert("Respons:"+url+"\n"+data);
                 self.Finished(false);
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -86,11 +87,12 @@ function ProgressBar(child, f, callback) {
             },
         });
     }
+    return self;
 };
 // マルチファイルアップロード
-function UploadFiles(files) {
+function UploadFiles(files,url, callback) {
     var self = this;
-    self.finishCallback = undefined;
+    self.finishCallback = callback;
     var upload = {      // calback_func に渡すオブジェクト
         abort: false,
         complete: 0,
@@ -123,7 +125,11 @@ function UploadFiles(files) {
     // プロセスバーのファイルリストを作成
     self.topBar = null;
     for (var i = 0; i < files.length; ++i) {
-        var next = new ProgressBar(self.topBar,files[i],function (aborted) {
+        var form = new FormData();
+        form.append('name', files[i].name);
+        form.append('file', files[i]);
+        form.append('size', files[i].size);
+        var next = new ProgressBar(self.topBar,form,function (aborted) {
             // 中止または完了時の処理
             if(upload.result(aborted) <= 0) self.CloseWait();;
             self.RestMessage(upload.rest);
@@ -132,9 +138,19 @@ function UploadFiles(files) {
         self.topBar = next;
     }
     $('body').append(bk_panel);
-    // メソッド定義
+    if (self.topBar === null) {
+        self.CloseWait();
+        alert("FILES EMPTY!!");
+        return;
+    }
+    // メッセージ表示
     self.RestMessage = function (n) {
         rest.text("${#core.RestFiiles}" + n);
+    }
+    // ダイアログを閉じる
+    self.CloseDialog = function () {
+        bk_panel.fadeOut("fast");
+        bk_panel.remove();
     }
     self.CloseWait = function () {
         if (self.finishCallback != undefined) self.finishCallback(upload);
@@ -147,31 +163,14 @@ function UploadFiles(files) {
             });
         }
     }
-    // ダイアログを閉じる
-    self.CloseDialog = function () {
-        bk_panel.fadeOut("fast");
-        bk_panel.remove();
-    }
     // アップロード実行
-    self.Execute = function (url, callback) {
-        if (self.topBar === null) {
-            self.CloseWait();
-            alert("FILES EMPTY!!");
-            return;
-        }
-        msg.text('${#core.Uploading}');
-        self.finishCallback = callback;
-        bk_panel.fadeIn('fast');
-        self.RestMessage(upload.rest);
-        self.topBar.AjaxStart(url);
-    }
+    msg.text('${#core.Uploading}');
+    bk_panel.fadeIn('fast');
+    self.RestMessage(upload.rest);
+    self.topBar.AjaxStart(url);
 }
-/* dropfile使い方案
-    $(セレクタ).drop_files(uploadURL,callback_func(res){
-            res.abort
-            res.complete
-            res.total
-    });
+/* ===============================================
+    ファイルを一つずつアップロードする
 */
 (function ($) {
 $.fn.dropfiles = function (uploadURL, callback) {
@@ -196,8 +195,7 @@ $.fn.dropfiles = function (uploadURL, callback) {
             e.preventDefault();
             self.removeClass('drag-over');
             var files = e.originalEvent.dataTransfer.files;
-            obj = new UploadFiles(files);
-            obj.Execute(uploadURL, callback);
+            UploadFiles(files,uploadURL, callback);
         },
     });
 };
