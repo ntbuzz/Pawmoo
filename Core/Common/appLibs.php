@@ -34,18 +34,15 @@ function extract_path_file_ext($path) {
 //==============================================================================
 // extract file path, returned path array [ path, filename ]
 function extract_path_filename($path) {
-    if(mb_substr($path,-1) == '/') {
-        $path = substr($path,0,strlen($path)-1);
-    }
+    $path = path_simplify($path);
     $nn = strrpos($path,'/');
     if($nn === FALSE) {
         $fn = $path;
-        $path = '';
+        $path = '/';
     } else {
         $fn = substr($path,$nn+1);
         $path = substr($path,0,$nn+1);
     }
-    if(mb_substr($path,-1) !== '/') $path .= '/';
     return array($path,$fn);
 }
 //==============================================================================

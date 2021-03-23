@@ -24,7 +24,7 @@
     margin-left: auto;
     margin-right: auto;
     border:2px solid black;
-    border-radius: 20px;     /* CSS3 */
+    border-radius: 15px;     /* CSS3 */
     background-color:white;
 	box-shadow: 1px 1px 2px gray;
 }
@@ -42,7 +42,7 @@
 }
 .cancel-button {
     width:14px;
-    height:16px;
+    height:24px;
 	border-top:1px dashed black;
 	border-right:1px dashed black;
 	border-bottom:1px dashed black;
@@ -52,7 +52,7 @@
 	color: red;
 	text-align:center;
     align-items: center;
-	padding:5px 0;
+	padding:0;
 	border-radius: 0 4px 4px 0;
     background: linear-gradient(#aaa,#FFF, #aaa);
 }
@@ -62,15 +62,16 @@
 }
 .progress-panel {
 	width:90%;
-	height:16px;
+	height:24px;
 	border-top:1px dashed black;
 	border-left:1px dashed black;
 	border-bottom:1px dashed black;
 	text-align:right;
-	padding:5px;
+	padding:0;
     margin:4px 0 4px 0;
 	border-radius: 5px 0 0 5px;
     color:gray;
+    overflow:hidden;
 }
 .progress-panel .progress-gain {
 	position:absolute;
@@ -85,20 +86,25 @@
 }
 .progress-panel .left {
 	position: absolute;
+    width:80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;    
 	left:0;
     font-size: 8pt;
 	font-weight:bold;
     color:inherit;
-    text-align: bottom;
-    padding-left:10px;
+    padding-left:5px;
+    text-align:left;
 }
 .progress-panel .right {
 	position: absolute;
-	right:10px;
+	right:5px;
     font-size: 8pt;
 	font-weight:bold;
     color:inherit;
     text-align: bottom;
+    white-space: nowrap;
 }
 /* 送信完了状態 */
 .progress-panel.complete { background-color:lightskyblue; color:black; 	border-radius: 5px;}
@@ -107,5 +113,5 @@
 .progress-panel.error { background-color:#C00000; color:white;border-radius: 5px;}
 /* ドラッグ中の枠 */
 .drag-over {
-    border: 2px solid #0B85A1;
+    border: 2px solid #0B85A1 !important;
 }

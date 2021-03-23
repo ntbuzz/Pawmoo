@@ -66,7 +66,7 @@ function ProgressBar(child, f, callback) {
                     xhrobj.upload.addEventListener('progress', function (e) {
                         var percent = parseInt(e.loaded / e.total * 100);
                         self.gainBar.width(percent+'%').html(percent+'%');
-                    });
+                    },false);
                 }
                 return xhrobj;
             },
