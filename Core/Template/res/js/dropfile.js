@@ -1,12 +1,20 @@
 //===============================================
 // アップロード処理のプログレスバーチェイン
+<<<<<<< HEAD
 function ProgressBar(child, f, callback) {
+=======
+// FormData(fmd) の中に複数のfileが定義可能
+function ProgressBar(child, fmd, callback) {
+>>>>>>> dev/master
     var self = this;
     self.finishCallback = callback;
     self.child_link = child;
     self.Aborted = false;
+<<<<<<< HEAD
     self.Form = new FormData();
     self.Form.append('file', f);
+=======
+>>>>>>> dev/master
     self.jqxhr = null;
     self.progress_Bar = $('<div class="progress-Bar"></div>');
     self.progressPanel = $('<div class="progress-panel"></div>').appendTo(self.progress_Bar);
@@ -15,13 +23,23 @@ function ProgressBar(child, f, callback) {
     self.FileSize = $('<span class="filesize right"></span>').appendTo(self.progressPanel);
     self.gainBar = $('<div class="progress-gain"></div>').appendTo(self.progressPanel);
     self.Cancel.click(function () {
+<<<<<<< HEAD
         if (confirm(f.name + "${#core.Confirm}")) {
+=======
+        if (confirm(fmd.get('name') + "${#core.Confirm}")) {
+>>>>>>> dev/master
             self.Abort(false);
         }
     });
     // ファイル情報を表示
+<<<<<<< HEAD
     if (f.size>0) {
         for (i = 0, sz = f.size; sz > 1024; i += 3, sz /= 1024) ;
+=======
+    sz = fmd.get('size');
+    if (sz>0) {
+        for (i = 0; sz > 1024; i += 3, sz /= 1024) ;
+>>>>>>> dev/master
         szStr = sz.toFixed(2) +" B  KB MB GB TB PB".substr(i,3);
         if (i >= 9 && sz > 1.0) {
             szStr = "Size Over > 1.0 GB";
@@ -32,7 +50,11 @@ function ProgressBar(child, f, callback) {
         self.Aborted = true;
     }
     self.FileSize.html(szStr);
+<<<<<<< HEAD
     self.FileName.html(f.name);
+=======
+    self.FileName.html(fmd.get('name'));
+>>>>>>> dev/master
     // 完了処理
     self.Finished = function (aborted) {
         self.Cancel.css('display','none');
@@ -47,6 +69,10 @@ function ProgressBar(child, f, callback) {
         if (propagate && self.child_link != null) self.child_link.Abort(true);
     }
     self.AjaxStart = function (url) {
+<<<<<<< HEAD
+=======
+        self.progress_Bar.css('display', 'flex');
+>>>>>>> dev/master
         if (self.child_link != null) self.child_link.AjaxStart(url);
         if (self.Aborted) {
             self.Finished(true);    // ERROR または ABORT
@@ -59,19 +85,31 @@ function ProgressBar(child, f, callback) {
             contentType: false,
             processData: false,
             cache: false,
+<<<<<<< HEAD
             data: self.Form,
+=======
+            data: fmd,
+>>>>>>> dev/master
             xhr: function () {
                 var xhrobj = $.ajaxSettings.xhr();
                 if (xhrobj.upload) {
                     xhrobj.upload.addEventListener('progress', function (e) {
                         var percent = parseInt(e.loaded / e.total * 100);
                         self.gainBar.width(percent+'%').html(percent+'%');
+<<<<<<< HEAD
                     });
+=======
+                    },false);
+>>>>>>> dev/master
                 }
                 return xhrobj;
             },
             success: function (data) {
+<<<<<<< HEAD
 //                alert(data);
+=======
+                alert("Respons:"+url+"\n"+data);
+>>>>>>> dev/master
                 self.Finished(false);
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -86,11 +124,20 @@ function ProgressBar(child, f, callback) {
             },
         });
     }
+<<<<<<< HEAD
 };
 // マルチファイルアップロード
 function UploadFiles(files) {
     var self = this;
     self.finishCallback = undefined;
+=======
+    return self;
+};
+// マルチファイルアップロード
+function UploadFiles(files,url, callback) {
+    var self = this;
+    self.finishCallback = callback;
+>>>>>>> dev/master
     var upload = {      // calback_func に渡すオブジェクト
         abort: false,
         complete: 0,
@@ -123,7 +170,15 @@ function UploadFiles(files) {
     // プロセスバーのファイルリストを作成
     self.topBar = null;
     for (var i = 0; i < files.length; ++i) {
+<<<<<<< HEAD
         var next = new ProgressBar(self.topBar,files[i],function (aborted) {
+=======
+        var form = new FormData();
+        form.append('name', files[i].name);
+        form.append('file', files[i]);
+        form.append('size', files[i].size);
+        var next = new ProgressBar(self.topBar,form,function (aborted) {
+>>>>>>> dev/master
             // 中止または完了時の処理
             if(upload.result(aborted) <= 0) self.CloseWait();;
             self.RestMessage(upload.rest);
@@ -132,10 +187,27 @@ function UploadFiles(files) {
         self.topBar = next;
     }
     $('body').append(bk_panel);
+<<<<<<< HEAD
     // メソッド定義
     self.RestMessage = function (n) {
         rest.text("${#core.RestFiiles}" + n);
     }
+=======
+    if (self.topBar === null) {
+        self.CloseWait();
+        alert("FILES EMPTY!!");
+        return;
+    }
+    // メッセージ表示
+    self.RestMessage = function (n) {
+        rest.text("${#core.RestFiiles}" + n);
+    }
+    // ダイアログを閉じる
+    self.CloseDialog = function () {
+        bk_panel.fadeOut("fast");
+        bk_panel.remove();
+    }
+>>>>>>> dev/master
     self.CloseWait = function () {
         if (self.finishCallback != undefined) self.finishCallback(upload);
         if (!upload.abort) {
@@ -147,6 +219,7 @@ function UploadFiles(files) {
             });
         }
     }
+<<<<<<< HEAD
     // ダイアログを閉じる
     self.CloseDialog = function () {
         bk_panel.fadeOut("fast");
@@ -172,6 +245,16 @@ function UploadFiles(files) {
             res.complete
             res.total
     });
+=======
+    // アップロード実行
+    msg.text('${#core.Uploading}');
+    bk_panel.fadeIn('fast');
+    self.RestMessage(upload.rest);
+    self.topBar.AjaxStart(url);
+}
+/* ===============================================
+    ファイルを一つずつアップロードする
+>>>>>>> dev/master
 */
 (function ($) {
 $.fn.dropfiles = function (uploadURL, callback) {
@@ -196,8 +279,12 @@ $.fn.dropfiles = function (uploadURL, callback) {
             e.preventDefault();
             self.removeClass('drag-over');
             var files = e.originalEvent.dataTransfer.files;
+<<<<<<< HEAD
             obj = new UploadFiles(files);
             obj.Execute(uploadURL, callback);
+=======
+            UploadFiles(files,uploadURL, callback);
+>>>>>>> dev/master
         },
     });
 };

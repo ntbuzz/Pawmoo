@@ -5,12 +5,13 @@
  */
 if(!defined('DEBUG_LEVEL')) define('DEBUG_LEVEL', 10);
 
-define('DBMSG_SYSTEM',  105);      // for Main, App, Controller
-define('DBMSG_LOCALE',  104);      // for LangUI
-define('DBMSG_VIEW',    103);      // for View, Helper
-define('DBMSG_MODEL',   102);      // for Model
-define('DBMSG_HANDLER', 101);      // for DB-Handler
-define('DBMSG_RESOURCE',100);      // for Style/Script
+define('DBMSG_SYSTEM',  106);      // for Main, App, Controller
+define('DBMSG_LOCALE',  105);      // for LangUI
+define('DBMSG_VIEW',    104);      // for View, Helper
+define('DBMSG_MODEL',   103);      // for Model
+define('DBMSG_HANDLER', 102);      // for DB-Handler
+define('DBMSG_RESOURCE',101);      // for Style/Script
+define('DBMSG_ERROR',   100);      // for ERROR
 define('DBMSG_LEVEL',   100);      // logging level
 define('DBMSG_DUMP',     -1);      // DUMP ONLY
 define('DBMSG_NOLOG',    -2);      // CLI dump ONLY

@@ -37,7 +37,12 @@ public function LoadContents($fname) {
 }
 //==============================================================================
 // ファイルの属性を生成
+<<<<<<< HEAD
 	private function make_attr_array($path,&$din) {
+=======
+	private function make_attr_array($path) {
+		$din = pathinfo($path);
+>>>>>>> dev/master
 		return array(
 			'fullname' => SysCharset($path),
 			'filename' => SysCharset($din["basename"]),
@@ -50,18 +55,21 @@ public function LoadContents($fname) {
 //==============================================================================
 // ファイルの属性を取得
 public function GetAttribute($path) {
+<<<<<<< HEAD
 	$din = pathinfo(LocalCharset($path));
 	return $this->make_attr_array($path,$din);
+=======
+	$path = LocalCharset($path);
+	return $this->make_attr_array($path);
+>>>>>>> dev/master
 }
 //==============================================================================
 // ファイル移動
 public function MoveFile($fromfile,$tofile) {
 	$srcname = LocalCharset($fromfile);		// 移動元ファイルパス
 	$tagname = LocalCharset($tofile);		// 移動先ファイルパス
-	if(file_move($srcname, $tagname)) {		// ファイル移動、移動先のフォルダがなければ作成
-		echo "{$srcname} を\n{$tagname} へ移動しました\n";
-	} else {
-		echo "{$srcname} の移動に失敗しました\n";
+	if(!file_move($srcname, $tagname)) {		// ファイル移動、移動先のフォルダがなければ作成
+		debug_log(DBMSG_CLI|DBMSG_ERROR,"{$srcname} の移動に失敗しました");
 	}
 }
 //==============================================================================
@@ -77,15 +85,21 @@ public function MoveAllFiles($fromdir,$todir) {
 		$srcname = LocalCharset($filelist['fullname']);	// 対象ファイルパス
 		$filename = $filelist['filename'];
 		$tagname = LocalCharset("{$todir}{$filename}");
-		file_move($srcname, $tagname);			// ファイル移動、移動先のフォルダがなければ作成
+		if(!file_move($srcname, $tagname)) {
+			debug_log(DBMSG_CLI|DBMSG_ERROR,"{$srcname} の移動に失敗しました");
+		}
 	}
 }
 //==============================================================================
 // ファイル削除
 public function DeleteFile($fullname) {
 	$srcname = LocalCharset($fullname);
-	if(file_exists($srcname)) unlink($srcname);         // 移動先に同名ファイルがあれば削除
-	echo $fname . ' を削除しました';
+	if(file_exists($srcname)) {
+		if(!unlink($srcname)) {
+			list($path,$fname) = extract_path_filename($srcname);
+			debug_log(DBMSG_CLI|DBMSG_ERROR,"{$fname} の削除に失敗しました");
+		}
+	}
 }
 //==============================================================================
 // 指定フォルダのファイル一括削除
@@ -93,7 +107,12 @@ public function DeleteAllFiles($topdir) {
 	$this->get_FolderLists($topdir);	// 削除フォルダのファイルリスト
 	foreach($this->Files as $filelist) {
 		$srcname = LocalCharset($filelist['fullname']);	// 対象ファイルパス
-		if(file_exists($srcname)) unlink($srcname);         // 移動先に同名ファイルがあれば削除
+		if(file_exists($srcname)) {
+			if(!unlink($srcname)) {
+				list($path,$fname) = extract_path_filename($srcname);
+				debug_log(DBMSG_CLI|DBMSG_ERROR,"{$fname} の削除に失敗しました");
+			}
+		}
 	}
 }
 //==============================================================================
@@ -109,11 +128,14 @@ public function DeleteAllFiles($topdir) {
             if(! in_array($fl,IgnoreFiles,true)) {
 //                clearstatcache();
                 $lfl = "{$dirs}/{$fl}";
-                $din = pathinfo($lfl);
                 if(is_dir($lfl)) {
                     $this->Folder[] = SysCharset($din["basename"]);
                 } else if(file_exists ($lfl)) {
+<<<<<<< HEAD
                     $this->Files[] = $this->make_attr_array($lfl,$din);
+=======
+                    $this->Files[] = $this->make_attr_array($lfl);
+>>>>>>> dev/master
                 } else {
                     echo "fail:" .$lfl;
                 }
@@ -141,10 +163,10 @@ public function DeleteAllFiles($topdir) {
 		set_time_limit(0);			// 処理制限時間を外す
 		// ディレクトリ指定なら一括ZIP
 		if(is_dir($filepath)) {
-			// 指定パスのファイルリストを取得する
+			// 指定パスのファイルリストを取得する => $this->Files
 			$this->get_FolderLists($filepath);
 			// 取得ファイルをZipに追加していく
-			foreach($filelist['FILE'] as $filelist) {
+			foreach($this->Files as $filelist) {
 				$fullname = $filelist['fullname'];
 				$filename = $filelist['filename'];
 				// 取得ファイルをZipに追加していく
@@ -164,11 +186,35 @@ public function DeleteAllFiles($topdir) {
 	}
 //==============================================================================
 // ファイルをZIPでダウンロード
+<<<<<<< HEAD
 public function ZipDownFile($path,$filename) {
 }
 //==============================================================================
 // フォルダをZIPでダウンロード
 public function ZipDownFolder($path) {
+=======
+	private function ZipResponse($srcname,$zipName) {
+		$zipName = "{$zipName}.zip";
+		$zipArchive = $this->Make_ZipFile($srcname,$zipName);
+//		ob_clean();
+		$zipName = LocalCharset($zipName);
+		header("Content-Type: application/zip; name='{$zipName}'");
+		header("Content-Disposition: attachment; filename='{$zipName}'");
+		header("Content-Length: ".filesize($zipArchive));
+		readfile($zipArchive);
+		unlink($zipArchive);
+	}
+//==============================================================================
+// ファイルをZIPでダウンロード
+public function ZipDownloadFile($path,$filename) {
+	list($fn,$ext) = extract_base_name($filename);
+	$this->ZipResponse("{$path}{$filename}",$fn);
+}
+//==============================================================================
+// フォルダをZIPでダウンロード
+public function ZipDownloadFolder($path,$zipName) {
+	$this->ZipResponse($path,$zipName);
+>>>>>>> dev/master
 }
 
 

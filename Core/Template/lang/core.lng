@@ -30,6 +30,11 @@
     CancelTitle => "送信を中止します"
     AbortDone => "送信完了しました."
     Abort => 中止
+<<<<<<< HEAD
+=======
+    DeleteFail => " の削除に失敗しました"
+    MoveFail => " の移動に失敗しました"
+>>>>>>> dev/master
 ]
 .en => [
     // for Pager Buttons
@@ -58,6 +63,11 @@
     CancelTitle => "Send Cancele"
     AbortDone => "SEND Complete."
     Abort => ABORT
+<<<<<<< HEAD
+=======
+    DeleteFail => " delete FAIL"
+    MoveFail => " move FAIL"
+>>>>>>> dev/master
 ]
 
 SW開発 => [

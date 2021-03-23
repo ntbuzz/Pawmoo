@@ -29,12 +29,6 @@
             });
     };
     // 指定要素 e のスクロールに追従する
-    $.fn.busy_icon = function (disp) {
-        var self = this; // jQueryオブジェクトを変数に代入しておく
-        self.css('display', (disp) ? 'block' : 'none');
-        $('body').css('cursor', (disp) ? 'wait' : 'default');
-    };
-    // 指定要素 e のスクロールに追従する
     $.fn.stickyOn = function (e) {
         var self = this; // jQueryオブジェクトを変数に代入しておく
         $(e).on("scroll", function () {
@@ -125,6 +119,10 @@
         });
         this.find(".openButton").click();
         return false;
+    };
+    // カーソルを BUSY に変更
+    $.busy_cursor = function (disp) {
+        $('body').css('cursor', (disp) ? 'wait' : 'default');
     };
     // Yes/No ダイアログボックスを開く
     $.dialogBox = function (title,msg, callback) {
