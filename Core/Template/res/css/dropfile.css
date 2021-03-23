@@ -41,7 +41,7 @@
     align-items: center;
 }
 .cancel-button {
-    width:14px;
+    width:16px;
     height:24px;
 	border-top:1px dashed black;
 	border-right:1px dashed black;
@@ -61,7 +61,7 @@
     background: linear-gradient(#FFF,#aaa, #FFF);
 }
 .progress-panel {
-	width:90%;
+	width:95%;
 	height:24px;
 	border-top:1px dashed black;
 	border-left:1px dashed black;
