@@ -1,9 +1,8 @@
 //===============================================
 // アップロード処理のプログレスバーチェイン
 // FormData(fmd) の中に複数のfileが定義可能
-function ProgressBar(child, fmd, callback) {
+function ProgressBar(child, fmd, callback_func) {
     var self = this;
-    self.finishCallback = callback;
     self.child_link = child;
     self.Aborted = false;
     self.jqxhr = null;
@@ -38,7 +37,7 @@ function ProgressBar(child, fmd, callback) {
         self.Cancel.css('display','none');
         var cls = (aborted) ? 'error' : 'complete';
         self.progressPanel.addClass(cls);
-        self.finishCallback(aborted);
+        callback_func(aborted);
     }
     // 送信を中止
     self.Abort = function (propagate) {
@@ -72,7 +71,7 @@ function ProgressBar(child, fmd, callback) {
                 return xhrobj;
             },
             success: function (data) {
-                alert("Respons:"+url+"\n"+data);
+//                alert("Respons:"+url+"\n"+data);
                 self.Finished(false);
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -90,9 +89,9 @@ function ProgressBar(child, fmd, callback) {
     return self;
 };
 // マルチファイルアップロード
-function UploadFiles(files,url, callback) {
+function UploadFiles(files,url, callback_func) {
     var self = this;
-    self.finishCallback = callback;
+    var topBar = null;
     var upload = {      // calback_func に渡すオブジェクト
         abort: false,
         complete: 0,
@@ -120,25 +119,25 @@ function UploadFiles(files,url, callback) {
     // 中止ボタンを追加するためのバー
     var button_bar = $('<div class="buttonBar"></div>');
     var cancel_close = $('<span class="button">${#core.Abort}</span>').appendTo(button_bar);
-    cancel_close.off().click(function () { self.topBar.Abort(true);});
+    cancel_close.off().click(function () { topBar.Abort(true);});
     dialog.append(button_bar);
     // プロセスバーのファイルリストを作成
-    self.topBar = null;
+    topBar = null;
     for (var i = 0; i < files.length; ++i) {
         var form = new FormData();
         form.append('name', files[i].name);
         form.append('file', files[i]);
         form.append('size', files[i].size);
-        var next = new ProgressBar(self.topBar,form,function (aborted) {
+        var next = new ProgressBar(topBar,form,function (aborted) {
             // 中止または完了時の処理
             if(upload.result(aborted) <= 0) self.CloseWait();;
             self.RestMessage(upload.rest);
         });
         obj.append(next.progress_Bar);
-        self.topBar = next;
+        topBar = next;
     }
     $('body').append(bk_panel);
-    if (self.topBar === null) {
+    if (topBar === null) {
         self.CloseWait();
         alert("FILES EMPTY!!");
         return;
@@ -153,7 +152,7 @@ function UploadFiles(files,url, callback) {
         bk_panel.remove();
     }
     self.CloseWait = function () {
-        if (self.finishCallback != undefined) self.finishCallback(upload);
+        if (callback_func != undefined) callback_func(upload);
         if (!upload.abort) {
             self.CloseDialog();  // ABORTせずに完了したら即ダイアログを閉じる
         } else {
@@ -167,7 +166,7 @@ function UploadFiles(files,url, callback) {
     msg.text('${#core.Uploading}');
     bk_panel.fadeIn('fast');
     self.RestMessage(upload.rest);
-    self.topBar.AjaxStart(url);
+    topBar.AjaxStart(url);
 }
 /* ===============================================
     ファイルを一つずつアップロードする

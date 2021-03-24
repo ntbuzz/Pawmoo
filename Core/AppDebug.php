@@ -13,9 +13,9 @@ define('DBMSG_HANDLER', 102);      // for DB-Handler
 define('DBMSG_RESOURCE',101);      // for Style/Script
 define('DBMSG_ERROR',   100);      // for ERROR
 define('DBMSG_LEVEL',   100);      // logging level
-define('DBMSG_DUMP',     -1);      // DUMP ONLY
-define('DBMSG_NOLOG',    -2);      // CLI dump ONLY
-define('DBMSG_DIE',      -3);      // die message
+define('DBMSG_DUMP',    107);      // DUMP ONLY
+define('DBMSG_NOLOG',   108);      // CLI dump ONLY
+define('DBMSG_DIE',     109);      // die message
 define('DBMSG_CLI',     256);      // CLI BIT Mask for CLI_DEBUG
 
 const EMPTY_MSG = " EMPTY\n";
@@ -60,7 +60,7 @@ function sep_level($lvl) {
     if($lvl === FALSE) return FALSE;
     $mod = ($lvl % DBMSG_CLI);
     $cli = ($lvl - $mod)/DBMSG_CLI;
-    if($mod < DBMSG_DIE) return FALSE;          // Invalid LEVEL
+    if($mod > DBMSG_DIE) return FALSE;          // Invalid LEVEL
     if($mod >= DBMSG_LEVEL) $mod = -$mod;       // SystemLog
     else if($mod > DEBUG_LEVEL) return FALSE;   // out of LEVEL
     return [$cli,$mod];
@@ -72,7 +72,8 @@ function log_reset($lvl) {
     $logging = sep_level($lvl);
     if($logging === FALSE) return;
     list($cli,$lvl) = $logging;
-    if(in_array($lvl,[DBMSG_DUMP, DBMSG_NOLOG, DBMSG_DIE, DBMSG_CLI])) return;      // no-logging level
+    if($lvl < -DBMSG_SYSTEM) return; // no-logging level
+//    if(in_array($lvl,[DBMSG_DUMP, DBMSG_NOLOG, DBMSG_DIE, DBMSG_CLI])) return;      // no-logging level
     unset($debug_log_str[$lvl]);
     MySession::set_paramIDs("debuglog.{$lvl}",NULL);
 }
@@ -89,6 +90,7 @@ function debug_log($lvl,...$items) {
     $logging = sep_level($lvl);
     if($logging === FALSE) return;
     list($cli,$lvl) = $logging;
+    if($lvl < -DBMSG_DIE) return;
     // バックトレースから呼び出し元の情報を取得
     $dump_log_info = function($items) {
         $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
@@ -160,18 +162,18 @@ function debug_log($lvl,...$items) {
     global $debug_log_str;
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
-        if($lvl === DBMSG_DIE) die("<pre>\n{$dmp_info}\n</pre>\n");
-        if($lvl === DBMSG_DUMP) {               // Anytime DUMP for WEB
-            echo "<pre>\n{$dmp_info}\n</pre>\n";
-        } else if($lvl === DBMSG_NOLOG) {      // Anytime DUMP for CLI
-            echo "{$dmp_info}\n";
-        } else if(CLI_DEBUG) {
-            if($cli !== 0) echo "{$dmp_info}\n";    // dump on CLI Running and CLI_MODE
-        } else {
-            // WEB Access logging $lvl, donot worry CLI_MODE
-            if(isset($debug_log_str[$lvl])) $dmp_info = $debug_log_str[$lvl] . $dmp_info;
-            MySession::set_paramIDs("debuglog.{$lvl}",$dmp_info);
-            $debug_log_str[$lvl] = $dmp_info;
+        switch($lvl) {
+        case DBMSG_DIE:     die("<pre>\n{$dmp_info}\n</pre>\n");
+        case DBMSG_DUMP:    echo "<pre>\n{$dmp_info}\n</pre>\n"; break;
+        case DBMSG_NOLOG:   // $lvl < 0
+        default:
+            if((DBMSG_LEVEL < $lvl && $lvl < 0) || (CLI_DEBUG && $cli !== 0)) {
+                echo "{$dmp_info}\n";
+            } else if(!CLI_DEBUG) {     // WEB Access logging $lvl, donot worry CLI_MODE
+                if(isset($debug_log_str[$lvl])) $dmp_info = $debug_log_str[$lvl] . $dmp_info;
+                MySession::set_paramIDs("debuglog.{$lvl}",$dmp_info);
+                $debug_log_str[$lvl] = $dmp_info;
+            }
         }
     }
 }

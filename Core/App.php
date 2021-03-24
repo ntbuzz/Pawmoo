@@ -109,7 +109,7 @@ public static function Get_AppPath($path) {
 }
 //==============================================================================
 // アプリケーションドキュメントフォルダ
-public static function Get_DocPath($path) {
+public static function Get_DocPath($path = '') {
     $docroot = dirname(__DIR__);        // Framework Folder
     $appname = static::$AppName;
     if(!empty($path)) $path = "{$path}/";
