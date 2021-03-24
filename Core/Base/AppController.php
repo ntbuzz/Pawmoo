@@ -204,7 +204,7 @@ public function ItemAction() {
 public function ContentsAction() {
 	$num = App::$Params[0];
 	$template = ucfirst(strtolower(App::$Filter));
-	if($nm > 0) $this->Model->GetRecord($num,TRUE,TRUE);
+	if($num > 0) $this->Model->GetRecord($num,TRUE,TRUE);
 	$this->View->ViewTemplate("{$template}Parts");
 }
 //==============================================================================

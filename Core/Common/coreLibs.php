@@ -50,7 +50,7 @@ function get_routing_path($root) {
         array_intval_recursive($params),
     );
     $ret = [$appname,$app_uri,$module,$q_str];
-    debug_log(-999, [
+    debug_log(FALSE, [
         'Framework Information' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
             "app_uri"=> $app_uri,
