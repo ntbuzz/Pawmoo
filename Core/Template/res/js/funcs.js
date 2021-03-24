@@ -57,6 +57,11 @@ Locations.prototype = {
         for (var n = path.length; (n > 1) && (!isNaN(path[n - 1])); --n);
         return this.trunc_path(n, e);
     },
+    params_path: function (e) {
+        var path = this.array;
+        for (var n = path.length; (n > 1) && (!isNaN(path[n - 1])); --n);
+        return path.slice(n).join("/");
+    },
 };
 //===============================================
 // ネスティッド SELECT
