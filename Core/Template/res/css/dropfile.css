@@ -116,3 +116,69 @@
 .drag-over {
     border: 2px solid #0B85A1 !important;
 }
+/********************************************************************************/
+/* ペアファイルのアップロード用スタイル */
+.files-pair {
+    width:100%;
+    padding: 0 5px;
+}
+.files-pair > table {
+    width:98%;
+    border-collapse: collapse;
+}
+.files-pair > table th {
+    border:1px solid black;
+    background-color: #ccc;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    padding: 0;
+    width: 70px;;
+}
+.files-pair > table td {
+    border:1px solid black;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding:2px 0px;
+}
+.files-pair > table td.first {
+    max-width: 160px;
+    min-width: 160px;
+    padding:2px 5px;
+    background-color: #aff;
+}
+.files-pair > table td.second {
+    max-width: 240px;
+    min-width: 240px;
+    background-color: #aff;
+    padding:2px 5px;
+}
+.files-pair > table td.second.error {
+    background-color: #f33;
+}
+
+.files-pair label > input {
+    width:0;
+    display:none;
+}
+.files-pair label {
+    cursor:pointer;
+    color: white;
+    background-color: darkblue;
+    padding: 20px;
+    border: double 2px white;
+}
+.files-pair input[type='text'] {
+    width:99%;
+    background-color: #fec;
+    margin:0;
+    padding:2px 5px;
+}
+
+.progress-dialog .buttonBar {
+    margin-top: 0.75em;
+}
+.button {
+    margin: 0 15px;
+}
