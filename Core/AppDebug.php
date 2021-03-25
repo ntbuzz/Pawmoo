@@ -167,7 +167,7 @@ function debug_log($lvl,...$items) {
         case DBMSG_DUMP:    echo "<pre>\n{$dmp_info}\n</pre>\n"; break;
         case DBMSG_NOLOG:   // $lvl < 0
         default:
-            if((DBMSG_LEVEL < $lvl && $lvl < 0) || (CLI_DEBUG && $cli !== 0)) {
+            if((-DBMSG_LEVEL < $lvl && $lvl < 0) || (CLI_DEBUG && $cli !== 0)) {
                 echo "{$dmp_info}\n";
             } else if(!CLI_DEBUG) {     // WEB Access logging $lvl, donot worry CLI_MODE
                 if(isset($debug_log_str[$lvl])) $dmp_info = $debug_log_str[$lvl] . $dmp_info;

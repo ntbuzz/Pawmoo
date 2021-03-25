@@ -149,7 +149,7 @@ function get_php_files($dirtop) {
 //==============================================================================
 // Make the file path end with /
 function path_simplify($path) {
-    return (mb_substr($path,-1) == '/') ? substr($path,0,strlen($path)-1) : $path;
+    return (mb_substr($path,-1) === '/') ? substr($path,0,strlen($path)-1) : $path;
 }
 //==============================================================================
 // Character code-set change

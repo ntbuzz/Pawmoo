@@ -67,7 +67,7 @@ function file_move($src,$dest){
     list($path,$fn) = extract_path_filename($dest);
     if(!file_exists($path)) mkdir($path,0777,true);     // recursive mkdir
     if(rename($src,$dest)) {
-        chmod($dest,0664);      // permission change
+        chmod($dest,0666);      // permission change
         return true;
     } else return false;
 }
