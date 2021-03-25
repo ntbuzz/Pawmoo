@@ -27,6 +27,7 @@
     DeleteFail  => "'%s' の削除に失敗しました"
     MoveFail    => "'%s' の移動に失敗しました"
 // ファイルアップロード
+    UNDO        => 取消
     FILES       => "送信ファイル:"
     FIRSTFILE   => "1st"
     SECONDFILE  => "2nd"
@@ -66,6 +67,7 @@
     DeleteFail  => "'%s' delete FAIL"
     MoveFail    => "'%s' move FAIL"
 // for drag&drop upload
+    UNDO        => Cancel
     FILES       => "Send Files:"
     FIRSTFILE   => "1st"
     SECONDFILE  => "2nd"

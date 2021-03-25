@@ -110,18 +110,17 @@ function UploadFiles(files,url, callback_func) {
     };
     // ダイアログ以外をクリックさせないため壁をつくる
     var bk_panel = $('<div class="progress-BK"></div>');
-    // ダイアログボックス
     var dialog = $('<div class="progress-dialog"></div>').appendTo(bk_panel);
-    // メッセージ表示
-    var msg = $('<span></span>').appendTo(dialog);
-    // 進捗表示用のボックス
+    var upload_msg = $('<span></span>').appendTo(dialog);
     var obj = $('<div class="progress-box"></div>').appendTo(dialog);
-    // 残りメッセージをプロセスバーの後ろに表示
     var rest = $('<span class="message" id="upfiles"></span>').appendTo(dialog);
     // 中止ボタンを追加するためのバー
     var button_bar = $('<div class="buttonBar"></div>');
     var cancel_close = $('<span class="button">${#.core.ABORT}</span>').appendTo(button_bar);
-    cancel_close.off().click(function () { topBar.Abort(true);});
+    cancel_close.off().click(function () {
+        $.busy_cursor(false);
+        topBar.Abort(true);
+    });
     dialog.append(button_bar);
     // プロセスバーのファイルリストを作成
     topBar = null;
@@ -158,16 +157,17 @@ function UploadFiles(files,url, callback_func) {
         if (!upload.abort) {
             self.CloseDialog();  // ABORTせずに完了したら即ダイアログを閉じる
         } else {
-            msg.text('${#.core.AbortDone}'); // ABORTしていたら確認用に閉じるボタン表示
+            upload_msg.text('${#.core.AbortDone}'); // ABORTしていたら確認用に閉じるボタン表示
             cancel_close.text('${#.core.Close}').off().click(function () {
                 self.CloseDialog();
             });
         }
     }
     // アップロード実行
-    msg.text('${#.core.Uploading}');
+    upload_msg.text('${#.core.Uploading}');
     bk_panel.fadeIn('fast');
     self.RestMessage(upload.rest);
+    $.busy_cursor(true);
     topBar.AjaxStart(url);
 }
 //=============================================================================================
@@ -232,15 +232,16 @@ function PairUploadDialog(rec_num, files,url,callback_func) {
     var rest = $('<span class="message" id="upfiles"></span>').appendTo(dialog);
     // 中止ボタンを追加するためのバー
     var button_bar = $('<div class="buttonBar"></div>');
-    var send_btn = $('<span class="button">${#.core.SEND}</span>').appendTo(button_bar);
-    var close_btn = $('<span class="button">${#.core.Close}</span>').appendTo(button_bar);
-    close_btn.off().click(function () {
+    var send_abort = $('<span class="button">${#.core.SEND}</span>').appendTo(button_bar);
+    var cancel_close = $('<span class="button">${#.core.UNDO}</span>').appendTo(button_bar);
+    cancel_close.off().click(function () {
         bk_panel.fadeOut("fast");
         bk_panel.remove();
-        $.busy_cursor(false);
     });
+    dialog.append(button_bar);
+    $('body').append(bk_panel);
     // 送信実行
-    send_btn.off().click(function () {
+    send_abort.off().click(function () {
         var secondf_set = true;
         $('.files-pair').each(function () {
             var num = $(this).attr('id');
@@ -280,17 +281,16 @@ function PairUploadDialog(rec_num, files,url,callback_func) {
             $(this).css('display', 'none'); // 押せないように消す
             $(this).closest('th').html("${#.core.SECONDFILE}");
         });
-        close_btn.css('display', 'none');   // 押せないように消す
-        $(this).text('${#.core.ABORT}');     // 中止ボタンに切替
+        cancel_close.css('display', 'none');   // 押せないように消す
+        $(this).text('${#.core.ABORT}');     // 送信→中止ボタンに切替
         $(this).off().click(function () {
             self.topBar.Abort(true);
             $(this).css('display', 'none'); // 押せないように消す
+            $.busy_cursor(false);
         });
         $.busy_cursor(true);
         topBar.AjaxStart(url);
     });
-    dialog.append(button_bar);
-    $('body').append(bk_panel);
     bk_panel.fadeIn('fast');
     // 残りファイル数表示
     self.RestMessage = function (n) {
@@ -299,11 +299,12 @@ function PairUploadDialog(rec_num, files,url,callback_func) {
     self.CloseWait = function () {
         if (callback_func != undefined) callback_func(upload);
         if (!upload.abort) {
-            close_btn.click();
+            cancel_close.click();
         } else {
-            upload_msg.text('${#.core.AbortDone}');     // ABORTしていたらメッセージを表示
-            send_btn.css('display', 'none');    // 送信ボタンは押せないように消す
-            close_btn.css('display', 'inline'); // 押せるように再表示
+            upload_msg.text('${#.core.AbortDone}'); // ABORTしていたらメッセージを表示
+            send_abort.css('display', 'none');        // 送信/中止ボタンは押せないように消す
+            cancel_close.text('${#.core.Close}');      // 閉じるに変更
+            cancel_close.css('display', 'inline');     // 押せるように再表示
         }
     }
 }

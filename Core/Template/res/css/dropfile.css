@@ -29,19 +29,23 @@
     background-color:white;
 	box-shadow: 1px 1px 2px gray;
 }
-.buttonBar {
+.progress-dialog .buttonBar {
     text-align:center;
     width:100%;
     height:auto;
     left:0;
-    bottom:2px;
+    margin-top: 1.5em;
+    margin-bottom:1.0em;
 }
-.progress-Bar {
+.progress-dialog .buttonBar>.button {
+    margin: 0 12px;
+}
+.progress-dialog .progress-Bar {
     width:100%;
     display:flex;
     align-items: center;
 }
-.cancel-button {
+.progress-Bar>.cancel-button {
     width:16px;
     height:24px;
 	border-top:1px dashed black;
@@ -57,11 +61,12 @@
 	border-radius: 0 4px 4px 0;
     background: linear-gradient(#aaa,#FFF, #aaa);
 }
-.cancel-button:hover {
+.progress-Bar>.cancel-button:hover {
 	color: blue;
     background: linear-gradient(#FFF,#aaa, #FFF);
 }
-.progress-panel {
+
+.progress-Bar>.progress-panel {
 	width:95%;
 	height:24px;
 	border-top:1px dashed black;
@@ -74,7 +79,7 @@
     color:gray;
     overflow:hidden;
 }
-.progress-panel .progress-gain {
+.progress-Bar>.progress-panel .progress-gain {
 	position:absolute;
 	top:0;
 	left:0;
@@ -85,7 +90,7 @@
 	background-color: rgba(150,180,255,0.75);
     border-radius: 6px;     /* CSS3 */
 }
-.progress-panel .left {
+.progress-Bar>.progress-panel .left {
 	position: absolute;
     width:80%;
     overflow: hidden;
@@ -98,7 +103,7 @@
     padding-left:5px;
     text-align:left;
 }
-.progress-panel .right {
+.progress-Bar>.progress-panel .right {
 	position: absolute;
 	right:5px;
     font-size: 8pt;
@@ -118,15 +123,15 @@
 }
 /********************************************************************************/
 /* ペアファイルのアップロード用スタイル */
-.files-pair {
+.progress-dialog>.files-pair {
     width:100%;
     padding: 0 5px;
 }
-.files-pair > table {
+.progress-dialog>.files-pair > table {
     width:98%;
     border-collapse: collapse;
 }
-.files-pair > table th {
+.progress-dialog>.files-pair > table th {
     border:1px solid black;
     background-color: #ccc;
     text-align: right;
@@ -135,50 +140,45 @@
     padding: 0;
     width: 70px;;
 }
-.files-pair > table td {
+.progress-dialog>.files-pair > table td {
     border:1px solid black;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     padding:2px 0px;
 }
-.files-pair > table td.first {
+.progress-dialog>.files-pair > table td.first {
     max-width: 160px;
     min-width: 160px;
     padding:2px 5px;
     background-color: #aff;
 }
-.files-pair > table td.second {
+.progress-dialog>.files-pair > table td.second {
     max-width: 240px;
     min-width: 240px;
     background-color: #aff;
     padding:2px 5px;
 }
-.files-pair > table td.second.error {
+.progress-dialog>.files-pair > table td.second.error {
     background-color: #f33;
 }
 
-.files-pair label > input {
+.progress-dialog>.files-pair label > input {
     width:0;
     display:none;
 }
-.files-pair label {
+.progress-dialog>.files-pair label {
     cursor:pointer;
     color: white;
     background-color: darkblue;
     padding: 20px;
     border: double 2px white;
 }
-.files-pair input[type='text'] {
-    width:99%;
-    background-color: #fec;
+.progress-dialog>.files-pair input[type='text'] {
+    width:98%;
+    background-color: #fafad0;
     margin:0;
     padding:2px 5px;
+    border:none;
 }
 
-.progress-dialog .buttonBar {
-    margin-top: 0.75em;
-}
-.button {
-    margin: 0 15px;
-}
