@@ -8,12 +8,12 @@ function ProgressBar(child, fmd, callback_func) {
     self.jqxhr = null;
     self.progress_Bar = $('<div class="progress-Bar"></div>');
     self.progressPanel = $('<div class="progress-panel"></div>').appendTo(self.progress_Bar);
-    self.Cancel = $('<div class="cancel-button" title="${#core.CancelTitle}">x</div>').appendTo(self.progress_Bar);
+    self.Cancel = $('<div class="cancel-button" title="${#.core.CancelTitle}">x</div>').appendTo(self.progress_Bar);
     self.FileName = $('<span class="filename left"></span>').appendTo(self.progressPanel);
     self.FileSize = $('<span class="filesize right"></span>').appendTo(self.progressPanel);
     self.gainBar = $('<div class="progress-gain"></div>').appendTo(self.progressPanel);
     self.Cancel.click(function () {
-        if (confirm(fmd.get('name') + "${#core.Confirm}")) {
+        if (confirm("${#.core.Confirm}".replace('%s',fmd.get('name')))) {
             self.Abort(false);
         }
     });
@@ -118,7 +118,7 @@ function UploadFiles(files,url, callback_func) {
     var rest = $('<span class="message" id="upfiles"></span>').appendTo(dialog);
     // 中止ボタンを追加するためのバー
     var button_bar = $('<div class="buttonBar"></div>');
-    var cancel_close = $('<span class="button">${#core.Abort}</span>').appendTo(button_bar);
+    var cancel_close = $('<span class="button">${#.core.ABORT}</span>').appendTo(button_bar);
     cancel_close.off().click(function () { topBar.Abort(true);});
     dialog.append(button_bar);
     // プロセスバーのファイルリストを作成
@@ -144,7 +144,7 @@ function UploadFiles(files,url, callback_func) {
     }
     // メッセージ表示
     self.RestMessage = function (n) {
-        rest.text("${#core.RestFiiles}" + n);
+        rest.text("${#.core.RestFiiles}" + n);
     }
     // ダイアログを閉じる
     self.CloseDialog = function () {
@@ -156,14 +156,14 @@ function UploadFiles(files,url, callback_func) {
         if (!upload.abort) {
             self.CloseDialog();  // ABORTせずに完了したら即ダイアログを閉じる
         } else {
-            msg.text('${#core.AbortDone}'); // ABORTしていたら確認用に閉じるボタン表示
-            cancel_close.text('${#core.Close}').off().click(function () {
+            msg.text('${#.core.AbortDone}'); // ABORTしていたら確認用に閉じるボタン表示
+            cancel_close.text('${#.core.Close}').off().click(function () {
                 self.CloseDialog();
             });
         }
     }
     // アップロード実行
-    msg.text('${#core.Uploading}');
+    msg.text('${#.core.Uploading}');
     bk_panel.fadeIn('fast');
     self.RestMessage(upload.rest);
     topBar.AjaxStart(url);

@@ -5,66 +5,81 @@
 
 .ja => [
     // ページャーボタン表示用
-    Page => ページ:
-    Total => "(全 %d件)"
-    Display => 表示数:
-    NextPage => "次へ＞"
-    PrevPage => "＜前へ"
+    Page        => ページ:
+    Total       => "(全 %d件)"
+    Display     => 表示数:
+    NextPage    => "次へ＞"
+    PrevPage    => "＜前へ"
     // ダイアログ用
-    Yes => はい
-    No => いいえ
-    Cancel => キャンセル
+    Yes     => はい
+    No      => いいえ
+    Cancel      => キャンセル
     SizeDisplay => サイズ表示
-    Close => 閉じる
-    Resize => サイズ変更
-    Login => ログイン
-    UserName => ユーザー名
-    Password => パスワード
-    SEND    => 送信
-    PassError => パスワードが違います
+    Close       => 閉じる
+    Resize      => サイズ変更
+    Login       => ログイン
+    UserName    => ユーザー名
+    Password    => パスワード
+    SEND        => 送信
+    PassError   => パスワードが違います
     UnknownUser => 不明なユーザー
-    SelectMe => 【選択してください】
-    Uploading => ファイルをアップロード中...
-    RestFiiles => "残り: "
-    Confirm => " を中止しますか"
+    SelectMe    => 【選択してください】
+    DeleteFail  => "'%s' の削除に失敗しました"
+    MoveFail    => "'%s' の移動に失敗しました"
+// ファイルアップロード
+    FILES       => "送信ファイル:"
+    FIRSTFILE   => "1st"
+    SECONDFILE  => "2nd"
+    UPTITLE     => "タイトル"
+    ENTER       => "2ndファイルを登録してください"
+    ABORT       => "中止"
+    NO_SECOND   => "'%s' の2ndファイルが未登録です"
+    NO_TITLE    => "'%s' のタイトルが未入力です"
+    Uploading   => "ファイルをアップロード中..."
+    RestFiiles  => "残り: "
+    Confirm     => "'%s' の送信を中止しますか"
     CancelTitle => "送信を中止します"
-    AbortDone => "送信完了しました."
-    Abort => 中止
-    DeleteFail => " の削除に失敗しました"
-    MoveFail => " の移動に失敗しました"
+    AbortDone   => "送信完了しました."
+    MAXFILE     => "送信ァイルは %d 個までです"
 ]
 .en => [
     // for Pager Buttons
-    Page => "Page:"
-    Total => "(Total %d)"
-    Display => Count:
-    NextPage => "Next&gt;"
-    PrevPage => "&lt;Prev"
+    Page        => "Page:"
+    Total       => "(Total %d)"
+    Display     => Count:
+    NextPage    => "Next&gt;"
+    PrevPage    => "&lt;Prev"
     // for Dialog
-    Yes => Yes
-    No => No
-    Cancel => Cancel
+    Yes     => Yes
+    No      => No
+    Cancel      => Cancel
     SizeDisplay => "Display Size"
-    Close => "Close"
-    Resize => "Resize"
-    Login => Login
-    UserName => "User Name"
-    Password => Password
-    SEND    => Send
-    PassError => 'PASSWORD Missing'
+    Close       => "Close"
+    Resize      => "Resize"
+    Login       => Login
+    UserName    => "User Name"
+    Password    => Password
+    SEND        => Send
+    PassError   => 'PASSWORD Missing'
     UnknownUser => "Unknown USER"
-    SelectMe => "[Select Item]"
-    Uploading => "Now Uploading..."
-    RestFiiles => "Rest Files: "
-    Confirm => " is Abort?"
-    CancelTitle => "Send Cancele"
-    AbortDone => "SEND Complete."
-    Abort => ABORT
-<<<<<<< HEAD
-=======
-    DeleteFail => " delete FAIL"
-    MoveFail => " move FAIL"
->>>>>>> dev/master
+    SelectMe    => "[Select Item]"
+    DeleteFail  => "'%s' delete FAIL"
+    MoveFail    => "'%s' move FAIL"
+// for drag&drop upload
+    FILES       => "Send Files:"
+    FIRSTFILE   => "1st"
+    SECONDFILE  => "2nd"
+    UPTITLE     => "Title"
+    ENTER       => "Enter 2nd File"
+    ABORT       => "Abort"
+    NO_SECOND   => "'%s' 2nd file unknown"
+    NO_TITLE    => "'%s' title empty"
+    Uploading   => "Now Uploading..."
+    RestFiiles  => "Rest: "
+    Confirm     => "'%s' is ABORT?"
+    CancelTitle => "Send Abort"
+    AbortDone   => "Send Complete."
+    MAXFILE     => "Upload Max %d Files"
 ]
 
 SW開発 => [
