@@ -32,7 +32,7 @@
             -103 => Model
             -102 => Handler
             -101 => Resource
-            -100 => Resource
+            -100 => ERROR
         ]
     ]
     DebugInfo => "Debug Info"

@@ -8,12 +8,12 @@ function ProgressBar(child, fmd, callback_func) {
     self.jqxhr = null;
     self.progress_Bar = $('<div class="progress-Bar"></div>');
     self.progressPanel = $('<div class="progress-panel"></div>').appendTo(self.progress_Bar);
-    self.Cancel = $('<div class="cancel-button" title="${#core.CancelTitle}">x</div>').appendTo(self.progress_Bar);
+    self.Cancel = $('<div class="cancel-button" title="${#.core.CancelTitle}">x</div>').appendTo(self.progress_Bar);
     self.FileName = $('<span class="filename left"></span>').appendTo(self.progressPanel);
     self.FileSize = $('<span class="filesize right"></span>').appendTo(self.progressPanel);
     self.gainBar = $('<div class="progress-gain"></div>').appendTo(self.progressPanel);
     self.Cancel.click(function () {
-        if (confirm(fmd.get('name') + "${#core.Confirm}")) {
+        if (confirm("${#.core.Confirm}".replace('%s',fmd.get('name')))) {
             self.Abort(false);
         }
     });
@@ -88,7 +88,9 @@ function ProgressBar(child, fmd, callback_func) {
     }
     return self;
 };
+//=============================================================================================
 // マルチファイルアップロード
+// 単独ファイルを複数同時にアップロード
 function UploadFiles(files,url, callback_func) {
     var self = this;
     var topBar = null;
@@ -108,18 +110,16 @@ function UploadFiles(files,url, callback_func) {
     };
     // ダイアログ以外をクリックさせないため壁をつくる
     var bk_panel = $('<div class="progress-BK"></div>');
-    // ダイアログボックス
     var dialog = $('<div class="progress-dialog"></div>').appendTo(bk_panel);
-    // メッセージ表示
-    var msg = $('<span></span>').appendTo(dialog);
-    // 進捗表示用のボックス
+    var upload_msg = $('<span></span>').appendTo(dialog);
     var obj = $('<div class="progress-box"></div>').appendTo(dialog);
-    // 残りメッセージをプロセスバーの後ろに表示
     var rest = $('<span class="message" id="upfiles"></span>').appendTo(dialog);
     // 中止ボタンを追加するためのバー
     var button_bar = $('<div class="buttonBar"></div>');
-    var cancel_close = $('<span class="button">${#core.Abort}</span>').appendTo(button_bar);
-    cancel_close.off().click(function () { topBar.Abort(true);});
+    var cancel_close = $('<span class="button">${#.core.ABORT}</span>').appendTo(button_bar);
+    cancel_close.off().click(function () {
+        topBar.Abort(true);
+    });
     dialog.append(button_bar);
     // プロセスバーのファイルリストを作成
     topBar = null;
@@ -144,7 +144,7 @@ function UploadFiles(files,url, callback_func) {
     }
     // メッセージ表示
     self.RestMessage = function (n) {
-        rest.text("${#core.RestFiiles}" + n);
+        rest.text("${#.core.RestFiiles}" + n);
     }
     // ダイアログを閉じる
     self.CloseDialog = function () {
@@ -152,26 +152,166 @@ function UploadFiles(files,url, callback_func) {
         bk_panel.remove();
     }
     self.CloseWait = function () {
+        $.busy_cursor(false);
         if (callback_func != undefined) callback_func(upload);
         if (!upload.abort) {
             self.CloseDialog();  // ABORTせずに完了したら即ダイアログを閉じる
         } else {
-            msg.text('${#core.AbortDone}'); // ABORTしていたら確認用に閉じるボタン表示
-            cancel_close.text('${#core.Close}').off().click(function () {
+            upload_msg.text('${#.core.AbortDone}'); // ABORTしていたら確認用に閉じるボタン表示
+            cancel_close.text('${#.core.Close}').off().click(function () {
                 self.CloseDialog();
             });
         }
     }
     // アップロード実行
-    msg.text('${#core.Uploading}');
+    upload_msg.text('${#.core.Uploading}');
     bk_panel.fadeIn('fast');
     self.RestMessage(upload.rest);
+    $.busy_cursor(true);
     topBar.AjaxStart(url);
 }
+//=============================================================================================
+// マルチペアファイルアップロード
+// ペアのファイルを個数制限付きでアップロード
+function PairUploadDialog(rec_num, files,url,callback_func) {
+    var self = this;
+    var upload = {      // calback_func に渡すオブジェクト
+        abort: false,
+        complete: 0,
+        total: files.length,
+        rest:  files.length,
+        result: function (ab) {
+            this.abort = this.abort || ab;
+            if (!ab) ++this.complete;
+            return --this.rest;
+        },
+        aborted: function () {
+            return (this.total - this.complete);
+        },
+    };
+    // ダイアログ以外をクリックさせないため壁をつくる
+    var bk_panel = $('<div class="progress-BK"></div>');
+    var dialog = $('<div class="progress-dialog"></div>').appendTo(bk_panel);
+    var upload_msg = $('<span></span>').appendTo(dialog);
+    // セカンドファイル名をセット
+    self.SecondFileName = function (obj, file, fname) {
+        fmsg = (file === undefined) ? "${#.core.ENTER}" :file.name;
+        ttl = fname.split(".").reverse().slice(1).reverse().join(".");
+        var cell = obj.find('td.second');
+        if (file === undefined) cell.addClass('error');
+        else cell.removeClass('error');
+        cell.html(fmsg);
+        obj.find('input[name=title]').val(ttl);
+    };
+    // プロセスバーのリスト生成
+    topBar = null;
+    for (var i = 0; i < files.length; ++i) {
+        var f = files[i];
+        var labels = "file_select_" + i;
+        var panel = $('<div class="files-pair" id="' + i + '"></div>').appendTo(dialog);;
+        var list = "${#.core.FILES}" + (i + 1) + "\
+        <table><tr>\
+        <th>${#.core.FIRSTFILE}</th><td class='first'>"+ f.name +"</td>\
+        <th class='labels'><label for='"+labels+"'>${#.core.SECONDFILE}<input type='file' id='"+labels+"' name='second_file'></label></th>\
+        <td class='second'></td></tr>\
+        <tr class='title_bar'><th>${#.core.UPTITLE}</th><td colspan=3>\
+        <input type='text' name='title' value=''></td>\
+        </tr></table>";
+        panel.append(list);
+        self.SecondFileName(panel, undefined, f.name);
+    }
+    // アップロードするファイルを選択
+    dialog.find('input[type=file]').change(function() {
+        var file = $(this).prop('files')[0];
+        var panel = $(this).closest('.files-pair');
+        i = panel.attr('id');
+        ref = (file === undefined) ? files[i] : file;
+        self.SecondFileName(panel, file, ref.name);
+    });
+    // 残りメッセージをプロセスバーの後ろに表示
+    var rest = $('<span class="message" id="upfiles"></span>').appendTo(dialog);
+    // 中止ボタンを追加するためのバー
+    var button_bar = $('<div class="buttonBar"></div>');
+    var send_abort = $('<span class="button">${#.core.SEND}</span>').appendTo(button_bar);
+    var cancel_close = $('<span class="button">${#.core.UNDO}</span>').appendTo(button_bar);
+    cancel_close.off().click(function () {
+        bk_panel.fadeOut("fast");
+        bk_panel.remove();
+    });
+    dialog.append(button_bar);
+    $('body').append(bk_panel);
+    // 送信実行
+    send_abort.off().click(function () {
+        var secondf_set = true;
+        $('.files-pair').each(function () {
+            var num = $(this).attr('id');
+            var ttl = $(this).find('input[name="title"]').val();
+            var ff2 = $(this).find('input[type=file]').prop('files')[0];
+            if (ff2 === undefined || ttl === "") {
+                msg = (ff2 === undefined) ? "${#.core.NO_SECOND}":"${#.core.NO_TITLE}";
+                alert(msg.replace('%s',files[num].name));
+                secondf_set = false;
+                return false;
+            }
+            var obj = new FormData();
+            obj.append('id', rec_num);  // レコードID
+            obj.append('num', num);     // 送信番号 0〜
+            obj.append('name', ttl);    // タイトル
+            obj.append('first', files[num]);    // ドロップファイル
+            obj.append('second',ff2);           // 2nd ファイル
+            obj.append('size', files[num].size + ff2.size);
+            var next = new ProgressBar(topBar,obj,function (aborted) {
+                if(upload.result(aborted) <= 0) self.CloseWait();;
+                self.RestMessage(upload.rest);
+            });
+            $(this).append(next.progress_Bar);
+            topBar = next;
+            $(this).find('.title_bar').css('display', 'none');
+            return true;
+        });
+        if (!secondf_set) return false;
+        if (topBar === null) {
+            self.CloseWait();
+            alert("FILES EMPTY!!");
+            return false;
+        }
+        upload_msg.text('${#.core.Uploading}');
+        self.RestMessage(upload.rest);
+        dialog.find('label').each(function () {
+            $(this).css('display', 'none'); // 押せないように消す
+            $(this).closest('th').html("${#.core.SECONDFILE}");
+        });
+        cancel_close.css('display', 'none');   // 押せないように消す
+        $(this).text('${#.core.ABORT}');     // 送信→中止ボタンに切替
+        $(this).off().click(function () {
+            self.topBar.Abort(true);
+            $(this).css('display', 'none'); // 押せないように消す
+        });
+        $.busy_cursor(true);
+        topBar.AjaxStart(url);
+    });
+    bk_panel.fadeIn('fast');
+    // 残りファイル数表示
+    self.RestMessage = function (n) {
+        rest.text("${#.core.RestFiiles}" + n);
+    }
+    self.CloseWait = function () {
+        $.busy_cursor(false);
+        if (callback_func != undefined) callback_func(upload);
+        if (!upload.abort) {
+            cancel_close.click();
+        } else {
+            upload_msg.text('${#.core.AbortDone}'); // ABORTしていたらメッセージを表示
+            send_abort.css('display', 'none');        // 送信/中止ボタンは押せないように消す
+            cancel_close.text('${#.core.Close}');      // 閉じるに変更
+            cancel_close.css('display', 'inline');     // 押せるように再表示
+        }
+    }
+}
+(function ($) {
 /* ===============================================
     ファイルを一つずつアップロードする
 */
-(function ($) {
 $.fn.dropfiles = function (uploadURL, callback) {
     var self = this;
     self.on({
@@ -195,6 +335,39 @@ $.fn.dropfiles = function (uploadURL, callback) {
             self.removeClass('drag-over');
             var files = e.originalEvent.dataTransfer.files;
             UploadFiles(files,uploadURL, callback);
+        },
+    });
+};
+/* ===============================================
+    ファイルを２つで一回のアップロードを実行する
+*/
+$.fn.dropfiles2 = function (rec_num,maxfiles,url, callback_func) {
+    var self = this;
+    self.on({
+        'dragenter': function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            self.addClass('drag-over');
+        },
+        'dragleave': function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            self.removeClass('drag-over');
+        },
+        'dragover': function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+        },
+        'drop': function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            self.removeClass('drag-over');
+            var files = e.originalEvent.dataTransfer.files;
+            if (files.length > maxfiles) {
+                alert("${#.core.MAXFILE}".replace('%d',maxfiles));
+                return false;
+            }
+            PairUploadDialog(rec_num,files, url,callback_func);
         },
     });
 };
