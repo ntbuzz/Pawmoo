@@ -118,7 +118,6 @@ function UploadFiles(files,url, callback_func) {
     var button_bar = $('<div class="buttonBar"></div>');
     var cancel_close = $('<span class="button">${#.core.ABORT}</span>').appendTo(button_bar);
     cancel_close.off().click(function () {
-        $.busy_cursor(false);
         topBar.Abort(true);
     });
     dialog.append(button_bar);
@@ -153,6 +152,7 @@ function UploadFiles(files,url, callback_func) {
         bk_panel.remove();
     }
     self.CloseWait = function () {
+        $.busy_cursor(false);
         if (callback_func != undefined) callback_func(upload);
         if (!upload.abort) {
             self.CloseDialog();  // ABORTせずに完了したら即ダイアログを閉じる
@@ -286,7 +286,6 @@ function PairUploadDialog(rec_num, files,url,callback_func) {
         $(this).off().click(function () {
             self.topBar.Abort(true);
             $(this).css('display', 'none'); // 押せないように消す
-            $.busy_cursor(false);
         });
         $.busy_cursor(true);
         topBar.AjaxStart(url);
@@ -297,6 +296,7 @@ function PairUploadDialog(rec_num, files,url,callback_func) {
         rest.text("${#.core.RestFiiles}" + n);
     }
     self.CloseWait = function () {
+        $.busy_cursor(false);
         if (callback_func != undefined) callback_func(upload);
         if (!upload.abort) {
             cancel_close.click();
