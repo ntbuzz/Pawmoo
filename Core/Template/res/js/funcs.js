@@ -85,7 +85,7 @@ SelectChain.prototype = {
     selfList: function (val,grp) {
         var self = this;
         self.my_obj.empty();
-        self.my_obj.append('<option value="0">${#core.SelectMe}</option>');
+        self.my_obj.append('<option value="0">${#.core.SelectMe}</option>');
         for (var i = 0; i < self.select_tag.length; i++) {
             var value = self.select_tag[i];
             if(value[2] == grp) {
