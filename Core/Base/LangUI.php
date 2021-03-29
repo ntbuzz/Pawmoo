@@ -70,12 +70,12 @@ public static function LangFiles($files) {
 //  言語ファイルの読み込み
 public static function LangDebug() {
     debug_log(DBMSG_LOCALE, [
-            "#LocalInfo" => [
-                'Locale' => static::$Locale,
-                'File'   => static::$LocaleFiles,
-                'Folder' => static::$LangDir,
-                'STRING' => static::$STRINGS,
-            ]]);
+		"#LocalInfo" => [
+			'Locale' => static::$Locale,
+			'File'   => static::$LocaleFiles,
+			'Folder' => static::$LangDir,
+			'STRING' => static::$STRINGS,
+		]]);
     }
 //==============================================================================
 //  セクション要素から空配列を削除する
