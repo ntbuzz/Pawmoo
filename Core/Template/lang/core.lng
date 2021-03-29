@@ -42,6 +42,7 @@
     CancelTitle => "送信を中止します"
     AbortDone   => "送信完了しました."
     MAXFILE     => "送信ァイルは %d 個までです"
+    BADFILE     => "'+','%','#' 文字を使用するとブラウザからダウンロードできなくなります！"
 ]
 .en => [
     // for Pager Buttons
@@ -82,6 +83,7 @@
     CancelTitle => "Send Abort"
     AbortDone   => "Send Complete."
     MAXFILE     => "Upload Max %d Files"
+    BADFILE     => "'+','%','#' chars used,Bad Download by WebBrowser!"
 ]
 
 SW開発 => [

@@ -61,7 +61,17 @@ function array_override($a, $b) {
     if(empty($b)) return $a;
     foreach($b as $key => $val) $a[$key] = $val;
     return $a;
-  }
+}
+//==============================================================================
+// alternative array_merge_recursive(), Overwrite existing index elements
+function array_override_recursive($a,$b) {
+    if(empty($b)) return $a;
+    if(is_scalar($a) || is_scalar($b)) return $b;
+    foreach($b as $key => $val) {
+        $a[$key] = (isset($a[$key])) ? array_override_recursive($a[$key],$val) : $val;
+    }
+    return $a;
+}
 //==============================================================================
 // text line split by NL char, and trim-space each line
 function text_line_array($del,$txt,$trim = FALSE) {

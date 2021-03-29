@@ -24,8 +24,6 @@ class LangUI {
 //==============================================================================
 //  言語ファイルの切替え
 public static function SwitchLangs($newlang) {
-    log_reset(DBMSG_LOCALE);
-    debug_log(DBMSG_LOCALE,["言語リスト" => $newlang]);
     $default = static::$LangDir;      // ロード先を保存
     $arr = array_unique(             // 重複行を取り除く
         array_filter(           // strlen を使って空行を取り除く
@@ -42,6 +40,11 @@ public static function SwitchLangs($newlang) {
     static::$Locale = ".{$langs}";            // 言語識別文字を付加
     static::$LocaleName = $langs;
     static::$STRINGS = [];
+    // ディレクトリが NULL ならログ処理の最中
+    if($default !== NULL) {
+        log_reset(DBMSG_LOCALE);
+        debug_log(DBMSG_LOCALE,["言語リスト" => $newlang]);
+    }
     // フレームワークの言語リソースを読込む
     static::$LangDir = 'Core/Template/lang/';
     self::LoadLang('core');
@@ -52,6 +55,7 @@ public static function SwitchLangs($newlang) {
 //==============================================================================
 //  言語ファイルの読み込み
 public static function LangFiles($files) {
+    if($files === NULL) return;
     if(is_array($files)) {          // 配列引数の時は各要素を言語ファイルとして処理
         foreach($files as $lang_file) {
             self::LoadLang($lang_file);
@@ -101,11 +105,11 @@ public static function LangDebug() {
             $values = [];           // ロケール定義
             foreach($section as $key => $val) {
                 if($key[0] == '@') {                // @以降の文字列をインポートリストに記憶しておき後で処理する
-                        $import[] = mb_substr($key,1);
+                    $import[] = mb_substr($key,1);
                 } else if($key[0] == '.') {        // ロケール定義
-                    if($key == static::$Locale) {         // モジュール名の直下に定義された言語
+                    if($key === static::$Locale) {         // モジュール名の直下に定義された言語
                         if(is_array($val)) {                           // ロケール定義配列になっていれば不要な言語を削除する
-                            $values = array_override($values,$val);   // 最上位にマージ
+                            $values = array_override_recursive($values,$val);   // 最上位にマージ
                         }
                     }
                 } else {
@@ -114,7 +118,7 @@ public static function LangDebug() {
                         foreach($val as $kk => $vv) {              // 識別子の子要素に言語キーがあるか探索する
                             if($kk[0] == '.') {
                                 if($kk == static::$Locale) {        // 識別子の下に定義された言語
-                                    $zz = (is_array($vv)) ? array_override($zz,$vv) : $vv;  // 配列ならマージスカラー要素ならそのまま
+                                    $zz = array_override_recursive($zz,$vv);  // 配列ならマージスカラー要素ならそのまま
                                 }
                             } else {
                                 $zz[$kk] = $vv;                     // 言語依存しない定義
@@ -123,7 +127,7 @@ public static function LangDebug() {
                     } else $zz = $val;
                     if($key[0] == '#') {       // グローバルIDの登録
                         $kk = mb_substr($key,1);
-                        if(!empty($zz)) static::$STRINGS[$kk] = $zz;
+                        static::$STRINGS[$kk] = array_override_recursive(static::$STRINGS[$kk],$zz);
                     } else {
                         $values[$key] = $zz;
                     }
@@ -131,7 +135,7 @@ public static function LangDebug() {
             }
             $values = self::emptyDelete($values);      // 空の要素を削除する
             if($is_global) {        // ファイル名がグローバル宣言ならトップレベルにマージする
-                static::$STRINGS = array_override(static::$STRINGS,$values);   // 同じIDは上書き
+                static::$STRINGS = array_override_recursive(static::$STRINGS,$values);   // 同じIDは上書き
             } else {
                 static::$STRINGS[$lang_file] = $values;       // ファイル名をキーに言語配列
             }
@@ -145,7 +149,7 @@ public static function LangDebug() {
             unset($section);
             return TRUE;
         } else {
-            debug_log(DBMSG_LOCALE,"UNDEFINED : {$lang_file}.lng\n");
+            debug_log(DBMSG_LOCALE,"UNDEFINED : {$lang_file}.lng");
         }
         return FALSE;
     }
