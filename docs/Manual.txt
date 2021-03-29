@@ -1324,42 +1324,43 @@
 
 ・配列操作
   array_override($a, $b)                array_merge() の代替え、無名要素も上書きする
+  array_override_recursive($a, $b)      array_merge_recursive() の代替え、同名要素を上書き
   text_line_array($del,$txt [,$trim])   テキストを配列に変換 $trimがTRUEなら空行削除
   array_to_text($array,$sep = "\n")     配列要素を改行テキストに変換
   array_member_value($array,$names)     構造化名(.)による多次元連想配列要素の参照
 
  ◆ Javascript関数
-  Javascriptで使用できるプロトタイプ関数の一覧です。
+  Javascriptで使用できるオブジェクト関数の一覧です。
 
 ・フレームワークのパス関連クラス
-    Locations.query()                 クエリ文字列
-    Locations.last_path()             パスの最後
-    Locations.fw_fullpath()           http:// で始まるフルパス変換
-    Locations.set_query(string)       クエリ文字列の設定
-    Locations.href_controller(array)  コントローラーパス以降を配列値で置換したURL
-    Locations.href_action(array)      アクションパス以降を配列値で置換したURL
-    Locations.href_filter(array)      コントローラーパス以降を配列値で置換したURL
-    Locations.href_param(array)       パラメータパス以降を配列値で置換したURL
-    Locations.href_number(array)      数値パス以降を配列値で置換したURL
+    pfLocations.query()                   クエリ文字列
+    pfLocations.set_query(string)         クエリ文字列の設定
+    pfLocations.last_item(n)              パスの最後からN番目を返す
+    pfLocations.fullpath(url)             フレームワークURLをhttp:// で始まるフルパス変換
+    pfLocations.cont_path(array,isnum)    コントローラーパス以降を配列値で置換したURL
+                                          isnum(省略可) が true なら現在のパラメータパスを付加
+    pfLocations.act_path(array,isnum)     アクションパス以降を配列値で置換したURL
+    pfLocations.filter_path(array,isnum)  コントローラーパス以降を配列値で置換したURL
+    pfLocations.href_param(array)         パラメータパス以降を配列値で置換したURL
 
  ◆ JQueryプラグイン
   JQueryのプラグインとして使用できる関数
 
-  ・スクロールを固定する
+・スクロールを固定する
     (セレクタ).stickyOn(親オブジェクト);
   「stickyBar」クラスを付加したときと同じですが、動的読み込みしたコンテンツ内で使います。
 
-  ・要素の幅・高さを最大値に調整します。
+・要素の幅・高さを最大値に調整します。
     (セレクタ).adjustWindow();          親要素の高さに調整する
   「fitWindow」クラスを付加したときと同じですが、動的読み込みしたコンテンツ内で使います。
 
-  ・フローティングウィンドウを開く
+・フローティングウィンドウを開く
     (セレクタ).floatWindow(タイトル, JSON, コールバック関数);
 
-  ・Yes/No ボタン付きのダイアログボックスを開く
+・Yes/No ボタン付きのダイアログボックスを開く
     $.dialogBox(タイトル,メッセージ, コールバック関数);
 
-  ・プルダウンセレクトの連動
+・プルダウンセレクトの連動
     (セレクタ).ChainSelect(セレクトテーブル,初期選択値)
       セレクトテーブルはチェインリストで定義します
         セレクト名: [
@@ -1388,3 +1389,32 @@
       
 	        OS名:      <select class="os-select" id="top-level" name="os_id" data-ekenebt="next-level"></select>
 	    プロダクトキー: <select class="license-select" id="next-level" name="license_id"></select>
+
+・ドラッグドロップアップロード
+	(セレクタ).dropfiles(uploadURL, callback_func)
+	(セレクタ).dropfiles2(maxfiles,uploadURL,callback_func)
+	
+	セレクタのタグにドラッグドロップされたファイルをアップロードします。
+	dropfiles2() はドロップされたファイルとペアになるファイルのダイアログを表示し、
+	リンク用のタイトル文字列を入力することができるダイアログを表示します。
+	また送信できるペアのファイルの最大数を指定できます。０を指定すると制限はチェックしません。
+	ダイアログに表示されるボタンやラベル名は言語リソースにより上書きすることができます。
+	モジュールの言語リソースに[core]セクションを作成し、必要な識別子を上書きしてください。
+
+      .core.SEND		  => 送信
+      .core.UNDO        => 取消
+      .core.ABORT       => "中止"
+      .core.Close       => 閉じる
+      .core.FILES       => "送信ファイル:"
+      .core.Uploading   => "ファイルをアップロード中..."
+      .core.RestFiiles  => "残り: "
+      .core.CancelTitle => "送信を中止します"
+      .core.AbortDone   => "送信完了しました."
+      .core.Confirm     => "'%s' の送信を中止しますか"
+      .core.FIRSTFILE   => "1st"
+      .core.SECONDFILE  => "2nd"
+      .core.UPTITLE     => "タイトル"
+      .core.ENTER       => "2ndファイルを登録してください"
+      .core.NO_SECOND   => "'%s' の2ndファイルが未登録です"
+      .core.NO_TITLE    => "'%s' のタイトルが未入力です"
+      .core.MAXFILE     => "送信ァイルは %d 個までです"

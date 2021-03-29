@@ -1,7 +1,8 @@
 //===============================================
 // アップロード処理のプログレスバーチェイン
 // FormData(fmd) の中に複数のfileが定義可能
-function ProgressBar(child, fmd, callback_func) {
+// name,size 引数は IE11 対策
+function ProgressBar(child, fmd, name,size,callback_func) {
     var self = this;
     self.child_link = child;
     self.Aborted = false;
@@ -13,12 +14,12 @@ function ProgressBar(child, fmd, callback_func) {
     self.FileSize = $('<span class="filesize right"></span>').appendTo(self.progressPanel);
     self.gainBar = $('<div class="progress-gain"></div>').appendTo(self.progressPanel);
     self.Cancel.click(function () {
-        if (confirm("${#.core.Confirm}".replace('%s',fmd.get('name')))) {
+        if (confirm("${#.core.Confirm}".replace('%s',name))) { // fmd.get('name')))) {
             self.Abort(false);
         }
     });
     // ファイル情報を表示
-    sz = fmd.get('size');
+    sz = size;  // fmd.get('size');
     if (sz>0) {
         for (i = 0; sz > 1024; i += 3, sz /= 1024) ;
         szStr = sz.toFixed(2) +" B  KB MB GB TB PB".substr(i,3);
@@ -31,7 +32,7 @@ function ProgressBar(child, fmd, callback_func) {
         self.Aborted = true;
     }
     self.FileSize.html(szStr);
-    self.FileName.html(fmd.get('name'));
+    self.FileName.html(name);//fmd.get('name'));
     // 完了処理
     self.Finished = function (aborted) {
         self.Cancel.css('display','none');
@@ -128,7 +129,7 @@ function UploadFiles(files,url, callback_func) {
         form.append('name', files[i].name);
         form.append('file', files[i]);
         form.append('size', files[i].size);
-        var next = new ProgressBar(topBar,form,function (aborted) {
+        var next = new ProgressBar(topBar,form,files[i].name,files[i].size,function (aborted) {
             // 中止または完了時の処理
             if(upload.result(aborted) <= 0) self.CloseWait();;
             self.RestMessage(upload.rest);
@@ -173,7 +174,7 @@ function UploadFiles(files,url, callback_func) {
 //=============================================================================================
 // マルチペアファイルアップロード
 // ペアのファイルを個数制限付きでアップロード
-function PairUploadDialog(rec_num, files,url,callback_func) {
+function PairUploadDialog(files,url,callback_func) {
     var self = this;
     var upload = {      // calback_func に渡すオブジェクト
         abort: false,
@@ -196,6 +197,7 @@ function PairUploadDialog(rec_num, files,url,callback_func) {
     // セカンドファイル名をセット
     self.SecondFileName = function (obj, file, fname) {
         fmsg = (file === undefined) ? "${#.core.ENTER}" :file.name;
+        if (file !== undefined && fmsg.is_invalid_name()) alert("${#.core.BADFILE}");
         ttl = fname.split(".").reverse().slice(1).reverse().join(".");
         var cell = obj.find('td.second');
         if (file === undefined) cell.addClass('error');
@@ -204,7 +206,6 @@ function PairUploadDialog(rec_num, files,url,callback_func) {
         obj.find('input[name=title]').val(ttl);
     };
     // プロセスバーのリスト生成
-    topBar = null;
     for (var i = 0; i < files.length; ++i) {
         var f = files[i];
         var labels = "file_select_" + i;
@@ -253,14 +254,22 @@ function PairUploadDialog(rec_num, files,url,callback_func) {
                 secondf_set = false;
                 return false;
             }
+            return true;
+        });
+        if (!secondf_set) return false;
+        // ２回目のループはチェック済の状態
+        topBar = null;
+        $('.files-pair').each(function () {
+            var num = $(this).attr('id');
+            var ttl = $(this).find('input[name="title"]').val();
+            var ff2 = $(this).find('input[type=file]').prop('files')[0];
             var obj = new FormData();
-            obj.append('id', rec_num);  // レコードID
             obj.append('num', num);     // 送信番号 0〜
             obj.append('name', ttl);    // タイトル
             obj.append('first', files[num]);    // ドロップファイル
             obj.append('second',ff2);           // 2nd ファイル
             obj.append('size', files[num].size + ff2.size);
-            var next = new ProgressBar(topBar,obj,function (aborted) {
+            var next = new ProgressBar(topBar,obj,ttl,files[num].size + ff2.size,function (aborted) {
                 if(upload.result(aborted) <= 0) self.CloseWait();;
                 self.RestMessage(upload.rest);
             });
@@ -269,7 +278,6 @@ function PairUploadDialog(rec_num, files,url,callback_func) {
             $(this).find('.title_bar').css('display', 'none');
             return true;
         });
-        if (!secondf_set) return false;
         if (topBar === null) {
             self.CloseWait();
             alert("FILES EMPTY!!");
@@ -308,6 +316,19 @@ function PairUploadDialog(rec_num, files,url,callback_func) {
         }
     }
 }
+//----------------------------------
+function isFileCharsetOK(files) {
+    for (var i = 0; i < files.length; ++i) {
+        fname = files[i].name;
+        // URL禁則文字のチェック
+        if (fname.is_invalid_name()) {
+            if (confirm("${#.core.BADFILE}")) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
 (function ($) {
 /* ===============================================
     ファイルを一つずつアップロードする
@@ -334,14 +355,14 @@ $.fn.dropfiles = function (uploadURL, callback) {
             e.preventDefault();
             self.removeClass('drag-over');
             var files = e.originalEvent.dataTransfer.files;
-            UploadFiles(files,uploadURL, callback);
+            if(isFileCharsetOK(files)) UploadFiles(files,uploadURL, callback);
         },
     });
 };
 /* ===============================================
     ファイルを２つで一回のアップロードを実行する
 */
-$.fn.dropfiles2 = function (rec_num,maxfiles,url, callback_func) {
+$.fn.dropfiles2 = function (maxfiles,url, callback_func) {
     var self = this;
     self.on({
         'dragenter': function (e) {
@@ -363,11 +384,11 @@ $.fn.dropfiles2 = function (rec_num,maxfiles,url, callback_func) {
             e.preventDefault();
             self.removeClass('drag-over');
             var files = e.originalEvent.dataTransfer.files;
-            if (files.length > maxfiles) {
+            if (maxfiles>0  && files.length > maxfiles) {
                 alert("${#.core.MAXFILE}".replace('%d',maxfiles));
                 return false;
             }
-            PairUploadDialog(rec_num,files, url,callback_func);
+            if(isFileCharsetOK(files)) PairUploadDialog(files, url,callback_func);
         },
     });
 };

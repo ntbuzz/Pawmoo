@@ -20,6 +20,7 @@ parse_str($q_str, $query);
 // URI: /logs/appname
 list($appname,$files) = $module;
 MySession::InitSession($appname);
+$debug_logs = get_debug_logs(); // 他のモジュールで上書きされる前にログ取得
 // 言語ファイルの対応
 if(array_key_exists('lang', $query)) {
     $lang = $query['lang'];
@@ -35,9 +36,8 @@ LangUI::construct($lang,NULL,NULL);    // Load CORE lang ONLY
 <?php
     $level_msg = LangUI::get_value(NULL,"debug.Level");
     $category_msg = LangUI::get_value(NULL,"debug.Level.Category",TRUE);
-    $debug_log_str = get_debug_logs();
-    if(!empty($debug_log_str)) {
-        foreach($debug_log_str as $key => $msg) {
+    if(!empty($debug_logs)) {
+        foreach($debug_logs as $key => $msg) {
             $title = (isset($category_msg[$key])) ? $category_msg[$key]:"{$level_msg}:{$key}";
             echo "<li>{$title}</li>\n";
         }
@@ -46,8 +46,8 @@ LangUI::construct($lang,NULL,NULL);    // Load CORE lang ONLY
         echo "</div>\n";
         echo "<div class='debug-panel'>\n";
         echo "<ul class='dbcontent'>\n";
-        if($debug_log_str !== NULL)
-        foreach($debug_log_str as $key => $msg) {
+        if($debug_logs !== NULL)
+        foreach($debug_logs as $key => $msg) {
             echo "<li><div class=\"debug_srcollbox\">\n";
             $msg = htmlspecialchars($msg);
             echo "<pre>\n{$msg}\n</pre>\n";

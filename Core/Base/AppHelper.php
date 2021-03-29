@@ -253,8 +253,8 @@ public function Form($act, $attr) {
 	if ($act[0] !== '/') $act = App::Get_AppRoot($act,TRUE);
 	$arg = '';
 	foreach($attr as $key => $val) {
-			$arg .= $key .'="' . $val . '"';
-}
+		$arg .= $key .'="' . $val . '"';
+	}
 	echo '<form action="' . $act . '" ' . $arg . '>';
 }
 //==============================================================================

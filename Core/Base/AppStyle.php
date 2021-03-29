@@ -76,7 +76,7 @@ class AppStyle {
             'SYSROOT' => $sysRoot,
             'APPROOT' => $appRoot,
             'appName' => $appname,
-            'controller' => $this->ModuleName,
+            'controller' => strtolower($this->ModuleName),
             'filename' => $filename,
             'extension' => $ext,
         );

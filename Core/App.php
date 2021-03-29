@@ -52,8 +52,8 @@ class App {
             'SYSROOT' => static::$sysRoot,
             'APPNAME' => static::$AppName,
             'APPROOT' => static::$appRoot,
-            'controller' => $controller,  //ucfirst($uri_array[2]),
-            'method' => $method,  //ucfirst($uri_array[3]),
+            'controller' => strtolower($controller),  //ucfirst($uri_array[2]),
+            'method' => strtolower($method),  //ucfirst($uri_array[3]),
             'filter' => static::$Filter,  // ucfirst(static::$Filter),
             'params' => static::$Params,
 
@@ -63,8 +63,8 @@ class App {
         static::$ReLocate = FALSE;        // URLの書き換え
         static::$execURI = array(
             'root' => static::$appRoot,
-            'controller' => $controller,
-            'method' => $method,
+            'controller' => strtolower($controller),  //ucfirst($uri_array[2]),
+            'method' => strtolower($method),  //ucfirst($uri_array[3]),
             'filter' => $filters,
             'params' => static::$Params,
             );
