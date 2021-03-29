@@ -5,34 +5,33 @@ String.prototype.trim2 = function() {
     return this.replace(/^[\s　]+|[\s　]+$/g, '');
 };
 //====================================================
+// ファイル名にURL-NGの文字があるか
+String.prototype.is_invalid_name = function () {
+    return (this.match(/^.*[\+%#].*?$/));
+};
+//====================================================
 // customize location object class for this framework
 const LOC_FULL      = 3;     // :url     http://host/url
 const LOC_SYS       = 2;     // /url     http://host/sysRoot/url
 const LOC_APPNEW    = 1;     // ./url    http://host/appRoot/url
 const LOC_APPSELF = 0;     // url .url http://host/appRoot/url
-// IEのために prototype ベースで実装
-var Locations = function (url) {
-    if (url == undefined) url = location.href;
-    var path = url.replace(/%3F/g, '?').split('?');
-    this.url = path[0];
-    this.qstr = (path.length == 1) ? '' : path[1];
-    this.base = location.origin;
-    this.array = this.url.replace(/^[\/]+|[\/]+$/g, '').split('/');
-    if (this.array[0] == "http:" || this.array[0] == "https:") {
-        this.base = this.array.slice(0, 3).join("/");
-        this.array = this.array.slice(3);
-        this.url = this.array.join("/") + "/";
-    }
-    var cont = "${$controller$}".toLowerCase();
-    if (this.array[1] != cont) this.array.splice(1, 0, cont);      // controller name compensate
-};
-Locations.prototype = {
-    query: function () { return (this.qstr == "") ? "" : "?" + this.qstr; },
-    set_query: function (q) { this.qstr = q; },
-    last_path: function () { return this.array[this.array.length - 2]; },
-    fw_fullpath: function () {
-        this.type = "./:".indexOf(this.url.charAt(0)) + 1;
-        var path = (this.type == 0) ? this.url : this.url.slice(1);
+//=====================================================
+// URIの操作
+function PawmooLocations() {
+    this.protocol = location.protocol;
+    this.host = location.host;
+    this.qstr = location.search;
+    this.items = location.pathname.replace(/^[\/]+|[\/]+$/g, '').split('/');
+    var cont = "${$controller$}";
+    if (this.items[1] !== cont) this.items.splice(1, 0, cont);      // controller name compensate
+//    alert("Pawmoo:" + cont+"\n"+objDump(this.items));
+    //
+    this.query = function () { return (this.qstr == "") ? "" : "?" + this.qstr; };
+    this.set_query = function (q) { this.query = q; };
+    this.last_item = function (n) { return this.items[this.items.length - n]; };
+    this.fullpath = function (url) {
+        this.type = "./:".indexOf(url.charAt(0)) + 1;
+        var path = (this.type == 0) ? url : url.slice(1);
         switch (this.type) {
             case 1:
                 if (path.charAt(0) == '/') path = path.slice(1);
@@ -42,27 +41,26 @@ Locations.prototype = {
             case 3: path = "/" + path; break;
         }
         return this.base + path;
-    },
-    trunc_path: function (n, e) {
-        for (var i = 0; i < e.length; i++) this.array[n + i] = e[i];
+    };
+    this.trunc_path = function (n, e, is_num) {
+        var path = this.items;
+        if (is_num === true) {
+            for (var i = path.length; (i > 1) && (!isNaN(path[i - 1])); --i);
+            nums = "/" + path.slice(i).join("/");
+        } else nums = "";
+        for (var i = 0; i < e.length; i++) path[n + i] = e[i];
         n = n + e.length;
-        return "/" + this.array.slice(0, n).join("/") + this.query();
-    },
-    href_controller: function (e) { return this.trunc_path(1, e); },
-    href_action: function (e) { return this.trunc_path(2, e); },
-    href_filter: function (e) { return this.trunc_path(3, e); },
-    href_param: function (e) { return this.trunc_path(4, e); },
-    href_number: function (e) {
-        var path = this.array;
-        for (var n = path.length; (n > 1) && (!isNaN(path[n - 1])); --n);
-        return this.trunc_path(n, e);
-    },
-    params_path: function (e) {
-        var path = this.array;
-        for (var n = path.length; (n > 1) && (!isNaN(path[n - 1])); --n);
-        return path.slice(n).join("/");
-    },
-};
+        return "/" + path.slice(0, n).join("/") + nums + this.query();
+    };
+    this.cont_path = function (e, isnum) { return this.trunc_path(1, e, isnum); };
+    this.act_path = function (e, isnum) { return this.trunc_path(2, e, isnum); };
+    this.filter_path = function (e, isnum) { return this.trunc_path(3, e, isnum); };
+    this.param_path = function (e) {
+        var path = this.items;
+        for (var n=0; (n < path.length) && (isNaN(path[n])); ++n);
+        return this.trunc_path(n,e,false);
+    };
+}
 //===============================================
 // ネスティッド SELECT
 // IEのために class でなく prototype ベースで実装
@@ -153,6 +151,10 @@ var objDump = function(obj, rIndent) {
      result = String(result);
      return result;
 };
+//====================================================
 function DebugSlider() {
     if (typeof LoadDebugBar == "function") LoadDebugBar();
 }
+//====================================================
+// platform Location Object
+var pfLocation = new PawmooLocations();

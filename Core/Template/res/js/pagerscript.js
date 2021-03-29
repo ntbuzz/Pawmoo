@@ -4,12 +4,10 @@
 */
     $(".pager .jump,.move").off().click(function () {
         var pg = $(this).attr("value"); // ページサイズ
-        var loc = new Locations();
-        location.href = loc.href_number([pg]);
+        location.href = pfLocation.param_path([pg]);
     });
 
     $(".pager #pagesize").change(function() {
-        var loc = new Locations();
-        location.href = loc.href_number([1,$(this).val()]);
+        location.href = pfLocation.param_path([1,$(this).val()]);
     });
 
