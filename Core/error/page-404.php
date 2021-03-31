@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
 <link rel='stylesheet' href='/res/css/errmsg.css' />
 </head>

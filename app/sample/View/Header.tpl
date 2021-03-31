@@ -1,6 +1,6 @@
 // アプリ共通ヘッダ
 <!DOCTYPE html>
-<html>
+<html lang="${'Login.LANG'}">
 '* ${#HEADER}アプリ共通ヘッダー'
 
 head => [

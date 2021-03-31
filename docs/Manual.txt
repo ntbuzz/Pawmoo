@@ -650,7 +650,7 @@
         [ list-section ],           　    配列要素：　セクション項目
         .XXXX#DDDD => [ list-section ]    クラス名(XXXX)、ID名(DDDD)付のリストセクション項目
   +select => [                            SELECTタグ専用のリスト出力
-    selected_key = > [                    連想キーは初期選択するアイテム名
+    selected_key. = > [                    連想キーは初期選択するアイテム名
       option_text => value                選択テキストと値のペアリスト
     ...   ]
   +table => [                             TABLEタグ専用の出力

@@ -54,6 +54,7 @@ class App {
             'APPROOT' => static::$appRoot,
             'controller' => strtolower($controller),  //ucfirst($uri_array[2]),
             'method' => strtolower($method),  //ucfirst($uri_array[3]),
+            'extention' => static::$MethodExtention,
             'filter' => static::$Filter,  // ucfirst(static::$Filter),
             'params' => static::$Params,
 
@@ -75,7 +76,7 @@ class App {
 // メソッドの置換
 public static function ChangeMethod($module,$method,$relocate = TRUE) { 
     static::$execURI['controller'] = $module;
-    static::$execURI['method'] = $method;
+    static::$execURI['method'] = strtolower($method);
     static::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================
@@ -88,7 +89,11 @@ public static function ChangeParams($params,$relocate = TRUE) {
 // メソッドの置換
 public static function Get_RelocateURL($force=FALSE) { 
     if(static::$ReLocate === FALSE && $force===FALSE) return NULL;
-    $url = array_to_URI(static::$execURI);
+	if(static::$MethodExtention !== FALSE) {
+		$execurl = array_filter(static::$execURI,function($v,$k) { return ($k !== "method");},ARRAY_FILTER_USE_BOTH);
+		$execurl[] = static::$execURI['method'] . "." . static::$MethodExtention;
+	} else 	$execurl = static::$execURI;
+    $url = array_to_URI($execurl);
     if(!empty(static::$Query)) {                  // exists QUERY strings
         $q = http_build_query(static::$Query);
         $url = "{$url}?{$q}";
