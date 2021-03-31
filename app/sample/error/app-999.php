@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
 <title><?= $page_title ?></title>
 <link rel='stylesheet' href='/res/css/errmsg.css' />

@@ -34,13 +34,13 @@ function PawmooLocations() {
         var path = (this.type == 0) ? url : url.slice(1);
         switch (this.type) {
             case 1:
-                if (path.charAt(0) == '/') path = path.slice(1);
+                if (path.charAt(0) === '/') path = path.slice(1);
                 else this.type = 0;
             case 0: path = "${$APPROOT$}" + path; break;
             case 2: path = "${$SYSROOT$}" + path; break;
             case 3: path = "/" + path; break;
         }
-        return this.base + path;
+        return  path+"/";
     };
     this.trunc_path = function (n, e, is_num) {
         var path = this.items;

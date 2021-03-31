@@ -94,9 +94,9 @@ $ReqCont = [
 $requrl = array_to_URI($ReqCont);
 if($redirect) {
     if(CLI_DEBUG) {
-        echo "Location:{$requrl}\n";
+        echo "Location:{$requrl}/";
     } else {
-        header("Location:{$requrl}");
+        header("Location:{$requrl}/");
     }
     exit;
 }

@@ -85,10 +85,7 @@ public function PutLayout($layout = NULL) {
 //==============================================================================
 // Terminate Response,
 public function __TerminateView() {
-    if($this->doTrailer) {
-        $tmplate = $this->get_TemplateName('Trailer');
-        $Helper = $this->Helper;
-        if($tmplate !== NULL) require_once ($tmplate);
+    if($this->doTrailer === TRUE) {
         // Do Replacement ADDRESS-BAR in Browser
         $url = App::Get_RelocateURL();
         if(isset($url)) {
@@ -97,6 +94,9 @@ public function __TerminateView() {
         }
         if( is_bool_false(MySession::get_paramIDs('debugger'))) return;
         $this->ViewTemplate('debugbar');
+        $tmplate = $this->get_TemplateName('Trailer');
+        $Helper = $this->Helper;
+        if($tmplate !== NULL) require_once ($tmplate);
     }
 }
 //==============================================================================
@@ -733,7 +733,7 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
     }
     //--------------------------------------------------------------------------
     //  select OUTPUT
-    // +select => [ selected_key = > [
+    // +select => [ selected_key. = > [
     //      option_text => value
     //      ...
     //  ] ]
@@ -743,6 +743,7 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<{$tag}{$attr}>\n";
         list($opt_key, $opt_val) = array_first_item($sec);
+		if(mb_substr($opt_key,-1)==='.') $opt_key = rtrim($opt_key,'.');
         $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
         $opt_val = $this->expand_SectionVar($opt_val,$vars);
         if(is_array($opt_val)) {
@@ -826,7 +827,7 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         if(!empty($innerText)) $attrs['value'] = $innerText;
         $attr = $this->gen_Attrs($attrs,$vars);
-        echo "<INPUT TYPE='text'{$attr}'>\n";
+        echo "<INPUT TYPE='text'{$attr}>\n";
     }
     //--------------------------------------------------------------------------
     //  INPUT RADIO OUTPUT
@@ -845,9 +846,9 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
             $opt_val = array_flat_reduce($opt_val);
             foreach($opt_val as $opt => $val) {
                 $sel = ($val == $sel_item) ? ' checked':'';
-                echo "{$tags} value='{$val}'{$sel}>{$opt}\n";
+                echo "<label>{$tags} value='{$val}'{$sel}>{$opt}</label>\n";
             }
-        } else echo "{$tags} value='{$opt_val}'>{$opt_val}\n";
+        } else echo "<label>{$tags} value='{$opt_val}'>{$opt_val}</label>\n";
     }
     //--------------------------------------------------------------------------
     //  INPUT CHECKBOX OUTPUT
@@ -883,12 +884,12 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         $tags = "<INPUT TYPE='checkbox'{$attr}";
         if(array_key_exists('name',$attrs)) {   // FORMAT-I
             $item = $check_item($sec);
-            echo "{$tags}{$item}\n";
+            echo "<label>{$tags}{$item}</label>\n";
         } else {            // FORMAT-II
             foreach($sec as $key => $val) {
                 if(!is_numeric($key)) {
                     $item = $check_item($val);
-                    echo "{$tags} name='{$key}'{$item}\n";
+                    echo "<label>{$tags} name='{$key}'{$item}</label>\n";
                 }
             }
         }

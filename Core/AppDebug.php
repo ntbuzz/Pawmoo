@@ -163,9 +163,9 @@ function debug_log($lvl,...$items) {
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
         switch($lvl) {
-        case DBMSG_DIE:     die("<pre>\n{$dmp_info}\n</pre>\n");
-        case DBMSG_DUMP:    echo "<pre>\n{$dmp_info}\n</pre>\n"; break;
-        case DBMSG_NOLOG:   // $lvl < 0
+        case -DBMSG_DIE:     die("<pre>\n{$dmp_info}\n</pre>\n");
+        case -DBMSG_DUMP:    echo "<pre>\n{$dmp_info}\n</pre>\n"; break;
+        case -DBMSG_NOLOG:   // $lvl < 0
         default:
             if((-DBMSG_LEVEL < $lvl && $lvl < 0) || (CLI_DEBUG && $cli !== 0)) {
                 echo "{$dmp_info}\n";
