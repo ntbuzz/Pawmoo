@@ -93,7 +93,7 @@ public static function Get_RelocateURL($force=FALSE) {
 		$execurl = array_filter(static::$execURI,function($v,$k) { return ($k !== "method");},ARRAY_FILTER_USE_BOTH);
 		$execurl[] = static::$execURI['method'] . "." . static::$MethodExtention;
 	} else 	$execurl = static::$execURI;
-    $url = array_to_URI(execurl);
+    $url = array_to_URI($execurl);
     if(!empty(static::$Query)) {                  // exists QUERY strings
         $q = http_build_query(static::$Query);
         $url = "{$url}?{$q}";
