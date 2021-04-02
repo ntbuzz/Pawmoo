@@ -1,0 +1,93 @@
+
+.dialog-BK {
+    z-index:1;
+    position:fixed;
+    display:none;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;/*for old Safari*/
+    height:100vh;
+    background-color:rgba(200,200,200,0.75);
+}
+.dialog-BK * {
+	margin:0;
+	padding:0;
+}
+.checklist-dialog {
+    position: absolute;
+    display:block;
+    padding:0 10px;
+    overflow: hidden;
+    margin-right: auto;
+    border:2px solid black;
+    border-radius: 15px;
+    background-color:white;
+	box-shadow: 1px 1px 2px gray;
+}
+.checklist-dialog ul {
+	top:0;
+	left:0;
+	display:block;
+	list-style: none;
+	margin-bottom:10px;
+}
+.checklist-dialog ul.col2 { column-count: 2; }
+.checklist-dialog ul.col3 { column-count: 3; }
+.checklist-dialog ul.col4 { column-count: 4; }
+.checklist-dialog ul.col5 { column-count: 5; }
+.checklist-dialog ul.col6 { column-count: 6; }
+.checklist-dialog ul.col7 { column-count: 7; }
+.checklist-dialog ul.col8 { column-count: 8; }
+.checklist-dialog ul.col9 { column-count: 9; }
+.checklist-dialog input.multi-check { margin-right:2px; }	/* 見た目の調整 */
+
+.checklist-dialog .buttonBar {
+    text-align:right;
+    width:100%;
+    height:auto;
+	border-bottom:1px solid black;
+	margin:5px 15px 5px 0;
+}
+.checklist-dialog .wbutton {
+	display:block;
+	width:120%;
+	left:-10%;
+	text-align:center;
+	cursor:pointer;
+	padding:3px;
+	box-shadow: 1px 1px 2px #E7E7E7;
+    background: linear-gradient(to bottom, silver, yellow);
+}
+/*
+.pulldown-label {
+	display:flex;
+	width:100%;
+	text-align: right;
+}
+*/
+.pulldown-label > span {
+	position:absolute;
+	right:0;
+	width:1.2em;
+	cursor:pointer;
+	margin:2px;
+	box-shadow: 1px 1px 2px #E7E7E7;
+    background: linear-gradient(to bottom, silver,gray);
+	text-align:center;
+}
+.pulldown-label > span:after {content:"▼";}
+/*
+.pulldown-button {
+	position:absolute;
+	right:0;
+	width:1.2em;
+	cursor:pointer;
+	margin:2px;
+	box-shadow: 1px 1px 2px #E7E7E7;
+    background: linear-gradient(to bottom, silver,gray);
+	text-align:center;
+}
+.pulldown-button:after {content:"▼";}
+*/
+.pulldown-label:after {content:"チェックリスト";}

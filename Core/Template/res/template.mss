@@ -17,6 +17,18 @@ Stylesheet => [
             @debugger:debugbar.css   // use DEBUGGER,if AppData['debugger'] in SESSION is not FLASE
         ]
     ]
+    checklist => [			// debug
+        +import => [
+            libstyle.css
+            context.css
+            floatwin.css
+            markdown.css
+            pagerstyle.css
+            popup.css
+			checklist.css
+            debugbar.css
+        ]
+    ]
 ]
 // =====================================================
 // javascript SECTION
@@ -36,4 +48,11 @@ Javascript => [
             window.js               // JQuery-Plugins
         ]
     ]
+    checklist => [			// debug
+        +import => [
+			checklist.js
+            funcs.js
+            window.js
+        ]
+	]
 ]

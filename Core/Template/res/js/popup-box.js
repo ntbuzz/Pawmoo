@@ -53,8 +53,6 @@ selector.each(function () {
                     self.css('height', h+ 'px');
                 }
             }
-            // マウス移動の範囲を配列に記憶する
-            var bound = [ x, y, self.width(), self.height() ];
             self.css({'left': x + 'px','top': y + 'px'});
             self.fadeIn('fast');
             // クローズイベントを登録

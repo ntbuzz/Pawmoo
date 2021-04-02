@@ -16,6 +16,7 @@ require_once('Core/Handler/NullHandler.php');
 //==============================================================================
 // field ALIAS and BIND-columns class
 class fieldAlias {
+	public $lang_alternate = FALSE;			// use origin field, when lang field empty
 	private	$lang_alias = [];
     private	$bind_columns = [];
 //==============================================================================
@@ -63,7 +64,7 @@ public function get_lang_alias($field_name) {
 // ALIAS fields replace to standard field, and BIND-column to record field
 public function to_lang_alias(&$row) {
     foreach($this->lang_alias as $key => $lang) {
-        if(!empty($row[$lang])) $row[$key] = $row[$lang];
+        if(!empty($row[$lang]) || $this->lang_alternate === FALSE) $row[$key] = $row[$lang];
         unset($row[$lang]);
     }
 }
@@ -78,7 +79,7 @@ public function to_bind_field(&$row) {
 // ALIAS fields replace to standard field, and BIND-column to record field
 public function to_alias_bind(&$row) {
     foreach($this->lang_alias as $key => $lang) {
-        if(!empty($row[$lang])) $row[$key] = $row[$lang];
+        if(!empty($row[$lang]) || $this->lang_alternate === FALSE) $row[$key] = $row[$lang];
         unset($row[$lang]);
     }
     foreach($this->bind_columns as $key => $columns) {

@@ -35,6 +35,24 @@ You will need the app repository and vendor libraries to run as an application.
 1. adjusted '.htaccess' or 'web.config' for your Web-Server.
 1. Open Browser, Typical URL is http://localhost/sample/index/
 
+## Folder Structure
+
+This framework does not create folders for each class.
+Controllers, Views, and Models are managed as a group in a Module folder for each function.
+
+(pawmoo) Framework body
+  ├ app
+  │ ├─ (Application-1)
+  │ │ ├─┬ Module folders (Index, Sample, etc,...)
+  │ │ │  ├…
+  │ │ │
+  │ │ ├── View     Application View Template folder
+  │ │ └── webroot  Static resource
+  │ ├─ (Application-2)
+  │ ........
+  ├ Core      Framework core code folder
+  └ vendor    Vendor library folder
+
 ### SECTION template SAMPLE
 
 Detail specification is [Here](../../wiki/Home)
