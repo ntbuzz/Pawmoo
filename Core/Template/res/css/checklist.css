@@ -21,7 +21,7 @@
     overflow: hidden;
     margin-right: auto;
     border:2px solid black;
-    border-radius: 15px;
+    border-radius: 5px;
     background-color:white;
 	box-shadow: 1px 1px 2px gray;
 }
@@ -59,35 +59,16 @@
 	box-shadow: 1px 1px 2px #E7E7E7;
     background: linear-gradient(to bottom, silver, yellow);
 }
-/*
-.pulldown-label {
-	display:flex;
-	width:100%;
-	text-align: right;
-}
-*/
 .pulldown-label > span {
-	position:absolute;
-	right:0;
-	width:1.2em;
-	cursor:pointer;
-	margin:2px;
-	box-shadow: 1px 1px 2px #E7E7E7;
-    background: linear-gradient(to bottom, silver,gray);
-	text-align:center;
+    z-index:1;
+    position:absolute;
+    top:0;
+    right: 5px;
+    width:16px;
+    height:22px;
+    cursor:pointer;
+    background: url(res/img/dropdown.png) no-repeat left top;
 }
-.pulldown-label > span:after {content:"▼";}
-/*
-.pulldown-button {
-	position:absolute;
-	right:0;
-	width:1.2em;
-	cursor:pointer;
-	margin:2px;
-	box-shadow: 1px 1px 2px #E7E7E7;
-    background: linear-gradient(to bottom, silver,gray);
-	text-align:center;
+.pulldown-label > span:hover {
+    background: url(res/img/dropdown.png) no-repeat left -22px;
 }
-.pulldown-button:after {content:"▼";}
-*/
-.pulldown-label:after {content:"チェックリスト";}
