@@ -40,6 +40,7 @@ You will need the app repository and vendor libraries to run as an application.
 This framework does not create folders for each class.
 Controllers, Views, and Models are managed as a group in a Module folder for each function.
 
+```
 (pawmoo) Framework body
   ├ app
   │ ├─ (Application-1)
@@ -52,6 +53,7 @@ Controllers, Views, and Models are managed as a group in a Module folder for eac
   │ ........
   ├ Core      Framework core code folder
   └ vendor    Vendor library folder
+```
 
 ### SECTION template SAMPLE
 
