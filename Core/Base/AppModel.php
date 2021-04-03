@@ -494,9 +494,9 @@ public function AddRecord($row) {
 // UPDATE Record
 public function UpdateRecord($num,$row) {
     $data = $this->field_pickup($row);
-//    debug_log(DBMSG_DUMP,[$row,$data]);     // for DEBUG
     if($this->is_valid($data)) {
         $this->field_alias_bind($data);
+//		debug_log(DBMSG_DUMP,[$row,$this->fields]);     // for DEBUG
         $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
     } else {
         debug_log(DBMSG_MODEL,['VALID-ERROR'=>$data]);

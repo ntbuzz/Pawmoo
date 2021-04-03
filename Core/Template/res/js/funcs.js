@@ -26,8 +26,8 @@ function PawmooLocations() {
     if (this.items[1] !== cont) this.items.splice(1, 0, cont);      // controller name compensate
 //    alert("Pawmoo:" + cont+"\n"+objDump(this.items));
     //
-    this.query = function () { return (this.qstr == "") ? "" : "?" + this.qstr; };
-    this.set_query = function (q) { this.query = q; };
+    this.query_str = function () { return (this.qstr == "") ? "" : this.qstr.replace(";","%3B"); };
+    this.set_query = function (q) { this.qstr = q; };
     this.last_item = function (n) { return this.items[this.items.length - n]; };
     this.fullpath = function (url) {
         this.type = "./:".indexOf(url.charAt(0)) + 1;
@@ -50,7 +50,7 @@ function PawmooLocations() {
         } else nums = "";
         for (var i = 0; i < e.length; i++) path[n + i] = e[i];
         n = n + e.length;
-        return "/" + path.slice(0, n).join("/") + nums + this.query();
+        return "/" + path.slice(0, n).join("/") + nums + this.query_str();
     };
     this.cont_path = function (e, isnum) { return this.trunc_path(1, e, isnum); };
     this.act_path = function (e, isnum) { return this.trunc_path(2, e, isnum); };

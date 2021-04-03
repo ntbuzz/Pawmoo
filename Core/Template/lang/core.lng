@@ -26,6 +26,9 @@
     SelectMe    => 【選択してください】
     DeleteFail  => "'%s' の削除に失敗しました"
     MoveFail    => "'%s' の移動に失敗しました"
+	CheckList	=> チェックリスト
+	CheckALL	=> 全て:
+	CheckConfirm	=> 確定
 // ファイルアップロード
     UNDO        => 取消
     FILES       => "送信ファイル:"
@@ -67,6 +70,9 @@
     SelectMe    => "[Select Item]"
     DeleteFail  => "'%s' delete FAIL"
     MoveFail    => "'%s' move FAIL"
+	CheckList	=> "Select Check"
+	CheckALL	=> "ALL Check:"
+	CheckConfirm	=> "Confirm"
 // for drag&drop upload
     UNDO        => Cancel
     FILES       => "Send Files:"
