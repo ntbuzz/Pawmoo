@@ -1,9 +1,9 @@
 // チェックリスト選択ボックスを表示する
 // JQueryプラグインで実装
 (function ($) {
-	$.fn.checkList = function (columns, select_list, callback) {
+	$.fn.popupCheckList = function (columns, select_list, callback) {
 		var list_val = $('#' + $(this).attr('data-element'));
-		$(this).html("${#.core.CHECKLIST}");
+		$(this).html("${#.core.CheckList}");
 		var btn = $('<span></span>').appendTo($(this));
 		btn.on('click', function () {
 			var self = $(this);
@@ -11,10 +11,10 @@
 			var bk_panel = $('<div class="dialog-BK"></div>').appendTo($('body'));
 			var dialog = $('<div class="checklist-dialog"></div>').appendTo(bk_panel);
 			dialog.click(function (e) { e.stopPropagation(); });	// イベントの伝播を止める
-			var button_bar = $('<div class="buttonBar">全て:</div>').appendTo(dialog);
+			var button_bar = $('<div class="buttonBar">${#.core.CheckALL}</div>').appendTo(dialog);
 			var check_btn = $('<input type="checkbox" />').appendTo(button_bar);
 			var check_list = $('<ul class="checklist-box"></ul>').appendTo(dialog);
-			var close_btn = $('<span class="wbutton">確定</span>').appendTo(dialog);
+			var close_btn = $('<span class="wbutton">${#.core.CheckConfirm}</span>').appendTo(dialog);
 			if (columns !== undefined) check_list.addClass('col' + columns);
 			// リスト作成
 			var target = list_val.val();
