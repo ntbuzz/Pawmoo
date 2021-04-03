@@ -37,7 +37,7 @@ You will need the app repository and vendor libraries to run as an application.
 
 ## Folder Structure
 
-This framework does not create folders for each class.
+This framework does not create folders for each class.  
 Controllers, Views, and Models are managed as a group in a Module folder for each function.
 
 ```
