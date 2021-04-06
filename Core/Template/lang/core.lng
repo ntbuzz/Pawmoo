@@ -26,9 +26,11 @@
     SelectMe    => 【選択してください】
     DeleteFail  => "'%s' の削除に失敗しました"
     MoveFail    => "'%s' の移動に失敗しました"
+// チェックリストダイアログ
 	CheckList	=> チェックリスト
 	CheckALL	=> 全て:
 	CheckConfirm	=> 確定
+	CheckTITLE	=> チェックダイアログ
 // ファイルアップロード
     UNDO        => 取消
     FILES       => "送信ファイル:"
@@ -92,17 +94,53 @@
     BADFILE     => "'+','%','#' chars used,Bad Download by WebBrowser!"
 ]
 
-SW開発 => [
-    .ja => [
-        PawmooHelp  => ヘルプアプリ
-        PC管理      => PC管理アプリ
-        ブログ      => ブログアプリ
-        Video管理   => ビデオ管理アプリ
-    ]
-    .en => [
-        PawmooHelp  => "Pawmoo Help App"
-        PC管理      => "PC-Manage App"
-        ブログ      => "BLOG App"
-        Video管理   => "Video-Manage App"
-    ]
+SiteMenu => [
+	.ja => [
+		System => システムメニュー
+	    WEB	=> [
+			WEB開発
+			SPIDER-MASTER => SPIDER-MASTER
+			PawmooHelp	=> ヘルプアプリ
+			PC管理	=> PC管理アプリ
+			ブログ	=> ブログアプリ
+			Sample	=> Sample
+			Video管理	=> ビデオ管理アプリ
+		]
+		管理 => [
+			管理ページ
+			トップ => トップ
+			PHP情報	=> PHP情報
+			Redmine	=> Redmine
+			Gitbucket	=> Gitbucket
+			GitHib	=> GitHib
+			SQLite	=> SQLite
+			PostgreSQL	=> PostgreSQL
+			MySQL	=>	MySQL
+			TestLink	=> TestLink
+		]
+	]
+	.en => [
+		System => "System Menu"
+	    WEB	=> [
+			"WEB Develop"
+			SPIDER-MASTER => SPIDER-MASTER
+			PawmooHelp	=> "Pawmoo Help App"
+			PC管理	=> "PC-Manage App"
+			ブログ	=> "BLOG App"
+			Sample	=> Sample
+			Video管理	=> "Video-Manage App"
+		]
+		管理 => [
+			Manage
+			トップ => TOP
+			PHP情報	=> PHP-Info
+			Redmine	=> Redmine
+			Gitbucket	=> Gitbucket
+			GitHib	=> GitHib
+			SQLite	=> SQLite
+			PostgreSQL	=> PostgreSQL
+			MySQL	=>	MySQL
+			TestLink	=> TestLink
+		]
+	]
 ]

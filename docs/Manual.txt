@@ -1418,3 +1418,21 @@
       .core.NO_SECOND   => "'%s' の2ndファイルが未登録です"
       .core.NO_TITLE    => "'%s' のタイトルが未入力です"
       .core.MAXFILE     => "送信ァイルは %d 個までです"
+
+・ポップアップチェックリスト
+	(セレクタ).popupCheckList(setup_objext, callback_func)
+
+	セレクタにはプラグイン内でラベルとボタンが付加されるので、空のDIVタグを使用してください。
+	セレクタの属性(data-element)で指定される「TEXTAREA」の内容を、CheckListObj 配列を元に、
+	チェックリストダイアログを表示し、callback_func を呼出します。
+	ダイアログ領域以外をクリックした場合、callback_func は呼出しません。
+	callback_func にはチェックされたラベルが改行により連結された文字列が渡されます。
+	関数内の $(this) は TEXTAREA要素になります。
+	setup_object 変数により動作を設定できます。
+		CheckBarLabel:	セレクタに設定するラベルテキスト	// .core.CheckList
+		DialogTitle:	ダイアログのタイトル				// .core.CheckTITLE
+		CheckFlip:		全てをチェックの有無				//	true
+		FlipLabel:		全てをチェックのラベルテキスト		// .core.CheckALL
+		ConfirmLabel:	ダイアログの確定ボタンテキスト		// .core.CheckConfirm
+		CheckLabels:	チェックリストラベルの配列			// []
+		Columns:		チェックリストのカラム数			// 2
