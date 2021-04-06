@@ -127,7 +127,7 @@ public static function LangDebug() {
                     } else $zz = $val;
                     if($key[0] == '#') {       // グローバルIDの登録
                         $kk = mb_substr($key,1);
-                        static::$STRINGS[$kk] = array_override_recursive(static::$STRINGS[$kk],$zz);
+                        static::$STRINGS[$kk] = isset(static::$STRINGS[$kk]) ? array_override_recursive(static::$STRINGS[$kk],$zz) : $zz;
                     } else {
                         $values[$key] = $zz;
                     }
