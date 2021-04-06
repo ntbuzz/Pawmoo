@@ -305,8 +305,8 @@ public function GetValueList() {
 //==============================================================================
 //   Get Field Value List
 // Result:   $this->Select (Field)
-public function GetFieldValues($field) {
-    $this->Select[$field] = $this->dbDriver->getValueLists(NULL,$field,$field);
+public function GetFieldValues($field, $cond = NULL) {
+    $this->Select[$field] = $this->dbDriver->getValueLists(NULL,$field,$field,$cond);
     debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $this->Select]);
 }
 //==============================================================================

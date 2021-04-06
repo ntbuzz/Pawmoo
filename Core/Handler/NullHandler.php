@@ -11,7 +11,7 @@ class NullHandler {
 	}
 public function setupRelations($relations) { }
 public function SetPaging($pagesize, $pagenum) { }
-public function getValueLists($table,$ref,$id) { return []; }
+public function getValueLists($table,$ref,$id,$cond) { return []; }
 public function getLastError() { return ''; }
 
 public function getRecordValue($row,$relations) { return []; }
