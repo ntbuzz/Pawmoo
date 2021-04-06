@@ -73,9 +73,9 @@ public function execSQL($sql,$logs = TRUE) {
 }
 //==============================================================================
 //	getValueLists: list-colum name, value-colums
-public function getValueLists($table,$ref,$id) {
+public function getValueLists($table,$ref,$id,$cond=NULL) {
 	if(empty($table)) $table = $this->table;
-	$sql = $this->sql_QueryValues($table,$ref,$id);
+	$sql = $this->sql_QueryValues($table,$ref,$id,$cond);
 	$this->execSQL($sql);
 	$values = array();
 	debug_log(9,["VALUE-LIST" => [$table,$ref,$id,$sql,'REL'=>$this->relations,'ALIAS'=>$this->fieldAlias->GetAlias()]]);
@@ -190,9 +190,10 @@ public function deleteRecord($wh) {
 // SQlite3, PostgreSQL, mariaDB unique SQL command(update, insert, replace) will be generate instance class
 //==============================================================================
 // get value lists
-	private function sql_QueryValues($table,$ref,$id) {
+	private function sql_QueryValues($table,$ref,$id,$cond) {
+		$where = empty($cond) ? "" : $this->sql_makeWHERE($cond,$table);
 //		$groupby = (empty($grp)) ? '' : " GROUP BY \"{$grp}\"";
-		return "SELECT \"{$id}\",\"{$ref}\" FROM {$table} ORDER BY \"{$id}\";";
+		return "SELECT \"{$id}\",\"{$ref}\" FROM {$table}{$where} ORDER BY \"{$id}\";";
 	}
 //==============================================================================
 //

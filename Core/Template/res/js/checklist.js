@@ -1,9 +1,19 @@
 // チェックリスト選択ボックスを表示する
 // JQueryプラグインで実装
 (function ($) {
-	$.fn.popupCheckList = function (columns, select_list, callback) {
+	$.fn.popupCheckList = function (setupobj, callback) {
+		var setting = {
+			CheckBarLabel:"${#.core.CheckList}",
+			DialogTitle: "${#.core.CheckTITLE}",
+			CheckFlip: true,
+			FlipLabel: "${#.core.CheckALL}",
+			ConfirmLabel:"${#.core.CheckConfirm}",
+			CheckLabels: [],
+			Columns: 2,
+		};
+		$.each(setupobj, function (key, value) { setting[key] = value;});
 		var list_val = $('#' + $(this).attr('data-element'));
-		$(this).html("${#.core.CheckList}");
+		$(this).html(setting.CheckBarLabel);
 		var btn = $('<span></span>').appendTo($(this));
 		btn.on('click', function () {
 			var self = $(this);
@@ -11,26 +21,43 @@
 			var bk_panel = $('<div class="dialog-BK"></div>').appendTo($('body'));
 			var dialog = $('<div class="checklist-dialog"></div>').appendTo(bk_panel);
 			dialog.click(function (e) { e.stopPropagation(); });	// イベントの伝播を止める
-			var button_bar = $('<div class="buttonBar">${#.core.CheckALL}</div>').appendTo(dialog);
-			var check_btn = $('<input type="checkbox" />').appendTo(button_bar);
+			var title_bar = $('<div class="titleBar"></div>').appendTo(dialog);
+			title_bar.append(setting.DialogTitle);
+			if (setting.CheckFlip) {
+				var button_bar = $('<span class="buttonBar"></span>').appendTo(title_bar);
+				button_bar.append(setting.FlipLabel);
+				var check_btn = $('<input type="checkbox" />').appendTo(button_bar);
+			}
 			var check_list = $('<ul class="checklist-box"></ul>').appendTo(dialog);
-			var close_btn = $('<span class="wbutton">${#.core.CheckConfirm}</span>').appendTo(dialog);
-			if (columns !== undefined) check_list.addClass('col' + columns);
+			var close_btn = $('<span class="wbutton"></span>').appendTo(dialog);
+			close_btn.append(setting.ConfirmLabel);
+			if (setting.Columns !== undefined) check_list.addClass('col' + setting.Columns);
 			// リスト作成
-			var target = list_val.val();
+			var target = list_val.val().split("\n").filter(v => v);
+			var merge_list = setting.CheckLabels.mymerged(target);
 			var all_check = false;
-			$.each(select_list, function (index, elem) {
+			$.each(merge_list, function (index, elem) {
 				var li_tag = $('<li></li>').appendTo(check_list);
-				var label_tag = $('<label></label>').appendTo(li_tag);
-				var item = $('<input type="checkbox" class="multi-check" value="' + elem + '" />').appendTo(label_tag);
-				if (target.indexOf(elem) != -1) {
-					item.prop('checked', true);
-					all_check = true;
+				if (parseInt(elem) < 0) {
+					li_tag.append('<hr>');		// separator
+				} else {
+					var label_tag = $('<label></label>').appendTo(li_tag);
+					var item = $('<input type="checkbox" class="multi-check" value="' + elem + '" />').appendTo(label_tag);
+					if (target.includes(elem)) {
+						item.prop('checked', true);
+						all_check = true;
+					}
+					label_tag.append(elem);
 				}
-				label_tag.append(elem);
 			});
-			// デフォルトのチェック状態
-			check_btn.prop('checked', all_check);
+			// デフォルトのチェック状態をフリップチェックに反映
+			if (setting.CheckFlip) {
+				check_btn.prop('checked', all_check);
+				check_btn.change(function () {
+					check_list.find('.multi-check').prop('checked', $(this).prop('checked'));
+					return false;
+				});
+			}
 			bk_panel.fadeIn('fast');
 			// ダイアログの位置
 			var x = self.offset().left + self.width();
@@ -48,10 +75,6 @@
 			}
 			dialog.css({ 'left': x + 'px', 'top': y + 'px' });
 			// イベント処理
-			check_btn.change(function () {
-				check_list.find('.multi-check').prop('checked', $(this).prop('checked'));
-				return false;
-			});
 			close_btn.click(function (e) {
 				var vals = $('.multi-check:checked').map(function () { return $(this).val(); }).get();
 				bk_panel.click();

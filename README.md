@@ -47,7 +47,7 @@ Controllers, Views, and Models are managed as a group in a Module folder for eac
   │ │ ├─┬ Module folders (Index, Sample, etc,...)
   │ │ │  ├…
   │ │ │
-  │ │ ├── View     Application View Template folder
+  │ │ ├── View     Common View Template for each Modules
   │ │ └── webroot  Static resource
   │ ├─ (Application-2)
   │ ........

@@ -10,6 +10,17 @@ String.prototype.is_invalid_name = function () {
     return (this.match(/^.*[\+%#].*?$/));
 };
 //====================================================
+// 配列要素のマージ
+Array.prototype.mymerged = function (b) {
+	var new_array =  this.slice();	// 配列コピー
+	b.forEach(function (val) {
+		if (val !== "" & new_array.includes(val) == false) {
+			new_array.push(val);
+		}
+	});
+	return new_array;
+};
+//====================================================
 // customize location object class for this framework
 const LOC_FULL      = 3;     // :url     http://host/url
 const LOC_SYS       = 2;     // /url     http://host/sysRoot/url
@@ -20,13 +31,13 @@ const LOC_APPSELF = 0;     // url .url http://host/appRoot/url
 function PawmooLocations() {
     this.protocol = location.protocol;
     this.host = location.host;
-    this.qstr = location.search;
+    this.qstr = location.search.replace('?','');
     this.items = location.pathname.replace(/^[\/]+|[\/]+$/g, '').split('/');
     var cont = "${$controller$}";
     if (this.items[1] !== cont) this.items.splice(1, 0, cont);      // controller name compensate
 //    alert("Pawmoo:" + cont+"\n"+objDump(this.items));
     //
-    this.query_str = function () { return (this.qstr == "") ? "" : this.qstr.replace(";","%3B"); };
+    this.query_str = function () { return (this.qstr == "") ? "" : "?"+this.qstr.replace(";","%3B"); };
     this.set_query = function (q) { this.qstr = q; };
     this.last_item = function (n) { return this.items[this.items.length - n]; };
     this.fullpath = function (url) {

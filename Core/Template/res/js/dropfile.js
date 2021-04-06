@@ -240,7 +240,6 @@ function PairUploadDialog(files,url,callback_func) {
         bk_panel.remove();
     });
     dialog.append(button_bar);
-    $('body').append(bk_panel);
     // 送信実行
     send_abort.off().click(function () {
         var secondf_set = true;
@@ -298,7 +297,6 @@ function PairUploadDialog(files,url,callback_func) {
         $.busy_cursor(true);
         topBar.AjaxStart(url);
     });
-    bk_panel.fadeIn('fast');
     // 残りファイル数表示
     self.RestMessage = function (n) {
         rest.text("${#.core.RestFiiles}" + n);
@@ -315,6 +313,8 @@ function PairUploadDialog(files,url,callback_func) {
             cancel_close.css('display', 'inline');     // 押せるように再表示
         }
     }
+    $('body').append(bk_panel);
+    bk_panel.fadeIn('fast');
 }
 //----------------------------------
 function isFileCharsetOK(files) {
