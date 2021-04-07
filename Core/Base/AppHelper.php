@@ -236,7 +236,7 @@ public function SelectObject($args) {
 		if(count($new_map)===2) $new_map[] = 0;
 		$object .= "\t[".implode(',',$new_map) ."],\n";
 	}
-	$object .= "]},\n";
+	$object .= "]},";
 	return $object;
 }
 /*
