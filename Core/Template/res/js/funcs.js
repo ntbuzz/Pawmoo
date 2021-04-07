@@ -73,7 +73,58 @@ function PawmooLocations() {
     };
 }
 //===============================================
-// ネスティッド SELECT
+// ネスティッド SELECT 改良バージョン
+function SelectLink(setupobj, id, callback) {
+	var self = this;
+	var self_obj = $('#' + id);
+	var my_prop = self_obj.attr('data-value');
+	var child_id = self_obj.attr('data-element');
+	if (my_prop === undefined) my_prop = id;
+	if (child_id === undefined) child_id = null;
+	var my_obj = setupobj[my_prop];
+	var select_me = '<option value="0">${#.core.SelectMe}</option>';
+	var child_obj = (child_id === null) ? null : new SelectLink(setupobj, child_id, callback);
+	self.selfList = function (val, grp) {
+		self_obj.empty();
+		var opt = 0;
+		if (my_obj.select_one) { self_obj.append(select_me); ++opt; }
+		$.each(my_obj.sel_list, function (key, value) {
+			if (value[2] === undefined || value[2] == grp) {
+				var sel = (value[0] === val) ? ' selected' : '';
+				self_obj.append('<option value="' + value[0] + '"' + sel + '>' + value[1] + '</option>');
+				++opt;
+			}
+		});
+		if (opt === 0) self_obj.append(select_me);
+	};
+    self.defaultList = function(val,grp) {
+		self.selfList(val, grp);
+		child_grp = self_obj.find('option:selected').val();
+        if(child_obj !== null) child_obj.defaultList(0,child_grp);
+	};
+    self.Select = function (val) {
+        if(child_obj !== null) val = child_obj.Select(val);
+        var grp = 0;
+		$.each(my_obj.sel_list, function (key, value) {
+			if (value[0] === val) {
+				grp = (value[2] === undefined) ? 0 : value[2];
+				return false;	// exit .each()
+			}
+			return true;
+		});
+        self.selfList(val, grp);
+        self_obj.off().change(function() {
+            var my_val = $(this).val();
+            if (child_obj !== null) child_obj.defaultList(0, my_val);
+            else if (callback !== null) {
+                var my_txt = $(this).children(':selected').text();
+                callback.call(this,my_val,my_txt);
+            }
+        });
+        return grp;
+    }
+};
+/*
 // IEのために class でなく prototype ベースで実装
 function SelectChain(mytag,selObj,callback) {
     var myobj = $('#'+mytag);
@@ -139,6 +190,7 @@ SelectChain.prototype = {
         return grp;
     }
 };
+*/
 //====================================================
 // for DEBUG dump Object
 var objDump = function(obj, rIndent) {

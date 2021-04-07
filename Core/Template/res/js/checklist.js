@@ -1,11 +1,11 @@
-// チェックリスト選択ボックスを表示する
 // JQueryプラグインで実装
 (function ($) {
+	// チェックリスト選択ボックスを表示する
 	$.fn.popupCheckList = function (setupobj, callback) {
 		var setting = {
 			CheckBarLabel:"${#.core.CheckList}",
 			DialogTitle: "${#.core.CheckTITLE}",
-			CheckFlip: true,
+			CheckFlip: false,
 			FlipLabel: "${#.core.CheckALL}",
 			ConfirmLabel:"${#.core.CheckConfirm}",
 			CheckLabels: [],

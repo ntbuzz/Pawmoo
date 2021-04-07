@@ -179,9 +179,8 @@
 }
 
 /* ヘルプアイコン */
-span.help_icon {
-    position:absolute;
-    top:4px;
+.help_icon {
+	display:inline-block;
     width:17px;
     height:15px;
     background: url(res/img/pop_help_c.png) no-repeat left bottom;

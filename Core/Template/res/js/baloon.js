@@ -14,8 +14,8 @@ selector.each(function () {
         if (tag == "!") ref = ref.slice(1); // 先頭が！ならアイコン追加しない
         var icon = (tag == "!") ? ref : ref + "-help";
         if ($('#' + icon).length == 0) {
-            $('#' + ref).append('<span class="help_icon" id="' + icon + '"></span>')
-                .css('margin-right','17px');
+			$('#' + ref).after('<span class="help_icon" id="' + icon + '"></span>');
+//                .css('margin-right','17px');
             ev = 'mouseover';   // ポップアップイベントが登録されていることがあるので、強制的にマウスオーバーにする
         }
         ref = '#' + icon;

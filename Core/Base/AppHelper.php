@@ -226,6 +226,20 @@ public function Contents_Tab($sel,$default='') {
 }
 //==============================================================================
 // ChainSelect Object-List
+public function SelectObject($args) {
+	list($selname,$select_one) = explode(",",$args);
+	$object = "{$selname}: {\n\tselect_one: {$select_one},\n\tsel_list: [\n";
+   	foreach($this->MyModel->Select[$selname] as $valset) {
+		$new_map = array_map(function($v) {
+			return (is_numeric($v)) ? $v :"'{$v}'";
+		},$valset);
+		if(count($new_map)===2) $new_map[] = 0;
+		$object .= "\t[".implode(',',$new_map) ."],\n";
+	}
+	$object .= "]},\n";
+	return $object;
+}
+/*
 public function SelectObject($keyset) {
 	if(is_scalar($keyset)) $keyset = explode(',',$keyset);
 	$str = '';
@@ -242,6 +256,7 @@ public function SelectObject($keyset) {
 	}
 	return $str;
 }
+*/
 //==============================================================================
 // Gen Form TAG
 // attr array
@@ -291,6 +306,12 @@ public function Input($type,$name,$attr) {
 public static function ImageTag($file,$attr) { 
 	$path = (($file[0] == '/') ? '/common' : App::$sysRoot) . $file;
 	echo "<image src='{$path}' {$attr} />\n";
+}
+//==============================================================================
+// JS array define
+public static function define_var_array($arr,$name) { 
+	$row = "var {$name} = {\n'" . inplode("',\n'",$arr) . "'\n};";
+	return $row;
 }
 
 }
