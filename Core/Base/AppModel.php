@@ -16,6 +16,7 @@ class AppModel extends AppObject {
         'Schema' => [],
         'PostRenames' => [],
         'Selection' => [],
+		'Lang_Alternate' => FALSE,
     ];
     protected $dbDriver;            // Database Driver
     protected $fields;              // Record-Data all fields value
@@ -50,6 +51,7 @@ class AppModel extends AppObject {
         $driver = $this->Handler . 'Handler';
         $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
         $this->DateFormat = $this->dbDriver->DateStyle;         // Date format from DB-Driver
+		$this->dbDriver->fieldAlias->lang_alternate = $this->Lang_Alternate;
 	}
 //==============================================================================
 // Initializ Class Property
@@ -65,8 +67,8 @@ public function ResetSchema() {
     $this->SelectionSetup();
     debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
-            "Header"    => $this->HeaderSchema,
-            "Field"     => $this->FieldSchema, 
+//            "Header"    => $this->HeaderSchema,
+//            "Field"     => $this->FieldSchema, 
             "Join-Defs"     => $this->dbDriver->relations,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
             "Select-Defs"   => $this->SelectionDef,
@@ -212,7 +214,7 @@ public function ResetSchema() {
                     if(is_scalar($ref_list)) {
                         $lnk = [ $model => "{$field}.{$ref_list}"] ;
                     } else {
-                        array_unshift($ref_list,$field);
+                        if(!empty($field)) array_unshift($ref_list,$field);
                         $lnk[$model] = $ref_list;
                     }
                 }
@@ -276,8 +278,14 @@ public function GetValueList() {
             $this->RecordFinder($cond,$ref_list,NULL,$filter_rec);
             $set_sort_value($key_name,$this->Records);
         } else if(is_array($ref_list)) {
-            $this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
-            $set_sort_value($key_name,$this->$model->Records);
+			list($method,$argts) = array_first_item($ref_list);
+			if(is_numeric($method)) {
+				$this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
+				$set_sort_value($key_name,$this->$model->Records);
+			} else if(method_exists($this->$model,$method)) {	// selection by method call 
+				$method_val = $this->$model->$method($args,$cond);
+				$set_sort_value($key_name,$method_val);
+			}
         } else {
             $ref_list = explode('.', $ref_list);
             $postfix = (count($ref_list) > 2);      // append to keyname_field
@@ -353,7 +361,7 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
     }
     $this->Records = $data;
     debug_log(DBMSG_CLI, ['DATA'=>$data]);
-    debug_log(9, [
+    debug_log(FALSE, [
         "record_max" => $this->record_max,
         "Filter" => $filter,
 //        "FieldSchema" => $this->FieldSchema,

@@ -5,7 +5,9 @@
 // ポップアップセレクター
 var selector = $(".popup-box");
 selector.each(function () {
-    var self = $(this); // jQueryオブジェクトを変数に代入しておく
+	var self = $(this); // jQueryオブジェクトを変数に代入しておく
+	var val = self.attr("value");
+	var buttons = (val===undefined) ? []: val.split(",");
     var ref = "#" + self.attr("data-element");  // 紐付けるID
     var self_id = "#"+self.attr("id");
     var resize_id = self_id+" .resize";
@@ -26,7 +28,7 @@ selector.each(function () {
                 });
             };
         };
-        var controlls = ["resize_message:${#core.SizeDisplay}", "close:${#core.Close}", "resize:${#core.Resize}"];
+        var controlls = ["resize_message:${#core.SizeDisplay}", /* "close:${#core.Close}",*/ "resize:${#core.Resize}"];
         controlls.forEach(function (value) {
             var cls = value.split(':');
             if (self.find("." + cls[0]).length == 0) {
@@ -34,8 +36,28 @@ selector.each(function () {
                 var tag = '<span class="'+cls[0]+alt+'"></span>';
                 self.append(tag);
             }
-        });
-        $(ref).on('click', function () {
+		});
+		if (buttons.length === 0) {
+			// カスタムボタンが未定義のときだけ閉じるボタンを追加する
+			var tag = '<span class="close" title="${#core.Close}"></span>';
+			self.append(tag);
+		} else {
+			var buttontag = "<div class='custom-button'>";
+			$.each(buttons, function (index, val) {
+				var label_class = val.split(":");
+				buttontag = buttontag + '<span class="button ' + label_class[1] + '">' + label_class[0] + '</span>';
+			});
+			buttontag = buttontag+"</div>";
+			self.append(buttontag);
+		}
+		// 閉じるためのカスタムイベントを定義する
+		$(self_id).on('close-me', function () {
+			self.fadeOut('fast');
+			$('.popup-BK').fadeOut('fast',function(){
+				$('.popup-BK').remove();
+			});
+		});
+        $(ref).off().on('click', function () {
             // バルーンを消すための領域を定義
             $('body').append('<div class="popup-BK"></div>');
             $('.popup-BK').fadeIn('fast');
@@ -56,13 +78,9 @@ selector.each(function () {
             self.css({'left': x + 'px','top': y + 'px'});
             self.fadeIn('fast');
             // クローズイベントを登録
-            $(self_id + " #close, .close, .cancel").click( function() {
-                // モーダルコンテンツとオーバーレイをフェードアウト
-                self.fadeOut('fast');
-                $('.popup-BK').fadeOut('fast',function(){
-                    $('.popup-BK').remove();
-                });
-            });
+			$(self_id).on('click', '#close, .close, .cancel', function () {
+				$(self_id).trigger('close-me');
+			});
         });
         // リサイズのドラッグ
         $(resize_id).on('mousedown', function(e) {

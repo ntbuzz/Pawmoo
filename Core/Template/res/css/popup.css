@@ -177,11 +177,26 @@
     padding-left:20px;
     margin-bottom:5px;
 }
+.popup-box .custom-button {
+	position:absolute;
+	display:flex;
+	bottom:5px;
+	width:95%;
+	padding-top:5px;
+	border-top:1px dotted silver;
+//	text-align: center;	// リソース内ではC++風コメントが使える、VSCodeのLintを除外しないとエラーに見える
+//	align-items: center;
+    justify-content: center;
+}
+.popup-box .custom-button > .button {
+	display: inline-block;
+	width:4em;
+	margin: 0 1em;
+}
 
 /* ヘルプアイコン */
-span.help_icon {
-    position:absolute;
-    top:4px;
+.help_icon {
+	display:inline-block;
     width:17px;
     height:15px;
     background: url(res/img/pop_help_c.png) no-repeat left bottom;

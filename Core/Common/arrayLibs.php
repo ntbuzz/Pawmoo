@@ -136,14 +136,14 @@ function array_key_exists_recursive($key,$arr) {
 // array-key duplicate avoidance
 function array_key_unique($key,&$arr) {
     $wkey = $key;
-    for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}:{$n}";
+    for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}::#{$n}";
     return $key;
 }
 //==============================================================================
 // set value by array-key duplicate avoidance
 function set_array_key_unique(&$arr,$key,$val) {
     $wkey = $key;
-    for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}:{$n}";
+    for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}::#{$n}";
     $arr[$key] = $val;
     return $key;
 }
