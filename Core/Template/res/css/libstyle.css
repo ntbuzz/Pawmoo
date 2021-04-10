@@ -55,3 +55,21 @@ html, body {
 .button:active {
 	background: #aaa;  
 }
+// 削除ボタン付きリスト
+.delete-item-list {
+	list-style: none;
+}
+.delete-item-list>li {
+	white-space: nowrap;
+	height:22px;
+}
+.delete-item-list>li>del {
+	display: inline-block;
+	width:18px;
+	height:20px;
+	cursor: pointer;
+	background: url(res/img/del_button.png) no-repeat left top;
+}
+.delete-item-list>li>del:hover {
+	background: url(res/img/del_button.png) no-repeat left -20px;
+}
