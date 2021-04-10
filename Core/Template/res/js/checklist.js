@@ -1,11 +1,11 @@
-// チェックリスト選択ボックスを表示する
 // JQueryプラグインで実装
 (function ($) {
+	// チェックリスト選択ボックスを表示する
 	$.fn.popupCheckList = function (setupobj, callback) {
 		var setting = {
 			CheckBarLabel:"${#.core.CheckList}",
 			DialogTitle: "${#.core.CheckTITLE}",
-			CheckFlip: true,
+			CheckFlip: false,
 			FlipLabel: "${#.core.CheckALL}",
 			ConfirmLabel:"${#.core.CheckConfirm}",
 			CheckLabels: [],
@@ -33,7 +33,7 @@
 			close_btn.append(setting.ConfirmLabel);
 			if (setting.Columns !== undefined) check_list.addClass('col' + setting.Columns);
 			// リスト作成
-			var target = list_val.val().split("\n").filter(v => v);
+			var target = list_val.val().split("\n").filter(function (v) { return (v.length); });
 			var merge_list = setting.CheckLabels.mymerged(target);
 			var all_check = false;
 			$.each(merge_list, function (index, elem) {
@@ -43,7 +43,7 @@
 				} else {
 					var label_tag = $('<label></label>').appendTo(li_tag);
 					var item = $('<input type="checkbox" class="multi-check" value="' + elem + '" />').appendTo(label_tag);
-					if (target.includes(elem)) {
+					if (target.is_exists(elem)) {
 						item.prop('checked', true);
 						all_check = true;
 					}

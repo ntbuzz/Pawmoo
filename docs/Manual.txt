@@ -619,11 +619,12 @@
     size=NN             :NN
     name=xxxx           [xxxx]
     value=vvvv          (vvvv)
+    data-value=zzzz     <zzzz>
     data-element=yyyy   {yyyy}
   書式順は上記の上から順に記述してください。
   ex.
-    span.right#menu[help](click){popup} => BUTTON
-    => <SPAN class="right" id="menu" name="help" value="click" data-element="popup">BUTTON</span>
+    span.right#menu[help](click)<ref-value>{popup} => BUTTON
+    => <SPAN class="right" id="menu" name="help" value="click" data-value="ref-value" data-element="popup">BUTTON</span>
 
   コマンド項目のトークンにはタグ生成に関連するタグコマンドと、テンプレート関連のコマンドがあります。
   テンプレートコマンド
@@ -1361,34 +1362,53 @@
     $.dialogBox(タイトル,メッセージ, コールバック関数);
 
 ・プルダウンセレクトの連動
-    (セレクタ).ChainSelect(セレクトテーブル,初期選択値)
-      セレクトテーブルはチェインリストで定義します
-        セレクト名: [
+    (セレクタ).ChainSelect(セレクトテーブル,初期選択値, コールバック関数)
+      セレクトテーブルはオブジェクトリストで定義します
+        セレクト名: {
+			select_one: true | false ,		// 「選択してください」を自動追加する、しない
+			sel_list: [						// セレクトリスト
               [ ID,　表示名, 親ID ],
-        ],
+			]
+		},
         ...
     トップレベルとなるセレクト名の親IDは省略、または0を入れておきます。
-    ここで指定する「セレクト名」はSELECTタグにつけるCLASS名と同じ名前にします。
+    ここで指定する「セレクト名」をモデルクラスの"Selection"定義名と同じにすると
+	後述のヘルパー変数メソッドによりオブジェクト定義が簡単にできるようになります。
     例： OS名とライセンスキーを連動させるセレクトテーブル
       var objList = {
-          'os-select': [
-              [  1, "Windows"        ],   // レベル0
-              [  2, "MacOS"  ],
-              [  3, "Linux", ],
+          'os-select': {
+		  		select_one: false,		// 「選択してください」は表示しない
+				sel_list: [				// セレクトリストの配列
+					[  1, "Windows"],
+					[  2, "MacOS"  ],
+					[  3, "Linux", ],
+				]
           ],
-          'license-select': [
-              [ 10, "Productkey-1", 1],   // レベル1
-              [ 11, "Productkey-2", 1],
-              [ 12, "Productkey-3", 2],
-              [ 15, "MIT-License",  3],
-          ]
+          'license-select': {
+		  		select_one: true,		// 「選択してください」を表示する
+				sel_list: [				// セレクトリストの配列
+					[ 10, "Productkey-1", 1],   // レベル1
+					[ 11, "Productkey-2", 1],
+					[ 12, "Productkey-3", 2],
+					[ 15, "MIT-License",  3],
+				],
+		  }
       };
       $('#top-level').ChainSelect(objList,10);  // 初期値を '10' で初期化
 
-      SELECTタグは次のように記述します。OPTION要素はセレクトテーブルから追加されるので記述不要です。
-      
-	        OS名:      <select class="os-select" id="top-level" name="os_id" data-ekenebt="next-level"></select>
-	    プロダクトキー: <select class="license-select" id="next-level" name="license_id"></select>
+	セレクトテーブルを作成するのに便利なメソッドが基底Helperクラスに定義してあります。
+	このメソッドは「ヘルパー変数で呼び出せるように引数は文字列として受け取ります。
+		${&SelectObject(os-select,false)}
+
+    SELECTタグでは、オブジェクトの参照プロパティを「data-value」属性で、
+	連動するSELECTタグを「data-element」属性で指定します。
+	OPTION要素はセレクトテーブルから追加されるので記述不要です。
+    
+	OS名:       	<select id="top-level" name="os_id" data-value="os-select" data-element="next-level"></select>
+	プロダクトキー: <select id="next-level" name="license_id" data-value="license-select"></select>
+	セクションテンプレート形式では次のようにします。
+		+select#top-level[os_id]<os-select>{next-level} => []
+		+select#next-level[license_id]<license-select> => []
 
 ・ドラッグドロップアップロード
 	(セレクタ).dropfiles(uploadURL, callback_func)

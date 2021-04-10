@@ -5,7 +5,7 @@
     // 連動セレクトタグ
     $.fn.ChainSelect = function (selObj,val,callback) {
         var id = this.attr('id');
-        var sel_chain = new SelectChain(id, selObj, callback);
+        var sel_chain = new SelectLink(selObj, id, callback);
         sel_chain.Select(val);
     };
     // 指定要素に読み込んだHTMLを書き込む
