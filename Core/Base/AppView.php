@@ -418,7 +418,7 @@ public function ViewTemplate($name,$vars = []) {
                                 set_array_key_unique($subsec,$sec,[]);
                             } else {
                                 // separate attribute
-                                $p = '/^([a-zA-Z]+[^\\\]):(.+)$/';
+                                $p = '/^([a-zA-Z][a-zA-Z\-]+[^\\\]):(.*)$/';
                                 if(preg_match($p,$sec,$m) === 1) {
                                     $attrList[$m[1]] = trim($m[2],"\"'");   // quote-char trim
                                 } else $innerText .= $sec;
@@ -426,8 +426,9 @@ public function ViewTemplate($name,$vars = []) {
                         } else $subsec[] = $sec;
                     } else {
                         $token = $this->expand_Strings(tag_body_name($token),$vars);
-                        if (ctype_alpha($token)) {      // attr-name
-                            if(!empty($sec)) $attrList[$token] = $sec;
+						if(preg_match('/^[a-zA-Z][a-zA-Z\-]+$/',$token)) {	// attr-name
+//                            if(!empty($sec)) 
+							$attrList[$token] = $sec;		// empty sec is single attr
                         } else {
                             set_array_key_unique($subsec,$token,$sec);
                         }
@@ -450,7 +451,8 @@ public function ViewTemplate($name,$vars = []) {
             foreach($attrs as $name => $val) {
                 $str = (is_array($val)) ? implode("\n",$val) :$val;
                 $str = $this->expand_Strings($str,$vars);
-                if(!empty($str)) $attr .= (is_numeric($name)) ? " {$str}" : " {$name}=\"{$str}\"";
+				if(empty($str)) $attr .= " {$name}";	// key-only attribute
+                else $attr .= (is_numeric($name)) ? " {$str}" : " {$name}=\"{$str}\"";
             }
         }
         return $attr;
@@ -749,7 +751,7 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         if(is_array($opt_val)) {
             $opt_val = array_flat_reduce($opt_val);
             foreach($opt_val as $opt => $val) {
-                $sel = ($val == $sel_item) ? ' selected':'';
+                $sel = ($val === $sel_item) ? ' selected':'';
                 echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
             }
         } else echo "<OPTION value='{$opt_val}'>{$opt_val}</OPTION>\n";
