@@ -329,6 +329,8 @@ public function ViewStyle($file_name) {
                     } else {
                         // @charset を削除して読み込む
                         $content = preg_replace('/(@charset.*;)/','/* $1 */',trim(file_get_contents($fn)) );
+						// C++ 風コメントを許す
+                        $content = preg_replace('/\/\/.*$/','',$content);
                         $content = $this->expand_Strings($content,$vars);
                         if($this->do_msg) echo "/* import({$filename}) in {$key} */\n";
                         $this->outputContents($content);

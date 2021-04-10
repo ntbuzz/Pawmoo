@@ -85,6 +85,11 @@ public function expand_locale($str) {
 //==============================================================================
 // Make HYPER-Link
 public function ALink($lnk,$txt,$under=false) {
+	echo $this->ALink_str($lnk,$txt,$under);
+}
+//==============================================================================
+// Make HYPER-Link
+public function ALink_str($lnk,$txt,$under=false) {
 	if($txt[0] == '#') {
 		$txt = mb_substr($txt,1);
 		$txt = $this->_($txt);
@@ -96,7 +101,7 @@ public function ALink($lnk,$txt,$under=false) {
 		$uline = (empty($under)) ? '' : " class='{$under}'";
 	} else $uline = ($under) ? '' : ' class="nounder"';
 	$target = (get_protocol($href) !== NULL) ? ' target=_blank':'';
-	echo "<a{$uline} href='{$href}'{$target}>{$txt}</a>";
+	return "<a{$uline} href='{$href}'{$target}>{$txt}</a>";
 }
 //==============================================================================
 // generate Page Button LABEL Tag
@@ -310,7 +315,7 @@ public static function ImageTag($file,$attr) {
 //==============================================================================
 // JS array define
 public static function define_var_array($arr,$name) { 
-	$row = "var {$name} = {\n'" . inplode("',\n'",$arr) . "'\n};";
+	$row = "var {$name} = [\n'" . implode("',\n'",$arr) . "'\n];";
 	return $row;
 }
 

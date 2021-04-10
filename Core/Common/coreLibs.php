@@ -164,7 +164,7 @@ function LocalCharset($str) {
 //==============================================================================
 // Removes the character string for duplicate judgment
 function tag_body_name($key) {
-    $n = strrpos($key,':');
+    $n = strrpos($key,'::#');
     if($n !== FALSE) {
         $dd = substr($key,$n+1);
         if(is_numeric($dd)) $key = substr($key,0,$n);

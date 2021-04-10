@@ -189,7 +189,7 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<img src='{$src}' alt='{$alt}'{$sz} />";
         },
 //------- ..class#id{ TEXT } CLASS/ID attributed SPAN/P replacement
-        '/\s\.\.(?:([\-\w]+))?(?:#([\-\w]+))?(:)?\{(.+?)\}\s/s' => function ($m) {
+        '/\s\.\.(?:([\-\w]+))?(?:#([\-\w]+))?(:)?\{(.*?)\}\s/s' => function ($m) {
             $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
             $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
             $tag = ($m[3]==='') ? 'span' : 'p';

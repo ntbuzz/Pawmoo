@@ -1,20 +1,33 @@
-// 共通関数
+// common prototype define (Mostly fo IE-11)
 //====================================================
-// IE8にはtrim()メソッドが無い！自前で実装
+// triming space
 String.prototype.trim2 = function() {
     return this.replace(/^[\s　]+|[\s　]+$/g, '');
 };
 //====================================================
-// ファイル名にURL-NGの文字があるか
+// check cannot use URI-charactor
 String.prototype.is_invalid_name = function () {
     return (this.match(/^.*[\+%#].*?$/));
 };
 //====================================================
-// 配列要素のマージ
+// element search: IE-11 is not have includes() method.
+Array.prototype.is_exists = function (v) {
+	var exists = false;
+	this.forEach(function (val) {
+		if (val === v) {
+			exists = true;
+			return false;	// break forEach
+		}
+		return true;	// continue next
+	});
+	return exists;
+};
+//====================================================
+// array merge: exclude duplicate element
 Array.prototype.mymerged = function (b) {
 	var new_array =  this.slice();	// 配列コピー
 	b.forEach(function (val) {
-		if (val !== "" & new_array.includes(val) == false) {
+		if (val !== "" & new_array.is_exists(val) == false) {
 			new_array.push(val);
 		}
 	});
@@ -35,8 +48,6 @@ function PawmooLocations() {
     this.items = location.pathname.replace(/^[\/]+|[\/]+$/g, '').split('/');
     var cont = "${$controller$}";
     if (this.items[1] !== cont) this.items.splice(1, 0, cont);      // controller name compensate
-//    alert("Pawmoo:" + cont+"\n"+objDump(this.items));
-    //
     this.query_str = function () { return (this.qstr == "") ? "" : "?"+this.qstr.replace(";","%3B"); };
     this.set_query = function (q) { this.qstr = q; };
     this.last_item = function (n) { return this.items[this.items.length - n]; };
@@ -73,7 +84,7 @@ function PawmooLocations() {
     };
 }
 //===============================================
-// ネスティッド SELECT 改良バージョン
+// Nested SELECT revised edition
 function SelectLink(setupobj, id, callback) {
 	var self = this;
 	var self_obj = $('#' + id);
@@ -124,73 +135,6 @@ function SelectLink(setupobj, id, callback) {
         return grp;
     }
 };
-/*
-// IEのために class でなく prototype ベースで実装
-function SelectChain(mytag,selObj,callback) {
-    var myobj = $('#'+mytag);
-    var ref = myobj.attr('class');
-    if (ref === undefined) ref = mytag;
-    var sub = myobj.attr('data-element');
-    this.my_obj = myobj;
-    this.select_tag = (ref in selObj) ? selObj[ref] :[];  // array-list
-    this.tag_id = ref;
-    this.tag_avtive = false;
-    this.Child_tag = (sub === undefined) ? null : new SelectChain(sub, selObj, callback);
-    if (this.Child_tag === null) {
-        this.callback_func = (callback === undefined) ? null : callback;
-    } else this.callback_func = null;   // セレクト中途ではコールバックしない
-};
-SelectChain.prototype = {
-    // Make Self OPTION List
-    selfList: function (val,grp) {
-        var self = this;
-        self.my_obj.empty();
-        self.my_obj.append('<option value="0">${#.core.SelectMe}</option>');
-        for (var i = 0; i < self.select_tag.length; i++) {
-            var value = self.select_tag[i];
-            if(value[2] == grp) {
-                var sel = (value[0] === val) ? ' selected' : '';
-                self.my_obj.append('<option value="' + value[0] + '"' + sel+'>' + value[1] + '</option>');
-            }
-        }
-    },
-    // Recursive OPTION List
-    defaultList: function(val,grp) {
-        var self = this;
-        self.selfList(val, grp);
-        if(self.Child_tag !== null) self.Child_tag.defaultList(0,val);
-    },
-    // Display List Group
-    myGroup: function (val) {
-        var self = this;
-        for (var i = 0; i < self.select_tag.length; i++) {
-            var value = self.select_tag[i];
-            if (val === value[0]) return value[2];
-        }
-        return 0;
-    },
-    // Selected List & OnChange Event set
-    Select: function (val) {
-        var self = this;
-        if(self.Child_tag !== null) val = self.Child_tag.Select(val);
-        var grp = self.myGroup(val);
-        self.selfList(val, grp);
-        self.my_obj.off().change(function() {
-            var my_val = $(this).val();
-            self.SelectValue = my_val;
-            self.tag_avtive = true;
-            if (self.Child_tag !== null) self.Child_tag.defaultList(0, my_val);
-            else if (self.callback_func !== null) {
-                // 最後のセレクトイベントでコールバック関数を呼ぶ、テキストも渡す
-                var my_txt = $(this).children(':selected').text();
-                self.callback_func(my_val,my_txt);
-            }
-        });
-        if (self.Child_tag === null && self.tag_avtive) self.my_obj.change();
-        return grp;
-    }
-};
-*/
 //====================================================
 // for DEBUG dump Object
 var objDump = function(obj, rIndent) {

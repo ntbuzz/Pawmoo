@@ -16,7 +16,7 @@ require_once('Core/Handler/NullHandler.php');
 //==============================================================================
 // field ALIAS and BIND-columns class
 class fieldAlias {
-	public $lang_alternate = FALSE;			// use origin field, when lang field empty
+	public $lang_alternate = TRUE;			// use origin field, when lang field empty
 	private	$lang_alias = [];
     private	$bind_columns = [];
 //==============================================================================
