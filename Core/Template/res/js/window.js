@@ -3,7 +3,8 @@
 // JQueryプラグインを定義する
 (function ($) {
     // 連動セレクトタグ
-    $.fn.ChainSelect = function (selObj,val,callback) {
+	$.fn.ChainSelect = function (selObj, val, callback) {
+		if (callback === undefined) callback = null;
         var id = this.attr('id');
         var sel_chain = new SelectLink(selObj, id, callback);
         sel_chain.Select(val);

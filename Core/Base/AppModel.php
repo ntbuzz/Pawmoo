@@ -278,7 +278,7 @@ public function GetValueList() {
             $this->RecordFinder($cond,$ref_list,NULL,$filter_rec);
             $set_sort_value($key_name,$this->Records);
         } else if(is_array($ref_list)) {
-			list($method,$argts) = array_first_item($ref_list);
+			list($method,$args) = array_first_item($ref_list);
 			if(is_numeric($method)) {
 				$this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
 				$set_sort_value($key_name,$this->$model->Records);

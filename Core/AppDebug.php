@@ -27,7 +27,7 @@ const EXCLUSION = [
 /*
     アプリケーションデバッグ情報
 */
-$debug_log_str = [];
+//$debug_log_str = [];
 $debug_run_time = 0;
 //==============================================================================
 //  デバッグログ出力
@@ -68,19 +68,29 @@ function sep_level($lvl) {
 //==========================================================================
 // ログリセット
 function log_reset($lvl) {
-    global $debug_log_str;
+//    global $debug_log_str;
     $logging = sep_level($lvl);
     if($logging === FALSE) return;
     list($cli,$lvl) = $logging;
     if($lvl < -DBMSG_SYSTEM) return; // no-logging level
 //    if(in_array($lvl,[DBMSG_DUMP, DBMSG_NOLOG, DBMSG_DIE, DBMSG_CLI])) return;      // no-logging level
-    unset($debug_log_str[$lvl]);
+//    unset($debug_log_str[$lvl]);
     MySession::set_paramIDs("debuglog.{$lvl}",NULL);
 }
 //==========================================================================
 // コマンドラインログの表示
 function debug_dump(...$items) {
     debug_log(DBMSG_CLI,$items);
+}
+//==========================================================================
+// NULL値の表示
+function get_null_value($arg) {
+	if($arg === []) $val = '[]';
+	else if($arg === NULL) $val = 'NULL';
+	else if(is_bool($arg)) $val = 'FALSE';
+	else if($arg === 0) $val = '0';
+	else $val = '""';
+	return "{$va}\n";
 }
 //==========================================================================
 // ログの記録または表示
@@ -116,13 +126,14 @@ function debug_log($lvl,...$items) {
                 if(gettype($val)==='object') {
                     $dmp .= "[{$val->ClassName}]\n"; // print_r($val,true);
                 } else if(empty($val)) {
-                    $dmp .= (is_int($val)) ? "0\n" : "NULL\n";
+                    $dmp .= get_null_value($val);
                 } else if(is_array($val)) {
                     $dmp .= "array(" . count($val) . ")\n";
                     $dmp .= $dump_object($val,$indent+1);
                 } else if(is_scalar($val)) {
                     if(is_int($val)) $dmp .= "{$val}\n";
-                    else {
+                    else if(is_bool($val)) $dmp .= "TRUE\n";
+					else {
                         $val = control_escape($val);
                         $dmp .= "'{$val}'\n";
                     }
@@ -132,7 +143,7 @@ function debug_log($lvl,...$items) {
         };
         foreach($items as $arg) {
             if(is_scalar($arg)) {
-                if(empty($arg)) $arg ='NULL'; else $arg= wordwrap(control_escape($arg),86,"\n");
+                $arg = ($arg === NULL) ? 'NULL': wordwrap(control_escape($arg),86,"\n");
                 $dmp_msg .= "{$arg}\n";
             } else if(is_array($arg)) {                        // 配列要素の出力
                 foreach($arg as $msg => $obj) {
@@ -143,7 +154,7 @@ function debug_log($lvl,...$items) {
                     if(gettype($obj)==='object') {
                         $dmp_msg .= "{$msg} : Class[{$obj->ClassName}]\n";// . print_r($obj,true);
                     } else if(empty($obj)) {
-                        $dmp_msg .= "{$msg} : NULL\n";
+                        $dmp_msg .= "{$msg} : " . get_null_value($obj);
                     } else if(is_scalar($obj)) {
                         $dmp_msg .= "{$msg} : {$obj}\n";
                     } else if(is_array($obj)) {
@@ -159,7 +170,7 @@ function debug_log($lvl,...$items) {
         }
         return "{$dmp_msg}\n";
     };
-    global $debug_log_str;
+//    global $debug_log_str;
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
         switch($lvl) {
@@ -170,9 +181,10 @@ function debug_log($lvl,...$items) {
             if((-DBMSG_LEVEL < $lvl && $lvl < 0) || (CLI_DEBUG && $cli !== 0)) {
                 echo "{$dmp_info}\n";
             } else if(!CLI_DEBUG) {     // WEB Access logging $lvl, donot worry CLI_MODE
-                if(isset($debug_log_str[$lvl])) $dmp_info = $debug_log_str[$lvl] . $dmp_info;
-                MySession::set_paramIDs("debuglog.{$lvl}",$dmp_info);
-                $debug_log_str[$lvl] = $dmp_info;
+//                if(isset($debug_log_str[$lvl])) $dmp_info = $debug_log_str[$lvl] . $dmp_info;
+//                MySession::set_paramIDs("debuglog.{$lvl}",$dmp_info);
+				MySession::set_paramIDs("debuglog.{$lvl}",$dmp_info,TRUE);
+//                $debug_log_str[$lvl] = $dmp_info;
             }
         }
     }

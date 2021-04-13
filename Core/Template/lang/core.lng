@@ -48,6 +48,11 @@
     AbortDone   => "送信完了しました."
     MAXFILE     => "送信ァイルは %d 個までです"
     BADFILE     => "'+','%','#' 文字を使用するとブラウザからダウンロードできなくなります！"
+	// カレンダー用
+	ToolTip => "カレンダーから選択"
+	monthNames => "'1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'"
+	dayNames => "'日','月','火','水','木','金','土'"
+	YearSuffix => '年'
 ]
 .en => [
     // for Pager Buttons
@@ -92,6 +97,11 @@
     AbortDone   => "Send Complete."
     MAXFILE     => "Upload Max %d Files"
     BADFILE     => "'+','%','#' chars used,Bad Download by WebBrowser!"
+	// for Calendar
+	ToolTip => "Pickup from CALENDER"
+	monthNames => "'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'"
+	dayNames => "'Sun','Mon','Tue','Wed','Thu','Fri','Sat'"
+	YearSuffix => ', '
 ]
 
 SiteMenu => [

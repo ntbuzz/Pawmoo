@@ -41,6 +41,7 @@ class AppView extends AppObject {
             'tabset'    => 'cmd_tabset',
             'floatwin'  => 'cmd_floatwin',
             'textbox'   => 'cmd_textbox',
+            'push'      => 'cmd_push',
             'php'       => 'cmd_php',
         ],
     );
@@ -420,7 +421,7 @@ public function ViewTemplate($name,$vars = []) {
                                 // separate attribute
                                 $p = '/^([a-zA-Z][a-zA-Z\-]+[^\\\]):(.*)$/';
                                 if(preg_match($p,$sec,$m) === 1) {
-                                    $attrList[$m[1]] = trim($m[2],"\"'");   // quote-char trim
+                                    $attrList[$m[1]] = ($m[2]==='') ? NULL : trim($m[2],"\"'");   // quote-char trim
                                 } else $innerText .= $sec;
                             }
                         } else $subsec[] = $sec;
@@ -449,10 +450,12 @@ public function ViewTemplate($name,$vars = []) {
         if(!empty($attrs)) {
             ksort($attrs);
             foreach($attrs as $name => $val) {
-                $str = (is_array($val)) ? implode("\n",$val) :$val;
-                $str = $this->expand_Strings($str,$vars);
-				if(empty($str)) $attr .= " {$name}";	// key-only attribute
-                else $attr .= (is_numeric($name)) ? " {$str}" : " {$name}=\"{$str}\"";
+				if($val === [] || $val === NULL) $attr .= " {$name}"; 
+				else {
+					$str = (is_array($val)) ? implode("\n",$val) :$val;
+					$str = $this->expand_Strings($str,$vars);
+					$attr .= (is_numeric($name)) ? " {$str}" : " {$name}=\"{$str}\"";
+				}
             }
         }
         return $attr;
@@ -604,6 +607,16 @@ public function ViewTemplate($name,$vars = []) {
         $_ = function($id) { return $this->_($id); };   // shortcut LANG-ID Convert
         extract($vars);
         eval($atext);
+    }
+    //--------------------------------------------------------------------------
+    //  PUSH SESSION variable
+    //  +push.name => value, +push.name => [ value-list ]
+    private function cmd_push($tag,$attrs,$sec,$vars) {
+        $txt = $this->expand_Strings(((is_array($sec)) ? array_to_text($sec) : $sec),$vars);
+		$txt = remove_space_comment_str($txt);
+        $name = $attrs['class'];
+		if(empty($name)) $name = 'resource';
+        MySession::set_paramIDs("view.{$name}",trim($txt),TRUE);
     }
     //--------------------------------------------------------------------------
     //  Define INLINE Section, for use after import Template
