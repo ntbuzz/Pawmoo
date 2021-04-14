@@ -90,7 +90,7 @@ function get_null_value($arg) {
 	else if(is_bool($arg)) $val = 'FALSE';
 	else if($arg === 0) $val = '0';
 	else $val = '""';
-	return "{$va}\n";
+	return "{$val}\n";
 }
 //==========================================================================
 // ログの記録または表示

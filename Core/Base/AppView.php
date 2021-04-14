@@ -173,7 +173,7 @@ public function ViewTemplate($name,$vars = []) {
                     return (mb_substr($nm,0,1)==='@') ? $this->Model->RecData[mb_substr($nm,1)]:$nm;
                 };
                 list($pat,$raw,$fn) = $m;
-                $var = $this->Model->RecData[$fn];     // get FIELD DATA
+                $var = ltrim($this->Model->RecData[$fn]);     // get FIELD DATA
                 if(count($m) !== 3) {
                     list(,,,$cmp,$val_true) = $m;
                     $val_true  = (empty($val_true) && !empty($cmp)) ? $var : $get_field_data($val_true);
@@ -452,7 +452,7 @@ public function ViewTemplate($name,$vars = []) {
             foreach($attrs as $name => $val) {
 				if($val === [] || $val === NULL) $attr .= " {$name}"; 
 				else {
-					$str = (is_array($val)) ? implode("\n",$val) :$val;
+					$str = (is_array($val)) ? implode("",$val) :$val;
 					$str = $this->expand_Strings($str,$vars);
 					$attr .= (is_numeric($name)) ? " {$str}" : " {$name}=\"{$str}\"";
 				}
@@ -614,7 +614,7 @@ public function ViewTemplate($name,$vars = []) {
     private function cmd_push($tag,$attrs,$sec,$vars) {
         $txt = $this->expand_Strings(((is_array($sec)) ? array_to_text($sec) : $sec),$vars);
 		$txt = remove_space_comment_str($txt);
-        $name = $attrs['class'];
+        $name = str_replace(' ','.',$attrs['class']);
 		if(empty($name)) $name = 'resource';
         MySession::set_paramIDs("view.{$name}",trim($txt),TRUE);
     }
@@ -759,7 +759,7 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         echo "<{$tag}{$attr}>\n";
         list($opt_key, $opt_val) = array_first_item($sec);
 		if(mb_substr($opt_key,-1)==='.') $opt_key = rtrim($opt_key,'.');
-        $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
+        $sel_item = (is_numeric($opt_key)) ? "{$opt_key}" : $this->expand_Strings($opt_key,$vars);
         $opt_val = $this->expand_SectionVar($opt_val,$vars);
         if(is_array($opt_val)) {
             $opt_val = array_flat_reduce($opt_val);

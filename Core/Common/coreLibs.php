@@ -206,15 +206,15 @@ function keystr_opr($str) {
 //==============================================================================
 // remove whote-space, newline
 function remove_space_comment_str($content) {
-	$pat = '[:(){}\[\]<>\=\?;,]';    // 前後の空白を削除する文字
+	$pat = '[:(){}\[\]<>\=\?;,]';    // remove white-space
 	$content = preg_replace("/\\s*({$pat})\\s+|\\s+({$pat})\\s*|(\\s)+/sm", '$1$2$3',
-			preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content));       // コメント行を削除
-	return trim($content);
+			remove_comment_str($content));		// remove comment
+	return $content;
 }
 //==============================================================================
 // remove comment
 function remove_comment_str($content) {
-	$content = preg_replace('/([\r\n])+/s',"\n",                  // コメント削除でできた空行を削除
-			preg_replace('/\/\*[\s\S]*?\*\/|\s+\/\/.*|^\/\/.*/','',$content));  // コメント行を削除
+	$content = preg_replace('/([\r\n])+/s',"\n",                  // remove empty line
+			preg_replace('/\/\*[\s\S]*?\*\/|\s+\/\/.*|^\/\/.*/','',$content));
 	return trim($content);
 }

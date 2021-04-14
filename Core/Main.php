@@ -198,5 +198,3 @@ $controllerInstance->__TerminateApp();
 // Database connection closed.
 LockDB::LockEnd();
 DatabaseHandler::CloseConnection();
-//=================================
-// Debugging Message

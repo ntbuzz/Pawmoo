@@ -295,10 +295,20 @@ public function ViewStyle($file_name) {
         $files = (is_array($sec)) ? $sec : array($sec);
         foreach($files as $key=>$vv) {
             if(empty($vv)) {
-                preg_match('/(?:@(\w+):)?(.+)/',$key,$m);
-                list($tmp,$vars,$vv) = $m;
-                $test_value = MySession::get_paramIDs($vars);
-                if(is_bool_false($test_value)) continue;
+				$p = '/@(?:\$(.+)|(\w+):(.+))$/';
+                if(preg_match($p,$key,$m)) {
+	                list($tmp,$id_name,$flag,$vv) = $m;
+					if(count($m)===2) {
+						$id = "view.{$id_name}";
+						$data = MySession::get_paramIDs($id);
+                        if($this->do_msg) echo "/* import from session '{$id}' */\n";
+						$this->outputContents($data);
+						continue;
+					} else {
+						$test_value = MySession::get_paramIDs($flag);
+						if(is_bool_false($test_value)) continue;
+					}
+				}
             }
             if(get_protocol($vv) !== NULL) {    // IMPORT from INTERNET URL
                 list($filename,$v_str) = (strpos($vv,';')!==FALSE)?explode(';',$vv):[$vv,''];  // 置換文字列
@@ -350,14 +360,9 @@ public function ViewStyle($file_name) {
 //    ファイルをコンパクト化して出力
     private function outputContents($content) {
         if($this->do_min) {         // コメント・改行を削除して最小化して出力する
-            $pat = '[:(){}\[\]<>\=\?;,]';    // 前後の空白を削除する文字
-            $content = preg_replace("/\\s*({$pat})\\s+|\\s+({$pat})\\s*|(\\s)+/sm", '$1$2$3',
-                    preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*?\n/','',$content));       // コメント行を削除
-            $content =trim($content);
+			$content = remove_space_comment_str($content);
         } else if(!$this->do_com) {         // コメントと不要な改行を削除して出力する
-            $content = preg_replace('/([\r\n])+/s',"\n",                  // コメント削除でできた空行を削除
-                    preg_replace('/\/\*[\s\S]*?\*\/|\s+\/\/.*|^\/\/.*/','',$content));  // コメント行を削除
-            $content =trim($content);
+			$content = remove_comment_str($content);
         }
         echo "{$content}\n";
     }
