@@ -95,8 +95,9 @@ function get_null_value($arg) {
 //==========================================================================
 // ログの記録または表示
 function debug_log($lvl,...$items) {
-    if( (defined('CLI_SUPPRESS') && CLI_DEBUG)
-        || (!CLI_DEBUG && ($lvl === DBMSG_CLI)) ) return;    // WEB request && NOLOG will be RETURN
+    if(	!in_array($lvl,[DBMSG_DIE,DBMSG_DUMP]) ||
+		(defined('CLI_SUPPRESS') && CLI_DEBUG) ||
+		(!CLI_DEBUG && ($lvl === DBMSG_CLI)) ) return;    // WEB request && NOLOG will be RETURN
     $logging = sep_level($lvl);
     if($logging === FALSE) return;
     list($cli,$lvl) = $logging;

@@ -7,7 +7,7 @@
  */
 class AppView extends AppObject {
     protected $Layout;
-    private $doTrailer = FALSE;
+    private $LayoutMode = FALSE;
     const Extensions = array("tpl","php","inc","html");
     private $currentTemplate;
     private $rep_array;
@@ -80,13 +80,18 @@ public function SetLayout($layoutfile) {
 public function PutLayout($layout = NULL) {
     if($layout === NULL) $layout = $this->Layout;
     debug_log(DBMSG_VIEW, "\$Layout = {$layout}");
+	$this->LayoutMode = TRUE;
+	$tmplate = $this->get_TemplateName('Preface');
+    if($tmplate !== NULL) {
+        $Helper = $this->Helper;
+		require_once ($tmplate);
+	}
     $this->ViewTemplate($layout);
-    $this->doTrailer = TRUE;
 }
 //==============================================================================
 // Terminate Response,
 public function __TerminateView() {
-    if($this->doTrailer === TRUE) {
+    if($this->LayoutMode) {
         // Do Replacement ADDRESS-BAR in Browser
         $url = App::Get_RelocateURL();
         if(isset($url)) {

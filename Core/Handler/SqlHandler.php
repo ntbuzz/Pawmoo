@@ -206,9 +206,11 @@ public function deleteRecord($wh) {
 		return "SELECT * FROM {$this->table} WHERE {$sql};";
 	}
 //==============================================================================
-// escape to single-quote(')
+// escape to single-quote('), (\)
 protected function sql_safequote(&$value) {
-	array_walk($value,function(&$v,$k){$v=str_replace("'","''",$v);});
+	foreach($value as $key => $val) {
+		if(gettype($val) === 'string') $value[$key] = $row[$key] = str_replace("'","''",str_replace('\\', '\\\\', $val));
+	}
 }
 //==============================================================================
 // generate JOIN token
