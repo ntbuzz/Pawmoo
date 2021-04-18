@@ -7,7 +7,7 @@
  */
 class AppView extends AppObject {
     protected $Layout;
-    private $doTrailer = FALSE;
+    private $LayoutMode = FALSE;
     const Extensions = array("tpl","php","inc","html");
     private $currentTemplate;
     private $rep_array;
@@ -41,6 +41,7 @@ class AppView extends AppObject {
             'tabset'    => 'cmd_tabset',
             'floatwin'  => 'cmd_floatwin',
             'textbox'   => 'cmd_textbox',
+            'push'      => 'cmd_push',
             'php'       => 'cmd_php',
         ],
     );
@@ -79,13 +80,18 @@ public function SetLayout($layoutfile) {
 public function PutLayout($layout = NULL) {
     if($layout === NULL) $layout = $this->Layout;
     debug_log(DBMSG_VIEW, "\$Layout = {$layout}");
+	$this->LayoutMode = TRUE;
+	$tmplate = $this->get_TemplateName('Preface');
+    if($tmplate !== NULL) {
+        $Helper = $this->Helper;
+		require_once ($tmplate);
+	}
     $this->ViewTemplate($layout);
-    $this->doTrailer = TRUE;
 }
 //==============================================================================
 // Terminate Response,
 public function __TerminateView() {
-    if($this->doTrailer === TRUE) {
+    if($this->LayoutMode) {
         // Do Replacement ADDRESS-BAR in Browser
         $url = App::Get_RelocateURL();
         if(isset($url)) {
@@ -172,7 +178,7 @@ public function ViewTemplate($name,$vars = []) {
                     return (mb_substr($nm,0,1)==='@') ? $this->Model->RecData[mb_substr($nm,1)]:$nm;
                 };
                 list($pat,$raw,$fn) = $m;
-                $var = $this->Model->RecData[$fn];     // get FIELD DATA
+                $var = ltrim($this->Model->RecData[$fn]);     // get FIELD DATA
                 if(count($m) !== 3) {
                     list(,,,$cmp,$val_true) = $m;
                     $val_true  = (empty($val_true) && !empty($cmp)) ? $var : $get_field_data($val_true);
@@ -420,7 +426,7 @@ public function ViewTemplate($name,$vars = []) {
                                 // separate attribute
                                 $p = '/^([a-zA-Z][a-zA-Z\-]+[^\\\]):(.*)$/';
                                 if(preg_match($p,$sec,$m) === 1) {
-                                    $attrList[$m[1]] = trim($m[2],"\"'");   // quote-char trim
+                                    $attrList[$m[1]] = ($m[2]==='') ? NULL : trim($m[2],"\"'");   // quote-char trim
                                 } else $innerText .= $sec;
                             }
                         } else $subsec[] = $sec;
@@ -449,10 +455,12 @@ public function ViewTemplate($name,$vars = []) {
         if(!empty($attrs)) {
             ksort($attrs);
             foreach($attrs as $name => $val) {
-                $str = (is_array($val)) ? implode("\n",$val) :$val;
-                $str = $this->expand_Strings($str,$vars);
-				if(empty($str)) $attr .= " {$name}";	// key-only attribute
-                else $attr .= (is_numeric($name)) ? " {$str}" : " {$name}=\"{$str}\"";
+				if($val === [] || $val === NULL) $attr .= " {$name}"; 
+				else {
+					$str = (is_array($val)) ? implode("",$val) :$val;
+					$str = $this->expand_Strings($str,$vars);
+					$attr .= (is_numeric($name)) ? " {$str}" : " {$name}=\"{$str}\"";
+				}
             }
         }
         return $attr;
@@ -606,6 +614,16 @@ public function ViewTemplate($name,$vars = []) {
         eval($atext);
     }
     //--------------------------------------------------------------------------
+    //  PUSH SESSION variable
+    //  +push.name => value, +push.name => [ value-list ]
+    private function cmd_push($tag,$attrs,$sec,$vars) {
+        $txt = $this->expand_Strings(((is_array($sec)) ? array_to_text($sec) : $sec),$vars);
+		$txt = remove_space_comment_str($txt);
+        $name = str_replace(' ','.',$attrs['class']);
+		if(empty($name)) $name = 'resource';
+        MySession::set_paramIDs("view.{$name}",trim($txt),TRUE);
+    }
+    //--------------------------------------------------------------------------
     //  Define INLINE Section, for use after import Template
     //  +inline.SecName => value  ( use import for @.SecName )
     private function cmd_inline($tag,$attrs,$sec,$vars) {
@@ -746,7 +764,7 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         echo "<{$tag}{$attr}>\n";
         list($opt_key, $opt_val) = array_first_item($sec);
 		if(mb_substr($opt_key,-1)==='.') $opt_key = rtrim($opt_key,'.');
-        $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
+        $sel_item = (is_numeric($opt_key)) ? "{$opt_key}" : $this->expand_Strings($opt_key,$vars);
         $opt_val = $this->expand_SectionVar($opt_val,$vars);
         if(is_array($opt_val)) {
             $opt_val = array_flat_reduce($opt_val);

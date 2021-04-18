@@ -231,6 +231,15 @@ public function SetPage($pagesize,$pagenum) {
     $this->dbDriver->SetPaging($this->pagesize,$this->page_num);
 }
 //==============================================================================
+// find Select key by value
+public function get_selectvalue_of_key($sel_name,$value) {
+	$str_value = strval($value);
+	foreach($hits->Select[$sel_name] as $key => $val) {
+		if($str_value === $val) return $key;
+	}
+	return "";
+}
+//==============================================================================
 // Get ROW-RECORD by Primarykey
 // Result:   $this->fields in Column Data
 public function getRecordByKey($id) {
@@ -278,7 +287,7 @@ public function GetValueList() {
             $this->RecordFinder($cond,$ref_list,NULL,$filter_rec);
             $set_sort_value($key_name,$this->Records);
         } else if(is_array($ref_list)) {
-			list($method,$argts) = array_first_item($ref_list);
+			list($method,$args) = array_first_item($ref_list);
 			if(is_numeric($method)) {
 				$this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
 				$set_sort_value($key_name,$this->$model->Records);

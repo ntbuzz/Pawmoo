@@ -131,7 +131,8 @@ function SelectLink(setupobj, id, callback) {
                 var my_txt = $(this).children(':selected').text();
                 callback.call(this,my_val,my_txt);
             }
-        });
+		});
+		if (child_obj === null) self_obj.change();
         return grp;
     }
 };
@@ -139,7 +140,7 @@ function SelectLink(setupobj, id, callback) {
 // for DEBUG dump Object
 var objDump = function(obj, rIndent) {
     if (!obj) return '';
-     var result = '', indent = '\t', br = '\n';
+     var result = '', indent = '  ', br = '\n';
      if (rIndent) indent += rIndent;
      if (typeof obj === 'object' && !obj.tagName) {
         result += '[ Object ] ->' + br;

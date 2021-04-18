@@ -189,6 +189,7 @@ if($controllerInstance->is_authorised()) {
 debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
 //    "#SessionClose" => MySession::$EnvData,
     "CLASS-MANAGER" => ClassManager::DumpObject(),
+    "SAVE-AppData"  => MySession::$EnvData['AppData'],     // included App::[sysVAR]
 ]);
 debug_run_time(DBMSG_CLI|DBMSG_SYSTEM);
 MySession::CloseSession();

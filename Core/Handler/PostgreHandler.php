@@ -63,14 +63,11 @@ public function getLastError() {
 // pg_update($this->dbb,$this->raw_table,$row,$wh);
 //==============================================================================
 public function updateRecord($wh,$row) {
-	$this->sql_safequote($row);
 	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ
-	// \ をエスケープする
-	foreach($row as $key => $val) {
-		$row[$key] = str_replace('\\', '\\\\', $val);
-	}
+	$this->sql_safequote($row);
+
 	// PostgreSQLのデータ型に変換
-	$aa = pg_convert($this->dbb,$this->raw_table,$row);
+	$aa = pg_convert($this->dbb,$this->raw_table,$row,PGSQL_CONV_FORCE_NULL );
 	if($aa === FALSE) {
 		$res1 = pg_get_result($this->dbb);
 		debug_log(DBMSG_DIE,[
@@ -101,10 +98,6 @@ public function updateRecord($wh,$row) {
 //==============================================================================
 public function insertRecord($row) {
 	$this->sql_safequote($row);
-	// \ をエスケープする
-//	foreach($row as $key => $val) {
-//		$row[$key] = str_replace('\\', '\\\\', $val);
-//	}
 	// PostgreSQLのデータ型に変換
 	$aa = pg_convert($this->dbb,$this->raw_table,$row);
 	if($aa === FALSE) {

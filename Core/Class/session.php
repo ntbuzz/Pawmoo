@@ -111,14 +111,17 @@ static function get_varIDs($tt,$names) {
 }
 //==============================================================================
 // ENV変数にアプリケーションパラメータを識別子指定で値を設定する
-static function set_paramIDs($names,$val) {
+static function set_paramIDs($names,$val,$append = FALSE) {
     $mem_arr = explode('.',PARAMS_NAME.".{$names}");
     $ee = &static::$EnvData;
     foreach($mem_arr as $key) {
         if(!isset($ee[$key])) $ee[$key] = [];
         $ee = &$ee[$key];
     }
-    $ee = $val;
+	if($append) {
+		$prev = (empty($ee)) ? '':"{$ee}\n";
+		$ee = "{$prev}{$val}";
+	} else $ee = $val;
 }
 //==============================================================================
 // ENV変数からアプリケーションパラメータを識別子指定で値を取得

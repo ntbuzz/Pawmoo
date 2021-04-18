@@ -62,8 +62,8 @@ EOF;
 //==============================================================================
 function ChainSelect() {
     return <<<EOS
-好きなアプリ： <select class="top-select" id="fav-list" data-element="fav-name"></select>
-    <select class="sub-select" id="fav-name"></select>
+好きなアプリ： <select id="fav-list" data-element="fav-name"></select>
+    <select id="fav-name"></select>
 EOS;
 }
 

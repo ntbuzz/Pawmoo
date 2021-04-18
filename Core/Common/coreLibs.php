@@ -166,7 +166,7 @@ function LocalCharset($str) {
 function tag_body_name($key) {
     $n = strrpos($key,'::#');
     if($n !== FALSE) {
-        $dd = substr($key,$n+1);
+        $dd = substr($key,$n+3);
         if(is_numeric($dd)) $key = substr($key,0,$n);
     }
     return $key;
@@ -203,4 +203,18 @@ function keystr_opr($str) {
     }
     return array($str,'');
 }
-
+//==============================================================================
+// remove whote-space, newline
+function remove_space_comment_str($content) {
+	$pat = '[:(){}\[\]<>\=\?;,]';    // remove white-space
+	$content = preg_replace("/\\s*({$pat})\\s+|\\s+({$pat})\\s*|(\\s)+/sm", '$1$2$3',
+			remove_comment_str($content));		// remove comment
+	return $content;
+}
+//==============================================================================
+// remove comment
+function remove_comment_str($content) {
+	$content = preg_replace('/([\r\n])+/s',"\n",                  // remove empty line
+			preg_replace('/\/\*[\s\S]*?\*\/|\s+\/\/.*|^\/\/.*/','',$content));
+	return trim($content);
+}
