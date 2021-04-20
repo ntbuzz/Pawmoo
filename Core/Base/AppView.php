@@ -173,21 +173,20 @@ public function ViewTemplate($name,$vars = []) {
                 // @field-name=compare-value!TRUE-VALUE:FALSE-VALUE
                 $p = '/(@{1,2})([^=!:\}]+)(?:=([^:!]+))?(?:!([^:\n]*))?(?:\:([^\n]+))?/';
                 preg_match($p,$var,$m);
-                debug_log(-999,[ "PREG" => $m]);
                 $get_field_data = function($nm) {
                     return (mb_substr($nm,0,1)==='@') ? $this->Model->RecData[mb_substr($nm,1)]:$nm;
                 };
                 list($pat,$raw,$fn) = $m;
                 $var = ltrim($this->Model->RecData[$fn]);     // get FIELD DATA
-                if(count($m) !== 3) {
-                    list(,,,$cmp,$val_true) = $m;
-                    $val_true  = (empty($val_true) && !empty($cmp)) ? $var : $get_field_data($val_true);
-                    $val_false = (count($m)===6 && !empty($m[5]))   ? $get_field_data($m[5]) : $var;
-                    if(empty($cmp)) {          // compare empty,then empty or bool_false
-                        $var = (empty($val_true)) ?
-                            ( (empty($var)) ? $val_false : $var ) :
-                            ( (is_bool_false($var)) ? $val_false : $val_true );
-                    } else $var = fnmatch($cmp,$var) ? $val_true : $val_false;       // compare wild-char
+                if(count($m) === 6) {
+                    list(,,,$cmp,$val_true,$val_false) = $m;
+					if($val_true === '') $val_true = "@{$fn}";
+					if($cmp === '') {	// no-comp will be empty-check
+						$an = (is_bool_false($var)) ? $val_false:$val_true;
+					} else {
+						$an = fnmatch($cmp,$var) ? $val_true : $val_false;       // compare wild-char
+					}
+					$var = $get_field_data($an);	// get data from alter-name
                 }
                 if($raw==='@') $var = str_replace("\n",'',text_to_html($var));
                 $val = $var;
@@ -308,13 +307,13 @@ public function ViewTemplate($name,$vars = []) {
             $key = $this->expand_Strings($key,$vars);
             $cmp_val = str_replace(["\n","\r"],'',$key);
             foreach($sec as $check => $value) {
-                if($check === '') $result = empty($cmp_val);            // is_empty ?
-                else if($check === '*') $result = !empty($cmp_val);     // is_notempty ?
+                if($check === '') $result = ($cmp_val==='');            // is_empty ?
+                else if($check === '*') $result = ($cmp_val !== '');     // is_notempty ?
                 else {
                     $chk_arr = explode('|',$check);
                     $result = FALSE;
                     foreach($chk_arr as $cmp_chk) {
-                        $result = (empty($cmp_chk)) ? empty($cmp_val) : fnmatch($cmp_chk,$cmp_val);       // compare wild-char
+                        $result = (empty($cmp_chk)) ? ($cmp_val==='') : fnmatch($cmp_chk,$cmp_val);       // compare wild-char
                         if($result) break;
                     }
                 }
@@ -764,7 +763,7 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         echo "<{$tag}{$attr}>\n";
         list($opt_key, $opt_val) = array_first_item($sec);
 		if(mb_substr($opt_key,-1)==='.') $opt_key = rtrim($opt_key,'.');
-        $sel_item = (is_numeric($opt_key)) ? "{$opt_key}" : $this->expand_Strings($opt_key,$vars);
+        $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
         $opt_val = $this->expand_SectionVar($opt_val,$vars);
         if(is_array($opt_val)) {
             $opt_val = array_flat_reduce($opt_val);
