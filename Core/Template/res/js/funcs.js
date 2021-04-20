@@ -1,3 +1,6 @@
+//====================================================
+// normarl javascript functions
+
 // common prototype define (Mostly fo IE-11)
 //====================================================
 // triming space
@@ -87,6 +90,7 @@ function PawmooLocations() {
 // Nested SELECT revised edition
 function SelectLink(setupobj, id, callback) {
 	var self = this;
+	var first_select = true;
 	var self_obj = $('#' + id);
 	var my_prop = self_obj.attr('data-value');
 	var child_id = self_obj.attr('data-element');
@@ -113,9 +117,9 @@ function SelectLink(setupobj, id, callback) {
 		child_grp = self_obj.find('option:selected').val();
         if(child_obj !== null) child_obj.defaultList(0,child_grp);
 	};
-    self.Select = function (val) {
+	self.Select = function (val) {
         if(child_obj !== null) val = child_obj.Select(val);
-        var grp = 0;
+		var grp = 0;
 		$.each(my_obj.sel_list, function (key, value) {
 			if (value[0] === val) {
 				grp = (value[2] === undefined) ? 0 : value[2];
@@ -129,13 +133,27 @@ function SelectLink(setupobj, id, callback) {
             if (child_obj !== null) child_obj.defaultList(0, my_val);
             else if (callback !== null) {
                 var my_txt = $(this).children(':selected').text();
-                callback.call(this,my_val,my_txt);
+                if(!first_select) callback.call(this,my_val,my_txt);
             }
 		});
 		if (child_obj === null) self_obj.change();
+		first_select = false;
         return grp;
     }
 };
+//====================================================
+// create FORM and SUBMIT
+var formSubmit = function (e, url) {
+	var form = $('<form method="POST">');
+	$.each(e, function (key, value) {
+		$('<input>').attr({
+			'type': 'hidden',
+			'name': key,
+			'value': value
+		}).appendTo(form);
+	});
+	form.attr('action', url).appendTo('body').submit();
+}
 //====================================================
 // for DEBUG dump Object
 var objDump = function(obj, rIndent) {

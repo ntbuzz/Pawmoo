@@ -3,7 +3,7 @@
 バルーンヘルプ表示CSS
 */
 .baloon-BK,.popup-BK {
-    z-index:9001;
+    z-index:10;
     display:none;
     position:fixed;
     top:0;
@@ -12,10 +12,13 @@
 	height:100%;/*for old Safari*/
     height:100vh;
 }
+.popup-BK {
+    z-index:1;
+}
 .baloon-BK:not(:target) {height:100%\9} /* IE9,10 */
 /*    ポップアップ吹き出し */
 .popup-baloon {
-    z-index:9999;
+    z-index:2;
     position:fixed;
     top:0;
     left:0;
@@ -101,7 +104,7 @@
     ポップアップボックス
 */
 .popup-box {
-    z-index:9002;
+    z-index:2;
     position:fixed;
     display:none;
     padding:10px;
@@ -116,7 +119,7 @@
 }
 /*	padding: 0px 10px;	/* [上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
 .popup-box span.resize {
-    z-index:9001;
+    z-index:3;
     position:absolute;
     right:0;
     bottom:0;
@@ -126,7 +129,7 @@
     background: url(res/img/resize.png) no-repeat left top;
 }
 .popup-box span.resize_message {
-    z-index:9001;
+    z-index:3;
     display:none;
     position: absolute;
     top: 0;
@@ -144,7 +147,7 @@
 
 /* close button */
 .popup-box span.close {
-    z-index:9001;
+    z-index:3;
     position:absolute;
     top:0;
     right: 5px;
@@ -205,7 +208,7 @@
 インフォボックス
 */
 .info-box {
-    z-index:9002;
+    z-index:2;
     position:fixed;
     display:none;
     min-width:100px;
@@ -224,7 +227,7 @@
     ダイアログボックス
 */
 .dialog-box {
-    z-index:9002;
+    z-index:2;
     position:fixed;
     display:none;
     min-width:200px;

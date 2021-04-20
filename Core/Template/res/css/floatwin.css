@@ -2,7 +2,7 @@
     floatWin style
 */
 .floatWindow {
-    z-index: 9901;
+    z-index: 2;
     display: none;
     position:absolute;
     width:550px;
@@ -49,7 +49,7 @@
 
 /* close button */
 .floatWindow span.close {
-    z-index:1;
+    z-index:3;
     position:absolute;
     top:0;
     right: 5px;
@@ -70,7 +70,7 @@
 }
 /*	padding: 0px 10px;	/* [上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
 .floatWindow span.resize {
-    z-index:1;
+    z-index:3;
     position:absolute;
     right:0;
     bottom:0;
@@ -80,7 +80,7 @@
     background: url(res/img/resize.png) no-repeat left top;
 }
 .floatWindow span.resize_message {
-    z-index:2;
+    z-index:3;
     border: 1px dashed gray;
     display:none;
     width: 120px;
@@ -96,12 +96,12 @@
     background-color:floralwhite;
 }
 
-/* 開くボタンと初期化タグは非表示 */
-.floatWindow span.openButton, data {
+/* 初期化タグは非表示 */
+.floatWindow data {
     display:none;
 }
 /* floatWindow の背景領域 */
-.floatBack {
+.floatWin-BK {
     position:fixed;
     top:0;
     left:0;
@@ -112,8 +112,7 @@
     filter:alpha(opacity=40);
 }
 /* 実行ボタン */
-.floatWindow .execButton,
-.floatWindow .closeButton
+.floatWindow .Button
 {
     margin: 0 15px;
 	border-top: 1px solid #ccc;
@@ -130,14 +129,12 @@
 */	box-shadow: 1px 1px 2px #E7E7E7;
     background: linear-gradient(#f1f1f1,#dfdfdf, #ccc);
 }
-.floatWindow .execButton:hover,
-.floatWindow .closeButton:hover
+.floatWindow .Button:hover
  {
     color:white;
     background: linear-gradient(#333,#888, #333);
 }
-.floatWindow .execButton:active,
-.floatWindow .closeButton:active
+.floatWindow .Button:active
 {
 	background: #aaa;  
 	padding: 6px 10px 4px;  
