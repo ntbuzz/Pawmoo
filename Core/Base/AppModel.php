@@ -234,7 +234,7 @@ public function SetPage($pagesize,$pagenum) {
 // find Select key by value
 public function get_selectvalue_of_key($sel_name,$value) {
 	$str_value = strval($value);
-	foreach($hits->Select[$sel_name] as $key => $val) {
+	foreach($this->Select[$sel_name] as $key => $val) {
 		if($str_value === $val) return $key;
 	}
 	return "";
