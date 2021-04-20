@@ -137,10 +137,7 @@ function SelectLink(setupobj, id, callback) {
             }
 		});
 		if (child_obj === null) self_obj.change();
-<<<<<<< HEAD
-=======
 		first_select = false;
->>>>>>> dev/master
         return grp;
     }
 };

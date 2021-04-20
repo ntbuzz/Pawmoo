@@ -314,11 +314,7 @@ echo "/*"; var_dump($tmplist); echo "*/";
 					if(count($m)===2) {
 						$id = "view.{$id_name}";
 						$data = MySession::get_paramIDs($id);
-<<<<<<< HEAD
-                        if($this->do_msg) echo "/* import from session '{$id}' */\n";
-=======
                         if($this->do_msg) echo "/* {$scope} import from session '{$id}' */\n";
->>>>>>> dev/master
 						$this->outputContents($data);
 						continue;
 					} else {

@@ -178,17 +178,6 @@ public function ViewTemplate($name,$vars = []) {
                 };
                 list($pat,$raw,$fn) = $m;
                 $var = ltrim($this->Model->RecData[$fn]);     // get FIELD DATA
-<<<<<<< HEAD
-                if(count($m) !== 3) {
-                    list(,,,$cmp,$val_true) = $m;
-                    $val_true  = (empty($val_true) && !empty($cmp)) ? $var : $get_field_data($val_true);
-                    $val_false = (count($m)===6 && !empty($m[5]))   ? $get_field_data($m[5]) : $var;
-                    if(empty($cmp)) {          // compare empty,then empty or bool_false
-                        $var = (empty($val_true)) ?
-                            ( (empty($var)) ? $val_false : $var ) :
-                            ( (is_bool_false($var)) ? $val_false : $val_true );
-                    } else $var = fnmatch($cmp,$var) ? $val_true : $val_false;       // compare wild-char
-=======
                 if(count($m) === 6) {
                     list(,,,$cmp,$val_true,$val_false) = $m;
 					if($val_true === '') $val_true = "@{$fn}";
@@ -198,7 +187,6 @@ public function ViewTemplate($name,$vars = []) {
 						$an = fnmatch($cmp,$var) ? $val_true : $val_false;       // compare wild-char
 					}
 					$var = $get_field_data($an);	// get data from alter-name
->>>>>>> dev/master
                 }
                 if($raw==='@') $var = str_replace("\n",'',text_to_html($var));
                 $val = $var;
