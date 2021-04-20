@@ -39,6 +39,7 @@ class AppStyle {
             'import'    => 'cmd_import',
             'section'   => 'cmd_section',
             'jquery'    => 'cmd_jquery',
+            'plugins'    => 'cmd_plugin',
         ],
         '*'  => 'do_comment',
     );
@@ -243,8 +244,20 @@ public function ViewStyle($file_name) {
         if($this->Filetype == 'js') {
             list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
             echo "$(function() { ";
-                $this->filesImport($tmplist,$sec);
+                $this->filesImport('jquery-',$tmplist,$sec);
             echo "});\n";
+        }
+    }
+//------------------------------------------------------------------------------
+// jquery Plugin
+// +plugin => [ files , ... ] or jquery => scalar
+    private function cmd_plugin($secParam, $param,$sec) {
+        if($this->Filetype == 'js') {
+            list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
+echo "/*"; var_dump($tmplist); echo "*/";
+            echo "(function ($) {\n";
+                $this->filesImport('plugins-',$tmplist,$sec);
+            echo "})(jQuery);\n";
         }
     }
 //------------------------------------------------------------------------------
@@ -252,7 +265,7 @@ public function ViewStyle($file_name) {
 // +import => [ files , ... ] or import => scalar
     private function cmd_import($secParam, $param,$sec) {
         list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
-        $this->filesImport($tmplist,$sec);
+        $this->filesImport('',$tmplist,$sec);
     }
 //------------------------------------------------------------------------------
 // section Command
@@ -291,7 +304,7 @@ public function ViewStyle($file_name) {
     }
 //------------------------------------------------------------------------------
 // ファイルのインポート処理
-    private function filesImport($tmplist, $sec) {
+    private function filesImport($scope,$tmplist, $sec) {
         $files = (is_array($sec)) ? $sec : array($sec);
         foreach($files as $key=>$vv) {
             if(empty($vv)) {
@@ -301,7 +314,11 @@ public function ViewStyle($file_name) {
 					if(count($m)===2) {
 						$id = "view.{$id_name}";
 						$data = MySession::get_paramIDs($id);
+<<<<<<< HEAD
                         if($this->do_msg) echo "/* import from session '{$id}' */\n";
+=======
+                        if($this->do_msg) echo "/* {$scope} import from session '{$id}' */\n";
+>>>>>>> dev/master
 						$this->outputContents($data);
 						continue;
 					} else {
@@ -313,7 +330,7 @@ public function ViewStyle($file_name) {
             if(get_protocol($vv) !== NULL) {    // IMPORT from INTERNET URL
                 list($filename,$v_str) = (strpos($vv,';')!==FALSE)?explode(';',$vv):[$vv,''];  // 置換文字列
                 parse_str($v_str, $vars);
-                if($this->do_msg) echo "/* import from {$filename} */\n";
+                if($this->do_msg) echo "/* {$scope}import from {$filename} */\n";
                 $content = file_get_contents($filename);
                 $replace_keys   = array_keys($vars);
                 $replace_values = array_values($vars);
@@ -342,7 +359,7 @@ public function ViewStyle($file_name) {
 						// C++ 風コメントを許す
                         $content = preg_replace('/\/\/.*$/','',$content);
                         $content = $this->expand_Strings($content,$vars);
-                        if($this->do_msg) echo "/* import({$filename}) in {$key} */\n";
+                        if($this->do_msg) echo "/* {$scope}import({$filename}) in {$key} */\n";
                         $this->outputContents($content);
                     }
                     $imported = TRUE;

@@ -99,7 +99,7 @@ public function updateRecord($wh,$row) {
 public function insertRecord($row) {
 	$this->sql_safequote($row);
 	// PostgreSQLのデータ型に変換
-	$aa = pg_convert($this->dbb,$this->raw_table,$row);
+	$aa = pg_convert($this->dbb,$this->raw_table,$row,PGSQL_CONV_FORCE_NULL);
 	if($aa === FALSE) {
 		$res1 = pg_get_result($this->dbb);
 		debug_log(DBMSG_DIE,[

@@ -34,25 +34,32 @@ Stylesheet => [
 // javascript SECTION
 Javascript => [
     common => [
+		+plugins => [
+            plugins/baloon.js               // Balloon Help
+            plugins/floatwin.js             // inner window 
+            plugins/info-box.js             // info-box for cannot move/resize
+            plugins/misc.js             // inner window 
+            plugins/popup-box.js            // popup-box 
+		]
         +jquery => [
-            baloon.js               // Balloon Help
-            info-box.js             // info-box for cannot move/resize
-            popup-box.js            // popup-box 
             context.js              // context menu popup
-            floatwin.js             // inner window 
             pagerscript.js          // pager button
+            window.js               // JQuery-Plugins
             @debugger:debugbar.js   // use DEBUGGER,if AppData['debugger'] in SESSION is not FLASE
         ]
         +import => [
             funcs.js                // common function/prototype
-            window.js               // JQuery-Plugins
         ]
     ]
     checklist => [			// debug
+		+plugins => [
+			plugins/checklist.js
+		]
+        +jquery => [
+            window.js               // JQuery-Plugins
+        ]
         +import => [
-			checklist.js
             funcs.js
-            window.js
         ]
 	]
 ]

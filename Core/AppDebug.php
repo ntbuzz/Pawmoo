@@ -88,16 +88,27 @@ function get_null_value($arg) {
 	if($arg === []) $val = '[]';
 	else if($arg === NULL) $val = 'NULL';
 	else if(is_bool($arg)) $val = 'FALSE';
+<<<<<<< HEAD
 	else if($arg === 0) $val = '0';
+=======
+	else if(is_int($arg)) $val = '0';
+	else if($arg !== '') $val = '"0"';
+>>>>>>> dev/master
 	else $val = '""';
 	return "{$val}\n";
 }
 //==========================================================================
 // ログの記録または表示
 function debug_log($lvl,...$items) {
+<<<<<<< HEAD
     if(	!in_array($lvl,[DBMSG_DIE,DBMSG_DUMP]) ||
 		(defined('CLI_SUPPRESS') && CLI_DEBUG) ||
 		(!CLI_DEBUG && ($lvl === DBMSG_CLI)) ) return;    // WEB request && NOLOG will be RETURN
+=======
+	if(CLI_DEBUG) {
+		if(defined('CLI_SUPPRESS')) return;		// dump suppress in command-line mode
+	} else if($lvl === DBMSG_CLI) return;    	// not command-line invoked
+>>>>>>> dev/master
     $logging = sep_level($lvl);
     if($logging === FALSE) return;
     list($cli,$lvl) = $logging;
@@ -127,6 +138,10 @@ function debug_log($lvl,...$items) {
                 if(gettype($val)==='object') {
                     $dmp .= "[{$val->ClassName}]\n"; // print_r($val,true);
                 } else if(empty($val)) {
+<<<<<<< HEAD
+=======
+//				echo "{$key}=NULL".get_null_value($val)."<br>\n";
+>>>>>>> dev/master
                     $dmp .= get_null_value($val);
                 } else if(is_array($val)) {
                     $dmp .= "array(" . count($val) . ")\n";

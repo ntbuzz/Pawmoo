@@ -233,6 +233,7 @@ public function Contents_Tab($sel,$default='') {
 // ChainSelect Object-List
 public function SelectObject($args) {
 	list($selname,$select_one) = explode(",",$args);
+	if(empty($select_one)) $select_one = 'true';
 	$object = "{$selname}: {\n\tselect_one: {$select_one},\n\tsel_list: [\n";
    	foreach($this->MyModel->Select[$selname] as $valset) {
 		$new_map = array_map(function($v) {
@@ -244,24 +245,6 @@ public function SelectObject($args) {
 	$object .= "]},";
 	return $object;
 }
-/*
-public function SelectObject($keyset) {
-	if(is_scalar($keyset)) $keyset = explode(',',$keyset);
-	$str = '';
-	foreach($keyset as $key) {
-		$str .= "'{$key}': [\n";
-    	foreach($this->MyModel->Select[$key] as $valset) {
-			$new_map = array_map(function($v) {
-				return (is_numeric($v)) ? $v :"'{$v}'";
-			},$valset);
-			if(count($new_map)===2) $new_map[] = 0;
-			$str .= "[".implode(',',$new_map) ."],\n";
-		}
-		$str .= "],\n";
-	}
-	return $str;
-}
-*/
 //==============================================================================
 // Gen Form TAG
 // attr array

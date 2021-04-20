@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // ウィンドウ操作関数
 //=========================================================
 // JQueryプラグインを定義する
@@ -168,28 +169,29 @@
 	};
 	
 })(jQuery);
+=======
+>>>>>>> dev/master
 // ***************************************************************************
 // セレクタを使う
-$(function () {
-    // スティッキー動作設定
-    var selector = $(".stickyBar");
-    selector.each(function () {
-        var self = $(this); // jQueryオブジェクトを変数に代入しておく
-        var stickyWin = self.closest('.fitWindow');
-        if (stickyWin.length == 0) stickyWin = self.parent();
-        // 親要素 のスクロールに追従する
-        stickyWin.on("scroll", function () {
-            var top = stickyWin.scrollTop();
-            self.css("top", top + "px");
-        });
-    });
-    // ウィンドウ高さ調整
-    var selector = $(".fitWindow");
-    selector.each(function () {
-        $(this).adjustWindow(); // jQueryオブジェクトを変数に代入しておく
-    });
-    $(window).resize();
-    // マークダウン外部リンク
-     $('.easy_markdown a[href^=http]:not(:has(img))').addClass("externalLink").attr('target','_blank');
-
+// スティッキー動作設定
+var selector = $(".stickyBar");
+selector.each(function () {
+	var self = $(this); // jQueryオブジェクトを変数に代入しておく
+	var stickyWin = self.closest('.fitWindow');
+	if (stickyWin.length == 0) stickyWin = self.parent();
+	// 親要素 のスクロールに追従する
+	stickyWin.on("scroll", function () {
+		var top = stickyWin.scrollTop();
+		self.css("top", top + "px");
+	});
 });
+// ウィンドウ高さ調整
+var selector = $(".fitWindow");
+selector.each(function () {
+	$(this).adjustWindow(); // jQueryオブジェクトを変数に代入しておく
+});
+//$(window).resize();
+// マークダウン外部リンク
+$('.easy_markdown a[href^=http]:not(:has(img))').addClass("externalLink").attr('target', '_blank');
+
+$("body").PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup();
