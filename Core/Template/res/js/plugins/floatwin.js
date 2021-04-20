@@ -9,7 +9,7 @@ $.fn.innerWindow = function (title) {
     var buttons = (val) ? val.split(",") : Array();
     var message_id= id+" .resize_message";
 //	操作ボタンパーツを追加
-    var controlls = ["openButton:", "close:${#core.Close}", "resize:${#core.Resize}", "resize_message:${#core.SizeDisplay}"];
+    var controlls = ["close:${#core.Close}", "resize:${#core.Resize}", "resize_message:${#core.SizeDisplay}"];
     controlls.forEach(function (value) {
         var cls = value.split(':');
         if (self.find("." + cls[0]).length == 0) {
@@ -19,12 +19,12 @@ $.fn.innerWindow = function (title) {
         }
     });
 //  標準ボタンパーツを追加
-    if(buttons.length) {
+	if (buttons.length && self.find(".center").length===0) {
         var buttontag = "<div class='center'><hr>";
         var buttonClass = [ "execButton", "closeButton"];
-        $.each(buttons,function(index,val) {
-            var action = buttonClass[index];
-            buttontag = buttontag+'<span class="Button '+action+'">'+val+'</span>';
+		$.each(buttons, function (index, val) {
+			var action = buttonClass[index];
+			buttontag = buttontag + '<span class="Button ' + action + '">' + val + '</span>';
         });
         buttontag = buttontag+"</div>";
         self.find('dd').append(buttontag);

@@ -38,9 +38,11 @@ $.fn.PopupBoxSetup = function () {
 			});
 			if (buttons.length === 0) {
 				// カスタムボタンが未定義のときだけ閉じるボタンを追加する
-				var tag = '<span class="close" title="${#core.Close}"></span>';
-				self.append(tag);
-			} else {
+				if (self.find(".close").length === 0) {
+					var tag = '<span class="close" title="${#core.Close}"></span>';
+					self.append(tag);
+				}
+			} else if (self.find(".custom-button").length === 0) {
 				var buttontag = "<div class='custom-button'>";
 				$.each(buttons, function (index, val) {
 					var label_class = val.split(":");
