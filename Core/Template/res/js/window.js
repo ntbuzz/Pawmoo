@@ -13,11 +13,7 @@ selector.each(function () {
 	});
 });
 // ウィンドウ高さ調整
-var selector = $(".fitWindow");
-selector.each(function () {
-	$(this).adjustWindow(); // jQueryオブジェクトを変数に代入しておく
-});
-//$(window).resize();
+$('body').fitWindow();
 // マークダウン外部リンク
 $('.easy_markdown a[href^=http]:not(:has(img))').addClass("externalLink").attr('target', '_blank');
 
