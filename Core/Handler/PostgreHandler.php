@@ -41,8 +41,8 @@ public function doQuery($sql) {
 			"SQL" => $sql,
 			"COND" => $this->LastCond,
 			"BUILD" => $this->LastBuild,
+			'QUERY失敗' => pg_last_error(),
 		]);
-		die('Postgres QUERY失敗' . pg_last_error());
 	}
 	return $this->rows;
 }
@@ -74,9 +74,9 @@ public function updateRecord($wh,$row) {
 			"ERROR:" => pg_result_error($res1),
 			"DBB" => $this->dbb,
 			"TABLE" => $this->raw_table,
-			"ROW" => $row
+			"ROW" => $row,
+			'Postgres CONVERT失敗' => pg_last_error(),
 		]);
-		die('Postgres CONVERT失敗' . pg_last_error());
 	}
 	$primary = '"' . key($wh) . '"';		// プライマリキー名を取得
 	$kstr = implode(',', array_keys($aa));	// フィールド名リストを作成
@@ -106,9 +106,9 @@ public function insertRecord($row) {
 			"ERROR:" => pg_result_error($res1),
 			"DBB" => $this->dbb,
 			"TABLE" => $this->raw_table,
-			"ROW" => $row
+			"ROW" => $row,
+			'Postgres CONVERT失敗' => pg_last_error(),
 		]);
-		die('Postgres CONVERT失敗' . pg_last_error());
 	}
 	$kstr = implode(',', array_keys($aa));	// フィールド名リストを作成
 	$vstr = implode(',', $aa);				// VALUES リストを作成
