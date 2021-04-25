@@ -68,9 +68,8 @@
     padding-left:1px;
     padding-top:1px;
 }
-/*	padding: 0px 10px;	/* [上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
-.floatWindow span.resize {
-    z-index:3;
+.floatWindow span.fw_resize {
+    z-index:33;
     position:absolute;
     right:0;
     bottom:0;
@@ -79,8 +78,8 @@
     cursor:se-resize;
     background: url(res/img/resize.png) no-repeat left top;
 }
-.floatWindow span.resize_message {
-    z-index:3;
+.floatWindow span.fw_resize_message {
+    z-index:33;
     border: 1px dashed gray;
     display:none;
     width: 120px;
@@ -102,6 +101,7 @@
 }
 /* floatWindow の背景領域 */
 .floatWin-BK {
+	z-index: 1;
     position:fixed;
     top:0;
     left:0;

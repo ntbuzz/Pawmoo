@@ -55,7 +55,7 @@ html, body {
 .button:active {
 	background: #aaa;  
 }
-// 削除ボタン付きリスト
+/* 削除ボタン付きリスト */
 .delete-item-list {
 	list-style: none;
 }
