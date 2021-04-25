@@ -45,7 +45,6 @@
 /* タブコンテンツ */
 .tabControll>ul.tabcontents {
     clear:both;
-    padding:10px;
 	list-style:none;
     border: 1px dotted gray;
 }

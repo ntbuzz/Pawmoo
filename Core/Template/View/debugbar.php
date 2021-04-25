@@ -4,12 +4,12 @@
 // DOMの準備ができたらログを読み込んでデバッグバーに格納する
 function LoadDebugBar() {
     var url = "/logs/<?= App::$AppName; ?>/";
-    $('.debugBar').css('display','none');
+    $('.debugBar').Visible(false);
     $.get(url)
         .done(function(data) {
             $('.debugBar')
                 .html(data)
-                .css('display','block');
+                .Visible('block');
         })
         .fail(function() {
             alert('Log Get-ERROR:'+url);

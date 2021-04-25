@@ -214,3 +214,13 @@ function array_member_value($nVal,$names) {
     }
     return $nVal;
 }
+//==============================================================================
+// get AND condition array by separate SPC word from find keyword
+function condition_array($keyset,$keystr) {
+	$cond = [];
+	$and = explode(' ',str_replace(['　','  '],' ',$keystr));
+    foreach($and as $nm) {
+		$cond[] = [$keyset => $val];
+    }
+    return $cond;
+}

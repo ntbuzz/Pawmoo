@@ -2,7 +2,7 @@
 // 位置固定のポップアップボックスを表示する
 // オプション設定のパネル表示などに使用する
 $.fn.PopupBoxSetup = function () {
-	$(this).find(".popup-box").each(function () {
+	this.find(".popup-box").each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var val = self.attr("value");
 		var buttons = (val === undefined) ? [] : val.split(",");
@@ -12,7 +12,7 @@ $.fn.PopupBoxSetup = function () {
 		var message_id = self_id + " .resize_message";
 		if (ref != "#" && self_id != "#") {
 			var ref_obj = $(ref);
-			ref_obj.css("cursor", "pointer");
+			ref_obj.css({ 'cursor': "pointer", 'z-index': 10 });
 			// サイズ属性があればウィンドウサイズを指定する
 			if (self.is('[size]')) {
 				var sz = self.attr("size").split(',');
@@ -31,26 +31,35 @@ $.fn.PopupBoxSetup = function () {
 			controlls.forEach(function (value) {
 				var cls = value.split(':');
 				if (self.find("." + cls[0]).length == 0) {
-					var alt = (cls[1] != '') ? '" title="' + cls[1] + '"' : '';
+					var alt = (cls[1] != '') ? '" title="' + cls[1] : '';
 					var tag = '<span class="' + cls[0] + alt + '"></span>';
 					self.append(tag);
-				}
+				};
 			});
 			if (buttons.length === 0) {
 				// カスタムボタンが未定義のときだけ閉じるボタンを追加する
 				if (self.find(".close").length === 0) {
 					var tag = '<span class="close" title="${#core.Close}"></span>';
 					self.append(tag);
-				}
-			} else if (self.find(".custom-button").length === 0) {
-				var buttontag = "<div class='custom-button'>";
+				};
+			} else {
+				var panel = self.find(".custom-button");
+				if (panel.length === 0) {
+					panel = $("<div class='custom-button'></div>").appendTo(self);
+				};
+				panel.empty();
 				$.each(buttons, function (index, val) {
 					var label_class = val.split(":");
-					buttontag = buttontag + '<span class="button ' + label_class[1] + '">' + label_class[0] + '</span>';
+					var btn = $('<span class="button ' + label_class[1] + '">' + label_class[0] + '</span>').appendTo(panel);
+					if (!["close", "cancel"].is_exists(label_class[1])) {
+						btn.off().click(function () {
+							self.submitObject(false, function (e) {
+								btn.trigger("execute",e);
+							});
+						});
+					};
 				});
-				buttontag = buttontag + "</div>";
-				self.append(buttontag);
-			}
+			};
 			// バルーンを消すための領域を定義
 			var backwall = $('<div class="popup-BK"></div>');
 			// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
@@ -58,6 +67,11 @@ $.fn.PopupBoxSetup = function () {
 				self.fadeOut('fast');
 				backwall.fadeOut('fast', function () {
 					backwall.remove();
+					var init_content = self.attr('data-init');	// クリアするコンテンツID
+					if (init_content !== undefined) {
+						alert(init_content + " CLEAR");
+						$('#' + init_content).empty();
+					}
 				});
 			});
 			// 起動ボタンのクリックで表示する
@@ -69,15 +83,15 @@ $.fn.PopupBoxSetup = function () {
 				var y = ref_obj.offset().top + self.getPaddingBox().top;
 				if ((x + self.outerWidth()) > $(window).innerWidth()) {
 					x = ref_obj.offset().left - self.outerWidth(true);   // padding+margin込みの幅を差引く
-				}
+				};
 				if ((y + self.outerHeight()) > $(window).innerHeight()) {
 					y = $(window).innerHeight() - self.outerHeight();   // padding+margin込みの高さを差引く;
 					if (y <= 0) {
 						y = 10;
 						var h = $(window).innerHeight() - 40;   // 上下 20px
 						self.css('height', h + 'px');
-					}
-				}
+					};
+				};
 				self.css({ 'left': x + 'px', 'top': y + 'px' });
 				self.fadeIn('fast');
 				// クローズイベントを登録
@@ -86,6 +100,18 @@ $.fn.PopupBoxSetup = function () {
             		e.preventDefault();
 					self.trigger('close-me');
 				});
+				// フォーム内のINPUTでENTERが押下されたときの処理
+				// data-value=??? に紐付けされたクラスのイベント発火
+				var enter = self.attr("data-value");  // 紐付けるID
+				if (enter !== undefined) {
+					self.on('keypress', 'input', function (e) {
+						if (e.key === 'Enter') {
+							e.stopPropagation();
+							e.preventDefault();
+							$('.' + enter).click();
+						}
+					});
+				};
 			});
 			// リサイズのドラッグ
 			$(resize_id).on('mousedown', function (e) {
@@ -110,5 +136,5 @@ $.fn.PopupBoxSetup = function () {
 			});     // mousedown()
 		};
 	});
-	return $(this);
+	return this;
 };

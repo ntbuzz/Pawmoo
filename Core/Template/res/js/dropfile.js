@@ -16,7 +16,7 @@ function ProgressBar(child, fmd, name,size,callback_func) {
     self.Cancel.click(function () {
         if (confirm("${#.core.Confirm}".replace('%s',name))) { // fmd.get('name')))) {
             self.Abort(false);
-        }
+        };
     });
     // ファイル情報を表示
     sz = size;  // fmd.get('size');
@@ -26,33 +26,33 @@ function ProgressBar(child, fmd, name,size,callback_func) {
         if (i >= 9 && sz > 1.0) {
             szStr = "Size Over > 1.0 GB";
             self.Aborted = true;
-        }
+        };
     } else {
         szStr = "Size ZERO or Directory";
         self.Aborted = true;
-    }
+    };
     self.FileSize.html(szStr);
     self.FileName.html(name);//fmd.get('name'));
     // 完了処理
     self.Finished = function (aborted) {
-        self.Cancel.css('display','none');
+        self.Cancel.Visible(false);
         var cls = (aborted) ? 'error' : 'complete';
         self.progressPanel.addClass(cls);
         callback_func(aborted);
-    }
+    };
     // 送信を中止
     self.Abort = function (propagate) {
         self.Aborted = true;
         if(self.jqxhr != null) self.jqxhr.abort();
         if (propagate && self.child_link != null) self.child_link.Abort(true);
-    }
+    };
     self.AjaxStart = function (url) {
-        self.progress_Bar.css('display', 'flex');
+        self.progress_Bar.Visible('flex');
         if (self.child_link != null) self.child_link.AjaxStart(url);
         if (self.Aborted) {
             self.Finished(true);    // ERROR または ABORT
             return;
-        }
+        };
         self.jqxhr = $.ajax({
             url: url,
             type: 'POST',
@@ -68,7 +68,7 @@ function ProgressBar(child, fmd, name,size,callback_func) {
                         var percent = parseInt(e.loaded / e.total * 100);
                         self.gainBar.width(percent+'%').html(percent+'%');
                     },false);
-                }
+                };
                 return xhrobj;
             },
             success: function (data) {
@@ -82,11 +82,11 @@ function ProgressBar(child, fmd, name,size,callback_func) {
                         'textStatus:' + textStatus + "\n" +
                         'errorThrown:' + errorThrown.message
                     );
-                }
+                };
                 self.Finished(true);    // ERROR または ABORT
             },
         });
-    }
+    };
     return self;
 };
 //=============================================================================================
@@ -136,22 +136,22 @@ function UploadFiles(files,url, callback_func) {
         });
         obj.append(next.progress_Bar);
         topBar = next;
-    }
+    };
     $('body').append(bk_panel);
     if (topBar === null) {
         self.CloseWait();
         alert("FILES EMPTY!!");
         return;
-    }
+    };
     // メッセージ表示
     self.RestMessage = function (n) {
         rest.text("${#.core.RestFiiles}" + n);
-    }
+    };
     // ダイアログを閉じる
     self.CloseDialog = function () {
         bk_panel.fadeOut("fast");
         bk_panel.remove();
-    }
+    };
     self.CloseWait = function () {
         $.busy_cursor(false);
         if (callback_func != undefined) callback_func(upload);
@@ -162,15 +162,15 @@ function UploadFiles(files,url, callback_func) {
             cancel_close.text('${#.core.Close}').off().click(function () {
                 self.CloseDialog();
             });
-        }
-    }
+        };
+    };
     // アップロード実行
     upload_msg.text('${#.core.Uploading}');
     bk_panel.fadeIn('fast');
     self.RestMessage(upload.rest);
     $.busy_cursor(true);
     topBar.AjaxStart(url);
-}
+};
 //=============================================================================================
 // マルチペアファイルアップロード
 // ペアのファイルを個数制限付きでアップロード
@@ -220,7 +220,7 @@ function PairUploadDialog(files,url,callback_func) {
         </tr></table>";
         panel.append(list);
         self.SecondFileName(panel, undefined, f.name);
-    }
+    };
     // アップロードするファイルを選択
     dialog.find('input[type=file]').change(function() {
         var file = $(this).prop('files')[0];
@@ -252,7 +252,7 @@ function PairUploadDialog(files,url,callback_func) {
                 alert(msg.replace('%s',files[num].name));
                 secondf_set = false;
                 return false;
-            }
+            };
             return true;
         });
         if (!secondf_set) return false;
@@ -274,25 +274,25 @@ function PairUploadDialog(files,url,callback_func) {
             });
             $(this).append(next.progress_Bar);
             topBar = next;
-            $(this).find('.title_bar').css('display', 'none');
+            $(this).find('.title_bar').Visible(false);
             return true;
         });
         if (topBar === null) {
             self.CloseWait();
             alert("FILES EMPTY!!");
             return false;
-        }
+        };
         upload_msg.text('${#.core.Uploading}');
         self.RestMessage(upload.rest);
         dialog.find('label').each(function () {
-            $(this).css('display', 'none'); // 押せないように消す
+            $(this).Visible(false); // 押せないように消す
             $(this).closest('th').html("${#.core.SECONDFILE}");
         });
-        cancel_close.css('display', 'none');   // 押せないように消す
+        cancel_close.Visible(false);   // 押せないように消す
         $(this).text('${#.core.ABORT}');     // 送信→中止ボタンに切替
         $(this).off().click(function () {
             self.topBar.Abort(true);
-            $(this).css('display', 'none'); // 押せないように消す
+            $(this).Visible(false); // 押せないように消す
         });
         $.busy_cursor(true);
         topBar.AjaxStart(url);
@@ -300,7 +300,7 @@ function PairUploadDialog(files,url,callback_func) {
     // 残りファイル数表示
     self.RestMessage = function (n) {
         rest.text("${#.core.RestFiiles}" + n);
-    }
+    };
     self.CloseWait = function () {
         $.busy_cursor(false);
         if (callback_func != undefined) callback_func(upload);
@@ -308,14 +308,14 @@ function PairUploadDialog(files,url,callback_func) {
             cancel_close.click();
         } else {
             upload_msg.text('${#.core.AbortDone}'); // ABORTしていたらメッセージを表示
-            send_abort.css('display', 'none');        // 送信/中止ボタンは押せないように消す
+            send_abort.Visible(false);        // 送信/中止ボタンは押せないように消す
             cancel_close.text('${#.core.Close}');      // 閉じるに変更
-            cancel_close.css('display', 'inline');     // 押せるように再表示
-        }
-    }
+            cancel_close.Visible('inline');     // 押せるように再表示
+        };
+    };
     $('body').append(bk_panel);
     bk_panel.fadeIn('fast');
-}
+};
 //----------------------------------
 function isFileCharsetOK(files) {
     for (var i = 0; i < files.length; ++i) {
@@ -324,11 +324,11 @@ function isFileCharsetOK(files) {
         if (fname.is_invalid_name()) {
             if (confirm("${#.core.BADFILE}")) {
                 return false;
-            }
-        }
-    }
+            };
+        };
+    };
     return true;
-}
+};
 (function ($) {
 /* ===============================================
     ファイルを一つずつアップロードする
@@ -387,7 +387,7 @@ $.fn.dropfiles2 = function (maxfiles,url, callback_func) {
             if (maxfiles>0  && files.length > maxfiles) {
                 alert("${#.core.MAXFILE}".replace('%d',maxfiles));
                 return false;
-            }
+            };
             if(isFileCharsetOK(files)) PairUploadDialog(files, url,callback_func);
         },
     });

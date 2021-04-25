@@ -16,5 +16,5 @@ $(".fitWindow").scroll(function () {
             .fadeIn();
     } else {
         moveButton.off().fadeOut();
-    }
+    };
 });

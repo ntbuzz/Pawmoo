@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2021 by nTak
  * @license    MIT
- * @version 0.61.0, 2021-04-20
+ * @version 0.62.0, 2021-04-25
  * System Require: PHP 5.6 or Higher
  *
 

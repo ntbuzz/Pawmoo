@@ -26,12 +26,12 @@ if (typeof popup_menu_function == "object") {
                             $(func_elem).click();
                         } else {        // IDそのものをクリック
                             $(func_id).click();
-                        }
+                        };
                         return false;   // 親要素に処理させない
                     });
                 } else {
                     $(this).addClass('disable');
-                }
+                };
             });
             ref.bind("contextmenu", function(e){
                 // イベント発生位置(クリック位置)を基準にメニューを表示
@@ -50,7 +50,7 @@ if (typeof popup_menu_function == "object") {
                     $(ref_id).removeClass('selected');  // 全部のクラスを変更
                     $(this).addClass('selected hilight');       // クリックされた要素のみ
                     return false;   // 親要素に処理させない
-                }
+                };
             });
 
         };
