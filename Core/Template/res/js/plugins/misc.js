@@ -91,7 +91,7 @@ $.fn.fitWindow = function (msg) {
 		var this_box = $(this).bound_box();
 		var pbottom = parent_bottom($(this).parent(),this_box.adjustBottom);
 		var my_height = pbottom - this_box.TopPos - this_box.withBottomMargin;
-		alert($(this).debug_id('BOTTOM=')+pbottom);
+//		alert($(this).debug_id('BOTTOM=')+pbottom);
 		var s_height = my_height;//-my_margin;
 		$(this).css({
 			'min-height': s_height + "px",
