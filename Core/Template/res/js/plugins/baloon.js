@@ -3,7 +3,7 @@
 // jquery => コマンドでインクルードすること
 // ポップアップセレクター
 $.fn.PopupBaloonSetup = function () {
-	$(this).find(".popup-baloon").each(function () {
+	this.find(".popup-baloon").each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var ref = self.attr("data-element");  // 紐付けるID
 		var act = ref.slice(0, 1);            // 先頭が＠ならmouseover
@@ -14,9 +14,10 @@ $.fn.PopupBaloonSetup = function () {
 			if (tag == "!") ref = ref.slice(1); // 先頭が！ならアイコン追加しない
 			var icon = (tag == "!") ? ref : ref + "-help";
 			if ($('#' + icon).length == 0) {
-				$('#' + ref).after('<span class="help_icon" id="' + icon + '"></span>');
+				$('#' + ref).after('<span class="help_icon" id="' + icon + '"></span>')
+							.css("margin-right", '2px');
 				ev = 'mouseover';   // ポップアップイベントが登録されていることがあるので、強制的にマウスオーバーにする
-			}
+			};
 			var icon_obj = $('#' + icon);
 			if (ev == "click") icon_obj.css("cursor", "help");
 			icon_obj.off(ev).on(ev, function () {
@@ -53,7 +54,7 @@ $.fn.PopupBaloonSetup = function () {
 						if ((this.top + this.height) <= $(window).height()) return false;
 						this.top = target.top - this.height - (target.height/2);
 						return true;
-					}
+					},
 				};
 				var cls = 'popup-baloon baloon-';
 				cls = cls + ((Balloon.outRangeY()) ? 'bottom-' : 'top-');
@@ -68,11 +69,11 @@ $.fn.PopupBaloonSetup = function () {
 						$('.baloon-BK').fadeOut('fast',function(){
 							$('.baloon-BK').remove();
 						});
-					}
+					};
 				});
 			});
 		};
 	});
-	return $(this);
+	return this;
 };
 
