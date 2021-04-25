@@ -41,6 +41,7 @@ class AppView extends AppObject {
             'tabset'    => 'cmd_tabset',
             'floatwin'  => 'cmd_floatwin',
             'textbox'   => 'cmd_textbox',
+            'textedit' 	=> 'cmd_textedit',
             'push'      => 'cmd_push',
             'php'       => 'cmd_php',
         ],
@@ -763,12 +764,12 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         echo "<{$tag}{$attr}>\n";
         list($opt_key, $opt_val) = array_first_item($sec);
 		if(mb_substr($opt_key,-1)==='.') $opt_key = rtrim($opt_key,'.');
-        $sel_item = (is_numeric($opt_key)) ? "{$opt_key}" : $this->expand_Strings($opt_key,$vars);
+        $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
         $opt_val = $this->expand_SectionVar($opt_val,$vars);
         if(is_array($opt_val)) {
             $opt_val = array_flat_reduce($opt_val);
             foreach($opt_val as $opt => $val) {
-                $sel = ($val === $sel_item) ? ' selected':'';
+                $sel = ($val == $sel_item) ? ' selected':'';	// allow digit-string compare
                 echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
             }
         } else echo "<OPTION value='{$opt_val}'>{$opt_val}</OPTION>\n";
@@ -786,7 +787,7 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<div{$attr}>\n";
         // create tabset
-        echo "<div class='tabPanel'><ul class='tabmenu'>\n";
+        echo "<div class='tabPanel'><ul class='tabmenu stickyBar'>\n";
         $tabs = array_keys($sec);
         foreach($tabs as $key_val) {
             list($tag,$attrs) = $this->tag_Separate($key_val,$vars);
@@ -841,12 +842,26 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
     }
     //--------------------------------------------------------------------------
     //  INPUT TEXT OUTPUT
-    // +textbox[name]:size => [  attribute => value value    ]
+    // +textbox:size[name] => [  attribute => value value    ]
     private function cmd_textbox($tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         if(!empty($innerText)) $attrs['value'] = $innerText;
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<INPUT TYPE='text'{$attr}>\n";
+    }
+    //--------------------------------------------------------------------------
+    //  TEXTAREA
+    // +textedit[name](rows:cols) => [  attribute => value value    ]
+    private function cmd_textedit($tag,$attrs,$sec,$vars) {
+        list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
+        if(isset($attrs['value'])) {
+			list($rows,$cols) = explode(':',$attrs['value']);
+			unset($attrs['value']);
+			if(!empty($rows)) $attrs['rows'] = $rows;
+			if(!empty($cols)) $attrs['cols'] = $cols;
+		}
+        $attr = $this->gen_Attrs($attrs,$vars);
+        echo "<TEXTAREA{$attr}>{$innerText}</TEXTAREA>\n";
     }
     //--------------------------------------------------------------------------
     //  INPUT RADIO OUTPUT
