@@ -35,10 +35,10 @@ Stylesheet => [
 Javascript => [
     common => [
 		+plugins => [
+            plugins/misc.js             	// miscellaneous plugin
             plugins/baloon.js               // Balloon Help
             plugins/floatwin.js             // inner window 
             plugins/info-box.js             // info-box for cannot move/resize
-            plugins/misc.js             // inner window 
             plugins/popup-box.js            // popup-box 
 		]
         +jquery => [
