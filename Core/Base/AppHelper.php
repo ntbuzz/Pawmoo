@@ -214,6 +214,42 @@ public function MakeListTable($deftab) {
 	echo "</tbody></table>";
 }
 //==============================================================================
+// Output Table List for ContentsView
+public function TableListView($header,$primary,$Records=NULL,$max=0) {
+	if($Records===NULL) {
+		$Records = $this->MyModel->Records;
+		$max = count($Records);
+	}
+	$cnt = count($Records);
+	echo "<h3>検索結果: {$cnt}/{$max}</h3>";
+	if($max > $cnt) echo "検索結果が多すぎます。キーワードを追加して絞り込んでください.";
+	echo '<div class="result_list_view fitWindow" id="sticky_header">';
+	echo "<table id='find_result_table' class='tablesorter'>\n<thead>\n";
+	echo '<tr>';
+	foreach($header as $key => $val) {
+		list($alias,$align,$flag,$wd) = $val;
+		$tsort = ($flag==2) ? '' : ' class="sorter-false"';
+		$style = ($wd==0) ? '' : " style='width:{$wd}px;'";
+		echo "<th${tsort}{$style}>{$alias}</th>";
+	}
+	echo "</tr>\n";
+	echo "</thead>\n<tbody>\n";
+	foreach($Records as $columns) {
+		$id = $columns[$primary];
+		echo "<tr class='item' id='{$id}'>";
+		foreach($header as $key => $val) {
+			list($alias,$align,$flag,$c_wd) = $val;
+			$data = $columns[$key];
+			$style = ($c_wd > 0) ? " style='max-width:{$c_wd}px;'":'';
+			$pos = self::AttrAlign[$align];
+			echo "<td{$pos}{$style}>{$data}</td>";
+		}
+		echo "</tr>\n";
+	}
+	echo "</tbody></table>";
+	echo '</div>';
+}
+//==============================================================================
 // Put Tabset
 public function Tabset($name,$menu,$sel) {
 	echo "<ul class='{$name}'>\n";

@@ -2,7 +2,7 @@
     ファイルアップロードダイアログのクラス定義
 */
 .progress-BK {
-    z-index:9910;
+    z-index:100;
     position:fixed;
     display:none;
     top:0;

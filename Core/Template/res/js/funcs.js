@@ -20,7 +20,7 @@ Array.prototype.is_exists = function (v) {
 		if (val === v) {
 			exists = true;
 			return false;	// break forEach
-		}
+		};
 		return true;	// continue next
 	});
 	return exists;
@@ -32,7 +32,7 @@ Array.prototype.mymerged = function (b) {
 	b.forEach(function (val) {
 		if (val !== "" & new_array.is_exists(val) == false) {
 			new_array.push(val);
-		}
+		};
 	});
 	return new_array;
 };
@@ -64,11 +64,11 @@ function PawmooLocations() {
             case 0: path = "${$APPROOT$}" + path; break;
             case 2: path = "${$SYSROOT$}" + path; break;
             case 3: path = "/" + path; break;
-        }
+		};
         return  path+"/";
     };
     this.trunc_path = function (n, e, is_num) {
-        var path = this.items;
+        var path = this.items.slice();
         if (is_num === true) {
             for (var i = path.length; (i > 1) && (!isNaN(path[i - 1])); --i);
             nums = "/" + path.slice(i).join("/");
@@ -85,30 +85,30 @@ function PawmooLocations() {
         for (var n=0; (n < path.length) && (isNaN(path[n])); ++n);
         return this.trunc_path(n,e,false);
     };
-}
+};
 //===============================================
 // Nested SELECT revised edition
-function SelectLink(setupobj, id, callback) {
+function SelectLink(setupobj, id, first_call, callback) {
 	var self = this;
-	var first_select = true;
+	var callback_call = first_call;
 	var self_obj = $('#' + id);
 	var my_prop = self_obj.attr('data-value');
-	var child_id = self_obj.attr('data-element');
 	if (my_prop === undefined) my_prop = id;
-	if (child_id === undefined) child_id = null;
 	var my_obj = setupobj[my_prop];
+	var child_id = self_obj.attr('data-element');
+	if (child_id === undefined) child_id = null;
 	var select_me = '<option value="0">${#.core.SelectMe}</option>';
-	var child_obj = (child_id === null) ? null : new SelectLink(setupobj, child_id, callback);
+	var child_obj = (child_id === null) ? null : new SelectLink(setupobj, child_id, first_call, callback);
 	self.selfList = function (val, grp) {
 		self_obj.empty();
 		var opt = 0;
-		if (my_obj.select_one) { self_obj.append(select_me); ++opt; }
+		if (my_obj.select_one) { self_obj.append(select_me); ++opt; };
 		$.each(my_obj.sel_list, function (key, value) {
 			if (value[2] === undefined || value[2] == grp) {
 				var sel = (value[0] === val) ? ' selected' : '';
 				self_obj.append('<option value="' + value[0] + '"' + sel + '>' + value[1] + '</option>');
 				++opt;
-			}
+			};
 		});
 		if (opt === 0) self_obj.append(select_me);
 	};
@@ -124,7 +124,7 @@ function SelectLink(setupobj, id, callback) {
 			if (value[0] === val) {
 				grp = (value[2] === undefined) ? 0 : value[2];
 				return false;	// exit .each()
-			}
+			};
 			return true;
 		});
         self.selfList(val, grp);
@@ -133,13 +133,13 @@ function SelectLink(setupobj, id, callback) {
             if (child_obj !== null) child_obj.defaultList(0, my_val);
             else if (callback !== null) {
                 var my_txt = $(this).children(':selected').text();
-                if(!first_select) callback.call(this,my_val,my_txt);
-            }
+				if (callback_call) callback.call(this, my_val, my_txt);
+				callback_call = true;
+			};
 		});
 		if (child_obj === null) self_obj.change();
-		first_select = false;
         return grp;
-    }
+    };
 };
 //====================================================
 // create FORM and SUBMIT
@@ -153,7 +153,7 @@ var formSubmit = function (e, url) {
 		}).appendTo(form);
 	});
 	form.attr('action', url).appendTo('body').submit();
-}
+};
 //====================================================
 // for DEBUG dump Object
 var objDump = function(obj, rIndent) {
@@ -168,19 +168,19 @@ var objDump = function(obj, rIndent) {
                 result += objDump(obj[key], indent);
             } else {
                 result += obj[key];
-            }
+			};
             result += br;
-        }
+		 };
     } else {
         result = obj;
-    }
+	};
      result = String(result);
      return result;
 };
 //====================================================
 function DebugSlider() {
     if (typeof LoadDebugBar == "function") LoadDebugBar();
-}
+};
 //====================================================
 // platform Location Object
 var pfLocation = new PawmooLocations();
