@@ -25,6 +25,31 @@
     background-color:white;
 	box-shadow: 1px 1px 2px gray;
 }
+/* checklist tabset */
+.checklist-dialog .checklist-tabs {
+	display:flex;
+	list-style:none;
+	margin:0;
+}
+.checklist-dialog .checklist-tabs>li {
+	border:1px solid black;
+	padding:0 20px;
+	border-radius: 5px 5px 0 0;
+	cursor: pointer;
+}
+.checklist-dialog .checklist-tabs>li.selected {
+	color: white;
+	background-color: gray;
+}
+/* tab-contents style */
+.checklist-dialog .checklist-contents {
+	clear:both;
+	list-style: none;
+	border:1px dotted gray;
+}
+.checklist-dialog .checklist-contents>li {padding:0;display:none;}
+.checklist-dialog .checklist-contents>li.selected {display:block;}
+
 .checklist-dialog ul {
 	top:0;
 	left:0;
