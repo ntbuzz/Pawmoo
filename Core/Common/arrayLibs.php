@@ -219,8 +219,11 @@ function array_member_value($nVal,$names) {
 function condition_array($keyset,$keystr) {
 	$cond = [];
 	$and = explode(' ',str_replace(['　','  '],' ',$keystr));
-    foreach($and as $nm) {
-		$cond[] = [$keyset => $val];
+    foreach($and as $val) {
+		if(mb_substr($val,0,1)==='-') {
+			$val = mb_substr($val,1);
+			$cond[] = ['NOT' => [$keyset => $val]];
+		} else  $cond[] = [$keyset => $val];
     }
     return $cond;
 }
