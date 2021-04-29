@@ -163,13 +163,16 @@ var objDump = function(obj, rIndent) {
      if (typeof obj === 'object' && !obj.tagName) {
         result += '[ Object ] ->' + br;
         for (var key in obj) {
-            result += indent + key + ' = ';
-            if (typeof obj[key] === 'object') {
+			result += indent + key + ' = ';
+			if (obj[key] instanceof jQuery) {
+                result += key +" is jQuery Object" + br;
+			} else if (typeof obj[key] === 'function') {
+                result += key +" is function()" + br;
+            } else if (typeof obj[key] === 'object') {
                 result += objDump(obj[key], indent);
             } else {
-                result += obj[key];
+                result += obj[key] + br;
 			};
-            result += br;
 		 };
     } else {
         result = obj;
