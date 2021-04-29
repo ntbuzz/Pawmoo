@@ -1369,13 +1369,6 @@
 	ex.
 		$('#Contents).LoadContents('load.php').fail(function() {alert('失敗'); });
 
-・コンテンツを読み込む
-    (セレクタ).LoadContents(URL, POSTオブジェクト,コールバック関数);
-	URLからHTMLデータを読み込んでセレクタに書き込みます。
-	.fail() メソッドを使うとPOSTが失敗したときの処理ができます。
-	ex.
-		$('#Contents).LoadContents('load.php').fail(function() {alert('失敗'); });
-
 ・Yes/No ボタン付きのダイアログボックスを開く
     $.dialogBox(タイトル,メッセージ, コールバック関数);
 

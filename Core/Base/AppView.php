@@ -787,7 +787,7 @@ debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<div{$attr}>\n";
         // create tabset
-        echo "<div class='tabPanel'><ul class='tabmenu stickyBar'>\n";
+        echo "<div class='tabPanel'><ul class='tabmenu'>\n";
         $tabs = array_keys($sec);
         foreach($tabs as $key_val) {
             list($tag,$attrs) = $this->tag_Separate($key_val,$vars);

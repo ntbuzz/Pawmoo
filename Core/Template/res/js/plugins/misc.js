@@ -177,7 +177,6 @@ $.fn.getPaddingBox = function() {
 $.busy_cursor = function (disp) {
 	$('body').css('cursor', (disp) ? 'wait' : 'default');
 };
-
 // Yes/No ダイアログボックスを開く
 $.dialogBox = function (title, msg, callback) {
 	var back_panel = $('<div class="popup-BK"></div>');
