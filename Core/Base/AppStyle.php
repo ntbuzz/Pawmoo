@@ -254,7 +254,6 @@ public function ViewStyle($file_name) {
     private function cmd_plugin($secParam, $param,$sec) {
         if($this->Filetype == 'js') {
             list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
-//echo "/*"; var_dump($tmplist); echo "*/";
             echo "(function ($) {\n";
                 $this->filesImport('plugins-',$tmplist,$sec);
             echo "})(jQuery);\n";

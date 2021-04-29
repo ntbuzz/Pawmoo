@@ -83,7 +83,7 @@ $.fn.innerWindow = function (title) {
 			left: ($(window).width() - self.outerWidth()) /2
 		});
 	});
-	$(window).resize();
+//	$(window).resize();
     // フォーム内のINPUTでENTERが押下されたときの処理
 	self.on('keypress', 'input', function (e) {
 		if (e.key === 'Enter') {
@@ -123,7 +123,8 @@ $.fn.innerWindow = function (title) {
         }).mouseup(function (e) {
             $(message_id).fadeOut('fast');
             self.css('user-select', '');    // テキスト選択可能
-            $(document).unbind("mousemove");
+			$(document).unbind("mousemove").unbind("mouseup");
+			self.fitWindow();
         });
     });
 	$('body').append(backwall);

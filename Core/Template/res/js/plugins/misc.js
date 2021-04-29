@@ -6,20 +6,25 @@ $.fn.Visible = function (flag) {
 	this.css('display', mode);
 	return this;
 };
-// 連動セレクトタグ
-$.fn.ChainSelect = function (selObj, val, first_call, callback) {
+// 連動セレクトタグ object, integer|string, boolean, function,
+$.fn.ChainSelect = function () {
 	var self = this;	// Reminder jQuery Self Object
-	// allow first_call omit.
-	if (typeof first_call === 'function') {
-		callback = first_call;
-		first_call = true;
-	} else if (first_call === undefined) {
-		first_call = false;
+	var target = {
+		selObj: null,
+		val: 0,
+		first_call: false,
+		callback: null,
 	};
-	if (callback === undefined) callback = null;
+	// 可変引数を解析
+	$.each(arguments,function (key,argv) {
+		if (typeof argv === 'boolean') target.first_call = argv;
+		else if (typeof argv === 'function') target.callback = argv;
+		else if (typeof argv === 'object') target.selObj = argv;
+		else target.val = argv;
+	});
 	var id = this.attr('id');
-	var sel_chain = new SelectLink(selObj, id, first_call, callback);
-	sel_chain.Select(val);
+	var sel_chain = new SelectLink(target.selObj, id, target.first_call, target.callback);
+	sel_chain.Select(target.val);
 	return self;
 };
 // 指定要素 e のスクロールに追従する
@@ -35,104 +40,93 @@ $.fn.stickyOn = function (e) {
 	});
 	return self;
 };
-// 要素のサイズを取得する
-$.fn.bound_box = function () {
-	var space = {
-		border: {
-			top: parseInt(this.css('border-top'),10),
-			left: parseInt(this.css('border-left'),10),
-			right: parseInt(this.css('border-right'),10),
-			bottom: parseInt(this.css('border-bottom'),10),
-		},
-		margin: {
-			top: parseInt(this.css('margin-top'),10),
-			left: parseInt(this.css('margin-left'),10),
-			right: parseInt(this.css('margin-right'),10),
-			bottom: parseInt(this.css('margin-bottom'),10),
-		},
-		padding: {
-			top: parseInt(this.css('padding-top'),10),
-			left: parseInt(this.css('padding-left'),10),
-			right: parseInt(this.css('padding-right'),10),
-			bottom: parseInt(this.css('padding-bottom'),10),
-		},
-	};
-	var target = {
-		top: parseInt(this.offset().top, 10),
-		left: parseInt(this.offset().left, 10),
-		outerWidth: parseInt(this.outerWidth(), 10),
-		outerHeight: parseInt(this.outerHeight(), 10),
-		TopPos: parseInt(this.offset().top, 10) + space.border.top + space.padding.top,
-		adjustRight: space.border.right + space.padding.right,
-		adjustBottom:space.border.bottom + space.padding.bottom,
-		withRightMargin: space.border.right + space.padding.right + space.margin.right,
-		withBottomMargin: space.border.bottom + space.padding.bottom + space.margin.bottom,
-	};
-	target.BottomPos = target.top + target.outerHeight - target.adjustBottom;
-	target.RightPos  = target.left+ target.outerWidth - target.adjustRight;
-	return target;
+// IE-11対策
+$.fn.css_value = function (css_name) {
+	return parseInt(this.css(css_name),10) || 0;
+};
+$.fn.debug_id = function () {
+	return this.prop('tagName') + '.' + this.prop('class') + "#" + this.prop('id');
 };
 // ウィンドウ高さ調整
-$.fn.fitWindow = function (msg) {
+$.fn.fitWindow = function () {
 	var self = this;	// Reminder jQuery Self Object
-	var my_box = self.bound_box();
-	var parent_bottom = function(obj,spc) {
-		if (obj.length === 0 || obj.is(self)) {
-			return my_box.BottomPos - spc;
-		}
-		var obj_box = obj.bound_box();
-		if (obj.hasClass("fitWindow")) {
-			return obj_box.BottomPos - spc;
-		}
-		spc = spc + obj_box.withBottomMargin;
-		return parent_bottom(obj.parent(),spc);
+	function bound_box(obj) {
+		this.tags = obj.debug_id();
+		this.overflow = obj.css_value('overflow');
+		this.TopLeft = {
+			x: obj.offset().left + obj.css_value('padding-left'),
+			y: obj.offset().top + obj.css_value('padding-top')
+		};
+		this.cssSize = {
+			width: obj.css_value('width'),
+			height:obj.css_value('height')
+		};
+		this.boxSpace = {
+			right: obj.css_value('padding-right') + obj.css_value('border-right'),
+			bottom:obj.css_value('padding-bottom')+ obj.css_value('border-bottom')
+		};
+		this.boxMargin = {
+			right: obj.css_value('margin-right'),
+			bottom:obj.css_value('margin-bottom')
+		};
+		this.BottomRight = {
+			x: obj.offset().left + obj.outerWidth() - this.boxSpace.right,
+			y: obj.offset().top + obj.outerHeight() - this.boxSpace.bottom
+		};
+		this.accSpace = { x: 0, y: 0 };
+		this.ParentRect = function(stopper) {
+			var p_obj = obj.parent();
+			var p_box = new bound_box(p_obj);
+			// 下側と右側は累積値が必要
+			p_box.accSpace.x = this.accSpace.x + this.boxSpace.right + this.boxMargin.right;
+			p_box.accSpace.y = this.accSpace.y + this.boxSpace.bottom + this.boxMargin.bottom;
+			if (p_obj.prop('tagName') === 'BODY') return p_box;
+			var stopClass = ['fitBase','fitWindow','popup-box','info-box','floatWindow'];
+			for(var n=0; n < stopClass.length; ++n) {
+				if(p_obj.hasClass(stopClass[n])) {
+//					alert('call-STOP:'+objDump(p_box));
+					return p_box;
+				};
+			};
+			return p_box.ParentRect(stopper);
+		};
 	};
 	self.find('.fitWindow').each(function () {
-		var this_box = $(this).bound_box();
-		var pbottom = parent_bottom($(this).parent(),this_box.adjustBottom);
-		var my_height = pbottom - this_box.TopPos - this_box.withBottomMargin;
-//		alert($(this).debug_id('BOTTOM=')+pbottom);
-		var s_height = my_height;//-my_margin;
+//		if ($(this).is(':hidden')) {
+//			alert('Skip-Box:' + $(this).debug_id());
+//			return true;
+//		};
+		var my_box = new bound_box($(this));	// self space will be with-margin
+		var pbox = my_box.ParentRect(self);
+		var s_height = pbox.BottomRight.y - pbox.accSpace.y  - my_box.TopLeft.y;
+		var s_width  = pbox.BottomRight.x - pbox.accSpace.x  - my_box.TopLeft.x;
+//		alert("SELF:"+objDump(my_box)+"\nPARENT:"+objDump(pbox)+"\nSIZE(H: "+s_height+", W:"+s_width+")");
 		$(this).css({
-			'min-height': s_height + "px",
-			'max-height': s_height + "px",
-			'overflow-y': "auto"
+			'width': s_width + "px",
+			'height': s_height + "px",
+			'overflow': "auto"
 		});
 	});
 	return self;
 };
-// 親要素の高さに調整する
-// $.fn.adjustWindow = function (msg) {
-// 	var self = this;	// Reminder jQuery Self Object
-// 	self.fitMe = function (msg) {
-// 		var p = self.parent();	// 親オブジェクト
-// 		var p_size = p.height();
-// 		var s_top = self.position().top;			// 親要素からの相対位置
-// 		var spc = self.outerHeight(true) - self.height();
-// 		var s_height = p_size - s_top - spc;
-// 		if (msg) alert("SELF:" + self.attr('class') + "\nPARENT-ID:" + p.attr('id') + "(" + p_size + ")" + "\nSIZE=(" + s_top + "," + s_height + ")\nSPC=" + spc);
-// 		self.css({
-// 			'width': '100%',
-// 			'min-height': s_height + "px",
-// 			'max-height': s_height + "px",
-// 			'overflow-y': "auto"
-// 		});
-// 		return self;
-// 	};
-// 	$(window).on("load resize", function () { self.fitMe(); });
-// 	self.fitMe(true).find('.fitWindow').each(function () { $(this).fitwindow(msg); });
-// 	return self;
-// };
 // 指定要素に読み込んだHTMLを書き込む
-// 
-$.fn.LoadContents = function (url, obj, callback) {
+//  url, postObject, fitWindowObject, callback_func
+$.fn.LoadContents = function () {
+	var target = {
+		url: '',
+		postObj: null,
+		fitWin: null,
+		callback: null,
+	};
+	// 可変引数を解析
+	$.each(arguments,function (key,argv) {
+		if (typeof argv === 'string') target.url = argv;
+		else if (typeof argv === 'function') target.callback = argv;
+		else if (argv instanceof jQuery) target.fitWin = argv;
+		else if (typeof argv === 'object') target.postObj = argv;
+	});
 	var self = this;	// Reminder jQuery Self Object
 	var result = true;	// for callback fail
-	if (typeof obj === 'function') {
-		callback = obj;
-		obj = null;
-	};
-	if (callback === undefined) callback = null;    // IE11で引数省略の不具合対応
 	// フェイルメソッドバージョン
 	self.fail = function (callback_error) {
 		if (result === false && callback_error !== undefined) {
@@ -141,14 +135,15 @@ $.fn.LoadContents = function (url, obj, callback) {
 		};
 	};
 	$.busy_cursor(true);
-	$.post(url,obj,
+	$.post(target.url,target.postObj,
 		function(data){
 			$.busy_cursor(false);
 			//リクエストが成功した際に実行する関数
 			self.result = false;
-			self.html(data).InitPopupSet().fitWindow(false);
+			self.html(data).InitPopupSet();
 			DebugSlider();
-			if (callback !== null) callback.call(self);
+			if (target.fitWin !== null) target.fitWin.fitWindow();
+			if (target.callback !== null) target.callback.call(self);
 		})
 		.fail(function() {
 			$.busy_cursor(false);
@@ -184,7 +179,8 @@ $.busy_cursor = function (disp) {
 };
 
 // Yes/No ダイアログボックスを開く
-$.dialogBox = function (title,msg, callback) {
+$.dialogBox = function (title, msg, callback) {
+	var back_panel = $('<div class="popup-BK"></div>');
 	var dialog_box = '<div class="dialog-box"><dl class="title"><dt>'+title+'</dt><dd><span class="dialog-msg">'+msg+'</span></dd></dl><div class="buttonList">';
 	var controlls = ["okButton:${#.core.Yes}", "cancelButton:${#.core.No}"];
 	controlls.forEach(function (value) {
@@ -192,10 +188,10 @@ $.dialogBox = function (title,msg, callback) {
 		dialog_box = dialog_box + '<span class="'+cls[0]+'">'+cls[1]+'</span>';
 	});
 	dialog_box = dialog_box + "</div></div>";
-	$('body').append(dialog_box);
+	back_panel.append(dialog_box);
+	$('body').append(back_panel);
 	// ボタン以外をクリックできないようにする
-	$('body').append('<div class="popup-BK"></div>');
-	$('.popup-BK').fadeIn('fast');
+	back_panel.fadeIn('fast');
 	var dialog = $('.dialog-box');
 	// バルーンコンテンツの表示位置をリンク先から取得して設定
 	var x = ($(window).innerWidth() - dialog.width())/2;  // 中央
@@ -213,14 +209,12 @@ $.dialogBox = function (title,msg, callback) {
 	// クローズイベントを登録
 	dialog.find(".okButton").off().click(function () {
 		dialog.fadeOut('fast');
-		$('.popup-BK').remove();
-		$(".dialog-box").remove();
+		back_panel.remove();
 		callback(true);
 	});
 	dialog.find(".cancelButton").off().click(function () {
 		dialog.fadeOut('fast');
-		$('.popup-BK').remove();
-		$(".dialog-box").remove();
+		back_panel.remove();
 		callback(false);
 	});
 };

@@ -8,8 +8,8 @@ $.fn.PopupBoxSetup = function () {
 		var buttons = (val === undefined) ? [] : val.split(",");
 		var ref = "#" + self.attr("data-element");  // 紐付けるID
 		var self_id = "#" + self.attr("id");
-		var resize_id = self_id + " .resize";
-		var message_id = self_id + " .resize_message";
+		var resize_id = self_id + " .pw_resize";
+		var message_id = self_id + " .pw_resize_message";
 		if (ref != "#" && self_id != "#") {
 			var ref_obj = $(ref);
 			ref_obj.css({ 'cursor': "pointer", 'z-index': 10 });
@@ -27,7 +27,7 @@ $.fn.PopupBoxSetup = function () {
 					});
 				};
 			};
-			var controlls = ["resize_message:${#core.SizeDisplay}", "resize:${#core.Resize}"];
+			var controlls = ["pw_resize_message:${#core.SizeDisplay}", "pw_resize:${#core.Resize}"];
 			controlls.forEach(function (value) {
 				var cls = value.split(':');
 				if (self.find("." + cls[0]).length == 0) {
@@ -131,7 +131,8 @@ $.fn.PopupBoxSetup = function () {
 				}).mouseup(function (e) {
 					self.css('user-select', '');    // テキスト選択可能
 					$(message_id).fadeOut('fast');
-					$(document).unbind("mousemove");
+					$(document).unbind("mousemove").unbind("mouseup");
+					self.fitWindow();
 				});
 			});     // mousedown()
 		};

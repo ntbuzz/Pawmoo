@@ -1352,11 +1352,22 @@
   「stickyBar」クラスを付加したときと同じですが、動的読み込みしたコンテンツ内で使います。
 
 ・要素の幅・高さを最大値に調整します。
-    (セレクタ).adjustWindow();          親要素の高さに調整する
+    (セレクタ).fitWindow();          親要素の高さに調整する
   「fitWindow」クラスを付加したときと同じですが、動的読み込みしたコンテンツ内で使います。
 
 ・フローティングウィンドウを開く
-    (セレクタ).floatWindow(タイトル, JSON, コールバック関数);
+    (セレクタ).floatWin(パラメータオブジェクト, コールバック関数);
+	パラメータオブジェクトのメンバー
+		Title: 		// ウィンドウタイトル
+		execButton: // コールバックを呼び出すボタンクラス名またはID名
+		formObj: 	// フォーム要素に設定する名前と値の集合オブジェクト
+
+・コンテンツを読み込む
+    (セレクタ).LoadContents(URL, POSTオブジェクト,コールバック関数);
+	URLからHTMLデータを読み込んでセレクタに書き込みます。
+	.fail() メソッドを使うとPOSTが失敗したときの処理ができます。
+	ex.
+		$('#Contents).LoadContents('load.php').fail(function() {alert('失敗'); });
 
 ・コンテンツを読み込む
     (セレクタ).LoadContents(URL, POSTオブジェクト,コールバック関数);
@@ -1462,5 +1473,5 @@
 		CheckFlip:		全てをチェックの有無				//	true
 		FlipLabel:		全てをチェックのラベルテキスト		// .core.CheckALL
 		ConfirmLabel:	ダイアログの確定ボタンテキスト		// .core.CheckConfirm
-		CheckLabels:	チェックリストラベルの配列			// []
+		CheckLists:		チェックリスト配列またはタブリストオブジェクト		// []
 		Columns:		チェックリストのカラム数			// 2
