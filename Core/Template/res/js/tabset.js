@@ -4,7 +4,7 @@ $(document).on('click','.tabControll>.tabPanel>.tabmenu>li',function () {
     var control = $(this).closest('.tabControll');
     var menu = control.children('.tabPanel').children('.tabmenu').children('li');
     var cont = control.children('.tabcontents').children('li');
-	var index = menu.index(this);
+	var index = menu.index($(this));
 	menu.removeClass('selected');		// TabMenu selected delete
 	$(this).addClass('selected');		// switch click TAB selected
 	cont.removeClass('selected');		// TabContents selected delete

@@ -114,9 +114,9 @@
     overflow:hidden;
     min-width:100px;
     min-height:150px;
+	padding-bottom: 12px;	/* for resize-icon */
 }
-/*	padding: 0px 10px;	/* [上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
-.popup-box span.resize {
+.popup-box span.pw_resize {
     z-index:3;
     position:absolute;
     right:0;
@@ -126,7 +126,7 @@
     cursor:se-resize;
     background: url(res/img/resize.png) no-repeat left top;
 }
-.popup-box span.resize_message {
+.popup-box span.pw_resize_message {
     z-index:3;
     display:none;
     position: absolute;
@@ -168,7 +168,7 @@
     overflow-y:auto;
     overflow-x:hidden;
     width:100%;
-    height:100%;
+    height:95%;
 }
 .popup-box dl dt {
     padding-left: 10px;
