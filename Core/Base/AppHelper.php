@@ -168,7 +168,7 @@ public function MakePageLinks() {
 		foreach($this->MyModel->HeaderSchema as $key => $val) {
 			list($alias,$align,$flag,$wd) = $val;
 			$tsort = ($flag==2) ? '' : ' class="sorter-false"';
-			$style = ($wd==0) ? '' : " style='width:{$wd}px;'";
+			$style = ($wd==0) ? '' : " style='min-width:{$wd}px;max-width:{$wd}px;'";
 			echo "<th${tsort}{$style}>{$alias}</th>";
 		}
 		echo "</tr>\n";
@@ -179,7 +179,7 @@ public function MakePageLinks() {
 		echo "<tr class='item' id='{$columns->Primary}'>";
 		foreach($this->MyModel->HeaderSchema as $key => $val) {
 			list($alias,$align,$flag,$c_wd) = $val;
-			$style = ($c_wd > 0) ? " style='max-width:{$c_wd}px;'":'';
+			$style = ($c_wd > 0) ? " style='width:{$c_wd}px;'":'';
 			$pos = self::AttrAlign[$align];
 			echo "<td{$pos}{$style}>{$columns->$key}</td>";
 		}
@@ -240,7 +240,7 @@ public function TableListView($header,$primary,$Records=NULL,$max=0) {
 		foreach($header as $key => $val) {
 			list($alias,$align,$flag,$c_wd) = $val;
 			$data = $columns[$key];
-			$style = ($c_wd > 0) ? " style='max-width:{$c_wd}px;'":'';
+			$style = ($c_wd > 0) ? " style='width:{$c_wd}px;'":'';
 			$pos = self::AttrAlign[$align];
 			echo "<td{$pos}{$style}>{$data}</td>";
 		}
