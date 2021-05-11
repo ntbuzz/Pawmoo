@@ -314,7 +314,7 @@ public function ViewTemplate($name,$vars = []) {
                     $chk_arr = explode('|',$check);
                     $result = FALSE;
                     foreach($chk_arr as $cmp_chk) {
-                        $result = (empty($cmp_chk)) ? ($cmp_val==='') : fnmatch($cmp_chk,$cmp_val);       // compare wild-char
+                        $result = ($cmp_chk==='') ? ($cmp_val==='') : fnmatch($cmp_chk,$cmp_val);       // compare wild-char
                         if($result) break;
                     }
                 }

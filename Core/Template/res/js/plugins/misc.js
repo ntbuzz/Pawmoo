@@ -102,7 +102,7 @@ $.fn.fitWindow = function () {
 		var s_width  = pbox.BottomRight.x - pbox.accSpace.x  - my_box.TopLeft.x;
 //		alert("SELF:"+objDump(my_box)+"\nPARENT:"+objDump(pbox)+"\nSIZE(H: "+s_height+", W:"+s_width+")");
 		$(this).css({
-			'width': s_width + "px",
+//			'width': s_width + "px",
 			'height': s_height + "px",
 			'overflow': "auto"
 		});
