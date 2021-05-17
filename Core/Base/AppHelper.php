@@ -179,7 +179,8 @@ public function MakePageLinks() {
 		echo "<tr class='item' id='{$columns->Primary}'>";
 		foreach($this->MyModel->HeaderSchema as $key => $val) {
 			list($alias,$align,$flag,$c_wd) = $val;
-			$style = ($c_wd > 0) ? " style='width:{$c_wd}px;'":'';
+//			$style = ($c_wd > 0) ? " style='width:{$c_wd}px;'":'';
+			$style = '';
 			$pos = self::AttrAlign[$align];
 			echo "<td{$pos}{$style}>{$columns->$key}</td>";
 		}
