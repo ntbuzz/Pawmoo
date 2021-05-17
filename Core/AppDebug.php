@@ -83,6 +83,11 @@ function debug_dump(...$items) {
     debug_log(DBMSG_CLI,$items);
 }
 //==========================================================================
+// 強制ダンプ
+function force_dump($items) {
+    debug_log(DBMSG_DUMP,$items);
+}
+//==========================================================================
 // NULL値の表示
 function get_null_value($arg) {
 	if($arg === []) $val = '[]';

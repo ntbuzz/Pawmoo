@@ -77,6 +77,7 @@ class App {
 public static function ChangeMethod($module,$method,$relocate = TRUE) { 
     static::$execURI['controller'] = $module;
     static::$execURI['method'] = strtolower($method);
+    static::$execURI['filter'] = [];
     static::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================

@@ -836,8 +836,12 @@
    @charset => XXXX                     文字セットを出力する
    +import => [ value, ... ]             CSS/JS ファイルのインクルード、スカラー値でも可
                                         テンプレートファイルと同レベルか上位レベルのフォルダで探索する
-   +jquery => [ value, ... ]             JSファイルの時のみ、JQuery関数 ファイルのインクルード
-                                        テンプレートファイルと同レベルか上位レベルのフォルダで探索する
+   +jquery => [ 						JSファイルの時のみ、テンプレートファイルと同レベルか上位レベルのフォルダで探索する
+   		filename, ...					JQuery関数 ファイルのインクルード
+		subfolder => [					subfolder下にあるJQueryプラグインのインクルード
+			pluginfile, ...
+		]
+   ]                                    
    +section => subsection               別のセクション定義を読み込みます。セクション名の探索順は次のようになります
                                         (自ファイル内) → (アプリ共通フォルダ) → (フレームワークフォルダ)
                                         先頭に！文字を付けると (アプリ共通フォルダ) 以降の探索になり、
@@ -1163,7 +1167,7 @@
     GetRecord($num,$join=FALSE)               // $num キーレコードデータを $fields, $RecData に格納、$join が TRUEならJOIN有効
     getRecordField($key,$value,$field)        // keyフィールドがvalueのレコードを検索しfield値を返す (JOIN無し)
     getCount($cond)                           // レコード数の検索
-    GetFieldValues($field)                    // $field で指定された列の値リストを $Select 配列に格納
+    getFieldValues($id,$field [, $cond] )     // $id,$field で指定された列のSelect配列形式の配列を返す。$cond で絞り込み可
     GetValueList()                            // Selectionスキーマで定義された値リストを $Select 配列に格納
     RecordFinder($cond [,$filter [,$sort ]])  // レコードリストの読み込み(JOIN済レコード)
     RawRecordFinder($cond,$filte,$sort)       // RecordFinder() のJOIN無し版
