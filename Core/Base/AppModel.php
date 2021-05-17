@@ -321,10 +321,11 @@ public function GetValueList() {
 }
 //==============================================================================
 //   Get Field Value List
-// Result:   $this->Select (Field)
-public function GetFieldValues($field, $cond = NULL) {
-    $this->Select[$field] = $this->dbDriver->getValueLists(NULL,$field,$field,$cond);
-    debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $this->Select]);
+// Result:  Select array
+public function getFieldValues($id,$field, $cond = NULL) {
+    $select = $this->dbDriver->getValueLists(NULL,$field,$id,$cond);
+    debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $select]);
+	return $select;
 }
 //==============================================================================
 // Get Record Field by field-key without JOIN fields.

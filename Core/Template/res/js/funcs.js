@@ -80,6 +80,7 @@ function PawmooLocations() {
     this.cont_path = function (e, isnum) { return this.trunc_path(1, e, isnum); };
     this.act_path = function (e, isnum) { return this.trunc_path(2, e, isnum); };
     this.filter_path = function (e, isnum) { return this.trunc_path(3, e, isnum); };
+    this.getfilter = function () { return this.items[2]; };
     this.param_path = function (e) {
         var path = this.items;
         for (var n=0; (n < path.length) && (isNaN(path[n])); ++n);
@@ -96,7 +97,7 @@ function SelectLink(setupobj, id, first_call, callback) {
 	if (my_prop === undefined) my_prop = id;
 	var my_obj = setupobj[my_prop];
 	var child_id = self_obj.attr('data-element');
-	if (child_id === undefined) child_id = null;
+	if($('#'+child_id).length === 0) child_id = null;
 	var select_me = '<option value="0">${#.core.SelectMe}</option>';
 	var child_obj = (child_id === null) ? null : new SelectLink(setupobj, child_id, first_call, callback);
 	self.selfList = function (val, grp) {
@@ -117,6 +118,15 @@ function SelectLink(setupobj, id, first_call, callback) {
 		child_grp = self_obj.find('option:selected').val();
         if(child_obj !== null) child_obj.defaultList(0,child_grp);
 	};
+	// suppress change() event 
+	self.SetSelect = function (my_val) {
+		if (child_obj !== null) child_obj.defaultList(0, my_val);
+		else if (callback !== null) {
+			var my_txt = $(this).children(':selected').text();
+			if (callback_call) callback.call(this, my_val, my_txt);
+			callback_call = true;
+		};
+	};
 	self.Select = function (val) {
         if(child_obj !== null) val = child_obj.Select(val);
 		var grp = 0;
@@ -129,15 +139,9 @@ function SelectLink(setupobj, id, first_call, callback) {
 		});
         self.selfList(val, grp);
         self_obj.off().change(function() {
-            var my_val = $(this).val();
-            if (child_obj !== null) child_obj.defaultList(0, my_val);
-            else if (callback !== null) {
-                var my_txt = $(this).children(':selected').text();
-				if (callback_call) callback.call(this, my_val, my_txt);
-				callback_call = true;
-			};
+			self.SetSelect($(this).val());
 		});
-		if (child_obj === null) self_obj.change();
+		if (child_obj === null) self.SetSelect(val);
         return grp;
     };
 };

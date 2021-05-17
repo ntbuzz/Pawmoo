@@ -8,7 +8,7 @@ $(document).on('click','.tabControll>.tabPanel>.tabmenu>li',function () {
 	menu.removeClass('selected');		// TabMenu selected delete
 	$(this).addClass('selected');		// switch click TAB selected
 	cont.removeClass('selected');		// TabContents selected delete
-	cont.eq(index).addClass('selected');	// switch TAB selected Contents
+	cont.eq(index).addClass('selected').fitWindow();	// switch TAB selected Contents
 	control.parents().scrollTop(0);
 });
 (function ($) {

@@ -80,24 +80,17 @@ $.fn.fitWindow = function () {
 			// 下側と右側は累積値が必要
 			p_box.accSpace.x = this.accSpace.x + this.boxSpace.right + this.boxMargin.right;
 			p_box.accSpace.y = this.accSpace.y + this.boxSpace.bottom + this.boxMargin.bottom;
-			if (p_obj.prop('tagName') === 'BODY') return p_box;
-			var stopClass = ['fitBase','fitWindow','popup-box','info-box','floatWindow'];
-			for(var n=0; n < stopClass.length; ++n) {
-				if(p_obj.hasClass(stopClass[n])) {
-//					alert('call-STOP:'+objDump(p_box));
-					return p_box;
-				};
+			if (p_obj.prop('tagName') === 'BODY' || stopper.is(p_obj) ) {
+				return p_box;
 			};
 			return p_box.ParentRect(stopper);
 		};
 	};
 	self.find('.fitWindow').each(function () {
-//		if ($(this).is(':hidden')) {
-//			alert('Skip-Box:' + $(this).debug_id());
-//			return true;
-//		};
+		var ref = $(this).attr("data-element");  // 紐付けるIDが指定されているか
+		var fit_obj = (ref === undefined) ? self : $('#'+ref);
 		var my_box = new bound_box($(this));	// self space will be with-margin
-		var pbox = my_box.ParentRect(self);
+		var pbox = my_box.ParentRect(fit_obj);
 		var s_height = pbox.BottomRight.y - pbox.accSpace.y  - my_box.TopLeft.y;
 		var s_width  = pbox.BottomRight.x - pbox.accSpace.x  - my_box.TopLeft.x;
 //		alert("SELF:"+objDump(my_box)+"\nPARENT:"+objDump(pbox)+"\nSIZE(H: "+s_height+", W:"+s_width+")");
@@ -112,6 +105,7 @@ $.fn.fitWindow = function () {
 // 指定要素に読み込んだHTMLを書き込む
 //  url, postObject, fitWindowObject, callback_func
 $.fn.LoadContents = function () {
+	var self = this;	// Reminder jQuery Self Object
 	var target = {
 		url: '',
 		postObj: null,
@@ -125,7 +119,6 @@ $.fn.LoadContents = function () {
 		else if (argv instanceof jQuery) target.fitWin = argv;
 		else if (typeof argv === 'object') target.postObj = argv;
 	});
-	var self = this;	// Reminder jQuery Self Object
 	var result = true;	// for callback fail
 	// フェイルメソッドバージョン
 	self.fail = function (callback_error) {
@@ -136,13 +129,15 @@ $.fn.LoadContents = function () {
 	};
 	$.busy_cursor(true);
 	$.post(target.url,target.postObj,
-		function(data){
+		function(data) {		// POST success
 			$.busy_cursor(false);
-			//リクエストが成功した際に実行する関数
 			self.result = false;
 			self.html(data).InitPopupSet();
+			if (self.find('.fitWindow').length > 0) {
+				if (target.fitWin === null) self.fitWindow();
+				else target.fitWin.fitWindow();
+			};
 			DebugSlider();
-			if (target.fitWin !== null) target.fitWin.fitWindow();
 			if (target.callback !== null) target.callback.call(self);
 		})
 		.fail(function() {

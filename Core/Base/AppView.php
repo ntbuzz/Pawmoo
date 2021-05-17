@@ -97,7 +97,7 @@ public function __TerminateView() {
         $url = App::Get_RelocateURL();
         if(isset($url)) {
             debug_log(DBMSG_VIEW,"RedirectURL: {$url}");
-            echo "<script type='text/javascript'>\n$(function() { history.replaceState(null, null, \"{$url}\"); });\n</script>\n";
+            echo "<script type='text/javascript'>\nhistory.replaceState(null, null, \"{$url}\");\n</script>\n";
         }
         if( is_bool_false(MySession::get_paramIDs('debugger'))) return;
         $this->ViewTemplate('debugbar');
@@ -678,7 +678,6 @@ public function ViewTemplate($name,$vars = []) {
     // ]
     private function cmd_list($tag,$attrs,$sec,$vars) {
         list($attrs,$text,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
-debug_log(-899,['SEC'=>$sec,'SUB'=>$subsec,'ATTR'=>$attrs,'TXT'=>$text]);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<{$tag}{$attr}>\n";
         foreach($subsec as $li_token => $li_sec) {

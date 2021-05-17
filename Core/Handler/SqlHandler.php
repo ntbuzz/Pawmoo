@@ -192,8 +192,19 @@ public function deleteRecord($wh) {
 // get value lists
 	private function sql_QueryValues($table,$ref,$id,$cond) {
 		$where = empty($cond) ? "" : $this->sql_makeWHERE($cond,$table);
+		$alias = [];
+		foreach([$ref,$id] as $field) {
+			$key = $this->fieldAlias->get_lang_alias($field);
+			$alias[$field] = $key;
+		}
+		$fields = array_map(function($k,$v)  {
+			if($k === $v) return "\"{$v}\"";
+			else return "\"{$v}\" AS \"{$k}\"";
+		},array_keys($alias),array_values($alias));
+		$sql = implode(',',$fields);
 //		$groupby = (empty($grp)) ? '' : " GROUP BY \"{$grp}\"";
-		return "SELECT \"{$id}\",\"{$ref}\" FROM {$table}{$where} ORDER BY \"{$id}\";";
+		$sql = "SELECT {$sql} FROM {$table}{$where} ORDER BY \"{$id}\";";
+		return $sql;
 	}
 //==============================================================================
 //

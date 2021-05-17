@@ -39,7 +39,6 @@ class AppStyle {
             'import'    => 'cmd_import',
             'section'   => 'cmd_section',
             'jquery'    => 'cmd_jquery',
-            'plugins'    => 'cmd_plugin',
         ],
         '*'  => 'do_comment',
     );
@@ -244,19 +243,17 @@ public function ViewStyle($file_name) {
         if($this->Filetype == 'js') {
             list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
             echo "$(function() { ";
-                $this->filesImport('jquery-',$tmplist,$sec);
+            $this->filesImport('jquery-',$tmplist,array_filter($sec,function($v) { return is_scalar($v);}));
             echo "});\n";
-        }
-    }
-//------------------------------------------------------------------------------
-// jquery Plugin
-// +plugin => [ files , ... ] or jquery => scalar
-    private function cmd_plugin($secParam, $param,$sec) {
-        if($this->Filetype == 'js') {
-            list($secname,$secData,$tmplist) = $secParam;       // 配列要素を分解
-            echo "(function ($) {\n";
-                $this->filesImport('plugins-',$tmplist,$sec);
-            echo "})(jQuery);\n";
+			$plugins = array_filter($sec,function($v) { return is_array($v);});
+			if(!empty($plugins)) {
+				echo "(function ($) {\n";
+				foreach($plugins as $subdir => $files) {
+					$files = array_map(function($v) use(&$subdir) { return "{$subdir}/{$v}"; },$files);
+					$this->filesImport('plugins-',$tmplist,$files);
+				}
+				echo "})(jQuery);\n";
+			}
         }
     }
 //------------------------------------------------------------------------------
