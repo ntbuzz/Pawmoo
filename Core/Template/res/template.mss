@@ -34,14 +34,14 @@ Stylesheet => [
 // javascript SECTION
 Javascript => [
     common => [
-		+plugins => [
-            plugins/misc.js             	// miscellaneous plugin
-            plugins/baloon.js               // Balloon Help
-            plugins/floatwin.js             // inner window 
-            plugins/info-box.js             // info-box for cannot move/resize
-            plugins/popup-box.js            // popup-box 
-		]
         +jquery => [
+			plugins => [
+				misc.js             	// miscellaneous plugin
+				baloon.js               // Balloon Help
+				floatwin.js             // inner window 
+				info-box.js             // info-box for cannot move/resize
+				popup-box.js            // popup-box 
+			]
             context.js              // context menu popup
             pagerscript.js          // pager button
             window.js               // JQuery-Plugins
@@ -52,10 +52,10 @@ Javascript => [
         ]
     ]
     checklist => [			// debug
-		+plugins => [
-			plugins/checklist.js
-		]
         +jquery => [
+			plugins => [
+				checklist.js
+			]
             window.js               // JQuery-Plugins
         ]
         +import => [
