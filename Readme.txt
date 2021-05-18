@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2021 by nTak
  * @license    MIT
- * @version 0.64.0, 2021-05-12
+ * @version 0.64.0, 2021-05-18
  * System Require: PHP 5.6 or Higher
  *
 
@@ -49,6 +49,9 @@
 3. 履歴
 【0.64.0】2021/05/12
 	・+plugin コマンドを+jqueryコマンドに統合
+	・fitWindowを再度改良
+	・getFieldValuesの仕様変更
+	・その他多数のバグ修正
 
 【0.63.0】2021/04/29
 	・チェックリストのタブ表示をサポート
