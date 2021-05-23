@@ -172,6 +172,13 @@ function tag_body_name($key) {
     return $key;
 }
 //==============================================================================
+// tag-attr multi-class define
+function get_class_names($cls, $with_attr = true) {
+	if($cls === '') return '';
+	$cls = trim(str_replace('.',' ',$cls));
+    return ($with_attr) ? " class='{$cls}'" : $cls;
+}
+//==============================================================================
 // get token type
 //  tag-token       1
 //  command-token   2
