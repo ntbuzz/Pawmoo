@@ -60,6 +60,11 @@ class AppModel extends AppObject {
         parent::class_initialize();
     }
 //==============================================================================
+// column exist check
+public function is_exist_column($name) {
+	return array_key_exists($name,$this->dbDriver->columns);
+}
+//==============================================================================
 // Switch Schema Language
 public function ResetSchema() {
     $this->SchemaAnalyzer();
@@ -269,54 +274,57 @@ public function GetRecord($num,$join=FALSE,$values=FALSE) {
 //==============================================================================
 //   Get Relation Table fields data list.
 // Result:   $this->Select (Relations)
-public function GetValueList() {
-    $valueLists = array();
+public function LoadSelection($key_names) {
     $filter_rec = function($record,$filter) {
         $new = [];
         foreach($filter as $key) $new[$key] = $record[$key];
         return $new;
     };
-    $set_sort_value = function($key,&$values) use(&$valueLists) {
-        $valueLists[$key] = $values;
-        ksort($valueLists[$key],SORT_FLAG_CASE|SORT_STRING);       // sort VALUE-LIST ignore-case
-    };
-    foreach($this->SelectionDef as $key_name => $seldef) {
-        list($target,$cond) = $seldef;
-        list($model,$ref_list) = array_first_item($target);
-        if(is_int($model)) {        // self list
-            $this->RecordFinder($cond,$ref_list,NULL,$filter_rec);
-            $set_sort_value($key_name,$this->Records);
-        } else if(is_array($ref_list)) {
+	$selections = (is_array($key_names)) ? $key_names : [$key_names];
+    foreach($selections as $key_name) {
+		list($target,$cond) = $this->SelectionDef[$key_name];
+		list($model,$ref_list) = array_first_item($target);
+		if(is_int($model)) {        // self list
+			$this->RecordFinder($cond,$ref_list,NULL,$filter_rec);
+			$this->Select[$key_name] = $this->Records;
+		} else if(is_array($ref_list)) {
 			list($method,$args) = array_first_item($ref_list);
 			if(is_numeric($method)) {
 				$this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
-				$set_sort_value($key_name,$this->$model->Records);
+				$this->Select[$key_name] = $this->$model->Records;
 			} else if(method_exists($this->$model,$method)) {	// selection by method call 
 				$method_val = $this->$model->$method($args,$cond);
-				$set_sort_value($key_name,$method_val);
+				$this->Select[$key_name] = $method_val;
 			}
-        } else {
-            $ref_list = explode('.', $ref_list);
-            $postfix = (count($ref_list) > 2);      // append to keyname_field
-            $ref_list = array_filter( $ref_list, "strlen" ) ;
-            $new_rec = [];
-            $this->$model->RecordFinder($cond,$ref_list,NULL,function($record,$filter) use(&$new_rec) {
-                $id = array_shift($filter);
-                foreach($filter as $key) {
-                    $rec_key = $record[$key];
-//                    if(!empty($rec_key)) 
-                    $new_rec[$key][$rec_key] = $record[$id];
-                }
-                return [];
-            });
-            array_shift($ref_list);     // remove relation-id
-            foreach($ref_list as $key) {
-                $key_set = ($postfix) ? "{$key_name}_{$key}" : $key_name;
-                $set_sort_value($key_set,$new_rec[$key]);
-            }
-        }
-    }
-    $this->Select= $valueLists;
+		} else {
+			$ref_list = explode('.', $ref_list);
+			$postfix = (count($ref_list) > 2);      // append to keyname_field
+			$ref_list = array_filter( $ref_list, "strlen" ) ;
+			$new_rec = [];
+			$this->$model->RecordFinder($cond,$ref_list,NULL,function($record,$filter) use(&$new_rec) {
+				$id = array_shift($filter);
+				foreach($filter as $key) {
+					$rec_key = $record[$key];
+					$new_rec[$key][$rec_key] = $record[$id];
+				}
+				return [];
+			});
+			array_shift($ref_list);     // remove relation-id
+			foreach($ref_list as $key) {
+				$key_set = ($postfix) ? "{$key_name}_{$key}" : $key_name;
+				$this->Select[$key_set] = $new_rec[$key];
+			}
+		}
+		ksort($this->Select[$key_name],SORT_FLAG_CASE|SORT_STRING);       // sort VALUE-LIST ignore-case
+	}
+}
+//==============================================================================
+//   Get Relation Table fields data list.
+// Result:   $this->Select (Relations)
+public function GetValueList() {
+    $this->Select= [];
+	$keyset = array_keys($this->SelectionDef);
+	$this->LoadSelection($keyset);
     debug_log(DBMSG_MODEL, [ "SELECT_LIST" => $this->Select]);
 }
 //==============================================================================

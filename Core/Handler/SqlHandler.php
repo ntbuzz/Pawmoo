@@ -236,19 +236,19 @@ protected function sql_safequote(&$value) {
 		$frm = " FROM {$this->table}";
 		$jstr = '';
 		if($use_relations && !empty($this->relations)) {
-			$join = [];
+			$join = [];//['L0'=>[],'L1'=>[]];
 			foreach($this->relations as $key => $val) {
 				foreach($val as $alias => $lnk) {
 					if(is_array($lnk)) {	// [ refer]
 						list($table,$ref,$rel_tbl,$rel_fn,$tbl_rel) = $lnk;
 						$rel = "{$rel_tbl}.\"{$rel_fn}\"={$table}.\"{$tbl_rel}\"";
-						if(isset($join[$table])) unset($join[$table]);	// duplicate-refer
+						if(!isset($join[$table])) $join[$table] = $rel;			// duplicate-refer
 					} else {
 						list($table,$fn,$ref) = explode('.', $lnk);
 						$rel = "{$this->table}.\"{$key}\"={$table}.\"{$fn}\"";
+						if(!isset($join[$table])) $join = [$table => $rel] + $join;	// duplicate-refer
 					}
 					$sql .= ",{$table}.\"{$ref}\" AS \"{$alias}\"";
-					$join[$table] = $rel;
 				}
 			}
 			foreach($join as $table => $val) $jstr .= " LEFT JOIN {$table} ON {$val}";
@@ -312,7 +312,8 @@ protected function sql_safequote(&$value) {
 					$v = mb_substr($v,1);
 					$op = 'NOT LIKE';
 				} else $op = 'LIKE';
-				return [$v,$op];
+				if(mb_strpos($v,'%') === FALSE) $v = "%{$v}%";
+				return ["'{$v}'",$op];
 			};
 			// multi-column LIKE op
 			$like_object = function($key,$val,$table) use(&$like_opstr) {
@@ -322,7 +323,7 @@ protected function sql_safequote(&$value) {
 					$opk = "{$table}.\"{$cmp}\"";
 					$cmp = array_map(function($v) use(&$opk,&$like_opstr) {
 							list($v,$opx) = $like_opstr($v);
-							return "({$opk} {$opx} '%{$v}%')";
+							return "(cast({$opk} as text) {$opx} {$v})";
 						},$val);
 					$expr[] = implode('OR',$cmp);
 				}
@@ -334,7 +335,11 @@ protected function sql_safequote(&$value) {
 				$expr = [];
 				foreach(string_to_array('+',$key) as $cmp) {
 					$cmp = $this->fieldAlias->get_lang_alias($cmp);
-					$expr[] = "({$table}.\"{$cmp}\" {$op} {$val})";
+					$fn = "{$table}.\"{$cmp}\"";
+					if(mb_strpos($val,'%') !== FALSE) {
+						$fn = "cast({$fn} as text)";
+					}
+					$expr[] = "({$fn} {$op} {$val})";
 				}
 				$opp = implode('OR',$expr);
 				return (count($expr)===1) ? $opp : "({$opp})";
@@ -361,7 +366,6 @@ protected function sql_safequote(&$value) {
 							$op = '=';
 						} else {
 							list($val,$op) = $like_opstr($val);
-							$val = "'%{$val}%'";
 						}
 						$opp = $multi_field($key,$op,$table,$val);
 					}
@@ -369,9 +373,19 @@ protected function sql_safequote(&$value) {
 					if(array_key_exists($key,$this->relations)) {		// check exists relations
 						$rel = $this->relations[$key];
 						list($nm,$rel) = array_first_item($rel);		// because each element will be same table,id
-						list($tbl,$fn) = explode('.',$rel);
-						$ops = $dump_object('AND',$val,$tbl);
-						$opp = "({$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE {$ops}))";
+						if(is_scalar($rel)) {
+							list($tbl,$fn) = explode('.',$rel);
+							$ops = $dump_object('AND',$val,$tbl);
+							$opp = "({$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE {$ops}))";
+						} else {
+							list($subtbl,$subfn,$tbl,$fn,$rel_fn) = $rel;
+                			$fid = ((substr($fn,-3)==='_id') ? substr($fn,0,strlen($fn)-3) : $fn)."_{$subfn}";
+							list($kk,$vv) = array_first_item($val);		// because each element will be same table,id
+							$val = [str_replace($fid,$subfn,$kk) => $vv]; // change rel-level field key
+							$ops = $dump_object('AND',$val,$subtbl);
+							$ops = "({$tbl}.\"{$fn}\" IN (SELECT Distinct({$subtbl}.\"{$rel_fn}\") FROM {$subtbl} WHERE {$ops}))";
+							$opp = "({$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$rel_fn}\") FROM {$tbl} WHERE {$ops}))";
+						}
 					} else continue;
 				} else if(is_array($val)) {
 					$in_op = [ '=' => 'IN', '==' => 'IN', '<>' => 'NOT IN', '!=' => 'NOT IN'];

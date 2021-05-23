@@ -73,3 +73,7 @@ html, body {
 .delete-item-list>li>del:hover {
 	background: url(res/img/del_button.png) no-repeat left -20px;
 }
+
+option.disable {
+	color:silver;
+}

@@ -105,7 +105,7 @@ function SelectLink(setupobj, id, first_call, callback) {
 		var opt = 0;
 		if (my_obj.select_one) { self_obj.append(select_me); ++opt; };
 		$.each(my_obj.sel_list, function (key, value) {
-			if (value[2] === undefined || value[2] == grp) {
+			if (value[2] === undefined || parseInt(value[2]) === parseInt(grp)) {
 				var sel = (value[0] === val) ? ' selected' : '';
 				self_obj.append('<option value="' + value[0] + '"' + sel + '>' + value[1] + '</option>');
 				++opt;
@@ -121,15 +121,15 @@ function SelectLink(setupobj, id, first_call, callback) {
 	// suppress change() event 
 	self.SetSelect = function (my_val) {
 		if (child_obj !== null) child_obj.defaultList(0, my_val);
-		else if (callback !== null) {
-			var my_txt = $(this).children(':selected').text();
-			if (callback_call) callback.call(this, my_val, my_txt);
+		 else if (typeof callback === 'function') {
+			var my_txt = self_obj.children(':selected').text();
+			if (callback_call) callback.call(this, my_val, my_txt, id);
 			callback_call = true;
 		};
 	};
-	self.Select = function (val) {
+	self.Select = function (val,in_progress) {
         if(child_obj !== null) val = child_obj.Select(val);
-		var grp = 0;
+		var grp = val;
 		$.each(my_obj.sel_list, function (key, value) {
 			if (value[0] === val) {
 				grp = (value[2] === undefined) ? 0 : value[2];
@@ -138,8 +138,12 @@ function SelectLink(setupobj, id, first_call, callback) {
 			return true;
 		});
         self.selfList(val, grp);
-        self_obj.off().change(function() {
-			self.SetSelect($(this).val());
+		self_obj.off().change(function () {
+			var my_val = $(this).val()
+			if (child_obj !== null && typeof in_progress === 'function') {
+				in_progress.call(this, my_val, id);
+			}
+			self.SetSelect(my_val);
 		});
 		if (child_obj === null) self.SetSelect(val);
         return grp;

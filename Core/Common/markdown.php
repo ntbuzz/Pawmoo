@@ -13,7 +13,7 @@ if (!function_exists('preg_replace_callback_array')) {
 // Like a MarkDown Description
 // Markdown syntax is the original syntax other than the general one.
 function pseudo_markdown($atext, $md_class = '') {
-    if(empty($md_class)) $md_class = 'easy_markdown';
+    $md_class = get_class_names("easy_markdown.{$md_class}");
     $replace_defs = [
         '/\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'    => '<a href="\\2">\\1</a>',
         "/\s\*\*(.+?)\*\*\s/" => '<strong>\\1</strong>',  // BOLD
@@ -27,9 +27,9 @@ function pseudo_markdown($atext, $md_class = '') {
     // <PRE>,CR-LF, \<TAG>, and <DL> tag
     $atext = preg_replace_callback_array([
         // pre tag with class
-        '/(?:^|\n)(```|~~~|\^\^\^)(?:([\-\w]+))?(.+?)\n\1/s' => function ($m) {
+        '/(?:^|\n)(```|~~~|\^\^\^)([\w\-]+(?:\.[\w\-]+)*)?(.+?)\n\1/s' => function ($m) {
             $class = [ '```' => 'code','~~~' => 'indent','^^^' => 'indent'];
-            $cls = ($m[2]==='')?$class[$m[1]]:$m[2];
+            $cls = ($m[2]==='')?$class[$m[1]]:get_class_names($m[2],false);
             $txt = ($cls==='code') ? htmlspecialchars($m[3]) : $m[3];
             return "\n<pre class='$cls'>{$txt}</pre>";
         },
@@ -104,11 +104,11 @@ function pseudo_markdown($atext, $md_class = '') {
         return $user_func($txt);
     }, $atext);
     // TABLE processing
-    $p = '/(?:^|\n)(\|.+?\|)(?:\n(?:\.([\-\w]+))?\n|$)/s';
+    $p = '/(?:^|\n)(\|.+?\|)(?:\n((?:\.[\w\-]+)*)\n|$)/s';
     $atext = preg_replace_callback($p,function($matches) {
         // Combine lines that do not end with '|' as multiple lines
         $txt = preg_replace('/([^|])\n+/','\\1<br>', $matches[1]);
-        $tbl_class = (empty($matches[2])) ? '':" {$matches[2]}";
+        $tbl_class = get_class_names("md_tbl{$matches[2]}");
         $col_row_span = function($key,$str) {
             $span_attr = ['@'=>'colspan','^'=>'rowspan'];
             $bind = '';
@@ -127,13 +127,13 @@ function pseudo_markdown($atext, $md_class = '') {
             $tags = [ '<' => 'left','>' => 'right','=' => 'center'];
             foreach($cols as $col) {
                 // maybe additional calss and colspan/rowspan
-                preg_match('/^(:)?([<>=])?(?:(@\d+|@+)|(\^\d+|\^+))*(?:\.([\-\w]+))?(?:#(\d+%?))?/',$col,$m);
+                preg_match('/^(:)?([<>=])?(?:(@\d+|@+)|(\^\d+|\^+))*((?:\.[\w\-]+)*)(?:#(\d+%?))?/',$col,$m);
                 $style = $attrs = '';
                 $tag = 'td';
                 switch(count($m)) {
                 case 7: $wd = (substr($m[6],-1)==='%') ? $m[6] : "{$m[6]}px";
                         $style .= ($m[6]==='') ? '':"width:{$wd};";
-                case 6: $attrs .= ($m[5]==='') ? '': " class='{$m[5]}'";
+                case 6: $attrs .= get_class_names($m[5]);
                 case 5: $attrs .= $col_row_span('^',$m[4]);
                 case 4: $attrs .= $col_row_span('@',$m[3]);
                 case 3: if(!empty($m[2])) {
@@ -149,7 +149,7 @@ function pseudo_markdown($atext, $md_class = '') {
             }
             return "<tr>{$ln}</tr>";
         },explode("\n", $txt));
-        return "<table class='md_tbl{$tbl_class}'>".implode("\n",$arr)."</table>\n";
+        return "<table{$tbl_class}>".implode("\n",$arr)."</table>\n";
     }, $atext);
 
 //------------------------------------------------------------------------------
@@ -167,9 +167,9 @@ function pseudo_markdown($atext, $md_class = '') {
     };
     $atext = preg_replace_callback_array([
 //------- HEAD(#) TAG
-        '/^(#{1,6})(?:\.([\-\w]+))? (.+?)$/m' => function($m) {
+        '/^(#{1,6})((?:\.[\w\-]+)*) (.+?)$/m' => function($m) {
             $n = strlen($m[1]);
-            $cls = ($m[2]==='')?'':" class='{$m[2]}'";
+            $cls = get_class_names($m[2]);
             return "<h{$n}{$cls}>{$m[3]}</h{$n}>";
         },
         '/^(?:---|___|\*\*\*)$/m'     => function($m) { return "<hr>"; },
@@ -189,22 +189,22 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<img src='{$src}' alt='{$alt}'{$sz} />";
         },
 //------- ..class#id{ TEXT } CLASS/ID attributed SPAN/P replacement
-        '/\s\.\.(?:([\-\w]+))?(?:#([\-\w]+))?(:)?\{(.*?)\}\s/s' => function ($m) {
-            $cls = ($m[1]==='') ? '' : " class='{$m[1]}'";
+        '/\s\.\.([\w\-]+(?:\.[\w\-]+)*)?(?:#([\-\w]+))?(:)?\{(.*?)\}\s/s' => function ($m) {
+            $cls = get_class_names($m[1]);
             $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
             $tag = ($m[3]==='') ? 'span' : 'p';
             $txt = $m[4];
             return "<{$tag}{$cls}{$ids}>{$txt}</{$tag}>";
         },
-//------- ...:{ TEXT }... NL change <br> tag in div-indent class
-        '/\s\.\.\.(?:([\-\w]+))?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
+//------- ...!{ TEXT }... NL change <br> tag in div-indent class
+        '/\s\.\.\.([\w\-]+(?:\.[\w\-]+)*)?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
             if($m[2]==='!') {
                 $txt = nl2br($m[3]);
                 // restore HTML-tag(</h1>) after <BR>
                 $txt = rtrim(preg_replace('/(<\/h\d>)(?:<br>|<br \/>)\n/i',"\\1\n","{$txt}\n"));
             } else $txt = trim($m[3]);
-            $cls = ($m[1]==='')?'indent':$m[1];
-            return "\n<div class='$cls'>{$txt}</div>";
+            $cls = ($m[1]==='')?'indent':get_class_names($m[1],false);
+            return "\n<div class='{$cls}'>{$txt}</div>";
         },
 //------- [check]{text} CHECKBOX MARK
         '/\[([^\]]*?)\]\{([^\}]*?[^\\\\])\}/' => function ($m) {
@@ -296,5 +296,5 @@ function pseudo_markdown($atext, $md_class = '') {
     // Returns the escaped character to the character before escaping.
     $p = '/\\\([~\-_<>\^\[\]`*#|\(\.{}])/s';
     $atext = preg_replace_callback($p,function($matches) {return $matches[1];}, $atext);
-    return "<div class='{$md_class}'>{$atext}</div>\n";
+    return "<div{$md_class}>{$atext}</div>\n";
 }

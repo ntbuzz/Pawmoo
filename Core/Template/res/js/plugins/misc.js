@@ -14,6 +14,7 @@ $.fn.ChainSelect = function () {
 		val: 0,
 		first_call: false,
 		callback: null,
+		progress : null,
 	};
 	// 可変引数を解析
 	$.each(arguments,function (key,argv) {
@@ -24,7 +25,14 @@ $.fn.ChainSelect = function () {
 	});
 	var id = this.attr('id');
 	var sel_chain = new SelectLink(target.selObj, id, target.first_call, target.callback);
-	sel_chain.Select(target.val);
+	// 中間タグのセレクトコールバック
+	self.InProgress = function (callback) {
+		target.progress = callback;
+	};
+	sel_chain.Select(target.val, function (v, id) {
+		if (typeof target.progress === 'function')
+			target.progress.call(this, v, id);
+	});
 	return self;
 };
 // 指定要素 e のスクロールに追従する

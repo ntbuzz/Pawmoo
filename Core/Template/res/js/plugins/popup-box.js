@@ -63,7 +63,9 @@ $.fn.PopupBoxSetup = function () {
 			// バルーンを消すための領域を定義
 			var backwall = $('<div class="popup-BK"></div>');
 			// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
-			self.off('close-me').on('close-me', function () {
+			self.off('close-me').on('close-me', function (e) {
+				e.stopPropagation();
+				e.preventDefault();
 				self.fadeOut('fast');
 				backwall.fadeOut('fast', function () {
 					backwall.remove();

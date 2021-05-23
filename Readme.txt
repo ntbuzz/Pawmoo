@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2021 by nTak
  * @license    MIT
- * @version 0.64.0, 2021-05-12
+ * @version 0.65.0, 2021-05-23
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,13 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 履歴
+【0.65.0】2021/05/23
+	・floatWin() のボタン処理コールバックを追加
+	・サブクエリ処理のバグ修正
+	・ChainSelect()の中間タグでのコールバックを追加
+	・+selectコマンドの OPTIONタグ処理変更
+	・他デバッグ分コメントなどの修正
+
 【0.64.0】2021/05/12
 	・+plugin コマンドを+jqueryコマンドに統合
 

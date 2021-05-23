@@ -266,7 +266,7 @@ public function ViewTemplate($name,$vars = []) {
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
     public function expand_Strings($str,$vars) {
         if(empty($str) || is_numeric($str)) return $str;
-        $p = '/\${[^}\s]+?}|\${[#%\'"\$@&][^}\s]+?}/';       // PARSE variable format
+        $p = '/\${[^}\s]+?}|\${[#%\'"\$@&:][^}\s]+?}/';       // PARSE variable format
         preg_match_all($p, $str, $m);
         $varList = $m[0]; 
         if(empty($varList)) return $str;        // not use variable.
@@ -547,6 +547,7 @@ public function ViewTemplate($name,$vars = []) {
     // TAG section direct OUTPUT for +jquery,+script,*style
     private function directOutput($beg_tag, $end_tag,$sec,$vars) {
         $txt = $this->expand_Strings(((is_array($sec)) ? array_to_text($sec) : $sec),$vars);
+//debug_log(DBMSG_DIE,['DIREC'=>$sec,$txt]);
         echo "{$beg_tag}\n{$txt}\n{$end_tag}\n";
     }
     //--------------------------------------------------------------------------
@@ -760,18 +761,16 @@ public function ViewTemplate($name,$vars = []) {
         if(!is_array($sec)) return;     // not allow scalar value
         list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         $attr = $this->gen_Attrs($attrs,$vars);
-        echo "<{$tag}{$attr}>\n";
         list($opt_key, $opt_val) = array_first_item($sec);
 		if(mb_substr($opt_key,-1)==='.') $opt_key = rtrim($opt_key,'.');
         $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
-        $opt_val = $this->expand_SectionVar($opt_val,$vars);
-        if(is_array($opt_val)) {
-            $opt_val = array_flat_reduce($opt_val);
-            foreach($opt_val as $opt => $val) {
-                $sel = ($val == $sel_item) ? ' selected':'';	// allow digit-string compare
-                echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
-            }
-        } else echo "<OPTION value='{$opt_val}'>{$opt_val}</OPTION>\n";
+        $opt_val = array_flat_reduce($this->expand_SectionVar($opt_val,$vars));
+        echo "<{$tag}{$attr}>\n";
+//		if(!in_array($sel_item,$opt_val)) echo "<OPTION> [SELECT ONE] </OPTION>\n";
+		foreach($opt_val as $opt => $val) {
+			$sel = ($val == $sel_item) ? ' selected':'';	// allow digit-string compare
+			echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
+		}
         echo "</{$tag}>\n";
     }
     //--------------------------------------------------------------------------
