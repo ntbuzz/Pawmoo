@@ -25,7 +25,7 @@ $.fn.ChainSelect = function () {
 	});
 	var id = this.attr('id');
 	var sel_chain = new SelectLink(target.selObj, id, target.first_call, target.callback);
-		// フェイルメソッドバージョン
+	// 中間タグのセレクトコールバック
 	self.InProgress = function (callback) {
 		target.progress = callback;
 	};
