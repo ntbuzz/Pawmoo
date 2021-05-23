@@ -2,8 +2,12 @@
 // JQueryプラグインで呼び出す
 //==============================================================================================
 // フローティングウィンドウのフォームのみ
-$.fn.innerWindow = function (title) {
+$.fn.innerWindow = function (title,callbackBtn, callback) {
 	var self = this;
+	var eventButtons = ['.close', '.cancel', '.closeButton', '.execButton'];
+	if (typeof callbackBtn === "string" && eventButtons.is_exists(callbackBtn)===false) eventButtons.push(callbackBtn);
+	var elements = eventButtons.join(',');
+	var callbacks = eventButtons.slice(3).join(',');
 	var id = "#" + self.attr("id");
     var val = self.attr("value");
     var buttons = (val) ? val.split(",") : Array();
@@ -27,8 +31,11 @@ $.fn.innerWindow = function (title) {
         var buttontag = "<div class='center'><hr>";
         var buttonClass = [ "execButton", "closeButton"];
 		$.each(buttons, function (index, val) {
-			var action = buttonClass[index];
-			buttontag = buttontag + '<span class="Button ' + action + '">' + val + '</span>';
+			var label_array = val.split(":");
+			var btn_label = label_array[0];
+			var action = label_array[1];
+			if(action === undefined || action === "") action = buttonClass[index];
+			buttontag = buttontag + '<span class="Button ' + action + '">' + btn_label + '</span>';
         });
         buttontag = buttontag+"</div>";
         self.find('dd').append(buttontag);
@@ -36,10 +43,20 @@ $.fn.innerWindow = function (title) {
 	self.find('dl dt').text(title);
 	// 背景をクリックできなくする
 	var backwall = $('<div class="floatWin-BK"></div>');
-    // クローズイベントを登録
-	self.off().on('click', '#close, .close, .cancel, .closeButton, .execButton', function (e) {
+    // イベントボタンリストを登録
+	self.off('click').on('click', elements, function (e) {
+//		alert(elements+"\nMe:"+$(this).prop('class'));
 		e.stopPropagation();
 		e.preventDefault();
+		// 実行イベントボタンを判定
+		if ($(callbacks).is($(this))) {
+//			alert(callbacks);
+			if (typeof callback === 'function') callback.call($(this));
+		};
+		self.trigger('close-me');
+	});
+	// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
+	self.off('close-me').on('close-me', function (e) {
 		self.fadeOut("fast");
 		self.find('#init_contents').html('');      // clear contents
 		$(document).unbind("mousemove");
@@ -141,7 +158,8 @@ $.fn.floatWin = function (setupObj, callback) {
 		execButton: '.execButton',
 		formObj: {},
 	};
-	$.each(setupObj, function (key, value) { setting[key] = value;});
+	if(typeof setupObj === 'string') setting.Title = setupObj;
+	else if(typeof setupObj === 'object') $.each(setupObj, function (key, value) { setting[key] = value;});
 	// Formparameter setup
 	$.each(setting.formObj, function (key, value) {
 		var target = self.find('[name="' + key + '"]');
@@ -164,7 +182,7 @@ $.fn.floatWin = function (setupObj, callback) {
 			};
 		};
 	});
-	self.find(setting.execButton).off().on('click', function () {
+	self.innerWindow(setting.Title, setting.execButton, function () {
 		var setobj = {};
 		self.find("*").each(function () {
 			var nm = $(this).attr('name');
@@ -177,9 +195,8 @@ $.fn.floatWin = function (setupObj, callback) {
 				};
 			};
 		});
-		if (callback !== null) callback.call(this,setobj);
+		if (typeof callback === "function") callback.call($(this), setobj);
 		return false;
 	});
-	self.innerWindow(setting.Title);
 	return self;
 };
