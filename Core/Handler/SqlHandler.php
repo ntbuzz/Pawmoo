@@ -240,8 +240,8 @@ protected function sql_safequote(&$value) {
 			foreach($this->relations as $key => $val) {
 				foreach($val as $alias => $lnk) {
 					if(is_array($lnk)) {	// [ refer]
-						list($table,$ref,$rel_tbl,$rel_fn,$tbl_rel) = $lnk;
-						$rel = "{$rel_tbl}.\"{$rel_fn}\"={$table}.\"{$tbl_rel}\"";
+						list($rel_tbl,$rel_fn,$fn,$table,$primary,$ref) = $lnk;
+						$rel = "{$rel_tbl}.\"{$fn}\"={$table}.\"{$primary}\"";
 						if(!isset($join[$table])) $join[$table] = $rel;			// duplicate-refer
 					} else {
 						list($table,$fn,$ref) = explode('.', $lnk);
@@ -280,6 +280,7 @@ protected function sql_safequote(&$value) {
 				foreach($arr as $key => $val) {
 					$child = $array_item_shurink((is_numeric($key))?$opr:$key,$val);
 					if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
+						if($child === []) continue;		// empty condition value
 						$array_merged($opr,$wd,$child);
 					} else {
 						set_array_key_unique($wd,$key,$child);
@@ -371,20 +372,27 @@ protected function sql_safequote(&$value) {
 					}
 				} else if($op === '@') {	// SUBQUERY op
 					if(array_key_exists($key,$this->relations)) {		// check exists relations
-						$rel = $this->relations[$key];
-						list($nm,$rel) = array_first_item($rel);		// because each element will be same table,id
+						$rel_defs = $this->relations[$key];
+						list($cond_fn,$op) = keystr_opr(array_key_first($val));
+						$rel_key = id_relation_name($key)."_{$cond_fn}";
+						if(array_key_exists($rel_key,$rel_defs)) {		// exists relation-defs
+							$rel = $rel_defs[$rel_key];
+						} else {
+							list($kk,$rel) = array_first_item($rel_defs);
+							if(is_array($rel)) $rel = implode('.',$rel);	// force scalar-value
+						}
 						if(is_scalar($rel)) {
 							list($tbl,$fn) = explode('.',$rel);
 							$ops = $dump_object('AND',$val,$tbl);
 							$opp = "({$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE {$ops}))";
 						} else {
-							list($subtbl,$subfn,$tbl,$fn,$rel_fn) = $rel;
-                			$fid = ((substr($fn,-3)==='_id') ? substr($fn,0,strlen($fn)-3) : $fn)."_{$subfn}";
+							list($tbl,$tbl_prim,$tbl_rel,$rel_tbl,$rel_fn,$fn) = $rel;
+							$fid = id_relation_name($tbl_rel)."_{$fn}";
 							list($kk,$vv) = array_first_item($val);		// because each element will be same table,id
-							$val = [str_replace($fid,$subfn,$kk) => $vv]; // change rel-level field key
-							$ops = $dump_object('AND',$val,$subtbl);
-							$ops = "({$tbl}.\"{$fn}\" IN (SELECT Distinct({$subtbl}.\"{$rel_fn}\") FROM {$subtbl} WHERE {$ops}))";
-							$opp = "({$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$rel_fn}\") FROM {$tbl} WHERE {$ops}))";
+							$val = [str_replace($fid,$fn,$kk) => $vv]; // change rel-level field key
+							$ops = $dump_object('AND',$val,$rel_tbl);
+							$ops = "({$tbl}.\"{$tbl_rel}\" IN (SELECT Distinct({$rel_tbl}.\"{$rel_fn}\") FROM {$rel_tbl} WHERE {$ops}))";
+							$opp = "({$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$tbl_prim}\") FROM {$tbl} WHERE {$ops}))";
 						}
 					} else continue;
 				} else if(is_array($val)) {
