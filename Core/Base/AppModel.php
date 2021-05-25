@@ -90,10 +90,6 @@ public function ResetSchema() {
             list($disp_name,$disp_flag,$width,$relations,$binds) = $defs;
             list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
             if(!empty($relations)) {
-                if(substr($key,-3)==='_id' && is_scalar($relations)) {
-                    $ref_key = substr($key,0,strlen($key)-3);
-                    $field[$key] = $key;        // setup name before _id cut-out
-                }
                 $relation[$key] = $relations;
             }
             if(!empty($binds)) {
@@ -133,17 +129,18 @@ public function ResetSchema() {
 //==============================================================================
 // nested relation model
 // CALL by Other Model Relation Analyzer
-    protected function JoinDefinition($table,$field) {
+    protected function JoinDefinition($table,$field,$rel_key) {
         if(is_array($this->dbDriver->relations)) {
             foreach($this->dbDriver->relations as $key => $refs) {
                 if(array_key_exists($field,$refs)) {
                     $lnk = explode('.',$refs[$field]);
                     return [
-                        $lnk[0],        // table
-                        $lnk[2],        //   ref_name
                         $table,         // rel_table
-                        $key,           //    rel_filed
-                        $lnk[1],        //    table_filed
+						$rel_key,		//   rel_key
+                        $key,           //   rel_filed
+                        $lnk[0],        // sub_table
+                        $lnk[1],        //   rel_id
+                        $lnk[2],        //   ref_name
                     ];
                 }
             }
@@ -155,7 +152,7 @@ public function ResetSchema() {
     private function RelationSetup() {
         $new_Relations = [];
         foreach($this->Relations as $key => $rel) {
-            $base_name = (substr($key,-3)==='_id') ? substr($key,0,strlen($key)-3) : $key;
+            $base_name = id_relation_name($key);
             $rel_array = is_array($rel);
             if($rel_array) {            // multi-column refer
                 list($db,$ref_list) = array_first_item($rel);
@@ -168,15 +165,18 @@ public function ResetSchema() {
                 list($model,$table,$field) = $this->model_view($db);
                 $link = "{$table}.{$field}";
                 if(is_scalar($ref_list)) $ref_list = [$ref_list];    // force array
+				$rel_def = array_key_first($rel);
             } else {
                 list($model,$table,$field,$refer) = $this->model_view($rel);
                 $link = "{$table}.{$field}";
                 $ref_list = [ $refer ];
+				$rel_def = $rel;
             }
             $sub_rel = [];
+			list($rel_tbl,$primary) = explode('.',$rel_def);
             foreach($ref_list as $refer) {
-                $sub_ref = $this->$model->JoinDefinition($table,$refer);
-                $alias_name = ($rel_array) ? "{$base_name}_{$refer}" : $base_name;
+                $sub_ref = $this->$model->JoinDefinition($table,$refer,$primary);
+                $alias_name = "{$base_name}_".id_relation_name($refer);
                 $this->FieldSchema[$alias_name] = NULL;   // $key; import MUST!
                 // locale if exist in relation-db
                 if($this->$model->dbDriver->fieldAlias->exists_locale($refer)) {
@@ -315,7 +315,7 @@ public function LoadSelection($key_names) {
 				$this->Select[$key_set] = $new_rec[$key];
 			}
 		}
-		ksort($this->Select[$key_name],SORT_FLAG_CASE|SORT_STRING);       // sort VALUE-LIST ignore-case
+		ksort($this->Select[$key_name],SORT_NUMERIC);       // sort VALUE-LIST ignore-case
 	}
 }
 //==============================================================================
@@ -378,7 +378,7 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
         }
     }
     $this->Records = $data;
-    debug_log(DBMSG_CLI, ['DATA'=>$data]);
+//    debug_log(DBMSG_CLI, ['DATA'=>$data]);
     debug_log(FALSE, [
         "record_max" => $this->record_max,
         "Filter" => $filter,

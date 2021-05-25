@@ -195,6 +195,11 @@ function is_tag_identifier($str) {
     return 0;   // text-token
 }
 //==============================================================================
+// '_id' fieldname omitted
+function id_relation_name($str) {
+	return (substr($str,-3)==='_id') ? substr($str,0,strlen($str)-3) : $str;
+}
+//==============================================================================
 // SQL Compare operator separate
 function keystr_opr($str) {
     $opr_set = ['=='=>NULL, '<>'=>NULL, '>='=>NULL, '<='=>NULL, '=>'=>'>=', '=<'=>'<=', '!='=>'<>',
