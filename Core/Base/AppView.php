@@ -226,7 +226,7 @@ public function ViewTemplate($name,$vars = []) {
                     $clsVar = ($cls === '::') ? $this->Helper : $this->Model;
                     if(isset($clsVar->$var)) { // exist Property?
                         $val = array_member_value($clsVar->$var,$mem);
-                    }
+                    } else $val = NULL;
                     break;
             case '^':       // both ENV or REQ VAR
             case '"':       // REQ-VAR

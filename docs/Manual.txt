@@ -364,14 +364,18 @@
   JOIN定義            フィールド名にリレーションする「モデル名.カラム名.取得カラム名」を指定します
                       複数のカラムを取得する場合は「モデル名.カラム名」をキー名とする連想配列で定義する
                       ex. 'name_id' => ..., 'NameModel.id.fullName'
-                      取得したカラムはフィールド名から[_id]を取り除いた要素名に代入されます。
-                      取得カラム名を明治したいときや、複数のカラムを取得する場合は連想配列として定義します。
-                      この場合は取得カラム名をアンダースコアで転結した要素名に代入されます。
+                      取得したカラムはフィールド名から[_id]を取り除いた要素名に取得カラム名をアンダースコアで
+                      連結した要素名に代入されます。代入されます。
                       ex. 'name_id' => ..., [ 'NameModel.id' => ['firstName','lastName'] ]
                           NameModel.firstName => name_firstName
                           NameModel.lastName  => name_lastName
-                      取得先のフィールドが別のテーブルへのリレーションになっている場合は、
-                      他のフィールドでも同じテーブルをJOIN定義してあると、エラーになります。
+                      取得先のフィールドが別のテーブルへのJOIN定義になっている場合は、１ネストのみ対応しています。
+                      ２ネスト以上のJOIN定義や循環参照になる場合は正しく処理できずにエラーになります。
+                      ex.
+                      AppliModel:       category_id => "Category.id" => ['name','class']
+                        CategoryModel:  class_id    => 'Class.id' => ['name','level']   →○
+                        CategoryModel:  app_id      => 'Appli.id.category_name'         →× (循環参照)
+                          ClassModel:   level_id    => 'CategoryLevel.id' => ['title']  →× (２ネスト)
   カラム連結          複数のカラムを連結した仮想カラムを生成します。
                       ex. 'name_id' => ..., [ 'fullName' => ['firstName','lastName'] ]
                       firstName と lastName カラムを連結して fullName カラムを生成して代入します。
@@ -415,8 +419,8 @@
   モデルクラスの各メソッドで使用する、レコード検索における条件句には論理式が使用できます。
   論理式は連想配列で指定し、次のような形式になります。
 
-    論理積   	AND => [ item, item,... ] | [ item, item,...]
-    論理和   	OR  => [ item, item,... ]
+    論理積      AND => [ item, item,... ] | [ item, item,...]
+    論理和      OR  => [ item, item,... ]
     否定      NOT => [ item ]
 
   item の指定はカラム名に演算子を付加した連想配列です。
@@ -513,6 +517,7 @@
       キー名は構造メンバー形式(xxx.yyy)で多次元配列を参照することもできます
         ${:Select[host_id]}       $Model->Select['host_id'] 要素を参照する
         ${:Select[host_id.name]}  $Model->Select['host_id']['name'] 要素を参照する
+      プロパティ変数が存在しない場合はNULLになります。
 
   ・レコード変数
       ${@フィールド名}      レコードデータのフィールド値、改行を<br>、HTML文字をエンティティ変換したもの
@@ -670,6 +675,14 @@
     FORMAT-II:                            複数のチェックボックスをまとめて出力するときはname属性をキーにした連想配列
       name1 => [ @value1=>TEXT [ STR1 => value1 ] ]
       name2 => [ @value2=>TEXT [ STR2 => value2 ] ]
+  +textbox:size[name]  => [				  INPUT TEXTタグを出力する
+  		attr => value						INPUTタグの属性を指定(省略可)
+  		valie								VALUE属性の値
+  	  ]
+  +textedit[name](rows:cols) => [		  TEXTAREAタグを出力する
+  		attr => value					  TEXTAREAタグの属性を指定(省略可)
+  		value								TEXTAREAのテキスト値
+  	]
   +dl => [ attr => value , [ items ]  ]   DLタグ専用のリスト出力、attr => value はDLタグの属性になる
     items :=                              リスト項目は次の要素から構成する
         inner-text,                       無名キースカラー要素：　DTタグのインナーテキスト
@@ -694,6 +707,8 @@
     DT-Title                              dl タグを直接記述せずにすむ
     [ DD-Section ]
   ]
+  +push.name => value					  セッション変数(name)に value を格納します。
+  										  この値はリソース定義内でインポートできます。
 
   特定の変数やデータにより、タグ出力を切替えるにはスイッチセクション(?記号)を使います。
   スイッチセクション :=
@@ -709,6 +724,7 @@
 
   メソッドで処理することにより、複雑な条件でスイッチセクションを定義できるようになります。
   このヘルパーメソッドはセクションフォーマット配列を返す関数として作成してください。
+  ※：スイッチセクションはサブセクション内のみで使用可能です。トップレベルでは正しく動作しません。
 
   サブセクション内でスカラー値を持つ要素はタグ属性として処理されますが、スカラー要素を持つ場合でも
   セクション要素として処理したいときは、タグ名に空のクラス名('.'のみ)を付けます。
@@ -836,11 +852,11 @@
    @charset => XXXX                     文字セットを出力する
    +import => [ value, ... ]             CSS/JS ファイルのインクルード、スカラー値でも可
                                         テンプレートファイルと同レベルか上位レベルのフォルダで探索する
-   +jquery => [ 						JSファイルの時のみ、テンプレートファイルと同レベルか上位レベルのフォルダで探索する
-   		filename, ...					JQuery関数 ファイルのインクルード
-		subfolder => [					subfolder下にあるJQueryプラグインのインクルード
-			pluginfile, ...
-		]
+   +jquery => [                         JSファイルの時のみ、テンプレートファイルと同レベルか上位レベルのフォルダで探索する
+        filename, ...                   JQuery関数 ファイルのインクルード
+        subfolder => [                  subfolder下にあるJQueryプラグインのインクルード
+            pluginfile, ...
+        ]
    ]                                    
    +section => subsection               別のセクション定義を読み込みます。セクション名の探索順は次のようになります
                                         (自ファイル内) → (アプリ共通フォルダ) → (フレームワークフォルダ)
@@ -921,10 +937,11 @@
     このセッション変数パラメータはコントローラーを呼び出すたびにリセットしており、
     連続して呼び出されるスタイル／スクリプトリソースとの間だけで共有されます。
 
-  インポートする対象ファイルにはCSS/JS以外にPHPファイルを指定することができ、条件判断により
-  複雑な出力の切り替えができるようになります。
-  ただし、モジュールクラスのインスタンスを参照することはできないので、処理中のモジュール情報は
-  セッション変数($EnvData['sysVAR'])から取得する必要があります。
+  インポートする対象ファイルにはCSS/JS以外にPHPファイルとセッション変数に格納されたデータを指定できます。
+  PHPファイルにより複雑な出力の切り替えができるようになりますが、モジュールクラスのインスタンスを参照する
+  ことはできないので、その場合、ビューテンプレートの +pushコマンドで保存したデータをインポートします。
+　セッション変数をインポートするには「＠＄変数名」と記述します。
+
 
 ■ 言語リソース テンプレート (*.lng)
   言語リソースは「モジュール名＋拡張子(lng)」で言語フォルダへ格納します。
@@ -1111,7 +1128,7 @@
     $defaultAction                //  デフォルトのアクション
     $defaultFilter                //  デフォルトのフィルター
     $disableAction                // 禁止する継承元のアクション
-	* $needLogin                    // ログイン要求の有無(デフォルト:FALSE)
+    * $needLogin                    // ログイン要求の有無(デフォルト:FALSE)
   * $aliasAction                  // アクションメソッドの別名呼出し配列
 
   ・クラスメソッド
@@ -1140,8 +1157,8 @@
     一致していないときや、複数のURIをひとつのメソッドで処理したい時などには別名呼出しを定義します。
     テンプレート変数には読替える前のメソッド名が格納されています。
       $aliasAction = [
-          'List'    => 'ListItems',		// ListメソッドをListitemsメソッドに読替える
-          'Viewall' => 'ListItems',		// ListallメソッドをListitemsメソッドに読替える
+          'List'    => 'ListItems',     // ListメソッドをListitemsメソッドに読替える
+          'Viewall' => 'ListItems',     // ListallメソッドをListitemsメソッドに読替える
         ];
 
 ・モデルクラス(AppModel)
@@ -1233,6 +1250,7 @@
 
     .floatWindow#＜要素ID＞ => [
       size => "幅,高さ,最小幅,最小高さ"　　　　// 指定しない場合はデフォルトサイズ
+      value => "実行ボタン名,取消ボタン名"	   // 組込みボタン、使用しない場合は独自にボタン定義する
       data#init => [ value => ＜ウィンドウに表示する初期データ＞ ]  // Drag&Dropウィンドウの時に使う
       dl => [ dt => [ "ウィンドウのタイトル" ]
       dd => [
@@ -1273,6 +1291,7 @@
 
     .popup-box#＜要素ID＞{＜表示対象の要素ID＞} => [
       size => "幅,高さ,最小幅,最小高さ"　　　　// 指定しない場合はデフォルトサイズ
+      value => "ボタン名:クラス名,..."		   // 指定しない場合は closeボタンを自動生成
       .contents => [ ＜ウィンドウに表示するデータ＞ ]
     ]
 
@@ -1302,8 +1321,8 @@
   stickyBarクラスは「position:sticky」のCSS が正しく動作しない(IE用)ときに指定します。
   このクラスを持つブロックは直前の fitWindow クラスブロックか親ブロックの位置に固定されます。
 
-  fitWindowクラスはウィンドウの高さを親ウィンドウまたは直近のfitWindowクラスの高さに合わせます。
-  height:100%; でスクロール領域がブラウザのウィンドウ外にはみ出てしまう現象を回避できます。
+  fitWindowクラスはウィンドウの高さを親ウィンドウまたは「data-element」属性で指定されたタグの高さに合わせます。
+  height:100%; でスクロール領域がブラウザやインナーウィンドウ外にはみ出てしまう現象を回避できます。
 
  ◆ ライブラリ関数
   コアシステムに組み込んである、アプリケーションから利用できるライブラリ関数一覧です。
@@ -1333,6 +1352,7 @@
   text_line_array($del,$txt [,$trim])   テキストを配列に変換 $trimがTRUEなら空行削除
   array_to_text($array,$sep = "\n")     配列要素を改行テキストに変換
   array_member_value($array,$names)     構造化名(.)による多次元連想配列要素の参照
+　condition_array($keyset,$keystr) 		$keystrを空白で区切り、$keysetのAND条件配列に変換
 
  ◆ Javascript関数
   Javascriptで使用できるオブジェクト関数の一覧です。
@@ -1361,17 +1381,17 @@
 
 ・フローティングウィンドウを開く
     (セレクタ).floatWin(パラメータオブジェクト, コールバック関数);
-	パラメータオブジェクトのメンバー
-		Title: 		// ウィンドウタイトル
-		execButton: // コールバックを呼び出すボタンクラス名またはID名
-		formObj: 	// フォーム要素に設定する名前と値の集合オブジェクト
+    パラメータオブジェクトのメンバー
+        Title:      // ウィンドウタイトル
+        execButton: // コールバックを呼び出すボタンクラス名またはID名
+        formObj:    // フォーム要素に設定する名前と値の集合オブジェクト
 
 ・コンテンツを読み込む
     (セレクタ).LoadContents(URL, POSTオブジェクト,コールバック関数);
-	URLからHTMLデータを読み込んでセレクタに書き込みます。
-	.fail() メソッドを使うとPOSTが失敗したときの処理ができます。
-	ex.
-		$('#Contents).LoadContents('load.php').fail(function() {alert('失敗'); });
+    URLからHTMLデータを読み込んでセレクタに書き込みます。
+    .fail() メソッドを使うとPOSTが失敗したときの処理ができます。
+    ex.
+        $('#Contents).LoadContents('load.php').fail(function() {alert('失敗'); });
 
 ・Yes/No ボタン付きのダイアログボックスを開く
     $.dialogBox(タイトル,メッセージ, コールバック関数);
@@ -1380,64 +1400,69 @@
     (セレクタ).ChainSelect(セレクトテーブル,初期選択値, コールバック関数)
       セレクトテーブルはオブジェクトリストで定義します
         セレクト名: {
-			select_one: true | false ,		// 「選択してください」を自動追加する、しない
-			sel_list: [						// セレクトリスト
+            select_one: true | false ,      // 「選択してください」を自動追加する、しない
+            sel_list: [                     // セレクトリスト
               [ ID,　表示名, 親ID ],
-			]
-		},
+            ]
+        },
         ...
     トップレベルとなるセレクト名の親IDは省略、または0を入れておきます。
     ここで指定する「セレクト名」をモデルクラスの"Selection"定義名と同じにすると
-	後述のヘルパー変数メソッドによりオブジェクト定義が簡単にできるようになります。
+    後述のヘルパー変数メソッドによりオブジェクト定義が簡単にできるようになります。
     例： OS名とライセンスキーを連動させるセレクトテーブル
       var objList = {
           'os-select': {
-		  		select_one: false,		// 「選択してください」は表示しない
-				sel_list: [				// セレクトリストの配列
-					[  1, "Windows"],
-					[  2, "MacOS"  ],
-					[  3, "Linux", ],
-				]
+                select_one: false,      // 「選択してください」は表示しない
+                sel_list: [             // セレクトリストの配列
+                    [  1, "Windows"],
+                    [  2, "MacOS"  ],
+                    [  3, "Linux", ],
+                ]
           ],
           'license-select': {
-		  		select_one: true,		// 「選択してください」を表示する
-				sel_list: [				// セレクトリストの配列
-					[ 10, "Productkey-1", 1],   // レベル1
-					[ 11, "Productkey-2", 1],
-					[ 12, "Productkey-3", 2],
-					[ 15, "MIT-License",  3],
-				],
-		  }
+                select_one: true,       // 「選択してください」を表示する
+                sel_list: [             // セレクトリストの配列
+                    [ 10, "Productkey-1", 1],   // レベル1
+                    [ 11, "Productkey-2", 1],
+                    [ 12, "Productkey-3", 2],
+                    [ 15, "MIT-License",  3],
+                ],
+          }
       };
       $('#top-level').ChainSelect(objList,10);  // 初期値を '10' で初期化
 
-	セレクトテーブルを作成するのに便利なメソッドが基底Helperクラスに定義してあります。
-	このメソッドは「ヘルパー変数で呼び出せるように引数は文字列として受け取ります。
-		${&SelectObject(os-select,false)}
-	２番めの引数は省略可能で、省略すると[true]が指定されたとして処理します。
+    セレクトテーブルを作成するのに便利なメソッドが基底Helperクラスに定義してあります。
+    このメソッドは「ヘルパー変数で呼び出せるように引数は文字列として受け取ります。
+        ${&SelectObject(os-select,false)}
+    ２番めの引数は省略可能で、省略すると[true]が指定されたとして処理します。
 
     SELECTタグでは、オブジェクトの参照プロパティを「data-value」属性で、
-	連動するSELECTタグを「data-element」属性で指定します。
-	OPTION要素はセレクトテーブルから追加されるので記述不要です。
+    連動するSELECTタグを「data-element」属性で指定します。
+    OPTION要素はセレクトテーブルから追加されるので記述不要です。
     
-	OS名:       	<select id="top-level" name="os_id" data-value="os-select" data-element="next-level"></select>
-	プロダクトキー: <select id="next-level" name="license_id" data-value="license-select"></select>
-	セクションテンプレート形式では次のようにします。
-		+select#top-level[os_id]<os-select>{next-level} => []
-		+select#next-level[license_id]<license-select> => []
+    OS名:           <select id="top-level" name="os_id" data-value="os-select" data-element="next-level"></select>
+    プロダクトキー: <select id="next-level" name="license_id" data-value="license-select"></select>
+    セクションテンプレート形式では次のようにします。
+        +select#top-level[os_id]<os-select>{next-level} => []
+        +select#next-level[license_id]<license-select> => []
 
-・ドラッグドロップアップロード
-	(セレクタ).dropfiles(uploadURL, callback_func)
-	(セレクタ).dropfiles2(maxfiles,uploadURL,callback_func)
+	コールバック関数は最下層のSelectタグ変更時に呼び出します。
+	最下層の前までのSELECTタグにコールバックを設定するときは InProgress()メソッドで処理します。
+	('#sel').ChainSelect(selObj,0, callback_func).InProgress(callback_func);
 	
-	セレクタのタグにドラッグドロップされたファイルをアップロードします。
-	dropfiles2() はドロップされたファイルとペアになるファイルのダイアログを表示し、
-	リンク用のタイトル文字列を入力することができるダイアログを表示します。
-	また送信できるペアのファイルの最大数を指定できます。０を指定すると制限はチェックしません。
-	ダイアログに表示されるボタンやラベル名は言語リソースにより上書きすることができます。
-	モジュールの言語リソースに[core]セクションを作成し、必要な識別子を上書きしてください。
+	
+・ドラッグドロップアップロード
+    (セレクタ).dropfiles(uploadURL, callback_func)
+    (セレクタ).dropfiles2(maxfiles,uploadURL,callback_func)
+    
+    セレクタのタグにドラッグドロップされたファイルをアップロードします。
+    dropfiles2() はドロップされたファイルとペアになるファイルのダイアログを表示し、
+    リンク用のタイトル文字列を入力することができるダイアログを表示します。
+    また送信できるペアのファイルの最大数を指定できます。０を指定すると制限はチェックしません。
+    ダイアログに表示されるボタンやラベル名は言語リソースにより上書きすることができます。
+    モジュールの言語リソースに[core]セクションを作成し、必要な識別子を上書きしてください。
 
-      .core.SEND		  => 送信
+      .core.SEND        => 送信
       .core.UNDO        => 取消
       .core.ABORT       => "中止"
       .core.Close       => 閉じる
@@ -1456,19 +1481,19 @@
       .core.MAXFILE     => "送信ァイルは %d 個までです"
 
 ・ポップアップチェックリスト
-	(セレクタ).popupCheckList(setup_objext, callback_func)
+    (セレクタ).popupCheckList(setup_objext, callback_func)
 
-	セレクタにはプラグイン内でラベルとボタンが付加されるので、空のDIVタグを使用してください。
-	セレクタの属性(data-element)で指定される「TEXTAREA」の内容を、CheckListObj 配列を元に、
-	チェックリストダイアログを表示し、callback_func を呼出します。
-	ダイアログ領域以外をクリックした場合、callback_func は呼出しません。
-	callback_func にはチェックされたラベルが改行により連結された文字列が渡されます。
-	関数内の $(this) は TEXTAREA要素になります。
-	setup_object 変数により動作を設定できます。
-		CheckBarLabel:	セレクタに設定するラベルテキスト	// .core.CheckList
-		DialogTitle:	ダイアログのタイトル				// .core.CheckTITLE
-		CheckFlip:		全てをチェックの有無				//	true
-		FlipLabel:		全てをチェックのラベルテキスト		// .core.CheckALL
-		ConfirmLabel:	ダイアログの確定ボタンテキスト		// .core.CheckConfirm
-		CheckLists:		チェックリスト配列またはタブリストオブジェクト		// []
-		Columns:		チェックリストのカラム数			// 2
+    セレクタにはプラグイン内でラベルとボタンが付加されるので、空のDIVタグを使用してください。
+    セレクタの属性(data-element)で指定される「TEXTAREA」の内容を、CheckListObj 配列を元に、
+    チェックリストダイアログを表示し、callback_func を呼出します。
+    ダイアログ領域以外をクリックした場合、callback_func は呼出しません。
+    callback_func にはチェックされたラベルが改行により連結された文字列が渡されます。
+    関数内の $(this) は TEXTAREA要素になります。
+    setup_object 変数により動作を設定できます。
+        CheckBarLabel:  セレクタに設定するラベルテキスト    // .core.CheckList
+        DialogTitle:    ダイアログのタイトル                // .core.CheckTITLE
+        CheckFlip:      全てをチェックの有無                //  true
+        FlipLabel:      全てをチェックのラベルテキスト      // .core.CheckALL
+        ConfirmLabel:   ダイアログの確定ボタンテキスト      // .core.CheckConfirm
+        CheckLists:     チェックリスト配列またはタブリストオブジェクト      // []
+        Columns:        チェックリストのカラム数            // 2

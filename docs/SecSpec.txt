@@ -209,7 +209,14 @@ Hyper-Link:
         ]
         name2 => ...                // seconde element, ...
     ]
-
++textbox:size[name]  => [			// INPUIT TEXT
+	attr => value					// other attribute
+  	valie							// VALUE attribute
+	]
++textedit[name](rows:cols) => [		// TEXTAREA
+	attr => value					// other attribute
+	value							// TEXT VALUE
+  	]
 +inline                             // Inline layout section definition. Can be reused by calling a template
     +inline.SecName => [            // Secname will be Template Name, using as @.SecName
         section
@@ -236,3 +243,4 @@ Hyper-Link:
         Window-Title               // Tilte bar text
         [ Section ]                // Window Contents
     ]
++push.name => value					// Save Session Var(name), Refer for Resource Import.
