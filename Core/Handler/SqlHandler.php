@@ -279,8 +279,8 @@ protected function sql_safequote(&$value) {
 				$wd = [];
 				foreach($arr as $key => $val) {
 					$child = $array_item_shurink((is_numeric($key))?$opr:$key,$val);
+					if($child === []) continue;		// empty condition value
 					if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
-						if($child === []) continue;		// empty condition value
 						$array_merged($opr,$wd,$child);
 					} else {
 						set_array_key_unique($wd,$key,$child);
