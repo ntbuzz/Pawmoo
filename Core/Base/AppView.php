@@ -877,8 +877,11 @@ public function ViewTemplate($name,$vars = []) {
         if(is_array($opt_val)) {
             $opt_val = array_flat_reduce($opt_val);
             foreach($opt_val as $opt => $val) {
-                $sel = ($val == $sel_item) ? ' checked':'';
-                echo "<label>{$tags} value='{$val}'{$sel}>{$opt}</label>\n";
+				if(is_numeric($opt)) echo $val;
+				else {
+					$sel = ($val == $sel_item) ? ' checked':'';
+					echo "<label>{$tags} value='{$val}'{$sel}>{$opt}</label>\n";
+				}
             }
         } else echo "<label>{$tags} value='{$opt_val}'>{$opt_val}</label>\n";
     }
@@ -889,7 +892,8 @@ public function ViewTemplate($name,$vars = []) {
     //        @Value => TEXT  [ ${@published} => 't' ]
     //  ]
     //  FORMAT-II
-    //  +checkbox => [
+    //  +checkbox[name] => [
+    //      		 [ @VALUE0 => TEXT [ ${@published} => 't' ] ]
     //      name1 => [ @VALUE1 => TEXT [ ${@published} => 't' ] ]
     //      name2 => [ @VALUE2 => TEXT [ ${@published} => 't' ] ]
     //  ]
@@ -903,7 +907,11 @@ public function ViewTemplate($name,$vars = []) {
                 if(is_numeric($key)) {
                     if(is_array($val)) {
                         list($cmp1, $cmp2) = array_first_item($val);
-                        $checked = $check_func($cmp1 === $cmp2);
+						if(preg_match('/^$(\d+)$/',$cmp2,$m)) {
+							$cmp2 = intval($m[1]);
+							$cmp1 = intval($cmp1);
+	                        $checked = $check_func(($cmp1 & $cmp2)!==0);
+						} else $checked = $check_func($cmp1 === $cmp2);
                     } else $checked = $check_func(!empty($val));
                 } else if($key[0]==='@') {
                     $value = mb_substr($key,1);
@@ -912,19 +920,21 @@ public function ViewTemplate($name,$vars = []) {
             }
             return " value='{$value}'{$checked}>{$txt}";
         };
+		if(isset($attrs['name'])) {
+			$name = $attrs['name'];
+			unset($attrs['name']);
+		} else $name = '';
         $attr = $this->gen_Attrs($attrs,$vars);
         $tags = "<INPUT TYPE='checkbox'{$attr}";
-        if(array_key_exists('name',$attrs)) {   // FORMAT-I
-            $item = $check_item($sec);
-            echo "<label>{$tags}{$item}</label>\n";
-        } else {            // FORMAT-II
-            foreach($sec as $key => $val) {
-                if(!is_numeric($key)) {
-                    $item = $check_item($val);
-                    echo "<label>{$tags} name='{$key}'{$item}</label>\n";
-                }
-            }
-        }
+		list($key,$check) = array_first_item($sec);
+		if(is_scalar($check)) {		// FORMAT-I
+			$sec = [ $name => $sec];
+		}
+		foreach($sec as $key => $val) {
+			$key = (is_numeric($key)) ? $name : tag_body_name($key);
+			$item = $check_item($val);
+			echo "<label>{$tags} name='{$key}'{$item}</label>\n";
+		}
     }
 
 }
