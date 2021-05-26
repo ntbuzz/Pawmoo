@@ -13,6 +13,20 @@ String.prototype.is_invalid_name = function () {
     return (this.match(/^.*[\+%#].*?$/));
 };
 //====================================================
+// start of strings in array values
+Array.prototype.startOfString = function (arr) {
+	var exists = false;
+	var base = this;
+	arr.forEach(function (val) {
+		if (base.substr(0,val.length) === val) {
+			exists = true;
+			return false;	// break forEach
+		};
+		return true;	// continue next
+	});
+	return exists;
+};
+//====================================================
 // element search: IE-11 is not have includes() method.
 Array.prototype.is_exists = function (v) {
 	var exists = false;
@@ -54,7 +68,11 @@ function PawmooLocations() {
     this.query_str = function () { return (this.qstr == "") ? "" : "?"+this.qstr.replace(";","%3B"); };
     this.set_query = function (q) { this.qstr = q; };
     this.last_item = function (n) { return this.items[this.items.length - n]; };
-    this.fullpath = function (url) {
+	this.fullpath = function (url) {
+		if (url.startOfString(['http://', 'https://', 'ftp://', 'file://'])) {
+			this.type = LOC_FULL;
+			return url;
+		}
         this.type = "./:".indexOf(url.charAt(0)) + 1;
         var path = (this.type == 0) ? url : url.slice(1);
         switch (this.type) {
