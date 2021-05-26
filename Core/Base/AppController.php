@@ -5,7 +5,7 @@
  */
 class AppController extends AppObject {
 	public $defaultAction = 'List';		// Omitted URI, Default Action 
-	public $defaultFilter = 'all';		// Default Filter
+//	public $defaultFilter = 'all';		// Default Filter
 	public $disableAction = [];			// Ban Action
 	private $my_method;					// active method list on Instance
 	protected $needLogin = FALSE;		// Login NEED flag
@@ -24,7 +24,7 @@ class AppController extends AppObject {
 		$view_class = (class_exists($view)) ? $view : 'AppView';		// file not exists, Use basic Class
 		$this->View = ClassManager::Create($view,$view_class,$this);
 		$this->Helper = $this->View->Helper;			// Helper class short-cut
-		if(empty(App::$Filter)) {
+		if(empty(App::$Filter) && isset($this->defaultFilter)) {
 			App::$Filters[0] = App::$Filter = $this->defaultFilter;
 		}
 			// filter of '*Action' method
