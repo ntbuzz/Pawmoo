@@ -14,7 +14,7 @@ String.prototype.is_invalid_name = function () {
 };
 //====================================================
 // start of strings in array values
-Array.prototype.startOfString = function (arr) {
+String.prototype.startOfString = function (arr) {
 	var exists = false;
 	var base = this;
 	arr.forEach(function (val) {

@@ -75,6 +75,8 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 		self.css({
 			"width": sz[0] + "px",
 			"height": sz[1] + "px",
+			"min-width": sz[0] + "px",
+			"min-height": sz[1] + "px"
 		});
 		if (sz.length == 4) {
 			self.css({
