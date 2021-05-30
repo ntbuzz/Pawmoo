@@ -217,6 +217,9 @@ public function ViewTemplate($name,$vars = []) {
                     $val = App::$SysVAR[$var];          // SysVAR[] property
                 }
                 break;
+            case '?': $var = mb_substr($var,1);     // Query parameter
+				$val = App::$Query[$var];          // Query[] property
+                break;
             case ':':                                   // Class Property
                    	$p = '/(:{1,2})(\w+)(?:\[([\w\.\'"]+)\])?/';
                     preg_match($p,$var,$m);
@@ -907,7 +910,7 @@ public function ViewTemplate($name,$vars = []) {
                 if(is_numeric($key)) {
                     if(is_array($val)) {
                         list($cmp1, $cmp2) = array_first_item($val);
-						if(preg_match('/^$(\d+)$/',$cmp2,$m)) {
+						if(preg_match('/^&(\d+)$/',$cmp2,$m)) {
 							$cmp2 = intval($m[1]);
 							$cmp1 = intval($cmp1);
 	                        $checked = $check_func(($cmp1 & $cmp2)!==0);
