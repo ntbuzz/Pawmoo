@@ -56,6 +56,11 @@ public function __TerminateApp() {
 	$this->View->__TerminateView();
 }
 //==============================================================================
+// (コマンドライン用)ビューの生成
+public function CreateAction() {
+	$this->Model->CreateMyView();
+}
+//==============================================================================
 // check active METHOD
 public function is_enable_action($action) {
 	if(	array_key_exists($action,$this->aliasAction) ||		// exists Alias Action
@@ -136,23 +141,26 @@ public function ActionDispatch($action) {
 // Auto Paging.
 public function AutoPaging($cond, $max_count = 100) {
 	list($num,$size) = App::$Params;
-	$cnt = $this->Model->getCount($cond);
-	if($num > 0) {
-		if($size === 0) {
-			$size = (array_key_exists('PageSize',MySession::$EnvData)) ? MySession::$EnvData['PageSize']:0;
-			if($size === 0) $size = $max_count;
-			if($cnt < $max_count) $size = 0;
-		}
+	$Page = MySession::get_envIDs('Paging');
+	$sCond = $Page['Cond'];
+	$sSize = $Page['Size'];
+	if(empty($cond)) {
+		if(!empty($sCond) && empty($cond)) $cond = $sCond;			// same condition
 	} else {
-		if($cnt > $max_count) {
-			$num = 1;
-			if($size === 0) $size = $max_count;
-		}
+		MySession::set_envIDs('Paging.Cond',$cond);
 	}
+	if(isset($Page['Size']) && $size === 0) {
+		$size = intval($Page['Size']);
+	}
+	$cnt = $this->Model->getCount($cond);
+	debug_log(DBMSG_SYSTEM, ['COND' => $cond,'SIZE'=>$size,'MAX'=>$max_count,"Page"  => $Page ]);
+	if($cnt < $size )  $size = 0;
+	else if($cnt > $max_count && $size === 0) $size = $max_count;
 	if($size > 0) {
-		MySession::$EnvData['PageSize'] = $size;		// remember in SESSION
 		$this->Model->SetPage($size,$num);
-		debug_log(DBMSG_SYSTEM, ["Param"  => App::$Params]);
+		MySession::set_envIDs('Paging.Size',$size);
+	} else {
+	 	MySession::rm_EnvData('Paging');
 	}
 }
 //==============================================================================

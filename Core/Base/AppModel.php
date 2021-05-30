@@ -60,6 +60,20 @@ class AppModel extends AppObject {
         parent::class_initialize();
     }
 //==============================================================================
+// Initializ Class Property
+public function CreateMyView() {
+	if(isset($this->ViewSchema)) {
+		$viewset = (isset($this->DataView)) ? ((is_array($this->DataView)) ? $this->DataView : [$this->DataView]) : [];
+		if(is_array($this->DataTable)) {
+			list($table,$view) = $this->DataTable;
+			if($table !== $view) array_unshift($viewset, $view);
+		} else $table = $this->DataTable;
+		foreach($viewset as $view) {
+			echo $this->dbDriver->createView($table,$view,$this->ViewSchema)."\n\n";
+		} 
+	}
+}
+//==============================================================================
 // column exist check
 public function is_exist_column($name) {
 	return array_key_exists($name,$this->dbDriver->columns);

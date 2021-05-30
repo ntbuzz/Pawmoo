@@ -104,14 +104,35 @@ static function set_if_empty($tt,$arr) {
 	}
 }
 //==============================================================================
-// ENV変数を識別子指定で取得する
+// ENV/REQUEST変数からドット識別子指定でスカラー取得する
 static function get_varIDs($tt,$names) {
 	$nVal = array_member_value(($tt)?static::$EnvData:static::$ReqData, $names);
 	return (is_array($nVal)) ? array_to_text($nVal,',') : $nVal;
 }
 //==============================================================================
+// ENV変数からドット識別子指定で取得する
+static function get_envIDs($nameID) {
+	return array_member_value(static::$EnvData, $nameID);
+}
+//==============================================================================
+// ENV変数にドット識別子指定で保存する
+static function set_envIDs($nameID,$val,$append = FALSE) {
+    $ee = &static::$EnvData;
+    $mem_arr = explode('.',$nameID);
+    foreach($mem_arr as $key) {
+        if(!isset($ee[$key])) $ee[$key] = [];
+        $ee = &$ee[$key];
+    }
+	if($append) {
+		$prev = (empty($ee)) ? '':"{$ee}\n";
+		$ee = "{$prev}{$val}";
+	} else $ee = $val;
+}
+//==============================================================================
 // ENV変数にアプリケーションパラメータを識別子指定で値を設定する
 static function set_paramIDs($names,$val,$append = FALSE) {
+	static::set_envIDs(PARAMS_NAME.".{$names}",$val,$append);
+/*
     $mem_arr = explode('.',PARAMS_NAME.".{$names}");
     $ee = &static::$EnvData;
     foreach($mem_arr as $key) {
@@ -122,6 +143,7 @@ static function set_paramIDs($names,$val,$append = FALSE) {
 		$prev = (empty($ee)) ? '':"{$ee}\n";
 		$ee = "{$prev}{$val}";
 	} else $ee = $val;
+*/
 }
 //==============================================================================
 // ENV変数からアプリケーションパラメータを識別子指定で値を取得
