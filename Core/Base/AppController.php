@@ -56,7 +56,7 @@ public function __TerminateApp() {
 	$this->View->__TerminateView();
 }
 //==============================================================================
-// (コマンドライン用)ビューの生成
+// VIEW CREATE for command-line
 public function CreateAction() {
 	$this->Model->CreateMyView();
 }
@@ -141,26 +141,31 @@ public function ActionDispatch($action) {
 // Auto Paging.
 public function AutoPaging($cond, $max_count = 100) {
 	list($num,$size) = App::$Params;
-	$Page = MySession::get_envIDs('Paging');
+	$cond = re_build_array($cond);
+	$PageName = "Paging.{$this->ModuleName}";
+	$Page = MySession::get_envIDs($PageName);
+	debug_log(DBMSG_SYSTEM, ['COND' => $cond,"Page"  => $Page ]);
 	$sCond = $Page['Cond'];
 	$sSize = $Page['Size'];
-	if(empty($cond)) {
-		if(!empty($sCond) && empty($cond)) $cond = $sCond;			// same condition
+	$sFilter = $Page['Filter'];
+	if($num > 1 || ($sFilter === App::$Filter && empty(MySession::$ReqData))) {
+		$cond = $sCond;			// same condition
 	} else {
-		MySession::set_envIDs('Paging.Cond',$cond);
+		$Page['Cond'] = $cond;
+		$Page['Filter'] = App::$Filter;
 	}
 	if(isset($Page['Size']) && $size === 0) {
 		$size = intval($Page['Size']);
 	}
 	$cnt = $this->Model->getCount($cond);
-	debug_log(DBMSG_SYSTEM, ['COND' => $cond,'SIZE'=>$size,'MAX'=>$max_count,"Page"  => $Page ]);
 	if($cnt < $size )  $size = 0;
 	else if($cnt > $max_count && $size === 0) $size = $max_count;
-	if($size > 0) {
-		$this->Model->SetPage($size,$num);
-		MySession::set_envIDs('Paging.Size',$size);
-	} else {
+	if($size === 0) {
 	 	MySession::rm_EnvData('Paging');
+	} else {
+		$Page['Size'] = $size;
+		MySession::set_envIDs($PageName,$Page);
+		$this->Model->SetPage($size,$num);
 	}
 }
 //==============================================================================
