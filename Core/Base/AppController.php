@@ -5,7 +5,7 @@
  */
 class AppController extends AppObject {
 	public $defaultAction = 'List';		// Omitted URI, Default Action 
-	public $defaultFilter = 'all';		// Default Filter
+//	public $defaultFilter = 'all';		// Default Filter
 	public $disableAction = [];			// Ban Action
 	private $my_method;					// active method list on Instance
 	protected $needLogin = FALSE;		// Login NEED flag
@@ -24,7 +24,7 @@ class AppController extends AppObject {
 		$view_class = (class_exists($view)) ? $view : 'AppView';		// file not exists, Use basic Class
 		$this->View = ClassManager::Create($view,$view_class,$this);
 		$this->Helper = $this->View->Helper;			// Helper class short-cut
-		if(empty(App::$Filter)) {
+		if(empty(App::$Filter) && isset($this->defaultFilter)) {
 			App::$Filters[0] = App::$Filter = $this->defaultFilter;
 		}
 			// filter of '*Action' method
@@ -54,6 +54,11 @@ class AppController extends AppObject {
 // Terminated Contorller
 public function __TerminateApp() {
 	$this->View->__TerminateView();
+}
+//==============================================================================
+// VIEW CREATE for command-line
+public function CreateAction() {
+	$this->Model->CreateMyView();
 }
 //==============================================================================
 // check active METHOD
@@ -136,23 +141,31 @@ public function ActionDispatch($action) {
 // Auto Paging.
 public function AutoPaging($cond, $max_count = 100) {
 	list($num,$size) = App::$Params;
-	$cnt = $this->Model->getCount($cond);
-	if($num > 0) {
-		if($size === 0) {
-			$size = (array_key_exists('PageSize',MySession::$EnvData)) ? MySession::$EnvData['PageSize']:0;
-			if($size === 0) $size = $max_count;
-			if($cnt < $max_count) $size = 0;
-		}
+	$cond = re_build_array($cond);
+	$PageName = "Paging.{$this->ModuleName}";
+	$Page = MySession::get_envIDs($PageName);
+	debug_log(DBMSG_SYSTEM, ['COND' => $cond,"Page"  => $Page ]);
+	$sCond = $Page['Cond'];
+	$sSize = $Page['Size'];
+	$sFilter = $Page['Filter'];
+	if($num > 1 || ($sFilter === App::$Filter && empty(MySession::$ReqData))) {
+		$cond = $sCond;			// same condition
 	} else {
-		if($cnt > $max_count) {
-			$num = 1;
-			if($size === 0) $size = $max_count;
-		}
+		$Page['Cond'] = $cond;
+		$Page['Filter'] = App::$Filter;
 	}
-	if($size > 0) {
-		MySession::$EnvData['PageSize'] = $size;		// remember in SESSION
+	if(isset($Page['Size']) && $size === 0) {
+		$size = intval($Page['Size']);
+	}
+	$cnt = $this->Model->getCount($cond);
+	if($cnt < $size )  $size = 0;
+	else if($cnt > $max_count && $size === 0) $size = $max_count;
+	if($size === 0) {
+	 	MySession::rm_EnvData('Paging');
+	} else {
+		$Page['Size'] = $size;
+		MySession::set_envIDs($PageName,$Page);
 		$this->Model->SetPage($size,$num);
-		debug_log(DBMSG_SYSTEM, ["Param"  => App::$Params]);
 	}
 }
 //==============================================================================

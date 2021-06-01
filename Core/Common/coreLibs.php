@@ -230,3 +230,36 @@ function remove_comment_str($content) {
 			preg_replace('/\/\*[\s\S]*?\*\/|\s+\/\/.*|^\/\/.*/','',$content));
 	return trim($content);
 }
+//==============================================================================
+// re-build condition array flat, possible
+function re_build_array($cond) {
+	$array_map_shurink = function($opr,$arr) use(&$array_map_shurink) {
+		$array_merged = function($opr,&$arr,$val) use(&$array_merged) {
+			if(is_array($val)) {
+				foreach($val as $kk => $vv) {
+					if($opr === $kk) {
+						$array_merged($opr,$arr,$vv);
+					} else {
+						set_array_key_unique($arr,$kk,$vv);
+					}
+				}
+			} else if(!empty($val)) $arr[] = $val;
+		};
+		$array_item_shurink = function($opr,$val) use(&$array_map_shurink) {
+			return (is_array($val)) ? $array_map_shurink($opr,$val) : $val;
+		};
+		$AND_OR = [ 'AND' => TRUE, 'OR' => TRUE ];
+		$wd = [];
+		foreach($arr as $key => $val) {
+			$child = $array_item_shurink((is_numeric($key))?$opr:$key,$val);
+			if($child === []) continue;		// empty condition value
+			if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
+				$array_merged($opr,$wd,$child);
+			} else {
+				set_array_key_unique($wd,$key,$child);
+			}
+		}
+		return $wd;
+	};
+	return $array_map_shurink('AND',$cond);
+}

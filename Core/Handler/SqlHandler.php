@@ -50,6 +50,31 @@ public function setupRelations($relations) {
 //	debug_log(DBMSG_HANDLER,["RELATIONS" => $this->relations]);
 }
 //==============================================================================
+// createView: Create View Table
+public function createView($table,$view,$schema,$exec = FALSE) {
+	$sql = "DROP VIEW IF EXISTS {$view};";
+	if($exec) $this->execSQL($sql);
+	$sql = "CREATE VIEW {$view} AS SELECT\n";
+	$join = $left = [];
+	foreach($this->raw_columns as $column) {
+	 	$join[] = "{$table}.\"{$column}\"";
+		if(array_key_exists($column,$schema)) {
+			foreach($schema[$column] as $alias => $rel) {
+				list($tbl,$id,$fn) = explode('.',$rel);
+				$join[] = "{$tbl}.\"{$fn}\" as $alias";
+				if(!isset($left[$tbl])) $left[$tbl] = "LEFT JOIN {$tbl} on {$table}.\"{$column}\" = {$tbl}.{$id}";
+			}
+		}
+	}
+	$bind = array_filter($schema,function($k) { return is_numeric($k);},ARRAY_FILTER_USE_KEY );
+debug_log(DBMSG_DUMP,['BIND'=>$bind]);
+	$sql .= implode($join,",\n")."\n";
+	$sql .= "FROM {$table}\n";
+	$sql .= implode($left,"\n").";";
+	if($exec) $this->execSQL($sql);
+	return $sql;
+}
+//==============================================================================
 // fetchDB: get record data , and replace alias and bind column
 public function fetchDB() {
 	if($row = $this->fetch_array()) {
@@ -259,40 +284,9 @@ protected function sql_safequote(&$value) {
 // Re-Build Condition ARRAY, Create SQL-WHERE statement.
 	private function sql_makeWHERE($cond,$target_table=NULL) {
 		if($target_table === NULL) $target_table = $this->table;
-		$re_build_array = function($cond) {
-			$array_map_shurink = function($opr,$arr) use(&$array_map_shurink) {
-				$array_merged = function($opr,&$arr,$val) use(&$array_merged) {
-					if(is_array($val)) {
-						foreach($val as $kk => $vv) {
-							if($opr === $kk) {
-								$array_merged($opr,$arr,$vv);
-							} else {
-								set_array_key_unique($arr,$kk,$vv);
-							}
-						}
-					} else if(!empty($val)) $arr[] = $val;
-				};
-				$array_item_shurink = function($opr,$val) use(&$array_map_shurink) {
-					return (is_array($val)) ? $array_map_shurink($opr,$val) : $val;
-				};
-				$AND_OR = [ 'AND' => TRUE, 'OR' => TRUE ];
-				$wd = [];
-				foreach($arr as $key => $val) {
-					$child = $array_item_shurink((is_numeric($key))?$opr:$key,$val);
-					if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
-						if($child === []) continue;		// empty condition value
-						$array_merged($opr,$wd,$child);
-					} else {
-						set_array_key_unique($wd,$key,$child);
-					}
-				}
-				return $wd;
-			};
-			return $array_map_shurink('AND',$cond);
-		};
 		if($cond ===NULL) return $this->LastSQL;
 		$this->LastCond = $cond;
-		$this->LastBuild= $new_cond = $re_build_array($cond);
+		$this->LastBuild= $new_cond = re_build_array($cond);
 		$sql = $this->makeExpr($new_cond,$target_table);
 		if(strlen($sql)) $sql = ' WHERE '.$sql;
 		debug_log(DBMSG_HANDLER,['COND-INPUT'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);

@@ -147,7 +147,7 @@ Hyper-Link:
 +ul/ol                              // UL/OL tag dedicated list output
     +ul/ol => [
         attr => value               // ul/ol tag attribute
-        list-text                   // scalar: <li> list-text </li>
+    	[ list-text ]               // <li> list-text </li>
         .XXX#DDD => [               // LI tag with attributem, it can be omitted.
             section                 // LI tag inner section.
         ]

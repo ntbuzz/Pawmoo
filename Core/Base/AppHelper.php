@@ -90,7 +90,7 @@ public function ALink($lnk,$txt,$under=false) {
 //==============================================================================
 // Make HYPER-Link
 public function ALink_str($lnk,$txt,$under=false) {
-	if($txt[0] == '#') {
+	if(mb_substr($txt,0,1) === '#') {
 		$txt = mb_substr($txt,1);
 		$txt = $this->_($txt);
 	}

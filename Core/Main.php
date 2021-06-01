@@ -101,7 +101,7 @@ if($redirect) {
     exit;
 }
 require_once('Class/ClassLoader.php');
-ClassLoader::Setup($appname,$controller);   // AutoLoader for Application folder
+ClassLoader::Setup($appname);   // AutoLoader for Application folder
 MySession::InitSession($appname,TRUE);         // Session Variable SETUP
 MySession::set_paramIDs('debugger',DEBUGGER);  // SET DEBUGGER
 MySession::set_paramIDs('sysinfo',[
@@ -189,7 +189,8 @@ if($controllerInstance->is_authorised()) {
 debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
 //    "#SessionClose" => MySession::$EnvData,
     "CLASS-MANAGER" => ClassManager::DumpObject(),
-    "SAVE-AppData"  => MySession::$EnvData['AppData'],     // included App::[sysVAR]
+    "SAVE-AppData"  => MySession::get_envIDs('AppData'),     // included App::[sysVAR]
+    "Paging"  => MySession::get_envIDs('Paging'),     // included App::[sysVAR]
 ]);
 debug_run_time(DBMSG_CLI|DBMSG_SYSTEM);
 MySession::CloseSession();
