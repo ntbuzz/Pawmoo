@@ -1,89 +1,172 @@
 <?php
+/**
+ * Autoloader for Database Table Creator ONLY!
+ */
+class SetupLoader {
+	public static $AliasClass = [];
+    private static $LoadDirs = [];
 //==============================================================================
-//
-class AppDatabase {
-//    protected $dbDriver;            // Database Driver
-	protected $varList = [];
-	public 	$raw_columns;   // target real column
-
-	function __construct() {
-		 $class = get_called_class();
-		echo "CLASS: {$class}\n";
-		foreach (get_class_vars($class) as $name => $default)
-			if (isset($class::$$name))
-				$this->varList[$name] = $default;
-	}
-//==============================================================================
-//	setup objerct property
-    protected function setProperty($props) {
-        foreach($props as $key => $val) {
-            $this->$key = $val;
+    private static function loadClass($className) {
+		foreach(static::$AliasClass as $fname => $classes) {
+			if(in_array($className,$classes)) {
+				$className = $fname;
+				break;
+			}
+		}
+        foreach(static::$LoadDirs as $directory) {
+            $file_name = "{$directory}/{$className}.php";
+            if(is_file($file_name)) {
+                require_once($file_name);
+                return true;
+            }
         }
-	debug_log(DBMSG_DUMP,['PROP'=>$this->Schema]);
     }
 //==============================================================================
-// Initializ Class Property
-public function CreateMyView($schema) {
-	$this->setProperty($schema);
-	$driver = $this->Handler . 'Handler';
-//    $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
-	$viewset = (isset($this->DataView)) ? ((is_array($this->DataView)) ? $this->DataView : [$this->DataView]) : [];
-	if(is_array($this->DataTable)) {
-		list($table,$view) = $this->DataTable;
-		if($table !== $view) array_unshift($viewset, $view);
-	} else $table = $this->DataTable;
-	foreach($viewset as $view) {
-//		echo $this->dbDriver->createView($table,$view,$this->ViewSchema,true)."\n\n";
-		echo $this->createSQL($table,$view)."\n\n";
-	} 
+// Setup専用のローダー
+public static function Setup($appname,$alias) {
+    static::$LoadDirs = [
+        'Core/Class',
+        "app/{$appname}/Config/Setup",
+    ];
+	static::$AliasClass = $alias;
+    spl_autoload_register(array('SetupLoader','loadClass'));
+}
+
 }
 //==============================================================================
-//
-   public function execute() {
-		foreach(array_keys($this->varList) as $vname) {
-			echo "TYPE({$vname}) = " . gettype(static::$$vname) ."\n";
-			$this->CreateMyView(static::$$vname);
-		}
+// Databas Table Create Class
+class AppDatabase {
+	private $MyTable = '';
+	private $ViewSet = [];
+    protected $dbDriver;            // Database Driver
+    protected static $Database = [];
+//==============================================================================
+// setup table-name and view-table list
+	function __construct() {
+        foreach(static::$Database as $key => $val) $this->$key = $val;
+		$viewset = (isset($this->DataView)) ? ((is_array($this->DataView)) ? $this->DataView : [$this->DataView]) : [];
+		if(is_array($this->DataTable)) {
+			list($table,$view) = $this->DataTable;
+			if($table !== $view) array_unshift($viewset, $view);
+		} else $table = $this->DataTable;
+		$this->MyTable = $table;
+		$this->ViewSet = $viewset;
+        $driver = $this->Handler . 'Handler';
+        $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
     }
+//==============================================================================
+// dynamic construct OBJECT Class for 'modules'
+public function __get($PropName) {
+    if(isset($this->$PropName)) return $this->$PropName;
+    $prop_name = "{$PropName}Setup";
+	$this->$PropName = new $prop_name();
+	return $this->$PropName;
+}
+//==============================================================================
+// extract DataTable or Alternate DataView
+    private function model_view($db) {
+        list($model,$field) = explode('.', "{$db}...");
+        if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
+            $model = $m[1];
+            $table = (is_array($this->$model->DataView))
+                        ? $this->$model->DataView[$m[2]]    // View Element Index
+                        : $this->$model->dbDriver->table;	// illegal define
+        } else $table = $this->$model->dbDriver->table;
+        return [$table,$field];
+    }
+//==============================================================================
+// execute SQL
+	private function doSQL($exec,$sql) {
+		if(empty($sql)) return;
+		if($exec) {
+			echo "EXEC SQL:\n{$sql}\n";
+			$this->dbDriver->execSQL($sql);
+		} else  echo "{$sql}\n\n";
+    }
+//==============================================================================
+// Execute Create TABLE,VIEW, and INTIAL DATA
+//	before check Dependent Table
+public function execute($exec) {
+	if(isset(static::$Dependent)) {
+		foreach(static::$Dependent as $table) {
+			$setuip_class = "{$table}Setup";
+			$db = new $setuip_class();
+			if(empty($db->dbDriver->columns)) $db->execute($exec);
+		}
+	}
+	// DROP in ViewSet views
+	$sql = '';
+	foreach($this->ViewSet as $view) {
+		$sql .= "DROP VIEW IF EXISTS {$view};\n";
+	}
+	$sql .= "DROP TABLE IF EXISTS {$this->MyTable};\n";
+	$this->doSQL($exec,$sql);
+	// Create Table
+	$fset = [];
+	foreach($this->Schema as $key => $field) {
+		list($ftype,$not_null) = $field;
+		$str = "{$key} {$ftype}";
+		if($not_null) $str .= " NOT NULL";
+		$fset[] = $str;
+	}
+	$fset[] = "PRIMARY KEY ({$this->Primary})";
+	$sql = "CREATE TABLE {$this->MyTable} (\n";
+	$sql .= implode($fset,",\n") . "\n);";
+	$this->doSQL($exec,$sql);
+	// IMPORT initial Table DATA
+	if(isset($this->InitCSV) && $exec) {
+		$sql = "TRUNCATE TABLE {$this->MyTable};";
+		$row_columns = array_keys($this->Schema);
+		foreach($this->InitCSV as $csv) {
+//			$data = explode(',',$csv);
+			$data = str_getcsv($csv);
+			$row = array_combine($row_columns,$data);
+			debug_log(DBMSG_DUMP,['DATA'=>$row]);
+//				$num = $row[$this->Primary];
+//				$this->dbDriver->updateRecord([$this->Primary=>$num],$row);
+			$this->dbDriver->insertRecord($row);
+		}
+	}
+	// create VIEW
+	foreach($this->ViewSet as $view) {
+		$sql = $this->createSQL($this->MyTable,$view);
+		$this->doSQL($exec,$sql);
+	}
+}
 //==============================================================================
 // createView: Create View Table
 // Schema => [
-//	 'name_list_id'	=> [
-// 		'host_name'		=> 'name',
-//	 	'bind_name'		=> [ 'source' , 'name'],	// BIND-FIELD
-//	 ],
-//	...
-// 	'license_id'	=> ['integer',	false ,'licenses.id'],
+// 	'hostname'		=> ['text',	false],						// NORMAL Field(TEXT)
+// 	'license_id'	=> ['integer',	false ,'licenses.id'],	// Relation Link LicesesSetup Class
 // ]
 // ViewSchema => [
 //		...
-//		'license_id'	=> [ 'os_license' => 'license' ],
-//		[ 'bind_name.sep' => [ 'entity' , 'location'] ],		// SELF BIND-FIELD
+//		'license_id'	=> [ 'os_license' => 'license' ],		// license_id = Licenses.id => Licenses.license as 'os_license' 
+//		[ 'bind_name.sep' => [ 'entity' , 'location'] ],		// BIND-FIELD on My-Table field
 //		[ 'bind_name.sep' => [ 'table1.refer' , 'ltable2.refer'] ],		// OTHER-TABLE BIND-FIELD
 // ]
 public function createSQL($table,$view) {
 	$alias_sep = function($key) {
 		if(substr($key, -1) === '.') $key .= ' ';
 		list($alias,$sep) = explode('.',"{$key}.");
-		$sep = (empty($sep)) ? '||' : "||\"{$sep}\"||";
 		return [$alias,$sep];
 	};
+	if(!isset($this->ViewSchema)) return '';
 	$view_schema = $this->ViewSchema;
-	$sql = "DROP VIEW IF EXISTS {$view};\n";
-	$sql .= "CREATE VIEW {$view} AS SELECT\n";
+	$sql = "CREATE VIEW {$view} AS SELECT\n";
 	$join = $left = [];
 	$raw_columns = array_keys($this->Schema);
 	foreach($this->Schema as $column => $defs) {
 	 	$join[] = "{$table}.\"{$column}\"";
 		if(array_key_exists($column,$view_schema)) {
 			list($key,$not_null,$rel) = $defs;
-			list($tbl,$id) = explode('.',$rel);
+			list($tbl,$id) = $this->model_view($rel);
 			foreach($view_schema[$column] as $alias => $name) {
 				if(is_array($name)) {	// combine
 					list($alias,$sep) = $alias_sep($alias);
 					$bind = [];
 					foreach($name as $fn) $bind[] = "{$tbl}.\"{$fn}\"";
-					$join[] = implode($bind,$sep) . " as {$alias}";
+					$join[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
 				} else {
 					$join[] = "{$tbl}.\"{$name}\" as {$alias}";
 				}
@@ -98,10 +181,10 @@ public function createSQL($table,$view) {
 			if(is_array($bind_fn)) {	// combine
 				list($alias,$sep) = $alias_sep($key);
 				$bind = array_map(function($fn) use (&$table) {
-					list($tbl,$nm) = (strpos($fn,'.')===false) ? [$table, $fn] : explode('.',$fn);
+					list($tbl,$nm) = (strpos($fn,'.')===false) ? [$table, $fn] : $this->model_view($fn);
 					 return "{$tbl}.\"{$nm}\"";
 				},$bind_fn);
-				$join[] = implode($bind,$sep) . " as {$alias}";
+				$join[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
 			}
 		}
 	}
