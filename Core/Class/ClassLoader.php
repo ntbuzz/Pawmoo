@@ -34,7 +34,7 @@ public static function Setup($appname,$controller=NULL) {
         "app/{$appname}/Models/Asst",
         "app/{$appname}/Models/Misc",
     ];
-	if($controller !== NULL) static::$LoadDirs = "app/{$appname}/modules/{$controller}";
+	if($controller !== NULL) static::$LoadDirs[] = "app/{$appname}/modules/{$controller}";
     spl_autoload_register(array('ClassLoader','loadClass'));
 }
 
