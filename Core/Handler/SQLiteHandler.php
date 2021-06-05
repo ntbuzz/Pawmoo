@@ -35,7 +35,6 @@ public function fieldConcat($sep,$arr) {
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
 //	debug_log(DBMSG_HANDLER,['SQL' => $sql]);
-	debug_log(DBMSG_DUMP,['SQL' => $sql]);
 	$this->rows = $this->dbb->query($sql);
 	return $this->rows;
 }
