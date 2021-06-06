@@ -25,6 +25,13 @@ protected function Connect($table) {
 	return $columns;
 }
 //==============================================================================
+//	field concatiname
+public function fieldConcat($sep,$arr) {
+	$bind = array_map(function($fn) {return "IFNULL({$fn},'')";},$arr);
+	$sep = (empty($sep)) ? '||' : "||'{Ssep}'||";
+	return implode($bind,$sep);
+}
+//==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
 //	debug_log(DBMSG_HANDLER,['SQL' => $sql]);

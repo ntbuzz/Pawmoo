@@ -9,7 +9,7 @@ class SectionModel extends AppModel {
         'Primary' => 'id',
         'Schema' => [
             'id'        => ['',0],
-            'blog_id'   => ['',0,'Contents.id.title'],
+            'blog_id'   => ['',0,'Index.id.title'],
             'seq_no'    => ['',0],
             'published' => ['',0],
             'title'     => ['',100],

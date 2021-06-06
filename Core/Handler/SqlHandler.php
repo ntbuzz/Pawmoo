@@ -28,6 +28,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	abstract protected function fetch_array();
 	abstract protected function getLastError();
 	abstract protected function updateRecord($wh, $row);		// INSERT or UPDATE
+	abstract public function fieldConcat($sep,$arr);		// CONCAT()
 //==============================================================================
 //	Constructor( table name, DB Handler)
 //==============================================================================
@@ -51,6 +52,7 @@ public function setupRelations($relations) {
 }
 //==============================================================================
 // createView: Create View Table
+/*
 public function createView($table,$view,$schema,$exec = FALSE) {
 	$sql = "DROP VIEW IF EXISTS {$view};";
 	if($exec) $this->execSQL($sql);
@@ -74,6 +76,7 @@ debug_log(DBMSG_DUMP,['BIND'=>$bind]);
 	if($exec) $this->execSQL($sql);
 	return $sql;
 }
+*/
 //==============================================================================
 // fetchDB: get record data , and replace alias and bind column
 public function fetchDB() {

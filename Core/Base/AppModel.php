@@ -61,6 +61,7 @@ class AppModel extends AppObject {
     }
 //==============================================================================
 // Initializ Class Property
+/*
 public function CreateMyView() {
 	if(isset($this->ViewSchema)) {
 		$viewset = (isset($this->DataView)) ? ((is_array($this->DataView)) ? $this->DataView : [$this->DataView]) : [];
@@ -73,6 +74,7 @@ public function CreateMyView() {
 		} 
 	}
 }
+*/
 //==============================================================================
 // column exist check
 public function is_exist_column($name) {

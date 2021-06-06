@@ -187,7 +187,6 @@ if($controllerInstance->is_authorised()) {
     $controllerInstance->ActionDispatch($method);
 }
 debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
-//    "#SessionClose" => MySession::$EnvData,
     "CLASS-MANAGER" => ClassManager::DumpObject(),
     "SAVE-AppData"  => MySession::get_envIDs('AppData'),     // included App::[sysVAR]
     "Paging"  => MySession::get_envIDs('Paging'),     // included App::[sysVAR]
