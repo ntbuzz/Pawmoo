@@ -40,15 +40,18 @@ class AppDatabase {
 	private $ViewSet = [];
     protected $dbDriver;            // Database Driver
     protected static $Database = [];
+	private $data_folder;
 //==============================================================================
 // setup table-name and view-table list
-	function __construct() {
+	function __construct($path) {
+echo "PATH:{$path}\n";
         foreach(static::$Database as $key => $val) $this->$key = $val;
 		$viewset = (isset($this->DataView)) ? ((is_array($this->DataView)) ? $this->DataView : [$this->DataView]) : [];
 		if(is_array($this->DataTable)) {
 			list($table,$view) = $this->DataTable;
 			if($table !== $view) array_unshift($viewset, $view);
 		} else $table = $this->DataTable;
+		$this->data_folder = $path;
 		$this->MyTable = $table;
 		$this->ViewSet = $viewset;
         $driver = $this->Handler . 'Handler';
@@ -59,7 +62,7 @@ class AppDatabase {
 public function __get($PropName) {
     if(isset($this->$PropName)) return $this->$PropName;
     $prop_name = "{$PropName}Setup";
-	$this->$PropName = new $prop_name();
+	$this->$PropName = new $prop_name($this->data_folder);
 	return $this->$PropName;
 }
 //==============================================================================
@@ -90,16 +93,17 @@ public function execute($exec) {
 	if(isset(static::$Dependent)) {
 		foreach(static::$Dependent as $table) {
 			$setuip_class = "{$table}Setup";
-			$db = new $setuip_class();
+			$db = new $setuip_class($this->data_folder);
 			if(empty($db->dbDriver->columns)) $db->execute($exec);
 		}
 	}
 	// DROP in ViewSet views
 	$sql = '';
 	foreach($this->ViewSet as $view) {
-		$sql .= "DROP VIEW IF EXISTS {$view};\n";
+		$sql = "DROP VIEW IF EXISTS {$view};\n";
+		$this->doSQL($exec,$sql);
 	}
-	$sql .= "DROP TABLE IF EXISTS {$this->MyTable};\n";
+	$sql = "DROP TABLE IF EXISTS {$this->MyTable};\n";
 	$this->doSQL($exec,$sql);
 	// Create Table
 	$fset = [];
@@ -115,22 +119,39 @@ public function execute($exec) {
 	$this->doSQL($exec,$sql);
 	// IMPORT initial Table DATA
 	if(isset($this->InitCSV) && $exec) {
-		$sql = "TRUNCATE TABLE {$this->MyTable};";
-		$row_columns = array_keys($this->Schema);
-		foreach($this->InitCSV as $csv) {
-//			$data = explode(',',$csv);
-			$data = str_getcsv($csv);
-			$row = array_combine($row_columns,$data);
-			debug_log(DBMSG_DUMP,['DATA'=>$row]);
-//				$num = $row[$this->Primary];
-//				$this->dbDriver->updateRecord([$this->Primary=>$num],$row);
-			$this->dbDriver->insertRecord($row);
+		if(is_array($this->InitCSV)) {
+			$sql = "TRUNCATE TABLE {$this->MyTable};";
+			$row_columns = array_keys($this->Schema);
+			foreach($this->InitCSV as $csv) {
+				$data = str_getcsv($csv);
+				$row = array_combine($row_columns,$data);
+				debug_log(DBMSG_DUMP,['DATA'=>$row]);
+				$this->dbDriver->insertRecord($row);
+			}
+		} else {
+			$this->loadCSV($this->InitCSV);
 		}
 	}
 	// create VIEW
 	foreach($this->ViewSet as $view) {
 		$sql = $this->createSQL($this->MyTable,$view);
 		$this->doSQL($exec,$sql);
+	}
+}
+//==============================================================================
+// CSV file Load (must be UTF-8)
+private function loadCSV($filename) {
+	$path = "{$this->data_folder}{$filename}";
+echo "INSERT: {$path}\n";
+	if (($handle = fopen($path, "r")) !== FALSE) {
+		$sql = "TRUNCATE TABLE {$this->MyTable};";
+		$row_columns = array_keys($this->Schema);
+		while (($data = fgetcsv($handle))) {
+//			debug_log(DBMSG_DUMP,['DATA'=>$data,'ROW'=>$row_columns]);
+			$row = array_combine($row_columns,$data);
+			$this->dbDriver->insertRecord($row);
+		}
+		fclose($handle);
 	}
 }
 //==============================================================================
@@ -145,7 +166,7 @@ public function execute($exec) {
 //		[ 'bind_name.sep' => [ 'entity' , 'location'] ],		// BIND-FIELD on My-Table field
 //		[ 'bind_name.sep' => [ 'table1.refer' , 'ltable2.refer'] ],		// OTHER-TABLE BIND-FIELD
 // ]
-public function createSQL($table,$view) {
+private function createSQL($table,$view) {
 	$alias_sep = function($key) {
 		if(substr($key, -1) === '.') $key .= ' ';
 		list($alias,$sep) = explode('.',"{$key}.");

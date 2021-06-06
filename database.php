@@ -27,7 +27,9 @@ setlocale( LC_ALL, 'ja_JP' );
 list($appname,$defs,$exec,$prop) = explode('/',strtolower("{$cmd_arg}///"));
 $defs = ucfirst($defs);
 
-$defsfile = "app/{$appname}/Config/Setup/Config.php";
+$config_path = "app/{$appname}/Config";
+$data_path = "{$config_path}/db_data/";
+$defsfile = "{$config_path}/Setup/Config.php";
 
 require_once($defsfile);
 
@@ -35,8 +37,8 @@ SetupLoader::Setup($appname,AliasMap);
 
 $setup_class = "{$defs}Setup";
 
-$db = new $setup_class();
-$db->execute($exec==='run',$prop);
+$db = new $setup_class($data_path);
+$db->execute($exec!=='test',$prop);
 
 //MySession::CloseSession();
 //DatabaseHandler::CloseConnection();
