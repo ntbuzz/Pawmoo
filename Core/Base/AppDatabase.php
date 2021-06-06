@@ -44,7 +44,6 @@ class AppDatabase {
 //==============================================================================
 // setup table-name and view-table list
 	function __construct($path) {
-echo "PATH:{$path}\n";
         foreach(static::$Database as $key => $val) $this->$key = $val;
 		$viewset = (isset($this->DataView)) ? ((is_array($this->DataView)) ? $this->DataView : [$this->DataView]) : [];
 		if(is_array($this->DataTable)) {
@@ -82,7 +81,7 @@ public function __get($PropName) {
 	private function doSQL($exec,$sql) {
 		if(empty($sql)) return;
 		if($exec) {
-			echo "EXEC SQL:\n{$sql}\n";
+			echo "SQL: {$sql}\n";
 			$this->dbDriver->execSQL($sql);
 		} else  echo "{$sql}\n\n";
     }
@@ -120,15 +119,17 @@ public function execute($exec) {
 	// IMPORT initial Table DATA
 	if(isset($this->InitCSV) && $exec) {
 		if(is_array($this->InitCSV)) {
+			debug_log(DBMSG_NOLOG,["INITIAL DATA" => $this->InitCSV]);
 			$sql = "TRUNCATE TABLE {$this->MyTable};";
 			$row_columns = array_keys($this->Schema);
 			foreach($this->InitCSV as $csv) {
 				$data = str_getcsv($csv);
 				$row = array_combine($row_columns,$data);
-				debug_log(DBMSG_DUMP,['DATA'=>$row]);
+//				debug_log(DBMSG_DUMP,['DATA'=>$row]);
 				$this->dbDriver->insertRecord($row);
 			}
 		} else {
+			echo "Load CSV from '{$this->InitCSV}'\n";
 			$this->loadCSV($this->InitCSV);
 		}
 	}
@@ -142,7 +143,6 @@ public function execute($exec) {
 // CSV file Load (must be UTF-8)
 private function loadCSV($filename) {
 	$path = "{$this->data_folder}{$filename}";
-echo "INSERT: {$path}\n";
 	if (($handle = fopen($path, "r")) !== FALSE) {
 		$sql = "TRUNCATE TABLE {$this->MyTable};";
 		$row_columns = array_keys($this->Schema);
