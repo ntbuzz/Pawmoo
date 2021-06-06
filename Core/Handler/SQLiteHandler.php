@@ -28,7 +28,7 @@ protected function Connect($table) {
 //	field concatiname
 public function fieldConcat($sep,$arr) {
 	$bind = array_map(function($fn) {return "IFNULL({$fn},'')";},$arr);
-	$sep = (empty($sep)) ? '||' : "||'{Ssep}'||";
+	$sep = (empty($sep)) ? '||' : "||'{$sep}'||";
 	return implode($bind,$sep);
 }
 //==============================================================================
