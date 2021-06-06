@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2021 by nTak
  * @license    MIT
- * @version 0.67.0, 2021-05-30
+ * @version 0.68.0, 2021-06-06
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,9 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 履歴
+【0.68.0】2021/06/06
+	・TABLE, VIEW のクリエーターツールを試験的サポート
+
 【0.67.0】2021/05/30
 	・CREATE VIEWメソッドの追加
 	・ページング不具合の修正
