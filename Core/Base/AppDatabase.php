@@ -99,10 +99,10 @@ public function execute($exec) {
 	// DROP in ViewSet views
 	$sql = '';
 	foreach($this->ViewSet as $view) {
-		$sql = "DROP VIEW IF EXISTS {$view};\n";
+		$sql = $this->dbDriver->drop_sql("VIEW",$view);
 		$this->doSQL($exec,$sql);
 	}
-	$sql = "DROP TABLE IF EXISTS {$this->MyTable};\n";
+	$sql = $this->dbDriver->drop_sql("TABLE",$this->MyTable);
 	$this->doSQL($exec,$sql);
 	// Create Table
 	$fset = [];
@@ -123,9 +123,8 @@ public function execute($exec) {
 			$sql = "TRUNCATE TABLE {$this->MyTable};";
 			$row_columns = array_keys($this->Schema);
 			foreach($this->InitCSV as $csv) {
-				$data = str_getcsv($csv);
+				$data = str_csvget($csv);		// for Windows/UTF-8 trouble avoidance
 				$row = array_combine($row_columns,$data);
-//				debug_log(DBMSG_DUMP,['DATA'=>$row]);
 				$this->dbDriver->insertRecord($row);
 			}
 		} else {
@@ -146,8 +145,7 @@ private function loadCSV($filename) {
 	if (($handle = fopen($path, "r")) !== FALSE) {
 		$sql = "TRUNCATE TABLE {$this->MyTable};";
 		$row_columns = array_keys($this->Schema);
-		while (($data = fgetcsv($handle))) {
-//			debug_log(DBMSG_DUMP,['DATA'=>$data,'ROW'=>$row_columns]);
+		while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
 			$row = array_combine($row_columns,$data);
 			$this->dbDriver->insertRecord($row);
 		}

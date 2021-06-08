@@ -32,6 +32,11 @@ public function fieldConcat($sep,$arr) {
 	return implode($bind,$sep);
 }
 //==============================================================================
+//	DROP TABLE/VIEW CASCADE
+public function drop_sql($kind,$table) {
+	return "DROP {$kind} IF EXISTS {$table};";
+}
+//==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
 //	debug_log(DBMSG_HANDLER,['SQL' => $sql]);

@@ -23,9 +23,12 @@ require_once('Core/Handler/DatabaseHandler.php');
 require_once('Core/Base/AppDatabase.php');
 
 date_default_timezone_set('Asia/Tokyo');
-setlocale( LC_ALL, 'ja_JP' );
-list($appname,$defs,$exec,$prop) = explode('/',strtolower("{$cmd_arg}///"));
-$defs = ucfirst($defs);
+
+$in = explode('/',"{$cmd_arg}///");
+// lower-case convert,except '$defs' parameter.
+list($appname,$defs,$exec,$prop) = array_map(
+		function($in,$low) { return ($low) ? strtolower($in) : $in;},
+		$in, [true, false, true, true]);
 
 $config_path = "app/{$appname}/Config";
 $data_path = "{$config_path}/db_data/";
@@ -37,8 +40,11 @@ SetupLoader::Setup($appname,AliasMap);
 
 $setup_class = "{$defs}Setup";
 
-$db = new $setup_class($data_path);
-$db->execute($exec!=='test',$prop);
-
-//MySession::CloseSession();
-//DatabaseHandler::CloseConnection();
+foreach(AliasMap as $fname => $classes) {
+	if(in_array($setup_class,$classes)) {
+		$db = new $setup_class($data_path);
+		$db->execute($exec!=='test',$prop);
+		exit;
+	}
+}
+echo "'{$setup_class}' NOT FOUND!\n";
