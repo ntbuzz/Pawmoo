@@ -263,3 +263,49 @@ function re_build_array($cond) {
 	};
 	return $array_map_shurink('AND',$cond);
 }
+//==============================================================================
+// UTF-8 CSV miss processing in Windows
+// str_csv version
+function str_csvget($csv_str) {
+	$quoted_str = function($v) {
+		$v = str_replace('""','"',$v);
+		if(mb_substr($v,0,1) === '"') $v = mb_substr($v,1,mb_strlen($v) - 2);
+		return $v;
+	};
+	$nquote = 0;
+	$csv = [];
+	$str = '';
+	$result = preg_split('/([",])/u',$csv_str,-1,PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
+	foreach($result as $ch) {
+		switch($ch) {
+		case ',':
+			if(($nquote%2)===0) {
+				$csv[] = $quoted_str($str);
+				$str = '';
+				$nquote = 0;
+			} else {
+				$str = "{$str}{$ch}";
+			}
+			break;
+		case '"':	++$nquote;
+		default:	$str = "{$str}{$ch}";
+		}
+	}
+	// last column
+	$csv[] = $quoted_str($str);
+	return $csv;
+}
+//==============================================================================
+// UTF-8 CSV miss processing in Windows
+// fgets version
+function fcsvget($handle) {
+	if(($csv = fgets($handle))) {
+		while( (mb_substr_count($csv,'"') %2) !== 0) {
+			if(($next=fgets($handle))) {
+				$csv .= $next;
+			} else break;
+		}
+		return str_csvget($csv);
+	}
+	return false;
+}
