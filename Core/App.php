@@ -87,6 +87,17 @@ public static function ChangeParams($params,$relocate = TRUE) {
     static::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================
+// パラメータ無しのパス
+public static function Get_PagingPath() { 
+	return array_to_URI([
+			static::$execURI['root'],
+			static::$execURI['controller'],
+			static::$execURI['method'],
+			static::$execURI['filter']
+		],
+		array_key_value(static::$Query,'&'));
+}
+//==============================================================================
 // メソッドの置換
 public static function Get_RelocateURL($force=FALSE) { 
     if(static::$ReLocate === FALSE && $force===FALSE) return NULL;

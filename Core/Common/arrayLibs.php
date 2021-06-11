@@ -116,9 +116,9 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
     return (is_array($array)) ? $dump_text(0,$array) : $array;
 }
 //==============================================================================
-function array_key_value($arr) {
+function array_key_value($arr,$sep=',') {
     array_walk($arr,function(&$item,$key) { $item = "{$key}={$item}"; });
-    return implode(",",$arr);
+    return implode($sep,$arr);
 }
 //==============================================================================
 // Recursive call to array_key_exists
@@ -178,7 +178,7 @@ function array_flat_reduce($arr) {
 }
 //==============================================================================
 // Generate URI from array, even when there is an array in the element
-function array_to_URI($arr) {
+function array_to_URI($arr,$query=NULL) {
     $array_builder = function ($lst) {
         $ret = [];
         foreach($lst as $val) {
@@ -188,7 +188,7 @@ function array_to_URI($arr) {
         return $ret;
     };
     $ret = $array_builder($arr);
-    return implode('/',$ret);
+    return implode('/',$ret) . ((!empty($query)) ? "?{$query}":'');
 }
 //==============================================================================
 // Concatenate array values by key value
