@@ -27,9 +27,11 @@ abstract class SQLHandler {	// extends SqlCreator {
 	abstract protected function doQuery($sql);
 	abstract protected function fetch_array();
 	abstract protected function getLastError();
-	abstract protected function updateRecord($wh, $row);		// INSERT or UPDATE
+	abstract protected function updateRecord($wh, $row);	// INSERT or UPDATE
 	abstract public function fieldConcat($sep,$arr);		// CONCAT()
-//==============================================================================
+	abstract public function drop_sql($kind,$table);		// DROP TABLE SQL
+	abstract public function truncate_sql($table);			// TRUNCATE SQL
+//==============================================================================v
 //	Constructor( table name, DB Handler)
 //==============================================================================
 function __construct($table,$handler) {

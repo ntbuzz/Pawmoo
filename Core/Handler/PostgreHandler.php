@@ -40,6 +40,11 @@ public function drop_sql($kind,$table) {
 	return "DROP {$kind} IF EXISTS {$table} CASCADE;";
 }
 //==============================================================================
+//	TRUNCATE TABLE
+public function truncate_sql($table) {
+	return "TRUNCATE TABLE {$able};";
+}
+//==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
 //	debug_log(DBMSG_HANDLER,['SQL' => $sql]);

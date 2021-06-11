@@ -99,18 +99,18 @@ public function execute($cmd) {
 	switch($cmd) {
 	case 'test':	$exeType = 0; break;
 	case 'renew':	$exeType = 1; break;
-	case 'view':
-	case '':	$exeType = 2; break;
-	default: return;
+	case NULL:		echo "NULL\n";
+	case 'view':	$exeType = 2; break;
+	case 'csv':		$exeType = 3; break;
+	default: echo "BAD Command({$cmd})\n"; return;
 	}
 	$exec = ($exeType !== 0);
 	// DROP in ViewSet views
-	$sql = '';
 	foreach($this->ViewSet as $view) {
 		$sql = $this->dbDriver->drop_sql("VIEW",$view);
 		$this->doSQL($exec,$sql);
 	}
-	if($exeType !== 2) {	// not a view-only
+	if(in_array($exeType, [0,1] )) {	// re-create or TEST mode
 		$sql = $this->dbDriver->drop_sql("TABLE",$this->MyTable);
 		$this->doSQL($exec,$sql);
 		// Create Table
@@ -125,27 +125,29 @@ public function execute($cmd) {
 		$sql = "CREATE TABLE {$this->MyTable} (\n";
 		$sql .= implode($fset,",\n") . "\n);";
 		$this->doSQL($exec,$sql);
-		// IMPORT initial Table DATA
-		if(isset($this->InitCSV) && $exec) {
-			if(is_array($this->InitCSV)) {
-				debug_log(DBMSG_NOLOG,["INITIAL DATA" => $this->InitCSV]);
-				$sql = "TRUNCATE TABLE {$this->MyTable};";
+	}
+	// IMPORT initial Table DATA, CSV load or TEST mode
+	if(isset($this->InitCSV) && in_array($exeType, [0,3] )) {
+		debug_log(DBMSG_NOLOG,["INITIAL DATA" => $this->InitCSV]);
+		$sql = $this->dbDriver->truncate_sql($this->MyTable);
+		$this->doSQL($exec,$sql);
+		if(is_array($this->InitCSV)) {
 				$row_columns = array_keys($this->Schema);
 				foreach($this->InitCSV as $csv) {
 					$data = str_csvget($csv);		// for Windows/UTF-8 trouble avoidance
 					$row = array_combine($row_columns,$data);
 					$this->dbDriver->insertRecord($row);
 				}
-			} else {
-				echo "Load CSV from '{$this->InitCSV}'\n";
-				$this->loadCSV($this->InitCSV);
-			}
+		} else {
+			echo "Load CSV from '{$this->InitCSV}'\n";
+			$this->loadCSV($this->InitCSV);
 		}
 	}
-	// create VIEW
-	foreach($this->ViewSet as $view) {
-		$sql = $this->createSQL($this->MyTable,$view);
-		$this->doSQL($exec,$sql);
+	if(in_array($exeType, [0,2] )) {	// View or TEST mode
+		foreach($this->ViewSet as $view) {
+			$sql = $this->createSQL($this->MyTable,$view);
+			$this->doSQL($exec,$sql);
+		}
 	}
 }
 //==============================================================================
@@ -153,7 +155,6 @@ public function execute($cmd) {
 private function loadCSV($filename) {
 	$path = "{$this->data_folder}{$filename}";
 	if (($handle = fopen($path, "r")) !== FALSE) {
-		$sql = "TRUNCATE TABLE {$this->MyTable};";
 		$row_columns = array_keys($this->Schema);
 		while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
 			$row = array_combine($row_columns,$data);
