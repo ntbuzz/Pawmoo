@@ -24,11 +24,15 @@ require_once('Core/Base/AppDatabase.php');
 
 date_default_timezone_set('Asia/Tokyo');
 
-$in = explode('/',"{$cmd_arg}///");
+$in = explode('/',"{$cmd_arg}//");
 // lower-case convert,except '$defs' parameter.
-list($appname,$defs,$exec,$prop) = array_map(
+// command-line: php database.php appname/model/[renew |view | test]
+// renew = re-create table & view
+// view  = re-create view (default)
+// test  = echo SQL, not-execute
+list($appname,$defs,$cmd) = array_map(
 		function($in,$low) { return ($low) ? strtolower($in) : $in;},
-		$in, [true, false, true, true]);
+		$in, [true, false, true]);
 
 $config_path = "app/{$appname}/Config";
 $data_path = "{$config_path}/db_data/";
@@ -43,7 +47,7 @@ $setup_class = "{$defs}Setup";
 foreach(AliasMap as $fname => $classes) {
 	if(in_array($setup_class,$classes)) {
 		$db = new $setup_class($data_path);
-		$db->execute($exec!=='test',$prop);
+		$db->execute($cmd);
 		exit;
 	}
 }

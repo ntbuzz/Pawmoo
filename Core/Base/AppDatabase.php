@@ -88,7 +88,7 @@ public function __get($PropName) {
 //==============================================================================
 // Execute Create TABLE,VIEW, and INTIAL DATA
 //	before check Dependent Table
-public function execute($exec) {
+public function execute($cmd) {
 	if(isset(static::$Dependent)) {
 		foreach(static::$Dependent as $table) {
 			$setuip_class = "{$table}Setup";
@@ -96,40 +96,50 @@ public function execute($exec) {
 			if(empty($db->dbDriver->columns)) $db->execute($exec);
 		}
 	}
+	switch($cmd) {
+	case 'test':	$exeType = 0; break;
+	case 'renew':	$exeType = 1; break;
+	case 'view':
+	case '':	$exeType = 2; break;
+	default: return;
+	}
+	$exec = ($exeType !== 0);
 	// DROP in ViewSet views
 	$sql = '';
 	foreach($this->ViewSet as $view) {
 		$sql = $this->dbDriver->drop_sql("VIEW",$view);
 		$this->doSQL($exec,$sql);
 	}
-	$sql = $this->dbDriver->drop_sql("TABLE",$this->MyTable);
-	$this->doSQL($exec,$sql);
-	// Create Table
-	$fset = [];
-	foreach($this->Schema as $key => $field) {
-		list($ftype,$not_null) = $field;
-		$str = "{$key} {$ftype}";
-		if($not_null) $str .= " NOT NULL";
-		$fset[] = $str;
-	}
-	$fset[] = "PRIMARY KEY ({$this->Primary})";
-	$sql = "CREATE TABLE {$this->MyTable} (\n";
-	$sql .= implode($fset,",\n") . "\n);";
-	$this->doSQL($exec,$sql);
-	// IMPORT initial Table DATA
-	if(isset($this->InitCSV) && $exec) {
-		if(is_array($this->InitCSV)) {
-			debug_log(DBMSG_NOLOG,["INITIAL DATA" => $this->InitCSV]);
-			$sql = "TRUNCATE TABLE {$this->MyTable};";
-			$row_columns = array_keys($this->Schema);
-			foreach($this->InitCSV as $csv) {
-				$data = str_csvget($csv);		// for Windows/UTF-8 trouble avoidance
-				$row = array_combine($row_columns,$data);
-				$this->dbDriver->insertRecord($row);
+	if($exeType !== 2) {	// not a view-only
+		$sql = $this->dbDriver->drop_sql("TABLE",$this->MyTable);
+		$this->doSQL($exec,$sql);
+		// Create Table
+		$fset = [];
+		foreach($this->Schema as $key => $field) {
+			list($ftype,$not_null) = $field;
+			$str = "{$key} {$ftype}";
+			if($not_null) $str .= " NOT NULL";
+			$fset[] = $str;
+		}
+		$fset[] = "PRIMARY KEY ({$this->Primary})";
+		$sql = "CREATE TABLE {$this->MyTable} (\n";
+		$sql .= implode($fset,",\n") . "\n);";
+		$this->doSQL($exec,$sql);
+		// IMPORT initial Table DATA
+		if(isset($this->InitCSV) && $exec) {
+			if(is_array($this->InitCSV)) {
+				debug_log(DBMSG_NOLOG,["INITIAL DATA" => $this->InitCSV]);
+				$sql = "TRUNCATE TABLE {$this->MyTable};";
+				$row_columns = array_keys($this->Schema);
+				foreach($this->InitCSV as $csv) {
+					$data = str_csvget($csv);		// for Windows/UTF-8 trouble avoidance
+					$row = array_combine($row_columns,$data);
+					$this->dbDriver->insertRecord($row);
+				}
+			} else {
+				echo "Load CSV from '{$this->InitCSV}'\n";
+				$this->loadCSV($this->InitCSV);
 			}
-		} else {
-			echo "Load CSV from '{$this->InitCSV}'\n";
-			$this->loadCSV($this->InitCSV);
 		}
 	}
 	// create VIEW
