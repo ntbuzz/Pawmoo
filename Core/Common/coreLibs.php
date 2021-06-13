@@ -266,7 +266,21 @@ function re_build_array($cond) {
 //==============================================================================
 // UTF-8 CSV miss processing in Windows
 // str_csv version
+function str_csv($csv_str) {
+	$p = '/(?:^|,)((?:"(?:[^"]|(?:\\\\)*\\")+"|[^,]+)*)/';
+	preg_match_all($p,$csv_str,$m);               // 全ての要素をトークン分離する
+	$csv = array_map(function($a) {
+		$v = str_replace('""','"',$a);
+		if(mb_substr($v,0,1) === '"') $v = mb_substr($v,1,mb_strlen($v) - 2);
+		return $v;
+	},$m[1]);	
+	return $csv;
+}
+//==============================================================================
+// UTF-8 CSV miss processing in Windows
+// str_csv version
 function str_csvget($csv_str) {
+//	$mm = str_csv($csv_str);
 	$quoted_str = function($v) {
 		$v = str_replace('""','"',$v);
 		if(mb_substr($v,0,1) === '"') $v = mb_substr($v,1,mb_strlen($v) - 2);
@@ -293,6 +307,7 @@ function str_csvget($csv_str) {
 	}
 	// last column
 	$csv[] = $quoted_str($str);
+	debug_log(DBMSG_NOLOG,['CSV'=>$csv]);
 	return $csv;
 }
 //==============================================================================
@@ -305,7 +320,7 @@ function fcsvget($handle) {
 				$csv .= $next;
 			} else break;
 		}
-		return str_csvget($csv);
+		return str_csvget(trim($csv));
 	}
 	return false;
 }

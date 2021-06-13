@@ -127,23 +127,26 @@ public function execute($cmd) {
 		$this->doSQL($exec,$sql);
 	}
 	// IMPORT initial Table DATA, CSV load or TEST mode
-	if(isset($this->InitCSV) && in_array($exeType, [0,3] )) {
+	if(isset($this->InitCSV) && in_array($exeType, [0,1,3] )) {
 		debug_log(DBMSG_NOLOG,["INITIAL DATA" => $this->InitCSV]);
 		$sql = $this->dbDriver->truncate_sql($this->MyTable);
 		$this->doSQL($exec,$sql);
 		if(is_array($this->InitCSV)) {
+			if($exec) {
 				$row_columns = array_keys($this->Schema);
 				foreach($this->InitCSV as $csv) {
 					$data = str_csvget($csv);		// for Windows/UTF-8 trouble avoidance
 					$row = array_combine($row_columns,$data);
 					$this->dbDriver->insertRecord($row);
 				}
+			}
 		} else {
 			echo "Load CSV from '{$this->InitCSV}'\n";
-			$this->loadCSV($this->InitCSV);
+			if($exec) $this->loadCSV($this->InitCSV);
 		}
 	}
-	if(in_array($exeType, [0,2] )) {	// View or TEST mode
+	if(in_array($exeType, [0,1,2] )) {	// View or TEST mode
+		debug_log(DBMSG_NOLOG,["VIEW-DEFS" => $this->ViewSet]);
 		foreach($this->ViewSet as $view) {
 			$sql = $this->createSQL($this->MyTable,$view);
 			$this->doSQL($exec,$sql);
@@ -158,6 +161,7 @@ private function loadCSV($filename) {
 		$row_columns = array_keys($this->Schema);
 		while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
 			$row = array_combine($row_columns,$data);
+		debug_log(DBMSG_NOLOG,["CSV DATA" => [$row_columns,$data, $row] ]);
 			$this->dbDriver->insertRecord($row);
 		}
 		fclose($handle);
