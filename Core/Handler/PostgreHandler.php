@@ -42,7 +42,7 @@ public function drop_sql($kind,$table) {
 //==============================================================================
 //	TRUNCATE TABLE
 public function truncate_sql($table) {
-	return "TRUNCATE TABLE {$able};";
+	return "TRUNCATE TABLE {$table};";
 }
 //==============================================================================
 //	doQuery: 	SQLを発行する
