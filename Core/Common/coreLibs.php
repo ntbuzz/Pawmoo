@@ -268,7 +268,7 @@ function re_build_array($cond) {
 // str_csv version
 function str_csv($csv_str) {
 	$p = '/(?:^|,)((?:"(?:[^"]|(?:\\\\)*\\")+"|[^,]+)*)/';
-	preg_match_all($p,$csv_str,$m);               // 全ての要素をトークン分離する
+	preg_match_all($p,$csv_str,$m);               // all token split
 	$csv = array_map(function($a) {
 		$v = str_replace('""','"',$a);
 		if(mb_substr($v,0,1) === '"') $v = mb_substr($v,1,mb_strlen($v) - 2);
@@ -327,32 +327,37 @@ function fcsvget($handle) {
 //==============================================================================
 //  variable format convert
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
-function expand_text($class,$str,$recdata,$vars) {
-    $expand_Walk = function(&$val, $key, $vars) use(&$recdata,&$class) {
+function expand_text($view,$str,$recdata,$vars) {
+    $expand_Walk = function(&$val, $key, $vars) use(&$recdata,&$view) {
         if($val[0] === '$') {           // top char is variable mark
             $var = mb_substr($val,1);
             $var = trim($var,'{}');                 // triming of delimitter { }
             switch($var[0]) {
-            case '@':
-                // field value, or alternate field or strings
-                // @field-name=compare-value!TRUE-VALUE:FALSE-VALUE
-                $p = '/(@{1,2})([^=!:\}]+)(?:=([^:!]+))?(?:!([^:\n]*))?(?:\:([^\n]+))?/';
+            case '@':	// @field-name=compare-value!TRUE-VALUE:FALSE-VALUE#limit-len
+				$p = '/(@{1,2})([^=!:#]+)(?:=([^!:#]+))?(?:!([^:#]*))?(?:\:([^#]+))?(?:#(\d+))?/';
                 preg_match($p,$var,$m);
                 $get_field_data = function($nm) {
                     return (mb_substr($nm,0,1)==='@') ? $recdata[mb_substr($nm,1)]:$nm;
                 };
                 list($pat,$raw,$fn) = $m;
                 $var = ltrim($recdata[$fn]);     // get FIELD DATA
-                if(count($m) === 6) {
-                    list(,,,$cmp,$val_true,$val_false) = $m;
-					if($val_true === '') $val_true = "@{$fn}";
-					if($cmp === '') {	// no-comp will be empty-check
-						$an = (is_bool_false($var)) ? $val_false:$val_true;
-					} else {
-						$an = fnmatch($cmp,$var) ? $val_true : $val_false;       // compare wild-char
+				switch(count($m)) {
+				case 7:		// limitation
+					$limit = intval($m[6]);
+					if(mb_strlen($var) > $limit) $var = mb_substr($var,0,$limit) . ' ...';
+				case 6:
+					$c = array_slice($m,3,3);
+					if(!empty(implode($c))) {
+	                    list($cmp,$val_true,$val_false) = $c;
+						if($val_true === '') $val_true = "@{$fn}";
+						if($cmp === '') {	// no-comp will be empty-check
+							$an = (is_bool_false($var)) ? $val_false:$val_true;
+						} else {
+							$an = fnmatch($cmp,$var) ? $val_true : $val_false;       // compare wild-char
+						}
+						$var = $get_field_data($an);	// get data from alter-name
 					}
-					$var = $get_field_data($an);	// get data from alter-name
-                }
+				}
                 if($raw==='@') $var = str_replace("\n",'',text_to_html($var));
                 $val = $var;
                 break;
@@ -365,7 +370,7 @@ function expand_text($class,$str,$recdata,$vars) {
                     $allow = ($var[0] === '#');         // allow array
                     if($allow) $var = mb_substr($var,1);
                 }
-                $val = $class->_($var,$allow);       // get Language define
+				if(isset($view)) $val = $view->_($var,$allow);       // get Language define
                 break;
             case '%': if(substr($var,-1) === '%') {     // is parameter number
                     $var = trim($var,'%');
@@ -385,16 +390,18 @@ function expand_text($class,$str,$recdata,$vars) {
 				$val = App::$Query[$var];          // Query[] property
                 break;
             case ':':                                   // Class Property
+				if(isset($view)) {
                    	$p = '/(:{1,2})(\w+)(?:\[([\w\.\'"]+)\])?/';
                     preg_match($p,$var,$m);
                     $m[] = NULL;    // add NULL element for list()
                     list($match,$cls,$var,$mem) = $m;
                     $mem = trim($mem,"\"'");        // allow quote char
-                    $clsVar = ($cls === '::') ? $class->Helper : $class->Model;
+                    $clsVar = ($cls === '::') ? $view->Helper : $view->Model;
                     if(isset($clsVar->$var)) { // exist Property?
                         $val = array_member_value($clsVar->$var,$mem);
                     } else $val = NULL;
-                    break;
+				}
+                break;
             case '^':       // both ENV or REQ VAR
             case '"':       // REQ-VAR
             case "'":       // ENV-VAR
@@ -409,19 +416,21 @@ function expand_text($class,$str,$recdata,$vars) {
                 }
                 break;
             case '&':       // Helper Method CALL
+				if(isset($view)) {
                    	$p = '/&(\w+)(?:\(([^\)]+)\))?/';
                     preg_match($p,$var,$m);
                     $var = $m[1];
                     $arg = (count($m)===3) ? $m[2]:NULL;
-                    if(method_exists($class->Helper,$var)) {
-                        $val = $class->Helper->$var($arg);
+                    if(method_exists($view->Helper,$var)) {
+                        $val = $view->Helper->$var($arg);
                     } else $val = "NOT-FOUND({$var})";
-                    break;
+				}
+				break;
             default:
                 if(isset($vars[$var])) {            // is LOCAL VAR-SET?
                     $val = $vars[$var];
-                } else if(isset($class->$var)) {     // is Class-Property?
-                    $val = $class->$var;
+                } else if(isset($view)) {
+					if(isset($view->$var)) $val = $view->$var;	// CLASS-PROPERTY
                 }
             }
         }
