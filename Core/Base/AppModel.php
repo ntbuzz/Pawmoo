@@ -44,7 +44,7 @@ class AppModel extends AppObject {
         $this->setProperty(self::$DatabaseSchema);      // Set Default Database Schema Property
         $this->setProperty(static::$DatabaseSchema);    // Set Instance Property from Database Schema Array
 		if(empty($this->Schema)) {
-			debug_log(DBMSG_DIE,["BAD Schema"=>$this->ClassName,"CLASS"=>$this->ClassName]);
+			debug_log(DBMSG_DIE,["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
 		}
 		if(empty($this->Primary)) $this->Primary = 'id';	// default primary name
         if(isset($this->ModelTables)) {                 // Multi-Language Tabele exists
@@ -93,7 +93,7 @@ public function ResetSchema() {
     debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
 //            "Header"    => $this->HeaderSchema,
-//            "Field"     => $this->FieldSchema, 
+            "Field"     => $this->FieldSchema, 
             "Join-Defs"     => $this->dbDriver->relations,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
             "Select-Defs"   => $this->SelectionDef,
