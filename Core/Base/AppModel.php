@@ -310,8 +310,13 @@ public function LoadSelection($key_names) {
 		} else if(is_array($ref_list)) {
 			list($method,$args) = array_first_item($ref_list);
 			if(is_numeric($method)) {
-				$this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
-				$this->Select[$key_name] = $this->$model->Records;
+				if(is_array($args)) {
+					list($id,$field) = $args;
+					$this->Select[$key_name] = $this->$model->getFieldValues($id,$field,$cond);
+				} else {
+					$this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
+					$this->Select[$key_name] = $this->$model->Records;
+				}
 			} else if(method_exists($this->$model,$method)) {	// selection by method call 
 				$method_val = $this->$model->$method($args,$cond);
 				$this->Select[$key_name] = $method_val;
