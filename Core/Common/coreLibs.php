@@ -263,3 +263,185 @@ function re_build_array($cond) {
 	};
 	return $array_map_shurink('AND',$cond);
 }
+//==============================================================================
+// UTF-8 CSV miss processing in Windows
+// str_csv version
+function str_csv($csv_str) {
+	$p = '/(?:^|,)((?:"(?:[^"]|(?:\\\\)*\\")+"|[^,]+)*)/';
+	preg_match_all($p,$csv_str,$m);               // all token split
+	$csv = array_map(function($a) {
+		$v = str_replace('""','"',$a);
+		if(mb_substr($v,0,1) === '"') $v = mb_substr($v,1,mb_strlen($v) - 2);
+		return $v;
+	},$m[1]);	
+	return $csv;
+}
+//==============================================================================
+// UTF-8 CSV miss processing in Windows
+// str_csv version
+function str_csvget($csv_str) {
+//	$mm = str_csv($csv_str);
+	$quoted_str = function($v) {
+		$v = str_replace('""','"',$v);
+		if(mb_substr($v,0,1) === '"') $v = mb_substr($v,1,mb_strlen($v) - 2);
+		return $v;
+	};
+	$nquote = 0;
+	$csv = [];
+	$str = '';
+	$result = preg_split('/([",])/u',$csv_str,-1,PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
+	foreach($result as $ch) {
+		switch($ch) {
+		case ',':
+			if(($nquote%2)===0) {
+				$csv[] = $quoted_str($str);
+				$str = '';
+				$nquote = 0;
+			} else {
+				$str = "{$str}{$ch}";
+			}
+			break;
+		case '"':	++$nquote;
+		default:	$str = "{$str}{$ch}";
+		}
+	}
+	// last column
+	$csv[] = $quoted_str($str);
+	debug_log(DBMSG_NOLOG,['CSV'=>$csv]);
+	return $csv;
+}
+//==============================================================================
+// UTF-8 CSV miss processing in Windows
+// fgets version
+function fcsvget($handle) {
+	if(($csv = fgets($handle))) {
+		while( (mb_substr_count($csv,'"') %2) !== 0) {
+			if(($next=fgets($handle))) {
+				$csv .= $next;
+			} else break;
+		}
+		return str_csvget(trim($csv));
+	}
+	return false;
+}
+//==============================================================================
+//  variable format convert
+// $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
+function expand_text($view,$str,$recdata,$vars) {
+    $expand_Walk = function(&$val, $key, $vars) use(&$recdata,&$view) {
+        if($val[0] === '$') {           // top char is variable mark
+            $var = mb_substr($val,1);
+            $var = trim($var,'{}');                 // triming of delimitter { }
+            switch($var[0]) {
+            case '@':	// @field-name=compare-value!TRUE-VALUE:FALSE-VALUE#limit-len
+				$p = '/(@{1,2})([^=!:#]+)(?:=([^!:#]+))?(?:!([^:#]*))?(?:\:([^#]+))?(?:#(\d+))?/';
+                preg_match($p,$var,$m);
+                $get_field_data = function($nm) {
+                    return (mb_substr($nm,0,1)==='@') ? $recdata[mb_substr($nm,1)]:$nm;
+                };
+                list($pat,$raw,$fn) = $m;
+                $var = ltrim($recdata[$fn]);     // get FIELD DATA
+				switch(count($m)) {
+				case 7:		// limitation
+					$limit = intval($m[6]);
+					if(mb_strlen($var) > $limit) $var = mb_substr($var,0,$limit) . ' ...';
+				case 6:
+					$c = array_slice($m,3,3);
+					if(!empty(implode($c))) {
+	                    list($cmp,$val_true,$val_false) = $c;
+						if($val_true === '') $val_true = "@{$fn}";
+						if($cmp === '') {	// no-comp will be empty-check
+							$an = (is_bool_false($var)) ? $val_false:$val_true;
+						} else {
+							$an = fnmatch($cmp,$var) ? $val_true : $val_false;       // compare wild-char
+						}
+						$var = $get_field_data($an);	// get data from alter-name
+					}
+				}
+                if($raw==='@') $var = str_replace("\n",'',text_to_html($var));
+                $val = $var;
+                break;
+            case '#': $var = mb_substr($var,1);     // Language refer
+                if($var[0]==='@') {                 // AUTO Transfer
+                    $var = mb_substr($var,1);
+                    $var = 'Transfer.'.trim($recdata[$var]);
+                    $allow = FALSE;
+                } else {
+                    $allow = ($var[0] === '#');         // allow array
+                    if($allow) $var = mb_substr($var,1);
+                }
+				if(isset($view)) $val = $view->_($var,$allow);       // get Language define
+                break;
+            case '%': if(substr($var,-1) === '%') {     // is parameter number
+                    $var = trim($var,'%');
+                    if(is_numeric($var)) $val = App::$Params[intval($var)];          // get value from Params[] property
+                    else {
+                        $n = strpos('abcdefghijklmnopqrstuvwxyz',$var);
+                        $val = (isset(App::$Filters[$n])) ? App::$Filters[$n] : '';
+                    }
+                }
+                break;
+            case '$': if(substr($var,-1) === '$') {
+                    $var = trim($var,'$');
+                    $val = App::$SysVAR[$var];          // SysVAR[] property
+                }
+                break;
+            case '?': $var = mb_substr($var,1);     // Query parameter
+				$val = App::$Query[$var];          // Query[] property
+                break;
+            case ':':                                   // Class Property
+				if(isset($view)) {
+                   	$p = '/(:{1,2})(\w+)(?:\[([\w\.\'"]+)\])?/';
+                    preg_match($p,$var,$m);
+                    $m[] = NULL;    // add NULL element for list()
+                    list($match,$cls,$var,$mem) = $m;
+                    $mem = trim($mem,"\"'");        // allow quote char
+                    $clsVar = ($cls === '::') ? $view->Helper : $view->Model;
+                    if(isset($clsVar->$var)) { // exist Property?
+                        $val = array_member_value($clsVar->$var,$mem);
+                    } else $val = NULL;
+				}
+                break;
+            case '^':       // both ENV or REQ VAR
+            case '"':       // REQ-VAR
+            case "'":       // ENV-VAR
+                if(substr($var,-1) === $var[0]) {     // check end-char
+                    $tt = $var[0];
+                    $var = trim($var,$tt);
+                    if($tt === '^') {
+                        $val = MySession::get_varIDs(true,$var);
+                        if(!empty($val)) break;
+                    }
+                    $val = MySession::get_varIDs(($tt==="'"),$var);// get SESSION ENV or REQUEST
+                }
+                break;
+            case '&':       // Helper Method CALL
+				if(isset($view)) {
+                   	$p = '/&(\w+)(?:\(([^\)]+)\))?/';
+                    preg_match($p,$var,$m);
+                    $var = $m[1];
+                    $arg = (count($m)===3) ? $m[2]:NULL;
+                    if(method_exists($view->Helper,$var)) {
+                        $val = $view->Helper->$var($arg);
+                    } else $val = "NOT-FOUND({$var})";
+				}
+				break;
+            default:
+                if(isset($vars[$var])) {            // is LOCAL VAR-SET?
+                    $val = $vars[$var];
+                } else if(isset($view)) {
+					if(isset($view->$var)) $val = $view->$var;	// CLASS-PROPERTY
+                }
+            }
+        }
+    };
+	if(empty($str) || is_numeric($str)) return $str;
+	$p = '/\${[^}\s]+?}|\${[#%\'"\$@&:][^}\s]+?}/';       // PARSE variable format
+	preg_match_all($p, $str, $m);
+	$varList = $m[0]; 
+	if(empty($varList)) return $str;        // not use variable.
+	$values = $varList = array_unique($varList);
+	array_walk($values, $expand_Walk, $vars);
+	$exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);
+	return $exvar;
+}

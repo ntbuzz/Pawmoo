@@ -147,12 +147,12 @@ public function AutoPaging($cond, $max_count = 100) {
 	debug_log(DBMSG_SYSTEM, ['COND' => $cond,"Page"  => $Page ]);
 	$sCond = $Page['Cond'];
 	$sSize = $Page['Size'];
-	$sFilter = $Page['Filter'];
-	if($num > 1 || ($sFilter === App::$Filter && empty(MySession::$ReqData))) {
+	$uri = App::Get_PagingPath();
+	if($uri === $Page['URI'] && empty(MySession::$ReqData)) {
 		$cond = $sCond;			// same condition
 	} else {
 		$Page['Cond'] = $cond;
-		$Page['Filter'] = App::$Filter;
+		$Page['URI'] = $uri;
 	}
 	if(isset($Page['Size']) && $size === 0) {
 		$size = intval($Page['Size']);

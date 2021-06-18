@@ -16,6 +16,8 @@ class NullHandler {
 	protected function updateRecord($wh,$row) { }
 //==============================================================================
 public function fieldConcat($sep,$arr) { return "";}
+public function drop_sql($kind,$table) { return "";}
+public function truncate_sql($table) { return "";}		// TRUNCATE SQL
 public function setupRelations($relations) { }
 public function SetPaging($pagesize, $pagenum) { }
 public function getValueLists($table,$ref,$id,$cond) { return []; }

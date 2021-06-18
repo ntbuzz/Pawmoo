@@ -88,7 +88,7 @@ public function __get($PropName) {
 //==============================================================================
 // Execute Create TABLE,VIEW, and INTIAL DATA
 //	before check Dependent Table
-public function execute($exec) {
+public function execute($cmd) {
 	if(isset(static::$Dependent)) {
 		foreach(static::$Dependent as $table) {
 			$setuip_class = "{$table}Setup";
@@ -96,47 +96,61 @@ public function execute($exec) {
 			if(empty($db->dbDriver->columns)) $db->execute($exec);
 		}
 	}
+	switch($cmd) {
+	case 'test':	$exeType = 0; break;
+	case 'renew':	$exeType = 1; break;
+	case NULL:		echo "NULL\n";
+	case 'view':	$exeType = 2; break;
+	case 'csv':		$exeType = 3; break;
+	default: echo "BAD Command({$cmd})\n"; return;
+	}
+	$exec = ($exeType !== 0);
 	// DROP in ViewSet views
-	$sql = '';
 	foreach($this->ViewSet as $view) {
-		$sql = "DROP VIEW IF EXISTS {$view};\n";
+		$sql = $this->dbDriver->drop_sql("VIEW",$view);
 		$this->doSQL($exec,$sql);
 	}
-	$sql = "DROP TABLE IF EXISTS {$this->MyTable};\n";
-	$this->doSQL($exec,$sql);
-	// Create Table
-	$fset = [];
-	foreach($this->Schema as $key => $field) {
-		list($ftype,$not_null) = $field;
-		$str = "{$key} {$ftype}";
-		if($not_null) $str .= " NOT NULL";
-		$fset[] = $str;
+	if(in_array($exeType, [0,1] )) {	// re-create or TEST mode
+		$sql = $this->dbDriver->drop_sql("TABLE",$this->MyTable);
+		$this->doSQL($exec,$sql);
+		// Create Table
+		$fset = [];
+		foreach($this->Schema as $key => $field) {
+			list($ftype,$not_null) = $field;
+			$str = "{$key} {$ftype}";
+			if($not_null) $str .= " NOT NULL";
+			$fset[] = $str;
+		}
+		$fset[] = "PRIMARY KEY ({$this->Primary})";
+		$sql = "CREATE TABLE {$this->MyTable} (\n";
+		$sql .= implode($fset,",\n") . "\n);";
+		$this->doSQL($exec,$sql);
 	}
-	$fset[] = "PRIMARY KEY ({$this->Primary})";
-	$sql = "CREATE TABLE {$this->MyTable} (\n";
-	$sql .= implode($fset,",\n") . "\n);";
-	$this->doSQL($exec,$sql);
-	// IMPORT initial Table DATA
-	if(isset($this->InitCSV) && $exec) {
+	// IMPORT initial Table DATA, CSV load or TEST mode
+	if(isset($this->InitCSV) && in_array($exeType, [0,1,3] )) {
+		debug_log(DBMSG_NOLOG,["INITIAL DATA" => $this->InitCSV]);
+		$sql = $this->dbDriver->truncate_sql($this->MyTable);
+		$this->doSQL($exec,$sql);
 		if(is_array($this->InitCSV)) {
-			debug_log(DBMSG_NOLOG,["INITIAL DATA" => $this->InitCSV]);
-			$sql = "TRUNCATE TABLE {$this->MyTable};";
-			$row_columns = array_keys($this->Schema);
-			foreach($this->InitCSV as $csv) {
-				$data = str_getcsv($csv);
-				$row = array_combine($row_columns,$data);
-//				debug_log(DBMSG_DUMP,['DATA'=>$row]);
-				$this->dbDriver->insertRecord($row);
+			if($exec) {
+				$row_columns = array_keys($this->Schema);
+				foreach($this->InitCSV as $csv) {
+					$data = str_csvget($csv);		// for Windows/UTF-8 trouble avoidance
+					$row = array_combine($row_columns,$data);
+					$this->dbDriver->insertRecord($row);
+				}
 			}
 		} else {
 			echo "Load CSV from '{$this->InitCSV}'\n";
-			$this->loadCSV($this->InitCSV);
+			if($exec) $this->loadCSV($this->InitCSV);
 		}
 	}
-	// create VIEW
-	foreach($this->ViewSet as $view) {
-		$sql = $this->createSQL($this->MyTable,$view);
-		$this->doSQL($exec,$sql);
+	if(in_array($exeType, [0,1,2] )) {	// View or TEST mode
+		debug_log(DBMSG_NOLOG,["VIEW-DEFS" => $this->ViewSet]);
+		foreach($this->ViewSet as $view) {
+			$sql = $this->createSQL($this->MyTable,$view);
+			$this->doSQL($exec,$sql);
+		}
 	}
 }
 //==============================================================================
@@ -144,11 +158,10 @@ public function execute($exec) {
 private function loadCSV($filename) {
 	$path = "{$this->data_folder}{$filename}";
 	if (($handle = fopen($path, "r")) !== FALSE) {
-		$sql = "TRUNCATE TABLE {$this->MyTable};";
 		$row_columns = array_keys($this->Schema);
-		while (($data = fgetcsv($handle))) {
-//			debug_log(DBMSG_DUMP,['DATA'=>$data,'ROW'=>$row_columns]);
+		while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
 			$row = array_combine($row_columns,$data);
+		debug_log(DBMSG_NOLOG,["CSV DATA" => [$row_columns,$data, $row] ]);
 			$this->dbDriver->insertRecord($row);
 		}
 		fclose($handle);

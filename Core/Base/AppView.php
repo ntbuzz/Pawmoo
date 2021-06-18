@@ -268,6 +268,8 @@ public function ViewTemplate($name,$vars = []) {
 //  variable format convert
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
     public function expand_Strings($str,$vars) {
+		$variable = array_override_recursive($this->env_vars,$vars);
+	return expand_text($this,$str,$this->Model->RecData,$variable);
         if(empty($str) || is_numeric($str)) return $str;
         $p = '/\${[^}\s]+?}|\${[#%\'"\$@&:][^}\s]+?}/';       // PARSE variable format
         preg_match_all($p, $str, $m);
@@ -313,7 +315,11 @@ public function ViewTemplate($name,$vars = []) {
             foreach($sec as $check => $value) {
                 if($check === '') $result = ($cmp_val==='');            // is_empty ?
                 else if($check === '*') $result = ($cmp_val !== '');     // is_notempty ?
-                else {
+                else if(mb_strpos($check,'...') !== false) {			// range comapre 1...9
+                    list($from,$top) = string_to_array('...,',$val);
+					$cmp_val = intval($cmp_val);
+                    $result = intval($from) <= $cmp_val && $cmp_val <= intval($to);
+				} else {
                     $chk_arr = explode('|',$check);
                     $result = FALSE;
                     foreach($chk_arr as $cmp_chk) {

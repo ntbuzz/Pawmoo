@@ -43,6 +43,10 @@ class AppModel extends AppObject {
 	    parent::__construct($owner);                    // call parent constructor
         $this->setProperty(self::$DatabaseSchema);      // Set Default Database Schema Property
         $this->setProperty(static::$DatabaseSchema);    // Set Instance Property from Database Schema Array
+		if(empty($this->Schema)) {
+			debug_log(DBMSG_DIE,["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
+		}
+		if(empty($this->Primary)) $this->Primary = 'id';	// default primary name
         if(isset($this->ModelTables)) {                 // Multi-Language Tabele exists
             $db_key = (array_key_exists(LangUI::$LocaleName,$this->ModelTables)) ? LangUI::$LocaleName : '*';
             $this->DataTable = $this->ModelTables[$db_key]; // DataTable SWITCH
@@ -89,7 +93,7 @@ public function ResetSchema() {
     debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
 //            "Header"    => $this->HeaderSchema,
-//            "Field"     => $this->FieldSchema, 
+            "Field"     => $this->FieldSchema, 
             "Join-Defs"     => $this->dbDriver->relations,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
             "Select-Defs"   => $this->SelectionDef,
@@ -306,8 +310,13 @@ public function LoadSelection($key_names) {
 		} else if(is_array($ref_list)) {
 			list($method,$args) = array_first_item($ref_list);
 			if(is_numeric($method)) {
-				$this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
-				$this->Select[$key_name] = $this->$model->Records;
+				if(is_array($args)) {
+					list($id,$field) = $args;
+					$this->Select[$key_name] = $this->$model->getFieldValues($id,$field,$cond);
+				} else {
+					$this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
+					$this->Select[$key_name] = $this->$model->Records;
+				}
 			} else if(method_exists($this->$model,$method)) {	// selection by method call 
 				$method_val = $this->$model->$method($args,$cond);
 				$this->Select[$key_name] = $method_val;

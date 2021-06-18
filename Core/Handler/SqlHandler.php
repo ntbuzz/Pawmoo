@@ -27,9 +27,11 @@ abstract class SQLHandler {	// extends SqlCreator {
 	abstract protected function doQuery($sql);
 	abstract protected function fetch_array();
 	abstract protected function getLastError();
-	abstract protected function updateRecord($wh, $row);		// INSERT or UPDATE
+	abstract protected function updateRecord($wh, $row);	// INSERT or UPDATE
 	abstract public function fieldConcat($sep,$arr);		// CONCAT()
-//==============================================================================
+	abstract public function drop_sql($kind,$table);		// DROP TABLE SQL
+	abstract public function truncate_sql($table);			// TRUNCATE SQL
+//==============================================================================v
 //	Constructor( table name, DB Handler)
 //==============================================================================
 function __construct($table,$handler) {
@@ -395,7 +397,7 @@ protected function sql_safequote(&$value) {
 				} else if(is_array($val)) {
 					$in_op = [ '=' => 'IN', '==' => 'IN', '<>' => 'NOT IN', '!=' => 'NOT IN'];
 					if(array_key_exists($op,$in_op)) {
-						$cmp = implode(',',array_map(function($v) { return "'{$v}'";},$val));
+						$cmp = implode(',',array_map(function($v) { return is_numeric($v) ? $v:"'{$v}'";},$val));
 						$opx = $in_op[$op];
 						$opp = $multi_field($key,$opx,$table,"({$cmp})");
 					} else {	// LIKE [ array ]

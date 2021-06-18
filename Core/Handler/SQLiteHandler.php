@@ -32,6 +32,16 @@ public function fieldConcat($sep,$arr) {
 	return implode($bind,$sep);
 }
 //==============================================================================
+//	DROP TABLE/VIEW CASCADE
+public function drop_sql($kind,$table) {
+	return "DROP {$kind} IF EXISTS {$table};";
+}
+//==============================================================================
+//	TRUNCATE TABLE
+public function truncate_sql($table) {
+	return "DELETE FROM {$table};VACUUM;";
+}
+//==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
 //	debug_log(DBMSG_HANDLER,['SQL' => $sql]);
@@ -62,7 +72,7 @@ public function insertRecord($row) {
 	error_reporting(E_ERROR);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
-		echo 'ERROR:'.$this->getLastError()."\n".$sql;
+		echo 'ERROR:'.$this->getLastError()."\n{$sql}\n";
 	}
 }
 //==============================================================================
@@ -83,7 +93,7 @@ public function updateRecord($wh,$row) {
 	error_reporting(E_ALL);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
-		echo 'ERROR:'.$this->getLastError()."\n".$sql;
+		echo 'ERROR:'.$this->getLastError()."\n{$sql}\n";
 	}
 }
 
