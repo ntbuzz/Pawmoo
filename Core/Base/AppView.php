@@ -162,123 +162,13 @@ public function ViewTemplate($name,$vars = []) {
         }
         return NULL;
     }
-//==============================================================================
-//  EXPAND variable
-    private function expand_Walk(&$val, $key, $vars) {
-        if($val[0] === '$') {           // top char is variable mark
-            $var = mb_substr($val,1);
-            $var = trim($var,'{}');                 // triming of delimitter { }
-            switch($var[0]) {
-            case '@':
-                // field value, or alternate field or strings
-                // @field-name=compare-value!TRUE-VALUE:FALSE-VALUE
-                $p = '/(@{1,2})([^=!:\}]+)(?:=([^:!]+))?(?:!([^:\n]*))?(?:\:([^\n]+))?/';
-                preg_match($p,$var,$m);
-                $get_field_data = function($nm) {
-                    return (mb_substr($nm,0,1)==='@') ? $this->Model->RecData[mb_substr($nm,1)]:$nm;
-                };
-                list($pat,$raw,$fn) = $m;
-                $var = ltrim($this->Model->RecData[$fn]);     // get FIELD DATA
-                if(count($m) === 6) {
-                    list(,,,$cmp,$val_true,$val_false) = $m;
-					if($val_true === '') $val_true = "@{$fn}";
-					if($cmp === '') {	// no-comp will be empty-check
-						$an = (is_bool_false($var)) ? $val_false:$val_true;
-					} else {
-						$an = fnmatch($cmp,$var) ? $val_true : $val_false;       // compare wild-char
-					}
-					$var = $get_field_data($an);	// get data from alter-name
-                }
-                if($raw==='@') $var = str_replace("\n",'',text_to_html($var));
-                $val = $var;
-                break;
-            case '#': $var = mb_substr($var,1);     // Language refer
-                if($var[0]==='@') {                 // AUTO Transfer
-                    $var = mb_substr($var,1);
-                    $var = 'Transfer.'.trim($this->Model->RecData[$var]);
-                    $allow = FALSE;
-                } else {
-                    $allow = ($var[0] === '#');         // allow array
-                    if($allow) $var = mb_substr($var,1);
-                }
-                $val = $this->_($var,$allow);       // get Language define
-                break;
-            case '%': if(substr($var,-1) === '%') {     // is parameter number
-                    $var = trim($var,'%');
-                    if(is_numeric($var)) $val = App::$Params[intval($var)];          // get value from Params[] property
-                    else {
-                        $n = strpos('abcdefghijklmnopqrstuvwxyz',$var);
-                        $val = (isset(App::$Filters[$n])) ? App::$Filters[$n] : '';
-                    }
-                }
-                break;
-            case '$': if(substr($var,-1) === '$') {
-                    $var = trim($var,'$');
-                    $val = App::$SysVAR[$var];          // SysVAR[] property
-                }
-                break;
-            case '?': $var = mb_substr($var,1);     // Query parameter
-				$val = App::$Query[$var];          // Query[] property
-                break;
-            case ':':                                   // Class Property
-                   	$p = '/(:{1,2})(\w+)(?:\[([\w\.\'"]+)\])?/';
-                    preg_match($p,$var,$m);
-                    $m[] = NULL;    // add NULL element for list()
-                    list($match,$cls,$var,$mem) = $m;
-                    $mem = trim($mem,"\"'");        // allow quote char
-                    $clsVar = ($cls === '::') ? $this->Helper : $this->Model;
-                    if(isset($clsVar->$var)) { // exist Property?
-                        $val = array_member_value($clsVar->$var,$mem);
-                    } else $val = NULL;
-                    break;
-            case '^':       // both ENV or REQ VAR
-            case '"':       // REQ-VAR
-            case "'":       // ENV-VAR
-                if(substr($var,-1) === $var[0]) {     // check end-char
-                    $tt = $var[0];
-                    $var = trim($var,$tt);
-                    if($tt === '^') {
-                        $val = MySession::get_varIDs(true,$var);
-                        if(!empty($val)) break;
-                    }
-                    $val = MySession::get_varIDs(($tt==="'"),$var);// get SESSION ENV or REQUEST
-                }
-                break;
-            case '&':       // Helper Method CALL
-                   	$p = '/&(\w+)(?:\(([^\)]+)\))?/';
-                    preg_match($p,$var,$m);
-                    $var = $m[1];
-                    $arg = (count($m)===3) ? $m[2]:NULL;
-                    if(method_exists($this->Helper,$var)) {
-                        $val = $this->Helper->$var($arg);
-                    } else $val = "NOT-FOUND({$var})";
-                    break;
-            default:
-                if(isset($vars[$var])) {            // is LOCAL VAR-SET?
-                    $val = $vars[$var];
-                } else if(isset($this->env_vars[$var])) {   // is TEMPLATE GLOBAL?
-                    $val = $this->env_vars[$var];
-                } else if(isset($this->$var)) {     // is Class-Property?
-                    $val = $this->$var;
-                }
-            }
-        }
-    }
+
 //==============================================================================
 //  variable format convert
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
     public function expand_Strings($str,$vars) {
 		$variable = array_override_recursive($this->env_vars,$vars);
-	return expand_text($this,$str,$this->Model->RecData,$variable);
-        if(empty($str) || is_numeric($str)) return $str;
-        $p = '/\${[^}\s]+?}|\${[#%\'"\$@&:][^}\s]+?}/';       // PARSE variable format
-        preg_match_all($p, $str, $m);
-        $varList = $m[0]; 
-        if(empty($varList)) return $str;        // not use variable.
-        $values = $varList = array_unique($varList);
-        array_walk($values, array($this, 'expand_Walk'), $vars);
-        $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);
-        return $exvar;
+		return expand_text($this,$str,$this->Model->RecData,$variable);
     }
 //==============================================================================
 //  EXPAND SECTION variable, $all = TRUE will recursive expand
