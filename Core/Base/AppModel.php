@@ -220,7 +220,7 @@ public function ResetSchema() {
 		                list($kk,$vv) = array_first_item($val);
 						if(is_int($kk)) $rel = $val;
 						else $cond = $val;
-					} else $rel[] = $val;
+					} else $rel = $val;
                 } else {
                     $rel[$key] = $val;
                 }
@@ -234,7 +234,6 @@ public function ResetSchema() {
                 $cond = [];
             } else {
                 list($target,$cond) = $separate_rel_cond($seldef);
-//debug_log(DBMSG_NOLOG,['KEY'=>$key_name,'DEF'=>$seldef,'TARGET'=>[$target,$cond],'REF'=>[$model,$ref_list]]);
                 list($model,$ref_list) = array_first_item($target);
                 if($model === 0) {
                     $lnk = $target;
@@ -306,14 +305,21 @@ public function LoadSelection($key_names) {
 		$sort_flag = SORT_REGULAR;
 		if(is_int($model)) {        // self list
 			$sel_item = [];
-			// Make [Value => Value ] Selection-List
-			$this->RecordFinder($cond,$ref_list,NULL,function($record,$filter) use(&$sel_item) {
-				foreach($filter as $key) {
-					$kk = $record[$key];
-					$sel_item[$kk] = $kk;
-				}
-				return [];
-			});
+			if(is_scalar($target)) {		// make ChainSelect
+				$this->RecordFinder($cond,$target,NULL,function($record,$filter) use(&$sel_item) {
+					list($val,$key) = $filter;		// filter will be array in callback func
+					if(empty($key)) $key = $val;
+					$sel_item[$record[$key]] = $record[$val];
+					return [];
+				});
+			} else {						// make Select
+				$this->RecordFinder($cond,$target,NULL,function($record,$filter) {
+					$new = [];
+					foreach($filter as $key) $new[$key] = $record[$key];
+					return $new;
+				});
+				$sel_item = $this->Records;
+			}
 			$sort_flag = SORT_FLAG_CASE | SORT_STRING;
 			$this->Select[$key_name] = $sel_item;
 		} else if(is_array($ref_list)) {
@@ -390,7 +396,10 @@ public function getCount($cond) {
 // Normalized Field-Filter
 	private function normalize_filter($filter) {
 		if(empty($filter)) $filter = $this->dbDriver->columns;
-		else if(is_scalar($filter)) $filter = [$filter];
+		else if(is_scalar($filter)) {
+//debug_log(DBMSG_MODEL,['CLASS'=>$this->ClassName,'NORMALIZ'=>$filter]);
+			$filter = (strpos($filter,'.')!==FALSE) ? explode('.',$filter): [$filter];
+		}
 		return $filter;
 	}
 //==============================================================================
