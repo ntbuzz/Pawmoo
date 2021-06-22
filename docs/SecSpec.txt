@@ -174,6 +174,14 @@ Hyper-Link:
         ]
     ]
 
++combobox                           // SELECT + TEXTBOX Combo TAG
+    +combobox => [					// syntax is same to +select
+        selected_key = > [          // default selected item value
+            option_text => value    // option tag text,and value
+            ...
+        ]
+    ]
+
 +table                              // Output dedicated to TABLE tag 
     +table => [
         .XXX#DDD => [               // TR tag with attribute
