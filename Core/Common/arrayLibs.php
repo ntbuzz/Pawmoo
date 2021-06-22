@@ -16,6 +16,7 @@ if (!function_exists('array_key_first')) {
 //==============================================================================
 // first key-value pair for associative arrays
 function array_first_item($arr) {
+	if(is_scalar($arr)) return [0,$arr];
     if(!empty($arr)) {
         foreach($arr as $key => $val) {
             return [$key,$val];
