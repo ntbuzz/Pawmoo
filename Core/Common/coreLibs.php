@@ -307,7 +307,7 @@ function str_csvget($csv_str) {
 	}
 	// last column
 	$csv[] = $quoted_str($str);
-	debug_log(DBMSG_NOLOG,['CSV'=>$csv]);
+//	debug_log(DBMSG_NOLOG,['CSV'=>$csv]);
 	return $csv;
 }
 //==============================================================================
