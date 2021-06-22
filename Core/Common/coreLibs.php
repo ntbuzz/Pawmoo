@@ -327,7 +327,7 @@ function fcsvget($handle) {
 //==============================================================================
 //  variable format convert
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
-function expand_text($view,$str,$recdata,$vars) {
+function expand_text($view,$str,$recdata,$vars,$match_all = false) {
     $expand_Walk = function(&$val, $key, $vars) use(&$recdata,&$view) {
         if($val[0] === '$') {           // top char is variable mark
             $var = mb_substr($val,1);
@@ -436,12 +436,43 @@ function expand_text($view,$str,$recdata,$vars) {
         }
     };
 	if(empty($str) || is_numeric($str)) return $str;
-	$p = '/\${[^}\s]+?}|\${[#%\'"\$@&:][^}\s]+?}/';       // PARSE variable format
-	preg_match_all($p, $str, $m);
-	$varList = $m[0]; 
-	if(empty($varList)) return $str;        // not use variable.
-	$values = $varList = array_unique($varList);
+	if($match_all) {
+		$values = $varList = [$str];
+	} else {
+		$p = '/\${[^}\s]+?}|\${[#%\'"\$@&:][^}\s]+?}/';       // PARSE variable format
+		preg_match_all($p, $str, $m);
+		$varList = $m[0]; 
+		if(empty($varList)) return $str;        // not use variable.
+		$values = $varList = array_unique($varList);
+	}
 	array_walk($values, $expand_Walk, $vars);
 	$exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);
 	return $exvar;
+}
+//==============================================================================
+//  string to associate array convert
+//  string is "key=val,key=val,..."
+function array_associate_convert($str) {
+	$arr = [];
+	foreach(explode(',',$str) as $itemval) {
+		if(!empty($itemval)) {
+			list($opt_text,$opt_val) = explode('=',$itemval); 
+			$arr[$opt_val] = $opt_text;
+		}
+	}
+	return $arr;
+}
+//==============================================================================
+//  make combobox HTML
+function make_combobox($sel_item,$opt_list,$size) {
+	$sz = int_value($size,12);
+	$input_val = $sel_item;
+	$tag= "<div class='combobox' style='width:{$sz}em;'>\n<select>\n";
+	foreach($opt_list as $opt => $val) {
+		$sel = ($val == $sel_item) ? ' selected':'';
+		$tag= "{$tag}<OPTION{$sel}>{$opt}</OPTION>\n";
+	}
+	$sz -= 2;
+	$tag = "{$tag}</select>\n<INPUT TYPE='text' style='width:{$sz}em;'value='{$input_val}' />\n</div>\n";
+	return $tag;
 }

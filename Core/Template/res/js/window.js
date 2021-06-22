@@ -18,3 +18,9 @@ $('body').fitWindow();
 $('.easy_markdown a[href^=http]:not(:has(img))').addClass("externalLink").attr('target', '_blank');
 
 $("body").PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup();
+// コンボボックスの処理
+$(document).on('change','.combobox>select',function () {
+	var txt = $(this).find('option:selected').html();
+	var inbox = $(this).parent().find('input');
+	inbox.val(txt);
+});

@@ -9,6 +9,12 @@ if (!function_exists('intdiv')) {
     }
 }
 //==============================================================================
+// get int value, and default set
+function int_value($digit,$default) {
+	$sz = intval($digit);
+	return ($sz===0) ? $default : $sz;
+}
+//==============================================================================
 // get file extention, return string is ".ext"
 function extract_extension($fn) {
     $nn = strrpos($fn,'.');
