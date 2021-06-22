@@ -323,7 +323,6 @@ public function LoadSelection($key_names) {
 					list($id,$field) = $args;
 					$this->Select[$key_name] = $this->$model->getFieldValues($id,$field,$cond);
 				} else {
-					die("MODEL-FINDER\n");
 					$this->$model->RawRecordFinder($cond,$ref_list,NULL,function($record,$filter) {
         				$new = [];
         				foreach($filter as $key) $new[$key] = $record[$key];
