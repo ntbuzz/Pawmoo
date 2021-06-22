@@ -41,9 +41,14 @@ class AppDatabase {
     protected $dbDriver;            // Database Driver
     protected static $Database = [];
 	private $data_folder;
+	private $owners;
+	private $myClass;
 //==============================================================================
 // setup table-name and view-table list
-	function __construct($path) {
+	function __construct($path,$owners=[]) {
+		$this->myClass = get_class($this);
+		if(!in_array($this->myClass,$owners)) $owners[] = $this->myClass;
+		$this->owners = $owners;
         foreach(static::$Database as $key => $val) $this->$key = $val;
 		$viewset = (isset($this->DataView)) ? ((is_array($this->DataView)) ? $this->DataView : [$this->DataView]) : [];
 		if(is_array($this->DataTable)) {
@@ -89,13 +94,6 @@ public function __get($PropName) {
 // Execute Create TABLE,VIEW, and INTIAL DATA
 //	before check Dependent Table
 public function execute($cmd) {
-	if(isset(static::$Dependent)) {
-		foreach(static::$Dependent as $table) {
-			$setuip_class = "{$table}Setup";
-			$db = new $setuip_class($this->data_folder);
-			if(empty($db->dbDriver->columns)) $db->execute($exec);
-		}
-	}
 	switch($cmd) {
 	case 'test':	$exeType = 0; break;
 	case 'renew':	$exeType = 1; break;
@@ -103,6 +101,15 @@ public function execute($cmd) {
 	case 'view':	$exeType = 2; break;
 	case 'csv':		$exeType = 3; break;
 	default: echo "BAD Command({$cmd})\n"; return;
+	}
+	if(isset(static::$Dependent)) {
+		foreach(static::$Dependent as $table) {
+			$setuip_class = "{$table}Setup";
+			if(!in_array($setuip_class,$this->owners)) {
+				$db = new $setuip_class($this->data_folder,$this->owners);
+				if(empty($db->dbDriver->columns) || $exeType !== 1) $db->execute($cmd);
+			}
+		}
 	}
 	$exec = ($exeType !== 0);
 	// DROP in ViewSet views
@@ -146,8 +153,8 @@ public function execute($cmd) {
 		}
 	}
 	if(in_array($exeType, [0,1,2] )) {	// View or TEST mode
-		debug_log(DBMSG_NOLOG,["VIEW-DEFS" => $this->ViewSet]);
 		foreach($this->ViewSet as $view) {
+		debug_log(DBMSG_NOLOG,["VIEW-DEFS" => $view]);
 			$sql = $this->createSQL($this->MyTable,$view);
 			$this->doSQL($exec,$sql);
 		}
@@ -161,7 +168,7 @@ private function loadCSV($filename) {
 		$row_columns = array_keys($this->Schema);
 		while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
 			$row = array_combine($row_columns,$data);
-		debug_log(DBMSG_NOLOG,["CSV DATA" => [$row_columns,$data, $row] ]);
+		debug_log(DBMSG_NOLOG,["CSV DATA" => $row]);
 			$this->dbDriver->insertRecord($row);
 		}
 		fclose($handle);

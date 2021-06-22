@@ -218,14 +218,22 @@ function pseudo_markdown($atext, $md_class = '') {
 //  textarea    => ^[name]!{text-value:col,row}
 //  textbox     => ^[name]={text-value:size}
 //  select      => ^[name]%{select-val:option1=val1,option2=val2,...}
-        '/(\s)\^\[([\-\w]+)?\]([@:!=%])\{((?:\$\{[^\}]+?\}|[^\}])+?|)\}/s' => function ($m) use(&$item_array) {
-            $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea','%' => 'select'];
+//  combobox    => ^[name]+{select-val:option1=val1,option2=val2,...:size}
+        '/(\s)\^\[([\-\w#]+)?\]([@:!=%+])\{((?:\$\{[^\}]+?\}|[^\}])+?|)\}/s' => function ($m) use(&$item_array) {
+            $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea','%' => 'select','%' => 'combo'];
             $spc = $m[1]; $kind = $m[3]; $val = $m[4];
             $vv = $type[$kind];
-            $nm = (empty($m[2])) ? '' : " name='{$m[2]}'";
+			list($nm,$id) = explode('#',"{$m[2]}#");
+            $nm = (empty($nm)) ? '' : " name='{$nm}'";
+			if(!empty($id)) $nm = "{$nm} id='{$id}'";
             $attr = " type='{$vv}'{$nm}";
             $tag = "<input{$attr}";
             switch($kind) {
+            case '+':   // combobox = select + textbox
+                    list($sel_val,$opt_items,$sz) = $item_array(':',$val,3);
+					$opt_list = array_associate_convert($opt_items);
+					$tag = make_combobox($sel_val,$opt_list,$sz);
+                    break;
             case '%':   // select
                     list($sel_val,$opt_items) = $item_array(':',$val,2);
                     $opt_list = ''; $cnt = 0;

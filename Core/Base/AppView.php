@@ -32,6 +32,7 @@ class AppView extends AppObject {
             'ol'        => 'cmd_list',
             'dl'        => 'cmd_dl',
             'select'    => 'cmd_select',
+            'combobox'  => 'cmd_combobox',
             'radio'     => 'cmd_radio',
             'checkbox'  => 'cmd_checkbox',
             'table'     => 'cmd_table',
@@ -162,7 +163,6 @@ public function ViewTemplate($name,$vars = []) {
         }
         return NULL;
     }
-
 //==============================================================================
 //  variable format convert
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
@@ -446,6 +446,7 @@ public function ViewTemplate($name,$vars = []) {
     // TAG section direct OUTPUT for +jquery,+script,*style
     private function directOutput($beg_tag, $end_tag,$sec,$vars) {
         $txt = $this->expand_Strings(((is_array($sec)) ? array_to_text($sec) : $sec),$vars);
+		if(is_array($txt)) $txt = array_to_text($txt);
 //debug_log(DBMSG_DIE,['DIREC'=>$sec,$txt]);
         echo "{$beg_tag}\n{$txt}\n{$end_tag}\n";
     }
@@ -538,13 +539,12 @@ public function ViewTemplate($name,$vars = []) {
         if(is_array($sec)) $atext = "\n{$atext}\n\n";
         $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
         // pre-expand for checkbox and radio/select markdown
-        $atext = preg_replace_callback('/(\[[^\]]*?\]\{(?:\$\{[^\}]+?\}|[^\}])+?\}|\^\[[^\]]*?\][%@:=]\{(?:\$\{[^\}]+?\}|[^\}])+?\})/',
+        $atext = preg_replace_callback('/(\[[^\]]*?\]\{(?:\$\{[^\}]+?\}|[^\}])+?\}|\^\[[^\]]*?\][%@:=+]\{(?:\$\{[^\}]+?\}|[^\}])+?\})/',
             function($m) use(&$vars) {
                 list($pat,$var) = $m;
                 $var = preg_replace_callback('/(\$\{[^\}]+?\})/',
                     function($mm) use(&$vars) {
-                        $vv = $mm[1];
-                        $this->expand_Walk($vv,0,$vars);
+						$vv = expand_text($this,$mm[1],$this->Model->RecData,$vars,true);
                         if(is_array($vv)) $vv = array_key_value($vv);
                         return $vv;
                     },$var);
@@ -671,6 +671,22 @@ public function ViewTemplate($name,$vars = []) {
 			echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
 		}
         echo "</{$tag}>\n";
+    }
+    //--------------------------------------------------------------------------
+    //  select + input text
+    // +combobox => [ selected_key. = > [
+    //      option_text => value
+    //      ...
+    //  ] ]
+    private function cmd_combobox($tag,$attrs,$sec,$vars) {
+        if(!is_array($sec)) return;     // not allow scalar value
+        list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
+        list($opt_key, $opt_val) = array_first_item($sec);
+		if(mb_substr($opt_key,-1)==='.') $opt_key = rtrim($opt_key,'.');
+        $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
+        $opt_val = array_flat_reduce($this->expand_SectionVar($opt_val,$vars));
+		$combo = make_combobox($sel_item,$opt_val,$attr['size']);
+		echo $combo;
     }
     //--------------------------------------------------------------------------
     // +tabset.classname => [

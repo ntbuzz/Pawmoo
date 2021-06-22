@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2021 by nTak
  * @license    MIT
- * @version 0.70.0, 2021-06-17
+ * @version 0.71.0, 2021-06-22
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,11 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 履歴
+【0.71.0】2021/06/22
+	・+combobox コマンド導入
+	・Self-Selectリスト取得のバグ修正
+	・テンプレート内のマークダウン変数展開のバグ修正
+
 【0.70.0】2021/06/17
 	・ページング不具合の修正
 	・DBハンドラ別のDROP SQLへの対応

@@ -216,8 +216,11 @@ public function ResetSchema() {
             $rel = $cond = [];
             foreach($defs as $key => $val) {
                 if(is_int($key)) {
-                    if(is_array($val)) $cond = $val;
-                    else $rel[] = $val;
+                    if(is_array($val)) {
+		                list($kk,$vv) = array_first_item($val);
+						if(is_int($kk)) $rel = $val;
+						else $cond = $val;
+					} else $rel = $val;
                 } else {
                     $rel[$key] = $val;
                 }
@@ -233,7 +236,7 @@ public function ResetSchema() {
                 list($target,$cond) = $separate_rel_cond($seldef);
                 list($model,$ref_list) = array_first_item($target);
                 if($model === 0) {
-                    $lnk[0] = $target;
+                    $lnk = $target;
                 } else {
                     list($model,$table,$field) = $this->model_view($model);
                     if(is_scalar($ref_list)) {
@@ -295,18 +298,30 @@ public function GetRecord($num,$join=FALSE,$values=FALSE) {
 //   Get Relation Table fields data list.
 // Result:   $this->Select (Relations)
 public function LoadSelection($key_names) {
-    $filter_rec = function($record,$filter) {
-        $new = [];
-        foreach($filter as $key) $new[$key] = $record[$key];
-        return $new;
-    };
 	$selections = (is_array($key_names)) ? $key_names : [$key_names];
     foreach($selections as $key_name) {
 		list($target,$cond) = $this->SelectionDef[$key_name];
 		list($model,$ref_list) = array_first_item($target);
+		$sort_flag = SORT_REGULAR;
 		if(is_int($model)) {        // self list
-			$this->RecordFinder($cond,$ref_list,NULL,$filter_rec);
-			$this->Select[$key_name] = $this->Records;
+			$sel_item = [];
+			if(is_scalar($target)) {		// make ChainSelect
+				$this->RecordFinder($cond,$target,NULL,function($record,$filter) use(&$sel_item) {
+					list($val,$key) = $filter;		// filter will be array in callback func
+					if(empty($key)) $key = $val;
+					$sel_item[$record[$key]] = $record[$val];
+					return [];
+				});
+			} else {						// make Select
+				$this->RecordFinder($cond,$target,NULL,function($record,$filter) {
+					$new = [];
+					foreach($filter as $key) $new[$key] = $record[$key];
+					return $new;
+				});
+				$sel_item = $this->Records;
+			}
+			$sort_flag = SORT_FLAG_CASE | SORT_STRING;
+			$this->Select[$key_name] = $sel_item;
 		} else if(is_array($ref_list)) {
 			list($method,$args) = array_first_item($ref_list);
 			if(is_numeric($method)) {
@@ -314,7 +329,11 @@ public function LoadSelection($key_names) {
 					list($id,$field) = $args;
 					$this->Select[$key_name] = $this->$model->getFieldValues($id,$field,$cond);
 				} else {
-					$this->$model->RawRecordFinder($cond,$ref_list,NULL,$filter_rec);
+					$this->$model->RawRecordFinder($cond,$ref_list,NULL,function($record,$filter) {
+        				$new = [];
+        				foreach($filter as $key) $new[$key] = $record[$key];
+				        return $new;
+    				});
 					$this->Select[$key_name] = $this->$model->Records;
 				}
 			} else if(method_exists($this->$model,$method)) {	// selection by method call 
@@ -322,6 +341,7 @@ public function LoadSelection($key_names) {
 				$this->Select[$key_name] = $method_val;
 			}
 		} else {
+			$sort_flag = SORT_NUMERIC;
 			$ref_list = explode('.', $ref_list);
 			$postfix = (count($ref_list) > 2);      // append to keyname_field
 			$ref_list = array_filter( $ref_list, "strlen" ) ;
@@ -340,7 +360,7 @@ public function LoadSelection($key_names) {
 				$this->Select[$key_set] = $new_rec[$key];
 			}
 		}
-		ksort($this->Select[$key_name],SORT_NUMERIC);       // sort VALUE-LIST ignore-case
+		ksort($this->Select[$key_name],$sort_flag);       // sort VALUE-LIST ignore-case
 	}
 }
 //==============================================================================
@@ -373,10 +393,20 @@ public function getCount($cond) {
     return $this->dbDriver->getRecordCount($cond);
 }
 //==============================================================================
+// Normalized Field-Filter
+	private function normalize_filter($filter) {
+		if(empty($filter)) $filter = $this->dbDriver->columns;
+		else if(is_scalar($filter)) {
+//debug_log(DBMSG_MODEL,['CLASS'=>$this->ClassName,'NORMALIZ'=>$filter]);
+			$filter = (strpos($filter,'.')!==FALSE) ? explode('.',$filter): [$filter];
+		}
+		return $filter;
+	}
+//==============================================================================
 // Get Record List by FIND-CONDITION with JOIN Table.
 // Result:   $this->Records  Find-Result List
 public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
-    if(empty($filter)) $filter = $this->dbDriver->columns;
+	$filter = $this->normalize_filter($filter);
     $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
         return in_array($vv,$filter,true) || ($vv === NULL);
     });
@@ -416,7 +446,7 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
 // Get Raw Record List by FIND-CONDITION without JOIN!.
 // Result:   $this->Records  Find-Result List
 public function RawRecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
-    if(empty($filter)) $filter = $this->dbDriver->columns;
+	$filter = $this->normalize_filter($filter);
     $fields_list = array_combine($filter,$filter);
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     $data = array();
@@ -442,7 +472,7 @@ public function RawRecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
 // Get First Record by condition w/o JOIN!
 // Result:   $this->RecData
 public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
-    if(empty($filter)) $filter = $this->dbDriver->columns;
+	$filter = $this->normalize_filter($filter);
     $fields_list = array_combine($filter,$filter);
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     $fields = $this->dbDriver->firstRecord($cond,FALSE,$sort);
@@ -453,7 +483,7 @@ public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
 // Result:   $this->NearData  Find-Result List by $filter field only
 //           $this->RecData   $primary Record Data by all fields
 public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
-    if(empty($filter)) $filter = $this->dbDriver->columns;
+	$filter = $this->normalize_filter($filter);
     $fields_list = [$this->Primary => $this->Primary];  // must be include Primary-Key
     foreach($filter as $key) {
         if(array_key_exists($key,$this->FieldSchema)) $fields_list[$key] = $this->FieldSchema[$key];
