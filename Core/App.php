@@ -74,10 +74,10 @@ class App {
     }
 //==============================================================================
 // メソッドの置換
-public static function ChangeMethod($module,$method,$relocate = TRUE) { 
+public static function ChangeMethod($module,$method,$clear_filter=TRUE, $relocate = TRUE) { 
     static::$execURI['controller'] = $module;
     static::$execURI['method'] = strtolower($method);
-    static::$execURI['filter'] = [];
+    if($clear_filter) static::$execURI['filter'] = [];
     static::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================
