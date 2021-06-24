@@ -42,6 +42,7 @@ class AppView extends AppObject {
             'tabset'    => 'cmd_tabset',
             'floatwin'  => 'cmd_floatwin',
             'textbox'   => 'cmd_textbox',
+            'datebox'   => 'cmd_datebox',
             'textedit' 	=> 'cmd_textedit',
             'push'      => 'cmd_push',
             'php'       => 'cmd_php',
@@ -206,7 +207,7 @@ public function ViewTemplate($name,$vars = []) {
                 if($check === '') $result = ($cmp_val==='');            // is_empty ?
                 else if($check === '*') $result = ($cmp_val !== '');     // is_notempty ?
                 else if(mb_strpos($check,'...') !== false) {			// range comapre 1...9
-                    list($from,$top) = string_to_array('...,',$val);
+                    list($from,$top) = string_to_array('...',$check);
 					$cmp_val = intval($cmp_val);
                     $result = intval($from) <= $cmp_val && $cmp_val <= intval($to);
 				} else {
@@ -352,6 +353,7 @@ public function ViewTemplate($name,$vars = []) {
     private function gen_Attrs($attrs,$vars) {
         $attr = "";
         if(!empty($attrs)) {
+			unset($attrs['param']);		// ignore attribute
             ksort($attrs);
             foreach($attrs as $name => $val) {
 				if($val === [] || $val === NULL) $attr .= " {$name}"; 
@@ -754,11 +756,35 @@ public function ViewTemplate($name,$vars = []) {
         echo "</TABLE>";
     }
     //--------------------------------------------------------------------------
+    private function size_replace(&$attrs) {
+        if(isset($attrs['size'])) {
+			$sz = $attrs['size'];
+			if(!is_numeric($sz)) {
+				unset($attrs['size']);
+				$attrs['style'] = "width:{$sz};";
+			}
+		}
+	}
+    //--------------------------------------------------------------------------
+    //  INPUT TEXT OUTPUT for CALENDAR
+    // +datebox:size[name] => [  attribute => value value    ]
+    private function cmd_datebox($tag,$attrs,$sec,$vars) {
+        list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
+        if(!empty($innerText)) $attrs['value'] = $innerText;
+		$class = ['calendar'=>1];
+		foreach(explode(' ',$attrs['class']) as $val) $class[$val] = 1;
+		$attrs['class'] = implode(' ',array_keys($class));
+		$this->size_replace($attrs);
+        $attr = $this->gen_Attrs($attrs,$vars);
+        echo "<INPUT TYPE='text'{$attr}>\n";
+    }
+    //--------------------------------------------------------------------------
     //  INPUT TEXT OUTPUT
     // +textbox:size[name] => [  attribute => value value    ]
     private function cmd_textbox($tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         if(!empty($innerText)) $attrs['value'] = $innerText;
+		$this->size_replace($attrs);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<INPUT TYPE='text'{$attr}>\n";
     }
@@ -767,12 +793,21 @@ public function ViewTemplate($name,$vars = []) {
     // +textedit[name](rows:cols) => [  attribute => value value    ]
     private function cmd_textedit($tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
+		$style = [];
         if(isset($attrs['value'])) {
-			list($rows,$cols) = explode(':',$attrs['value']);
+			list($rows,$cols) = explode(':',"{$attrs['value']}:");
 			unset($attrs['value']);
-			if(!empty($rows)) $attrs['rows'] = $rows;
-			if(!empty($cols)) $attrs['cols'] = $cols;
+			if(!empty($rows)) {
+				if(is_numeric($rows)) $attrs['rows'] = $rows;
+				else $style[] = "height:{$rows};";
+			}
+			if(!empty($cols)) {
+				if(is_numeric($cols)) $attrs['cols'] = $cols;
+				else $style[] = "width:{$cols};";
+			}
 		}
+		$style_str = implode(';',$style);
+		if(!empty($style_str)) $attrs['style'] = $style_str;
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<TEXTAREA{$attr}>{$innerText}</TEXTAREA>\n";
     }
