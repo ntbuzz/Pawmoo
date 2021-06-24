@@ -145,9 +145,9 @@ if(!$controllerInstance->is_enable_action($method)) {
     }
 }
 if(strcasecmp($appname,$controller) === 0) {
-    App::ChangeMethod('',$method);     // hide controller in URI
+    App::ChangeMethod('',$method,false);     // hide controller in URI
 } else {
-    App::ChangeMethod($controller,$method);
+    App::ChangeMethod($controller,$method,false);
 }
 // remind Controller, Method name in App class
 App::$Controller  = $controller;
