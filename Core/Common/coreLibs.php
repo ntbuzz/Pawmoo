@@ -457,7 +457,7 @@ function array_associate_convert($str) {
 	foreach(explode(',',$str) as $itemval) {
 		if(!empty($itemval)) {
 			list($opt_text,$opt_val) = explode('=',$itemval); 
-			$arr[$opt_val] = $opt_text;
+			$arr[$opt_text] = $opt_val;
 		}
 	}
 	return $arr;
@@ -473,6 +473,6 @@ function make_combobox($sel_item,$opt_list,$size) {
 		$tag= "{$tag}<OPTION{$sel}>{$opt}</OPTION>\n";
 	}
 	$sz -= 2;
-	$tag = "{$tag}</select>\n<INPUT TYPE='text' style='width:{$sz}em;'value='{$input_val}' />\n</div>\n";
+	$tag = "{$tag}</select>\n<INPUT TYPE='text' style='width:{$sz}em;' value='{$input_val}' />\n</div>\n";
 	return $tag;
 }
