@@ -360,7 +360,9 @@ public function ViewTemplate($name,$vars = []) {
 				else {
 					$str = (is_array($val)) ? implode("",$val) :$val;
 					$str = $this->expand_Strings($str,$vars);
-					$attr .= (is_numeric($name)) ? " {$str}" : " {$name}=\"{$str}\"";
+					$quote = mb_substr($str,0,1).mb_substr($str,-1);
+					$q = ($quote !== '""' && $quote !== "''") ? '"' : '';
+					$attr .= (is_numeric($name)) ? " {$str}" : " {$name}={$q}{$str}{$q}";
 				}
             }
         }
@@ -756,16 +758,6 @@ public function ViewTemplate($name,$vars = []) {
         echo "</TABLE>";
     }
     //--------------------------------------------------------------------------
-    private function size_replace(&$attrs) {
-        if(isset($attrs['size'])) {
-			$sz = $attrs['size'];
-			if(!is_numeric($sz)) {
-				unset($attrs['size']);
-				$attrs['style'] = "width:{$sz};";
-			}
-		}
-	}
-    //--------------------------------------------------------------------------
     //  INPUT TEXT OUTPUT for CALENDAR
     // +datebox:size[name] => [  attribute => value value    ]
     private function cmd_datebox($tag,$attrs,$sec,$vars) {
@@ -774,7 +766,7 @@ public function ViewTemplate($name,$vars = []) {
 		$class = ['calendar'=>1];
 		foreach(explode(' ',$attrs['class']) as $val) $class[$val] = 1;
 		$attrs['class'] = implode(' ',array_keys($class));
-		$this->size_replace($attrs);
+		$attrs = attr_sz_xchange($attrs);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<INPUT TYPE='text'{$attr}>\n";
     }
@@ -784,7 +776,7 @@ public function ViewTemplate($name,$vars = []) {
     private function cmd_textbox($tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         if(!empty($innerText)) $attrs['value'] = $innerText;
-		$this->size_replace($attrs);
+		$attrs = attr_sz_xchange($attrs);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<INPUT TYPE='text'{$attr}>\n";
     }
@@ -793,21 +785,13 @@ public function ViewTemplate($name,$vars = []) {
     // +textedit[name](rows:cols) => [  attribute => value value    ]
     private function cmd_textedit($tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
-		$style = [];
         if(isset($attrs['value'])) {
 			list($rows,$cols) = explode(':',"{$attrs['value']}:");
 			unset($attrs['value']);
-			if(!empty($rows)) {
-				if(is_numeric($rows)) $attrs['rows'] = $rows;
-				else $style[] = "height:{$rows};";
-			}
-			if(!empty($cols)) {
-				if(is_numeric($cols)) $attrs['cols'] = $cols;
-				else $style[] = "width:{$cols};";
-			}
+			if(!empty($rows)) $attrs['rows'] = $rows;
+			if(!empty($cols)) $attrs['cols'] = $cols;
 		}
-		$style_str = implode(';',$style);
-		if(!empty($style_str)) $attrs['style'] = $style_str;
+		$attrs = attr_sz_xchange($attrs);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<TEXTAREA{$attr}>{$innerText}</TEXTAREA>\n";
     }
