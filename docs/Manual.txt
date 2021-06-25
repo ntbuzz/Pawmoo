@@ -384,12 +384,12 @@
 
   セレクトタグのためのセレクションスキーマ定義は次のようになります。
     'Selection' => [
-      セレクション名    => [ Modelキー => [ フィールドリスト ], [絞込み条件] ],   	// ChainSelect()用の選択リスト
-      セレクション名    => [ フィールドリスト, [絞込み条件] ],                    	// 自モデルレコードの ChainSelect()用選択リスト
-      セレクション名    => [ Modelキー => フィールド名, [絞込み条件] ],          	// [表示テキスト] = 選択値 のリスト
-      セレクション名    => [ フィールドセット, [絞込み条件] ],          			// 自モデルレコードの[表示テキスト] = 選択値リスト
-      セレクション名    => [ Model名.  => [ メソッド名 => メソッド引数 ], [絞込み条件] ],     // メソッドの呼出し結果をリスト格納
-      セレクション名    => [ Model名.  => [ [ 値列, ラベル列 ] ], [絞込み条件] ],     // getFieldValues()メソッドの呼出し結果をリスト格納
+a)     セレクション名 => [ Modelキー => [ フィールドリスト ],	[絞込み条件] ],   	// ChainSelect()用の選択リスト
+b)     セレクション名 => [ [ フィールドリスト],					[絞込み条件] ],     // 自モデルレコードの ChainSelect()用選択リスト
+c)     セレクション名 => [ Modelキー => フィールド名,			[絞込み条件] ],     // [フィールド名] = Modelキー値 のリスト
+d)     セレクション名 => [ Model名. => {値列.}ラベル列,			[絞込み条件] ],     // [ラベル列] = 値列 のリスト
+e)     セレクション名 => [ {値列.}ラベル列,						[絞込み条件] ],     // 自モデルの [ラベル列] = 値列 のリスト
+f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッド引数 ], [絞込み条件] ],     // メソッドの呼出し結果をリスト格納
     ],
     Modelキー:    		モデル名＋値フィールド          		'Model.id'
     フィールドリスト：	フィールド名のカンマリスト              [ 'id', 'name' , ... ]
@@ -397,25 +397,21 @@
 	フィールドセット:	単独フィールド名の場合(ex. 'name') はセレクション値は、[name] = name
 						フィールド名をドット接続(ex. 'id.name')すると [name] = id がセレクション値となる
 
-  最初の２つはJQueryプラグインの ChainSelect() で使用するためのデータ配列を生成します。
+  a), b) の２つはJQueryプラグインの ChainSelect() で使用するためのデータ配列を生成します。
   そのままでは参照できないため、ヘルパーの SelectObject() を呼出して、オブジェクト形式に変換して
   レイアウトに埋め込みます。
-  3つ目の定義は簡易マークダウンや +selectコマンドのパラメータとしてそのまま使用できます。
-  フィールド名を複数またはピリオドから始めるとセレクション名にフィールド名を付加した要素名に
-  値を格納します。一つだけのときはセレクション名をそのまま使います。ひとつだけでもフィールド名を
-  付加したいときは先頭にピリオドをつけてください。
-    ex.     'table' => [ 'Table.id' => 'name'   ]         Select['table'] にnameの値リスト
-    'table' => [ 'Table.id' => '.name'  ]         Select['table_name'] にnameの値リスト
-
-  ４つ目と５つ目はModelメソッドを呼出して + select コマンドのパラメータを作成します。
-  ４つ目はメソッド名で指定されたModelメソッドに引数(配列の時は配列のまま)と、絞り込み条件を渡します。
-  このときのメソッド定義は次のようにします。
+  c), d), e) は簡易マークダウンや +selectコマンドのパラメータとしてそのまま使用できます。
+  {値列.}を省略するとPrimaryフィールドを使用します。
+  c) と d) は値列 Modelキーの一部として指定するか、フィールド名のリストで指定するかの違いでほぼ同じです。
+  d) が異なるのは値列を共に省略したときに Primary 列を使用する点です。
+  f) はメソッド名で指定されたModelメソッドに引数(配列の時は配列のまま)と、絞り込み条件を渡します。
+  戻り値はSelect変数に格納されますが、形式はメソッドの戻り値に依存します。
+  メソッド定義は次のようにしてください。
     public function SelMethod($args, $cond) {
       // $args はセレクションスキーマ内で定義されたものがそのまま渡される
       //    直値の場合    'SelMethod' => '文字列'     $args = '文字列'
       //    配列の場合    'SelMethod' => [1,2,3]      $args = [1,2,3]
     }
-  ５つ目はモデルクラス標準メソッドの getFieldValues() を呼出します。
 
   セレクションスキーマは値リストを全レコードを読み込んで取得するので、
   大容量のテーブルを参照するときは「必ず[絞り込み条件]を指定」するようにしてください。
@@ -447,9 +443,9 @@
     ex. 'status=" => '終了'
   使用できる演算子は次の通りです
     ＝  等しい
-    <>  等しくない
-    >=  以上
-    <=  以下
+    <>  等しくない (!= でも可)
+    >=  以上 (=> でも可)
+    <=  以下 (=< でも可)
     >   大きい
     <   小さい
     @   サブクエリ(※)
@@ -683,67 +679,67 @@
     +img => [ attr => value, src ]          imageタグの簡易出力書式, class,id以外の属性を指定しない場合はスカラー値で定義できる
     +img => src
     +ul/ol => [ attr => value , items ]     UL/OLタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
-      items :=                            リスト項目は次の要素から構成する
-        [ list-section ],           　    配列要素：　セクション項目
-        .XXXX#DDDD => [ list-section ]    クラス名(XXXX)、ID名(DDDD)付のリストセクション項目
+      items :=                                リスト項目は次の要素から構成する
+        [ list-section ],           　          配列要素：　セクション項目
+        .XXXX#DDDD => [ list-section ]          クラス名(XXXX)、ID名(DDDD)付のリストセクション項目
     +select => [                            SELECTタグ専用のリスト出力
-      selected_key. = > [                    連想キーは初期選択するアイテム名
-      option_text => value                選択テキストと値のペアリスト
+      selected_key. = > [                     連想キーは初期選択するアイテム名
+      option_text => value                    選択テキストと値のペアリスト
       ...   ]
-    +combobox => [                        SELECTタグとテキストボックスを組合せたコンボボックスの出力
-      selected_key. = > [                    連想キーは初期選択するアイテム名
-      option_text => value                選択テキストと値のペアリスト
+    +combobox:size => [                     SELECTタグとテキストボックスを組合せたコンボボックスの出力、sizeはem単位固定
+      selected_key. = > [                     連想キーは初期選択するアイテム名
+      option_text => value                    選択テキストと値のペアリスト
       ...   ]
     +table => [                             TABLEタグ専用の出力
-      [                                   TR 配列, クラス/ID属性を使用可 (ex: .item#id => [ ... ] )
-        th=>TEXT | [ TH-CELL ]            TH ヘッダセル, 要素を配列にするとセクションコマンドが使える
-        .td_attr=>[ TD-CELL ] | [ TD-CELL ]  TD セル、キー名を指定するとクラス/ID属性を付加できる
+      [                                       TR 配列, クラス/ID属性を使用可 (ex: .item#id => [ ... ] )
+        th=>TEXT | [ TH-CELL ]                  TH ヘッダセル, 要素を配列にするとセクションコマンドが使える
+        .td_attr=>[ TD-CELL ] | [ TD-CELL ]     TD セル、キー名を指定するとクラス/ID属性を付加できる
       ] ... ]
     +radio => [ attr => value , items ]     INPUT RADIOタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
-      items :=                            リスト項目は次の要素から構成する
-        checked-option-value =>           キー名と同じ値がデフォルト選択要素
-        [ option => value ... ]         選択テキストと値のペアリスト
+      items :=                                リスト項目は次の要素から構成する
+        checked-option-value =>                 キー名と同じ値がデフォルト選択要素
+        [ option => value ... ]                 選択テキストと値のペアリスト
     +checkbox => [  check-items ]           チェックボックス、2つのフォーマットが使用可能
-      FORMAT-I:                             単独のチェックボックスではname属性を指定する
+      FORMAT-I:                               単独のチェックボックスではname属性を指定する
         name=TEXT
-        @Value => TEXT  [ STR => value ]    @Value=>TEXTはチェックされたときの値と表示文字、STRとvalue が等しいときはchecked
-      FORMAT-II:                            複数のチェックボックスをまとめて出力するときはname属性をキーにした連想配列
+        @Value => TEXT  [ STR => value ]        @Value=>TEXTはチェックされたときの値と表示文字、STRとvalue が等しいときはchecked
+      FORMAT-II:                              複数のチェックボックスをまとめて出力するときはname属性をキーにした連想配列
         name1 => [ @value1=>TEXT [ STR1 => value1 ] ]
         name2 => [ @value2=>TEXT [ STR2 => value2 ] ]
-    +textbox:size[name]  => [         INPUT TEXTタグを出力する
-        attr => value           INPUTタグの属性を指定(省略可)
-        valie               VALUE属性の値
+    +textbox:size[name]  => [               INPUT TEXTタグを出力する、sizeに'em'や'%'が含まれた場合"style"タグ変換する
+        attr => value                         INPUTタグの属性を指定(省略可)
+        valie                                 VALUE属性の値
       ]
-    +textedit[name](rows:cols) => [     TEXTAREAタグを出力する
-        attr => value           TEXTAREAタグの属性を指定(省略可)
-        value               TEXTAREAのテキスト値
+    +textedit[name](rows:cols) => [         TEXTAREAタグを出力する、rows,colsに'em'や'%'が含まれた場合"style"タグ変換する
+        attr => value                         TEXTAREAタグの属性を指定(省略可)
+        value                                 TEXTAREAのテキスト値
       ]
     +dl => [ attr => value , [ items ]  ]   DLタグ専用のリスト出力、attr => value はDLタグの属性になる
       items :=                              リスト項目は次の要素から構成する
-        inner-text,                       無名キースカラー要素：　DTタグのインナーテキスト
-        attr => value,                    DTタグの属性
-        [ list-section ],           　    無名キー配列要素：　DD要素のセクション項目
-        .XXXX#DDDD => [ list-section ]    DD属性にクラス名(XXXX)、ID名(DDDD)を付けたセクション項目
+        inner-text,                           無名キースカラー要素：　DTタグのインナーテキスト
+        attr => value,                        DTタグの属性
+        [ list-section ],           　        無名キー配列要素：　DD要素のセクション項目
+        .XXXX#DDDD => [ list-section ]        DD属性にクラス名(XXXX)、ID名(DDDD)を付けたセクション項目
     %link => [ link_str => href, ... ]      ハイパーリンク link_str に href のリンクを設定,Helper->ALinkを呼び出す
-                        単独タグの場合は省略形として以下の書式も使用できる
-                          %link_str => href
+                                            単独タグの場合は省略形として以下の書式も使用できる
+                                              %link_str => href
     +inline.SecName => [ ... ]              インラインのレイアウトセクション定義。テンプレート呼出しで再利用ができる
     +markdown => Text                       Text を簡易マークダウンとして整形したものを出力する
-                        クラス属性を指定するとマークダウンのクラス名とする
-                        Textが配列で渡された場合は、各要素を改行で結合したTextとして扱う
+                                            クラス属性を指定するとマークダウンのクラス名とする
+                                            Textが配列で渡された場合は、各要素を改行で結合したTextとして扱う
     +recordset => [ Section ]               読み込んだレコードごとに Section を繰り返す
-                        name属性に：をつけるとモデルクラスのプロパティ変数で繰り返す
-                          ex. +recordset[:Outline] => [ Section ]
+                                            name属性に：をつけるとモデルクラスのプロパティ変数で繰り返す
+                                              ex. +recordset[:Outline] => [ Section ]
     +tabset => [                            ul タグを使ったタブセットの出力
-      Title1 => [ Section ]                 テンプレート内の tabset.css を読み込むことでタブコントロール表示する
+      Title1 => [ Section ]                   テンプレート内の tabset.css を読み込むことでタブコントロール表示する
         ...                                   タブ切替え時に独自の処理が不要なら、テンプレートの tabset.js を読み込む
       ]
     +floatwin.class#id => [                 floatWindow ブロックの簡易記述構文
-      DT-Title                              dl タグを直接記述せずにすむ
+      DT-Title                                dl タグを直接記述せずにすむ
       [ DD-Section ]
       ]
-    +push.name => value             セッション変数(name)に value を格納する
-                        この値はリソース定義内でインポートできる
+    +push.name => value                     セッション変数(name)に value を格納する
+                                            この値はリソース定義内でインポートできる
 
   特定の変数やデータにより、タグ出力を切替えるにはスイッチセクション(?記号)を使います。
   スイッチセクション :=
@@ -858,9 +854,13 @@
     ^[name]={textvalue:size}                 // text ボックス
     ^[name]!{textvalue:col,row}              // textarea
     ^[name]%{selectval:option1=val1,...}     // select
-    ^[name]+{selectval:option1=val1,...}     // combobox(select+textbox)
+    ^[name]+{selectval:option1=val1,...:size}     // combobox(select+textbox) sizeは'em'単位固定
     item や textvalue に '}' が含まれるときはエスケープ '\}' します。
     textareaのインナーテキストは<BR>タグが除去され、その他のHTML特殊文字はエンティティ変換されます。
+	これらの部品に ^ と [ の間にクラス名やID名を付加することができます。クラス名は複数、ID名はひとつだけ記述します。
+		ex. 	^class1.class2#id1[name]...
+	textボックスとtextareaに指定できる"size"は数字のみで指定された場合は、通常のHTMLタグ(size=??,rows=??,cols=??)を
+	出力しますが、数字以外の文字が含まれた場合、CSS変換(style="width:??;height:??")します。
 
   定義リスト(DL)
     :タイトル(DT)

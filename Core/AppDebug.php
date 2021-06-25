@@ -15,7 +15,9 @@ define('DBMSG_ERROR',   100);      // for ERROR
 define('DBMSG_LEVEL',   100);      // logging level
 define('DBMSG_DUMP',    107);      // DUMP ONLY
 define('DBMSG_NOLOG',   108);      // CLI dump ONLY
-define('DBMSG_DIE',     109);      // die message
+define('DBMSG_STDERR',  109);      // STDERR output
+define('DBMSG_DIE',     119);      // die message
+define('DBMSG_NONE',    false);    // none
 define('DBMSG_CLI',     256);      // CLI BIT Mask for CLI_DEBUG
 
 const EMPTY_MSG = " EMPTY\n";
@@ -182,6 +184,7 @@ function debug_log($lvl,...$items) {
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
         switch($lvl) {
+        case -DBMSG_STDERR:  fputs(STDERR,$dmp_info); break;
         case -DBMSG_DIE:     die("<pre>\n{$dmp_info}\n</pre>\n");
         case -DBMSG_DUMP:    echo "<pre>\n{$dmp_info}\n</pre>\n"; break;
         case -DBMSG_NOLOG:   $lvl  = -99;

@@ -219,13 +219,17 @@ function pseudo_markdown($atext, $md_class = '') {
 //  textbox     => ^[name]={text-value:size}
 //  select      => ^[name]%{select-val:option1=val1,option2=val2,...}
 //  combobox    => ^[name]+{select-val:option1=val1,option2=val2,...:size}
-        '/(\s)\^\[([\-\w#]+)?\]([@:!=%+])\{((?:\$\{[^\}]+?\}|[^\}])+?|)\}/s' => function ($m) use(&$item_array) {
-            $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea','%' => 'select','%' => 'combo'];
-            $spc = $m[1]; $kind = $m[3]; $val = $m[4];
+//		Frant class & id name,description between '^' and '[', like ^class#id[name]...
+        '/(\s)\^([\w\-\.]+)?(?:#([\w\-]+))?\[([\-\w#]+)?\]([@:!=%+])\{((?:\$\{[^\}]+?\}|[^\}])+?|)\}/s' => function ($m) use(&$item_array) {
+            $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea','%' => 'select','+' => 'combo'];
+			list($tmp,$spc,$cls,$id,$nm,$kind,$val) = $m;
             $vv = $type[$kind];
-			list($nm,$id) = explode('#',"{$m[2]}#");
-            $nm = (empty($nm)) ? '' : " name='{$nm}'";
-			if(!empty($id)) $nm = "{$nm} id='{$id}'";
+			$nm = (empty($nm)) ? '' : " name='{$nm}'";
+			if(!empty($cls)) {
+				$cls = trim(str_replace('.',' '<$cls));
+				$nm = "{$nm} class='{cls}'";
+			}
+			if(empty($id)) $nm = "{$nm} id='{$id}'";
             $attr = " type='{$vv}'{$nm}";
             $tag = "<input{$attr}";
             switch($kind) {
@@ -279,9 +283,14 @@ function pseudo_markdown($atext, $md_class = '') {
             case '!':   // text area
                     $vv = explode(':',$val);
                     if(count($vv)===2) {
-                        $size = explode(',',$vv[1]); 
-                        $sz = " cols='{$size[0]}' rows='{$size[1]}'";
+                        $size = explode(',',$vv[1]);
+						switch(count($size)) {
+						case 2: $sz = array_key_value(attr_sz_xchange(['cols'=>$size[0],'rows'=>$size[1]]),' '); break;
+						case 1: $sz = array_key_value(attr_sz_xchange(['cols'=>$size[0]]),' '); break;
+						default: $sz = '';
+						}
                     } else $sz = '';
+					if(!empty($sz)) $sz = " {$sz}";
                     // restore if ...{ TEXT }... mark converted.
 //                    $txt = rtrim(str_replace(["<BR>\n","<br>\n","<BR />\n","<br />\n"],"\n", "{$vv[0]}\n"));
                     $txt = rtrim(preg_replace('/(?:<br>|<br \/>)\n/i',"\n","{$vv[0]}\n"));
@@ -290,7 +299,7 @@ function pseudo_markdown($atext, $md_class = '') {
                     break;
             case '=':   // text
                     $vv = explode(':',$val);
-                    $sz = (empty($vv[1])) ? '' : " size='{$vv[1]}'";
+                    $sz = (empty($vv[1])) ? '' : (' '.array_key_value(attr_sz_xchange(['size'=>$vv[1]]),' '));
                     $tag = "{$spc}{$tag}{$sz} value='{$vv[0]}' />";
                     break;
             }

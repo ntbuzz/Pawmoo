@@ -117,8 +117,8 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
     return (is_array($array)) ? $dump_text(0,$array) : $array;
 }
 //==============================================================================
-function array_key_value($arr,$sep=',') {
-    array_walk($arr,function(&$item,$key) { $item = "{$key}={$item}"; });
+function array_key_value($arr,$sep=',',$quote='') {
+    array_walk($arr,function(&$item,$key) use(&$quote) { $item = "{$key}={$quote}{$item}{$quote}"; });
     return implode($sep,$arr);
 }
 //==============================================================================

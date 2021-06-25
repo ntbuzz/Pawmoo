@@ -240,7 +240,8 @@ public function ResetSchema() {
                 } else {
                     list($model,$table,$field) = $this->model_view($model);
                     if(is_scalar($ref_list)) {
-                        $lnk = [ $model => "{$field}.{$ref_list}"] ;
+                        $field = (empty($field))? $ref_list: "{$field}.{$ref_list}";
+                        $lnk = [ $model => $field];
                     } else {
                         if(!empty($field)) array_unshift($ref_list,$field);
                         $lnk[$model] = $ref_list;
@@ -296,71 +297,37 @@ public function GetRecord($num,$join=FALSE,$values=FALSE) {
 }
 //==============================================================================
 //   Get Relation Table fields data list.
-// Result:   $this->Select (Relations)
+//	a. key-name => [ Model.id => [ name, pid],	[ cond ] ]		for ChainSelect() [ id,name,pid ]
+//	b. key-name => [ [ name, pid],				[ cond ] ]		for ChainSelect() by SELF [ Primary,name,pid ]
+//	c. key-name => [ Model.id => name,			[ cond ] ]		for Select() in Model [nam] = id
+//	d. key-name => [ Model. => number.title,	[ cond ] ]		for Select() in Model [title] = number or Primary
+//	e. key-name => [ id.title,					[ cond ] ]		for Select() by SELF [title] = number or Primary
+//	f. key-name => [ Model. => [ Method => argument],[ cond ] ]		Chain() ir Select() value,depend on Model Method returned.
 public function LoadSelection($key_names) {
 	$selections = (is_array($key_names)) ? $key_names : [$key_names];
     foreach($selections as $key_name) {
 		list($target,$cond) = $this->SelectionDef[$key_name];
 		list($model,$ref_list) = array_first_item($target);
-		$sort_flag = SORT_REGULAR;
 		if(is_int($model)) {        // self list
-			$sel_item = [];
-			if(is_scalar($target)) {		// make ChainSelect
-				$this->RecordFinder($cond,$target,NULL,function($record,$filter) use(&$sel_item) {
-					list($val,$key) = $filter;		// filter will be array in callback func
-					if(empty($key)) $key = $val;
-					$sel_item[$record[$key]] = $record[$val];
-					return [];
-				});
-			} else {						// make Select
-				$this->RecordFinder($cond,$target,NULL,function($record,$filter) {
-					$new = [];
-					foreach($filter as $key) $new[$key] = $record[$key];
-					return $new;
-				});
-				$sel_item = $this->Records;
-			}
-			$sort_flag = SORT_FLAG_CASE | SORT_STRING;
-			$this->Select[$key_name] = $sel_item;
+			// case b., e.
+			$this->Select[$key_name] = $this->SelectFinder(is_array($target),$target,$cond);
+
 		} else if(is_array($ref_list)) {
+			// case a., f.
 			list($method,$args) = array_first_item($ref_list);
 			if(is_numeric($method)) {
-				if(is_array($args)) {
-					list($id,$field) = $args;
-					$this->Select[$key_name] = $this->$model->getFieldValues($id,$field,$cond);
-				} else {
-					$this->$model->RawRecordFinder($cond,$ref_list,NULL,function($record,$filter) {
-        				$new = [];
-        				foreach($filter as $key) $new[$key] = $record[$key];
-				        return $new;
-    				});
-					$this->Select[$key_name] = $this->$model->Records;
-				}
-			} else if(method_exists($this->$model,$method)) {	// selection by method call 
+				// case a.
+				$this->Select[$key_name] = $this->$model->SelectFinder(true,$ref_list,$cond);
+			} else if(method_exists($this->$model,$method)) {	// case f.
 				$method_val = $this->$model->$method($args,$cond);
+				ksort($method_val,SORT_FLAG_CASE | SORT_STRING );
 				$this->Select[$key_name] = $method_val;
 			}
 		} else {
-			$sort_flag = SORT_NUMERIC;
-			$ref_list = explode('.', $ref_list);
-			$postfix = (count($ref_list) > 2);      // append to keyname_field
-			$ref_list = array_filter( $ref_list, "strlen" ) ;
-			$new_rec = [];
-			$this->$model->RecordFinder($cond,$ref_list,NULL,function($record,$filter) use(&$new_rec) {
-				$id = array_shift($filter);
-				foreach($filter as $key) {
-					$rec_key = $record[$key];
-					$new_rec[$key][$rec_key] = $record[$id];
-				}
-				return [];
-			});
-			array_shift($ref_list);     // remove relation-id
-			foreach($ref_list as $key) {
-				$key_set = ($postfix) ? "{$key_name}_{$key}" : $key_name;
-				$this->Select[$key_set] = $new_rec[$key];
-			}
+			// case c., d.
+			$ref_list = array_filter(explode('.', $ref_list), "strlen" );
+			$this->Select[$key_name] = $this->$model->SelectFinder(false,$ref_list,$cond);
 		}
-		ksort($this->Select[$key_name],$sort_flag);       // sort VALUE-LIST ignore-case
 	}
 }
 //==============================================================================
@@ -377,7 +344,7 @@ public function GetValueList() {
 // Result:  Select array
 public function getFieldValues($id,$field, $cond = NULL) {
     $select = $this->dbDriver->getValueLists(NULL,$field,$id,$cond);
-    debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $select]);
+//    debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $select]);
 	return $select;
 }
 //==============================================================================
@@ -402,6 +369,35 @@ public function getCount($cond) {
 		}
 		return $filter;
 	}
+//==============================================================================
+// Get Selection pair
+// Result:   Select array
+public function SelectFinder($chain, $filter, $cond) {
+	$filter = $this->normalize_filter($filter);
+	list($id,$fn,$pid) = array_alternative($filter,3);
+	$data = [];
+    $this->dbDriver->findRecord($cond,TRUE);
+    while (($fields = $this->dbDriver->fetchDB())) {
+		if($chain) {
+			if(empty($fn)) {
+				$fn = $id;
+				$id = $this->Primary;
+			}
+			$pval = (empty($pid)) ? 0 : $fields[$pid];
+			$data[] = [ $fields[$id], $fields[$fn], $pval];
+		} else {
+			$key = (empty($fn)) ? $fields[$id] : $fields[$fn];
+			$data[$key] = $fields[$id];
+		}
+	}
+	if(!$chain) ksort($data,SORT_FLAG_CASE|SORT_STRING);
+    debug_log(DBMSG_NONE, [
+        "Filter" => $filter,
+        "COND" => $cond,
+        "RECORDS" => $data,
+    ]);
+	return $data;
+}
 //==============================================================================
 // Get Record List by FIND-CONDITION with JOIN Table.
 // Result:   $this->Records  Find-Result List
@@ -560,6 +556,17 @@ public function get_post_field($key) {
         unset($data[$this->Primary]);
         return $data;
     }
+//==============================================================================
+// Copy record
+public function CopyRecord($id,$replaces=[]) {
+    $row = $this->getRecordBy($this->Primary,$id);
+	foreach($replaces as $fn => $val) {
+		if(array_key_exists($fn,$row)) $row[$fn] = $val;
+	}
+	$data = $this->field_pickup($row);
+// 	$data = array_intval_recursice($data);
+    $this->dbDriver->insertRecord($data);
+}
 //==============================================================================
 // Add NEW record
 public function AddRecord($row) {
