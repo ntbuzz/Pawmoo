@@ -219,7 +219,7 @@ function keystr_opr($str) {
 // remove whote-space, newline
 function remove_space_comment_str($content) {
 	$pat = '[:(){}\[\]<>\=\?;,]';    // remove white-space
-	$content = preg_replace("/\\s*({$pat})\\s+|\\s+({$pat})\\s*|(\\s)+/sm", '$1$2$3',
+	$content = preg_replace("/\\s*({$pat}|\\n|\\s)\\s*|\\s+[+\-]\\s+/sm", '$1$2',
 			remove_comment_str($content));		// remove comment
 	return $content;
 }
@@ -340,7 +340,7 @@ function expand_text($view,$str,$recdata,$vars,$match_all = false) {
                     return (mb_substr($nm,0,1)==='@') ? $recdata[mb_substr($nm,1)]:$nm;
                 };
                 list($pat,$raw,$fn) = $m;
-                $var = ltrim($recdata[$fn]);     // get FIELD DATA
+				$var = trim(isset($recdata[$fn]) ? $recdata[$fn] : '');     // get FIELD DATA
 				switch(count($m)) {
 				case 7:		// limitation
 					$limit = intval($m[6]);
