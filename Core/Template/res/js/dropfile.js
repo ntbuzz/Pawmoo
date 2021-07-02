@@ -14,12 +14,12 @@ function ProgressBar(child, fmd, name,size,callback_func) {
     self.FileSize = $('<span class="filesize right"></span>').appendTo(self.progressPanel);
     self.gainBar = $('<div class="progress-gain"></div>').appendTo(self.progressPanel);
     self.Cancel.click(function () {
-        if (confirm("${#.core.Confirm}".replace('%s',name))) { // fmd.get('name')))) {
+        if (confirm("${#.core.Confirm}".replace('%s',name))) {
             self.Abort(false);
         };
     });
     // ファイル情報を表示
-    sz = size;  // fmd.get('size');
+    sz = size;	// fmd.get('size');
     if (sz>0) {
         for (i = 0; sz > 1024; i += 3, sz /= 1024) ;
         szStr = sz.toFixed(2) +" B  KB MB GB TB PB".substr(i,3);
@@ -32,7 +32,7 @@ function ProgressBar(child, fmd, name,size,callback_func) {
         self.Aborted = true;
     };
     self.FileSize.html(szStr);
-    self.FileName.html(name);//fmd.get('name'));
+    self.FileName.html(name);	//fmd.get('name'));
     // 完了処理
     self.Finished = function (aborted) {
         self.Cancel.Visible(false);
