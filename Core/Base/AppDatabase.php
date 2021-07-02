@@ -102,7 +102,7 @@ public function execute($cmd) {
 	case 'csv':		$exeType = 3; break;
 	default: echo "BAD Command({$cmd})\n"; return;
 	}
-	if(isset(static::$Dependent)) {
+	if(isset(static::$Dependent) && $exeType !== 2) {
 		foreach(static::$Dependent as $table) {
 			$setuip_class = "{$table}Setup";
 			if(!in_array($setuip_class,$this->owners)) {
