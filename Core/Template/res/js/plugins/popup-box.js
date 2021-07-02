@@ -73,7 +73,7 @@ $.fn.PopupBoxSetup = function () {
 					if (init_content !== undefined) {
 						alert(init_content + " CLEAR");
 						$('#' + init_content).empty();
-					}
+					};
 				});
 			});
 			// 起動ボタンのクリックで表示する
@@ -111,7 +111,7 @@ $.fn.PopupBoxSetup = function () {
 							e.stopPropagation();
 							e.preventDefault();
 							$('.' + enter).click();
-						}
+						};
 					});
 				};
 			});

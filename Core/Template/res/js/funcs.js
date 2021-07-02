@@ -72,7 +72,7 @@ function PawmooLocations() {
 		if (url.startOfString(['http://', 'https://', 'ftp://', 'file://'])) {
 			this.type = LOC_FULL;
 			return url;
-		}
+		};
         this.type = "./:".indexOf(url.charAt(0)) + 1;
         var path = (this.type == 0) ? url : url.slice(1);
         switch (this.type) {
@@ -157,10 +157,10 @@ function SelectLink(setupobj, id, first_call, callback) {
 		});
         self.selfList(val, grp);
 		self_obj.off().change(function () {
-			var my_val = $(this).val()
-			if (child_obj !== null && typeof in_progress === 'function') {
+			var my_val = $(this).val();
+			if (child_obj !== null && typeof in_progress === "function") {
 				in_progress.call(this, my_val, id);
-			}
+			};
 			self.SetSelect(my_val);
 		});
 		if (child_obj === null) self.SetSelect(val);
@@ -169,9 +169,10 @@ function SelectLink(setupobj, id, first_call, callback) {
 };
 //====================================================
 // create FORM and SUBMIT
-var formSubmit = function (e, url) {
+var formSubmit = function (send_obj, url) {
+	$.busy_cursor(true);
 	var form = $('<form method="POST">');
-	$.each(e, function (key, value) {
+	$.each(send_obj, function (key, value) {
 		$('<input>').attr({
 			'type': 'hidden',
 			'name': key,

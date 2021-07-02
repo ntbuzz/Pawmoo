@@ -733,7 +733,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     +tabset => [                            ul タグを使ったタブセットの出力
       Title1 => [ Section ]                   テンプレート内の tabset.css を読み込むことでタブコントロール表示する
         ...                                   タブ切替え時に独自の処理が不要なら、テンプレートの tabset.js を読み込む
-      ]
+      ]										クラスに .slider-[top|bottom|left|right] を付加するとタブスライダーを表示する。
     +floatwin.class#id => [                 floatWindow ブロックの簡易記述構文
       DT-Title                                dl タグを直接記述せずにすむ
       [ DD-Section ]

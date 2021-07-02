@@ -176,6 +176,22 @@ $.fn.getPaddingBox = function() {
 	};
 	return widths;
 };
+// フォーム部品(INPUT,SELECT,TEXTAREA)の変更時にクラス属性をセットする
+$.fn.onChageFormItems = function(cls) {
+	var self = this;
+	self.on('change', 'input,select,textarea', function () {
+		var ptag = $(this).parent();
+		if (ptag.hasClass('combobox')) {
+			// コンボボックス用のSELECTはmodifiedをつけない
+		} else {
+			$(this).addClass(cls);
+			// チェックボックスとラジオボタンは label タグの色を変える
+			if (['checkbox', 'radio'].is_exists($(this).prop('type'))) {
+				ptag.addClass('changed');
+			};
+		};
+	});
+};
 // カーソルを BUSY に変更
 $.busy_cursor = function (disp) {
 	$('body').css('cursor', (disp) ? 'wait' : 'default');
@@ -234,7 +250,7 @@ $.fn.submitObject = function (false_check,callback) {
 			var tt = $(this).attr('type');
 			if (tt == 'checkbox' || tt == 'radio') {
 				if ($(this).is(':checked')) value = $(this).val();
-				else if (false_check) value = 'f';   // チェックされていないときの値をセット
+				else if (false_check) value = false;   // チェックされていないときの値をセット
 				else return true;
 			} else value = $(this).val();
 			setobj[nm] = value;

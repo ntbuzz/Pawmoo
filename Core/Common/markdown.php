@@ -108,7 +108,8 @@ function pseudo_markdown($atext, $md_class = '') {
     $atext = preg_replace_callback($p,function($matches) {
         // Combine lines that do not end with '|' as multiple lines
         $txt = preg_replace('/([^|])\n+/','\\1<br>', $matches[1]);
-        $tbl_class = get_class_names("md_tbl{$matches[2]}");
+		$tbl_class = (isset($matches[2])) ? $matches[2] : '';
+        $tbl_class = get_class_names("md_tbl{$tbl_class}");
         $col_row_span = function($key,$str) {
             $span_attr = ['@'=>'colspan','^'=>'rowspan'];
             $bind = '';
@@ -219,17 +220,17 @@ function pseudo_markdown($atext, $md_class = '') {
 //  textbox     => ^[name]={text-value:size}
 //  select      => ^[name]%{select-val:option1=val1,option2=val2,...}
 //  combobox    => ^[name]+{select-val:option1=val1,option2=val2,...:size}
-//		Frant class & id name,description between '^' and '[', like ^class#id[name]...
-        '/(\s)\^([\w\-\.]+)?(?:#([\w\-]+))?\[([\-\w#]+)?\]([@:!=%+])\{((?:\$\{[^\}]+?\}|[^\}])+?|)\}/s' => function ($m) use(&$item_array) {
+//		Grant class & id name,description between '^' and '[', like ^class#id[name]...
+        '/(\s)\^([\w\-\.]+)?(?:#([\w\-]+))?\[([\w\-]+)?\]([@:!=%+])\{((?:\$\{[^\}]+?\}|[^\}])+?|)\}/s' => function ($m) use(&$item_array) {
             $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea','%' => 'select','+' => 'combo'];
 			list($tmp,$spc,$cls,$id,$nm,$kind,$val) = $m;
             $vv = $type[$kind];
 			$nm = (empty($nm)) ? '' : " name='{$nm}'";
 			if(!empty($cls)) {
-				$cls = trim(str_replace('.',' '<$cls));
-				$nm = "{$nm} class='{cls}'";
+				$cls = trim(str_replace('.',' ',$cls));
+				$nm = "{$nm} class='{$cls}'";
 			}
-			if(empty($id)) $nm = "{$nm} id='{$id}'";
+			if(!empty($id)) $nm = "{$nm} id='{$id}'";
             $attr = " type='{$vv}'{$nm}";
             $tag = "<input{$attr}";
             switch($kind) {

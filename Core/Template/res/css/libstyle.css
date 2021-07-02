@@ -81,6 +81,7 @@ option.disable {
 .combobox  {
 	height:1.75em;
 	padding:0;
+	display:inline-flex;
 }
 .combobox select {
 	width:100%;
@@ -95,4 +96,7 @@ option.disable {
 	border:none;
 	/* height:1.25em;
 	margin:2px; */
+}
+.ui-datepicker-trigger {
+   position: absolute;
 }

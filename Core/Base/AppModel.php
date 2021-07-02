@@ -240,8 +240,17 @@ public function ResetSchema() {
                 } else {
                     list($model,$table,$field) = $this->model_view($model);
                     if(is_scalar($ref_list)) {
-                        $field = (empty($field))? $ref_list: "{$field}.{$ref_list}";
-                        $lnk = [ $model => $field];
+						if($ref_list[0]==='.') {
+							$ref_list = mb_substr($ref_list,1);
+							if(mb_strpos($ref_list,'.') === false) {
+								$key_name = "{$key_name}_{$ref_list}";
+							}
+						}
+						if(empty($field)) {
+							if(substr_count($ref_list, '.') !== 1) $ref_list = "{$this->Primary}.{$ref_list}";
+						} else $ref_list = "{$field}.{$ref_list}";
+                        $lnk = [ $model => $ref_list];
+//debug_log(DBMSG_NOLOG,['MOD'=>$this->ModuleName,'NAME'=>$key_name,'MODEL'=>$model,'FIELD'=>$field,'REF'=>$ref_list,'LINK'=>$lnk]);
                     } else {
                         if(!empty($field)) array_unshift($ref_list,$field);
                         $lnk[$model] = $ref_list;
@@ -300,8 +309,9 @@ public function GetRecord($num,$join=FALSE,$values=FALSE) {
 //	a. key-name => [ Model.id => [ name, pid],	[ cond ] ]		for ChainSelect() [ id,name,pid ]
 //	b. key-name => [ [ name, pid],				[ cond ] ]		for ChainSelect() by SELF [ Primary,name,pid ]
 //	c. key-name => [ Model.id => name,			[ cond ] ]		for Select() in Model [nam] = id
-//	d. key-name => [ Model. => number.title,	[ cond ] ]		for Select() in Model [title] = number or Primary
-//	e. key-name => [ id.title,					[ cond ] ]		for Select() by SELF [title] = number or Primary
+//	d. key-name => [ Model. => number.title,	[ cond ] ]		for Select() in Model [title] = number|Primary
+//	d'.key-name => [ Model. => id.number.title,	[ cond ] ]		for Select() in Model [number] = id|Primary in key_name_number,[title] = id|Primary in keyname_title
+//	e. key-name => [ id.title,					[ cond ] ]		for Select() by SELF [title] = number|Primary
 //	f. key-name => [ Model. => [ Method => argument],[ cond ] ]		Chain() ir Select() value,depend on Model Method returned.
 public function LoadSelection($key_names) {
 	$selections = (is_array($key_names)) ? $key_names : [$key_names];
@@ -528,7 +538,7 @@ public function is_valid(&$row) {
 }
 //==============================================================================
 // field-alias, field-bind processing.
-    private function field_alias_bind($row) {
+    private function field_lang_alias($row) {
         $this->fields = array();
         foreach($row as $key => $val) {
             $alias = ($this->AliasMode) ? $this->dbDriver->fieldAlias->get_lang_alias($key) :$key;
@@ -554,7 +564,12 @@ public function get_post_field($key) {
             }
         }
         unset($data[$this->Primary]);
-        return $data;
+		if($this->is_valid($data)) {
+			return $data;
+		} else {
+			debug_log(DBMSG_MODEL,['VALID-ERROR'=>$data]);
+	        return FALSE;
+		}
     }
 //==============================================================================
 // Copy record
@@ -563,31 +578,27 @@ public function CopyRecord($id,$replaces=[]) {
 	foreach($replaces as $fn => $val) {
 		if(array_key_exists($fn,$row)) $row[$fn] = $val;
 	}
-	$data = $this->field_pickup($row);
-// 	$data = array_intval_recursice($data);
-    $this->dbDriver->insertRecord($data);
+	if($data = $this->field_pickup($row)) {
+	    $row = $this->dbDriver->insertRecord($data);
+		$this->RecData = ($row) ? $row : [];
+	}
 }
 //==============================================================================
 // Add NEW record
 public function AddRecord($row) {
-    $data = $this->field_pickup($row);
-    if($this->is_valid($data)) {
-        $this->field_alias_bind($data);
-        $this->dbDriver->insertRecord($this->fields);
-    } else {
-        debug_log(DBMSG_MODEL,['VALID-ERROR'=>$data]);
+	if($data = $this->field_pickup($row)) {
+        $this->field_lang_alias($data);
+	    $row = $this->dbDriver->insertRecord($this->fields);
+		$this->RecData = ($row) ? $row : [];
     }
 }
 //==============================================================================
 // UPDATE Record
 public function UpdateRecord($num,$row) {
-    $data = $this->field_pickup($row);
-    if($this->is_valid($data)) {
-        $this->field_alias_bind($data);
-//		debug_log(DBMSG_DUMP,[$row,$this->fields]);     // for DEBUG
-        $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
-    } else {
-        debug_log(DBMSG_MODEL,['VALID-ERROR'=>$data]);
+	if($data = $this->field_pickup($row)) {
+        $this->field_lang_alias($data);
+        $row = $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
+		$this->RecData = ($row) ? $row : [];
     }
 }
 
