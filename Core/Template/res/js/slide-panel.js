@@ -81,23 +81,24 @@ $(".slide-panel").each(function () {
 			radius: '5px 5px 0 0',
 		},
 		// スライダーを折畳む
-		collapse: function (dir, animate) {
+		tab_collapse: function (dir, animate) {
 			var tab = this[dir];
-			if (animate) self.animate(tab.collapse, 180);
+			if (animate) self.animate(tab.collapse, 110);
 			else self.css(tab.collapse);
 			tab_obj.css(tab.tab_css).find('li').css('border-radius', tab.radius);
 		},
 		// スライダーを開く
-		expand: function (dir) {
+		tab_expand: function (dir) {
 			var tab = this[dir];
-			self.animate(tab.collapse, 500);
+			objDump(tab);
+			self.animate(tab.expand, 220);
 			tab_obj.css({
 				left: 0, top: 0,
 				transform:'none',
 			}).find('li').css('border-radius', '5px 5px 0 0');
 		},
 	};
-	slidetabs.collapse(direct,false);
+	slidetabs.tab_collapse(direct,false);
 	tab_obj.children('li').on('click', function () {
 		// クリックされたタブを表示
 	    var menu = $(this).parent().children('li');
@@ -116,14 +117,12 @@ $(".slide-panel").each(function () {
 			backwall.remove();
 			menu.removeClass('selected');		// TabMenu selected delete
 			cont.removeClass('selected');		// TabContents selected delete
-			slidetabs.collapse(direct,true);
-			self.animate(collapse, 180);
-			tab_obj.css(tab_css).find('li').css('border-radius', radius);
+			slidetabs.tab_collapse(direct,true);
 		});
 		$(this).addClass('selected');		// switch click TAB selected
 		cont.eq(index).addClass('selected');	// switch TAB selected Contents
 		// スライダーを開く
-		slidetabs.expand(direct);
+		slidetabs.tab_expand(direct);
 	});
 });
 
