@@ -12,6 +12,7 @@ Stylesheet => [
             context.css         // context menu popup
             floatwin.css        // floating Windows
             markdown.css        // markdown sttle
+            slide-panel.css     // slide-panel
             pagerstyle.css      // pager button
             popup.css           // balloon/popupbox/dialog
             @debugger:debugbar.css   // use DEBUGGER,if AppData['debugger'] in SESSION is not FLASE
@@ -44,6 +45,7 @@ Javascript => [
 			]
             context.js              // context menu popup
             pagerscript.js          // pager button
+            slide-panel.js          // Slide-Panel
             window.js               // JQuery-Plugins
             @debugger:debugbar.js   // use DEBUGGER,if AppData['debugger'] in SESSION is not FLASE
         ]

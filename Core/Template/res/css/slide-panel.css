@@ -1,0 +1,62 @@
+/* デバッグツール用のスタイル */
+.slide-panel {
+	z-index:10;
+	position:fixed;
+	background-color: whitesmoke;
+	white-space: nowrap;
+padding-top:1.6em;
+	/* padding:1.6em 10px 10px 10px; */
+}
+/* タブメニュー */
+.slide-panel>ul.slide-tab {
+	position: absolute;
+	display: flex;
+	list-style: none;
+	transform-origin: left top;
+}
+.slide-panel>ul.slide-tab:after {
+	clear: both;
+}
+.slide-panel>ul.slide-tab>li {
+	cursor: pointer;
+	height: 1.65em;
+	padding: 2px 12px;
+	background-color: silver;
+	border: 1px solid black;
+}
+.slide-panel>ul.slide-tab>li:hover {
+	background-color: gray;
+	color: white;
+}
+.slide-panel>ul.slide-tab>li.selected {
+	font-style: bold;
+	background-color: navy;
+	color: white;
+}
+/* タブコンテンツ */
+.slide-panel>ul.slide-contents {
+	clear: both;
+width:100%;
+height:100%;
+	list-style: none;
+	border: 1px solid gray;
+	overflow: hidden;
+padding:10px;
+}
+.slide-panel>ul.slide-contents>li {padding:0; display:none; }
+.slide-panel>ul.slide-contents>li.selected {padding:0; display:block; }
+
+/* 閉じるための外領域 */
+.slideBK {
+	z-index:1;
+	position: fixed;
+	top: 0;
+	left: 0;
+	height:100%;
+	width:100%;
+	background:#eee;
+	opacity: 0.4;
+	filter: alpha(opacity=40);
+	-moz-opacity:0.40;
+    display:none;
+}
