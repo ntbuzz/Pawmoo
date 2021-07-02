@@ -206,8 +206,9 @@ public function ViewTemplate($name,$vars = []) {
             foreach($sec as $check => $value) {
                 if($check === '') $result = ($cmp_val==='');            // is_empty ?
                 else if($check === '*') $result = ($cmp_val !== '');     // is_notempty ?
+                else if(is_numeric($check)) $result = intval($check) === intval($cmp_val);
                 else if(mb_strpos($check,'...') !== false) {			// range comapre 1...9
-                    list($from,$top) = string_to_array('...',$check);
+                    list($from,$to) = string_to_array('...',$check);
 					$cmp_val = intval($cmp_val);
                     $result = intval($from) <= $cmp_val && $cmp_val <= intval($to);
 				} else {
@@ -233,7 +234,7 @@ public function ViewTemplate($name,$vars = []) {
                         set_array_key_unique($wd,$kk,$vv);
                     }
                 }
-            } else $wd[$key] = $val;
+            } else set_array_key_unique($wd,$key,$val);
         }
         return $wd;
     }
@@ -245,6 +246,7 @@ public function ViewTemplate($name,$vars = []) {
             echo "DIE!!!!!!!!!!!!\n";
             return;
         }
+		$divSection = $this->array_if_selector($divSection, $vars);
         debug_log(-999,['SEC' =>$divSection, 'VARS'=>$vars]);
         foreach($divSection as $token => $sec) {
             $sec = $this->array_if_selector($sec, $vars);
@@ -353,7 +355,6 @@ public function ViewTemplate($name,$vars = []) {
     private function gen_Attrs($attrs,$vars) {
         $attr = "";
         if(!empty($attrs)) {
-			unset($attrs['param']);		// ignore attribute
             ksort($attrs);
             foreach($attrs as $name => $val) {
 				if($val === [] || $val === NULL) $attr .= " {$name}"; 
@@ -523,7 +524,8 @@ public function ViewTemplate($name,$vars = []) {
     //  +push.name => value, +push.name => [ value-list ]
     private function cmd_push($tag,$attrs,$sec,$vars) {
         $txt = $this->expand_Strings(((is_array($sec)) ? array_to_text($sec) : $sec),$vars);
-		$txt = remove_space_comment_str($txt);
+		$str = remove_space_comment_str($txt);
+		$txt = str_replace(["\r","\n"],['',"\\n\n"],$str);
         $name = str_replace(' ','.',$attrs['class']);
 		if(empty($name)) $name = 'resource';
         MySession::set_paramIDs("view.{$name}",trim($txt),TRUE);
@@ -689,7 +691,8 @@ public function ViewTemplate($name,$vars = []) {
 		if(mb_substr($opt_key,-1)==='.') $opt_key = rtrim($opt_key,'.');
         $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
         $opt_val = array_flat_reduce($this->expand_SectionVar($opt_val,$vars));
-		$combo = make_combobox($sel_item,$opt_val,$attr['size']);
+		$sz = (isset($attrs['size'])) ? $attrs['size'] : '';
+		$combo = make_combobox($sel_item,$opt_val,$sz);
 		echo $combo;
     }
     //--------------------------------------------------------------------------
@@ -697,23 +700,34 @@ public function ViewTemplate($name,$vars = []) {
     //      Menu1.selected => [ Contents1 ]
     //      Menu2 => [ Contents2 ] ...
     //  ]
+	// classname will be 'slider-[top|bottom|right|left]', its slider-panel convert
     private function cmd_tabset($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
+        list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         $mycls = (isset($attrs['class']))? $attrs['class'] :'';
-        $attrs['class'] = rtrim("tabControll {$mycls}");
+		if(strpos($mycls,'slider-') !== false) {
+			$mycls = "slider-panel {$mycls}";
+			$tabset = '<ul class="slider-tab">';
+			$tabend = '</ul>';
+			$contents='<ul class="slide-contents">';
+		} else {
+			$mycls = "tabControll {$mycls}";
+			$tabset = '<div class="tabPanel"><ul class="tabmenu">';
+			$tabend = '</ul></div>';
+			$contents='<ul class="tabcontents">';
+		}
+        $attrs['class'] = rtrim($mycls);
         $attr = $this->gen_Attrs($attrs,$vars);
-        echo "<div{$attr}>\n";
+        echo "<div{$attr}>{$tabset}\n";
         // create tabset
-        echo "<div class='tabPanel'><ul class='tabmenu'>\n";
         $tabs = array_keys($sec);
         foreach($tabs as $key_val) {
             list($tag,$attrs) = $this->tag_Separate($key_val,$vars);
             $attr = $this->gen_Attrs($attrs,$vars);
             echo "<li{$attr}>{$tag}</li>\n";
         }
-        echo "</ul></div>\n";
+        echo "{$tabend}\n{$contents}";
         // create tab-contents block
-        echo "<ul class='tabcontents'>\n";
         foreach($sec as $key => $val) {
             list($tag,$attrs) = $this->tag_Separate($key,$vars);
             if(is_array($val)) list($attrs,$text,$val) = $this->subsec_separate($val,$attrs,$vars);
@@ -723,8 +737,7 @@ public function ViewTemplate($name,$vars = []) {
             $this->sectionAnalyze($val,$vars);
             echo "</li>\n";
         }
-        echo "</ul>\n";
-        echo "</div>";
+        echo "</ul>\n</div>\n";
     }
     //--------------------------------------------------------------------------
     //  TABLE OUTPUT
