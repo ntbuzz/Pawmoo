@@ -102,8 +102,9 @@ public function updateRecord($wh,$row) {
 		$sep = ",";
 	}
 	// UPSERT 文を生成
-	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) ON CONFLICT ({$primary}) DO UPDATE {$set};";
+	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) ON CONFLICT ({$primary}) DO UPDATE {$set} RETURNING *;";
 	$res = $this->doQuery($sql);
+	return $this->fetchDB();
 }
 //==============================================================================
 //	INSERT
@@ -133,8 +134,9 @@ public function insertRecord($row) {
 		$sep = ",";
 	}
 	// UPSERT 文を生成
-	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr});";
+	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) RETURNING *;";
 	$res = $this->doQuery($sql);
+	return $this->fetchDB();
 }
 
 }

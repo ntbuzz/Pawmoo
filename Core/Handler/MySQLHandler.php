@@ -64,12 +64,13 @@ public function insertRecord($row) {
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
 	$vstr = "'" . implode("','", $row) . "'";
 
-	$sql = "INSERT INTO {$this->raw_table} ({$kstr}) VALUES ({$vstr});";
+	$sql = "INSERT INTO {$this->raw_table} ({$kstr}) VALUES ({$vstr}) RETURNING *;";
 	error_reporting(E_ERROR);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
 		echo 'ERROR:'.$this->getLastError()."\n".$sql;
-	}
+		return [];
+	} else	return $this->fetchDB();
 }
 //==============================================================================
 //	レコードの更新 $row[key] value
@@ -85,12 +86,13 @@ public function updateRecord($wh,$row) {
 		$sep = ", ";
 	}
 	// UPSERT 文を生成
-	$sql = "UPDATE \"{$this->raw_table}\"{$set}{$where};";
+	$sql = "UPDATE \"{$this->raw_table}\"{$set}{$where} RETURNING *;";
 	error_reporting(E_ERROR);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
 		echo 'ERROR:'.$this->getLastError()."\n".$sql;
-	}
+		return [];
+	} else	return $this->fetchDB();
 }
 
 }

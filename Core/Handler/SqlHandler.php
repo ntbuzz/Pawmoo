@@ -53,33 +53,6 @@ public function setupRelations($relations) {
 //	debug_log(DBMSG_HANDLER,["RELATIONS" => $this->relations]);
 }
 //==============================================================================
-// createView: Create View Table
-/*
-public function createView($table,$view,$schema,$exec = FALSE) {
-	$sql = "DROP VIEW IF EXISTS {$view};";
-	if($exec) $this->execSQL($sql);
-	$sql = "CREATE VIEW {$view} AS SELECT\n";
-	$join = $left = [];
-	foreach($this->raw_columns as $column) {
-	 	$join[] = "{$table}.\"{$column}\"";
-		if(array_key_exists($column,$schema)) {
-			foreach($schema[$column] as $alias => $rel) {
-				list($tbl,$id,$fn) = explode('.',$rel);
-				$join[] = "{$tbl}.\"{$fn}\" as $alias";
-				if(!isset($left[$tbl])) $left[$tbl] = "LEFT JOIN {$tbl} on {$table}.\"{$column}\" = {$tbl}.{$id}";
-			}
-		}
-	}
-	$bind = array_filter($schema,function($k) { return is_numeric($k);},ARRAY_FILTER_USE_KEY );
-debug_log(DBMSG_DUMP,['BIND'=>$bind]);
-	$sql .= implode($join,",\n")."\n";
-	$sql .= "FROM {$table}\n";
-	$sql .= implode($left,"\n").";";
-	if($exec) $this->execSQL($sql);
-	return $sql;
-}
-*/
-//==============================================================================
 // fetchDB: get record data , and replace alias and bind column
 public function fetchDB() {
 	if($row = $this->fetch_array()) {
