@@ -306,14 +306,15 @@ public function ViewStyle($file_name) {
             if(empty($vv)) {
 				$p = '/@(?:\$(.+)|(\w+):(.+))$/';
                 if(preg_match($p,$key,$m)) {
-	                list($tmp,$id_name,$flag,$vv) = $m;
 					if(count($m)===2) {
+		                list($tmp,$id_name) = $m;
 						$id = "view.{$id_name}";
 						$data = MySession::get_paramIDs($id);
                         if($this->do_msg) echo "/* {$scope} import from session '{$id}' */\n";
 						$this->outputContents($data);
 						continue;
 					} else {
+		                list($tmp,$id_name,$flag,$vv) = $m;
 						$test_value = MySession::get_paramIDs($flag);
 						if(is_bool_false($test_value)) continue;
 					}
