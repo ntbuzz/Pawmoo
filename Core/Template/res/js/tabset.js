@@ -1,4 +1,5 @@
 
+// this file use +import command.
 // TabControll Click Event
 $(document).on('click','.tabControll>.tabPanel>.tabmenu>li',function () {
     var control = $(this).closest('.tabControll');
