@@ -3,6 +3,10 @@ $(".slide-panel").each(function () {
 	var self = $(this); // jQueryオブジェクトを変数に代入しておく
 	// サイズ属性があればウィンドウサイズを指定する
 	var default_sz = (self.is('[size]')) ? self.attr("size") : '50%';
+	var tms = (self.is('[data-value]')) ? self.attr("data-value") : '220';
+	let items = tms.split('-');
+	var tm_expand   = parseInt(items[0]);
+	var tm_collapse = (items.length < 2) ? ~~(tm_expand/2) : parseInt(items[1]);
 	var tab_obj = self.find('.slide-tab');
 	var class_arr = self.attr('class').split(" ");
 	var direct = "none";
@@ -83,15 +87,14 @@ $(".slide-panel").each(function () {
 		// スライダーを折畳む
 		tab_collapse: function (dir, animate) {
 			var tab = this[dir];
-			if (animate) self.animate(tab.collapse, 110);
+			if (animate) self.animate(tab.collapse, tm_collapse);
 			else self.css(tab.collapse);
 			tab_obj.css(tab.tab_css).find('li').css('border-radius', tab.radius);
 		},
 		// スライダーを開く
 		tab_expand: function (dir) {
 			var tab = this[dir];
-			objDump(tab);
-			self.animate(tab.expand, 220);
+			self.animate(tab.expand, tm_expand);
 			tab_obj.css({
 				left: 0, top: 0,
 				transform:'none',
