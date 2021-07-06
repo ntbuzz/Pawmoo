@@ -144,7 +144,7 @@ public function AutoPaging($cond, $max_count = 100) {
 	$cond = re_build_array($cond);
 	$PageName = "Paging.{$this->ModuleName}";
 	$Page = MySession::get_envIDs($PageName);
-	debug_log(DBMSG_SYSTEM, ['COND' => $cond,"Page"  => $Page ]);
+//	debug_log(DBMSG_SYSTEM, ['COND' => $cond,"Page"  => $Page ]);
 	$sCond = $Page['Cond'];
 	$sSize = $Page['Size'];
 	$uri = App::Get_PagingPath();

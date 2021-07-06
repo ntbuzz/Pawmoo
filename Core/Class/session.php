@@ -12,19 +12,27 @@ else {
 	session_start();
 }
 define('PARAMS_NAME','AppData');
+define('SYSLOG_ID','Syslog');
+define('RESOURCE_ID','Resource');
+
 class MySession {
 	public static $EnvData;
 	public static $ReqData;
 	public static $MY_SESSION_ID;
+	private static $SYS_SESSION_ID;
+	public static $SysData;			// for SysLog, Resource Push
 //==============================================================================
 // static クラスにおける初期化処理
-static function InitSession($appname = 'default',$unset_param = FALSE) {
+static function InitSession($appname = 'default',$controller='',$unset_param = FALSE) {
 	$appname = strtolower($appname);
 	$session_id = SESSION_PREFIX . "_{$appname}";
+	$session_sys="{$session_id}_sys";
 //	unset($_SESSION[$session_id]);
 	static::$MY_SESSION_ID = $session_id;
+	static::$SYS_SESSION_ID = $session_sys;
 	// セッションキーがあれば読み込む
 	static::$EnvData = (array_key_exists($session_id,$_SESSION)) ? $_SESSION[$session_id] : [];
+	static::$SysData = (array_key_exists($session_sys,$_SESSION)) ? $_SESSION[$session_sys] : [];
 	// for Login skip on CLI debug.php processing
 	if(CLI_DEBUG) {
 		static::$EnvData['Login'] = ['username' => 'ntak'];
@@ -38,32 +46,40 @@ static function InitSession($appname = 'default',$unset_param = FALSE) {
 	}
 	static::$ReqData = array_intval_recursive(static::$ReqData);
 	static::$EnvData = array_intval_recursive(static::$EnvData);
-	if($unset_param) unset(static::$EnvData[PARAMS_NAME]);             // Delete Style Parameter for AppStyle
+	if($unset_param) {
+		unset(static::$EnvData[PARAMS_NAME]);           // Delete Style Parameter for AppStyle
+		unset(static::$SysData[SYSLOG_ID]);				// delete system Log
+//		unset(static::$SysData[RESOURCE_ID][$controller]);	// delete controller resource
+//		static::$SysData = [];
+	}
 }
 //==============================================================================
 // セッションに保存する
 static function CloseSession() {
+//	log_dump(['SESSION'=>static::$EnvData,'SYSTEM'=>static::$SysData]);
 	$_SESSION[static::$MY_SESSION_ID] = static::$EnvData;
+	$_SESSION[static::$SYS_SESSION_ID] = static::$SysData;
 }
 //---------------------------- 新しいインタフェース ----------------------------
 //==============================================================================
 // REQUEST変数から環境変数に移動する
-static function preservReqData(...$keys) {
+static function preservReqData($envKey,...$keys) {
 	foreach($keys as $nm) {
 		if(array_key_exists($nm,static::$ReqData)) {
-			static::$EnvData[$nm] = static::$ReqData[$nm];
+			static::$EnvData[$envKey][$nm] = static::$ReqData[$nm];
 			unset(static::$ReqData[$nm]);
 		}
 	}
 }
 //==============================================================================
 // SESSION変数からREQUESTに移動する
-static function rollbackReqData(...$keys) {
+static function rollbackReqData($envKey,...$keys) {
 	foreach($keys as $nm) {
-		if(array_key_exists($nm,static::$EnvData)) {
-			static::$ReqData[$nm] = static::$EnvData[$nm];
-			unset(static::$EnvData[$nm]);
+		if(array_key_exists($nm,static::$EnvData[$envKey])) {
+			static::$ReqData[$nm] = static::$EnvData[$envKey][$nm];
+//			unset(static::$EnvData[$envKey][$nm]);
 		}
+		unset(static::$EnvData[$envKey]);
 	}
 }
 //==============================================================================
@@ -132,24 +148,53 @@ static function set_envIDs($nameID,$val,$append = FALSE) {
 // ENV変数にアプリケーションパラメータを識別子指定で値を設定する
 static function set_paramIDs($names,$val,$append = FALSE) {
 	static::set_envIDs(PARAMS_NAME.".{$names}",$val,$append);
-/*
-    $mem_arr = explode('.',PARAMS_NAME.".{$names}");
-    $ee = &static::$EnvData;
-    foreach($mem_arr as $key) {
-        if(!isset($ee[$key])) $ee[$key] = [];
-        $ee = &$ee[$key];
-    }
-	if($append) {
-		$prev = (empty($ee)) ? '':"{$ee}\n";
-		$ee = "{$prev}{$val}";
-	} else $ee = $val;
-*/
 }
 //==============================================================================
 // ENV変数からアプリケーションパラメータを識別子指定で値を取得
 static function get_paramIDs($names) {
 	$nVal = array_member_value(static::$EnvData, PARAMS_NAME.".{$names}");
 	return $nVal;
+}
+//==============================================================================
+// システムログを格納
+static function syslog_SetData($names,$val,$append = FALSE,$resource = FALSE) {
+	$kid = ($resource) ? RESOURCE_ID : SYSLOG_ID;
+	$ee = &static::$SysData[$kid];
+	$mem_arr = array_filter(explode('.',$names),'strlen');
+	foreach($mem_arr as $key) {
+		if(!isset($ee[$key])) $ee[$key] = [];
+		$ee = &$ee[$key];
+	}
+	if($append) {
+		$prev = (empty($ee)) ? '':"{$ee}\n";
+		$ee = "{$prev}{$val}";
+	} else $ee = $val;
+//log_dump(['ID'=>"{$kid}.{$names}",'SYS'=>static::$SysData,'VAL'=>$nVal]);
+}
+//==============================================================================
+// システムログを取得
+static function syslog_GetData($names,$resource = FALSE) {
+	$kid = ($resource) ? RESOURCE_ID : SYSLOG_ID;
+	$nVal = array_member_value(static::$SysData, "{$kid}.{$names}");
+//log_dump(['ID'=>"{$kid}.{$names}",'VAL'=>$nVal]);
+	return $nVal;
+}
+//==============================================================================
+// システムログのID名変更
+static function syslog_RenameID($trans) {
+//log_dump(static::$EnvData);
+	$rename_member = function($arr) use(&$rename_member,&$trans) {
+		if(is_array($arr)) {
+			foreach($arr as $key => $val) {
+				if(array_key_exists($key,$trans)) {
+					$arr[$trans[$key]] = $rename_member($val);
+					unset($arr[$key]);
+				} else $arr[$key] = $rename_member($val);
+			}
+		}
+		return $arr;
+	};
+	static::$SysData[SYSLOG_ID] = $rename_member(static::$SysData[SYSLOG_ID]);
 }
 //==============================================================================
 // ENV変数をクリア

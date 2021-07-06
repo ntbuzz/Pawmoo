@@ -169,10 +169,10 @@ function SelectLink(setupobj, id, first_call, callback) {
 };
 //====================================================
 // create FORM and SUBMIT
-var formSubmit = function (send_obj, url) {
+var formSubmit = function (obj, url) {
 	$.busy_cursor(true);
 	var form = $('<form method="POST">');
-	$.each(send_obj, function (key, value) {
+	$.each(obj, function (key, value) {
 		$('<input>').attr({
 			'type': 'hidden',
 			'name': key,

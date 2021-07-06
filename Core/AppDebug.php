@@ -22,39 +22,70 @@ define('DBMSG_CLI',     256);      // CLI BIT Mask for CLI_DEBUG
 
 const EMPTY_MSG = " EMPTY\n";
 const EXCLUSION = [
-    'debuglog' => 1,
+//    'Syslog' => 1,
     'password' => 1,
     'passwd' => 1,
 ];
 /*
     アプリケーションデバッグ情報
 */
-//$debug_log_str = [];
-$debug_run_time = 0;
+class sysLog {
+    public static $AppName	= 'app';    // アプリケーション名
+    public static $Controller='cont';   // 実行コントローラ名
+    public static $Method	= 'auto';	// 呼出しメソッド名
+	public static $run_time = 0;
 //==============================================================================
-//  デバッグログ出力
-function get_debug_logs() {
-    $current_log = MySession::get_paramIDs('debuglog');
-    if($current_log !== NULL) ksort($current_log);
-    return $current_log;
+// 静的クラスでのシステム変数初期化
+public static function __Init($appname,$controller,$method) {
+	static::$AppName 	= $appname;
+	static::$Controller = $controller;
+	static::$Method		= $method;
+	// 設定される前に吐き出されたログを取込む
+	MySession::syslog_RenameID(['app'=>$appname,'cont'=>$controller,'auto'=>$method]);
+}
+//==============================================================================
+// ログ識別子
+public static function getLogName($id = '') {
+	return implode([static::$Controller,static::$Method,$id],'.');
+}
+//==============================================================================
+// ログ取得URI
+public static function getLogURI() {
+	return implode([static::$AppName,static::$Controller,static::$Method],'/');
 }
 //==========================================================================
 // 実行時間測定開始
-function debug_run_start() {
-    global $debug_run_time;
-    $debug_run_time = microtime(TRUE);
+public static function run_start() {
+    static::$run_time = microtime(TRUE);
 }
 //==========================================================================
 // 実行時間表示
-function debug_run_time($lvl) {
-    global $debug_run_time;
-    $tm = round((microtime(TRUE) - $debug_run_time), 2);     // 少数2位まで
+public static function run_time($lvl) {
+    $tm = round((microtime(TRUE) - static::$run_time), 2);     // 少数2位まで
     $maxmem = round(memory_get_peak_usage()/(1024*1024),2);
     $sec = LangUI::get_value('debug','.Second');
     debug_log($lvl,[
         "#ExecTime" => "{$tm} {$sec}",
         "#MaxMemory" => "{$maxmem} MB",
     ]);
+}
+//==============================================================================
+//  最終ログ
+public static function last_logs() {
+	$sysVAR = MySession::$EnvData['sysVAR'];
+    return self::logs($sysVAR['controller'],$sysVAR['method']);
+}
+//==============================================================================
+//  デバッグログ出力
+public static function logs($cont,$method) {
+	$id_name = implode([ucfirst(strtolower($cont)),ucfirst(strtolower($method))],'.');
+    $current_log = MySession::syslog_GetData($id_name);
+	if(empty($method)) list($method,$current_log) = array_first_item($current_log);
+    if($current_log !== NULL) ksort($current_log);
+//log_dump(['CONT'=>[$cont,$method],'LOG'=>$current_log]);
+    return $current_log;
+}
+
 }
 //==========================================================================
 // ログレベルの分解
@@ -70,14 +101,11 @@ function sep_level($lvl) {
 //==========================================================================
 // ログリセット
 function log_reset($lvl) {
-//    global $debug_log_str;
     $logging = sep_level($lvl);
     if($logging === FALSE) return;
     list($cli,$lvl) = $logging;
     if($lvl < -DBMSG_SYSTEM) return; // no-logging level
-//    if(in_array($lvl,[DBMSG_DUMP, DBMSG_NOLOG, DBMSG_DIE, DBMSG_CLI])) return;      // no-logging level
-//    unset($debug_log_str[$lvl]);
-    MySession::set_paramIDs("debuglog.{$lvl}",NULL);
+    MySession::syslog_SetData(sysLog::getLogName($lvl),NULL);
 }
 //==========================================================================
 // コマンドラインログの表示
@@ -86,7 +114,7 @@ function debug_dump(...$items) {
 }
 //==========================================================================
 // 強制ダンプ
-function force_dump($items) {
+function log_dump($items) {
     debug_log(DBMSG_DUMP,$items);
 }
 //==========================================================================
@@ -144,7 +172,7 @@ function debug_log($lvl,...$items) {
                     if(is_int($val)) $dmp .= "{$val}\n";
                     else if(is_bool($val)) $dmp .= "TRUE\n";
 					else {
-                        $val = control_escape($val);
+                        $val = htmlspecialchars(control_escape($val));
                         $dmp .= "'{$val}'\n";
                     }
                 }
@@ -192,10 +220,7 @@ function debug_log($lvl,...$items) {
             if((-DBMSG_LEVEL < $lvl && $lvl < 0) || (CLI_DEBUG && $cli !== 0)) {
                 echo "{$dmp_info}\n";
             } else if(!CLI_DEBUG) {     // WEB Access logging $lvl, donot worry CLI_MODE
-//                if(isset($debug_log_str[$lvl])) $dmp_info = $debug_log_str[$lvl] . $dmp_info;
-//                MySession::set_paramIDs("debuglog.{$lvl}",$dmp_info);
-				MySession::set_paramIDs("debuglog.{$lvl}",$dmp_info,TRUE);
-//                $debug_log_str[$lvl] = $dmp_info;
+				MySession::syslog_SetData(sysLog::getLogName($lvl),$dmp_info,TRUE);
             }
         }
     }

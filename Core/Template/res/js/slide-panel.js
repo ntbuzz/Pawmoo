@@ -3,6 +3,10 @@ $(".slide-panel").each(function () {
 	var self = $(this); // jQueryオブジェクトを変数に代入しておく
 	// サイズ属性があればウィンドウサイズを指定する
 	var default_sz = (self.is('[size]')) ? self.attr("size") : '50%';
+	var tms = (self.is('[data-value]')) ? self.attr("data-value") : '220';
+	let items = tms.split('-');
+	var tm_expand   = parseInt(items[0]);
+	var tm_collapse = (items.length < 2) ? ~~(tm_expand/2) : parseInt(items[1]);
 	var tab_obj = self.find('.slide-tab');
 	var class_arr = self.attr('class').split(" ");
 	var direct = "none";
@@ -83,15 +87,14 @@ $(".slide-panel").each(function () {
 		// スライダーを折畳む
 		tab_collapse: function (dir, animate) {
 			var tab = this[dir];
-			if (animate) self.animate(tab.collapse, 110);
+			if (animate) self.animate(tab.collapse, tm_collapse);
 			else self.css(tab.collapse);
 			tab_obj.css(tab.tab_css).find('li').css('border-radius', tab.radius);
 		},
 		// スライダーを開く
 		tab_expand: function (dir) {
 			var tab = this[dir];
-			objDump(tab);
-			self.animate(tab.expand, 220);
+			self.animate(tab.expand, tm_expand);
 			tab_obj.css({
 				left: 0, top: 0,
 				transform:'none',
@@ -105,13 +108,14 @@ $(".slide-panel").each(function () {
 		var cont = self.find('ul.slide-contents').children('li');
 		var index = menu.index($(this));
 		menu.removeClass('selected');		// TabMenu selected delete
-		cont.removeClass('selected');		// TabContents selected delete
+		$(this).addClass('selected');		// switch click TAB selected
+		cont.removeClass('selected').eq(index).addClass('selected');		// TabContents selected delete
 		// スライダーを消す領域を付加
 		var backwall = $('.slideBK');
 		if (!backwall.length) {
 			backwall = $('<div class="slideBK"></div>');
 			$('body').append(backwall);
-		}
+		};
 		backwall.fadeIn('fast');
 		backwall.off().click(function () {
 			backwall.remove();
@@ -119,10 +123,9 @@ $(".slide-panel").each(function () {
 			cont.removeClass('selected');		// TabContents selected delete
 			slidetabs.tab_collapse(direct,true);
 		});
-		$(this).addClass('selected');		// switch click TAB selected
-		cont.eq(index).addClass('selected');	// switch TAB selected Contents
 		// スライダーを開く
 		slidetabs.tab_expand(direct);
+		self.fitWindow();	// switch TAB selected Contents
 	});
 });
 

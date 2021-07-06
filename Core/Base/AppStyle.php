@@ -308,8 +308,8 @@ public function ViewStyle($file_name) {
                 if(preg_match($p,$key,$m)) {
 					if(count($m)===2) {
 		                list($tmp,$id_name) = $m;
-						$id = "view.{$id_name}";
-						$data = MySession::get_paramIDs($id);
+						$id = "{$this->ModuleName}.{$id_name}";
+						$data = MySession::syslog_GetData($id,TRUE);
                         if($this->do_msg) echo "/* {$scope} import from session '{$id}' */\n";
 						$this->outputContents($data);
 						continue;

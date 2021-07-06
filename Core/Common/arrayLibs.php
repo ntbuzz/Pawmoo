@@ -207,7 +207,7 @@ function array_concat_keys(&$arr,$keys) {
 // get array element by structured-name
 function array_member_value($nVal,$names) {
     if(empty($names)) return $nVal;
-    $vset = (mb_strpos($names,'.') !== FALSE) ? explode('.',$names):[$names];
+    $vset = (mb_strpos($names,'.') !== FALSE) ? array_filter(explode('.',$names),'strlen'):[$names];
     foreach($vset as $nm) {
         if(is_array($nVal) && array_key_exists($nm,$nVal)) {
             $nVal = $nVal[$nm];

@@ -102,7 +102,7 @@ if($redirect) {
 }
 require_once('Class/ClassLoader.php');
 ClassLoader::Setup($appname);   // AutoLoader for Application folder
-MySession::InitSession($appname,TRUE);         // Session Variable SETUP
+MySession::InitSession($appname,$controller,TRUE);         // Session Variable SETUP
 MySession::set_paramIDs('debugger',DEBUGGER);  // SET DEBUGGER
 MySession::set_paramIDs('sysinfo',[
     'platform'  => PLATFORM_NAME,
@@ -149,9 +149,11 @@ if(strcasecmp($appname,$controller) === 0) {
 } else {
     App::ChangeMethod($controller,$method,false);
 }
+sysLog::__Init($appname,$controller,$method);
+//LangUI::construct($lang,App::Get_AppPath("View/lang/"),['#common',$controller]);
 // remind Controller, Method name in App class
-App::$Controller  = $controller;
-App::$Method= $method;
+// App::$Controller  = $controller;
+// App::$Method= $method;
 //=================================
 // Debugging Message
 debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
@@ -178,7 +180,7 @@ debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
     ],
 ]);
 
-debug_run_start();
+sysLog::run_start();
 LockDB::LockStart();
 // Login unnecessary, or Login success returned TRUE.
 if($controllerInstance->is_authorised()) {
@@ -189,9 +191,11 @@ if($controllerInstance->is_authorised()) {
 debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
     "CLASS-MANAGER" => ClassManager::DumpObject(),
     "SAVE-AppData"  => MySession::get_envIDs('AppData'),     // included App::[sysVAR]
-    "Paging"  => MySession::get_envIDs('Paging'),     // included App::[sysVAR]
+    "SESSION Resource"  => MySession::$SysData[RESOURCE_ID],
+    "Paging"  => MySession::get_envIDs('Paging'),
+//    "SESSION LOG"  => MySession::$SysData,
 ]);
-debug_run_time(DBMSG_CLI|DBMSG_SYSTEM);
+sysLog::run_time(DBMSG_CLI|DBMSG_SYSTEM);
 MySession::CloseSession();
 // call OUTPUT terminate
 $controllerInstance->__TerminateApp();

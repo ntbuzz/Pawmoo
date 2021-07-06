@@ -216,7 +216,7 @@ function pseudo_markdown($atext, $md_class = '') {
 //------- FORM parts
 //  radio       => ^[name]@{checkitem:item1=val1,item2=val2,...}
 //  checkbox    => ^[name]:{item1=val1:checked,item2=val2:checked,...}
-//  textarea    => ^[name]!{text-value:col,row}
+//  textarea    => ^[name]!{text-value:row,col}
 //  textbox     => ^[name]={text-value:size}
 //  select      => ^[name]%{select-val:option1=val1,option2=val2,...}
 //  combobox    => ^[name]+{select-val:option1=val1,option2=val2,...:size}
@@ -284,12 +284,9 @@ function pseudo_markdown($atext, $md_class = '') {
             case '!':   // text area
                     $vv = explode(':',$val);
                     if(count($vv)===2) {
-                        $size = explode(',',$vv[1]);
-						switch(count($size)) {
-						case 2: $sz = array_key_value(attr_sz_xchange(['cols'=>$size[0],'rows'=>$size[1]]),' '); break;
-						case 1: $sz = array_key_value(attr_sz_xchange(['cols'=>$size[0]]),' '); break;
-						default: $sz = '';
-						}
+						list($rows,$cols) = explode(',',"{$vv[1]},");
+						$wd = array_filter(['rows'=>$rows,'cols'=>$cols],'strlen');
+						$sz = array_key_value(attr_sz_xchange($wd),' ');
                     } else $sz = '';
 					if(!empty($sz)) $sz = " {$sz}";
                     // restore if ...{ TEXT }... mark converted.

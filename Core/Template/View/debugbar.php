@@ -3,7 +3,7 @@
 <script>
 // DOMの準備ができたらログを読み込んでデバッグバーに格納する
 function LoadDebugBar() {
-    var url = "/logs/<?= App::$AppName; ?>/";
+    var url = "/logs/<?= sysLog::getLogURI(); ?>/";
     $('.debugBar').Visible(false);
     $.get(url)
         .done(function(data) {
