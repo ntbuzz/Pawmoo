@@ -528,7 +528,8 @@ public function ViewTemplate($name,$vars = []) {
 		$txt = str_replace(["\r","\n"],['',"\\n\n"],$str);
         $name = str_replace(' ','.',$attrs['class']);
 		if(empty($name)) $name = 'resource';
-        MySession::set_paramIDs("view.{$name}",trim($txt),TRUE);
+		$push_name = implode([App::$Controller,$name],'.');
+        MySession::syslog_SetData($push_name,trim($txt),FALSE,TRUE);
     }
     //--------------------------------------------------------------------------
     //  Define INLINE Section, for use after import Template
@@ -706,8 +707,8 @@ public function ViewTemplate($name,$vars = []) {
         list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         $mycls = (isset($attrs['class']))? $attrs['class'] :'';
 		if(strpos($mycls,'slider-') !== false) {
-			$mycls = "slider-panel {$mycls}";
-			$tabset = '<ul class="slider-tab">';
+			$mycls = "slide-panel {$mycls}";
+			$tabset = '<ul class="slide-tab">';
 			$tabend = '</ul>';
 			$contents='<ul class="slide-contents">';
 		} else {
@@ -718,7 +719,7 @@ public function ViewTemplate($name,$vars = []) {
 		}
         $attrs['class'] = rtrim($mycls);
         $attr = $this->gen_Attrs($attrs,$vars);
-        echo "<div{$attr}>{$tabset}\n";
+        echo "<div{$attr}>\n{$tabset}\n";
         // create tabset
         $tabs = array_keys($sec);
         foreach($tabs as $key_val) {
