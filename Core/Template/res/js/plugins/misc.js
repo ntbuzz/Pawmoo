@@ -244,17 +244,20 @@ $.fn.InitPopupSet = function () {
 $.fn.submitObject = function (false_check,callback) {
 	var self = this;	// Reminder jQuery Self Object
 	var setobj = {};
-	self.find("*").each(function () {
-		var nm = $(this).attr('name');
-		if (nm) {
+	// 兄弟要素を含めるため親要素に戻ってname属性を検索する
+	self.parent().find('[name]').each(function () {
+		var nm = $(this).attr('name');	// 検索済の要素なので必ず存在する
+		if ($(this).prop('tagName') === 'UL') {
+			value = $(this).text().trim();
+		} else {
 			var tt = $(this).attr('type');
-			if (tt == 'checkbox' || tt == 'radio') {
+			if (tt === 'checkbox' || tt === 'radio') {
 				if ($(this).is(':checked')) value = $(this).val();
-				else if (false_check) value = false;   // チェックされていないときの値をセット
+				else if (tt === 'checkbox' && false_check) value = false;   // チェックされていないときの値をセット
 				else return true;
 			} else value = $(this).val();
-			setobj[nm] = value;
 		};
+		setobj[nm] = value;
 	});
 	if (callback !== undefined) callback.call(self, setobj);
 	return self;

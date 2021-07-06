@@ -35,7 +35,9 @@ $(".calendar").each(function () {
 	self.datepicker(date_form);
 });
 // ウィンドウ高さ調整
-$('body').fitWindow();
+$(window).resize(function () {
+	$('body').fitWindow();
+});
 // マークダウン外部リンク
 $('.easy_markdown a[href^=http]:not(:has(img))').addClass("externalLink").attr('target', '_blank');
 
@@ -47,3 +49,5 @@ $(document).on('change','.combobox>select',function () {
 	inbox.val(txt);
 	inbox.addClass('modified');
 });
+// ウィンドウサイズ調整
+$(window).resize();

@@ -108,13 +108,14 @@ $(".slide-panel").each(function () {
 		var cont = self.find('ul.slide-contents').children('li');
 		var index = menu.index($(this));
 		menu.removeClass('selected');		// TabMenu selected delete
-		cont.removeClass('selected');		// TabContents selected delete
+		$(this).addClass('selected');		// switch click TAB selected
+		cont.removeClass('selected').eq(index).addClass('selected');		// TabContents selected delete
 		// スライダーを消す領域を付加
 		var backwall = $('.slideBK');
 		if (!backwall.length) {
 			backwall = $('<div class="slideBK"></div>');
 			$('body').append(backwall);
-		}
+		};
 		backwall.fadeIn('fast');
 		backwall.off().click(function () {
 			backwall.remove();
@@ -122,10 +123,9 @@ $(".slide-panel").each(function () {
 			cont.removeClass('selected');		// TabContents selected delete
 			slidetabs.tab_collapse(direct,true);
 		});
-		$(this).addClass('selected');		// switch click TAB selected
-		cont.eq(index).addClass('selected');	// switch TAB selected Contents
 		// スライダーを開く
 		slidetabs.tab_expand(direct);
+		self.fitWindow();	// switch TAB selected Contents
 	});
 });
 
