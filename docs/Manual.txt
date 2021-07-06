@@ -859,7 +859,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     ^[name]@{checkval:item1=val1,item2=val2,,item3=val3}    // radio ボタン checkval=val の item にチェックをつける、空項目は改行(<br>)を挿入
     ^[name]:{item1=val1:checked}             // checkbox ボタン :checked が FALSE(0,NULL,'f','false')判定でなければチェックをつける
     ^[name]={textvalue:size}                 // text ボックス
-    ^[name]!{textvalue:col,row}              // textarea
+    ^[name]!{textvalue:row,col}              // textarea
     ^[name]%{selectval:option1=val1,...}     // select
     ^[name]+{selectval:option1=val1,...:size}     // combobox(select+textbox) sizeは'em'単位固定
     item や textvalue に '}' が含まれるときはエスケープ '\}' します。
@@ -1061,10 +1061,10 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   もしメモリ不足が発生するようなら、PHP.INIでメモリ容量を増やしてください。
   DEBUG_LEVEL                           // デバッガーの最大メッセージレベル
   DEBUGGER                              // デバッグメッセージバーの表示
-  debug_run_start()                     // 実行時間測定
-  debug_run_time(レベル)                // 実行時間のをレベルメッセージに追加
+  sysLog::run_start()                     // 実行時間測定
+  sysLog::run_time(レベル)                // 実行時間のをレベルメッセージに追加
   debug_log(メッセージレベル,...出力要素) // 出力要素のログ出力
-  get_debug_logs()                      // メッセージログの取得
+  sysLog::debug_logs()                      // メッセージログの取得
 
 ◆ LangUI クラス
 ・静的変数

@@ -100,7 +100,7 @@ You can use "~~~" or "^^^" instead of "```" in the pre element, in which case th
 ^[name]@{checkval:item1=val1,item2=val2,, item3=val3} // Radio item, checkval = val, insert line break (<br>) for empty item
 ^[name]:{item1=val1:checked}           // Ceckbox Item: Check if checked is not FALSE judgment
 ^[name]={textvalue:size}               // Text box
-^[name]!{textvalue:col,row}            // Textarea
+^[name]!{textvalue:row,col}            // Textarea
 ^[name]%{selectval:option1=val1,...}   // select
 
 Escape'\}' if item or textvalue contains'}'.  
