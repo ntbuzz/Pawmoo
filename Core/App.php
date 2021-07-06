@@ -59,6 +59,8 @@ class App {
             'params' => static::$Params,
 
         );
+		App::$Controller  = $controller;
+		App::$Method= $method;
         static::$Query = array_intval_recursive($query);
         // メソッドの書き換えによるアドレスバー操作用
         static::$ReLocate = FALSE;        // URLの書き換え
