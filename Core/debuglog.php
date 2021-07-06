@@ -17,10 +17,11 @@ date_default_timezone_set('Asia/Tokyo');
 $root = basename(dirname(__DIR__));        // Framework Folder
 list($appname,$app_uri,$module,$q_str) = get_routing_path($root);
 parse_str($q_str, $query);
-// URI: /logs/appname
-list($appname,$files) = $module;
-MySession::InitSession($appname);
-$debug_logs = get_debug_logs(); // 他のモジュールで上書きされる前にログ取得
+// URI: /logs/appname/cont/act
+list($appname,$cont,$filter) = $module;
+MySession::InitSession($appname,$cont);
+$debug_logs = sysLog::last_logs(); // 他のモジュールで上書きされる前にログ取得
+//log_dump(['MOD'=>[$cont,$method],'LOG'=>$debug_logs,'SESSION'=>MySession::$EnvData]);
 // 言語ファイルの対応
 if(array_key_exists('lang', $query)) {
     $lang = $query['lang'];

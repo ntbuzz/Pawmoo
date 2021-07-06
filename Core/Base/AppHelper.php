@@ -39,7 +39,7 @@ public function ViewTemplate($layout) {
 // Runtime output
 public function Runtime() {
 	echo "<hr>\n";
-	debug_run_time(-1);
+	sysLog::run_time(-1);
 }
 //==============================================================================
 // Resource(.css/.js) Output (Not USE!)

@@ -37,7 +37,7 @@ list($controller,$files) = $module;
 //$files = $module[3][0];        // ファイル名はパラメータに入る
 // ファイル名を拡張子と分離する
 list($filename,$ext) = extract_base_name($files);
-MySession::InitSession($appname);
+MySession::InitSession($appname,$controller);
 // 言語ファイルの対応
 if(array_key_exists('lang', $query)) {
     $lang = $query['lang'];
