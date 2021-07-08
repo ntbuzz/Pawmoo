@@ -41,17 +41,17 @@ public static function __Init($appname,$controller,$method) {
 	static::$Controller = $controller;
 	static::$Method		= $method;
 	// 設定される前に吐き出されたログを取込む
-	MySession::syslog_RenameID(['app'=>$appname,'cont'=>$controller,'auto'=>$method]);
+	MySession::syslog_RenameID(['app'=>$appname,'cont'=>$controller]);
 }
 //==============================================================================
 // ログ識別子
 public static function getLogName($id = '') {
-	return implode([static::$Controller,static::$Method,$id],'.');
+	return implode([static::$Controller,$id],'.');
 }
 //==============================================================================
 // ログ取得URI
 public static function getLogURI() {
-	return implode([static::$AppName,static::$Controller,static::$Method],'/');
+	return implode([static::$AppName,static::$Controller],'/');
 }
 //==========================================================================
 // 実行時間測定開始
@@ -72,18 +72,29 @@ public static function run_time($lvl) {
 //==============================================================================
 //  最終ログ
 public static function last_logs() {
-	$sysVAR = MySession::$EnvData['sysVAR'];
-    return self::logs($sysVAR['controller'],$sysVAR['method']);
+	$cont = MySession::getEnvIDs('sysVAR.controller');
+    return self::get_logs($cont);
 }
 //==============================================================================
 //  デバッグログ出力
-public static function logs($cont,$method) {
-	$id_name = implode([ucfirst(strtolower($cont)),ucfirst(strtolower($method))],'.');
+public static function get_logs($cont) {
+	$id_name = ucfirst(strtolower($cont));
     $current_log = MySession::syslog_GetData($id_name);
-	if(empty($method)) list($method,$current_log) = array_first_item($current_log);
     if($current_log !== NULL) ksort($current_log);
-//log_dump(['CONT'=>[$cont,$method],'LOG'=>$current_log]);
     return $current_log;
+}
+//==========================================================================
+// 強制ダンプ
+public static function dump($items) {
+    debug_log((CLI_DEBUG)?DBMSG_STDERR:DBMSG_DUMP,$items);
+}
+//==========================================================================
+// コマンドラインログの表示
+public static function debug(...$items) {
+    debug_log(DBMSG_CLI,$items);
+}
+public static function die(...$items) {
+    debug_log(DBMSG_DIE,$items);
 }
 
 }
@@ -106,16 +117,6 @@ function log_reset($lvl) {
     list($cli,$lvl) = $logging;
     if($lvl < -DBMSG_SYSTEM) return; // no-logging level
     MySession::syslog_SetData(sysLog::getLogName($lvl),NULL);
-}
-//==========================================================================
-// コマンドラインログの表示
-function debug_dump(...$items) {
-    debug_log(DBMSG_CLI,$items);
-}
-//==========================================================================
-// 強制ダンプ
-function log_dump($items) {
-    debug_log(DBMSG_DUMP,$items);
 }
 //==========================================================================
 // NULL値の表示
@@ -163,7 +164,6 @@ function debug_log($lvl,...$items) {
                 if(gettype($val)==='object') {
                     $dmp .= "[{$val->ClassName}]\n"; // print_r($val,true);
                 } else if(empty($val)) {
-//				echo "{$key}=NULL".get_null_value($val)."<br>\n";
                     $dmp .= get_null_value($val);
                 } else if(is_array($val)) {
                     $dmp .= "array(" . count($val) . ")\n";
