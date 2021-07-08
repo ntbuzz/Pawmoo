@@ -333,13 +333,14 @@ function expand_text($view,$str,$recdata,$vars,$match_all = false) {
             $var = mb_substr($val,1);
             $var = trim($var,'{}');                 // triming of delimitter { }
             switch($var[0]) {
+			// cannot use in RESOURCE (AppStyle)
             case '@':	// @field-name=compare-value!TRUE-VALUE:FALSE-VALUE#limit-len
 				$p = '/(@{1,2})([^=!:#]+)(?:=([^!:#]+))?(?:!([^:#]*))?(?:\:([^#]+))?(?:#(\d+))?/';
                 preg_match($p,$var,$m);
-                $get_field_data = function($nm) {
+                $get_field_data = function($nm) use(&$recdata) {
                     return (mb_substr($nm,0,1)==='@') ? $recdata[mb_substr($nm,1)]:$nm;
                 };
-                list($pat,$raw,$fn) = $m;
+                list($all,$raw,$fn) = $m;
 				$var = trim(isset($recdata[$fn]) ? $recdata[$fn] : '');     // get FIELD DATA
 				switch(count($m)) {
 				case 7:		// limitation
@@ -372,6 +373,7 @@ function expand_text($view,$str,$recdata,$vars,$match_all = false) {
                 }
 				if(isset($view)) $val = $view->_($var,$allow);       // get Language define
                 break;
+			// cannot use in RESOURCE (AppStyle)
             case '%': if(substr($var,-1) === '%') {     // is parameter number
                     $var = trim($var,'%');
                     if(is_numeric($var)) $val = App::$Params[intval($var)];          // get value from Params[] property
@@ -383,12 +385,15 @@ function expand_text($view,$str,$recdata,$vars,$match_all = false) {
                 break;
             case '$': if(substr($var,-1) === '$') {
                     $var = trim($var,'$');
-                    $val = App::$SysVAR[$var];          // SysVAR[] property
+					$env = MySession::getEnvValues('sysVAR');
+                    $val = $env[$var];          // SysVAR[] property
                 }
                 break;
+			// cannot use in RESOURCE (AppStyle)
             case '?': $var = mb_substr($var,1);     // Query parameter
 				$val = App::$Query[$var];          // Query[] property
                 break;
+			// cannot use in RESOURCE (AppStyle)
             case ':':                                   // Class Property
 				if(isset($view)) {
                    	$p = '/(:{1,2})(\w+)(?:\[([\w\.\'"]+)\])?/';
@@ -409,12 +414,13 @@ function expand_text($view,$str,$recdata,$vars,$match_all = false) {
                     $tt = $var[0];
                     $var = trim($var,$tt);
                     if($tt === '^') {
-                        $val = MySession::get_varIDs(true,$var);
+                        $val = MySession::getEnvIDs($var,true);	// scalar-Get
                         if(!empty($val)) break;
                     }
-                    $val = MySession::get_varIDs(($tt==="'"),$var);// get SESSION ENV or REQUEST
+					$val = ($tt==="'") ? MySession::getEnvIDs($var,true) : MySession::getPostValues($var);
                 }
                 break;
+			// cannot use in RESOURCE (AppStyle)
             case '&':       // Helper Method CALL
 				if(isset($view)) {
                    	$p = '/&(\w+)(?:\(([^\)]+)\))?/';
