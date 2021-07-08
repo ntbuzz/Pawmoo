@@ -17,11 +17,10 @@ date_default_timezone_set('Asia/Tokyo');
 $root = basename(dirname(__DIR__));        // Framework Folder
 list($appname,$app_uri,$module,$q_str) = get_routing_path($root);
 parse_str($q_str, $query);
-// URI: /logs/appname/cont/act
+// URI: /logs/appname/cont
 list($appname,$cont,$filter) = $module;
 MySession::InitSession($appname,$cont);
-$debug_logs = sysLog::last_logs(); // 他のモジュールで上書きされる前にログ取得
-//log_dump(['MOD'=>[$cont,$method],'LOG'=>$debug_logs,'SESSION'=>MySession::$EnvData]);
+$debug_logs = sysLog::get_logs($cont); // コントローラーログの取得
 // 言語ファイルの対応
 if(array_key_exists('lang', $query)) {
     $lang = $query['lang'];
@@ -42,7 +41,6 @@ LangUI::construct($lang,NULL,NULL);    // Load CORE lang ONLY
             $title = (isset($category_msg[$key])) ? $category_msg[$key]:"{$level_msg}:{$key}";
             echo "<li>{$title}</li>\n";
         }
-//        echo "<li>ENV</li>\n";
         echo "</ul>\n";
         echo "</div>\n";
         echo "<div class='debug-panel'>\n";
@@ -54,9 +52,6 @@ LangUI::construct($lang,NULL,NULL);    // Load CORE lang ONLY
             echo "<pre>\n{$msg}\n</pre>\n";
             echo "</div></li>\n";
         }
-//        echo "<li><div class=\"debug_srcollbox\">\n";
-//        debug_log(-19,MySession::$EnvData['AppData']);
-//        echo "</div></li>\n";
     }
 ?>
 </ul>
