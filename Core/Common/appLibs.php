@@ -157,7 +157,8 @@ function make_hyperlink($lnk,$modname) {
             $prf = mb_substr($lnk,0,2);
             $ref = mb_substr($lnk,2);
             if(array_key_exists($prf,$protocols)) {
-                $lnk = $protocols[$prf] . App::$SysVAR['SERVER'] . $ref;
+				$srv = MySession::getEnvValues('sysVAR.SERVER');
+                $lnk = $protocols[$prf] . "{$srv}{$ref}";
             } else $lnk = $ref;
             break;
         default:

@@ -14,6 +14,13 @@ if (!function_exists('array_key_first')) {
     }
 }
 //==============================================================================
+// multi delimitter explode
+function str_explode($delm,$string,$trim_empty = true) {
+    $str_arr = (is_array($delm)) ? explode($delm[0],str_replace($delm, $delm[0], $string)) : explode($delm,$string);
+	if($trim_empty) $str_arr = array_filter($str_arr, "strlen");
+    return $str_arr;
+}
+//==============================================================================
 // first key-value pair for associative arrays
 function array_first_item($arr) {
 	if(is_scalar($arr)) return [0,$arr];
@@ -120,6 +127,12 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
 function array_key_value($arr,$sep=',',$quote='') {
     array_walk($arr,function(&$item,$key) use(&$quote) { $item = "{$key}={$quote}{$item}{$quote}"; });
     return implode($sep,$arr);
+}
+//==============================================================================
+function array_filter_values($arr,$filter) {
+	$val = [];
+	foreach($filter as $key) $val[] = (array_key_exists($$key)) ? $arr[$key] : NULL;
+	return $val;
 }
 //==============================================================================
 // Recursive call to array_key_exists
