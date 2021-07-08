@@ -189,13 +189,14 @@ function pseudo_markdown($atext, $md_class = '') {
             }
             return "<img src='{$src}' alt='{$alt}'{$sz} />";
         },
-//------- ..class#id{ TEXT } CLASS/ID attributed SPAN/P replacement
-        '/\s\.\.([\w\-]+(?:\.[\w\-]+)*)?(?:#([\-\w]+))?(:)?\{(.*?)\}\s/s' => function ($m) {
-            $cls = get_class_names($m[1]);
-            $ids = ($m[2]==='') ? '' : " id='{$m[2]}'";
-            $tag = ($m[3]==='') ? 'span' : 'p';
-            $txt = $m[4];
-            return "<{$tag}{$cls}{$ids}>{$txt}</{$tag}>";
+//------- ..class#id(value){TEXT} CLASS/ID/VALUE attributed SPAN/P replacement
+        '/\s\.\.([\w\-]+(?:\.[\w\-]+)*)?(?:#([\-\w]+))?(?:\(([^\)]+)\))?(:)?\{(.*?)\}\s/s' => function ($m) {
+			list($mm,$cls,$ids,$val,$tag,$txt) = $m;
+            $cls = get_class_names($cls);
+            $ids = ($ids==='') ? '' : " id='{$ids}'";
+            $val = ($val==='') ? '' : " value='{$val}'";
+            $tag = ($tag==='') ? 'span' : 'p';
+            return "<{$tag}{$cls}{$ids}{$val}>{$txt}</{$tag}>";
         },
 //------- ...!{ TEXT }... NL change <br> tag in div-indent class
         '/\s\.\.\.([\w\-]+(?:\.[\w\-]+)*)?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
@@ -265,7 +266,7 @@ function pseudo_markdown($atext, $md_class = '') {
                             $radio .= "{$tag}{$chk} value='{$radio_val}'>{$radio_text} ";
                         }
                     }
-                    $tag = "{$spc}{$radio}";
+                    $tag = "{$spc}<label>{$radio}</label>";
                     break;
             case ':':   // checkbox
                     $checkbox = '';
@@ -279,7 +280,7 @@ function pseudo_markdown($atext, $md_class = '') {
                             $checkbox .= "{$tag}{$chk} value='{$check_val}'>{$check_text} ";
                         }
                     }
-                    $tag = "{$spc}{$checkbox}";
+                    $tag = "{$spc}<label>{$checkbox}</label>";
                     break;
             case '!':   // text area
                     $vv = explode(':',$val);
