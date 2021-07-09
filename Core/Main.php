@@ -190,10 +190,10 @@ if($controllerInstance->is_authorised()) {
 }
 debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
     "CLASS-MANAGER" => ClassManager::DumpObject(),
-    "SAVE-AppData"  => MySession::get_envIDs('AppData'),     // included App::[sysVAR]
-    "SESSION Resource"  => MySession::$SysData[RESOURCE_ID],
-    "Paging"  => MySession::get_envIDs('Paging'),
-//    "SESSION LOG"  => MySession::$SysData,
+    "SAVE-AppData"  => MySession::getEnvIDs('AppData',false),     // included App::[sysVAR]
+    "SESSION Resource"  => MySession::syslog_GetData('',TRUE),	// MySession::$SysData[RESOURCE_ID],
+    "Paging"  => MySession::getEnvIDs('Paging',false),
+//    "SESSION LOG"  => MySession::$SysData[SYSLOG_ID],
 ]);
 sysLog::run_time(DBMSG_CLI|DBMSG_SYSTEM);
 MySession::CloseSession();

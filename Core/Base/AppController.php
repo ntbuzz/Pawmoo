@@ -143,7 +143,7 @@ public function AutoPaging($cond, $max_count = 100) {
 	list($num,$size) = App::$Params;
 	$cond = re_build_array($cond);
 	$PageName = "Paging.{$this->ModuleName}";
-	$Page = MySession::get_envIDs($PageName);
+	$Page = MySession::getEnvIDs($PageName,false);
 //	debug_log(DBMSG_SYSTEM, ['COND' => $cond,"Page"  => $Page ]);
 	$sCond = $Page['Cond'];
 	$sSize = $Page['Size'];
@@ -164,7 +164,7 @@ public function AutoPaging($cond, $max_count = 100) {
 	 	MySession::rm_EnvData('Paging');
 	} else {
 		$Page['Size'] = $size;
-		MySession::set_envIDs($PageName,$Page);
+		MySession::setEnvIDs($PageName,$Page);
 		$this->Model->SetPage($size,$num);
 	}
 }
@@ -234,11 +234,10 @@ public function AddAction() {
 public function UpdateAction() {
 	$num = App::$Params[0];
 	$url = App::$Referer;
-	MySession::setVariables(TRUE,['RecordNo' => $num]);
+	MySession::setEnvVariables(['RecordNo' => $num]);
 	$this->Model->UpdateRecord($num,MySession::$ReqData);
 	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
 	header('Location:' . $url);
-//	echo App::$Referer;
 }
 //==============================================================================
 // Default PDF Convert Action

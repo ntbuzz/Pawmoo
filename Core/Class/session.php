@@ -47,20 +47,19 @@ static function InitSession($appname = 'default',$controller='',$unset_param = F
 	static::$ReqData = array_intval_recursive(static::$ReqData);
 	static::$EnvData = array_intval_recursive(static::$EnvData);
 	if($unset_param) {
-		unset(static::$EnvData[PARAMS_NAME]);           // Delete Style Parameter for AppStyle
-		unset(static::$SysData[SYSLOG_ID]);				// delete system Log
-//		unset(static::$SysData[RESOURCE_ID][$controller]);	// delete controller resource
-//		static::$SysData = [];
+		unset(static::$EnvData[PARAMS_NAME]);           	// Delete Style Parameter for AppStyle
+		unset(static::$SysData[SYSLOG_ID][$controller]);	// delete contoller LOG
+//		static::$EnvData = [];		// for DEBUG
+//		static::$SysData = [];		// for DEBUG
 	}
 }
 //==============================================================================
 // セッションに保存する
 static function CloseSession() {
-//	log_dump(['SESSION'=>static::$EnvData,'SYSTEM'=>static::$SysData]);
+//	sysLog::dump(['SESSION'=>static::$EnvData,'SYSTEM'=>static::$SysData]);
 	$_SESSION[static::$MY_SESSION_ID] = static::$EnvData;
 	$_SESSION[static::$SYS_SESSION_ID] = static::$SysData;
 }
-//---------------------------- 新しいインタフェース ----------------------------
 //==============================================================================
 // REQUEST変数から環境変数に移動する
 static function preservReqData($envKey,...$keys) {
@@ -83,56 +82,30 @@ static function rollbackReqData($envKey,...$keys) {
 	}
 }
 //==============================================================================
-// ENV(tt=TRUE) または REQ(tt=FALSE) 変数値を返す
-static function getValue($tt,$key) {
-	$varData = ($tt) ? static::$EnvData : static::$ReqData;
-	return (array_key_exists($key,$varData)) ? $varData[$key] : NULL;
+// ENV変数値を返す
+static function getEnvValues(...$keys) {
+	if(count($keys)===1) $keys = $keys[0];
+	return self::getVariables2(static::$EnvData,$keys);
 }
 //==============================================================================
-// ENV(tt=TRUE) または REQ(tt=FALSE) 変数から値を取得した配列で返す
-static function getVariables($tt,...$arr) {
-	$varData = ($tt) ? static::$EnvData : static::$ReqData;
-	$result = [];
-	foreach($arr as $nm) {
-		$result[] = (array_key_exists($nm,$varData)) ? $varData[$nm] : '';
-	}
-	return $result;
-}
-//==============================================================================
-// ENV(tt=TRUE) または REQ(tt=FALSE) 変数に値をセット
-// 冗長だが PHP5.6 でも動作する方法をとる
-static function setVariables($tt,$arr) {
-	foreach($arr as $key => $val) {
-		if($tt) static::$EnvData[$key] = $val;
-		else static::$ReqData[$key] = $val;
-	}
+// ENV変数に値をセット
+static function setEnvVariables($arr) {
+	self::setVariables2(static::$EnvData,$arr);
 }
 //==============================================================================
 // setVariables と同じだが、未定義キーだけを値セットする
-// 冗長だが PHP5.6 でも動作する方法をとる
-static function set_if_empty($tt,$arr) {
-	foreach($arr as $key => $val) {
-		if($tt) {
-			if(!array_key_exists($key,static::$EnvData)) static::$EnvData[$key] = $val;
-		} else {
-			if(!array_key_exists($key,static::$ReqData)) static::$ReqData[$key] = $val;
-		}
-	}
+static function setEnv_if_empty($arr) {
+	self::set_if_empty2(static::$EnvData,$arr);
 }
 //==============================================================================
-// ENV/REQUEST変数からドット識別子指定でスカラー取得する
-static function get_varIDs($tt,$names) {
-	$nVal = array_member_value(($tt)?static::$EnvData:static::$ReqData, $names);
-	return (is_array($nVal)) ? array_to_text($nVal,',') : $nVal;
-}
-//==============================================================================
-// ENV変数からドット識別子指定で取得する
-static function get_envIDs($nameID) {
-	return array_member_value(static::$EnvData, $nameID);
+// ドット識別子指定はENV変数のみ
+static function getEnvIDs($id_name,$scalar=TRUE) {
+	$nVal = array_member_value(static::$EnvData, $id_name);
+	return ($scalar && is_array($nVal)) ? array_to_text($nVal,',') : $nVal;
 }
 //==============================================================================
 // ENV変数にドット識別子指定で保存する
-static function set_envIDs($nameID,$val,$append = FALSE) {
+static function setEnvIDs($nameID,$val,$append = FALSE) {
     $ee = &static::$EnvData;
     $mem_arr = explode('.',$nameID);
     foreach($mem_arr as $key) {
@@ -145,9 +118,46 @@ static function set_envIDs($nameID,$val,$append = FALSE) {
 	} else $ee = $val;
 }
 //==============================================================================
-// ENV変数にアプリケーションパラメータを識別子指定で値を設定する
-static function set_paramIDs($names,$val,$append = FALSE) {
-	static::set_envIDs(PARAMS_NAME.".{$names}",$val,$append);
+// REQ変数操作、REQ変数はフラットな連想配列構造なので、ドット識別子IFは不要
+//==============================================================================
+// POST変数値を返す
+static function getPostValues(...$keys) {
+	if(count($keys)===1) $keys = $keys[0];
+	return self::getVariables2(static::$ReqData,$keys);
+}
+//==============================================================================
+// POST変数に値をセット
+static function setPostVariables($arr) {
+	self::setVariables2(static::$ReqData,$arr);
+}
+//==============================================================================
+// setVariables と同じだが、未定義キーだけを値セットする
+static function setPost_if_empty($arr) {
+	self::set_if_empty2(static::$ReqData,$arr);
+}
+//==============================================================================
+// 連想配列から変数値を返す
+private static function getValue2($varData,$key) {
+	return (array_key_exists($key,$varData)) ? $varData[$key] : NULL;
+}
+//==============================================================================
+// 連想配列から変数配列を返す
+private static function getVariables2($varData,$arr) {
+	$result = is_array($arr) ? [] : NULL;
+	if(is_array($arr))  {
+		foreach($arr as $nm) $result[] = (array_key_exists($nm,$varData)) ? $varData[$nm] : '';
+		return $result;
+	} else 	return (array_key_exists($arr,$varData)) ? $varData[$arr] : NULL;
+}
+//==============================================================================
+// 連想配列に値をセット
+private static function setVariables2(&$varData,$arr) {
+	foreach($arr as $key => $val) $varData[$key] = $val;
+}
+//==============================================================================
+// ENV変数にアプリケーションパラメータを識別子指定で設定する
+static function set_paramIDs($names,$val) {
+	static::setEnvIDs(PARAMS_NAME.".{$names}",$val);
 }
 //==============================================================================
 // ENV変数からアプリケーションパラメータを識別子指定で値を取得
@@ -169,20 +179,20 @@ static function syslog_SetData($names,$val,$append = FALSE,$resource = FALSE) {
 		$prev = (empty($ee)) ? '':"{$ee}\n";
 		$ee = "{$prev}{$val}";
 	} else $ee = $val;
-//log_dump(['ID'=>"{$kid}.{$names}",'SYS'=>static::$SysData,'VAL'=>$nVal]);
+//	sysLog::dump(['ID'=>"{$kid}.{$names}",'SYS'=>static::$SysData,'VAL'=>$nVal]);
 }
 //==============================================================================
 // システムログを取得
 static function syslog_GetData($names,$resource = FALSE) {
 	$kid = ($resource) ? RESOURCE_ID : SYSLOG_ID;
 	$nVal = array_member_value(static::$SysData, "{$kid}.{$names}");
-//log_dump(['ID'=>"{$kid}.{$names}",'VAL'=>$nVal]);
+//	sysLog::dump(['ID'=>"{$kid}.{$names}",'VAL'=>$nVal]);
 	return $nVal;
 }
 //==============================================================================
 // システムログのID名変更
 static function syslog_RenameID($trans) {
-//log_dump(static::$EnvData);
+//	sysLog::dump(static::$EnvData);
 	$rename_member = function($arr) use(&$rename_member,&$trans) {
 		if(is_array($arr)) {
 			foreach($arr as $key => $val) {
@@ -223,22 +233,5 @@ static function setup_Login($login=NULL) {
 	// SESSION 変数に即時反映させる
 	$_SESSION[static::$MY_SESSION_ID] = static::$EnvData;
 }
-/*
-==============================================================================
-	旧メソッドから新メソッドへの読替え
-static function PostToEnv($keys)	=> preservReqData() , rollbackReqData(...$keys)
-static function PostVars(...$arr)	=> getVariables($tt,...$arr)
-static function EnvVars(...$arr)	=> getVariables($tt,...$arr)
-static function get_envVars($names) => get_varIDs($tt,$names)
-static function SetDefault($nm,$val)=> set_if_empty($tt,$arr)
-static function SetEnvVar($nm,$val) => setVariables($tt,$arr)
-static function SetPostVars($arr)  	=> setVariables($tt,$arr)
-static function UnsetEnvData($arr) 	=> rm_EnvData(...$arr)
-static function getLoginValue($id) 	=> get_LoginValue($id)
-static function setLoginValue($id,$val) => set_LoginValue($array)
-static function getLoginInfo() 		=> get_LoginValue(NULL)
-static function SetLogin($login) 	=> setup_Login($login)
-static function ClearLogin()  		=> setup_Login(NULL)
-*/
 
 }

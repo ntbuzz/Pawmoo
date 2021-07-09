@@ -59,14 +59,15 @@ const LOC_APPSELF = 0;     // url .url http://host/appRoot/url
 //=====================================================
 // URIの操作
 function PawmooLocations() {
-    this.protocol = location.protocol;
-    this.host = location.host;
-    this.qstr = location.search.replace('?','');
-    this.items = location.pathname.replace(/^[\/]+|[\/]+$/g, '').split('/');
-    var cont = "${$controller$}";
-    if (this.items[1] !== cont) this.items.splice(1, 0, cont);      // controller name compensate
+//    var cont = "${$controller$}";
+    this.protocol = window.location.protocol;
+    this.host = window.location.host;
+    this.qstr = window.location.search.replace('?','');
+    this.items = window.location.pathname.replace(/^[\/]+|[\/]+$/g, '').split('/');
+//    if (this.items[1] !== cont) this.items.splice(1, 0, cont);      // controller name compensate
     this.query_str = function () { return (this.qstr == "") ? "" : "?"+this.qstr.replace(";","%3B"); };
     this.set_query = function (q) { this.qstr = q; };
+    this.clear_query = function () { this.qstr = ""; };
     this.last_item = function (n) { return this.items[this.items.length - n]; };
 	this.fullpath = function (url) {
 		if (url.startOfString(['http://', 'https://', 'ftp://', 'file://'])) {
@@ -103,7 +104,11 @@ function PawmooLocations() {
         var path = this.items;
         for (var n=0; (n < path.length) && (isNaN(path[n])); ++n);
         return this.trunc_path(n,e,false);
-    };
+	};
+	this.Locate = function (url) {
+		$.busy_cursor(true);
+		location.href = url;
+	};
 };
 //===============================================
 // Nested SELECT revised edition

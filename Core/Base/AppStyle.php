@@ -377,53 +377,16 @@ public function ViewStyle($file_name) {
         echo "{$content}\n";
     }
 //==============================================================================
-//  変数を置換する
-    private function expand_Walk(&$val, $key, $vars) {
-        if($val[0] === '$' && $val[1] === '{' ) {       // 先頭の2文字が変数文字
-            $var = mb_substr($val,1);
-            $var = trim($var,'{}');                 // 変数の区切り文字{ } は無条件にトリミング
-            switch($var[0]) {
-            case '#':
-                $var = mb_substr($var,1);     // 言語ファイルの参照
-                $prefix = ($var[0]==='.') ? $this->ModuleName : 'resource';
-                $val = LangUI::get_value($prefix, $var);
-                break;
-            case '$': if(substr($var,-1) === '$') {     // 末尾文字を確かめる
-                    $var = trim($var,'$');              // システム変数値
-                    if(isset($this->repVARS[$var])) $val = $this->repVARS[$var];
-                }
-                break;
-            case '^':       // ENV or REQ VAR
-            case '"':       // REQ-VAR
-            case "'":       // ENV-VAR
-                if(substr($var,-1) === $var[0]) {     // check end-char
-                    $tt = $var[0];
-                    $var = trim($var,$tt);
-                    if($tt === '^') {                   // ENV/REQ both check
-                        $val = MySession::get_varIDs(true,$var);
-                        if(!empty($val)) break;
-                    }
-                    $val = MySession::get_varIDs(($tt==="'"),$var);// get SESSION ENV or REQUEST
-                }
-                break;
-            default:
-                if(isset($vars[$var])) $val = $vars[$var];             // 環境変数で置換
-            }
-        }
-    }
+// read LOCALE resource for expand_text(). (ssame as AppObject)
+public function _($defs, $allow_array = FALSE) {
+	$prefix = ($defs[0] === '.') ? $this->ModuleName : 'resource';
+    return LangUI::get_value($prefix, $defs, $allow_array);
+}
 //==============================================================================
 //  文字列の変数置換を行う
-// $[@#%$]varname | ${[@#%$]varname} | {$SysVar$} | {%Params%}
     private function expand_Strings($str,$vars) {
-        $p = '/(?:\${[^}\s]+?}|\${[#%\'"\$][^}\s]+?})/';          // 変数リストの配列を取得
-        preg_match_all($p, $str, $m);
-        $varList = $m[0];
-        if(empty($varList)) return $str;        // 変数が使われて無ければ置換不要
-        $values = $varList = array_unique($varList);
-        array_walk($values, array($this, 'expand_Walk'), $vars);
-        // 配列が返ることもある
-        $exvar = (is_array($values[0])) ? $values[0]:str_replace($varList,$values,$str);    // 置換配列を使って一気に置換
-        return $exvar;
+		$variable = array_override_recursive($this->repVARS,$vars);
+		return expand_text($this,$str,[],$variable);
 }
 
 

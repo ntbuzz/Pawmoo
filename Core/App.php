@@ -59,8 +59,8 @@ class App {
             'params' => static::$Params,
 
         );
-		App::$Controller  = $controller;
-		App::$Method= $method;
+		static::$Controller  = $controller;
+		static::$Method= $method;
         static::$Query = array_intval_recursive($query);
         // メソッドの書き換えによるアドレスバー操作用
         static::$ReLocate = FALSE;        // URLの書き換え
@@ -72,7 +72,10 @@ class App {
             'params' => static::$Params,
             );
         // リクエスト情報を記憶
-        MySession::$EnvData['sysVAR'] = static::$SysVAR;
+        MySession::setEnvVariables([
+			'sysVAR'	=> static::$SysVAR,
+			'QUERY'		=> static::$Query,
+		]);
     }
 //==============================================================================
 // メソッドの置換
