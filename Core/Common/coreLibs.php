@@ -479,7 +479,7 @@ function make_combobox($sel_item,$opt_list,$size) {
 		$tag= "{$tag}<OPTION{$sel}>{$opt}</OPTION>\n";
 	}
 	$sz -= 2;
-	$tag = "{$tag}</select>\n<INPUT TYPE='text' style='width:{$sz}em;' value='{$input_val}' />\n</div>\n";
+	$tag = "{$tag}</select>\n<INPUT TYPE='text' value='{$input_val}' />\n</div>\n";
 	return $tag;
 }
 //==============================================================================
