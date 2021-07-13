@@ -131,7 +131,7 @@ function array_key_value($arr,$sep=',',$quote='') {
 //==============================================================================
 function array_filter_values($arr,$filter) {
 	$val = [];
-	foreach($filter as $key) $val[] = (array_key_exists($$key)) ? $arr[$key] : NULL;
+	foreach($filter as $key) $val[] = (array_key_exists($key,$arr)) ? $arr[$key] : NULL;
 	return $val;
 }
 //==============================================================================
