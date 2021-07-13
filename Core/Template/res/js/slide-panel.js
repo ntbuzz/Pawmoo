@@ -24,15 +24,6 @@ $(".slide-panel").each(function () {
 	// サイズを設定
 	switch (direct) {
 		case "top": case "bottom":
-<<<<<<< HEAD
-			bottom_left = (position === "left");
-			self.css({width: "100%", height: default_sz+"px"});break;
-		case "left": case "right":
-			bottom_left = (position === "bottom");
-			self.css({ width: default_sz + "px", height: "100%" }); break;
-		default:
-			bottom_left = false;
-=======
 			tab_move = (position === "left");
 			self.css({width: "100%", height: default_sz+"px"});break;
 		case "left": case "right":
@@ -40,15 +31,11 @@ $(".slide-panel").each(function () {
 			self.css({ width: default_sz + "px", height: "100%" }); break;
 		default:
 			tab_move = false;
->>>>>>> dev/master
 			self.css({ width: "100%", height: "100%" });
 	};
 	// スライダーの操作オブジェクトを生成
 	var slidetabs = {
-<<<<<<< HEAD
-=======
 		move_flag: tab_move,
->>>>>>> dev/master
 		width:		self.outerWidth(),
 		height:		self.outerHeight(),
 		tab_width:	tab_obj.outerWidth(),
@@ -74,11 +61,7 @@ $(".slide-panel").each(function () {
 					collapse: {top: this.unit(-this.height)	},
 					expand: { top: 0 },
 					tab_css: {
-<<<<<<< HEAD
-						left: (bottom_left) ? 0 : this.unit(this.width - this.tab_width),
-=======
 						left: (this.move_flag) ? 0 : this.unit(this.width - this.tab_width),
->>>>>>> dev/master
 						bottom: this.unit(-this.tab_height),
 					},
 					radius: '0 0 5px 5px',
@@ -88,11 +71,7 @@ $(".slide-panel").each(function () {
 					collapse: {	right: 0,bottom: this.unit(-this.height)},
 					expand: { bottom: 0 },
 					tab_css: {
-<<<<<<< HEAD
-						left: (bottom_left) ? 0 : this.unit(this.width - this.tab_width),
-=======
 						left: (this.move_flag) ? 0 : this.unit(this.width - this.tab_width),
->>>>>>> dev/master
 						top: this.unit(-this.tab_height),
 					},
 					radius: '5px 5px 0 0',
@@ -101,36 +80,20 @@ $(".slide-panel").each(function () {
 			case "left": return {
 					collapse: { left: this.unit(-this.width) },
 					expand: { left: 0 },
-<<<<<<< HEAD
-					tab_css: (bottom_left) ?
-						this.bottom_left(this.tab_width + 12, this.width + this.tab_height - 2) :
-						this.top_left(0, this.width + this.tab_height - 2),
-					radius: '5px 5px 0 0',
-					moveTo: (!bottom_left),
-=======
 					tab_css: (this.move_flag) ?
 						this.bottom_left(this.tab_width + 12, this.width + this.tab_height - 2) :
 						this.top_left(0, this.width + this.tab_height - 2),
 					radius: '5px 5px 0 0',
 					moveTo: (!this.move_flag),
->>>>>>> dev/master
 				};
 			case "right": return {
 					collapse: { right: this.unit(-this.width) },
 					expand: { right: 0, },
-<<<<<<< HEAD
-					tab_css: (bottom_left) ?
-						this.bottom_left(this.tab_width + 12, 0) :
-						this.top_left(0,0),
-					radius: '0 0 5px 5px',
-					moveTo: (!bottom_left),
-=======
 					tab_css: (this.move_flag) ?
 						this.bottom_left(this.tab_width + 12, 0) :
 						this.top_left(0,0),
 					radius: '0 0 5px 5px',
 					moveTo: (!this.move_flag),
->>>>>>> dev/master
 				};
 			default: return {
 					collapse: { left: 0 },
@@ -141,45 +104,25 @@ $(".slide-panel").each(function () {
 				};
 			};
 		},
-<<<<<<< HEAD
-		moveTabTop: function (move) {
-			if (move) {
-				tab_obj.css({ left: 0, top: 0, transform: 'none' })
-						.find('li').css('border-radius', '5px 5px 0 0');
-				tab_contents.css('top', this.tab_height);
-			};
-=======
 		restoreTab: function (tab, animate) {
 			if(!animate) self.css(tab.collapse);	// アニメーションしてなければ即座に隠す
 			tab_obj.css(tab.tab_css).find('li').css('border-radius', tab.radius);
->>>>>>> dev/master
 		},
 		// スライダーを折畳む
 		tab_collapse: function (dir, animate) {
 			var tab = this.param(dir);
-<<<<<<< HEAD
-			if (animate) self.animate(tab.collapse, tm_collapse);
-			else self.css(tab.collapse);
-			tab_obj.css(tab.tab_css).find('li').css('border-radius', tab.radius);
-=======
 			if (animate) self.animate(tab.collapse, tm_collapse, function () { slidetabs.restoreTab(tab,animate);});
 			else slidetabs.restoreTab(tab,animate);
->>>>>>> dev/master
 		},
 		// スライダーを開く
 		tab_expand: function (dir) {
 			var tab = this.param(dir);
-<<<<<<< HEAD
-			this.moveTabTop(tab.moveTo);
-			self.animate(tab.expand, tm_expand);
-=======
 			self.animate(tab.expand, tm_expand);
 			if (tab.moveTo) {
 				tab_obj.css({ left: 0, top: 0, transform: 'none' })
 						.find('li').css('border-radius', '5px 5px 0 0');
 				tab_contents.css('top', this.tab_height);
 			};
->>>>>>> dev/master
 			self.fitWindow();
 		},
 	};
