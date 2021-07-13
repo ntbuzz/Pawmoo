@@ -155,6 +155,14 @@ private static function setVariables2(&$varData,$arr) {
 	foreach($arr as $key => $val) $varData[$key] = $val;
 }
 //==============================================================================
+// setVariables と同じだが、未定義キーだけを値セットする
+// 冗長だが PHP5.6 でも動作する方法をとる
+private static function set_if_empty2(&$data,$arr) {
+	foreach($arr as $key => $val) {
+		if(!array_key_exists($key,$data)) $data[$key] = $val;
+	}
+}
+//==============================================================================
 // ENV変数にアプリケーションパラメータを識別子指定で設定する
 static function set_paramIDs($names,$val) {
 	static::setEnvIDs(PARAMS_NAME.".{$names}",$val);

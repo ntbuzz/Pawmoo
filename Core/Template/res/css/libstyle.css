@@ -94,6 +94,7 @@ option.disable {
 	left:3px;
 	bottom:3px;
 	border:none;
+	width:calc(100% - 1.5em);
 	/* height:1.25em;
 	margin:2px; */
 }

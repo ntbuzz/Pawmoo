@@ -84,7 +84,8 @@ function PawmooLocations() {
             case 2: path = "${$SYSROOT$}" + path; break;
             case 3: path = "/" + path; break;
 		};
-        return  path+"/";
+		if (path.slice(-1) === "/") path = path.slice(0, -1);
+        return  path;
     };
     this.trunc_path = function (n, e, is_num) {
         var path = this.items.slice();
