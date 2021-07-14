@@ -17,12 +17,6 @@
     SizeDisplay => サイズ表示
     Close       => 閉じる
     Resize      => サイズ変更
-    Login       => ログイン
-    UserName    => ユーザー名
-    Password    => パスワード
-    SEND        => 送信
-    PassError   => パスワードが違います
-    UnknownUser => 不明なユーザー
     SelectMe    => 【選択してください】
     DeleteFail  => "'%s' の削除に失敗しました"
     MoveFail    => "'%s' の移動に失敗しました"
@@ -31,6 +25,7 @@
 	CheckALL	=> 全て:
 	CheckConfirm	=> 確定
 	CheckTITLE	=> チェックダイアログ
+    SEND        => 送信
 // ファイルアップロード
     UNDO        => 取消
     FILES       => "送信ファイル:"
@@ -68,18 +63,13 @@
     SizeDisplay => "Display Size"
     Close       => "Close"
     Resize      => "Resize"
-    Login       => Login
-    UserName    => "User Name"
-    Password    => Password
-    SEND        => Send
-    PassError   => 'PASSWORD Missing'
-    UnknownUser => "Unknown USER"
     SelectMe    => "[Select Item]"
     DeleteFail  => "'%s' delete FAIL"
     MoveFail    => "'%s' move FAIL"
 	CheckList	=> "Select Check"
 	CheckALL	=> "ALL Check:"
 	CheckConfirm	=> "Confirm"
+    SEND        => Send
 // for drag&drop upload
     UNDO        => Cancel
     FILES       => "Send Files:"
@@ -102,6 +92,28 @@
 	monthNames => "'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'"
 	dayNames => "'Sun','Mon','Tue','Wed','Thu','Fri','Sat'"
 	YearSuffix => ', '
+]
+#Login => [
+	.ja => [
+		LoginPage  	=> ログイン
+		LoginTitle  => ログイン
+		UserName    => ユーザー名
+		Password    => パスワード
+		LOGIN       => ログイン
+		PassError   => パスワードが違います
+		NeedLogin	=> ログインしてください
+		UnknownUser => 不明なユーザー
+	]
+	.en => [
+		LoginPage 	=> Login
+		LoginTitle  => Signe-In
+		UserName    => "User Name"
+		Password    => Password
+		LOGIN       => Login
+		PassError   => 'Password Missing'
+		NeedLogin	=> "Please Login"
+		UnknownUser => "Unknown USER"
+	]
 ]
 
 SiteMenu => [

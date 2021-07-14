@@ -69,8 +69,8 @@ public function is_enable_action($action) {
 }
 //==============================================================================
 // authorised login mode, if need view LOGIN form, return FALSE
-public function is_authorised() {
-	if($this->needLogin) {
+public function is_authorised($method) {
+	if($this->needLogin && $method !== 'Logout') {
 		if(CLI_DEBUG) {
 			$this->Login->defaultUser();
 			return TRUE;
@@ -80,14 +80,22 @@ public function is_authorised() {
 		$data = $this->Login->is_validLogin(MySession::$ReqData);
 		if($data === NULL) {		// non-request NEW LOGIN POST
 			// check ALREADY LOGIN information if EXIST
+			$userid = MySession::get_LoginValue($login_key);
 			if($this->Login->error_type === NULL) {		// NO-POST LOGIN
-				$userid = MySession::get_LoginValue($login_key);    // already Login check, IN SESSION
 				$data = $this->Login->is_validUser($userid);		// is_enabled account
 			}
 			if($data === NULL) {
 				$msg = $this->__('.Login');
 				$err_msg = $this->Login->error_type;
-				page_response('app-999.php',$msg,$msg,$err_msg);     // LOGIN PAGE Response
+				page_response('app-login.php',[
+					'page_title'	=> $this->__('Login.LoginPage'),
+					'msg_title'		=> $this->__('Login.LoginTitle'),
+					'user_title'	=> $this->__('Login.UserName'),
+					'pass_title'	=> $this->__('Login.Password'),
+					'send_button'	=> $this->__('Login.LOGIN'),
+					'msg_body'		=> $this->Login->error_type,
+					'login_user'	=> $userid,
+				]);     // LOGIN PAGE Response
 			}
 		} else {
 			list($userid,$lang) = $data;

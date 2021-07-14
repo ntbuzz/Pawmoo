@@ -13,13 +13,13 @@ abstract class LoginClass extends AppModel {
 //==============================================================================
 //　ユーザーIDの妥当性を検証する
 public function is_validUser($userid,$passwd = NULL) {
-    $this->error_type = "Login NEED at '{$this->LoginID}'";
+    $this->error_type = $this->__('Login.NeedLogin');
     if(empty($userid)) return NULL;
     $data = $this->getRecordBy($this->LoginID,$userid);
     if($userid === $data[$this->LoginID]) {
         // $passwd != NULL ならここでパスワードチェックをする
         if($passwd !== NULL) {
-            $this->error_type = $this->__('.PassError');
+		    $this->error_type = $this->__('Login.PassError');
             $user_pass = $data['password'];
             if($passwd !== $user_pass) return NULL;
         }
@@ -28,7 +28,7 @@ public function is_validUser($userid,$passwd = NULL) {
         $this->error_type = '';
         return [$userid,$lang];
     }
-    $this->error_type = $this->__('.UnknownUser').": '{$userid}'";
+    $this->error_type = $this->__('Login.UnknownUser').": '{$userid}'";
     return NULL;
 }
 //==============================================================================
@@ -38,9 +38,6 @@ public function is_validLogin($values) {
     foreach($values as $key => $val) {
         // FORM POST name, renamed to Database column name
         $xkey = $this->get_post_field($key);
-//        if(isset($this->PostRenames) && array_key_exists($key,$this->PostRenames))
-//            $key = $this->PostRenames[$key];
-//        else $xkey = $key;
         if(array_key_exists($xkey,$this->Schema)) {     // pickup exists field name
             list($disp,$flag) = $this->Schema[$xkey];   // need encrypt password
             $dval = ($flag === 1) ? passwd_encrypt($val) : $val;
@@ -49,7 +46,9 @@ public function is_validLogin($values) {
     }
     $this->error_type = NULL;
     if(!array_key_exists($this->LoginID,$Login)) return NULL;
-    return $this->is_validUser($Login[$this->LoginID],$Login['password']);
+	$passwd = $Login['password'];
+	if(empty($passwd)) $passwd = '*';
+    return $this->is_validUser($Login[$this->LoginID],$passwd);
 }
 
 }

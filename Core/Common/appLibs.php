@@ -188,6 +188,7 @@ function mark_active_words($atext,$word,$class) {
 function passwd_encrypt($str) {
     $method_name = 'AES-256-CBC';
     $key_string = SESSION_PREFIX;
-    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method_name));
+//    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method_name));
+	$iv = '';
     return openssl_encrypt($str,$method_name,$key_string,0,$iv);
 }
