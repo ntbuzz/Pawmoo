@@ -217,6 +217,12 @@ function array_concat_keys(&$arr,$keys) {
     return trim($ss);
 }
 //==============================================================================
+// set array element
+function array_set_element(&$arr,$name,$val) {
+	if(!empty($val)) $arr[$name] = $val;
+	else if(!is_array_key_exists($name,$arr)) $arr[$name] = '""';
+}
+//==============================================================================
 // get array element by structured-name
 function array_member_value($nVal,$names) {
     if(empty($names)) return $nVal;
