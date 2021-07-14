@@ -80,7 +80,7 @@ private static function convMailAddress($arr) {
 	foreach($arr as $addr => $name) {
 		$addres[] = (empty($name)) ?  "<{$addr}>" : mb_encode_mimeheader($name) . " <{$addr}>";
 	}
-	return 	implode($addres,', ');
+	return 	implode(', ',$addres);
 }
 //==============================================================================
 // 差出人を設定
@@ -105,7 +105,7 @@ static function Send() {
 			'TO'=>static::$To,
 			'SUBJECT'=>static::$Subject,
 			'BODY'=>$body]);
-	};
+	}
 }
 
 }

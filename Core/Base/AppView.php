@@ -528,7 +528,7 @@ public function ViewTemplate($name,$vars = []) {
 		$txt = str_replace(["\r","\n"],['',"\\n\n"],$str);
         $name = str_replace(' ','.',$attrs['class']);
 		if(empty($name)) $name = 'resource';
-		$push_name = implode([App::$Controller,$name],'.');
+		$push_name = implode('.',[App::$Controller,$name]);
         MySession::syslog_SetData($push_name,trim($txt),FALSE,TRUE);
     }
     //--------------------------------------------------------------------------
@@ -776,7 +776,7 @@ public function ViewTemplate($name,$vars = []) {
     // +datebox:size[name] => [  attribute => value value    ]
     private function cmd_datebox($tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
-        if(!empty($innerText)) $attrs['value'] = $innerText;
+		array_set_element($attrs,'value',$innerText);
 		$class = ['calendar'=>1];
 		foreach(explode(' ',$attrs['class']) as $val) $class[$val] = 1;
 		$attrs['class'] = implode(' ',array_keys($class));
@@ -789,7 +789,7 @@ public function ViewTemplate($name,$vars = []) {
     // +textbox:size[name] => [  attribute => value value    ]
     private function cmd_textbox($tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
-        if(!empty($innerText)) $attrs['value'] = $innerText;
+		array_set_element($attrs,'value',$innerText);
 		$attrs = attr_sz_xchange($attrs);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<INPUT TYPE='text'{$attr}>\n";
