@@ -220,7 +220,7 @@ function array_concat_keys(&$arr,$keys) {
 // set array element
 function array_set_element(&$arr,$name,$val) {
 	if(!empty($val)) $arr[$name] = $val;
-	else if(!is_array_key_exists($name,$arr)) $arr[$name] = '""';
+	else if(!array_key_exists($name,$arr)) $arr[$name] = '""';
 }
 //==============================================================================
 // get array element by structured-name
