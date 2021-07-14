@@ -4,11 +4,12 @@
  * 	MySession:	Management SESSION variable, POST/GET variables
  */
 //セッションの有効期限を5分に設定
-$session_time = (60 * 60);			// SESSION KEEP 60-min
+$session_time = (60 * 60 * 24);			// SESSION KEEP 1-day
 if(CLI_DEBUG) $_SESSION = [];
 else {
-	ini_set('session.gc_divisor',1);
 	ini_set('session.gc_maxlifetime',$session_time);
+ 	ini_set('session.gc_probability',1);
+	ini_set('session.gc_divisor',1);
 	session_start();
 }
 define('PARAMS_NAME','AppData');
