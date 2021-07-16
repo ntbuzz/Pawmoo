@@ -1073,7 +1073,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 
 ・静的メソッド
   LangUI::construct($lang)              // 言語リストを元にクラスを初期化する (Main.phpのみで使用)
-  LangUI::LangFiles($files)             // モジュール言語ファイルを読み込む、$filesは配列可
+  LangUI::SwitchLangs($new_lang)        // 言語を切り替える
   LangUI::get_value($mod, $id, $allow)  // モジュール内の言語識別名から文字列を取り出す、allow = TRUE なら配列を返す
   LangUI::get_array($arr, $mod, $var)   // 言語識別名から翻訳要素名を取り出し、連想配列の値を返す
 
@@ -1086,6 +1086,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 ・静的メソッド
   MySession::InitSession()              // セッション変数を初期化する(Main.phpのみで使用)
   MySession::CloseSession()             // セッション変数を書き戻す(Main.phpのみで使用)
+  MySession::ClearSession()             // セッションに保存する変数を消去(Logoutメソッド)
   MySession::preservReqData(...$keys)   // REQUEST変数から環境変数に移動する
   MySession::rollbackReqData(...$keys)  // SESSION変数からREQUESTに移動する
   MySession::getVariables($tt,...$arr)  // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から値を取得した配列で返す
@@ -1100,6 +1101,10 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   MySession::set_LoginValue($arr)       // ログイン情報に書込
   MySession::setup_Login($login=NULL)   // ログイン情報を置換
 
+  MySession::assignPagingIDs($id,$val)	// $valに値が設定されていればPaging情報に書込
+  MySession::getPagingIDs($id) 			// Paging情報の $id 名を取得
+  MySession::setPagingIDs($id,$val)		// Paging情報の $id 名に書込,$val === NULL なら削除
+
 ◆ SendMail クラス（実験的）
 ・静的変数
   SendMail::$Header;                  // メールヘッダ
@@ -1112,6 +1117,13 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 
 ・静的メソッド
   SendMail::_Init()                   // static クラスにおける初期化処理(Main.phpのみで使用)
+  SendMail::Reset($obj)				  // $obj 配列による初期化、$obj 配列は以下の連想配列
+									  //  'From' => [ email => user-name ],
+									  //  'To'   => [ email => user-name, ... ],
+									  //  'Cc'   => [ email => user-name, ... ],
+									  //  'Bcc'  => [ email => user-name, ... ],
+									  //  'Subject' => strings ,
+									  //  'Message' => body-text
   SendMail::AppendMessage($msg)       // 本文にmsgを追加
   SendMail::SetFrom($username,$email) // 差出人を設定
   SendMail::AppendCC($email)          // 写しの宛先を追加
