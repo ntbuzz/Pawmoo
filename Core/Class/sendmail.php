@@ -108,7 +108,7 @@ static function Send() {
 		'SUBJECT'=>static::$Subject,
 		'BODY'=>$body]);
 	]);
-	$to = 'dge-fb-pssc-hp@fujifilm.com';
+	$to = 'root@localhost';
 	$subject = "テスト:{$subject}";
 	$header = self::ConvHeader('','From',static::$From);
 	if(mb_send_mail($to,$subject,$body,$header) === false) {
