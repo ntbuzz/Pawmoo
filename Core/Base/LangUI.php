@@ -49,6 +49,7 @@ public static function SwitchLangs($newlang) {
     self::LangFiles('Core/Template/lang/','core');
     // アプリケーションの言語リソースパス
     self::LangFiles($default,static::$controllers);
+    self::LangDebug();
 }
 //==============================================================================
 //  言語ファイルの読み込み
@@ -60,7 +61,6 @@ private static function LangFiles($folder,$files) {
     foreach($files as $lang_file) {
 		self::LoadLang($folder,$lang_file);
     }
-    self::LangDebug();
 }
 //==============================================================================
 //  言語ファイルの読み込み
@@ -97,6 +97,7 @@ public static function LangDebug() {
 		$lang_recursive = function($sec) use(&$lang_recursive) {
 			if(is_scalar($sec)) return $sec;
 			$new_sec = [];
+			$lang_only = true;
 			foreach($sec as $key => $val) {
 				if($key[0] === '.') {
 					if($key === static::$Locale) {			// 言語定義
@@ -105,9 +106,11 @@ public static function LangDebug() {
 						else $new_sec = array_override_recursive($new_sec,$vv);
 					}
 				} else {
+					$lang_only = false;
 					$new_sec[$key] = $lang_recursive($val);
 				}
 			}
+			if($lang_only && count($new_sec)===1) return $new_sec[0];
 			return $new_sec;
 		};
         if(file_exists($fullpath)) {
