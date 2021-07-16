@@ -1,31 +1,18 @@
 // デバッグメッセージで使用する言語リソース
 //
-.ja => [
-    Level => [
-        APP
-        Category => [
-            -106 => システム
-            -105 => 言語
-            -104 => ビュー
-            -103 => モデル
-            -102 => ハンドラー
-            -101 => リソース
-            -100 => エラー
-        ]
-    ]
-    DebugInfo => デバッグ情報
-    PathInfo => パス情報
-    SessionClose => セッションクローズ
-    PagerParam => ページャーパラメータ
-    ExecTime => "実行時間"
-    MaxMemory => "メモリ消費 最大: "
-    Second => 秒
-    LocalInfo => ロケール情報
-]
-.en => [
-    Level => [
-        App
-        Category => [
+Level => [
+	APP
+	Category => [
+		.ja => [
+			-106 => システム
+			-105 => 言語
+			-104 => ビュー
+			-103 => モデル
+			-102 => ハンドラー
+			-101 => リソース
+			-100 => エラー
+		]
+        .en => [
             -106 => System
             -105 => Locale
             -104 => View
@@ -34,14 +21,37 @@
             -101 => Resource
             -100 => ERROR
         ]
-    ]
-    DebugInfo => "Debug Info"
-    PathInfo => "Path Info"
-    SessionClose => "Session Close"
-
-    PagerParam => "Pager Param"
-    ExecTime => "Execute Time"
-    MaxMemory => "Memory Max"
-    Second => sec.
-    LocalInfo => Locale
+	]
+]
+DebugInfo => [
+	.ja => デバッグ情報
+    .en => "Debug Info"
+]
+PathInfo => [
+	.ja => パス情報
+    .en => "Path Info"
+]
+SessionClose => [
+	.ja => セッションクローズ
+    .en => "Session Close"
+]
+PagerParam => [
+	.ja => ページャーパラメータ
+    .en => "Pager Param"
+]
+ExecTime => [
+	.ja => "実行時間"
+    .en => "Execute Time"
+]
+MaxMemory => [
+	.ja => "メモリ消費 最大: "
+    .en => "Memory Max"
+]
+Second => [
+	.ja => 秒
+    .en => sec.
+]
+LocalInfo => [
+	.ja => ロケール情報
+    .en => Locale
 ]

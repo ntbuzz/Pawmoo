@@ -94,75 +94,90 @@
 	YearSuffix => ', '
 ]
 #Login => [
-	.ja => [
-		LoginPage  	=> ログイン
-		LoginTitle  => ログイン
-		UserName    => ユーザー名
-		Password    => パスワード
-		LOGIN       => ログイン
-		PassError   => パスワードが違います
-		NeedLogin	=> ログインしてください
-		UnknownUser => 不明なユーザー
+	LoginPage  	=> [
+		.ja => ログイン
+		.en => Login
 	]
-	.en => [
-		LoginPage 	=> Login
-		LoginTitle  => Signe-In
-		UserName    => "User Name"
-		Password    => Password
-		LOGIN       => Login
-		PassError   => 'Password Missing'
-		NeedLogin	=> "Please Login"
-		UnknownUser => "Unknown USER"
+	LoginTitle  => [
+		.ja => ログイン
+		.en => Signe-In
+	]
+	UserName    => [
+		.ja => ユーザー名
+		.en => "User Name"
+	]
+	Password    => [
+		.ja => パスワード
+		.en => Password
+	]
+	LOGIN       => [
+		.ja => ログイン
+		.en => Login
+	]
+	PassError   => [
+		.ja => パスワードが違います
+		.en => 'Password Missing'
+	]
+	NeedLogin	=> [
+		.ja => ログインしてください
+		.en => "Please Login"
+	]
+	UnknownUser => [
+		.ja	=> 不明なユーザー
+		.en => "Unknown USER"
 	]
 ]
 
 SiteMenu => [
-	.ja => [
-		System => システムメニュー
-	    WEB	=> [
-			WEB開発
-			SPIDER-MASTER => SPIDER-MASTER
-			PawmooHelp	=> ヘルプアプリ
-			PC管理	=> PC管理アプリ
-			ブログ	=> ブログアプリ
-			Sample	=> Sample
-			Video管理	=> ビデオ管理アプリ
+	System => [
+		.ja => システムメニュー
+		.en => "System Menu"
+	]
+	WEB	=> [
+		.ja => WEB開発
+		.en => "WEB Develop"
+		SPIDER-MASTER => [
+			.ja => SPIDER-MASTER
+			.en => SPIDER-MASTER
 		]
-		管理 => [
-			管理ページ
-			トップ => トップ
-			PHP情報	=> PHP情報
-			Redmine	=> Redmine
-			Gitbucket	=> Gitbucket
-			GitHib	=> GitHib
-			SQLite	=> SQLite
-			PostgreSQL	=> PostgreSQL
-			MySQL	=>	MySQL
-			TestLink	=> TestLink
+		PawmooHelp	=> [
+			.ja => ヘルプアプリ
+			.en	=> "Pawmoo Help App"
+		]
+		PC管理	=> [
+			.ja => PC管理アプリ
+			.en	=> "PC-Manage App"
+		]
+		ブログ	=> [
+			.ja => ブログアプリ
+			.en	=> "BLOG App"
+		]
+		Sample	=> [
+			.ja => サンプル
+			.en	=> Sample
+		]
+		Video管理	=> [
+			.ja => ビデオ管理アプリ
+			.en	=> "Video-Manage App"
 		]
 	]
-	.en => [
-		System => "System Menu"
-	    WEB	=> [
-			"WEB Develop"
-			SPIDER-MASTER => SPIDER-MASTER
-			PawmooHelp	=> "Pawmoo Help App"
-			PC管理	=> "PC-Manage App"
-			ブログ	=> "BLOG App"
-			Sample	=> Sample
-			Video管理	=> "Video-Manage App"
+	管理 => [
+		.ja => 管理ページ
+		.en => Manage
+		トップ => [
+			.ja => トップ
+			.en => TOP
 		]
-		管理 => [
-			Manage
-			トップ => TOP
-			PHP情報	=> PHP-Info
-			Redmine	=> Redmine
-			Gitbucket	=> Gitbucket
-			GitHib	=> GitHib
-			SQLite	=> SQLite
-			PostgreSQL	=> PostgreSQL
-			MySQL	=>	MySQL
-			TestLink	=> TestLink
+		PHP情報	=> [
+			.ja => PHP情報
+			.en	=> PHP-Info
 		]
+		Redmine	=> Redmine
+		Gitbucket	=>	Gitbucket
+		GitHib	=> GitHib
+		SQLite	=> SQLite
+		PostgreSQL => PostgreSQL
+		MySQL	=> MySQL
+		TestLink => TestLink
 	]
 ]
