@@ -130,6 +130,14 @@ function get_null_value($arg) {
 	return "{$val}\n";
 }
 //==========================================================================
+// sysLogクラスのエイリアス
+function debug_dump($items) {
+	sysLog::dump($items);
+}
+function debug_die($items) {
+	sysLog::die($items);
+}
+//==========================================================================
 // ログの記録または表示
 function debug_log($lvl,...$items) {
 	if(CLI_DEBUG) {
