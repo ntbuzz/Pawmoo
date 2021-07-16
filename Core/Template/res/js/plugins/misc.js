@@ -241,11 +241,12 @@ $.fn.InitPopupSet = function () {
 	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup();
 };
 // FormSubmit用のオブジェクトを生成
-$.fn.submitObject = function (false_check,callback) {
+$.fn.submitObject = function (false_check,callback,is_parent) {
 	var self = this;	// Reminder jQuery Self Object
 	var setobj = {};
+	var top_opj = (is_parent === false) ? self : self.parent();
 	// 兄弟要素を含めるため親要素に戻ってname属性を検索する
-	self.parent().find('[name]').each(function () {
+	top_opj.find('[name]').each(function () {
 		var nm = $(this).attr('name');	// 検索済の要素なので必ず存在する
 		if ($(this).prop('tagName') === 'UL') {
 			value = $(this).text().trim();
