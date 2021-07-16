@@ -46,24 +46,20 @@ public static function SwitchLangs($newlang) {
         debug_log(DBMSG_LOCALE,["言語リスト" => $newlang]);
     }
     // フレームワークの言語リソースを読込む
-    static::$LangDir = 'Core/Template/lang/';
-    self::LoadLang('core');
+    self::LangFiles('Core/Template/lang/','core');
     // アプリケーションの言語リソースパス
-    static::$LangDir = $default;
-    self::LangFiles(static::$controllers);
+    self::LangFiles($default,static::$controllers);
 }
 //==============================================================================
 //  言語ファイルの読み込み
-public static function LangFiles($files) {
-    if($files === NULL) return;
-    if(is_array($files)) {          // 配列引数の時は各要素を言語ファイルとして処理
-        foreach($files as $lang_file) {
-            self::LoadLang($lang_file);
-        }
-    } else {
-        self::LoadLang($files);        // スカラー引数は単独読み込み
-    }
+private static function LangFiles($folder,$files) {
+	static::$LangDir = $folder;
     static::$LocaleFiles = $files;
+    if($files === NULL) return;
+	if(is_scalar($files)) $files = [$files];	// 配列へ変換
+    foreach($files as $lang_file) {
+		self::LoadLang($folder,$lang_file);
+    }
     self::LangDebug();
 }
 //==============================================================================
@@ -90,48 +86,51 @@ public static function LangDebug() {
     }
 //==============================================================================
 //  言語ファイルの読み込み
-    private static function LoadLang($lang_file) {
+    private static function LoadLang($folder,$lang_file) {
         if(empty($lang_file)) return;
         $is_global = ($lang_file[0] == '#');
         if($is_global) {
             $lang_file = mb_substr($lang_file,1);
         }
         if(isset(static::$STRINGS[$lang_file])) return TRUE;     // 連想キーが定義済なら処理しない
-        $fullpath = static::$LangDir . "{$lang_file}.lng";
+        $fullpath = "{$folder}{$lang_file}.lng";
+		$lang_recursive = function($sec) use(&$lang_recursive) {
+			if(is_scalar($sec)) return $sec;
+			$new_sec = [];
+			foreach($sec as $key => $val) {
+				if($key[0] === '.') {
+					if($key === static::$Locale) {			// 言語定義
+						$vv = $lang_recursive($val);
+						if(is_scalar($vv)) $new_sec[] = $vv;
+						else $new_sec = array_override_recursive($new_sec,$vv);
+					}
+				} else {
+					$new_sec[$key] = $lang_recursive($val);
+				}
+			}
+			return $new_sec;
+		};
         if(file_exists($fullpath)) {
             $parser = new SectionParser($fullpath);
             $section = $parser->getSectionDef(false);
             $import = [];           // インポートリスト
             $values = [];           // ロケール定義
             foreach($section as $key => $val) {
-                if($key[0] == '@') {                // @以降の文字列をインポートリストに記憶しておき後で処理する
-                    $import[] = mb_substr($key,1);
-                } else if($key[0] == '.') {        // ロケール定義
+				switch($key[0]) {
+				case '@': $import[] = mb_substr($key,1); break;
+				case '#':
+					$kk = mb_substr($key,1);
+					$arr = (isset(static::$STRINGS[$kk])) ? static::$STRINGS[$kk] : [];
+					static::$STRINGS[$kk] = array_override_recursive($arr,$lang_recursive($val));
+					break;
+				case '.':
                     if($key === static::$Locale) {         // モジュール名の直下に定義された言語
-                        if(is_array($val)) {                           // ロケール定義配列になっていれば不要な言語を削除する
-                            $values = array_override_recursive($values,$val);   // 最上位にマージ
-                        }
+						$values = array_override_recursive($values,$lang_recursive($val));   // 最上位にマージ
                     }
-                } else {
-                    if(is_array($val)) {                           // ロケール定義配列になっていれば不要な言語を削除する
-                        $zz = [];                                   // ロケールが無い識別子をマージするための配列
-                        foreach($val as $kk => $vv) {              // 識別子の子要素に言語キーがあるか探索する
-                            if($kk[0] == '.') {
-                                if($kk == static::$Locale) {        // 識別子の下に定義された言語
-                                    $zz = array_override_recursive($zz,$vv);  // 配列ならマージスカラー要素ならそのまま
-                                }
-                            } else {
-                                $zz[$kk] = $vv;                     // 言語依存しない定義
-                            }
-                        }
-                    } else $zz = $val;
-                    if($key[0] == '#') {       // グローバルIDの登録
-                        $kk = mb_substr($key,1);
-                        static::$STRINGS[$kk] = isset(static::$STRINGS[$kk]) ? array_override_recursive(static::$STRINGS[$kk],$zz) : $zz;
-                    } else {
-                        $values[$key] = $zz;
-                    }
-                }
+					break;
+				default:
+					$values[$key] = (is_scalar($val)) ? $val : $lang_recursive($val);
+				}
             }
             $values = self::emptyDelete($values);      // 空の要素を削除する
             if($is_global) {        // ファイル名がグローバル宣言ならトップレベルにマージする
@@ -142,7 +141,7 @@ public static function LangDebug() {
             // インポート宣言されたファイルを読み込む
             foreach($import as $val) {                      // インポートリストの読み込み処理
                 if(! isset(static::$STRINGS[$val])) {          // ループ回避のため未定義のものだけ処理する
-                    self::LoadLang($val);                  // 再帰呼出
+                    self::LoadLang($folder,$val);                  // 再帰呼出
                 }
             }
             unset($parser);

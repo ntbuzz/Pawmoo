@@ -46,7 +46,7 @@ EOS;
                 if ( in_array($wrapstr, self::WORDSTRING,true)) {
                     $token = trim($token, $wrapstr);
                     if(mb_substr($token,0,1)==='^') {
-                        $token = implode( "\n" , text_line_array("\n",mb_substr($token,1),FALSE));
+                        $token = implode("\n", text_line_array("\n",mb_substr($token,1),FALSE));
                     }
                 } else if($token !== '=>') {
                     $md = explode('=>',trim($token));

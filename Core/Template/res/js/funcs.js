@@ -64,7 +64,6 @@ function PawmooLocations() {
     this.host = window.location.host;
     this.qstr = window.location.search.replace('?','');
     this.items = window.location.pathname.replace(/^[\/]+|[\/]+$/g, '').split('/');
-//    if (this.items[1] !== cont) this.items.splice(1, 0, cont);      // controller name compensate
     this.query_str = function () { return (this.qstr == "") ? "" : "?"+this.qstr.replace(";","%3B"); };
     this.set_query = function (q) { this.qstr = q; };
     this.clear_query = function () { this.qstr = ""; };

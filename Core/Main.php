@@ -183,7 +183,7 @@ debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
 sysLog::run_start();
 LockDB::LockStart();
 // Login unnecessary, or Login success returned TRUE.
-if($controllerInstance->is_authorised()) {
+if($controllerInstance->is_authorised($method)) {
     debug_log(DBMSG_CLI|DBMSG_SYSTEM, [ 'LockDB OWNER' => LockDB::GetOwner()]);
     // Controller Method Dispacher
     $controllerInstance->ActionDispatch($method);

@@ -27,7 +27,7 @@ protected function Connect($table) {
 //==============================================================================
 //	field concatiname
 public function fieldConcat($sep,$arr) {
-	return "concat_ws('{$sep}'," . implode($arr,',') . ")";
+	return "concat_ws('{$sep}'," . implode(',',$arr) . ")";
 }
 //==============================================================================
 //	DROP TABLE/VIEW CASCADE
