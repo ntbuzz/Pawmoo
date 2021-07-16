@@ -80,10 +80,10 @@ public function is_authorised($method) {
 		$data = $this->Login->is_validLogin(MySession::$ReqData);
 		if($data === NULL) {		// non-request NEW LOGIN POST
 			// check ALREADY LOGIN information if EXIST
-			$userid = MySession::get_LoginValue($login_key);
 			if($this->Login->error_type === NULL) {		// NO-POST LOGIN
+				$userid = MySession::get_LoginValue($login_key);
 				$data = $this->Login->is_validUser($userid);		// is_enabled account
-			}
+			} else $userid = MySession::getPostData($login_key);
 			if($data === NULL) {
 				$msg = $this->__('.Login');
 				$err_msg = $this->Login->error_type;
@@ -113,7 +113,8 @@ public function is_authorised($method) {
 //==============================================================================
 // Logout Processing
 public function LogoutAction() {
-	MySession::setup_Login(NULL);
+//	MySession::setup_Login(NULL);
+	MySession::ClearSession();
 	$url = App::Get_SysRoot('index.html');
 	if(CLI_DEBUG) echo "Location:{$url}\n";
 	else header("Location:{$url}");
@@ -150,8 +151,7 @@ public function ActionDispatch($action) {
 public function AutoPaging($cond, $max_count = 100) {
 	list($num,$size) = App::$Params;
 	$cond = re_build_array($cond);
-	$PageName = "Paging.{$this->ModuleName}";
-	$Page = MySession::getEnvIDs($PageName,false);
+	$Page = MySession::getPagingIDs('Setup');
 //	debug_log(DBMSG_SYSTEM, ['COND' => $cond,"Page"  => $Page ]);
 	$sCond = $Page['Cond'];
 	$sSize = $Page['Size'];
@@ -168,13 +168,11 @@ public function AutoPaging($cond, $max_count = 100) {
 	$cnt = $this->Model->getCount($cond);
 	if($cnt < $size )  $size = 0;
 	else if($cnt > $max_count && $size === 0) $size = $max_count;
-	if($size === 0) {
-	 	MySession::rm_EnvData('Paging');
-	} else {
+	if($size > 0) {
 		$Page['Size'] = $size;
-		MySession::setEnvIDs($PageName,$Page);
 		$this->Model->SetPage($size,$num);
-	}
+	} else $Page = NULL;	// remove Paging.Setup
+	MySession::setPagingIDs('Setup',$Page);
 }
 //==============================================================================
 // Auto Paging, and Model Finder
