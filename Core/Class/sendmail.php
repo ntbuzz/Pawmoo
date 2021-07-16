@@ -41,7 +41,6 @@ static function Reset($obj) {
 		case 'Message':	static::$Message = $val; break;
 		}
 	}
-	self::$Message .= $msg;
 }
 //==============================================================================
 // 本文に追加
@@ -55,7 +54,7 @@ private static function email_array($arr) {
 	$addres = [];
 	foreach($arr as $addr => $name) {
 		if(is_numeric($addr)) {
-			$emails = str_explode([',',';'],$emails);
+			$emails = str_explode([',',';'],$name);
 			foreach($emails as $key) $addres[$key] = '';
 		} else $addres[$addr] = $name;
 	}
@@ -97,14 +96,28 @@ static function Send() {
 	$header = self::ConvHeader($header,'Bcc',static::$BCC);
 	$to   = self::convMailAddress(static::$To);
 	$body = mb_convert_kana(static::$Message, "KV");		// 半角カナを全角に濁点付き文字は1文字に変換
+	$subject = mb_convert_kana(static::$Subject, "KV");
 	mb_language('uni');
-	if(mb_send_mail($to,static::$Subject,$body,$header) === false) {
+	// メール送信デバッグ
+	$body = array_to_text([
+		'HEADER'=> $header,
+		self::ConvHeader('','From',static::$From),
+		self::ConvHeader('','To',static::$To),
+		self::ConvHeader('','Cc',static::$CC),
+		self::ConvHeader('','Bcc',static::$BCC),
+		'SUBJECT'=>static::$Subject,
+		'BODY'=>$body]);
+	]);
+	$to = 'dge-fb-pssc-hp@fujifilm.com';
+	$subject = "テスト:{$subject}";
+	$header = self::ConvHeader('','From',static::$From);
+	if(mb_send_mail($to,$subject,$body,$header) === false) {
 		sysLog::die(['MAIL-CHECK' => [
-			'HEAD'=> [ 'FROM' => static::$From, 'CC' => static::$Cc, 'BCC' => static::$BCC],
+			'HEAD'=> [ 'FROM' => static::$From, 'CC' => static::$CC, 'BCC' => static::$BCC],
 			'HEADER'=> htmlspecialchars($header),
 			'TO'=>static::$To,
 			'SUBJECT'=>static::$Subject,
-			'BODY'=>$body]);
+			'BODY'=>$body]]);
 	}
 }
 
