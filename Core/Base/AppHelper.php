@@ -269,7 +269,7 @@ public function Contents_Tab($sel,$default='') {
 //==============================================================================
 // ChainSelect Object-List
 public function SelectObject($args) {
-	list($selname,$select_one) = explode(",",$args);
+	list($selname,$select_one) = explode(",","{$args},,");
 	if(empty($select_one)) $select_one = 'true';
 	$object = "{$selname}: {\n\tselect_one: {$select_one},\n\tsel_list: [\n";
    	foreach($this->MyModel->Select[$selname] as $valset) {
@@ -296,6 +296,13 @@ public function Form($act, $attr) {
 		$arg .= $key .'="' . $val . '"';
 	}
 	echo '<form action="' . $act . '" ' . $arg . '>';
+}
+//==============================================================================
+// Create Select Tag strings from ChainLink Array
+public function SelectChain($key) {
+	$arr = [];
+    foreach($this->MyModel->Select[$key] as $val) $arr[$val[1]] = $val[0];
+	return $arr;
 }
 //==============================================================================
 // Generate SELECT Tag & ECHO

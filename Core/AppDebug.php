@@ -46,12 +46,12 @@ public static function __Init($appname,$controller,$method) {
 //==============================================================================
 // ログ識別子
 public static function getLogName($id = '') {
-	return implode([static::$Controller,$id],'.');
+	return implode('.',[static::$Controller,$id]);
 }
 //==============================================================================
 // ログ取得URI
 public static function getLogURI() {
-	return implode([static::$AppName,static::$Controller],'/');
+	return implode('/',[static::$AppName,static::$Controller]);
 }
 //==========================================================================
 // 実行時間測定開始
@@ -128,6 +128,14 @@ function get_null_value($arg) {
 	else if($arg !== '') $val = '"0"';
 	else $val = '""';
 	return "{$val}\n";
+}
+//==========================================================================
+// sysLogクラスのエイリアス
+function debug_dump($items) {
+	sysLog::dump($items);
+}
+function debug_die($items) {
+	sysLog::die($items);
 }
 //==========================================================================
 // ログの記録または表示

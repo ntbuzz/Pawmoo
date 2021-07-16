@@ -24,11 +24,6 @@ function get_routing_path($root) {
     list($appname,$controller,$method) = $args;
     $filters = array_splice($args,3);
     $filename = '';
-/*
-    $params = array_filter($pp,function($v) use(&$filename) {
-        if(strpos($v,'.')===FALSE) return TRUE;
-        $filename = $v;return FALSE;});
-*/
     $params = array_filter($pp,
         function($v) use(&$filename) {
             $ext = extract_extension($v);
@@ -78,14 +73,13 @@ function error_response($error_page,$app_name, $app_uri, $module) {
 }
 //==============================================================================
 // Output Message Page
-// enabled of PHP VARIABLE:
-//      $app_root       Application Top URI
-//      $$page_title    Page Title
-//      $msg_title      Message Title
-//      $msg_body       Message Body
-function page_response($app_page,...$msg_array) {
+// variable in page will be msg_array [ keyname => value, ... ]
+//  and root URI information additional
+//      $sys_root    System top URI
+//      $app_root    Application top URI
+function page_response($app_page,$msg_array) {
     $folders = array(App::Get_AppPath("error/"),"Core/error/");
-    list($page_title,$msg_title,$msg_body) = $msg_array;
+	foreach($msg_array as $nm => $val) $$nm = $val;		// set local variable
     $sys_root = App::Get_SysRoot();
     $app_root = App::Get_AppRoot();
     foreach($folders as $file) {
@@ -186,7 +180,7 @@ function get_class_names($cls, $with_attr = true) {
 //  text            0   digit | alpha-numeric
 function is_tag_identifier($str) {
     // digit or empty string is not token
-    if(empty($str) || is_array($str)) return 0;
+    if($str ==='' || is_array($str)) return 0;
     if(strpos('*&@+<?%-',$str[0]) !== FALSE)     return 2;       // command-token
     // dirty pattern for TAG-token
     $p = '/^(?:[a-zA-Z_]*)(?:[\.#][a-zA-Z_\-\s]*)+(?:\:\d+)?(?:[\{\(\[].+?[\}\)\]])*$/';
@@ -243,7 +237,7 @@ function re_build_array($cond) {
 						set_array_key_unique($arr,$kk,$vv);
 					}
 				}
-			} else if(!empty($val)) $arr[] = $val;
+			} else if($val !== '') $arr[] = $val;
 		};
 		$array_item_shurink = function($opr,$val) use(&$array_map_shurink) {
 			return (is_array($val)) ? $array_map_shurink($opr,$val) : $val;
@@ -252,7 +246,7 @@ function re_build_array($cond) {
 		$wd = [];
 		foreach($arr as $key => $val) {
 			$child = $array_item_shurink((is_numeric($key))?$opr:$key,$val);
-			if($child === []) continue;		// empty condition value
+			if(is_numeric($key) && ($child === [] || $child === NULL)) continue;		// empty condition value
 			if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
 				$array_merged($opr,$wd,$child);
 			} else {
@@ -348,7 +342,7 @@ function expand_text($view,$str,$recdata,$vars,$match_all = false) {
 					if(mb_strlen($var) > $limit) $var = mb_substr($var,0,$limit) . ' ...';
 				case 6:
 					$c = array_slice($m,3,3);
-					if(!empty(implode($c))) {
+					if(implode('',$c) !== '') {
 	                    list($cmp,$val_true,$val_false) = $c;
 						if($val_true === '') $val_true = "@{$fn}";
 						if($cmp === '') {	// no-comp will be empty-check
@@ -415,7 +409,7 @@ function expand_text($view,$str,$recdata,$vars,$match_all = false) {
                     $var = trim($var,$tt);
                     if($tt === '^') {
                         $val = MySession::getEnvIDs($var,true);	// scalar-Get
-                        if(!empty($val)) break;
+                        if($val !== '') break;
                     }
 					$val = ($tt==="'") ? MySession::getEnvIDs($var,true) : MySession::getPostValues($var);
                 }
@@ -441,14 +435,14 @@ function expand_text($view,$str,$recdata,$vars,$match_all = false) {
             }
         }
     };
-	if(empty($str) || is_numeric($str)) return $str;
+	if($str === '' || is_numeric($str)) return $str;
 	if($match_all) {
 		$values = $varList = [$str];
 	} else {
 		$p = '/\${[^}\s]+?}|\${[#%\'"\$@&:][^}\s]+?}/';       // PARSE variable format
 		preg_match_all($p, $str, $m);
 		$varList = $m[0]; 
-		if(empty($varList)) return $str;        // not use variable.
+		if($varList === []) return $str;        // not use variable.
 		$values = $varList = array_unique($varList);
 	}
 	array_walk($values, $expand_Walk, $vars);
@@ -461,7 +455,7 @@ function expand_text($view,$str,$recdata,$vars,$match_all = false) {
 function array_associate_convert($str) {
 	$arr = [];
 	foreach(explode(',',$str) as $itemval) {
-		if(!empty($itemval)) {
+		if($itemval !== '') {
 			list($opt_text,$opt_val) = explode('=',$itemval); 
 			$arr[$opt_text] = $opt_val;
 		}

@@ -4,11 +4,12 @@
  * 	MySession:	Management SESSION variable, POST/GET variables
  */
 //セッションの有効期限を5分に設定
-$session_time = (60 * 60);			// SESSION KEEP 60-min
+$session_time = (60 * 60 * 24);			// SESSION KEEP 1-day
 if(CLI_DEBUG) $_SESSION = [];
 else {
-	ini_set('session.gc_divisor',1);
 	ini_set('session.gc_maxlifetime',$session_time);
+ 	ini_set('session.gc_probability',1);
+	ini_set('session.gc_divisor',1);
 	session_start();
 }
 define('PARAMS_NAME','AppData');
@@ -21,10 +22,12 @@ class MySession {
 	public static $MY_SESSION_ID;
 	private static $SYS_SESSION_ID;
 	public static $SysData;			// for SysLog, Resource Push
+	private static $Controller;
 //==============================================================================
 // static クラスにおける初期化処理
 static function InitSession($appname = 'default',$controller='',$unset_param = FALSE) {
 	$appname = strtolower($appname);
+	static::$Controller = (empty($controller)) ? 'Res' : $controller;
 	$session_id = SESSION_PREFIX . "_{$appname}";
 	$session_sys="{$session_id}_sys";
 //	unset($_SESSION[$session_id]);
@@ -35,7 +38,7 @@ static function InitSession($appname = 'default',$controller='',$unset_param = F
 	static::$SysData = (array_key_exists($session_sys,$_SESSION)) ? $_SESSION[$session_sys] : [];
 	// for Login skip on CLI debug.php processing
 	if(CLI_DEBUG) {
-		static::$EnvData['Login'] = ['username' => 'ntak'];
+		static::$EnvData['Login'] = [];
 	}
 	// overwrite real POST/GET variables
 	static::$ReqData = [];
@@ -52,6 +55,11 @@ static function InitSession($appname = 'default',$controller='',$unset_param = F
 //		static::$EnvData = [];		// for DEBUG
 //		static::$SysData = [];		// for DEBUG
 	}
+}
+//==============================================================================
+// セッション保存の変数を破棄
+static function ClearSession() {
+	static::$EnvData = static::$SysData = [];
 }
 //==============================================================================
 // セッションに保存する
@@ -87,6 +95,9 @@ static function getEnvValues(...$keys) {
 	if(count($keys)===1) $keys = $keys[0];
 	return self::getVariables2(static::$EnvData,$keys);
 }
+static function getEnvData($keys) {
+	return self::getValue2(static::$EnvData,$keys);
+}
 //==============================================================================
 // ENV変数に値をセット
 static function setEnvVariables($arr) {
@@ -118,12 +129,49 @@ static function setEnvIDs($nameID,$val,$append = FALSE) {
 	} else $ee = $val;
 }
 //==============================================================================
+// ドット識別子指定でENV変数を削除
+static function rmEnvIDs($nameID) {
+    $ee = &static::$EnvData;
+    $mem_arr = explode('.',$nameID);
+	$rm = array_pop($mem_arr);
+    foreach($mem_arr as $key) {
+        if(!isset($ee[$key])) return;
+        $ee = &$ee[$key];
+    }
+	unset($ee[$rm]);
+	return false;
+}
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// ページング情報のR/W
+private static function PagingIDs($id) {
+	$mod = static::$Controller;
+	return "Paging.{$mod}.{$id}";
+}
+static function assignPagingIDs($id,$val) {
+	$id_name = self::PagingIDs($id);
+	if($val==='') return array_member_value(static::$EnvData,$id_name);
+	static::setEnvIDs($id_name,$val);
+	return $val;
+}
+static function getPagingIDs($id) {
+	$id_name = self::PagingIDs($id);
+	return array_member_value(static::$EnvData,$id_name);
+}
+static function setPagingIDs($id,$val) {
+	$id_name = self::PagingIDs($id);
+	if($val===NULL) self::rmEnvIDs($id_name);
+	else static::setEnvIDs($id_name,$val);
+}
+//==============================================================================
 // REQ変数操作、REQ変数はフラットな連想配列構造なので、ドット識別子IFは不要
 //==============================================================================
 // POST変数値を返す
 static function getPostValues(...$keys) {
 	if(count($keys)===1) $keys = $keys[0];
 	return self::getVariables2(static::$ReqData,$keys);
+}
+static function getPostData($keys) {
+	return self::getValue2(static::$ReqData,$keys);
 }
 //==============================================================================
 // POST変数に値をセット
@@ -223,7 +271,7 @@ static function rm_EnvData(...$arr) {
 // ログイン情報を取得
 static function get_LoginValue($id = NULL) {
 	$LoginData = static::$EnvData['Login'];
-	if($id === NULL || empty($LoginData)) return $LoginData;
+	if($id === NULL || empty($LoginData)) return '';
 	return (array_key_exists($id,$LoginData)) ? $LoginData[$id] : '';
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -17,12 +17,6 @@
     SizeDisplay => サイズ表示
     Close       => 閉じる
     Resize      => サイズ変更
-    Login       => ログイン
-    UserName    => ユーザー名
-    Password    => パスワード
-    SEND        => 送信
-    PassError   => パスワードが違います
-    UnknownUser => 不明なユーザー
     SelectMe    => 【選択してください】
     DeleteFail  => "'%s' の削除に失敗しました"
     MoveFail    => "'%s' の移動に失敗しました"
@@ -31,6 +25,7 @@
 	CheckALL	=> 全て:
 	CheckConfirm	=> 確定
 	CheckTITLE	=> チェックダイアログ
+    SEND        => 送信
 // ファイルアップロード
     UNDO        => 取消
     FILES       => "送信ファイル:"
@@ -68,18 +63,13 @@
     SizeDisplay => "Display Size"
     Close       => "Close"
     Resize      => "Resize"
-    Login       => Login
-    UserName    => "User Name"
-    Password    => Password
-    SEND        => Send
-    PassError   => 'PASSWORD Missing'
-    UnknownUser => "Unknown USER"
     SelectMe    => "[Select Item]"
     DeleteFail  => "'%s' delete FAIL"
     MoveFail    => "'%s' move FAIL"
 	CheckList	=> "Select Check"
 	CheckALL	=> "ALL Check:"
 	CheckConfirm	=> "Confirm"
+    SEND        => Send
 // for drag&drop upload
     UNDO        => Cancel
     FILES       => "Send Files:"
@@ -103,54 +93,91 @@
 	dayNames => "'Sun','Mon','Tue','Wed','Thu','Fri','Sat'"
 	YearSuffix => ', '
 ]
+#Login => [
+	LoginPage  	=> [
+		.ja => ログイン
+		.en => Login
+	]
+	LoginTitle  => [
+		.ja => ログイン
+		.en => Signe-In
+	]
+	UserName    => [
+		.ja => ユーザー名
+		.en => "User Name"
+	]
+	Password    => [
+		.ja => パスワード
+		.en => Password
+	]
+	LOGIN       => [
+		.ja => ログイン
+		.en => Login
+	]
+	PassError   => [
+		.ja => パスワードが違います
+		.en => 'Password Missing'
+	]
+	NeedLogin	=> [
+		.ja => ログインしてください
+		.en => "Please Login"
+	]
+	UnknownUser => [
+		.ja	=> 不明なユーザー
+		.en => "Unknown USER"
+	]
+]
 
 SiteMenu => [
-	.ja => [
-		System => システムメニュー
-	    WEB	=> [
-			WEB開発
-			SPIDER-MASTER => SPIDER-MASTER
-			PawmooHelp	=> ヘルプアプリ
-			PC管理	=> PC管理アプリ
-			ブログ	=> ブログアプリ
-			Sample	=> Sample
-			Video管理	=> ビデオ管理アプリ
+	System => [
+		.ja => システムメニュー
+		.en => "System Menu"
+	]
+	WEB	=> [
+		.ja => WEB開発
+		.en => "WEB Develop"
+		SPIDER-MASTER => [
+			.ja => SPIDER-MASTER
+			.en => SPIDER-MASTER
 		]
-		管理 => [
-			管理ページ
-			トップ => トップ
-			PHP情報	=> PHP情報
-			Redmine	=> Redmine
-			Gitbucket	=> Gitbucket
-			GitHib	=> GitHib
-			SQLite	=> SQLite
-			PostgreSQL	=> PostgreSQL
-			MySQL	=>	MySQL
-			TestLink	=> TestLink
+		PawmooHelp	=> [
+			.ja => ヘルプアプリ
+			.en	=> "Pawmoo Help App"
+		]
+		PC管理	=> [
+			.ja => PC管理アプリ
+			.en	=> "PC-Manage App"
+		]
+		ブログ	=> [
+			.ja => ブログアプリ
+			.en	=> "BLOG App"
+		]
+		Sample	=> [
+			.ja => サンプル
+			.en	=> Sample
+		]
+		Video管理	=> [
+			.ja => ビデオ管理アプリ
+			.en	=> "Video-Manage App"
 		]
 	]
-	.en => [
-		System => "System Menu"
-	    WEB	=> [
-			"WEB Develop"
-			SPIDER-MASTER => SPIDER-MASTER
-			PawmooHelp	=> "Pawmoo Help App"
-			PC管理	=> "PC-Manage App"
-			ブログ	=> "BLOG App"
-			Sample	=> Sample
-			Video管理	=> "Video-Manage App"
+	管理 => [
+		.ja => 管理ページ
+		.en => Manage
+		トップ => [
+			.ja => トップ
+			.en => TOP
 		]
-		管理 => [
-			Manage
-			トップ => TOP
-			PHP情報	=> PHP-Info
-			Redmine	=> Redmine
-			Gitbucket	=> Gitbucket
-			GitHib	=> GitHib
-			SQLite	=> SQLite
-			PostgreSQL	=> PostgreSQL
-			MySQL	=>	MySQL
-			TestLink	=> TestLink
+		PHP情報	=> [
+			.ja => PHP情報
+			.en	=> PHP-Info
 		]
+		Redmine	=> Redmine
+		Gitbucket	=>	Gitbucket
+		GitHib	=> GitHib
+		SQLite	=> SQLite
+		PostgreSQL => PostgreSQL
+		MySQL	=> MySQL
+		TestLink => TestLink
 	]
 ]

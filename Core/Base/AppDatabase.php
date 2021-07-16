@@ -130,7 +130,7 @@ public function execute($cmd) {
 		}
 		$fset[] = "PRIMARY KEY ({$this->Primary})";
 		$sql = "CREATE TABLE {$this->MyTable} (\n";
-		$sql .= implode($fset,",\n") . "\n);";
+		$sql .= implode(",\n",$fset) . "\n);";
 		$this->doSQL($exec,$sql);
 	}
 	// IMPORT initial Table DATA, CSV load or TEST mode
@@ -229,9 +229,9 @@ private function createSQL($table,$view) {
 			}
 		}
 	}
-	$sql .= implode($join,",\n")."\n";
+	$sql .= implode(",\n",$join)."\n";
 	$sql .= "FROM {$table}\n";
-	$sql .= implode($left,"\n").";";
+	$sql .= implode("\n",$left).";";
 	return $sql;
 }
 }

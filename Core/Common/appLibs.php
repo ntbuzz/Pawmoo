@@ -142,8 +142,8 @@ function get_protocol($href) {
 // /xxx     sysRoot/xxx
 // ./xxx    appRoot/modname/xxx
 // xxx      appRoot/xxx
-// !!xxx    http://SERVER/xxx
-// !:xxx    https://SERVER/xxx
+// !!xxx    https://SERVER/xxx
+// !:xxx    http://SERVER/xxx
 function make_hyperlink($lnk,$modname) {
     if(get_protocol($lnk) === NULL) {
         // check on TOP-CHAR
@@ -157,7 +157,7 @@ function make_hyperlink($lnk,$modname) {
             $prf = mb_substr($lnk,0,2);
             $ref = mb_substr($lnk,2);
             if(array_key_exists($prf,$protocols)) {
-				$srv = MySession::getEnvValues('sysVAR.SERVER');
+				$srv = MySession::getEnvIDs('sysVAR.SERVER');
                 $lnk = $protocols[$prf] . "{$srv}{$ref}";
             } else $lnk = $ref;
             break;
@@ -188,6 +188,8 @@ function mark_active_words($atext,$word,$class) {
 function passwd_encrypt($str) {
     $method_name = 'AES-256-CBC';
     $key_string = SESSION_PREFIX;
-    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method_name));
+//    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method_name));
+	$iv = '';
     return openssl_encrypt($str,$method_name,$key_string,0,$iv);
 }
+// $original_text = openssl_decrypt($str,$method_name,$key_string,0,$iv);

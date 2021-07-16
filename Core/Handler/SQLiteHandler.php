@@ -29,7 +29,7 @@ protected function Connect($table) {
 public function fieldConcat($sep,$arr) {
 	$bind = array_map(function($fn) {return "IFNULL({$fn},'')";},$arr);
 	$sep = (empty($sep)) ? '||' : "||'{$sep}'||";
-	return implode($bind,$sep);
+	return implode($sep,$bind);
 }
 //==============================================================================
 //	DROP TABLE/VIEW CASCADE
@@ -68,14 +68,16 @@ public function insertRecord($row) {
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
 	$vstr = "'" . implode("','", $row) . "'";
 
-	$sql = "INSERT INTO {$this->raw_table} ({$kstr}) VALUES ({$vstr}) RETURNING *;";
+	$sql = "INSERT INTO {$this->raw_table} ({$kstr}) VALUES ({$vstr});";
 	error_reporting(E_ERROR);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
 		echo 'ERROR:'.$this->getLastError()."\n{$sql}\n";
 		return FALSE;
 	}
-	return $this->fetchDB();
+// SQLite3 old version cannot support 'RETURNING'.
+//	return $this->fetchDB();
+	return [];
 }
 //==============================================================================
 //	レコードの更新 $row[key] value
@@ -91,8 +93,15 @@ public function updateRecord($wh,$row) {
 		$sep = ", ";
 	}
 	// UPSERT 文を生成
-	$sql = "UPDATE \"{$this->raw_table}\"{$set}{$where} RETURNING *;";
+	$sql = "UPDATE \"{$this->raw_table}\"{$set}{$where};";
 	error_reporting(E_ALL);
+	$rows = $this->doQuery($sql);
+	if(!$rows) {
+		echo 'ERROR:'.$this->getLastError()."\n{$sql}\n";
+		return FALSE;
+	}
+// SQLite3 old version cannot support 'RETURNING'.
+	$sql = "SELECT * FROM {$this->raw_table}{$where};";
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
 		echo 'ERROR:'.$this->getLastError()."\n{$sql}\n";
