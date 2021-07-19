@@ -3,6 +3,8 @@
  * PHPフレームワーク
  *  LangUI:  言語ファイルを操作するstaticクラス
  */
+if(!defined('DEFAULT_LANG')) define('DEFAULT_LANG', 'ja');				// 言語ファイル
+
 //==============================================================================
 // 言語ファイルの操作クラス
 class LangUI {
@@ -37,6 +39,7 @@ public static function SwitchLangs($newlang) {
             ),
             'strlen'));
     $langs = array_shift($arr);             // strict回避
+	if(empty($langs)) $langs = DEFAULT_LANG;
     static::$Locale = ".{$langs}";            // 言語識別文字を付加
     static::$LocaleName = $langs;
     static::$STRINGS = [];
@@ -110,7 +113,10 @@ public static function LangDebug() {
 					$new_sec[$key] = $lang_recursive($val);
 				}
 			}
-			if($lang_only && count($new_sec)===1) return $new_sec[0];
+			if($lang_only && count($new_sec)===1) {
+				list($key,$val) = array_first_item($new_sec);
+				if(is_numeric($key)) return $val;
+			}
 			return $new_sec;
 		};
         if(file_exists($fullpath)) {

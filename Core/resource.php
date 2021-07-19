@@ -32,6 +32,8 @@ date_default_timezone_set('Asia/Tokyo');
 $root = basename(dirname(__DIR__));        // Framework Folder
 list($appname,$app_uri,$module,$q_str) = get_routing_path($root);
 parse_str($q_str, $query);
+require_once("app/{$appname}/Config/config.php");
+
 list($fwroot,$appRoot) = $app_uri;
 list($controller,$files) = $module;
 //$files = $module[3][0];        // ファイル名はパラメータに入る
