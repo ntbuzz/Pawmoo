@@ -4,12 +4,6 @@
 @debug
 
 .ja => [
-    // ページャーボタン表示用
-    Page        => ページ:
-    Total       => "(全 %d件)"
-    Display     => 表示数:
-    NextPage    => "次へ＞"
-    PrevPage    => "＜前へ"
     // ダイアログ用
     Yes     => はい
     No      => いいえ
@@ -43,19 +37,8 @@
     AbortDone   => "送信完了しました."
     MAXFILE     => "送信ァイルは %d 個までです"
     BADFILE     => "'+','%','#' 文字を使用するとブラウザからダウンロードできなくなります！"
-	// カレンダー用
-	ToolTip => "カレンダーから選択"
-	monthNames => "'1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'"
-	dayNames => "'日','月','火','水','木','金','土'"
-	YearSuffix => '年'
 ]
 .en => [
-    // for Pager Buttons
-    Page        => "Page:"
-    Total       => "(Total %d)"
-    Display     => Count:
-    NextPage    => "Next&gt;"
-    PrevPage    => "&lt;Prev"
     // for Dialog
     Yes     => Yes
     No      => No
@@ -87,11 +70,49 @@
     AbortDone   => "Send Complete."
     MAXFILE     => "Upload Max %d Files"
     BADFILE     => "'+','%','#' chars used,Bad Download by WebBrowser!"
-	// for Calendar
-	ToolTip => "Pickup from CALENDER"
-	monthNames => "'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'"
-	dayNames => "'Sun','Mon','Tue','Wed','Thu','Fri','Sat'"
-	YearSuffix => ', '
+]
+// ページャーボタン表示用  for Pager Buttons
+Page=>[
+	.ja=> ページ:
+    .en=> "Page:"
+]
+Total=>[
+	.ja=> "(全 %d件)"
+    .en=> "(Total %d)"
+]
+Display=>[
+	.ja=> 表示数:
+    .en=> Count:
+]
+NextPage=>[
+	.ja=> "次へ＞"
+    .en=> "Next&gt;"
+]
+PrevPage=>[
+	.ja=> "＜前へ"
+    .en=> "&lt;Prev"
+]
+// カレンダー用
+ToolTip =>[
+	.ja=> "カレンダーから選択"
+	.en=> "Pickup from CALENDER"
+]
+// JSの配列に入れるため前後のクオートは省く
+monthNames =>[
+	.ja=> "1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月"
+	.en=> "Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec"
+]
+dayNames =>[
+	.ja=> "日','月','火','水','木','金','土"
+	.en=> "Sun','Mon','Tue','Wed','Thu','Fri','Sat"
+]
+YearSuffix =>[
+	.ja=> '年'
+	.en=> ', '
+]
+calendarTitle =>[
+	.ja=> "%y年%mのカレンダー"
+	.en=> "%y, %m Calendar"
 ]
 #Login => [
 	LoginPage  	=> [
@@ -128,49 +149,84 @@
 	]
 ]
 
-SiteMenu => [
-	System => [
-		.ja => システムメニュー
-		.en => "System Menu"
+#Login => [
+	LoginPage=>[
+		.ja=> ログイン
+		.en=> Login
 	]
-	WEB	=> [
-		.ja => WEB開発
-		.en => "WEB Develop"
-		SPIDER-MASTER => [
-			.ja => SPIDER-MASTER
-			.en => SPIDER-MASTER
+	LoginTitle=>[
+		.ja=> ログイン
+		.en=> Signe-In
+	]
+	UserName=>[
+		.ja=> ユーザー名
+		.en=> "User Name"
+	]
+	Password=>[
+		.ja=> パスワード
+		.en=> Password
+	]
+	LOGIN=>[
+		.ja=> ログイン
+		.en=> Login
+	]
+	PassError=>[
+		.ja=> パスワードが違います
+		.en=> 'Password Missing'
+	]
+	NeedLogin=>[
+		.ja=> ログインしてください
+		.en=> "Please Login"
+	]
+	UnknownUser=>[
+		.ja=> 不明なユーザー
+		.en=> "Unknown USER"
+	]
+]
+
+SiteMenu=>[
+	System=>[
+		.ja=> システムメニュー
+		.en=> "System Menu"
+	]
+	WEB=>[
+		.ja=> WEB開発
+		.en=> "WEB Develop"
+		SPIDER-MASTER=>[
+			.ja=> SPIDER-MASTER
+			.en=> SPIDER-MASTER
 		]
-		PawmooHelp	=> [
-			.ja => ヘルプアプリ
-			.en	=> "Pawmoo Help App"
+		PawmooHelp=>[
+			.ja=> ヘルプアプリ
+			.en=> "Pawmoo Help App"
 		]
-		PC管理	=> [
-			.ja => PC管理アプリ
-			.en	=> "PC-Manage App"
+		PC管理=>[
+			.ja=> PC管理アプリ
+			.en=> "PC-Manage App"
 		]
-		ブログ	=> [
-			.ja => ブログアプリ
-			.en	=> "BLOG App"
+		ブログ=>[
+			.ja=> ブログアプリ
+			.en=> "BLOG App"
 		]
-		Sample	=> [
-			.ja => サンプル
-			.en	=> Sample
+		Sample=>[
+			.ja=> サンプル
+			.en=> Sample
 		]
-		Video管理	=> [
-			.ja => ビデオ管理アプリ
-			.en	=> "Video-Manage App"
+		Video管理=>[
+			.ja=> ビデオ管理アプリ
+			.en=> "Video-Manage App"
 		]
 	]
-	管理 => [
-		.ja => 管理ページ
-		.en => Manage
-		トップ => [
-			.ja => トップ
-			.en => TOP
+	管理=>[
+		.ja=> 管理ページ
+		.en=> Manage
+		トップ=>[
+			.ja=> トップ
+			.en=> TOP
 		]
-		PHP情報	=> [
-			.ja => PHP情報
-			.en	=> PHP-Info
+		PHP情報=>[
+			.ja=> PHP情報
+			.en=> PHP-Info
 		]
 		Redmine	=> Redmine
 		Gitbucket	=>	Gitbucket

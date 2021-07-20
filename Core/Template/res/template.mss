@@ -58,7 +58,6 @@ Javascript => [
 			plugins => [
 				checklist.js
 			]
-            window.js               // JQuery-Plugins
         ]
         +import => [
             funcs.js

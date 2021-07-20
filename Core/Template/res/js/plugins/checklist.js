@@ -9,6 +9,35 @@ $.fn.popupCheckList = function (setupobj, callback) {
 		ConfirmLabel:"${#.core.CheckConfirm}",
 		CheckLists: [],
 		Columns: 2,
+		CheckJoin: "\n",
+	};
+	// 要素配列と現在値配列から全リストを生成してコールバックする
+	var setCheckList = function (base, addval, callback) {
+		var label_val = {};
+		// ベースの要素配列
+		base.forEach(function (val) {
+			if(typeof val === "string" &&  val.indexOf('=') >= 0) {
+				var dat = val.split("=");
+				label = dat[0];
+				value = dat[1];
+			} else label = value = val;
+			label_val[label] = value;
+		});
+		// 現在登録されている値をマージ
+		addval.forEach(function (val) {
+			var exists = false;
+			for (const [key, value] of Object.entries(label_val)) {
+				if (value === val) {
+					exists = true;
+					break;
+				};
+			};
+			if (!exists) label_val[val] = val;
+		});
+		// 出来上がったオブジェクトを要素ごとにコールバック
+		for (const [key, value] of Object.entries(label_val)) {
+			callback(key, value);
+		};
 	};
 	$.each(setupobj, function (key, value) { setting[key] = value;});
 	var list_val = $('#' + this.attr('data-element'));
@@ -33,21 +62,20 @@ $.fn.popupCheckList = function (setupobj, callback) {
 			var check_list = $('<ul class="checklist-box"></ul>').appendTo(appendObj);
 			if (setting.Columns !== undefined) check_list.addClass('col' + setting.Columns);
 			// リスト作成
-			var target = list_val.val().split("\n").filter(function (v) { return (v.length); });
-			var merge_list = checklist_items.mymerged(target);
+			var target = list_val.val().split(/;|\n/g).filter(function (v) { return (v.length); });
 			var all_check = false;
-			$.each(merge_list, function (index, elem) {
+			setCheckList(checklist_items, target, function (label, value) {
 				var li_tag = $('<li></li>').appendTo(check_list);
-				if (parseInt(elem) < 0) {
+				if (parseInt(value) < 0) {
 					li_tag.append('<hr>');		// separator
 				} else {
 					var label_tag = $('<label></label>').appendTo(li_tag);
-					var item = $('<input type="checkbox" class="multi-check" value="' + elem + '" />').appendTo(label_tag);
-					if (target.is_exists(elem)) {
+					var item = $('<input type="checkbox" class="multi-check" value="' + value+ '" />').appendTo(label_tag);
+					if (target.is_exists(value)) {
 						item.prop('checked', true);
 						all_check = true;
 					};
-					label_tag.append(elem);
+					label_tag.append(label);
 				};
 			});
 		};
@@ -105,8 +133,9 @@ $.fn.popupCheckList = function (setupobj, callback) {
 		// イベント処理
 		close_btn.click(function (e) {
 			var vals = $('.multi-check:checked').map(function () { return $(this).val(); }).get();
+			const uniq = Array.from(new Set(vals)).join(setting.CheckJoin);	// 重複を削除して結合
 			bk_panel.click();
-			if (callback !== undefined) callback.call(list_val, vals.join("\n"));
+			if (callback !== undefined) callback.call(list_val, uniq);
 			return false;
 		});
 		bk_panel.click(function (e) {

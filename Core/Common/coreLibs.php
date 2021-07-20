@@ -321,8 +321,8 @@ function fcsvget($handle) {
 //==============================================================================
 //  variable format convert
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
-function expand_text($view,$str,$recdata,$vars,$match_all = false) {
-    $expand_Walk = function(&$val, $key, $vars) use(&$recdata,&$view) {
+function expand_text($class,$str,$recdata,$vars,$match_all = false) {
+    $expand_Walk = function(&$val, $key, $vars) use(&$recdata,&$class) {
         if($val[0] === '$') {           // top char is variable mark
             $var = mb_substr($val,1);
             $var = trim($var,'{}');                 // triming of delimitter { }
@@ -365,7 +365,7 @@ function expand_text($view,$str,$recdata,$vars,$match_all = false) {
                     $allow = ($var[0] === '#');         // allow array
                     if($allow) $var = mb_substr($var,1);
                 }
-				if(isset($view)) $val = $view->_($var,$allow);       // get Language define
+				if(isset($class)) $val = $class->_($var,$allow);       // get Language define
                 break;
 			// cannot use in RESOURCE (AppStyle)
             case '%': if(substr($var,-1) === '%') {     // is parameter number
@@ -389,13 +389,13 @@ function expand_text($view,$str,$recdata,$vars,$match_all = false) {
                 break;
 			// cannot use in RESOURCE (AppStyle)
             case ':':                                   // Class Property
-				if(isset($view)) {
+				if(isset($class)) {
                    	$p = '/(:{1,2})(\w+)(?:\[([\w\.\'"]+)\])?/';
                     preg_match($p,$var,$m);
                     $m[] = NULL;    // add NULL element for list()
                     list($match,$cls,$var,$mem) = $m;
                     $mem = trim($mem,"\"'");        // allow quote char
-                    $clsVar = ($cls === '::') ? $view->Helper : $view->Model;
+                    $clsVar = ($cls === '::') ? $class->Helper : $class->Model;
                     if(isset($clsVar->$var)) { // exist Property?
                         $val = array_member_value($clsVar->$var,$mem);
                     } else $val = NULL;
@@ -416,21 +416,21 @@ function expand_text($view,$str,$recdata,$vars,$match_all = false) {
                 break;
 			// cannot use in RESOURCE (AppStyle)
             case '&':       // Helper Method CALL
-				if(isset($view)) {
+				if(isset($class)) {
                    	$p = '/&(\w+)(?:\(([^\)]+)\))?/';
                     preg_match($p,$var,$m);
                     $var = $m[1];
                     $arg = (count($m)===3) ? $m[2]:NULL;
-                    if(method_exists($view->Helper,$var)) {
-                        $val = $view->Helper->$var($arg);
+                    if(method_exists($class->Helper,$var)) {
+                        $val = $class->Helper->$var($arg);
                     } else $val = "NOT-FOUND({$var})";
 				}
 				break;
             default:
                 if(isset($vars[$var])) {            // is LOCAL VAR-SET?
                     $val = $vars[$var];
-                } else if(isset($view)) {
-					if(isset($view->$var)) $val = $view->$var;	// CLASS-PROPERTY
+                } else if(isset($class)) {
+					if(isset($class->$var)) $val = $class->$var;	// CLASS-PROPERTY
                 }
             }
         }
