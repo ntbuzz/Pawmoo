@@ -93,7 +93,7 @@ public static function dump($items) {
 public static function debug(...$items) {
     debug_log(DBMSG_CLI,$items);
 }
-public static function die(...$items) {
+public static function halt(...$items) {
     debug_log(DBMSG_DIE,$items);
 }
 
@@ -135,7 +135,7 @@ function debug_dump($items) {
 	sysLog::dump($items);
 }
 function debug_die($items) {
-	sysLog::die($items);
+	sysLog::halt($items);
 }
 //==========================================================================
 // ログの記録または表示
