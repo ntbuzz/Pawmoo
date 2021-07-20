@@ -17,8 +17,8 @@ $(".calendar").each(function () {
 	var self = $(this); // jQueryオブジェクトを変数に代入しておく
 	var date_form = {
 		dateFormat: 'yy-mm-dd',
-		monthNames: [${#.core.monthNames}],
-		dayNamesMin: [${#.core.dayNames}],
+		monthNames: [ '${#.core.monthNames}' ],
+		dayNamesMin: [ '${#.core.dayNames}' ],
 		yearSuffix: "${#.core.YearSuffix}",
 		buttonImage: "/res/images/calender_icon.png",   // カレンダーアイコン画像
 		buttonImageOnly: true,           // 画像として表示

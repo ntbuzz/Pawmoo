@@ -4,6 +4,7 @@
  *  AppStyle:   css, js joined by template
  */
 require_once('Core/Class/Parser.php');
+require_once('Core/Base/AppStyleHelper.php');
 
 class AppStyle {
     const ContentList = [
@@ -57,6 +58,7 @@ class AppStyle {
     function __construct($appname, $app_uri, $modname, $filename, $ext) {
         // Module(res) will be Common URI Modele
         $this->ModuleName = ($modname == 'Res') ? '' : $modname;  
+		$this->Helper = new AppStyleHelper($this);
         $this->Template = self::ContentList[$ext];
         $this->myname = "{$filename}{$ext}";
         $fldr = $this->Template['folder'];

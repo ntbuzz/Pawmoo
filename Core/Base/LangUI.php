@@ -3,6 +3,8 @@
  * PHPフレームワーク
  *  LangUI:  言語ファイルを操作するstaticクラス
  */
+if(!defined('DEFAULT_LANG')) define('DEFAULT_LANG', 'ja');				// 言語ファイル
+
 //==============================================================================
 // 言語ファイルの操作クラス
 class LangUI {
@@ -37,6 +39,7 @@ public static function SwitchLangs($newlang) {
             ),
             'strlen'));
     $langs = array_shift($arr);             // strict回避
+	if(empty($langs)) $langs = DEFAULT_LANG;
     static::$Locale = ".{$langs}";            // 言語識別文字を付加
     static::$LocaleName = $langs;
     static::$STRINGS = [];
@@ -49,6 +52,7 @@ public static function SwitchLangs($newlang) {
     self::LangFiles('Core/Template/lang/','core');
     // アプリケーションの言語リソースパス
     self::LangFiles($default,static::$controllers);
+    self::LangDebug();
 }
 //==============================================================================
 //  言語ファイルの読み込み
@@ -60,7 +64,6 @@ private static function LangFiles($folder,$files) {
     foreach($files as $lang_file) {
 		self::LoadLang($folder,$lang_file);
     }
-    self::LangDebug();
 }
 //==============================================================================
 //  言語ファイルの読み込み
@@ -97,6 +100,7 @@ public static function LangDebug() {
 		$lang_recursive = function($sec) use(&$lang_recursive) {
 			if(is_scalar($sec)) return $sec;
 			$new_sec = [];
+			$lang_only = true;
 			foreach($sec as $key => $val) {
 				if($key[0] === '.') {
 					if($key === static::$Locale) {			// 言語定義
@@ -105,8 +109,13 @@ public static function LangDebug() {
 						else $new_sec = array_override_recursive($new_sec,$vv);
 					}
 				} else {
+					$lang_only = false;
 					$new_sec[$key] = $lang_recursive($val);
 				}
+			}
+			if($lang_only && count($new_sec)===1) {
+				list($key,$val) = array_first_item($new_sec);
+				if(is_numeric($key)) return $val;
 			}
 			return $new_sec;
 		};

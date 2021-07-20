@@ -1094,14 +1094,14 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   MySession::set_if_empty($tt,$arr)     // setVariables と同じだが、未定義キーだけを値セットする
   MySession::get_varIDs($tt,$names)     // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から識別子指定で取得する
   MySession::set_paramIDs($name,$val,$append) // 'AppData.($name)'要素として値を格納する、$appendが真なら追加する
-  MySession::get_paramIDs($name)    // 'AppData.($name)'要素から値を取得する
+  MySession::get_paramIDs($name)    	// 'AppData.($name)'要素から値を取得する
   MySession::rm_EnvData(...$arr)        // ENV変数をクリア
 
   MySession::get_LoginValue($id = NULL) // ログイン情報を取得
   MySession::set_LoginValue($arr)       // ログイン情報に書込
   MySession::setup_Login($login=NULL)   // ログイン情報を置換
 
-  MySession::assignPagingIDs($id,$val)	// $valに値が設定されていればPaging情報に書込
+  MySession::assignPagingIDs($id,$val)	// $valに値が設定されていればPaging情報の$idに書込
   MySession::getPagingIDs($id) 			// Paging情報の $id 名を取得
   MySession::setPagingIDs($id,$val)		// Paging情報の $id 名に書込,$val === NULL なら削除
 
