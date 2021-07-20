@@ -28,15 +28,18 @@ table.calendar td {
 // 現在の年月を取得
 $year = date('Y');
 $month = date('n');
-$weekheader = ["日","月","火","水","木","金","土"];
+$weekheader = explode(',',str_replace(['"',"'"],'',LangUI::get_value('core', '.dayNames')));
+$monthheader = explode(',',str_replace(['"',"'"],'',LangUI::get_value('core', '.monthNames')));
+$title = LangUI::get_value('core', '.calendarTitle');
  // 月末日を取得
 $last_day = date('j', mktime(0, 0, 0, $month + 1, 0, $year));
 $first_week = date('w',mktime(0, 0, 0, $month, 1, $year));
 $last_week = $last_day + $first_week;
 $column = 0;
 $date = 1;
+
 echo "<div class='month_calendar'>";
-echo "{$year}年{$month}月のカレンダー";
+echo str_replace(['%y','%m'],[$year,$monthheader[$month-1]],$title);
 echo "<table class='calendar'>";
 echo "<tr>";
 foreach($weekheader as $wk) echo "<th>{$wk}</th>";
