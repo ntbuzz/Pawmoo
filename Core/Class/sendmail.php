@@ -89,6 +89,14 @@ private static function ConvHeader($header,$attr,$addres) {
 	return $header;
 }
 //==============================================================================
+// メールデバッグ用
+private static function MailAddress($addres) {
+	if(is_scalar($addres)) return "<{$addres}>";
+	$addr = [];
+	foreach($addres as $mm => $nm) $addr[] = "{$nm} <{$mm}>"
+	return implode(',',$addr);
+}
+//==============================================================================
 // メール送信
 static function Send() {
 	$header = self::ConvHeader('','From',static::$From);
@@ -101,12 +109,14 @@ static function Send() {
 	// メール送信デバッグ
 	$body = array_to_text([
 		'HEADER'=> $header,
-		self::ConvHeader('','From',static::$From),
-		self::ConvHeader('','To',static::$To),
-		self::ConvHeader('','Cc',static::$CC),
-		self::ConvHeader('','Bcc',static::$BCC),
-		'SUBJECT'=>static::$Subject,
-		'BODY'=>$body]);
+		'MAIL-BODY' => [
+			'From'	=> self::MailAddress(static::$From),
+			'To'	=> self::MailAddress(static::$To),
+			'Cc'	=> self::MailAddress(static::$CC),
+			'Bcc'	=> self::MailAddress(static::$BCC),
+			'SUBJECT'=>static::$Subject,
+			'BODY'	=> $body,
+		]]);
 	]);
 	$to = 'root@localhost';
 	$subject = "テスト:{$subject}";

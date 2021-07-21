@@ -44,7 +44,7 @@ class AppModel extends AppObject {
         $this->setProperty(self::$DatabaseSchema);      // Set Default Database Schema Property
         $this->setProperty(static::$DatabaseSchema);    // Set Instance Property from Database Schema Array
 		if(empty($this->Schema)) {
-			debug_log(DBMSG_DIE,["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
+			debug_log(DBMSG_STDERR,["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
 		}
 		if(empty($this->Primary)) $this->Primary = 'id';	// default primary name
         if(isset($this->ModelTables)) {                 // Multi-Language Tabele exists
