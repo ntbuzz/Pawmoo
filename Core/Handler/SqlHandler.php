@@ -130,6 +130,16 @@ public function getRecordValue($cond,$use_relations) {
 	return ($row === FALSE) ? []:$row;
 }
 //==============================================================================
+//	getMaxValueRecord($field_name) 
+//		get MAX value into field_name by this-table
+//==============================================================================
+public function getMaxValueRecord($field_name) {
+	$sql = "SELECT MAX({$field_name}) as \"max_val\" FROM {$this->table}";
+	$this->execSQL($sql);
+	$row = $this->fetchDB();
+	return ($row) ? $row['max_val'] : 0;
+}
+//==============================================================================
 //	findRecord(cond): 
 //	cond: query condition
 //      [ AND... ] OR [ AND... ]
