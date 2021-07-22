@@ -140,6 +140,34 @@ public function getMaxValueRecord($field_name) {
 	return ($row) ? $row['max_val'] : 0;
 }
 //==============================================================================
+//	getMaxValueRecord($field_name) 
+//		get MAX value into field_name by this-table
+//==============================================================================
+public function getGroupCalcList($fields,$groups,$calc=NULL,$sortby) {
+	$this->active_column = $fields;
+	if(!empty($calc)) {
+		foreach($calc as $func => $alias) {
+			list($fn,$ff) = explode('.',$func);
+			$fields[] = "{$ff}({$fn}) as {$alias}";
+			$this->active_column[] = $alias;
+		}
+	}
+	$sel = implode(',',$fields);
+	$grp = implode(',',$groups);
+	$sort = "";
+	if($sortby !== []) {
+		$col = [];
+		foreach($sortby as $column => $seq) {
+			$order = ($seq === SORTBY_DESCEND) ? "desc" : "asc";
+			$col[]= "{$column} {$order}";
+		}
+		$sort = " ORDER BY ".implode(',',$col);
+	}
+	$sql = "SELECT {$sel} FROM '{$this->raw_table}' GROUP BY {$grp}{$sort};";
+	$this->execSQL($sql);
+	return $sql;
+}
+//==============================================================================
 //	findRecord(cond): 
 //	cond: query condition
 //      [ AND... ] OR [ AND... ]

@@ -522,6 +522,24 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
     $this->NearData = [$r_prev, $r_next ];
 }
 //==============================================================================
+// for Access Log Aggregate method
+//	pickup FIELD set by GROUP BY grouping columns.
+//	and except NOT NULL COLUMN and RECORD count Limited
+protected function tableAggregate($fields,$groups,$calc = NULL,$not_null_column = NULL,$limit=0,$sortby = []) {
+    $data = array();
+	$sql = $this->dbDriver->getGroupCalcList($fields,$groups,$calc,$sortby);
+	echo "SQL: {$sql}\n";
+	$cnt = 0;
+    while (($fields = $this->dbDriver->fetchDB())) {
+		if(empty($not_null_column) || !empty($fields[$not_null_column])) {
+			$data[] = $fields;
+			if($limit > 0 && ++$cnt >= $limit) break;
+		}
+    }
+    $this->Records = $data;
+	$this->Headers = $this->dbDriver->active_column;
+}
+//==============================================================================
 // Delete Record(Primary-key)
 public function DeleteRecord($num) {
     $this->dbDriver->deleteRecord([$this->Primary => $num]);
