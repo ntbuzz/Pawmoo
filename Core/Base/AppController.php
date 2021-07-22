@@ -5,14 +5,11 @@
  */
 class AppController extends AppObject {
 	public $defaultAction = 'List';		// Omitted URI, Default Action 
-//	public $defaultFilter = 'all';		// Default Filter
 	public $disableAction = [];			// Ban Action
 	private $my_method;					// active method list on Instance
 	protected $needLogin = FALSE;		// Login NEED flag
-	protected $aliasAction = [			// Action Method Alias
-//			'List' => 'View',			// ListAction called ViewAction
-//			'View' => 'List',			// ViewAction called ListAction
-	];
+	protected $aliasAction = [];		// Action Method Alias [ Alias => Real,... ]
+	protected $discardParams = 'List';	// Params Discard method
 //==============================================================================
 // constructor: create MODEL, VIEW(with HELPER)
 	function __construct($owner = NULL){
@@ -99,8 +96,9 @@ public function is_authorised($method) {
 			}
 		} else {
 			list($userid,$lang) = $data;
-			if(!empty($lang)) {
-				MySession::set_LoginValue([$login_key => $userid,'LANG'=>$lang]);
+			if(empty($lang)) $lang = LangUI::$LocaleName;
+			MySession::set_LoginValue([$login_key => $userid,'LANG'=>$lang]);
+			if($lang !== LangUI::$LocaleName) {
 				LangUI::SwitchLangs($lang);
 				$this->Model->ResetSchema();
 				debug_log(DBMSG_SYSTEM,['Language SWITCH'=>$lang]);
@@ -137,6 +135,8 @@ protected function ActionPostProcess($action) {
 //==============================================================================
 // Method Dispatcher before Pre-Process, after Post-Processing
 public function ActionDispatch($action) {
+	$discard = (is_scalar($this->discardParams)) ? [$this->discardParams] : $this->discardParams;
+	if(in_array($action,$discard)) App::CleareParams();
 	if($this->ActionPreProcess($action)) {
 		if(array_key_exists($action,$this->aliasAction)) {
 			$action = $this->aliasAction[$action];
@@ -150,6 +150,7 @@ public function ActionDispatch($action) {
 // Auto Paging.
 public function AutoPaging($cond, $max_count = 100) {
 	list($num,$size) = App::$Params;
+	if($num === 0) $num = 1;
 	$cond = re_build_array($cond);
 	$Page = MySession::getPagingIDs('Setup');
 //	debug_log(DBMSG_SYSTEM, ['COND' => $cond,"Page"  => $Page ]);
@@ -171,6 +172,7 @@ public function AutoPaging($cond, $max_count = 100) {
 	if($size > 0) {
 		$Page['Size'] = $size;
 		$this->Model->SetPage($size,$num);
+		App::$Params[0] = $num;
 	} else $Page = NULL;	// remove Paging.Setup
 	MySession::setPagingIDs('Setup',$Page);
 }
