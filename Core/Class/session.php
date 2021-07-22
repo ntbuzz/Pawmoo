@@ -147,20 +147,28 @@ private static function PagingIDs($id) {
 	$mod = static::$Controller;
 	return "Paging.{$mod}.{$id}";
 }
-static function assignPagingIDs($id,$val) {
-	$id_name = self::PagingIDs($id);
-	if($val==='') return array_member_value(static::$EnvData,$id_name);
-	static::setEnvIDs($id_name,$val);
-	return $val;
-}
 static function getPagingIDs($id) {
 	$id_name = self::PagingIDs($id);
 	return array_member_value(static::$EnvData,$id_name);
 }
-static function setPagingIDs($id,$val) {
+static function assignPagingIDs($id,$val) {
 	$id_name = self::PagingIDs($id);
-	if($val===NULL) self::rmEnvIDs($id_name);
-	else static::setEnvIDs($id_name,$val);
+	if($val==='') return array_member_value(static::$EnvData,$id_name);
+	self::setPagingIDs($id,$val);
+	return $val;
+}
+static function setPagingIDs($id,$val) {
+	$mod = "Paging." . static::$Controller;
+	$page = array_member_value(static::$EnvData,$mod);
+	unset(static::$EnvData['Paging']);	// 他モジュールのパラメータを消す
+    $ee = &$page;
+    $mem_arr = explode('.',$id);
+    foreach($mem_arr as $key) {
+        if(!isset($ee[$key])) $ee[$key] = [];
+        $ee = &$ee[$key];
+    }
+	$ee = $val;
+	static::$EnvData['Paging'][static::$Controller] = $page;
 }
 //==============================================================================
 // REQ変数操作、REQ変数はフラットな連想配列構造なので、ドット識別子IFは不要
@@ -213,7 +221,7 @@ private static function set_if_empty2(&$data,$arr) {
 //==============================================================================
 // ENV変数にアプリケーションパラメータを識別子指定で設定する
 static function set_paramIDs($names,$val) {
-	static::setEnvIDs(PARAMS_NAME.".{$names}",$val);
+	self::setEnvIDs(PARAMS_NAME.".{$names}",$val);
 }
 //==============================================================================
 // ENV変数からアプリケーションパラメータを識別子指定で値を取得
