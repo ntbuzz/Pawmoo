@@ -204,6 +204,7 @@ public function findRecord($cond,$use_relations = FALSE,$sort = []) {
 }
 //==============================================================================
 //	firstRecord(cond,use-relation,sort): 
+// returned col-data or FALSE
 //==============================================================================
 public function firstRecord($cond,$use_relations = FALSE,$sort) {
 	$where = $this->sql_makeWHERE($cond);
@@ -220,7 +221,7 @@ public function firstRecord($cond,$use_relations = FALSE,$sort) {
 	$sql .= "{$where};";
 	$this->execSQL($sql);
 	$row = $this->fetchDB();
-	return ($row === FALSE) ? []:$row;
+	return ($row === FALSE) ? FALSE:$row;
 }
 //==============================================================================
 //	deleteRecord(wh): 

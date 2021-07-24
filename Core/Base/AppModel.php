@@ -310,7 +310,6 @@ public function GetRecord($num,$join=FALSE,$values=FALSE) {
 //	b. key-name => [ [ name, pid],				[ cond ] ]		for ChainSelect() by SELF [ Primary,name,pid ]
 //	c. key-name => [ Model.id => name,			[ cond ] ]		for Select() in Model [nam] = id
 //	d. key-name => [ Model. => number.title,	[ cond ] ]		for Select() in Model [title] = number|Primary
-//	d'.key-name => [ Model. => id.number.title,	[ cond ] ]		for Select() in Model [number] = id|Primary in key_name_number,[title] = id|Primary in keyname_title
 //	e. key-name => [ id.title,					[ cond ] ]		for Select() by SELF [title] = number|Primary
 //	f. key-name => [ Model. => [ Method => argument],[ cond ] ]		Chain() ir Select() value,depend on Model Method returned.
 public function LoadSelection($key_names) {
@@ -358,11 +357,14 @@ public function getFieldValues($id,$field, $cond = NULL) {
 	return $select;
 }
 //==============================================================================
-// Get Record Field by field-key without JOIN fields.
+// Get Record Field(s) by field-key without JOIN fields.
+// multi fields is separate by SPC, COMMA or DOT
 // Result:   field-data
 public function getRecordField($key,$value,$field) {
     $this->getRecordBy($key,$value);
-    return (array_key_exists($field,$this->fields)) ? $this->fields[$field] : NULL;
+	$fields = str_explode(['.',' ',','],$field);
+	return implode(' ',array_filter_values($this->fields,$fields));
+//    return (array_key_exists($field,$this->fields)) ? $this->fields[$field] : NULL;
 }
 //==============================================================================
 // 条件に一致するレコード数を検索する
@@ -476,13 +478,14 @@ public function RawRecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
 }
 //==============================================================================
 // Get First Record by condition w/o JOIN!
-// Result:   $this->RecData
+// Result:   return field array or FALSE
 public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
 	$filter = $this->normalize_filter($filter);
     $fields_list = array_combine($filter,$filter);
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     $fields = $this->dbDriver->firstRecord($cond,FALSE,$sort);
-    $this->RecData = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
+    return ($fields === FALSE) ? FALSE : array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
+//    $this->RecData = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
 }
 //==============================================================================
 // Get Record with Prev/Next Record List by FIND-CONDITION without JOIN!.
