@@ -94,3 +94,27 @@ static $Database = [
 	],
 ];
 }
+//==============================================================================
+// アクセスログ
+class AccessSetup extends AppDatabase {
+static $Database = [
+	'Handler' => HANDLER,
+	'DataTable' => 'accesslog',
+	'DataView' => [],
+	'Primary' => 'id',
+	'Schema' => [
+		'id'			=> [ 'integer', true ],
+		'logdate'		=> [ 'date', false ],
+		'access'		=> [ 'time', false ],
+		'last_access'	=> [ 'time', false ],
+		'userid'		=> [ 'TEXT', false ],
+		'logid'			=> [ 'TEXT', false ],
+		'page'			=> [ 'TEXT', false ],
+		'method'		=> [ 'TEXT', false ],
+		'contents'		=> [ 'integer', false ],
+		'repeat'		=> [ 'integer', false ],
+		'query'			=> [ 'TEXT', false ],
+		'post'			=> [ 'TEXT', false ],
+	],
+];
+}

@@ -8,6 +8,7 @@ Stylesheet => [
             blogstyle.css
             tabmenu.css
             tabset.css
+			mystyle.css
         ]
         +section => ^common       // 上位のセクションを呼出す
     ]
