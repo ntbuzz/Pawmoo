@@ -10,6 +10,8 @@ class AppController extends AppObject {
 	protected $needLogin = FALSE;		// Login NEED flag
 	protected $aliasAction = [];		// Action Method Alias [ Alias => Real,... ]
 	protected $discardParams = 'List';	// Params Discard method
+    protected $noLogging = NULL;		// execute log save exception method list ex. [ 'List',... ]
+	protected $LoggingMethod = NULL;	// execute log sabe Model "class.method". ex. 'Access.Logging'
 //==============================================================================
 // constructor: create MODEL, VIEW(with HELPER)
 	function __construct($owner = NULL){
@@ -133,6 +135,18 @@ protected function ActionPostProcess($action) {
 	return TRUE;
 }
 //==============================================================================
+// execute log output Model call, after $action invoked.
+private function exec_Logging($action) {
+	$no_log = (in_array($this->noLogging,['*',$action],true)) ||
+			(is_array($this->noLogging) && in_array($action,$this->noLogging,true));
+	list($model,$method) = explode('.',"{$this->LoggingMethod}.");
+	if(!empty($model) && !$no_log) {
+		if(empty($method)) $method = 'Logged';
+		$class_name = "{$model}Model";
+		if(class_exists($class_name)) $this->$model->$method($this,$action);
+	}
+}
+//==============================================================================
 // Method Dispatcher before Pre-Process, after Post-Processing
 public function ActionDispatch($action) {
 	$discard = (is_scalar($this->discardParams)) ? [$this->discardParams] : $this->discardParams;
@@ -144,6 +158,7 @@ public function ActionDispatch($action) {
 		$method = "{$action}Action";
 		$this->$method();
 		$this->ActionPostProcess($action);
+		$this->exec_Logging($action);
 	}
 }
 //==============================================================================

@@ -143,7 +143,8 @@ public function getMaxValueRecord($field_name) {
 //	getMaxValueRecord($field_name) 
 //		get MAX value into field_name by this-table
 //==============================================================================
-public function getGroupCalcList($fields,$groups,$calc=NULL,$sortby) {
+public function getGroupCalcList($cond,$fields,$groups,$calc,$sortby,$max) {
+	$where = $this->sql_makeWHERE($cond);
 	$this->active_column = $fields;
 	if(!empty($calc)) {
 		foreach($calc as $func => $alias) {
@@ -163,8 +164,10 @@ public function getGroupCalcList($fields,$groups,$calc=NULL,$sortby) {
 		}
 		$sort = " ORDER BY ".implode(',',$col);
 	}
-	$sql = "SELECT {$sel} FROM '{$this->raw_table}' GROUP BY {$grp}{$sort};";
-	$this->execSQL($sql);
+	$limit = ($max > 0) ? (($this->is_offset) ? " offset 0 limit {$max}" : " limit 0,{$max}"):'';
+	$sql = "SELECT {$sel} FROM '{$this->raw_table}'{$where} GROUP BY {$grp}{$sort}{$limit};";
+	$this->execSQL($sql,false);
+debug_log(DBMSG_HANDLER,["LOG-Aggregate" => [ 'COND' => $cond,'SQL'=>$sql]]);
 	return $sql;
 }
 //==============================================================================

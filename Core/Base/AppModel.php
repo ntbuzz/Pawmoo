@@ -525,16 +525,11 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
 // for Access Log Aggregate method
 //	pickup FIELD set by GROUP BY grouping columns.
 //	and except NOT NULL COLUMN and RECORD count Limited
-protected function tableAggregate($fields,$groups,$calc = NULL,$not_null_column = NULL,$limit=0,$sortby = []) {
+protected function tableAggregate($cond,$fields,$groups,$calc = NULL,$sortby = [],$limit=0) {
     $data = array();
-	$sql = $this->dbDriver->getGroupCalcList($fields,$groups,$calc,$sortby);
-	echo "SQL: {$sql}\n";
-	$cnt = 0;
+	$sql = $this->dbDriver->getGroupCalcList($cond,$fields,$groups,$calc,$sortby,$limit);
     while (($fields = $this->dbDriver->fetchDB())) {
-		if(empty($not_null_column) || !empty($fields[$not_null_column])) {
-			$data[] = $fields;
-			if($limit > 0 && ++$cnt >= $limit) break;
-		}
+		$data[] = $fields;
     }
     $this->Records = $data;
 	$this->Headers = $this->dbDriver->active_column;
