@@ -1218,8 +1218,8 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 ・モデルクラス(AppModel)
   ・プロパティ変数
     $DatabaseSchema             // クラス・プロパティ変数連想配列として定義する(static)
-    * $dbDriver;                  // データベースドライバー
-    * $fields;                    // レコードフィールドの値
+    * $dbDriver;                // データベースドライバー
+    * $fields;                  // レコードフィールドの値
     $pagesize;                  // ページャーの表示単位
     $page_num;                  // 表示するページ番号
     $record_max;                // 総レコード数
@@ -1240,11 +1240,17 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     getCount($cond)                           // レコード数の検索
     getFieldValues($id,$field [, $cond] )     // $id,$field で指定された列のSelect配列形式の配列を返す。$cond で絞り込み可
     GetValueList()                            // Selectionスキーマで定義された値リストを $Select 配列に格納
-    LoadSelection($jeys)          　// Selectionスキーマから $keys 配列で指定されたキー名の値リストを $Select 配列に格納
+    LoadSelection($jeys)          　		  // Selectionスキーマから $keys 配列で指定されたキー名の値リストを $Select 配列に格納
     RecordFinder($cond [,$filter [,$sort ]])  // レコードリストの読み込み(JOIN済レコード)
     RawRecordFinder($cond,$filte,$sort)       // RecordFinder() のJOIN無し版
     NearRecordFinder($id,$cond,$filter,$sort) // $cond で抽出され $sort 順のレコードから $id とその前後のレコードを取得する
-                          // 「GetRecord($id,TRUE)＋前後の $filter フィールド値」 と同じ意味
+                          					  // 「GetRecord($id,TRUE)＋前後の $filter フィールド値」 と同じ意味
+	tableAggregate($cond,$groups,$calc,$sortby,$limit)	// GROUP BYによるテーブル集計。取得列はグルーピング列＋集計列のみ(GROUP BY制約)
+							// $cond	検索条件 RecordFinder()等と同じ
+							// $groups	グルーピングするフィールド配列
+							// $calc	フィールド名＋集計関数とエイリアス名	ex. [ 'col.SUM' => sum_col ]
+							// $sortby	ソート列とソート順の連想配列
+							// $limit	取得レコード数
     DeleteRecord($num)                        // $num キーレコードの削除
     MultiDeleteRecord($cond)                  // 条件指定のレコード削除
     is_valid(&$row)                           // フィールドデータの検証、戻り値 TRUE=データ有効、FALSE=データ無効
@@ -1256,7 +1262,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   ビュークラスはテンプレート処理へのI/Fを提供するクラスでサブクラスを定義する必要はありません、
   アプリ独自に拡張することができますが、その場合は基底クラスの処理を阻害しないようにしてください。
   ・プロパティ変数
-    * $Layout;                    // レイアウトテンプレート名
+    * $Layout;                  // レイアウトテンプレート名
     SetLayout($layoutfile)      // デフォルトレイアウト変更
     PutLayout()                 // レイアウト出力
     ViewTemplate($name)         // レイアウトテンプレート処理
