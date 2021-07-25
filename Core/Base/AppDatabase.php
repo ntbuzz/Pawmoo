@@ -43,6 +43,13 @@ class AppDatabase {
 	private $data_folder;
 	private $owners;
 	private $myClass;
+	const typeXchanger  = [
+		'Postgre' =>  [],
+		'SQLite' => [
+			'serial' => 'integer',
+		],
+		'MySQL' => [],
+	];
 //==============================================================================
 // setup table-name and view-table list
 	function __construct($path,$owners=[]) {
@@ -124,6 +131,8 @@ public function execute($cmd) {
 		$fset = [];
 		foreach($this->Schema as $key => $field) {
 			list($ftype,$not_null) = $field;
+			$lftype = strtolower($ftype);
+			if(array_key_exists($lftype,self::typeXchanger[HANDLER])) $ftype = self::typeXchanger[HANDLER][$lftype];
 			$str = "{$key} {$ftype}";
 			if($not_null) $str .= " NOT NULL";
 			$fset[] = $str;
