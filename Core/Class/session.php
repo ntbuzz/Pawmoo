@@ -147,20 +147,28 @@ private static function PagingIDs($id) {
 	$mod = static::$Controller;
 	return "Paging.{$mod}.{$id}";
 }
-static function assignPagingIDs($id,$val) {
-	$id_name = self::PagingIDs($id);
-	if($val==='') return array_member_value(static::$EnvData,$id_name);
-	static::setEnvIDs($id_name,$val);
-	return $val;
-}
 static function getPagingIDs($id) {
 	$id_name = self::PagingIDs($id);
 	return array_member_value(static::$EnvData,$id_name);
 }
-static function setPagingIDs($id,$val) {
+static function assignPagingIDs($id,$val) {
 	$id_name = self::PagingIDs($id);
-	if($val===NULL) self::rmEnvIDs($id_name);
-	else static::setEnvIDs($id_name,$val);
+	if($val==='') return array_member_value(static::$EnvData,$id_name);
+	self::setPagingIDs($id,$val);
+	return $val;
+}
+static function setPagingIDs($id,$val) {
+	$mod = "Paging." . static::$Controller;
+	$page = array_member_value(static::$EnvData,$mod);
+	unset(static::$EnvData['Paging']);	// 他モジュールのパラメータを消す
+    $ee = &$page;
+    $mem_arr = explode('.',$id);
+    foreach($mem_arr as $key) {
+        if(!isset($ee[$key])) $ee[$key] = [];
+        $ee = &$ee[$key];
+    }
+	$ee = $val;
+	static::$EnvData['Paging'][static::$Controller] = $page;
 }
 //==============================================================================
 // REQ変数操作、REQ変数はフラットな連想配列構造なので、ドット識別子IFは不要
@@ -213,7 +221,7 @@ private static function set_if_empty2(&$data,$arr) {
 //==============================================================================
 // ENV変数にアプリケーションパラメータを識別子指定で設定する
 static function set_paramIDs($names,$val) {
-	static::setEnvIDs(PARAMS_NAME.".{$names}",$val);
+	self::setEnvIDs(PARAMS_NAME.".{$names}",$val);
 }
 //==============================================================================
 // ENV変数からアプリケーションパラメータを識別子指定で値を取得
@@ -271,7 +279,8 @@ static function rm_EnvData(...$arr) {
 // ログイン情報を取得
 static function get_LoginValue($id = NULL) {
 	$LoginData = static::$EnvData['Login'];
-	if($id === NULL || empty($LoginData)) return '';
+	if($id === NULL) return $LoginData;
+//	if($id === NULL || empty($LoginData)) return '';
 	return (array_key_exists($id,$LoginData)) ? $LoginData[$id] : '';
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -291,3 +300,39 @@ static function setup_Login($login=NULL) {
 }
 
 }
+/*
+==============================================================================
+	旧メソッドから新メソッドへの読替え
+PostToEnv($keys)	=>	preservReqData($envKey,...$keys)	// REQUEST変数から環境変数に移動する
+						rollbackReqData($envKey,...$keys)	// SESSION変数からREQUESTに移動する
+PostVars(...$arr)	=> 	getPostValues(...$keys)				// 複数のPOST変数値を返す
+						getPostData($keys)					// POST変数値
+SetPostVars($arr)  	=> 	setPostVariables($arr)				// POST変数に値をセット
+						setPost_if_empty($arr)				// 未定義キーだけを値セットする
+EnvVars(...$arr)	=> 	getEnvValues(...$keys)				// 複数のENV変数値を返す
+						getEnvData($keys)					// ENV変数値
+SetEnvVar($nm,$val) =>	setEnvVariables($arr)				// 複数のENV変数に値をセット
+SetDefault($nm,$val)=> 	setEnv_if_empty($arr)				// 未定義キーだけを値セットする
+get_envVars($names) =>	getEnvIDs($id_name,$scalar)			// ドット識別子指定でENV変数を取得
+						setEnvIDs($nameID,$val,$append )	// ENV変数にドット識別子指定で保存する
+						set_paramIDs($names,$val)			// AddData変数にnames識別子指定で設定する
+						get_paramIDs($names)				// AppData変数からname識別子指定で値を取得
+UnsetEnvData($arr) 	=> 	rm_EnvData(...$arr)					// ENV変数をクリア
+						rmEnvIDs($nameID)					// ドット識別子指定でENV変数を削除
+getLoginValue($id)		=> get_LoginValue($id)				// ログイン情報を取得
+setLoginValue($id,$val) => get_LoginValue($arr)				// ログイン情報に書込
+getLoginInfo() 			=> get_LoginValue(NULL)				// ログイン配列を取得
+SetLogin($login) 		=> setup_Login($login)				// ログイン情報を置換
+ClearLogin()  			=> setup_Login(NULL)				// ログイン情報を消去
+=================================================================
+以下は新メソッドのみ
+	ページング情報のR/W
+		assignPagingIDs($id,$val)
+		getPagingIDs($id)
+		setPagingIDs($id,$val)
+	システムログの操作
+		syslog_SetData($names,$val,$append,$resource)		// システムログを格納
+		syslog_GetData($names,$resource)					// システムログを取得
+		syslog_RenameID($trans)								// システムログのID名変更
+*/
+

@@ -778,7 +778,8 @@ public function ViewTemplate($name,$vars = []) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
 		array_set_element($attrs,'value',$innerText);
 		$class = ['calendar'=>1];
-		foreach(explode(' ',$attrs['class']) as $val) $class[$val] = 1;
+		if(array_key_exists('class',$attrs))
+			foreach(explode(' ',$attrs['class']) as $val) $class[$val] = 1;
 		$attrs['class'] = implode(' ',array_keys($class));
 		$attrs = attr_sz_xchange($attrs);
         $attr = $this->gen_Attrs($attrs,$vars);

@@ -92,6 +92,11 @@ public static function ChangeParams($params,$relocate = TRUE) {
     static::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================
+// パラメータの消去
+public static function CleareParams() {
+	for($i=0;$i < count(static::$Params);++$i) static::$Params[$i] = NULL;
+}
+//==============================================================================
 // パラメータ無しのパス
 public static function Get_PagingPath() { 
 	return array_to_URI([

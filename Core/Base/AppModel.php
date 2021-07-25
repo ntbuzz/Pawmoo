@@ -44,7 +44,7 @@ class AppModel extends AppObject {
         $this->setProperty(self::$DatabaseSchema);      // Set Default Database Schema Property
         $this->setProperty(static::$DatabaseSchema);    // Set Instance Property from Database Schema Array
 		if(empty($this->Schema)) {
-			debug_log(DBMSG_DIE,["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
+			debug_log(DBMSG_STDERR,["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
 		}
 		if(empty($this->Primary)) $this->Primary = 'id';	// default primary name
         if(isset($this->ModelTables)) {                 // Multi-Language Tabele exists
@@ -310,7 +310,6 @@ public function GetRecord($num,$join=FALSE,$values=FALSE) {
 //	b. key-name => [ [ name, pid],				[ cond ] ]		for ChainSelect() by SELF [ Primary,name,pid ]
 //	c. key-name => [ Model.id => name,			[ cond ] ]		for Select() in Model [nam] = id
 //	d. key-name => [ Model. => number.title,	[ cond ] ]		for Select() in Model [title] = number|Primary
-//	d'.key-name => [ Model. => id.number.title,	[ cond ] ]		for Select() in Model [number] = id|Primary in key_name_number,[title] = id|Primary in keyname_title
 //	e. key-name => [ id.title,					[ cond ] ]		for Select() by SELF [title] = number|Primary
 //	f. key-name => [ Model. => [ Method => argument],[ cond ] ]		Chain() ir Select() value,depend on Model Method returned.
 public function LoadSelection($key_names) {
@@ -358,11 +357,14 @@ public function getFieldValues($id,$field, $cond = NULL) {
 	return $select;
 }
 //==============================================================================
-// Get Record Field by field-key without JOIN fields.
+// Get Record Field(s) by field-key without JOIN fields.
+// multi fields is separate by SPC, COMMA or DOT
 // Result:   field-data
 public function getRecordField($key,$value,$field) {
     $this->getRecordBy($key,$value);
-    return (array_key_exists($field,$this->fields)) ? $this->fields[$field] : NULL;
+	$fields = str_explode(['.',' ',','],$field);
+	return implode(' ',array_filter_values($this->fields,$fields));
+//    return (array_key_exists($field,$this->fields)) ? $this->fields[$field] : NULL;
 }
 //==============================================================================
 // 条件に一致するレコード数を検索する
@@ -476,13 +478,14 @@ public function RawRecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
 }
 //==============================================================================
 // Get First Record by condition w/o JOIN!
-// Result:   $this->RecData
+// Result:   return field array or FALSE
 public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
 	$filter = $this->normalize_filter($filter);
     $fields_list = array_combine($filter,$filter);
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     $fields = $this->dbDriver->firstRecord($cond,FALSE,$sort);
-    $this->RecData = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
+    return ($fields === FALSE) ? FALSE : array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
+//    $this->RecData = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
 }
 //==============================================================================
 // Get Record with Prev/Next Record List by FIND-CONDITION without JOIN!.
@@ -520,6 +523,19 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
     $this->row_number = $row_num;
     $this->record_max = $this->dbDriver->recordMax;
     $this->NearData = [$r_prev, $r_next ];
+}
+//==============================================================================
+// for Access Log Aggregate method
+//	pickup FIELD set by GROUP BY grouping columns.
+//	and except NOT NULL COLUMN and RECORD count Limited
+protected function tableAggregate($cond,$groups,$calc = NULL,$sortby = [],$limit=0) {
+    $data = array();
+	$sql = $this->dbDriver->getGroupCalcList($cond,$groups,$calc,$sortby,$limit);
+    while (($fields = $this->dbDriver->fetchDB())) {
+		$data[] = $fields;
+    }
+    $this->Records = $data;
+	$this->Headers = $this->dbDriver->active_column;
 }
 //==============================================================================
 // Delete Record(Primary-key)

@@ -93,7 +93,7 @@ public static function dump($items) {
 public static function debug(...$items) {
     debug_log(DBMSG_CLI,$items);
 }
-public static function die(...$items) {
+public static function halt(...$items) {
     debug_log(DBMSG_DIE,$items);
 }
 
@@ -135,7 +135,10 @@ function debug_dump($items) {
 	sysLog::dump($items);
 }
 function debug_die($items) {
-	sysLog::die($items);
+	sysLog::halt($items);
+}
+function stderr($str) {
+	fputs(STDERR,"{$str}\n");
 }
 //==========================================================================
 // ログの記録または表示
@@ -193,7 +196,7 @@ function debug_log($lvl,...$items) {
                 $dmp_msg .= "{$arg}\n";
             } else if(is_array($arg)) {                        // 配列要素の出力
                 foreach($arg as $msg => $obj) {
-                    if($msg[0] === '#') {
+                    if(mb_substr($msg,0,1) === '#') {
                         $msg[0] = '.';
                         $msg = LangUI::get_value('debug',$msg);
                     }
@@ -220,7 +223,7 @@ function debug_log($lvl,...$items) {
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
         switch($lvl) {
-        case -DBMSG_STDERR:  fputs(STDERR,$dmp_info); break;
+        case -DBMSG_STDERR:  stderr($dmp_info); break;
         case -DBMSG_DIE:     die("<pre>\n{$dmp_info}\n</pre>\n");
         case -DBMSG_DUMP:    echo "<pre>\n{$dmp_info}\n</pre>\n"; break;
         case -DBMSG_NOLOG:   $lvl  = -99;

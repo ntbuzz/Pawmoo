@@ -16,3 +16,23 @@
     width:29%;
     border: 1px solid black;
 }
+
+.thintable {
+	border-collapse: collapse;
+}
+.thintable th {
+	text-align: center;
+	background-color: silver;
+}
+.thintable td {
+}
+.thintable th,
+.thintable td {
+	padding:2px;
+	border:1px solid black;
+	vertical-align: top;
+}
+.thintable td.num {
+	text-align: right;
+	padding-right:5px;
+}

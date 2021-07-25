@@ -130,6 +130,47 @@ public function getRecordValue($cond,$use_relations) {
 	return ($row === FALSE) ? []:$row;
 }
 //==============================================================================
+//	getMaxValueRecord($field_name) 
+//		get MAX value into field_name by this-table
+//==============================================================================
+public function getMaxValueRecord($field_name) {
+	$sql = "SELECT MAX({$field_name}) as \"max_val\" FROM {$this->table}";
+	$this->execSQL($sql);
+	$row = $this->fetchDB();
+	return ($row) ? $row['max_val'] : 0;
+}
+//==============================================================================
+//	getMaxValueRecord($field_name) 
+//		get MAX value into field_name by this-table
+//==============================================================================
+public function getGroupCalcList($cond,$groups,$calc,$sortby,$max) {
+	$where = $this->sql_makeWHERE($cond);
+	$this->active_column = $fields = $groups;
+	if(!empty($calc)) {
+		foreach($calc as $func => $alias) {
+			list($fn,$ff) = explode('.',$func);
+			$fields[] = "{$ff}({$fn}) as {$alias}";
+			$this->active_column[] = $alias;
+		}
+	}
+	$sel = implode(',',$fields);
+	$grp = implode(',',$groups);
+	$sort = "";
+	if($sortby !== []) {
+		$col = [];
+		foreach($sortby as $column => $seq) {
+			$order = ($seq === SORTBY_DESCEND) ? "desc" : "asc";
+			$col[]= "{$column} {$order}";
+		}
+		$sort = " ORDER BY ".implode(',',$col);
+	}
+	$limit = ($max > 0) ? (($this->is_offset) ? " offset 0 limit {$max}" : " limit 0,{$max}"):'';
+	$sql = "SELECT {$sel} FROM {$this->raw_table}{$where} GROUP BY {$grp}{$sort}{$limit};";
+	$this->execSQL($sql,false);
+debug_log(DBMSG_HANDLER,["LOG-Aggregate" => [ 'COND' => $cond,'SQL'=>$sql]]);
+	return $sql;
+}
+//==============================================================================
 //	findRecord(cond): 
 //	cond: query condition
 //      [ AND... ] OR [ AND... ]
@@ -163,6 +204,7 @@ public function findRecord($cond,$use_relations = FALSE,$sort = []) {
 }
 //==============================================================================
 //	firstRecord(cond,use-relation,sort): 
+// returned col-data or FALSE
 //==============================================================================
 public function firstRecord($cond,$use_relations = FALSE,$sort) {
 	$where = $this->sql_makeWHERE($cond);
@@ -179,7 +221,7 @@ public function firstRecord($cond,$use_relations = FALSE,$sort) {
 	$sql .= "{$where};";
 	$this->execSQL($sql);
 	$row = $this->fetchDB();
-	return ($row === FALSE) ? []:$row;
+	return ($row === FALSE) ? FALSE:$row;
 }
 //==============================================================================
 //	deleteRecord(wh): 

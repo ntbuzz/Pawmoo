@@ -66,5 +66,37 @@ function ChainSelect() {
     <select id="fav-name"></select>
 EOS;
 }
+//==============================================================================
+// RankingLog
+public function Ranking($max = 0) {
+	$this->Access->LogRanking($max);
+	echo "<table class='thintable'>\n";
+	echo "<tr><th>No.</th>";
+	foreach($this->Access->Headers as $head) {
+		echo "<th>{$head}</th>";
+	}
+	echo "</tr>\n";
+	$no = 1;
+	foreach($this->Access->Records as $record) {
+		echo "<tr>";
+		echo "<td class='num'>{$no}</td>";
+		$lnk = "/sample/".strtolower($record['logid']);
+		$title = "";
+		if($record['method'] === 'View') {
+			$model = $record['page'];
+			$id = $record['contents'];
+			$title = $this->$model->getRecordField('id',$id,'title');
+		}
+		if(empty($title)) $title = $record['logid'];
+		$record['logid'] = "<a href='{$lnk}'>{$title}</a>";
+		foreach($record as $column) {
+			$cls = (is_numeric($column)) ? ' class="num"' : '';
+			echo "<td{$cls}>{$column}</td>";
+		}
+		echo "<tr>\n";
+		++$no;
+	}
+	echo "</table>\n";
+}
 
 }

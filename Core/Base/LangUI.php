@@ -39,7 +39,11 @@ public static function SwitchLangs($newlang) {
             ),
             'strlen'));
     $langs = array_shift($arr);             // strict回避
+<<<<<<< HEAD
 	if(empty($langs)) $langs = DEFAULT_LANG;
+=======
+	if(empty($langs)) $langs = (defined('DEFAULT_LANG')) ? DEFAULT_LANG : 'ja';
+>>>>>>> dev/master
     static::$Locale = ".{$langs}";            // 言語識別文字を付加
     static::$LocaleName = $langs;
     static::$STRINGS = [];

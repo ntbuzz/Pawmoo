@@ -4,6 +4,8 @@ class IndexController extends AppController {
 	public $defaultAction = 'List';		//  デフォルトのアクション
 	public $disableAction = [ 'Page','Makepdf' ];	// 無視するアクション
     protected $needLogin = FALSE;
+    protected $noLogging = [];//継承元も含めログ除外メソッド
+	protected $LoggingMethod = 'Access.Logged';	// ログ処理モデルとメソッドを定義
 //==============================================================================
 //	クラス初期化処理
 	protected function ClassInit() {

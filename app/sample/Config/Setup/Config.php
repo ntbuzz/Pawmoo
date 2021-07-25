@@ -1,7 +1,7 @@
 <?php
 //--------------------------------------------
 // SQLite3データベース
-define('SQLITE_DB',__DIR__ . '/../blog.db');
+define('SQLITE_DB',__DIR__ . '/../sample.db');
 //--------------------------------------------
 // PostgreSQLのサーバー定義
 define('PG_HOST','localhost');
@@ -46,5 +46,6 @@ const AliasMap  = [
     	'BlogSetup',
     	'SectionSetup',
 		'ParagraphSetup',
+		'AccessSetup',
 	],
 ];
