@@ -6,6 +6,7 @@
     Category => この記事のカテゴリ：
     PREV    => 前の記事：
     NEXT    => ：次の記事
+	アクセスログ	=> アクセスログ
 ]
 .en => [
     BLOGTITLE => "Is this BLOG ?"
@@ -13,4 +14,5 @@
     Category => Category:
     PREV    => PREV:
     NEXT    => :NEXT
+	アクセスログ	=> "Access Log"
 ]
