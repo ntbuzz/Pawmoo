@@ -164,7 +164,7 @@ public function ActionDispatch($action) {
 //==============================================================================
 // Auto Paging.
 public function AutoPaging($cond, $max_count = 100) {
-	list($num,$size) = App::$Params;
+	list($num,$size) = array_intval(App::$Params);
 	if($num === 0) $num = 1;
 	$cond = re_build_array($cond);
 	$Page = MySession::getPagingIDs('Setup');
@@ -221,18 +221,25 @@ public function FindAction() {
 	$this->View->PutLayout();
 }
 //==============================================================================
-// Default View Action
+// Default View Action (Full Page)
 public function ViewAction() {
 	$num = App::$Params[0];
 	$this->Model->GetRecord($num,TRUE,TRUE);
 	$this->View->PutLayout('ContentView');
 }
 //==============================================================================
-// Default Item View Action
+// Default Item View Action (Parts of Page)
 public function ItemAction() {
 	$num = App::$Params[0];
 	$this->Model->GetRecord($num,TRUE,TRUE);
-	$this->View->ViewTemplate('ContentView');
+	$this->View->ViewTemplate('ItemView');
+}
+//==============================================================================
+// Delete Record
+public function DeleteAction() {
+	$num = App::$Params[0];
+	$this->Model->DeleteRecord($num);
+	header('Location:' . App::$Referer);
 }
 //==============================================================================
 // Contents Template Action in AJAX access for like a SPA
