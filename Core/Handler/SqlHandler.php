@@ -6,6 +6,7 @@
 //==============================================================================
 abstract class SQLHandler {	// extends SqlCreator {
 	public  $DateStyle = 'Y-m-d';	// Date format
+	public  $TimeStyle = 'H:i:s';
 	public	$recordId;		// dummy for FMDB
 	public	$table;			// connect table
 	public	$columns;       // record column data
@@ -114,7 +115,7 @@ public function getRecordCount($cond) {
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
 	$this->execSQL("{$sql}{$where};");
 	$field = $this->fetch_array();
-	return ($field) ? $field["total"] : 0;
+	return ($field) ? intval($field["total"]) : 0;
 }
 //==============================================================================
 //	getRecordValue($cond,$use_relations) 
