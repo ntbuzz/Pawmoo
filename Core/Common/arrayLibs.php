@@ -163,6 +163,11 @@ function set_array_key_unique(&$arr,$key,$val) {
     return $key;
 }
 //==============================================================================
+// convert array element STRING to INTEGER
+function array_intval($arr) {
+    return array_map(function($v) { return intval($v);} , $arr);
+}
+//==============================================================================
 // convert to num STRING to INTEGER
 function array_intval_recursive($arr) {
     if(is_scalar($arr)) return (is_numeric($arr))?intval($arr):$arr;
@@ -222,6 +227,11 @@ function array_concat_keys(&$arr,$keys) {
 function array_set_element(&$arr,$name,$val) {
 	if(!empty($val)) $arr[$name] = $val;
 	else if(!array_key_exists($name,$arr)) $arr[$name] = '""';
+}
+//==============================================================================
+// set array element
+function array_set_key_value(&$arr,$keys,$vals) {
+	foreach(array_combine($keys,$vals) as $key => $val) $arr[$key] = $val;
 }
 //==============================================================================
 // set associate array combined name and value
