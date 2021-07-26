@@ -109,14 +109,18 @@ MySession::set_paramIDs('sysinfo',[
     'copyright' => COPYTIGHT,
     'version'   => CURRENT_VERSION,  // framework version
 ]);
-// Locale parameter in URL query.
-if(array_key_exists('lang', $query)) {
-    $lang = $query['lang'];
-    unset($query['lang']);
-    MySession::set_LoginValue(['LANG' => $lang]);
-} else {
-    $lang = MySession::get_LoginValue('LANG');
-    if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+// LANG and REGION parameter in URL query.
+foreach(['lang'=>$_SERVER['HTTP_ACCEPT_LANGUAGE'], 'region'=>'jp'] as $key => $val) {
+	if(array_key_exists($key, $query)) {
+		$def = $query[$key];
+//		unset($query[$key]);
+	} else {
+		$uname = strtoupper($key);
+		$def = MySession::get_LoginValue($uname);
+	}
+	if($def === NULL || $def === 'undefined') $def = $val;
+	MySession::set_LoginValue(['LANG' => $lang]);
+	$$key = $def;
 }
 // INITIALIZED App static class.
 App::__Init($appname,$app_uri,$module,$query,$requrl);
@@ -125,15 +129,6 @@ $libs = get_php_files(App::Get_AppPath("common/"));
 foreach($libs as $files) {
     require_once $files;
 }
-// Locale parameter in URL query.
-// if(array_key_exists('lang', $query)) {
-//     $lang = $query['lang'];
-//     unset($query['lang']);
-//     MySession::set_LoginValue(['LANG' => $lang]);
-// } else {
-//     $lang = MySession::get_LoginValue('LANG');
-//     if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
-// }
 if(empty($lang)) $lang = DEFAULT_LANG;
 // Load Common Locale tranlate parameter
 LangUI::construct($lang,App::Get_AppPath("View/lang/"),['#common',$controller]);
