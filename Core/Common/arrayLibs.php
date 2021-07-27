@@ -17,7 +17,7 @@ if (!function_exists('array_key_first')) {
 // multi delimitter explode
 function str_explode($delm,$string,$trim_empty = true) {
     $str_arr = (is_array($delm)) ? explode($delm[0],str_replace($delm, $delm[0], $string)) : explode($delm,$string);
-	if($trim_empty) $str_arr = array_filter($str_arr, "strlen");
+	if($trim_empty) $str_arr = array_map(function($v) { return trim($v);} , array_filter($str_arr, "strlen"));
     return $str_arr;
 }
 //==============================================================================
