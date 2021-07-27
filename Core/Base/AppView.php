@@ -208,7 +208,7 @@ public function ViewTemplate($name,$vars = []) {
                 else if($check === '*') $result = ($cmp_val !== '');     // is_notempty ?
                 else if(is_numeric($check)) $result = intval($check) === intval($cmp_val);
                 else if(mb_strpos($check,'...') !== false) {			// range comapre 1...9
-                    list($from,$to) = string_to_array('...',$check);
+                    list($from,$to) = str_explode('...',$check);
 					$cmp_val = intval($cmp_val);
                     $result = intval($from) <= $cmp_val && $cmp_val <= intval($to);
 				} else {
