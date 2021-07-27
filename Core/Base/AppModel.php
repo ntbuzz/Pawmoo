@@ -55,6 +55,8 @@ class AppModel extends AppObject {
         $driver = $this->Handler . 'Handler';
         $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
         $this->DateFormat = $this->dbDriver->DateStyle;         // Date format from DB-Driver
+        $this->TimeFormat = $this->dbDriver->TimeStyle;         // Time format from DB-Driver
+        $this->DateTimeFormat = "{$this->DateFormat} {$this->TimeFormat}"; // DateTime
 		$this->dbDriver->fieldAlias->lang_alternate = $this->Lang_Alternate;
 	}
 //==============================================================================
@@ -63,22 +65,6 @@ class AppModel extends AppObject {
         $this->ResetSchema();                   // Schema Initialize
         parent::class_initialize();
     }
-//==============================================================================
-// Initializ Class Property
-/*
-public function CreateMyView() {
-	if(isset($this->ViewSchema)) {
-		$viewset = (isset($this->DataView)) ? ((is_array($this->DataView)) ? $this->DataView : [$this->DataView]) : [];
-		if(is_array($this->DataTable)) {
-			list($table,$view) = $this->DataTable;
-			if($table !== $view) array_unshift($viewset, $view);
-		} else $table = $this->DataTable;
-		foreach($viewset as $view) {
-			echo $this->dbDriver->createView($table,$view,$this->ViewSchema)."\n\n";
-		} 
-	}
-}
-*/
 //==============================================================================
 // column exist check
 public function is_exist_column($name) {

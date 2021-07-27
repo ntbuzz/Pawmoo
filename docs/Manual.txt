@@ -1218,8 +1218,8 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 ・モデルクラス(AppModel)
   ・プロパティ変数
     $DatabaseSchema             // クラス・プロパティ変数連想配列として定義する(static)
-    * $dbDriver;                  // データベースドライバー
-    * $fields;                    // レコードフィールドの値
+    * $dbDriver;                // データベースドライバー
+    * $fields;                  // レコードフィールドの値
     $pagesize;                  // ページャーの表示単位
     $page_num;                  // 表示するページ番号
     $record_max;                // 総レコード数
@@ -1240,11 +1240,17 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     getCount($cond)                           // レコード数の検索
     getFieldValues($id,$field [, $cond] )     // $id,$field で指定された列のSelect配列形式の配列を返す。$cond で絞り込み可
     GetValueList()                            // Selectionスキーマで定義された値リストを $Select 配列に格納
-    LoadSelection($jeys)          　// Selectionスキーマから $keys 配列で指定されたキー名の値リストを $Select 配列に格納
+    LoadSelection($jeys)          　		  // Selectionスキーマから $keys 配列で指定されたキー名の値リストを $Select 配列に格納
     RecordFinder($cond [,$filter [,$sort ]])  // レコードリストの読み込み(JOIN済レコード)
     RawRecordFinder($cond,$filte,$sort)       // RecordFinder() のJOIN無し版
     NearRecordFinder($id,$cond,$filter,$sort) // $cond で抽出され $sort 順のレコードから $id とその前後のレコードを取得する
-                          // 「GetRecord($id,TRUE)＋前後の $filter フィールド値」 と同じ意味
+                          					  // 「GetRecord($id,TRUE)＋前後の $filter フィールド値」 と同じ意味
+	tableAggregate($cond,$groups,$calc,$sortby,$limit)	// GROUP BYによるテーブル集計。取得列はグルーピング列＋集計列のみ(GROUP BY制約)
+							// $cond	検索条件 RecordFinder()等と同じ
+							// $groups	グルーピングするフィールド配列
+							// $calc	フィールド名＋集計関数とエイリアス名	ex. [ 'col.SUM' => sum_col ]
+							// $sortby	ソート列とソート順の連想配列
+							// $limit	取得レコード数
     DeleteRecord($num)                        // $num キーレコードの削除
     MultiDeleteRecord($cond)                  // 条件指定のレコード削除
     is_valid(&$row)                           // フィールドデータの検証、戻り値 TRUE=データ有効、FALSE=データ無効
@@ -1256,7 +1262,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   ビュークラスはテンプレート処理へのI/Fを提供するクラスでサブクラスを定義する必要はありません、
   アプリ独自に拡張することができますが、その場合は基底クラスの処理を阻害しないようにしてください。
   ・プロパティ変数
-    * $Layout;                    // レイアウトテンプレート名
+    * $Layout;                  // レイアウトテンプレート名
     SetLayout($layoutfile)      // デフォルトレイアウト変更
     PutLayout()                 // レイアウト出力
     ViewTemplate($name)         // レイアウトテンプレート処理
@@ -1378,6 +1384,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 ◆ ライブラリ関数
   コアシステムに組み込んである、アプリケーションから利用できるライブラリ関数一覧です。
 
+
 ・ファイル名関連
   extract_extension($filename)     $filename から拡張子を取り出す
   extract_base_name($ffilename)    返り値は array(ファイル名,拡張子)
@@ -1387,23 +1394,50 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   byte_format($size)               ファイルサイズを表す文字列を返す(KB,MB,GB)
 
 ・文字列操作
-  str_fixwidth($exp,$pading,$width)    $exp を固定長に変換する
-  strpos_of_array($str,$hayz)          $hayz 配列内に $str 文字列があるか
-  text_to_html($atext)                 テキストをHTML文字列への変換
-  json_escape($a)                      JSONで使用できる文字列に変換
-  pseudo_markdown($atext)              簡易マークダウン
-  get_protocol($href)                  先頭がプロトコルかどうか判定
-  make_hyperlink($lnk,$modname)        ハイパーリンク生成
-  mark_active_words($atext,$word,$class) span タグでのマーキング
-  passwd_encrypt($str)                 OPENSSLを使った暗号化
+  control_escape($a)						コントロール文字をエスケープした文字に変換
+  echo_safe($atext,$is_safe = TRUE)			HTMLセーフな文字列に変換して出力
+  get_protocol($href)                		先頭がプロトコルかどうか判定、違えばNULL
+  int_value($digit,$default)				$digitを数値変換、ゼロなら$defaultを返す
+  is_bool_false($bool)						$bool がFALSE判定に合致するかを返す
+  json_escape($a)                      		JSONで使用できる文字列に変換
+  make_hyperlink($lnk,$modname)				ハイパーリンクの省略文字をURIへ変換する
+  mark_active_words($atext,$word,$class)	span タグでのマーキング
+  passwd_encrypt($str)                 		OPENSSLを使った暗号化
+  pseudo_markdown($atext)              		簡易マークダウン
+  str_fixwidth($exp,$pading,$width)    		$exp を固定長に変換する
+  strlen_limit($str,$maxlen)				文字列を $maxlenで切り取る
+  strpos_of_array($str,$hayz)          		$hayz 配列内に $str 文字列があるか
+  text_to_html($atext)                 		テキストをHTML文字列への変換
 
 ・配列操作
-  array_override($a, $b)                array_merge() の代替え、無名要素も上書きする
-  array_override_recursive($a, $b)      array_merge_recursive() の代替え、同名要素を上書き
-  text_line_array($del,$txt [,$trim])   テキストを配列に変換 $trimがTRUEなら空行削除
-  array_to_text($array,$sep = "\n")     配列要素を改行テキストに変換
-  array_member_value($array,$names)     構造化名(.)による多次元連想配列要素の参照
-  condition_array($keyset,$keystr)    $keystrを空白で区切り、$keysetのAND条件配列に変換
+  array_alternative($a,$max = 0, $b = []) 		配列 $a を $bにより $max要素数に拡張する
+  array_concat_keys(&$arr,$keys)				$keys で指示されたキー名の要素を連結する
+  array_depth($a, $c = 0) 						配列のネスト数を返す
+  array_filter_values($arr,$filter)				配列内から$filterで支持されたキー名の値を配列で返す
+  array_first_item($arr)						連想配列の最初の要素をキー名、値の配列で返す
+  array_flat_reduce($arr) 						ネストされた配列をフラットな配列に変換
+  array_intval($arr) 							配列要素にintval()を適用する
+  array_intval_recursive($arr)					array_intval() の再帰版
+  array_item_value(&$arr,$key,$default=NULL)	連想配列の要素値、存在しないときは$defaultを返す
+  array_key_exists_recursive($key,$arr)			array_key_exists() のネスト版
+  array_key_unique($key,&$arr)					配列内のキー名重複を回避するキー名を返す
+  array_key_value($arr,$sep=',',$quote='')		配列を キー名＝値　のテキスト変換
+  array_member_value($nVal,$names)				ドットで区切られた要素名の値を取得する
+  array_override($a, $b)                		array_merge() の代替え、無名要素も上書きする
+  array_override_recursive($a, $b)      		array_merge_recursive() の代替え、同名要素を上書き
+  array_reduce_recursive($array,$callback,$init='') array_reduce()再帰版 callbackにはキー名が渡される
+  array_set_element(&$arr,$name,$val)			$nameで示されるキー名要素に値を設定。空文字なら "" を設定する
+  array_set_key_value(&$arr,$keys,$vals)		($keys,$vals)で指示される配列要素を$arrに設定する
+  array_to_text($array,$sep = "\n")     		配列要素を改行テキストに変換
+  array_to_URI($arr,$query=NULL)				配列からURIに変換しquery文字列を付加
+  condition_array($keyset,$keystr)				検索文字列を配列条件に変換 - がある文字列はNOT演算変換
+  set_array_key_unique(&$arr,$key,$val) 		$key を重複しないようにして値をセット
+  str_explode($delm,$string,$trim_empty=TRUE)	explode() の複数デリミタ版
+  strpos_of_array($str,$hayz)					配列要素に $str が含まれれば TRUE
+  text_line_array($del,$txt [,$trim])   		テキストを配列に変換 $trimがTRUEなら空行削除
+
+  string_to_array($sep, $str) 					廃止 → str_explode() へ
+  array_merge_combine(&$arr,$keyset,$valset)	廃止 → array_set_key_value() へ
 
 ◆ Javascript関数
   Javascriptで使用できるオブジェクト関数の一覧です。
@@ -1414,13 +1448,23 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   pfLocations.last_item(n)              パスの最後からN番目を返す
   pfLocations.fullpath(url)             フレームワークURLをhttp:// で始まるフルパス変換
   pfLocations.cont_path(array,isnum)    コントローラーパス以降を配列値で置換したURL
-  isnum(省略可) が true なら現在のパラメータパスを付加
+                                        isnum(省略可) が true なら現在のパラメータパスを付加
   pfLocations.act_path(array,isnum)     アクションパス以降を配列値で置換したURL
   pfLocations.filter_path(array,isnum)  コントローラーパス以降を配列値で置換したURL
   pfLocations.href_param(array)         パラメータパス以降を配列値で置換したURL
 
+・フォーム操作
+  formSubmit(obj, url)					オブジェクト変数からフォームを生成して url にサブミットします
+
 ◆ JQueryプラグイン
   JQueryのプラグインとして使用できる関数
+
+・サブミットオブジェクトの抽出
+  (セレクタ).submitObject(チェックBOXのFALSE、コールバック関数、探索オブジェクト);
+	name属性をもつタグから値を取り出し、オブジェクト変数としてコールバックを呼出します。
+	チェックBOXのFALSEをTRUEにするとcheckbox属性にcheckedがついていない時は 'f'をセットします
+	探索オブジェクトをがTRUEの場合、親オブジェクトからタグ探索します
+	コールバック関数 = function(抽出されたオブジェクト変数)
 
 ・スクロールを固定する
   (セレクタ).stickyOn(親オブジェクト);

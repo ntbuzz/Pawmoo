@@ -109,14 +109,18 @@ MySession::set_paramIDs('sysinfo',[
     'copyright' => COPYTIGHT,
     'version'   => CURRENT_VERSION,  // framework version
 ]);
-// Locale parameter in URL query.
-if(array_key_exists('lang', $query)) {
-    $lang = $query['lang'];
-    unset($query['lang']);
-    MySession::set_LoginValue(['LANG' => $lang]);
-} else {
-    $lang = MySession::get_LoginValue('LANG');
-    if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+// LANG and REGION parameter in URL query.
+foreach(['lang'=>$_SERVER['HTTP_ACCEPT_LANGUAGE'], 'region'=>'jp'] as $key => $val) {
+	if(array_key_exists($key, $query)) {
+		$def = $query[$key];
+//		unset($query[$key]);
+	} else {
+		$uname = strtoupper($key);
+		$def = MySession::get_LoginValue($uname);
+	}
+	if(empty($def) || $def === 'undefined') $def = $val;
+	MySession::set_LoginValue([$uname => $def]);
+	$$key = $def;
 }
 // INITIALIZED App static class.
 App::__Init($appname,$app_uri,$module,$query,$requrl);
@@ -125,15 +129,6 @@ $libs = get_php_files(App::Get_AppPath("common/"));
 foreach($libs as $files) {
     require_once $files;
 }
-// Locale parameter in URL query.
-// if(array_key_exists('lang', $query)) {
-//     $lang = $query['lang'];
-//     unset($query['lang']);
-//     MySession::set_LoginValue(['LANG' => $lang]);
-// } else {
-//     $lang = MySession::get_LoginValue('LANG');
-//     if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
-// }
 if(empty($lang)) $lang = DEFAULT_LANG;
 // Load Common Locale tranlate parameter
 LangUI::construct($lang,App::Get_AppPath("View/lang/"),['#common',$controller]);
@@ -160,41 +155,36 @@ if(strcasecmp($appname,$controller) === 0) {
     App::ChangeMethod($controller,$method,false);
 }
 sysLog::__Init($appname,$controller,$method);
-//LangUI::construct($lang,App::Get_AppPath("View/lang/"),['#common',$controller]);
-// remind Controller, Method name in App class
-// App::$Controller  = $controller;
-// App::$Method= $method;
 //=================================
-// Debugging Message
-debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
-    '#PathInfo' => [
-        'SERVER'    => $_SERVER['SERVER_NAME'],
-        "DOCROOT"   => App::$DocRoot,
-        "REQ_URI"   => $_SERVER['REQUEST_URI'],
-        "REFERER"   => App::$Referer,
-        "QUERY"     => App::$Query,
-    ],
-    '#DebugInfo' => [
-        "AppName"       => App::$AppName,
-        "Class"         => $ContClass,
-        "Controller"    => App::$Controller,
-        "Action"        => App::$Method,
-        "Filters"       => App::$Filters,
-//        "Param"         => App::$Params,
-        "Re-Location" => App::Get_RelocateURL(),
-    ],
-    "SESSION Variables" => [
-        "SESSION_ID"=> MySession::$MY_SESSION_ID,
-        "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
-        "POST"      => MySession::$ReqData,     // Hide debuglog,password
-    ],
-]);
-
 sysLog::run_start();
 LockDB::LockStart();
 // Login unnecessary, or Login success returned TRUE.
 if($controllerInstance->is_authorised($method)) {
-    debug_log(DBMSG_CLI|DBMSG_SYSTEM, [ 'LockDB OWNER' => LockDB::GetOwner()]);
+    // Debugging Message
+    debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
+        '#PathInfo' => [
+            'SERVER'    => $_SERVER['SERVER_NAME'],
+            "DOCROOT"   => App::$DocRoot,
+            "REQ_URI"   => $_SERVER['REQUEST_URI'],
+            "REFERER"   => App::$Referer,
+            "QUERY"     => App::$Query,
+        ],
+        '#DebugInfo' => [
+            "AppName"       => App::$AppName,
+            "Class"         => $ContClass,
+            "Controller"    => App::$Controller,
+            "Action"        => App::$Method,
+            "Filters"       => App::$Filters,
+    //        "Param"         => App::$Params,
+            "Re-Location" => App::Get_RelocateURL(),
+        ],
+        "SESSION Variables" => [
+            "SESSION_ID"=> MySession::$MY_SESSION_ID,
+            "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
+            "POST"      => MySession::$ReqData,     // Hide debuglog,password
+        ],
+        'LockDB OWNER' => LockDB::GetOwner(),
+    ]);
     // Controller Method Dispacher
     $controllerInstance->ActionDispatch($method);
 }

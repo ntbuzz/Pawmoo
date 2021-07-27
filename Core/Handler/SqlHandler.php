@@ -6,6 +6,7 @@
 //==============================================================================
 abstract class SQLHandler {	// extends SqlCreator {
 	public  $DateStyle = 'Y-m-d';	// Date format
+	public  $TimeStyle = 'H:i:s';
 	public	$recordId;		// dummy for FMDB
 	public	$table;			// connect table
 	public	$columns;       // record column data
@@ -114,7 +115,7 @@ public function getRecordCount($cond) {
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
 	$this->execSQL("{$sql}{$where};");
 	$field = $this->fetch_array();
-	return ($field) ? $field["total"] : 0;
+	return ($field) ? intval($field["total"]) : 0;
 }
 //==============================================================================
 //	getRecordValue($cond,$use_relations) 
@@ -333,7 +334,7 @@ protected function sql_safequote(&$value) {
 			// multi-column LIKE op
 			$like_object = function($key,$val,$table) use(&$like_opstr) {
 				$expr = [];
-				foreach(string_to_array('+',$key) as $cmp) {
+				foreach(str_explode('+',$key) as $cmp) {
 					$cmp = $this->fieldAlias->get_lang_alias($cmp);
 					$opk = "{$table}.\"{$cmp}\"";
 					$cmp = array_map(function($v) use(&$opk,&$like_opstr) {
@@ -348,7 +349,7 @@ protected function sql_safequote(&$value) {
 			// multi-columns f1+f2+f3...  OP val
 			$multi_field = function($key,$op,$table,$val) {
 				$expr = [];
-				foreach(string_to_array('+',$key) as $cmp) {
+				foreach(str_explode('+',$key) as $cmp) {
 					$cmp = $this->fieldAlias->get_lang_alias($cmp);
 					$fn = "{$table}.\"{$cmp}\"";
 					if(mb_strpos($val,'%') !== FALSE) {
@@ -375,7 +376,7 @@ protected function sql_safequote(&$value) {
 					} else { // not have op code
 						if(mb_strpos($val,'...') !== FALSE) {
 							$op = 'BETWEEN';
-							list($from,$to) = string_to_array('...',$val);
+							list($from,$to) = str_explode('...',$val);
 							$val = "'{$from}' AND '{$to}'";
 						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';

@@ -93,7 +93,7 @@ private static function ConvHeader($header,$attr,$addres) {
 private static function MailAddress($addres) {
 	if(is_scalar($addres)) return "<{$addres}>";
 	$addr = [];
-	foreach($addres as $mm => $nm) $addr[] = "{$nm} <{$mm}>"
+	foreach($addres as $mm => $nm) $addr[] = "{$nm} <{$mm}>";
 	return implode(',',$addr);
 }
 //==============================================================================
@@ -117,7 +117,6 @@ static function Send() {
 			'SUBJECT'=>static::$Subject,
 			'BODY'	=> $body,
 		]]);
-	]);
 	$to = 'root@localhost';
 	$subject = "テスト:{$subject}";
 	$header = self::ConvHeader('','From',static::$From);

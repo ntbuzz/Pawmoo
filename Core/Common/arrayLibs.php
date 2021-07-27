@@ -51,7 +51,7 @@ function array_alternative($a,$max = 0, $b = []) {
 //==============================================================================
 // strpos for array version
 function strpos_of_array($str,$hayz) {
-    foreach($hays as $val) {
+    foreach($hayz as $val) {
         if(strpos($str,$val) !== false) return TRUE;
     }
     return FALSE;
@@ -90,11 +90,6 @@ function text_line_array($del,$txt,$trim = FALSE) {
             ), ($trim) ? 'strlen' : function($a) { return TRUE;}
         ));
     return $array;
-}
-//==============================================================================
-// The result of splitting the text and returning an array with whitespace removed
-function string_to_array($sep, $str) {
-    return array_map(function($v) { return trim($v); },explode($sep,$str));
 }
 //==============================================================================
 // array value concatinate to TEXT
@@ -157,10 +152,13 @@ function array_key_unique($key,&$arr) {
 //==============================================================================
 // set value by array-key duplicate avoidance
 function set_array_key_unique(&$arr,$key,$val) {
-    $wkey = $key;
-    for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}::#{$n}";
+    $key = array_key_unique($key,$arr);
     $arr[$key] = $val;
-    return $key;
+}
+//==============================================================================
+// convert array element STRING to INTEGER
+function array_intval($arr) {
+    return array_map(function($v) { return intval($v);} , $arr);
 }
 //==============================================================================
 // convert to num STRING to INTEGER
@@ -224,10 +222,9 @@ function array_set_element(&$arr,$name,$val) {
 	else if(!array_key_exists($name,$arr)) $arr[$name] = '""';
 }
 //==============================================================================
-// set associate array combined name and value
-function array_merge_combine(&$arr,$keyset,$valset) {
-	$ix = 0;
-	foreach($keyset as $keyname) $arr[$keyname] = $valset[$ix++];
+// set array element
+function array_set_key_value(&$arr,$keys,$vals) {
+	foreach(array_combine($keys,$vals) as $key => $val) $arr[$key] = $val;
 }
 //==============================================================================
 // get array element by structured-name
