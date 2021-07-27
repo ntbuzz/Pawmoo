@@ -111,11 +111,11 @@ MySession::set_paramIDs('sysinfo',[
 ]);
 // LANG and REGION parameter in URL query.
 foreach(['lang'=>$_SERVER['HTTP_ACCEPT_LANGUAGE'], 'region'=>'jp'] as $key => $val) {
+	$uname = strtoupper($key);
 	if(array_key_exists($key, $query)) {
 		$def = $query[$key];
-//		unset($query[$key]);
+		unset($query[$key]);
 	} else {
-		$uname = strtoupper($key);
 		$def = MySession::get_LoginValue($uname);
 	}
 	if(empty($def) || $def === 'undefined') $def = $val;
