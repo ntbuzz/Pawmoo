@@ -118,8 +118,8 @@ foreach(['lang'=>$_SERVER['HTTP_ACCEPT_LANGUAGE'], 'region'=>'jp'] as $key => $v
 		$uname = strtoupper($key);
 		$def = MySession::get_LoginValue($uname);
 	}
-	if($def === NULL || $def === 'undefined') $def = $val;
-	MySession::set_LoginValue(['LANG' => $lang]);
+	if(empty($def) || $def === 'undefined') $def = $val;
+	MySession::set_LoginValue([$uname => $def]);
 	$$key = $def;
 }
 // INITIALIZED App static class.
@@ -155,41 +155,36 @@ if(strcasecmp($appname,$controller) === 0) {
     App::ChangeMethod($controller,$method,false);
 }
 sysLog::__Init($appname,$controller,$method);
-//LangUI::construct($lang,App::Get_AppPath("View/lang/"),['#common',$controller]);
-// remind Controller, Method name in App class
-// App::$Controller  = $controller;
-// App::$Method= $method;
 //=================================
-// Debugging Message
-debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
-    '#PathInfo' => [
-        'SERVER'    => $_SERVER['SERVER_NAME'],
-        "DOCROOT"   => App::$DocRoot,
-        "REQ_URI"   => $_SERVER['REQUEST_URI'],
-        "REFERER"   => App::$Referer,
-        "QUERY"     => App::$Query,
-    ],
-    '#DebugInfo' => [
-        "AppName"       => App::$AppName,
-        "Class"         => $ContClass,
-        "Controller"    => App::$Controller,
-        "Action"        => App::$Method,
-        "Filters"       => App::$Filters,
-//        "Param"         => App::$Params,
-        "Re-Location" => App::Get_RelocateURL(),
-    ],
-    "SESSION Variables" => [
-        "SESSION_ID"=> MySession::$MY_SESSION_ID,
-        "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
-        "POST"      => MySession::$ReqData,     // Hide debuglog,password
-    ],
-]);
-
 sysLog::run_start();
 LockDB::LockStart();
 // Login unnecessary, or Login success returned TRUE.
 if($controllerInstance->is_authorised($method)) {
-    debug_log(DBMSG_CLI|DBMSG_SYSTEM, [ 'LockDB OWNER' => LockDB::GetOwner()]);
+    // Debugging Message
+    debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
+        '#PathInfo' => [
+            'SERVER'    => $_SERVER['SERVER_NAME'],
+            "DOCROOT"   => App::$DocRoot,
+            "REQ_URI"   => $_SERVER['REQUEST_URI'],
+            "REFERER"   => App::$Referer,
+            "QUERY"     => App::$Query,
+        ],
+        '#DebugInfo' => [
+            "AppName"       => App::$AppName,
+            "Class"         => $ContClass,
+            "Controller"    => App::$Controller,
+            "Action"        => App::$Method,
+            "Filters"       => App::$Filters,
+    //        "Param"         => App::$Params,
+            "Re-Location" => App::Get_RelocateURL(),
+        ],
+        "SESSION Variables" => [
+            "SESSION_ID"=> MySession::$MY_SESSION_ID,
+            "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
+            "POST"      => MySession::$ReqData,     // Hide debuglog,password
+        ],
+        'LockDB OWNER' => LockDB::GetOwner(),
+    ]);
     // Controller Method Dispacher
     $controllerInstance->ActionDispatch($method);
 }
