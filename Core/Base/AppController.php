@@ -99,6 +99,7 @@ public function is_authorised($method) {
 		} else {
 			list($userid,$lang) = $data;
 			if(empty($lang)) $lang = LangUI::$LocaleName;
+			$lang = get_locale_lang($lang);
 			MySession::set_LoginValue([$login_key => $userid,'LANG'=>$lang]);
 			if($lang !== LangUI::$LocaleName) {
 				LangUI::SwitchLangs($lang);

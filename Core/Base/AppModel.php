@@ -236,7 +236,6 @@ public function ResetSchema() {
 							if(substr_count($ref_list, '.') !== 1) $ref_list = "{$this->Primary}.{$ref_list}";
 						} else $ref_list = "{$field}.{$ref_list}";
                         $lnk = [ $model => $ref_list];
-//debug_log(DBMSG_NOLOG,['MOD'=>$this->ModuleName,'NAME'=>$key_name,'MODEL'=>$model,'FIELD'=>$field,'REF'=>$ref_list,'LINK'=>$lnk]);
                     } else {
                         if(!empty($field)) array_unshift($ref_list,$field);
                         $lnk[$model] = $ref_list;
@@ -344,13 +343,17 @@ public function getFieldValues($id,$field, $cond = NULL) {
 }
 //==============================================================================
 // Get Record Field(s) by field-key without JOIN fields.
-// multi fields is separate by SPC, COMMA or DOT
+// multi fields is separate by SPC(DOT), ARRAY (COMMA)
 // Result:   field-data
 public function getRecordField($key,$value,$field) {
     $this->getRecordBy($key,$value);
-	$fields = str_explode(['.',' ',','],$field);
-	return implode(' ',array_filter_values($this->fields,$fields));
-//    return (array_key_exists($field,$this->fields)) ? $this->fields[$field] : NULL;
+	$keys = explode(',',$field);
+	$vals = array_map(function($fn) {
+			$dot = explode('.',$fn);
+			return implode(' ',array_filter_values($this->fields,$dot));
+		},$keys);
+	if(count($vals)===1) return $vals[0];
+	else return array_combine($keys,$vals);
 }
 //==============================================================================
 // 条件に一致するレコード数を検索する
@@ -362,7 +365,6 @@ public function getCount($cond) {
 	private function normalize_filter($filter) {
 		if(empty($filter)) $filter = $this->dbDriver->columns;
 		else if(is_scalar($filter)) {
-//debug_log(DBMSG_MODEL,['CLASS'=>$this->ClassName,'NORMALIZ'=>$filter]);
 			$filter = (strpos($filter,'.')!==FALSE) ? explode('.',$filter): [$filter];
 		}
 		return $filter;
@@ -514,7 +516,7 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
 // for Access Log Aggregate method
 //	pickup FIELD set by GROUP BY grouping columns.
 //	and except NOT NULL COLUMN and RECORD count Limited
-protected function tableAggregate($cond,$groups,$calc = NULL,$sortby = [],$limit=0) {
+protected function tableAggregate($cond,$groups,$calc = NULL,$filter=NULL,$sortby = [],$limit=0) {
     $data = array();
 	$sql = $this->dbDriver->getGroupCalcList($cond,$groups,$calc,$sortby,$limit);
     while (($fields = $this->dbDriver->fetchDB())) {
@@ -522,6 +524,9 @@ protected function tableAggregate($cond,$groups,$calc = NULL,$sortby = [],$limit
     }
     $this->Records = $data;
 	$this->Headers = $this->dbDriver->active_column;
+	if(!empty($filter)) {
+		$this->Headers = array_filter($filter,function($vv) { return in_array($vv,$this->Headers,true);});
+	}
 }
 //==============================================================================
 // Delete Record(Primary-key)

@@ -25,18 +25,19 @@ class LangUI {
 //  言語ファイルの切替え
 public static function SwitchLangs($newlang) {
     $default = static::$LangDir;      // ロード先を保存
-    $arr = array_unique(             // 重複行を取り除く
-        array_filter(           // strlen を使って空行を取り除く
-            array_map(          // 各要素に有効識別子の取り出し関数を適用
-                function($a) {
-                    if(($n=strpos($a,'-')) !== FALSE)       return substr($a,0,$n);     // en-US => en
-                    else if(($n=strpos($a,';')) !== FALSE)  return substr($a,0,$n);     // en;q=0.9 => en
-                    else return $a;
-                },
-                explode(',', $newlang)  // 言語受け入れリスト
-            ),
-            'strlen'));
-    $langs = array_shift($arr);             // strict回避
+    // $arr = array_unique(             // 重複行を取り除く
+    //     array_filter(           // strlen を使って空行を取り除く
+    //         array_map(          // 各要素に有効識別子の取り出し関数を適用
+    //             function($a) {
+    //                 if(($n=strpos($a,'-')) !== FALSE)       return substr($a,0,$n);     // en-US => en
+    //                 else if(($n=strpos($a,';')) !== FALSE)  return substr($a,0,$n);     // en;q=0.9 => en
+    //                 else return $a;
+    //             },
+    //             explode(',', $newlang)  // 言語受け入れリスト
+    //         ),
+    //         'strlen'));
+    // $langs = array_shift($arr);             // strict回避
+	$langs = get_locale_lang($newlang);
 	if(empty($langs)) $langs = (defined('DEFAULT_LANG')) ? DEFAULT_LANG : 'ja';
     static::$Locale = ".{$langs}";            // 言語識別文字を付加
     static::$LocaleName = $langs;

@@ -1245,10 +1245,11 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     RawRecordFinder($cond,$filte,$sort)       // RecordFinder() のJOIN無し版
     NearRecordFinder($id,$cond,$filter,$sort) // $cond で抽出され $sort 順のレコードから $id とその前後のレコードを取得する
                           					  // 「GetRecord($id,TRUE)＋前後の $filter フィールド値」 と同じ意味
-	tableAggregate($cond,$groups,$calc,$sortby,$limit)	// GROUP BYによるテーブル集計。取得列はグルーピング列＋集計列のみ(GROUP BY制約)
+	tableAggregate($cond,$groups,$calc,$filter,$sortby,$limit)	// GROUP BYによるテーブル集計。取得列はグルーピング列＋集計列のみ(GROUP BY制約)
 							// $cond	検索条件 RecordFinder()等と同じ
 							// $groups	グルーピングするフィールド配列
 							// $calc	フィールド名＋集計関数とエイリアス名	ex. [ 'col.SUM' => sum_col ]
+							// $filter	グルーピングするフィールドのうちリスト表示のためのフィールドフィルタ
 							// $sortby	ソート列とソート順の連想配列
 							// $limit	取得レコード数
     DeleteRecord($num)                        // $num キーレコードの削除
@@ -1432,7 +1433,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   array_to_URI($arr,$query=NULL)				配列からURIに変換しquery文字列を付加
   condition_array($keyset,$keystr)				検索文字列を配列条件に変換 - がある文字列はNOT演算変換
   set_array_key_unique(&$arr,$key,$val) 		$key を重複しないようにして値をセット
-  str_explode($delm,$string,$trim_empty=TRUE)	explode() の複数デリミタ版
+  str_explode($delm,$string,$trim_empty=TRUE)	explode() に複数デリミタ許可、空行削除とtrim()の機能を付加
   strpos_of_array($str,$hayz)					配列要素に $str が含まれれば TRUE
   text_line_array($del,$txt [,$trim])   		テキストを配列に変換 $trimがTRUEなら空行削除
 
