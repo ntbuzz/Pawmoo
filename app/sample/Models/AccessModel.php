@@ -94,7 +94,7 @@ public function LogRanking($max = 0) {
 	$start = $today - self::aggregate_period;
 	$period = date('Y-m-d',$start)."...".date('Y-m-d',$today);
 	$cond = ['logdate' => $period];
-	$this->tableAggregate($cond,$groups,$calc,$sortby,$max);
+	$this->tableAggregate($cond,$groups,$calc,NULL,$sortby,$max);
 }
 
 
