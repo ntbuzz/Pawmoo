@@ -156,6 +156,22 @@ function LocalCharset($str) {
             mb_convert_encoding($str,"sjis-win","UTF-8") : $str;
 }
 //==============================================================================
+// Locale type pickup
+function get_locale_lang($lang_str) {
+    $arr = array_unique(            // remove duplicate line
+        array_filter(           	// empty line delete
+            array_map(         		// pickup each element
+                function($a) {
+                    if(($n=strpos($a,'-')) !== FALSE)       return substr($a,0,$n);     // en-US => en
+                    else if(($n=strpos($a,';')) !== FALSE)  return substr($a,0,$n);     // en;q=0.9 => en
+                    else return $a;
+                },
+                explode(',', $lang_str)
+            ),
+            'strlen'));
+    return  array_shift($arr);             // strict回避
+}
+//==============================================================================
 // Removes the character string for duplicate judgment
 function tag_body_name($key) {
     $n = strrpos($key,'::#');

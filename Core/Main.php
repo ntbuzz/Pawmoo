@@ -119,6 +119,7 @@ foreach(['lang'=>$_SERVER['HTTP_ACCEPT_LANGUAGE'], 'region'=>'jp'] as $key => $v
 		$def = MySession::get_LoginValue($uname);
 	}
 	if(empty($def) || $def === 'undefined') $def = $val;
+//	$def = get_locale_lang($def);
 	MySession::set_LoginValue([$uname => $def]);
 	$$key = $def;
 }
