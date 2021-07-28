@@ -1245,10 +1245,11 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     RawRecordFinder($cond,$filte,$sort)       // RecordFinder() のJOIN無し版
     NearRecordFinder($id,$cond,$filter,$sort) // $cond で抽出され $sort 順のレコードから $id とその前後のレコードを取得する
                           					  // 「GetRecord($id,TRUE)＋前後の $filter フィールド値」 と同じ意味
-	tableAggregate($cond,$groups,$calc,$sortby,$limit)	// GROUP BYによるテーブル集計。取得列はグルーピング列＋集計列のみ(GROUP BY制約)
+	tableAggregate($cond,$groups,$calc,$filter,$sortby,$limit)	// GROUP BYによるテーブル集計。取得列はグルーピング列＋集計列のみ(GROUP BY制約)
 							// $cond	検索条件 RecordFinder()等と同じ
 							// $groups	グルーピングするフィールド配列
 							// $calc	フィールド名＋集計関数とエイリアス名	ex. [ 'col.SUM' => sum_col ]
+							// $filter	グルーピングするフィールドのうちリスト表示のためのフィールドフィルタ
 							// $sortby	ソート列とソート順の連想配列
 							// $limit	取得レコード数
     DeleteRecord($num)                        // $num キーレコードの削除
