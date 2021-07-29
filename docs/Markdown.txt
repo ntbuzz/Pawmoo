@@ -15,6 +15,8 @@ If you want to escape markdown or HTML tag characters. Prepend a backslash (\).
 ## Basic syntax
 
 [Text](URL)         // Hyperlink  
+                       The URL can contain whitespace-separated attribute values.
+                       ex. [MyLink](http://www.example.com/user/hp class="new-win")
 ![ALT-text](URL)    // Image link to URL
                        The following are original specifications
                        You can specify a specific path by adding: or! To the first character of the URL.
