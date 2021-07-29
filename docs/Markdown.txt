@@ -38,8 +38,8 @@ __Emphasis__              // Emphasis (em)
 --Cancellationline--      // Cancellation line (del)
  _Underline_              // Underline (text-decolration: underline)
 
--- Item 1                   // List (UL-LI)
--- Item 2
+- Item 1                   // List (UL-LI)
+- Item 2
 
 1. Item 1                  // Number list (OL-LI)
 1. Item 2
@@ -64,35 +64,35 @@ Immediately after the attribute character in the table cell, ^, @ and. If you co
 Also, if you specify #numerical value, you can specify the column width (width) with the style attribute, so you can save the trouble of creating a class that specifies the column width.  
 
 |:.abc data |        // Immerse the class name abc in the TH tag
-|=@@@  Data |        // Center the TD tag and concatenate 3 columns (as many as @) (COLSPAN = 3)
-|=^^^  Data |        // Center the TD tag and concatenate 3 rows (as many as ^) (ROWSPAN = 3)
+|=@@@  Data |        // Center the TD tag and concatenate 3 columns (as many as @) (COLSPAN = 3),same of '@3'
+|=^^^  Data |        // Center the TD tag and concatenate 3 rows (as many as ^) (ROWSPAN = 3), same of '^3'
 |:=#80 Data |        // Center the TH tag and set the column width to 80px (style = width: 80px;).
 
 ### Element
 
-..ClassName#ID{text}       // Class name, SPAN tag with ID name specified, class name, ID name can be omitted. Space is required before and after.
-                             Use P tag with ':' in front of {} in text
-                             ..abc:{text} => <p class="abc"> text </p>
+..ClassName#ID{text} // Class name, SPAN tag with ID name specified, class name, ID name can be omitted. Space is required before and after.
+                        Use P tag with ':' in front of {} in text
+                        ..abc:{text} => <p class="abc"> text </p>
 
 ### Block
 
-...ClassName{             // div class=ClassName, if you omit the class name, it will be "indent" class
-Text                      // Add! Before the curly braces to automatically convert line breaks in the text to <br> tags.
-}...                     // ex. ...!{ Line break Text  → <br> Tag automatic conversion}
+...ClassName{        // div class=ClassName, if you omit the class name, it will be "indent" class
+Text                 // Add! Before the curly braces to automatically convert line breaks in the text to <br> tags.
+}...                 // ex. ...!{ Line break Text  → <br> Tag automatic conversion}
 
 ### Code
 
-```ClassName              // pre class="ClassName ", if you omit the class name, it will be "code" class.
+```ClassName         // pre class="ClassName ", if you omit the class name, it will be "code" class.
   source-code
-```                      // pre-terminate
+```                  // pre-terminate
 
 "Code, indent, quote" is defined in the standard style for the class name.  
 You can use "~~~" or "^^^" instead of "```" in the pre element, in which case the abbreviated class name is indent.
   
 ### Checkbox view
 
-[Checked]{Labelname}      // Blank bracket if checked is FALSE (empty string, 0, f, false)
-                          // Otherwise, display with [X]
+[Checked]{Labelname}  // Blank bracket if checked is FALSE (empty string, 0, f, false)
+                      // Otherwise, display with [X]
 
 
 ### Form parts
@@ -111,5 +111,5 @@ Escape'\}' if item or textvalue contains'}'.
 Body1 (DD)
 :Title2 (DT)
 Body2 (DD)
-\n\n                                           // End with two consecutive line breaks
+\n\n                  // End with two consecutive line breaks
 
