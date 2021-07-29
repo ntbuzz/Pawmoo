@@ -15,7 +15,8 @@ if (!function_exists('preg_replace_callback_array')) {
 function pseudo_markdown($atext, $md_class = '') {
     $md_class = get_class_names("easy_markdown.{$md_class}");
     $replace_defs = [
-        '/\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'    => '<a href="\\2">\\1</a>',
+//        '/\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'    => '<a href="\\2">\\1</a>',
+		'/\[([^\]]+)\]\(([^\)\s]+)(\s[^\)]+)*\)/' => '<a href="\\2"\\3>\\1</a>',
         "/\s\*\*(.+?)\*\*\s/" => '<strong>\\1</strong>',  // BOLD
         "/\s__(.+?)__\s/"     => '<em>\\1</em>',   // BOLD
         "/\s--(.+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
