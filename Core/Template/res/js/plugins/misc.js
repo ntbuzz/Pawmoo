@@ -238,6 +238,28 @@ $.dialogBox = function (title, msg, callback) {
 };
 // 動的コンテンツに対して、プラグイン要素を初期化する
 $.fn.InitPopupSet = function () {
+	// カレンダー設定
+	this.find(".calendar").each(function () {
+		var self = $(this); // jQueryオブジェクトを変数に代入しておく
+		var date_form = {
+			dateFormat: 'yy-mm-dd 00:00:00',
+			monthNames: [ '${#.core.monthNames}' ],
+			dayNamesMin: [ '${#.core.dayNames}' ],
+			yearSuffix: "${#.core.YearSuffix}",
+			buttonImage: "/res/images/calender_icon.png",   // カレンダーアイコン画像
+			buttonImageOnly: true,           // 画像として表示
+			showOn: "button",                   // カレンダー呼び出し元の定義
+			buttonText: "${#.core.ToolTip}", // ツールチップ表示文言
+			showMonthAfterYear: true,
+		};
+		if (self.hasClass('no_icon')) {
+			delete date_form.buttonImage;
+			delete date_form.buttonImageOnly;
+			delete date_form.showOn;
+			delete date_form.buttonText;
+		};
+		self.datepicker(date_form);
+	});
 	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup();
 };
 // FormSubmit用のオブジェクトを生成

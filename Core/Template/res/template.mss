@@ -56,7 +56,8 @@ Javascript => [
     checklist => [			// debug
         +jquery => [
 			plugins => [
-				checklist.js
+//				checklist.js
+				checkselect.js
 			]
         ]
         +import => [
