@@ -1,15 +1,41 @@
 // JQueryプラグインで実装
-// チェックリスト選択ボックスを表示する
-$.fn.popupCheckList = function (setupobj, callback) {
+// ラジオセレクト、チェックリスト選択ボックスを表示する
+$.fn.popupCheckSelect = function (setupobj, callback) {
 	var setting = {
-		CheckBarLabel:"${#.core.CheckList}",
+		DialogLabel: "${#.core.CheckList}",
 		DialogTitle: "${#.core.CheckTITLE}",
-		CheckFlip: false,
-		FlipLabel: "${#.core.CheckALL}",
 		ConfirmLabel:"${#.core.CheckConfirm}",
-		CheckLists: [],
-		Columns: 2,
+		FlipLabel: "${#.core.CheckALL}",
+		RadioType: true,
+		CheckFlip: false,
 		CheckJoin: "\n",
+		Columns: 2,
+		Rows: 0,
+		ItemsList: [],
+	};
+	$.each(setupobj, function (key, value) { setting[key] = value;});
+	var tag_name = this.attr('data-name');
+	var tag_obj = this.find('[name='+tag_name+']');
+	if (tag_obj.length == 0) {
+		alert("ERROR");
+		return false;
+	};
+	tag_obj.css("padding", "0 5px");
+	var btn = $('<span class="dropdown"></span>');
+	var label = this.find('label');
+	if (label.length != 0) {
+		label.text(setting.DialogLabel);
+		label.after(btn);
+		tag_obj.css("width", "100%");
+	} else {
+		var ww = this.innerWidth() - tag_obj.position().left - 20;
+		tag_obj.css("width", ww);
+		this.append(btn);
+	}
+	if (setting.RadioType) {
+		var input_tag = "type='radio' name='"+tag_name+"'";
+	} else {
+		var input_tag = "type='checkbox' class='multi-check'";
 	};
 	// 要素配列と現在値配列から全リストを生成してコールバックする
 	var setCheckList = function (base, addval, callback) {
@@ -39,10 +65,6 @@ $.fn.popupCheckList = function (setupobj, callback) {
 			callback(key, value);
 		};
 	};
-	$.each(setupobj, function (key, value) { setting[key] = value;});
-	var list_val = $('#' + this.attr('data-element'));
-	this.html(setting.CheckBarLabel);
-	var btn = $('<span></span>').appendTo(this);
 	btn.on('click', function () {
 		var self = $(this);
 		// ダイアログ領域以外はクローズする
@@ -51,26 +73,26 @@ $.fn.popupCheckList = function (setupobj, callback) {
 		dialog.click(function (e) { e.stopPropagation(); });	// イベントの伝播を止める
 		var title_bar = $('<div class="titleBar"></div>').appendTo(dialog);
 		title_bar.append(setting.DialogTitle);
-		// 全てをチェックするチェックボックスの追加
-		if (setting.CheckFlip) {
-			var button_bar = $('<span class="buttonBar"></span>').appendTo(title_bar);
+		// ラジオボタンでなければ全てをチェックするチェックボックスの追加
+		if (setting.RadioType == false && setting.CheckFlip) {
+			var button_bar = $('<span class="checkBar"></span>').appendTo(title_bar);
 			button_bar.append(setting.FlipLabel);
 			var check_btn = $('<input type="checkbox" />').appendTo(button_bar);
 		};
-		// checklist-box を作成
-		var make_checklist_box = function (appendObj, checklist_items) {
+		// list-box を作成
+		var all_check = false;
+		var make_list_box = function (appendObj, check_items) {
 			var check_list = $('<ul class="checklist-box"></ul>').appendTo(appendObj);
 			if (setting.Columns !== undefined) check_list.addClass('col' + setting.Columns);
 			// リスト作成
-			var target = list_val.val().split(/;|\n/g).filter(function (v) { return (v.length); });
-			var all_check = false;
-			setCheckList(checklist_items, target, function (label, value) {
+			var target = tag_obj.val().split(/;|\n/g).filter(function (v) { return (v.length); });
+			setCheckList(check_items, target, function (label, value) {
 				var li_tag = $('<li></li>').appendTo(check_list);
 				if (parseInt(value) < 0) {
 					li_tag.append('<hr>');		// separator
 				} else {
 					var label_tag = $('<label></label>').appendTo(li_tag);
-					var item = $('<input type="checkbox" class="multi-check" value="' + value+ '" />').appendTo(label_tag);
+					var item = $('<input '+input_tag+' value="' + value+ '" />').appendTo(label_tag);
 					if (target.is_exists(value)) {
 						item.prop('checked', true);
 						all_check = true;
@@ -79,13 +101,13 @@ $.fn.popupCheckList = function (setupobj, callback) {
 				};
 			});
 		};
-		if ($.isArray(setting.CheckLists)) {
+		if ($.isArray(setting.ItemsList)) {
 			var check_contents = $('<ul class="checklist-contents"></ul>').appendTo(dialog);
-			make_checklist_box(check_contents, setting.CheckLists);
-		} else if (typeof setting.CheckLists === 'object') {
+			make_list_box(check_contents, setting.ItemsList);
+		} else if (typeof setting.ItemsList === 'object') {
 			var check_tabset = $('<ul class="checklist-tabs"></ul>').appendTo(dialog);
 			var check_contents = $('<ul class="checklist-contents"></ul>').appendTo(dialog);
-			setting.CheckLists.Labels.forEach(function (label) {
+			$.each(setting.ItemsList, function(label, value) {
 				var tab = $('<li>' + label + '</li>').appendTo(check_tabset);
 				tab.click(function(e) {
 					var menu = check_tabset.children('li');
@@ -96,18 +118,20 @@ $.fn.popupCheckList = function (setupobj, callback) {
 					$(this).addClass('selected');		// switch click TAB selected
 					cont.eq(index).addClass('selected');	// switch TAB selected Contents
 				});
-			});
-			setting.CheckLists.dataList.forEach(function (value) {
 				var content = $('<li></li>').appendTo(check_contents);
-				make_checklist_box(content, value);
+				make_list_box(content, value);
 			});
 			check_tabset.children().first().addClass('selected');
 			check_contents.children().first().addClass('selected');
-		};
-		var close_btn = $('<span class="wbutton"></span>').appendTo(dialog);
+		}
+		if (setting.Rows > 0) {
+			check_contents.css('height', setting.Rows*1.5 + "em");
+		}
+		var btn_bar = $('<div class="bottom-bar"></div>').appendTo(dialog);
+		var close_btn = $('<span class="wbutton"></span>').appendTo(btn_bar);
 		close_btn.append(setting.ConfirmLabel);
 		// フリップチェックボックスがあればデフォルトのチェック状態を反映
-		if (setting.CheckFlip) {
+		if (setting.RadioType == false && setting.CheckFlip) {
 			check_btn.prop('checked', all_check);
 			check_btn.change(function () {
 				check_contents.find('.multi-check').prop('checked', $(this).prop('checked'));
@@ -116,8 +140,8 @@ $.fn.popupCheckList = function (setupobj, callback) {
 		};
 		bk_panel.fadeIn('fast');
 		// ダイアログの位置
-		var x = self.offset().left + self.width();
-		var y = self.offset().top + 10;
+		var x = self.offset().left;
+		var y = self.offset().top + self.outerHeight();
 		if ((x + dialog.outerWidth()) > $(window).innerWidth()) {
 			x = self.offset().left - dialog.outerWidth(true);   // padding+margin込みの幅を差引く
 		};
@@ -132,10 +156,14 @@ $.fn.popupCheckList = function (setupobj, callback) {
 		dialog.css({ 'left': x + 'px', 'top': y + 'px' });
 		// イベント処理
 		close_btn.click(function (e) {
-			var vals = $('.multi-check:checked').map(function () { return $(this).val(); }).get();
-			const uniq = Array.from(new Set(vals)).join(setting.CheckJoin);	// 重複を削除して結合
+			if (setting.RadioType) {
+				uniq = $('input[name="'+tag_name+'"]:checked').val();
+			} else {
+				vals = $('.multi-check:checked').map(function () { return $(this).val(); }).get();
+				uniq = Array.from(new Set(vals)).join(setting.CheckJoin);	// 重複を削除して結合
+			};
 			bk_panel.click();
-			if (callback !== undefined) callback.call(list_val, uniq);
+			if (callback !== undefined) callback.call(tag_obj, uniq);
 			return false;
 		});
 		bk_panel.click(function (e) {
