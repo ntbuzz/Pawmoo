@@ -125,7 +125,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 			check_contents.children().first().addClass('selected');
 		}
 		if (setting.Rows > 0) {
-			check_contents.css('height', setting.Rows*1.5 + "em");
+			check_contents.css('max-height', setting.Rows*1.5 + "em");
 		}
 		var btn_bar = $('<div class="bottom-bar"></div>').appendTo(dialog);
 		var close_btn = $('<span class="wbutton"></span>').appendTo(btn_bar);

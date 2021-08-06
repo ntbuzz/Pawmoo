@@ -46,7 +46,7 @@
 	padding-left: 1em;
 	padding-right: 1em;
 	overflow: auto;
-	/* border:1px dotted gray; */
+	padding-top:5px;
 }
 .checklist-dialog .checklist-contents>li {padding:0;display:none;}
 .checklist-dialog .checklist-contents>li.selected {display:block;}
