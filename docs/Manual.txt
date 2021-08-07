@@ -1576,20 +1576,49 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     .core.NO_TITLE    => "'%s' のタイトルが未入力です"
     .core.MAXFILE     => "送信ァイルは %d 個までです"
 
-・ポップアップチェックリスト
-  (セレクタ).popupCheckList(setup_objext, callback_func)
+・ポップアップチェックセレクタ
+  (セレクタ).popupCheckSelect(setup_object, callback_func)
 
-  セレクタにはプラグイン内でラベルとボタンが付加されるので、空のDIVタグを使用してください。
-  セレクタの属性(data-element)で指定される「TEXTAREA」の内容を、CheckListObj 配列を元に、
-  チェックリストダイアログを表示し、callback_func を呼出します。
-  ダイアログ領域以外をクリックした場合、callback_func は呼出しません。
-  callback_func にはチェックされたラベルが改行により連結された文字列が渡されます。
-  関数内の $(this) は TEXTAREA要素になります。
-  setup_object 変数により動作を設定できます。
-    CheckBarLabel:  セレクタに設定するラベルテキスト    // .core.CheckList
-    DialogTitle:    ダイアログのタイトル                // .core.CheckTITLE
-    CheckFlip:      全てをチェックの有無                //  true
-    FlipLabel:      全てをチェックのラベルテキスト      // .core.CheckALL
-    ConfirmLabel:   ダイアログの確定ボタンテキスト      // .core.CheckConfirm
-    CheckLists:     チェックリスト配列またはタブリストオブジェクト      // []
-    Columns:        チェックリストのカラム数            // 2
+  セレクタの data-element 属性で指示される name 属性を持つタグに対し、
+  チェックボックスまたはラジオボタンによるチェックリストダイアログを表示します。
+  タグの記述例は次のようになります。
+
+  ラジオボタンリストの例：
+  	<div id="radio-test" data-element="radioselect">
+		<p>選択：</p><input type="text" name="radioselect">
+	</div>
+
+  セクション形式:
+	#radio-test{radioselect} => [
+		p. => 選択:
+		input[radioselect] => [ type => "text" value => "選択してください" ]
+	]
+
+  上記の例は SELECT タグのような見た目になりますが、 p. タグの変わりに label タグを使うと
+  setup_object.DialogLabel テキストとポップアップのボタン(▼)を組合せてタイトルバーの様に
+  表示することができます。textarea の上部にタイトルバーとして表示するときなどに使います。
+
+  checkbox か radio のどちらを表示するかは、setup_object の MultiSelect プロパティで決まります。
+  MultiSelect のデフォルト設定値は以下のようになっており、チェックボックスリストを表示します。
+  MultiSelete に "false" を設定するとラジオボタンリストを表示します。
+
+    setup_object = {
+      DialogLabel:    ポップアップボタン▼のラベル        // .core.CheckList
+      DialogTitle:    ダイアログのタイトル                // .core.CheckTITLE
+      ConfirmLabel:   確定ボタンのテキスト                // .core.CheckConfirm
+      MultiSelect: {
+          FlipCheck:  全てをチェックの有無                //  true
+          FlipLabel:  全てをチェックのラベルテキスト      // .core.CheckALL
+          Separate:   選択項目の区切り文字                // "\n"
+      },
+      Columns:        チェックリストのカラム数            // 2
+      Rows:           表示する最大行数                    // 0 ブラウザに従う
+	  ItemsList:      チェックリスト配列またはタブリストオブジェクト      // []
+	};
+
+  チェックリストをタブ表示するときは ItemsList にタブ名と値リストの配列による
+  オブジェクト変数で定義します。
+	  ItemsList: {
+        "タブ1": [ リスト配列1 ],
+        "タブ2": [ リスト配列2 ],
+      },
