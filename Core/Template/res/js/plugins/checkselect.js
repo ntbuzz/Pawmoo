@@ -4,17 +4,28 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 	var setting = {
 		DialogLabel: "${#.core.CheckList}",
 		DialogTitle: "${#.core.CheckTITLE}",
-		ConfirmLabel:"${#.core.CheckConfirm}",
-		FlipLabel: "${#.core.CheckALL}",
-		RadioType: true,
-		CheckFlip: false,
-		CheckJoin: "\n",
+		ConfirmLabel: "${#.core.CheckConfirm}",
+		MultiSelect: true,				// true or object-type use "checkbox",other will be radio
 		Columns: 2,
 		Rows: 0,
 		ItemsList: [],
 	};
-	$.each(setupobj, function (key, value) { setting[key] = value;});
-	var tag_name = this.attr('data-name');
+	// checkbox select dialog options.
+	var CheckListOption = {
+		FlipCheck: true,
+		FlipLabel: "${#.core.CheckALL}",
+		Separate: "\n",
+	};
+	$.each(setupobj, function (key, value) { setting[key] = value; });
+	// Is CheckList Dialog Type
+	var multi_type = Object.prototype.toString.call(setting.MultiSelect).slice(8, -1).toLowerCase();
+	if (multi_type === 'object') {
+		$.each(setting.MultiSelect, function (key, value) { CheckListOption[key] = value; });
+		setting.MultiSelect = true;
+	} else if (multi_type !== 'boolean') {
+		setting.MultiSelect = false;
+	};
+	var tag_name = this.attr('data-element');
 	var tag_obj = this.find('[name='+tag_name+']');
 	if (tag_obj.length == 0) {
 		alert("ERROR");
@@ -32,10 +43,9 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 		tag_obj.css("width", ww);
 		this.append(btn);
 	}
-	if (setting.RadioType) {
-		var input_tag = "type='radio' name='"+tag_name+"'";
-	} else {
-		var input_tag = "type='checkbox' class='multi-check'";
+	var input_tag = "type='radio' name='" + tag_name + "'";
+	if (setting.MultiSelect === true) {
+		input_tag = "type='checkbox' class='multi-check'";
 	};
 	// 要素配列と現在値配列から全リストを生成してコールバックする
 	var setCheckList = function (base, addval, callback) {
@@ -74,9 +84,9 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 		var title_bar = $('<div class="titleBar"></div>').appendTo(dialog);
 		title_bar.append(setting.DialogTitle);
 		// ラジオボタンでなければ全てをチェックするチェックボックスの追加
-		if (setting.RadioType == false && setting.CheckFlip) {
+		if (setting.MultiSelect === true && CheckListOption.FlipCheck) {
 			var button_bar = $('<span class="checkBar"></span>').appendTo(title_bar);
-			button_bar.append(setting.FlipLabel);
+			button_bar.append(CheckListOption.FlipLabel);
 			var check_btn = $('<input type="checkbox" />').appendTo(button_bar);
 		};
 		// list-box を作成
@@ -131,7 +141,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 		var close_btn = $('<span class="wbutton"></span>').appendTo(btn_bar);
 		close_btn.append(setting.ConfirmLabel);
 		// フリップチェックボックスがあればデフォルトのチェック状態を反映
-		if (setting.RadioType == false && setting.CheckFlip) {
+		if (setting.MultiSelect === true && CheckListOption.FlipCheck) {
 			check_btn.prop('checked', all_check);
 			check_btn.change(function () {
 				check_contents.find('.multi-check').prop('checked', $(this).prop('checked'));
@@ -156,11 +166,11 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 		dialog.css({ 'left': x + 'px', 'top': y + 'px' });
 		// イベント処理
 		close_btn.click(function (e) {
-			if (setting.RadioType) {
-				uniq = $('input[name="'+tag_name+'"]:checked').val();
-			} else {
+			if (setting.MultiSelect === true) {
 				vals = $('.multi-check:checked').map(function () { return $(this).val(); }).get();
-				uniq = Array.from(new Set(vals)).join(setting.CheckJoin);	// 重複を削除して結合
+				uniq = Array.from(new Set(vals)).join(CheckListOption.Separate);	// 重複を削除して結合
+			} else {
+				uniq = $('input[name="'+tag_name+'"]:checked').val();
 			};
 			bk_panel.click();
 			if (callback !== undefined) callback.call(tag_obj, uniq);
