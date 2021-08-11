@@ -35,7 +35,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 	var btn = $('<span class="dropdown"></span>');
 	if (typeof setting.PopupLabel === "string") {
 		var label = $('<label>' + setting.PopupLabel + '</label>');
-		this.append(label);
+		this.prepend(label);
 		label.after(btn);
 		tag_obj.css("width", "100%");
 	} else {
