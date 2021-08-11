@@ -47,6 +47,8 @@
 	padding-right: 1em;
 	overflow: auto;
 	padding-top:5px;
+	margin-bottom: 8px;
+	border-top: 1px dotted gray;
 }
 .checklist-dialog .checklist-contents>li {padding:0;display:none;}
 .checklist-dialog .checklist-contents>li.selected {display:block;}
@@ -123,6 +125,7 @@
 }
 .popup-checklist > label {
 	width:100%;
+	padding-left: 5px;
 	background-color: silver;
 	border:1px solid gray;
 }
