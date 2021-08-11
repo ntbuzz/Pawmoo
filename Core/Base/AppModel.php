@@ -79,7 +79,7 @@ public function ResetSchema() {
     debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
 //            "Header"    => $this->HeaderSchema,
-            "Field"     => $this->FieldSchema, 
+//            "Field"     => $this->FieldSchema, 
             "Join-Defs"     => $this->dbDriver->relations,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
             "Select-Defs"   => $this->SelectionDef,
@@ -290,6 +290,11 @@ public function GetRecord($num,$join=FALSE,$values=FALSE) {
     if($values) $this->GetValueList();
 }
 //==============================================================================
+// Selection define condition change.
+public function ChangeSelectCondition($name,$cond) {
+	$this->SelectionDef[$name][1] = $cond;
+}
+//==============================================================================
 //   Get Relation Table fields data list.
 //	a. key-name => [ Model.id => [ name, pid],	[ cond ] ]		for ChainSelect() [ id,name,pid ]
 //	b. key-name => [ [ name, pid],				[ cond ] ]		for ChainSelect() by SELF [ Primary,name,pid ]
@@ -354,6 +359,13 @@ public function getRecordField($key,$value,$field) {
 		},$keys);
 	if(count($vals)===1) return $vals[0];
 	else return array_combine($keys,$vals);
+}
+//==============================================================================
+// Get Record Field(s) by Primary value without JOIN fields.
+// multi fields is separate by SPC(DOT), ARRAY (COMMA)
+// Result:   field-data
+public function getRecordByField($primary,$field) {
+	return $this->getRecordField($this->Primary,$primary,$field);
 }
 //==============================================================================
 // 条件に一致するレコード数を検索する
