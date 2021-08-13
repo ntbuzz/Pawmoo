@@ -40,6 +40,16 @@ Array.prototype.is_exists = function (v) {
 	return exists;
 };
 //====================================================
+// delete element by value, don't duplicate
+Array.prototype.delete_exists = function (val) {
+	var index = this.indexOf(val);
+	if(index != -1) {
+		this.splice(index, 1);
+		return true;
+	};
+	return false;
+};
+//====================================================
 // array merge: exclude duplicate element
 Array.prototype.mymerged = function (b) {
 	var new_array =  this.slice();	// 配列コピー
