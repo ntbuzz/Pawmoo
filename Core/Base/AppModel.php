@@ -576,6 +576,10 @@ public function get_post_field($key) {
 // pickup on exist edit table database field
     private function field_pickup($row) {
         $data = array();
+		// last-update field update, if exists
+        if(!array_key_exists('last_update',$row)) {
+			$row['last_update'] = date($this->DateTimeFormat);
+		}
         foreach($row as $key => $val) {
             $xkey = $this->get_post_field($key);
             if(array_key_exists($xkey,$this->dbDriver->raw_columns)) {
