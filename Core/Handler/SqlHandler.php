@@ -375,9 +375,17 @@ protected function sql_safequote(&$value) {
 						}
 					} else { // not have op code
 						if(mb_strpos($val,'...') !== FALSE) {
-							$op = 'BETWEEN';
 							list($from,$to) = str_explode('...',$val);
-							$val = "'{$from}' AND '{$to}'";
+							if(empty($from)) {
+								$op = '<=';
+								$val = $to;
+							} else if(empty($to)) {
+								$op = '>=';
+								$val = $from;
+							} else {
+								$op = 'BETWEEN';
+								$val = "'{$from}' AND '{$to}'";
+							}
 						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';
 						} else {

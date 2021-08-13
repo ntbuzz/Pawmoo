@@ -176,8 +176,10 @@ private function loadCSV($filename) {
 	if (($handle = fopen($path, "r")) !== FALSE) {
 		$row_columns = array_keys($this->Schema);
 		while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
+			if(count($data) !== count($row_columns)) {
+				debug_die(['CHECK-CSV'=>['FILE'=>$path,'COL'=>$row_columns,'CSV'=>$data]]);
+			}
 			$row = array_combine($row_columns,$data);
-		debug_log(DBMSG_NOLOG,["CSV DATA" => $row]);
 			$this->dbDriver->insertRecord($row);
 		}
 		fclose($handle);

@@ -290,34 +290,15 @@ function str_csv($csv_str) {
 // UTF-8 CSV miss processing in Windows
 // str_csv version
 function str_csvget($csv_str) {
-//	$mm = str_csv($csv_str);
-	$quoted_str = function($v) {
-		$v = str_replace('""','"',$v);
-		if(mb_substr($v,0,1) === '"') $v = mb_substr($v,1,mb_strlen($v) - 2);
-		return $v;
-	};
-	$nquote = 0;
+	$p = '/(?:^|,)((?:"(?:[^"]|"")*")|[^,]*)*)/u';
+	preg_match_all($p,$csv_str,$m);
 	$csv = [];
-	$str = '';
-	$result = preg_split('/([",])/u',$csv_str,-1,PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
-	foreach($result as $ch) {
-		switch($ch) {
-		case ',':
-			if(($nquote%2)===0) {
-				$csv[] = $quoted_str($str);
-				$str = '';
-				$nquote = 0;
-			} else {
-				$str = "{$str}{$ch}";
-			}
-			break;
-		case '"':	++$nquote;
-		default:	$str = "{$str}{$ch}";
-		}
+	foreach($m[1] as $item) {
+		$wrapstr = mb_substr($item,0,1) . mb_substr($item,-1);     // top-end char pair
+		if($wrapstr === '""' || $wrapstr === "''") $item = trim($item,$wrapstr);
+		if($item === '' || $item === 'NULL') $item = NULL;
+		$csv[] = (is_numeric($item)) ? intval($item) : $item;
 	}
-	// last column
-	$csv[] = $quoted_str($str);
-//	debug_log(DBMSG_NOLOG,['CSV'=>$csv]);
 	return $csv;
 }
 //==============================================================================

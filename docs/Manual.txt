@@ -1257,6 +1257,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     is_valid(&$row)                           // フィールドデータの検証、戻り値 TRUE=データ有効、FALSE=データ無効
     AddRecord($row)                           // レコード追加
     UpdateRecord($num,$row)                   // レコードの更新
+							// AddRecord(), UpdateRecord() は 'last_update' フィールドが存在するときに更新日時を書込む
 
 
 ・ビュークラス(AppView)
@@ -1595,7 +1596,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 	]
 
   上記の例は SELECT タグのような見た目になりますが、 p. タグの変わりに label タグを使うと
-  setup_object.DialogLabel テキストとポップアップのボタン(▼)を組合せてタイトルバーの様に
+  setup_object.PopupLabel テキストとポップアップのボタン(▼)を組合せてタイトルバーの様に
   表示することができます。textarea の上部にタイトルバーとして表示するときなどに使います。
 
   checkbox か radio のどちらを表示するかは、setup_object の MultiSelect プロパティで決まります。
@@ -1603,7 +1604,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   MultiSelete に "false" を設定するとラジオボタンリストを表示します。
 
     setup_object = {
-      DialogLabel:    ポップアップボタン▼のラベル        // .core.CheckList
+      PopupLabel:    ポップアップボタン▼のラベル        // .core.CheckList
       DialogTitle:    ダイアログのタイトル                // .core.CheckTITLE
       ConfirmLabel:   確定ボタンのテキスト                // .core.CheckConfirm
       MultiSelect: {
