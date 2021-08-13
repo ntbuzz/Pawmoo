@@ -177,7 +177,7 @@ $.fn.getPaddingBox = function() {
 	return widths;
 };
 // フォーム部品(INPUT,SELECT,TEXTAREA)の変更時にクラス属性をセットする
-$.fn.onChageFormItems = function(cls) {
+$.fn.onChangeFormItems = function(cls) {
 	var self = this;
 	self.on('change', 'input,select,textarea', function () {
 		var ptag = $(this).parent();
