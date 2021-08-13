@@ -290,7 +290,7 @@ function str_csv($csv_str) {
 // UTF-8 CSV miss processing in Windows
 // str_csv version
 function str_csvget($csv_str) {
-	$p = '/(?:^|,)((?:"(?:[^"]|"")*")|[^,]*)*)/u';
+	$p = '/(?:^|,)((?:"(?:[^"]|"")*"|[^,]*)*)/u';
 	preg_match_all($p,$csv_str,$m);
 	$csv = [];
 	foreach($m[1] as $item) {
