@@ -63,8 +63,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 		};
 		// list-box を作成
 		var all_check = false;
-		var make_list_box = function (appendObj, check_items, target) {
-			var check_list = $('<ul class="checklist-box"></ul>').appendTo(appendObj);
+		var make_list_box = function (check_list, check_items, target) {
 			if (setting.Columns !== undefined) check_list.addClass('col' + setting.Columns);
 			// リストオブジェクト作成
 			var label_val = {};
@@ -96,12 +95,14 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 			return target;
 		};
 		var current_list = tag_obj.val().split(/;|\n/g).filter(function (v) { return (v.length); });
+		var check_contents = $('<ul class="checklist-contents"></ul>');
 		if ($.isArray(setting.ItemsList)) {
-			var check_contents = $('<ul class="checklist-contents"></ul>').appendTo(dialog);
-			current_list = make_list_box(check_contents, setting.ItemsList,current_list);
+			check_contents.appendTo(dialog);
+			var check_list = $('<ul class="checklist-box"></ul>').appendTo(check_contents);
+			current_list = make_list_box(check_list, setting.ItemsList,current_list);
 		} else if (typeof setting.ItemsList === 'object') {
 			var check_tabset = $('<ul class="checklist-tabs"></ul>').appendTo(dialog);
-			var check_contents = $('<ul class="checklist-contents"></ul>').appendTo(dialog);
+			check_contents.appendTo(dialog);
 			$.each(setting.ItemsList, function(label, value) {
 				var tab = $('<li>' + label + '</li>').appendTo(check_tabset);
 				tab.click(function(e) {
@@ -114,20 +115,15 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 					cont.eq(index).addClass('selected');	// switch TAB selected Contents
 				});
 				var content = $('<li></li>').appendTo(check_contents);
-				current_list = make_list_box(content, value, current_list);
+				var check_list = $('<ul class="checklist-box"></ul>').appendTo(content);
+				current_list = make_list_box(check_list, value, current_list);
 			});
 			check_tabset.children().first().addClass('selected');
 			check_contents.children().first().addClass('selected');
 		};
 		// 残りの現在データを先頭のタブリストに加える
 		var top_tab = check_contents.children().first().find('.checklist-box');
-		current_list.forEach(function (val) {
-			var li_tag = $('<li></li>').appendTo(top_tab);
-			var label_tag = $('<label></label>').appendTo(li_tag);
-			var item = $('<input '+input_tag+' value="' + val+ '" />').appendTo(label_tag);
-			item.prop('checked', true);
-			label_tag.append(val);
-		});
+		current_list = make_list_box(top_tab, current_list, current_list);
 		if (setting.Rows > 0) {
 			check_contents.css('max-height', setting.Rows*1.5 + "em");
 		};
