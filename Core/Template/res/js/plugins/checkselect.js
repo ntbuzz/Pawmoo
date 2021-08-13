@@ -47,36 +47,6 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 	if (setting.MultiSelect === true) {
 		input_tag = "type='checkbox' class='multi-check'";
 	};
-	// 要素配列と現在値配列から全リストを生成してコールバックする
-	var setCheckList = function (base, addval, callback) {
-		var label_val = {};
-		// ベースの要素配列
-		base.forEach(function (val) {
-			if(typeof val === "string" &&  val.indexOf('=') >= 0) {
-				var dat = val.split("=");
-				label = dat[0];
-				value = dat[1];
-			} else label = value = val;
-			label_val[label] = value;
-		});
-		// 現在値は先頭ページのみにマージ
-		if ($.isArray(addval)) {
-			addval.forEach(function (val) {
-				var exists = false;
-				for (const [key, value] of Object.entries(label_val)) {
-					if (value === val) {
-						exists = true;
-						break;
-					};
-				};
-				if (!exists) label_val[val] = val;
-			});
-		};
-		// 出来上がったオブジェクトを要素ごとにコールバック
-		for (const [key, value] of Object.entries(label_val)) {
-			callback(key, value);
-		};
-	};
 	btn.on('click', function () {
 		var self = $(this);
 		// ダイアログ領域以外はクローズする
@@ -96,9 +66,18 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 		var make_list_box = function (appendObj, check_items, target) {
 			var check_list = $('<ul class="checklist-box"></ul>').appendTo(appendObj);
 			if (setting.Columns !== undefined) check_list.addClass('col' + setting.Columns);
-			// リスト作成
-//			var target = tag_obj.val().split(/;|\n/g).filter(function (v) { return (v.length); });
-			setCheckList(check_items, target, function (label, value) {
+			// リストオブジェクト作成
+			var label_val = {};
+			check_items.forEach(function (val) {
+				if(typeof val === "string" &&  val.indexOf('=') >= 0) {
+					var dat = val.split("=");
+					label = dat[0];
+					value = dat[1];
+				} else label = value = val;
+				label_val[label] = value;
+			});
+			// 出来上がったオブジェクトを要素をリスティングする
+			for (const [label, value] of Object.entries(label_val)) {
 				var li_tag = $('<li></li>').appendTo(check_list);
 				if (parseInt(value) < 0) {
 					li_tag.append('<hr>');		// separator
@@ -106,19 +85,20 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 					var label_tag = $('<label></label>').appendTo(li_tag);
 					var item = $('<input '+input_tag+' value="' + value+ '" />').appendTo(label_tag);
 					if ($.isArray(target)) {
-						if (target.is_exists(value)) {
+						if (target.delete_exists(value)) {
 							item.prop('checked', true);
 							all_check = true;
 						};
 					};
 					label_tag.append(label);
 				};
-			});
+			};
+			return target;
 		};
 		var current_list = tag_obj.val().split(/;|\n/g).filter(function (v) { return (v.length); });
 		if ($.isArray(setting.ItemsList)) {
 			var check_contents = $('<ul class="checklist-contents"></ul>').appendTo(dialog);
-			make_list_box(check_contents, setting.ItemsList,current_list);
+			current_list = make_list_box(check_contents, setting.ItemsList,current_list);
 		} else if (typeof setting.ItemsList === 'object') {
 			var check_tabset = $('<ul class="checklist-tabs"></ul>').appendTo(dialog);
 			var check_contents = $('<ul class="checklist-contents"></ul>').appendTo(dialog);
@@ -134,12 +114,20 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 					cont.eq(index).addClass('selected');	// switch TAB selected Contents
 				});
 				var content = $('<li></li>').appendTo(check_contents);
-				make_list_box(content, value, current_list);
-				current_list = null;
+				current_list = make_list_box(content, value, current_list);
 			});
 			check_tabset.children().first().addClass('selected');
 			check_contents.children().first().addClass('selected');
 		};
+		// 残りの現在データを先頭のタブリストに加える
+		var top_tab = check_contents.children().first().find('.checklist-box');
+		current_list.forEach(function (val) {
+			var li_tag = $('<li></li>').appendTo(top_tab);
+			var label_tag = $('<label></label>').appendTo(li_tag);
+			var item = $('<input '+input_tag+' value="' + val+ '" />').appendTo(label_tag);
+			item.prop('checked', true);
+			label_tag.append(val);
+		});
 		if (setting.Rows > 0) {
 			check_contents.css('max-height', setting.Rows*1.5 + "em");
 		};
