@@ -1257,6 +1257,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     is_valid(&$row)                           // フィールドデータの検証、戻り値 TRUE=データ有効、FALSE=データ無効
     AddRecord($row)                           // レコード追加
     UpdateRecord($num,$row)                   // レコードの更新
+							// AddRecord(), UpdateRecord() は 'last_update' フィールドが存在するときに更新日時を書込む
 
 
 ・ビュークラス(AppView)
