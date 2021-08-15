@@ -63,19 +63,16 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 		// button bar for confirm button and all checkbox
 		var btn_bar = $('<div class="bottom-bar"></div>');
 		if (check_all_flip) {
-			var all_tag = $('<label>'+CheckListOption.FlipLabel+'</label>').appendTo(btn_bar);
+			var all_tag = $('<label>' + CheckListOption.FlipLabel + '</label>').appendTo(btn_bar);
 			var check_btn = $('<input type="checkbox" />').appendTo(all_tag);
 			check_btn.change(function () {
-				check_contents.find('li.selected').find('.multi-check').prop('checked', $(this).prop('checked'));
+				active_list.find('.multi-check').prop('checked', $(this).prop('checked'));
 				return false;
 			});
-		};
-		// switch check for TAB changed.
-		var flip_checkbox = function (sel_cont) {
-			if (check_all_flip) {
-				var all_check = (sel_cont.find('.multi-check:checked').length !== 0);
+			btn_bar.on('check-flip', function () {
+				var all_check = (active_list.find('.multi-check:checked').length !== 0);
 				check_btn.prop('checked', all_check);
-			};
+			});
 		};
 		// create of check/radio list-box
 		var make_list_box = function (check_list, check_items, target) {
@@ -113,7 +110,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 		if ($.isArray(setting.ItemsList)) {
 			check_contents.appendTo(dialog);
 			var check_list = $('<ul class="checklist-box"></ul>').appendTo(check_contents);
-			current_list = make_list_box(check_list, setting.ItemsList,current_list);
+			current_list = make_list_box(check_list, setting.ItemsList, current_list);
 		} else if (typeof setting.ItemsList === 'object') {
 			var check_tabset = $('<ul class="checklist-tabs"></ul>').appendTo(dialog);
 			check_contents.appendTo(dialog);
@@ -126,9 +123,8 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 					menu.removeClass('selected');		// TabMenu selected delete
 					cont.removeClass('selected');		// TabContents selected delete
 					$(this).addClass('selected');		// switch click TAB selected
-					var sel_cont = cont.eq(index); 
-					sel_cont.addClass('selected');	// switch TAB selected Contents
-					flip_checkbox(sel_cont);
+					active_list = cont.eq(index).addClass('selected').find('.checklist-box');
+					btn_bar.trigger('check-flip');
 				});
 				var content = $('<li></li>').appendTo(check_contents);
 				var check_list = $('<ul class="checklist-box"></ul>').appendTo(content);
@@ -138,12 +134,12 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 			check_contents.children().first().addClass('selected');
 		};
 		// insert for existing data that was not checked
-		var top_tab = check_contents.children().first().find('.checklist-box');
-		current_list = make_list_box(top_tab, current_list, current_list);
+		var active_list = check_contents.find('.checklist-box').first();
+		current_list = make_list_box(active_list, current_list, current_list);
 		if (setting.Rows > 0) {
 			check_contents.css('max-height', setting.Rows*1.5 + "em");
 		};
-		flip_checkbox(top_tab);
+		btn_bar.trigger('check-flip');
 		btn_bar.appendTo(dialog);
 		var close_btn = $('<span class="wbutton"></span>').appendTo(btn_bar);
 		close_btn.append(setting.ConfirmLabel);
