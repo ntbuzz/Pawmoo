@@ -419,6 +419,8 @@ function expand_text($class,$str,$recdata,$vars,$match_all = false) {
                     $var = $m[1];
                     $arg = (count($m)===3) ? $m[2]:NULL;
                     if(method_exists($class->Helper,$var)) {
+						$arr = explode(',',$arg);
+						$arg = (count($arr)===1) ? $arg : $arr;
                         $val = $class->Helper->$var($arg);
                     } else $val = "NOT-FOUND({$var})";
 				}
