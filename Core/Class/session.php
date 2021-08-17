@@ -4,12 +4,13 @@
  * 	MySession:	Management SESSION variable, POST/GET variables
  */
 //セッションの有効期限を5分に設定
-$session_time = (60 * 60 * 24);			// SESSION KEEP 1-day
 if(CLI_DEBUG) $_SESSION = [];
 else {
-	ini_set('session.gc_maxlifetime',$session_time);
- 	ini_set('session.gc_probability',1);
-	ini_set('session.gc_divisor',1);
+	$limit_time = strtotime('tomorrow') + (3*60*60);	// tomorrow AM 3:00
+	$session_time = $limit_time - time();	// SESSION KEEP as NOW - AM 3:00
+	ini_set('session.gc_maxlifetime',"{$session_time}");
+ 	ini_set('session.gc_probability','1');
+	ini_set('session.gc_divisor','1');
 	session_start();
 }
 define('PARAMS_NAME','AppData');
@@ -278,10 +279,12 @@ static function rm_EnvData(...$arr) {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // ログイン情報を取得
 static function get_LoginValue($id = NULL) {
-	$LoginData = static::$EnvData['Login'];
-	if($id === NULL) return $LoginData;
-//	if($id === NULL || empty($LoginData)) return '';
-	return (array_key_exists($id,$LoginData)) ? $LoginData[$id] : '';
+	if(array_key_exists('Login',static::$EnvData)) {
+		$LoginData = static::$EnvData['Login'];
+		if($id === NULL) return $LoginData;
+		if(array_key_exists($id,$LoginData)) return $LoginData[$id];
+	}
+	return '';
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // ログイン情報に書込
