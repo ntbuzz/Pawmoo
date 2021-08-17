@@ -30,15 +30,18 @@
 }
 .checklist-dialog .checklist-tabs>li {
 	width:100%;
-	padding:0 20px;
+	padding:2px 20px;
 	cursor: pointer;
-	color: silver;
-	background-color: gray;
+	color: gray;
+	background-color: whitesmoke;
 	white-space: nowrap;
 	text-align: center;
+	border-left: 1px dotted gray;
+	border-right: 1px dotted gray;
 }
 .checklist-dialog .checklist-tabs>li.selected {
 	color: white;
+	font-weight: bold;
 	background-color: navy;
 }
 /* tab-contents style */
@@ -74,7 +77,7 @@
 	width:100%;
 	font-size: 8pt;
 	overflow: hidden;
-	padding: 0 0.5em;
+	padding: 5px 0.5em;
 	color:white;
 	background-color: navy;
 }
