@@ -106,19 +106,20 @@ static function Send() {
 	$body = mb_convert_kana(static::$Message, "KV");		// 半角カナを全角に濁点付き文字は1文字に変換
 	$subject = mb_convert_kana(static::$Subject, "KV");
 	mb_language('uni');
-	// メール送信デバッグ
-	$body = array_to_text([
-		'HEADER'=> $header,
-		'MAIL-BODY' => [
-			'From'	=> self::MailAddress(static::$From),
-			'To'	=> self::MailAddress(static::$To),
-			'Cc'	=> self::MailAddress(static::$CC),
-			'Bcc'	=> self::MailAddress(static::$BCC),
-			'SUBJECT'=>static::$Subject,
-			'BODY'	=> $body,
-		]]);
-	$to = 'root@localhost';
-	$subject = "テスト:{$subject}";
+	if(defined('SENDMAIL_DEBUG')) {		// デバッグメールの宛先が定義されている
+		$body = array_to_text([
+			'HEADER'=> $header,
+			'MAIL-BODY' => [
+				'From'	=> self::MailAddress(static::$From),
+				'To'	=> self::MailAddress(static::$To),
+				'Cc'	=> self::MailAddress(static::$CC),
+				'Bcc'	=> self::MailAddress(static::$BCC),
+				'SUBJECT'=>static::$Subject,
+				'BODY'	=> $body,
+			]]);
+		$to = SENDMAIL_DEBUG;
+		$subject = "DEBUG: {$subject}";
+	}
 	$header = self::ConvHeader('','From',static::$From);
 	if(mb_send_mail($to,$subject,$body,$header) === false) {
 		sysLog::die(['MAIL-CHECK' => [
