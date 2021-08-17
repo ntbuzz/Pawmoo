@@ -23,7 +23,7 @@ function str_explode($delm,$string,$trim_empty = true) {
 //==============================================================================
 // text line split by NL char, and reverse element with trim
 function explode_reverse($delm,$text) {
-	$array = array_reverse(array_filter(explode($del,trim($text)),'strlen'));
+	$array = array_reverse(array_filter(explode($delm,trim($text)),'strlen'));
     return $array;
 }
 //==============================================================================
