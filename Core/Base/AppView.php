@@ -298,6 +298,7 @@ public function ViewTemplate($name,$vars = []) {
             list($sep,$tsep) = str_split($seps);
             $n = strrpos($tag,$sep);
             while( $n !== FALSE) {
+				if(mb_strcut($tag,$n-1),2) === $seps) break;	// empty element
                 $m = strrpos($tag,$tsep);
                 $str = ($m === FALSE || $m === $n) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
                 $tag = mb_strcut($tag,0,$n);
@@ -400,7 +401,15 @@ public function ViewTemplate($name,$vars = []) {
         if($is_inline && array_key_exists($tag,$this->inlineSection)) {
             $this->sectionAnalyze($this->inlineSection[$tag],$vars);
         } else {
-            $this->ViewTemplate($tag,$vars);
+			$tmp = explode('::',$tag);
+			if(count($tmp) === 1) {
+	            $this->ViewTemplate($tag,$vars);
+			} else {
+				list($cont,$act) = $tmp;			// other module method CALL
+				$class = "{$cont}Controller";
+				$method = "{$act}Action";
+				$this->$class->$method($vars);
+			}
         }
     }
     //==========================================================================
@@ -825,13 +834,15 @@ public function ViewTemplate($name,$vars = []) {
         $sel_item = (is_numeric($opt_key)) ? '' : $opt_key;
         if(is_array($opt_val)) {
             $opt_val = array_flat_reduce($opt_val);
+			echo '<ul class="radio-list">';
             foreach($opt_val as $opt => $val) {
-				if(is_numeric($opt)) echo $val;
+				if(is_numeric($opt)) echo "<li>{$val}</li>\n";
 				else {
 					$sel = ($val == $sel_item) ? ' checked':'';
-					echo "<label>{$tags} value='{$val}'{$sel}>{$opt}</label>\n";
+					echo "<li><label>{$tags} value='{$val}'{$sel}>{$opt}</label></li>\n";
 				}
             }
+			echo "</ul>\n";
         } else echo "<label>{$tags} value='{$opt_val}'>{$opt_val}</label>\n";
     }
     //--------------------------------------------------------------------------
