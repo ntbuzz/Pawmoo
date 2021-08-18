@@ -298,7 +298,7 @@ public function ViewTemplate($name,$vars = []) {
             list($sep,$tsep) = str_split($seps);
             $n = strrpos($tag,$sep);
             while( $n !== FALSE) {
-				if(mb_strcut($tag,$n-1),2) === $seps) break;	// empty element
+				if(mb_strcut($tag,$n-1,2) === $seps) break;	// empty element
                 $m = strrpos($tag,$tsep);
                 $str = ($m === FALSE || $m === $n) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
                 $tag = mb_strcut($tag,0,$n);
