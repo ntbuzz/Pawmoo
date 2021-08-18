@@ -187,8 +187,8 @@ public function AutoPaging($cond, $max_count = 100) {
 	else if($cnt > $max_count && $size === 0) $size = $max_count;
 	if($size > 0) {
 		$Page['Size'] = $size;
+		$Page['Page'] = App::$Params[0] = $num;
 		$this->Model->SetPage($size,$num);
-		App::$Params[0] = $num;
 	} else $Page = NULL;	// remove Paging.Setup
 	MySession::setPagingIDs('Setup',$Page);
 }
