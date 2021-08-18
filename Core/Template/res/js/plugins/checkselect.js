@@ -28,7 +28,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 	var tag_name = this.attr('data-element');
 	var tag_obj = this.find('[name='+tag_name+']');
 	if (tag_obj.length == 0) {
-		alert("ERROR:"+tag_name);
+		alert("NOT FOUND ERROR:"+tag_name);
 		return false;
 	};
 	tag_obj.css("padding", "0 5px");

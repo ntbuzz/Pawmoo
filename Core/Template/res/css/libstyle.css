@@ -102,3 +102,13 @@ option.disable {
 .ui-datepicker-trigger {
    position: absolute;
 }
+ul.radio-list {
+	list-style: none;
+	display: flex;
+}
+.vertical>ul.radio-list {
+	display: block;
+}
+ul.radio-list>li {
+	margin: 0 5px;
+}
