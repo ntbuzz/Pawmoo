@@ -40,6 +40,11 @@ public function truncate_sql($table) {
 	return "TRUNCATE TABLE {$table};";
 }
 //==============================================================================
+//	RESET SEQ to PRIMARY
+protected function reset_seq($table,$primary) {
+	return FALSE;
+}
+//==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
 	$this->rows = $this->dbb->query($sql);
