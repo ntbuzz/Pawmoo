@@ -112,3 +112,10 @@ ul.radio-list {
 ul.radio-list>li {
 	margin: 0 5px;
 }
+ul.radio-list>li>label {
+	margin: 0 2px;
+}
+/* チェックボックスの位置揃え */
+ul.radio-list>li>label>input {
+	vertical-align: middle;
+}
