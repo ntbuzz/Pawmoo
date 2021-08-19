@@ -176,7 +176,8 @@ function pseudo_markdown($atext, $md_class = '') {
         },
         '/^(?:---|___|\*\*\*)$/m'     => function($m) { return "<hr>"; },
 //------- ![alt-text](URL) IMAGE TAG /multi-pattern replace
-        '/!\[([^:\]]+)(?::(\d+,\d+))?\]\(([!:])?([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/' => function ($m) use(&$item_array) {
+//        '/!\[([^:\]]+)(?::(\d+,\d+))?\]\(([!:])?([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/' => function ($m) use(&$item_array) {
+        '/!\[([^:\]]+)(?::(\d+,\d+))?\]\(([!:])?([^\)]+)\)/' => function ($m) use(&$item_array) {
             $alt = $m[1];
             if($m[2]==='') $sz = '';
             else {
