@@ -313,7 +313,7 @@ public function ViewTemplate($name,$vars = []) {
     }
 //==============================================================================
 // Analyzed Section, and Dispatch Command method
-    private function subsec_separate($section,$attrList,$vars) {
+    private function subsec_separate($section,$attrList,$vars,$all_item=TRUE) {
         $subsec = [];
         if(is_scalar($section)) {
             $innerText = array_to_text($this->expand_Strings($section,$vars));
@@ -335,7 +335,7 @@ public function ViewTemplate($name,$vars = []) {
                         } else $subsec[] = $sec;
                     } else {
                         $token = $this->expand_Strings(tag_body_name($token),$vars);
-						if(preg_match('/^[a-zA-Z][a-zA-Z\-]+$/',$token)) {	// attr-name
+						if($all_item && preg_match('/^[a-zA-Z][a-zA-Z\-]+$/',$token)) {	// attr-name
 //                            if(!empty($sec)) 
 							$attrList[$token] = $sec;		// empty sec is single attr
                         } else {
@@ -761,10 +761,11 @@ public function ViewTemplate($name,$vars = []) {
         echo "<TABLE{$attr}>\n";
         foreach($sec as $key => $val) {        // tr loop
             if(!is_numeric($key)) {
-                list($key,$attrs) = $this->tag_Separate($key,$vars);
-                $tr_attr = $this->gen_Attrs($attrs,$vars);
-                echo "<TR{$tr_attr}>";
-            } else echo "<TR>";
+                list($key,$tr_attrs) = $this->tag_Separate($key,$vars);
+            } else $tr_attrs = [];
+	        list($tr_attrs,$tmp,$val) = $this->subsec_separate($val,$tr_attrs,$vars,FALSE);	// scalar ONLY
+            $tr_attr = $this->gen_Attrs($tr_attrs,$vars);
+            echo "<TR{$tr_attr}>";
             if(is_array($val)) {
                 foreach($val as $td_key => $td_val) {         // th,td loop
                     list($tag,$attrs) = $this->tag_Separate($td_key,$vars);
@@ -822,7 +823,7 @@ public function ViewTemplate($name,$vars = []) {
     //--------------------------------------------------------------------------
     //  INPUT RADIO OUTPUT
     // +radio[name] => [  select_option_value = > [
-    //      option_text => option_value
+    //      option_text => option_value or option_value.()
     //      ...
     //  ] ]
     private function cmd_radio($tag,$attrs,$sec,$vars) {
@@ -838,8 +839,15 @@ public function ViewTemplate($name,$vars = []) {
             foreach($opt_val as $opt => $val) {
 				if(is_numeric($opt)) echo "<li>{$val}</li>\n";
 				else {
+					$val2 = explode('.',$val);
+					if(count($val2) === 2) {
+						$val = $val2[0];
+						$bc = mb_substr($val2[1],0,1);
+						$ec = mb_substr($val2[1],1,1);
+						if(empty($ec)) $ec = $bc;
+					} else $bc = $ec = '';
 					$sel = ($val == $sel_item) ? ' checked':'';
-					echo "<li><label>{$tags} value='{$val}'{$sel}>{$opt}</label></li>\n";
+					echo "<li>{$bc}<label>{$tags} value='{$val}'{$sel}>{$opt}</label>{$ec}</li>\n";
 				}
             }
 			echo "</ul>\n";
