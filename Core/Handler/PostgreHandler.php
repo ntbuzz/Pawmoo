@@ -47,7 +47,7 @@ public function truncate_sql($table) {
 //==============================================================================
 //	RESET SEQ to PRIMARY
 protected function reset_seq($table,$primary) {
-	$sql = "select setval('{$table}_{$primary}_seq',(select max({$primary}) form {$table}));";
+	$sql = "select setval('{$table}_{$primary}_seq',(select max({$primary}) from {$table}));";
 	return $sql;
 }
 //==============================================================================
