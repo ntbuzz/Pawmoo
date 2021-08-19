@@ -9,7 +9,7 @@ class AppController extends AppObject {
 	private $my_method;					// active method list on Instance
 	protected $needLogin = FALSE;		// Login NEED flag
 	protected $aliasAction = [];		// Action Method Alias [ Alias => Real,... ]
-	protected $discardParams = 'List';	// Params Discard method
+	protected $discardParams = [];		// Params Discard method
     protected $noLogging = NULL;		// execute log save exception method list ex. [ 'List',... ]
 	protected $LoggingMethod = NULL;	// execute log sabe Model "class.method". ex. 'Access.Logging'
 //==============================================================================
