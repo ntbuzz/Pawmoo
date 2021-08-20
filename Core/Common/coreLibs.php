@@ -195,14 +195,19 @@ function get_class_names($cls, $with_attr = true) {
 // setvariable      3
 //  text            0   digit | alpha-numeric
 function is_tag_identifier($str) {
-    // digit or empty string is not token
-    if($str ==='' || is_array($str)) return 0;
-    if(strpos('*&@+<?%-',$str[0]) !== FALSE)     return 2;       // command-token
-    // dirty pattern for TAG-token
-    $p = '/^(?:[a-zA-Z_]*)(?:[\.#][a-zA-Z_\-\s]*)+(?:\:\d+)?(?:[\{\(\[].+?[\}\)\]])*$/';
-    if(preg_match($p,$str)) return 1;
-    if(preg_match('/^\$\w+$/',$str)) return 3;    // variable-token
-    return 0;   // text-token
+    // token is scalar string
+	if(is_scalar($str)) {
+		$tokens = [
+			'/^([\*&@\+<\?%\-])(?!\1|$)/' => 2,				// command-token (not repeat char)
+			'/^\$\w+$/' => 3,							   // variable-token
+			// dirty pattern for TAG-token
+			'/^(?:[a-zA-Z_]*)(?:[\.#][a-zA-Z_\-\s]*)+(?:\:\d+)?(?:[\{\(\[].+?[\}\)\]])*$/' => 1,
+		];
+		foreach($tokens as $pattern => $ret_val) {
+			if(preg_match($pattern,$str)) return $ret_val;
+		}
+	}
+    return 0;
 }
 //==============================================================================
 // '_id' fieldname omitted
