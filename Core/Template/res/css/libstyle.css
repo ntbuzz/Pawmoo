@@ -96,21 +96,18 @@ option.disable {
 	bottom:3px;
 	border:none;
 	width:calc(100% - 1.5em);
-	/* height:1.25em;
-	margin:2px; */
 }
 .ui-datepicker-trigger {
    position: absolute;
 }
+/* ラジオボタンリスト */
 ul.radio-list {
 	list-style: none;
-	display: flex;
 }
-.vertical>ul.radio-list {
-	display: block;
-}
+/* デフォルトは横並び */
 ul.radio-list>li {
 	margin: 0 5px;
+	display: inline;
 }
 ul.radio-list>li>label {
 	margin: 0 2px;
@@ -118,4 +115,8 @@ ul.radio-list>li>label {
 /* チェックボックスの位置揃え */
 ul.radio-list>li>label>input {
 	vertical-align: middle;
+}
+/* 縦並び指定ブロック内 */
+.vertical>ul.radio-list>li {
+	display: block;
 }

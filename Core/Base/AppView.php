@@ -829,7 +829,8 @@ public function ViewTemplate($name,$vars = []) {
     //--------------------------------------------------------------------------
     //  INPUT RADIO OUTPUT
     // +radio[name] => [  select_option_value = > [
-    //      option_text => option_value or option_value.()
+    //      option_text => option_value
+	//		 option_text.() => option_value
     //      ...
     //  ] ]
     private function cmd_radio($tag,$attrs,$sec,$vars) {
@@ -843,11 +844,17 @@ public function ViewTemplate($name,$vars = []) {
             $opt_val = array_flat_reduce($opt_val);
 			echo '<ul class="radio-list">';
             foreach($opt_val as $opt => $val) {
-				if(is_numeric($opt)) echo "<li>{$val}</li>\n";
-				else {
-					$val2 = explode('.',$val);
+				$opt = tag_body_name($opt);
+				if(is_numeric($opt) ) {
+					switch($val) {
+					case '-':	$val ='<br>'; break;
+					case '---':	$val ='<hr>'; break;
+					}
+					echo "<li>{$val}</li>\n";
+				} else {
+					$val2 = explode('.',$opt);
 					if(count($val2) === 2) {
-						$val = $val2[0];
+						$opt = $val2[0];
 						$bc = mb_substr($val2[1],0,1);
 						$ec = mb_substr($val2[1],1,1);
 						if(empty($ec)) $ec = $bc;
