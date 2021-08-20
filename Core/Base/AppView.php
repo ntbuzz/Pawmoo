@@ -549,25 +549,31 @@ public function ViewTemplate($name,$vars = []) {
     }
     //--------------------------------------------------------------------------
     // MARKDOWN OUTPUT
-    //  +markdown.classname => markdown-text
+    //  +markdown.classname => scalar-markdown-text-direct or [ sectionn-variables ... ]
     private function cmd_markdown($tag,$attrs,$sec,$vars) {
-        $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
-        if(is_array($sec)) $atext = "\n{$atext}\n\n";
         $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
-        // pre-expand for checkbox and radio/select markdown
-        $atext = preg_replace_callback('/(\[[^\]]*?\]\{(?:\$\{[^\}]+?\}|[^\}])+?\}|\^\[[^\]]*?\][%@:=+]\{(?:\$\{[^\}]+?\}|[^\}])+?\})/',
-            function($m) use(&$vars) {
-                list($pat,$var) = $m;
-                $var = preg_replace_callback('/(\$\{[^\}]+?\})/',
-                    function($mm) use(&$vars) {
-						$vv = expand_text($this,$mm[1],$this->Model->RecData,$vars,true);
-                        if(is_array($vv)) $vv = array_key_value($vv);
-                        return $vv;
-                    },$var);
-                return $var;
-            },$atext);
-        $mtext = pseudo_markdown( $atext,$cls);
-        $mtext = $this->expand_Strings($mtext,$vars);
+		if(is_array($sec)) {
+	        $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
+			// expand section variable before markdown
+			$atext = $this->expand_Strings("\n{$atext}\n\n",$vars);
+			$mtext = pseudo_markdown($atext,$cls);
+		} else {
+			// pre-expand for checkbox and radio/select markdown
+			$atext = preg_replace_callback('/(\[[^\]]*?\]\{(?:\$\{[^\}]+?\}|[^\}])+?\}|\^\[[^\]]*?\][%@:=+]\{(?:\$\{[^\}]+?\}|[^\}])+?\})/',
+				function($m) use(&$vars) {
+					list($pat,$var) = $m;
+					$var = preg_replace_callback('/(\$\{[^\}]+?\})/',
+						function($mm) use(&$vars) {
+							$vv = expand_text($this,$mm[1],$this->Model->RecData,$vars,true);
+							if(is_array($vv)) $vv = array_key_value($vv);
+							return $vv;
+						},$var);
+					return $var;
+				},$sec);
+			$mtext = pseudo_markdown($atext,$cls);
+			// rest variable expand.(not markdown text)
+			$mtext = $this->expand_Strings($mtext,$vars);
+		}
         echo $mtext;
     }
     //--------------------------------------------------------------------------
