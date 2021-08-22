@@ -842,23 +842,14 @@ public function ViewTemplate($name,$vars = []) {
         $sel_item = (is_numeric($opt_key)) ? '' : $opt_key;
         if(is_array($opt_val)) {
             $opt_val = array_flat_reduce($opt_val);
-			echo '<ul class="radio-list">';
+			echo '<ul class="input-list">';
             foreach($opt_val as $opt => $val) {
-				$opt = tag_body_name($opt);
 				if(is_numeric($opt) ) {
-					switch($val) {
-					case '-':	$val ='<br>'; break;
-					case '---':	$val ='<hr>'; break;
-					}
+					$val = separate_tag_value($val);
 					echo "<li>{$val}</li>\n";
 				} else {
-					$val2 = explode('.',$opt);
-					if(count($val2) === 2) {
-						$opt = $val2[0];
-						$bc = mb_substr($val2[1],0,1);
-						$ec = mb_substr($val2[1],1,1);
-						if(empty($ec)) $ec = $bc;
-					} else $bc = $ec = '';
+					$opt = tag_body_name($opt);
+					list($opt,$bc,$ec) = tag_label_value($opt);
 					$sel = ($val == $sel_item) ? ' checked':'';
 					echo "<li>{$bc}<label>{$tags} value='{$val}'{$sel}>{$opt}</label>{$ec}</li>\n";
 				}
@@ -911,11 +902,20 @@ public function ViewTemplate($name,$vars = []) {
 		if(is_scalar($check)) {		// FORMAT-I
 			$sec = [ $name => $sec];
 		}
+		echo '<ul class="input-list">';
 		foreach($sec as $key => $val) {
-			$key = (is_numeric($key)) ? $name : tag_body_name($key);
-			$item = $check_item($val);
-			echo "<label>{$tags} name='{$key}'{$item}</label>\n";
+			$key = is_numeric($key) ? $name : tag_body_name($key);
+			if(is_scalar($val)) {
+				$val = separate_tag_value($val);
+				echo "<li>{$val}</li>\n";
+			} else {
+				$key = tag_body_name($key);
+				list($key,$bc,$ec) = tag_label_value($key);
+				$item = $check_item($val);
+				echo "<li>{$bc}<label>{$tags} name='{$key}'{$item}</label>{$ec}</li>\n";
+			}
 		}
+		echo '</ul>';
     }
 
 }

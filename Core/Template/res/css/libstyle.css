@@ -100,23 +100,23 @@ option.disable {
 .ui-datepicker-trigger {
    position: absolute;
 }
-/* ラジオボタンリスト */
-ul.radio-list {
+/* チェックボックス・ラジオボタンリスト */
+ul.input-list {
 	list-style: none;
 }
 /* デフォルトは横並び */
-ul.radio-list>li {
+ul.input-list>li {
 	margin: 0 5px;
 	display: inline;
 }
-ul.radio-list>li>label {
+ul.input-list>li>label {
 	margin: 0 2px;
 }
 /* チェックボックスの位置揃え */
-ul.radio-list>li>label>input {
+ul.input-list>li>label>input {
 	vertical-align: middle;
 }
 /* 縦並び指定ブロック内 */
-.vertical>ul.radio-list>li {
+.vertical>ul.input-list>li {
 	display: block;
 }

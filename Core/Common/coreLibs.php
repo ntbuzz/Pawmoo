@@ -182,6 +182,27 @@ function tag_body_name($key) {
     return $key;
 }
 //==============================================================================
+// additional label char separate
+function tag_label_value($str) {
+	$val = explode('.',$str);
+	if(count($val) === 2) {
+		$str = $val[0];
+		$bc = mb_substr($val[1],0,1);
+		$ec = mb_substr($val[1],1,1);
+		if(empty($ec)) $ec = $bc;
+	} else $bc = $ec = '';
+	return [$str,$bc,$ec];
+}
+//==============================================================================
+// separate tag convert
+function separate_tag_value($val) {
+	switch($val) {
+	case '-':	return '<br>';
+	case '---':	return '<hr>';
+	default:	return $val;
+	}
+}
+//==============================================================================
 // tag-attr multi-class define
 function get_class_names($cls, $with_attr = true) {
 	if($cls === '') return '';
