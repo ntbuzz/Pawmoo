@@ -45,6 +45,12 @@ public function truncate_sql($table) {
 	return "TRUNCATE TABLE {$table};";
 }
 //==============================================================================
+//	RESET SEQ to PRIMARY
+protected function reset_seq($table,$primary) {
+	$sql = "select setval('{$table}_{$primary}_seq',(select max({$primary}) from {$table}));";
+	return $sql;
+}
+//==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
 //	debug_log(DBMSG_HANDLER,['SQL' => $sql]);

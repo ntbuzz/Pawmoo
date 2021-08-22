@@ -103,6 +103,7 @@ public function __get($PropName) {
 public function execute($cmd) {
 	switch($cmd) {
 	case 'test':	$exeType = 0; break;
+	case 'new':
 	case 'renew':	$exeType = 1; break;
 	case NULL:		echo "NULL\n";
 	case 'view':	$exeType = 2; break;
@@ -160,11 +161,15 @@ public function execute($cmd) {
 			echo "Load CSV from '{$this->InitCSV}'\n";
 			if($exec) $this->loadCSV($this->InitCSV);
 		}
+		list($ftype,$not_null) = $this->Schema[$this->Primary];
+		if(strtolower($ftype) === 'serial') {
+			$this->dbDriver->resetPrimary($this->Primary);
+		}
 	}
 	if(in_array($exeType, [0,1,2] )) {	// View or TEST mode
 		foreach($this->ViewSet as $view) {
 		debug_log(DBMSG_NOLOG,["VIEW-DEFS" => $view]);
-			$sql = $this->createSQL($this->MyTable,$view);
+			$sql = $this->createView($this->MyTable,$view);
 			$this->doSQL($exec,$sql);
 		}
 	}
@@ -178,7 +183,7 @@ private function loadCSV($filename) {
 		while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
 			if(count($data) !== count($row_columns)) {
 				debug_die(['CHECK-CSV'=>['FILE'=>$path,'COL'=>$row_columns,'CSV'=>$data]]);
-			}
+			} else if(array_diff($data, $row_columns) === []) continue;	// maybe CSV field HEADER
 			$row = array_combine($row_columns,$data);
 			$this->dbDriver->insertRecord($row);
 		}
@@ -197,7 +202,7 @@ private function loadCSV($filename) {
 //		[ 'bind_name.sep' => [ 'entity' , 'location'] ],		// BIND-FIELD on My-Table field
 //		[ 'bind_name.sep' => [ 'table1.refer' , 'ltable2.refer'] ],		// OTHER-TABLE BIND-FIELD
 // ]
-private function createSQL($table,$view) {
+private function createView($table,$view) {
 	$alias_sep = function($key) {
 		if(substr($key, -1) === '.') $key .= ' ';
 		list($alias,$sep) = explode('.',"{$key}.");

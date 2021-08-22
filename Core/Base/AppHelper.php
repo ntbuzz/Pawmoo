@@ -269,7 +269,7 @@ public function Contents_Tab($sel,$default='') {
 //==============================================================================
 // ChainSelect Object-List
 public function SelectObject($args) {
-	list($selname,$select_one) = explode(",","{$args},,");
+	list($selname,$select_one) = (is_array($args)) ? $args : [$args,NULL];
 	if(empty($select_one)) $select_one = 'true';
 	$object = "{$selname}: {\n\tselect_one: {$select_one},\n\tsel_list: [\n";
    	foreach($this->MyModel->Select[$selname] as $valset) {
@@ -341,8 +341,10 @@ public static function ImageTag($file,$attr) {
 }
 //==============================================================================
 // JS array define
-public static function define_var_array($arr,$name) { 
-	$row = "var {$name} = [\n'" . implode("',\n'",$arr) . "'\n];";
+public static function define_var_array($arr,$name) {
+	$items = array_filter($arr,'strlen');	// delete empty item
+	$list = (empty($items)) ? '' : "'" . implode("',\n'",$arr) . "'";
+	$row = "var {$name} = [\n{$list}\n];";
 	return $row;
 }
 

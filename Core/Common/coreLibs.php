@@ -182,6 +182,27 @@ function tag_body_name($key) {
     return $key;
 }
 //==============================================================================
+// additional label char separate
+function tag_label_value($str) {
+	$val = explode('.',$str);
+	if(count($val) === 2) {
+		$str = $val[0];
+		$bc = mb_substr($val[1],0,1);
+		$ec = mb_substr($val[1],1,1);
+		if(empty($ec)) $ec = $bc;
+	} else $bc = $ec = '';
+	return [$str,$bc,$ec];
+}
+//==============================================================================
+// separate tag convert
+function separate_tag_value($val) {
+	switch($val) {
+	case '-':	return '<br>';
+	case '---':	return '<hr>';
+	default:	return $val;
+	}
+}
+//==============================================================================
 // tag-attr multi-class define
 function get_class_names($cls, $with_attr = true) {
 	if($cls === '') return '';
@@ -195,14 +216,19 @@ function get_class_names($cls, $with_attr = true) {
 // setvariable      3
 //  text            0   digit | alpha-numeric
 function is_tag_identifier($str) {
-    // digit or empty string is not token
-    if($str ==='' || is_array($str)) return 0;
-    if(strpos('*&@+<?%-',$str[0]) !== FALSE)     return 2;       // command-token
-    // dirty pattern for TAG-token
-    $p = '/^(?:[a-zA-Z_]*)(?:[\.#][a-zA-Z_\-\s]*)+(?:\:\d+)?(?:[\{\(\[].+?[\}\)\]])*$/';
-    if(preg_match($p,$str)) return 1;
-    if(preg_match('/^\$\w+$/',$str)) return 3;    // variable-token
-    return 0;   // text-token
+    // token is scalar string
+	if(is_scalar($str)) {
+		$tokens = [
+			'/^([\*&@\+<\?%\-])(?!\1|$)/' => 2,				// command-token (not repeat char)
+			'/^\$\w+$/' => 3,							   // variable-token
+			// dirty pattern for TAG-token
+			'/^(?:[a-zA-Z_]*)(?:[\.#][a-zA-Z_\-\s]*)+(?:\:\d+)?(?:[\{\(\[].+?[\}\)\]])*$/' => 1,
+		];
+		foreach($tokens as $pattern => $ret_val) {
+			if(preg_match($pattern,$str)) return $ret_val;
+		}
+	}
+    return 0;
 }
 //==============================================================================
 // '_id' fieldname omitted
@@ -290,7 +316,7 @@ function str_csv($csv_str) {
 // UTF-8 CSV miss processing in Windows
 // str_csv version
 function str_csvget($csv_str) {
-	$p = '/(?:^|,)((?:"(?:[^"]|"")*")|[^,]*)*)/u';
+	$p = '/(?:^|,)((?:"(?:[^"]|"")*"|[^,]*)*)/u';
 	preg_match_all($p,$csv_str,$m);
 	$csv = [];
 	foreach($m[1] as $item) {
@@ -419,6 +445,8 @@ function expand_text($class,$str,$recdata,$vars,$match_all = false) {
                     $var = $m[1];
                     $arg = (count($m)===3) ? $m[2]:NULL;
                     if(method_exists($class->Helper,$var)) {
+						$arr = explode(',',$arg);
+						$arg = (count($arr)===1) ? $arg : $arr;
                         $val = $class->Helper->$var($arg);
                     } else $val = "NOT-FOUND({$var})";
 				}

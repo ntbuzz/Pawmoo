@@ -16,7 +16,7 @@ function pseudo_markdown($atext, $md_class = '') {
     $md_class = get_class_names("easy_markdown.{$md_class}");
     $replace_defs = [
 //        '/\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'    => '<a href="\\2">\\1</a>',
-		'/\[([^\]]+)\]\(([^\)\s]+)(\s[^\)]+)*\)/' => '<a href="\\2"\\3>\\1</a>',
+//		'/\[([^\]]+)\]\(([^\)\s]+)(\s[^\)]+)*\)/' => '<a href="\\2"\\3>\\1</a>',
         "/\s\*\*(.+?)\*\*\s/" => '<strong>\\1</strong>',  // BOLD
         "/\s__(.+?)__\s/"     => '<em>\\1</em>',   // BOLD
         "/\s--(.+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
@@ -175,8 +175,25 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<h{$n}{$cls}>{$m[3]}</h{$n}>";
         },
         '/^(?:---|___|\*\*\*)$/m'     => function($m) { return "<hr>"; },
+//------- [text](URL) HYPER LINK
+//			!(URL)	Target = NEW
+//			^(URL)	Target = TOP
+//			:(URL)	Target = SELF
+		'/\[([^\]]+)\]([!\^:])?\(([^\)]+)\)/' => function($m) {
+			$txt = $m[1];
+			$arr = explode(' ',$m[3]);		// allow user attribute
+			$url = array_shift($arr);
+            switch($m[2]) {
+            case '!': $arr[] = 'target="_blank"'; break;
+            case '^': $arr[] = 'target="_top"'; break;
+            case ':': $arr[] = 'target="_self"'; break;
+            }
+			$attr = empty($arr) ? '': ' '.implode(' ',$arr);
+			return "<a href='{$url}'{$attr}>{$txt}</a>";
+		},
 //------- ![alt-text](URL) IMAGE TAG /multi-pattern replace
-        '/!\[([^:\]]+)(?::(\d+,\d+))?\]\(([!:])?([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/' => function ($m) use(&$item_array) {
+//        '/!\[([^:\]]+)(?::(\d+,\d+))?\]\(([!:])?([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/' => function ($m) use(&$item_array) {
+        '/!\[([^:\]]+)(?::(\d+,\d+))?\]\(([!:])?([^\)]+)\)/' => function ($m) use(&$item_array) {
             $alt = $m[1];
             if($m[2]==='') $sz = '';
             else {

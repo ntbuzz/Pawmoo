@@ -29,6 +29,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	abstract protected function fetch_array();
 	abstract protected function getLastError();
 	abstract protected function updateRecord($wh, $row);	// INSERT or UPDATE
+	abstract protected function reset_seq($table,$primary);	// Reset SEQ #
 	abstract public function fieldConcat($sep,$arr);		// CONCAT()
 	abstract public function drop_sql($kind,$table);		// DROP TABLE SQL
 	abstract public function truncate_sql($table);			// TRUNCATE SQL
@@ -52,6 +53,12 @@ function __construct($table,$handler) {
 public function setupRelations($relations) {
 	$this->relations = $relations;
 //	debug_log(DBMSG_HANDLER,["RELATIONS" => $this->relations]);
+}
+//==============================================================================
+// reset primary seq value
+public function resetPrimary($primary) {
+	$sql = $this->reset_seq($this->raw_table,$primary);
+	if($sql) $this->doQuery($sql);
 }
 //==============================================================================
 // fetchDB: get record data , and replace alias and bind column

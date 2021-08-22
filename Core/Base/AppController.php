@@ -9,7 +9,7 @@ class AppController extends AppObject {
 	private $my_method;					// active method list on Instance
 	protected $needLogin = FALSE;		// Login NEED flag
 	protected $aliasAction = [];		// Action Method Alias [ Alias => Real,... ]
-	protected $discardParams = 'List';	// Params Discard method
+	protected $discardParams = [];		// Params Discard method
     protected $noLogging = NULL;		// execute log save exception method list ex. [ 'List',... ]
 	protected $LoggingMethod = NULL;	// execute log sabe Model "class.method". ex. 'Access.Logging'
 //==============================================================================
@@ -187,8 +187,8 @@ public function AutoPaging($cond, $max_count = 100) {
 	else if($cnt > $max_count && $size === 0) $size = $max_count;
 	if($size > 0) {
 		$Page['Size'] = $size;
+		$Page['Page'] = App::$Params[0] = $num;
 		$this->Model->SetPage($size,$num);
-		App::$Params[0] = $num;
 	} else $Page = NULL;	// remove Paging.Setup
 	MySession::setPagingIDs('Setup',$Page);
 }

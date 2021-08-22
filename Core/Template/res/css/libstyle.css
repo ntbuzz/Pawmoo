@@ -96,9 +96,27 @@ option.disable {
 	bottom:3px;
 	border:none;
 	width:calc(100% - 1.5em);
-	/* height:1.25em;
-	margin:2px; */
 }
 .ui-datepicker-trigger {
    position: absolute;
+}
+/* チェックボックス・ラジオボタンリスト */
+ul.input-list {
+	list-style: none;
+}
+/* デフォルトは横並び */
+ul.input-list>li {
+	margin: 0 5px;
+	display: inline;
+}
+ul.input-list>li>label {
+	margin: 0 2px;
+}
+/* チェックボックスの位置揃え */
+ul.input-list>li>label>input {
+	vertical-align: middle;
+}
+/* 縦並び指定ブロック内 */
+.vertical>ul.input-list>li {
+	display: block;
 }

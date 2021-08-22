@@ -42,6 +42,11 @@ public function truncate_sql($table) {
 	return "DELETE FROM {$table};VACUUM;";
 }
 //==============================================================================
+//	RESET SEQ to PRIMARY
+protected function reset_seq($table,$primary) {
+	return FALSE;
+}
+//==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
 //	debug_log(DBMSG_HANDLER,['SQL' => $sql]);

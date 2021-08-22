@@ -11,7 +11,6 @@ require_once('Core/Handler/SqlHandler.php');
 require_once('Core/Handler/SQLiteHandler.php');
 require_once('Core/Handler/PostgreHandler.php');
 require_once('Core/Handler/NullHandler.php');
-//require_once('Core/Handler/FMDBHandler.php');
 
 //==============================================================================
 // field ALIAS and BIND-columns class

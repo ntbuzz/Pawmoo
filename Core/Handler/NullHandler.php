@@ -15,6 +15,7 @@ class NullHandler {
 	protected function doQuery($sql) { return NULL; }
 	protected function fetch_array() { return FALSE; }
 	protected function updateRecord($wh,$row) { }
+	protected function reset_seq($table,$primary) { return FALSE;}
 //==============================================================================
 public function fieldConcat($sep,$arr) { return "";}
 public function drop_sql($kind,$table) { return "";}
