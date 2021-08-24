@@ -17,4 +17,8 @@
 	parse_str($q_str, $query);
 	$_REQUEST =  $query;
 
+	$ln = str_repeat("=", 50);
+	print_r($argv);
+	echo "{$ln} START HERE ${ln}\n";
+
 	require_once('index.php');		// リソース呼出しとの振分けも行う

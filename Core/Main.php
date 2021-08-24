@@ -36,12 +36,12 @@ require_once('Class/ClassManager.php');
 
 // Setup TIMEZONE
 date_default_timezone_set(TIME_ZONE);
-// for CLI DEBUG
-if(CLI_DEBUG) {
-	$ln = str_repeat("=", 50);
-	print_r($argv);
-	echo "{$ln} START HERE ${ln}\n";
-}
+// // for CLI DEBUG
+// if(CLI_DEBUG) {
+// 	$ln = str_repeat("=", 50);
+// 	print_r($argv);
+// 	echo "{$ln} START HERE ${ln}\n";
+// }
 
 $redirect = false;      // Redirect flag
 $root = basename(dirname(__DIR__));        // Framework Folder
