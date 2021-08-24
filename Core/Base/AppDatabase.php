@@ -100,31 +100,43 @@ public function __get($PropName) {
 //==============================================================================
 // Execute Create TABLE,VIEW, and INTIAL DATA
 //	before check Dependent Table
-public function execute($cmd) {
-	switch($cmd) {
-	case 'test':	$exeType = 0; break;
-	case 'new':
-	case 'renew':	$exeType = 1; break;
-	case NULL:		echo "NULL\n";
-	case 'view':	$exeType = 2; break;
-	case 'csv':		$exeType = 3; break;
-	default: echo "BAD Command({$cmd})\n"; return;
+private function SetupClass($table) {
+	$setup_class = "{$table}Setup";
+	if(!in_array($setup_class,$this->owners)) {
+		return new $setup_class($this->data_folder,$this->owners);
 	}
+	return NULL;
+}
+//==============================================================================
+// Execute Create TABLE,VIEW, and INTIAL DATA
+//	before check Dependent Table
+public function execute($cmd) {
+	$exec_types = [
+		'viewtest' =>	-1,	// view test-mode
+		'test' =>	0,		// create test-mode
+		'new' =>	1,		// re-create table & view
+		'view' =>	2,		// re-create view only
+		'csv' =>	3,		// tCSV import
+		'renew' =>	1,		// 'new' alias
+	];
+	if(array_key_exists($cmd,$exec_types)) {
+		$exeType  = $exec_types[$cmd];
+		$exec = ($exeType > 0);
+	} else {
+		echo "BAD Command({$cmd})\n";
+		return;
+	}
+	// Dependent ModelClass Create before self Table Create
 	if(isset(static::$Dependent) && $exeType !== 2) {
 		foreach(static::$Dependent as $table) {
-			$setuip_class = "{$table}Setup";
-			if(!in_array($setuip_class,$this->owners)) {
-				$db = new $setuip_class($this->data_folder,$this->owners);
+			$db = $this->SetupClass($table);
+			if($db !== NULL) {
 				if(empty($db->dbDriver->columns) || $exeType !== 1) $db->execute($cmd);
 			}
 		}
 	}
-	$exec = ($exeType !== 0);
-	// DROP in ViewSet views
-	foreach($this->ViewSet as $view) {
-		$sql = $this->dbDriver->drop_sql("VIEW",$view);
-		$this->doSQL($exec,$sql);
-	}
+	// DROP in ViewSet views CASCADE for SQLite3
+	$this->dropViewCascade($exec);
 	if(in_array($exeType, [0,1] )) {	// re-create or TEST mode
 		$sql = $this->dbDriver->drop_sql("TABLE",$this->MyTable);
 		$this->doSQL($exec,$sql);
@@ -166,12 +178,15 @@ public function execute($cmd) {
 			$this->dbDriver->resetPrimary($this->Primary);
 		}
 	}
-	if(in_array($exeType, [0,1,2] )) {	// View or TEST mode
-		foreach($this->ViewSet as $view) {
-		debug_log(DBMSG_NOLOG,["VIEW-DEFS" => $view]);
-			$sql = $this->createView($this->MyTable,$view);
-			$this->doSQL($exec,$sql);
+	if(in_array($exeType, [-1,0,1,2] )) {	// View or TEST mode
+		// re-create DROP related VIEW
+		if(isset(static::$Dependent)) {
+			foreach(static::$Dependent as $table) {
+				$db = $this->SetupClass($table);
+				if($db !== NULL) $db->createViewSet($exec);
+			}
 		}
+		$this->createViewSet($exec);
 	}
 }
 //==============================================================================
@@ -188,6 +203,29 @@ private function loadCSV($filename) {
 			$this->dbDriver->insertRecord($row);
 		}
 		fclose($handle);
+	}
+}
+//==============================================================================
+// createViewSet: create View group for other model
+public function dropViewCascade($exec) {
+	if(isset(static::$Dependent)) {
+		foreach(static::$Dependent as $table) {
+			$db = $this->SetupClass($table);
+			if($db !== NULL) $db->dropViewCascade($exec);
+		}
+	}
+	foreach($this->ViewSet as $view) {
+		$sql = $this->dbDriver->drop_sql("VIEW",$view);
+		$this->doSQL($exec,$sql);
+	}
+}
+//==============================================================================
+// createViewSet: create Self View group for other model
+public function createViewSet($exec) {
+	foreach($this->ViewSet as $view) {
+		debug_log(DBMSG_NOLOG,["VIEW-DEFS" => $view]);
+		$sql = $this->createView($this->MyTable,$view);
+		$this->doSQL($exec,$sql);
 	}
 }
 //==============================================================================
