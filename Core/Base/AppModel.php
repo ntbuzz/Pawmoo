@@ -272,10 +272,8 @@ public function getRecordByKey($id) {
 // Get ROW-RECORD by Field Name
 // Result:   $this->fields in Column Data
 public function getRecordBy($key,$value) {
-    if(!empty($value)) {
-        $row = $this->dbDriver->doQueryBy($key,$value);
-        $this->fields = ($row === FALSE) ? [] : $row;
-    } else $this->fields = array();
+	$row = $this->dbDriver->doQueryBy($key,$value);
+	$this->fields = ($row === FALSE) ? [] : $row;
     return $this->fields;
 }
 //==============================================================================
@@ -283,7 +281,7 @@ public function getRecordBy($key,$value) {
 // Result:   $this->RecData in Column Data
 public function GetRecord($num,$join=FALSE,$values=FALSE) {
     if($join) {
-        if(empty($num)) $this->fields = array();
+        if($num === '') $this->fields = array();
         else $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],TRUE);
     } else $this->getRecordBy($this->Primary,$num);
     $this->RecData= $this->fields;
