@@ -23,7 +23,7 @@ define('DBMSG_CLI',     256);      // CLI BIT Mask for CLI_DEBUG
 const EMPTY_MSG = " EMPTY\n";
 const EXCLUSION = [
 //    'Syslog' => 1,
-    'password' => 1,
+//    'password' => 1,
     'passwd' => 1,
 ];
 /*
