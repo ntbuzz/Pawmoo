@@ -11,6 +11,17 @@ abstract class LoginClass extends AppModel {
     static public $LoginUser;
     public $error_type;
 //==============================================================================
+//　Default User Info for CLI Debug
+public function defaultUser() {
+	static::$LoginUser = [
+		'userid'	=>	'guest',
+		'roll'		=>	'Guest',
+		'language'	=>	'ja',
+		'full_name'	=>	'Guest User',
+		'email'		=>	'no-mail@localhost',
+	];
+}
+//==============================================================================
 //　ユーザーIDの妥当性を検証する
 public function is_validUser($userid,$passwd = NULL) {
     $this->error_type = $this->__('Login.NeedLogin');
@@ -23,10 +34,18 @@ public function is_validUser($userid,$passwd = NULL) {
             $user_pass = $data['password'];
             if($passwd !== $user_pass) return NULL;
         }
-        static::$LoginUser = $data;
-        $lang = (isset($data['language'])) ? $data['language']: DEFAULT_LANG;
         $this->error_type = '';
-        return [$userid,$lang];
+		$user_lang = array_filter_values($data,['language','region'],[DEFAULT_LANG,DEFAULT_REGION]);
+		list($lang,$region) = array_filter_values(App::$Query,['lang','region'],$user_lang);
+		if($lang !== LangUI::$LocaleName) {
+			// Reload UserDataa when User Locale not match current Locale
+			LangUI::SwitchLangs($lang);
+			$this->ResetSchema();
+		    $data = $this->getRecordBy($this->LoginID,$userid);
+			debug_log(DBMSG_SYSTEM,['Language Switch'=>$lang]);
+		}
+        static::$LoginUser = $data;
+        return [$userid,$lang,$region];
     }
     $this->error_type = $this->__('Login.UnknownUser').": '{$userid}'";
     return NULL;

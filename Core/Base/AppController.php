@@ -67,48 +67,64 @@ public function is_enable_action($action) {
 	return FALSE;	// diable ActionMethod
 }
 //==============================================================================
+// setup login user language and region
+	private function setup_user_lang_region($data,$userdata,$loginkey = NULL) {
+		list($userid,$lang,$region) = $data;
+		$login_data = [
+			'LANG' => $lang,
+			'REGION' => $region,
+		];
+		if($loginkey !== NULL) $login_data[$loginkey] = $userdata[$loginkey];
+		MySession::set_LoginValue($login_data);
+	}
+//==============================================================================
 // authorised login mode, if need view LOGIN form, return FALSE
 public function is_authorised($method) {
-	if($this->needLogin && $method !== 'Logout') {
-		if(CLI_DEBUG) {
-			$this->Login->defaultUser();
-			return TRUE;
-		}
-		$login_key = isset($this->Login->LoginID)?$this->Login->LoginID:'login-user';
-		// new login request POST check
-		$data = $this->Login->is_validLogin(MySession::$ReqData);
-		if($data === NULL) {		// non-request NEW LOGIN POST
-			// check ALREADY LOGIN information if EXIST
-			if($this->Login->error_type === NULL) {		// NO-POST LOGIN
-				$userid = MySession::get_LoginValue($login_key);
-				$data = $this->Login->is_validUser($userid);		// is_enabled account
-			} else $userid = MySession::getPostData($login_key);
-			if($data === NULL) {
-				$msg = $this->__('.Login');
-				$err_msg = $this->Login->error_type;
-				page_response('app-login.php',[
-					'page_title'	=> $this->__('Login.LoginPage'),
-					'msg_title'		=> $this->__('Login.LoginTitle'),
-					'user_title'	=> $this->__('Login.UserName'),
-					'pass_title'	=> $this->__('Login.Password'),
-					'send_button'	=> $this->__('Login.LOGIN'),
-					'msg_body'		=> $this->Login->error_type,
-					'login_user'	=> $userid,
-				]);     // LOGIN PAGE Response
+	if(defined('LOGIN_CLASS')) {			// enable Login Class
+		$model = LOGIN_CLASS . 'Model';
+		$Login = $this->$model;
+		$login_key = isset($Login->LoginID) ? $Login->LoginID:'login-user';
+		if($this->needLogin && $method !== 'Logout') {
+			if(CLI_DEBUG) {
+				$Login->defaultUser();
+				return TRUE;
 			}
+			// new login request POST check
+			$data = $Login->is_validLogin(MySession::$ReqData);
+			if($data === NULL) {		// non-request NEW LOGIN POST
+				// check ALREADY LOGIN information if EXIST
+				if($Login->error_type === NULL) {		// NO-POST LOGIN
+					$userid = MySession::get_LoginValue($login_key);
+					$data = $Login->is_validUser($userid);		// is_enabled account
+				} else $userid = MySession::getPostData($login_key);
+				if($data === NULL) {
+					$msg = $this->__('.Login');
+					$err_msg = $Login->error_type;
+					$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
+					page_response($login_page,[
+						'page_title'	=> $this->__('Login.LoginPage'),
+						'msg_title'		=> $this->__('Login.LoginTitle'),
+						'user_title'	=> $this->__('Login.UserName'),
+						'pass_title'	=> $this->__('Login.Password'),
+						'send_button'	=> $this->__('Login.LOGIN'),
+						'msg_body'		=> $Login->error_type,
+						'login_user'	=> $userid,
+					]);     // LOGIN PAGE Response
+				}
+			} else {
+				$this->setup_user_lang_region($data,$model::$LoginUser,$login_key);
+			}
+			LockDB::SetOwner($userid);
 		} else {
-			list($userid,$lang) = $data;
-			if(empty($lang)) $lang = LangUI::$LocaleName;
-			$lang = get_locale_lang($lang);
-			MySession::set_LoginValue([$login_key => $userid,'LANG'=>$lang]);
-			if($lang !== LangUI::$LocaleName) {
-				LangUI::SwitchLangs($lang);
-				$this->Model->ResetSchema();
-				debug_log(DBMSG_SYSTEM,['Language SWITCH'=>$lang]);
+			$userid = MySession::get_LoginValue($login_key);
+			// already login and empty UserData
+			if(!empty($userid) && !isset($model::$LoginUser)) {
+				// Reload UserData
+				$data = $Login->is_validUser($userid);
+				$this->setup_user_lang_region($data,$model::$LoginUser);
 			}
 		}
-		LockDB::SetOwner($userid);
-	};
+	}
 	return TRUE;
 }
 //==============================================================================
