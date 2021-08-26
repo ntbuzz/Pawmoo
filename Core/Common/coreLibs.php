@@ -302,19 +302,6 @@ function re_build_array($cond) {
 //==============================================================================
 // UTF-8 CSV miss processing in Windows
 // str_csv version
-function str_csv($csv_str) {
-	$p = '/(?:^|,)((?:"(?:[^"]|(?:\\\\)*\\")+"|[^,]+)*)/';
-	preg_match_all($p,$csv_str,$m);               // all token split
-	$csv = array_map(function($a) {
-		$v = str_replace('""','"',$a);
-		if(mb_substr($v,0,1) === '"') $v = mb_substr($v,1,mb_strlen($v) - 2);
-		return $v;
-	},$m[1]);	
-	return $csv;
-}
-//==============================================================================
-// UTF-8 CSV miss processing in Windows
-// str_csv version
 function str_csvget($csv_str) {
 	$p = '/(?:^|,)((?:"(?:[^"]|"")*"|[^,]*)*)/u';
 	preg_match_all($p,$csv_str,$m);
