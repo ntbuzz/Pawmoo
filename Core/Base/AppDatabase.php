@@ -20,6 +20,7 @@ class SetupLoader {
                 return true;
             }
         }
+		echo "NOT FOUND:{$className}\n";
     }
 //==============================================================================
 // Setup専用のローダー
@@ -67,6 +68,7 @@ class AppDatabase {
 		$this->ViewSet = $viewset;
         $driver = $this->Handler . 'Handler';
         $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
+		echo "CREATE:{$this->myClass}\n";
     }
 //==============================================================================
 // dynamic construct OBJECT Class for 'modules'
@@ -93,7 +95,7 @@ public function __get($PropName) {
 	private function doSQL($exec,$sql) {
 		if(empty($sql)) return;
 		if($exec) {
-			echo "SQL: {$sql}\n";
+//			echo "SQL: {$sql}\n";
 			$this->dbDriver->execSQL($sql);
 		} else  echo "{$sql}\n\n";
     }
@@ -145,7 +147,7 @@ public function execute($cmd) {
 		foreach($this->Schema as $key => $field) {
 			list($ftype,$not_null) = $field;
 			$lftype = strtolower($ftype);
-			if(array_key_exists($lftype,self::typeXchanger[HANDLER])) $ftype = self::typeXchanger[HANDLER][$lftype];
+			if(array_key_exists($lftype,static::typeXchanger[HANDLER])) $ftype = static::typeXchanger[HANDLER][$lftype];
 			$str = "{$key} {$ftype}";
 			if($not_null) $str .= " NOT NULL";
 			$fset[] = $str;
@@ -180,12 +182,12 @@ public function execute($cmd) {
 	}
 	if(in_array($exeType, [-1,0,1,2] )) {	// View or TEST mode
 		// re-create DROP related VIEW
-		if(isset(static::$Dependent)) {
-			foreach(static::$Dependent as $table) {
-				$db = $this->SetupClass($table);
-				if($db !== NULL) $db->createViewSet($exec);
-			}
-		}
+		// if(isset(static::$Dependent)) {
+		// 	foreach(static::$Dependent as $table) {
+		// 		$db = $this->SetupClass($table);
+		// 		if($db !== NULL) $db->createViewSet($exec);
+		// 	}
+		// }
 		$this->createViewSet($exec);
 	}
 }
@@ -206,14 +208,14 @@ private function loadCSV($filename) {
 	}
 }
 //==============================================================================
-// createViewSet: create View group for other model
+// dropViewSet: DROP View related
 public function dropViewCascade($exec) {
-	if(isset(static::$Dependent)) {
-		foreach(static::$Dependent as $table) {
-			$db = $this->SetupClass($table);
-			if($db !== NULL) $db->dropViewCascade($exec);
-		}
-	}
+	// if(isset(static::$Dependent)) {
+	// 	foreach(static::$Dependent as $table) {
+	// 		$db = $this->SetupClass($table);
+	// 		if($db !== NULL) $db->dropViewCascade($exec);
+	// 	}
+	// }
 	foreach($this->ViewSet as $view) {
 		$sql = $this->dbDriver->drop_sql("VIEW",$view);
 		$this->doSQL($exec,$sql);
