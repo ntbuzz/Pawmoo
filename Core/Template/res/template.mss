@@ -6,6 +6,12 @@
 // =====================================================
 // stylesheet SECTION
 Stylesheet => [
+    htmlstyle => [
+        +import => [
+            bodystyle.css        // Template Default Style
+		]
+        +section => common       //
+	]
     common => [
         +import => [
             libstyle.css        // Template Default Style

@@ -1,19 +1,6 @@
 @charset "UTF-8";
 /* フレームワークの基本スタイル */
 /*	[上下左右] [上下][左右} [上][左右][下] [上][右][下][左] */
-* {
-    position: relative;
-    margin: 0;
-    padding: 0;    
-	box-sizing: border-box;
-}
-html, body {
-    height: 100vh;
-    min-height: 100vh;
-    font-size:10pt;
-	overflow: hidden;
-}
-
 .appWindow {
     position:fixed;
     width: 100%;
