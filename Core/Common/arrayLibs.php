@@ -131,9 +131,14 @@ function array_key_value($arr,$sep=',',$quote='') {
     return implode($sep,$arr);
 }
 //==============================================================================
-function array_filter_values($arr,$filter) {
+function array_filter_values($arr,$filter,$alt=[]) {
 	$val = [];
-	foreach($filter as $key) $val[] = (array_key_exists($key,$arr)) ? $arr[$key] : NULL;
+	if(is_array($arr)) {
+		$alt = array_combine($filter,array_alternative($alt,count($filter)));
+		foreach($filter as $key) $val[] = (array_key_exists($key,$arr)) ? $arr[$key] : $alt[$key];
+	} else {
+		$val = array_fill(0,count($filter),NULL);
+	}
 	return $val;
 }
 //==============================================================================
