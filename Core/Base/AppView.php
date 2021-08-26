@@ -302,7 +302,7 @@ public function ViewTemplate($name,$vars = []) {
                 $m = strrpos($tag,$tsep);
                 $str = ($m === FALSE || $m === $n) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
                 $tag = mb_strcut($tag,0,$n);
-                if(!empty($str)) {
+                if($str !== '') {
                     $attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} ".$attrList[$key] : $str;
                 }
                 $n = strrpos($tag,$sep);
