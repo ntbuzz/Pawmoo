@@ -193,3 +193,8 @@ function passwd_encrypt($str) {
     return openssl_encrypt($str,$method_name,$key_string,0,$iv);
 }
 // $original_text = openssl_decrypt($str,$method_name,$key_string,0,$iv);
+//==============================================================================
+// random password create
+function passwd_random($n = 8) {
+    return substr(base_convert(bin2hex(openssl_random_pseudo_bytes($n)),16,36),0,$n);
+}

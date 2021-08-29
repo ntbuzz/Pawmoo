@@ -10,7 +10,7 @@ Stylesheet => [
             tabset.css
 			mystyle.css
         ]
-        +section => ^common       // 上位のセクションを呼出す
+        +section => ^htmlstyle       // 上位のセクションを呼出す
     ]
 ]
 // モジュールスクリプトのテンプレート

@@ -79,10 +79,10 @@ class App {
     }
 //==============================================================================
 // メソッドの置換
-public static function ChangeMethod($module,$method,$clear_filter=TRUE, $relocate = TRUE) { 
+public static function ChangeMethod($module,$method,$change_filter=[], $relocate = TRUE) { 
     static::$execURI['controller'] = $module;
     static::$execURI['method'] = strtolower($method);
-    if($clear_filter) static::$execURI['filter'] = [];
+    if(is_array($change_filter)) static::$execURI['filter'] = $change_filter;
     static::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================
@@ -108,16 +108,17 @@ public static function Get_PagingPath() {
 		array_key_value(static::$Query,'&'));
 }
 //==============================================================================
-// メソッドの置換
-public static function Get_RelocateURL($force=FALSE) { 
+// メソッドとクエリ文字列の置換後のURLを返す
+public static function Get_RelocateURL($force=FALSE,$query=NULL) { 
     if(static::$ReLocate === FALSE && $force===FALSE) return NULL;
 	if(static::$MethodExtention !== FALSE) {
 		$execurl = array_filter(static::$execURI,function($v,$k) { return ($k !== "method");},ARRAY_FILTER_USE_BOTH);
 		$execurl[] = static::$execURI['method'] . "." . static::$MethodExtention;
 	} else 	$execurl = static::$execURI;
     $url = array_to_URI($execurl);
-    if(!empty(static::$Query)) {                  // exists QUERY strings
-        $q = http_build_query(static::$Query);
+	if(!is_array($query)) $query = static::$Query;
+    if(!empty($query)) {                  // exists QUERY strings
+        $q = http_build_query($query);
         $url = "{$url}?{$q}";
     }
 //    debug_log(DBMSG_SYSTEM, ["RE-LOCATE-JMP" => static::$execURI,'URI'=>$url]);

@@ -26,22 +26,11 @@ require_once('Common/coreLibs.php');
 // also autoload enabled, but not use for performance up
 require_once('App.php');
 require_once('Base/AppObject.php');
-require_once('Base/AppController.php');
-require_once('Base/AppModel.php');
-//require_once('Base/AppFilesModel.php');
-require_once('Base/AppView.php');
-require_once('Base/AppHelper.php');
 require_once('Base/LangUI.php');
 require_once('Class/ClassManager.php');
 
 // Setup TIMEZONE
 date_default_timezone_set(TIME_ZONE);
-// for CLI DEBUG
-if(CLI_DEBUG) {
-	$ln = str_repeat("=", 50);
-	print_r($argv);
-	echo "{$ln} START HERE ${ln}\n";
-}
 
 $redirect = false;      // Redirect flag
 $root = basename(dirname(__DIR__));        // Framework Folder
@@ -67,6 +56,11 @@ if($controller === 'Error') {       // ERROR PAGE
     error_response("page-{$code}.php",$appname,$app_uri,$module);
 }
 require_once("app/{$appname}/Config/config.php");
+require_once('Base/AppController.php');
+require_once('Base/AppModel.php');
+require_once('Base/AppView.php');
+require_once('Base/AppHelper.php');
+
 // Check URI-Redirect direction
 if(!defined('FORCE_REDIRECT')) define('FORCE_REDIRECT', FALSE);
 
@@ -114,12 +108,12 @@ foreach(['lang'=>$_SERVER['HTTP_ACCEPT_LANGUAGE'], 'region'=>'jp'] as $key => $v
 	$uname = strtoupper($key);
 	if(array_key_exists($key, $query)) {
 		$def = $query[$key];
-		unset($query[$key]);
+//		unset($query[$key]);
 	} else {
+//		$def = $val;
 		$def = MySession::get_LoginValue($uname);
 	}
 	if(empty($def) || $def === 'undefined') $def = $val;
-//	$def = get_locale_lang($def);
 	MySession::set_LoginValue([$uname => $def]);
 	$$key = $def;
 }
@@ -194,6 +188,7 @@ debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
     "SAVE-AppData"  => MySession::getEnvIDs('AppData',false),     // included App::[sysVAR]
     "SESSION Resource"  => MySession::syslog_GetData('',TRUE),	// MySession::$SysData[RESOURCE_ID],
     "Paging"  => MySession::getEnvIDs('Paging',false),
+     "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
 //    "SESSION LOG"  => MySession::$SysData[SYSLOG_ID],
 ]);
 sysLog::run_time(DBMSG_CLI|DBMSG_SYSTEM);

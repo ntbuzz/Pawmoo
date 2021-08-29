@@ -42,6 +42,10 @@ require_once($defsfile);
 
 SetupLoader::Setup($appname,AliasMap);
 
+$ln = str_repeat("=", 50);
+print_r($argv);
+echo "{$ln} START HERE ${ln}\n";
+
 $setup_class = "{$defs}Setup";
 
 foreach(AliasMap as $fname => $classes) {

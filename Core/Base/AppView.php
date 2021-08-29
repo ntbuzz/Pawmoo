@@ -302,7 +302,7 @@ public function ViewTemplate($name,$vars = []) {
                 $m = strrpos($tag,$tsep);
                 $str = ($m === FALSE || $m === $n) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
                 $tag = mb_strcut($tag,0,$n);
-                if(!empty($str)) {
+                if($str !== '') {
                     $attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} ".$attrList[$key] : $str;
                 }
                 $n = strrpos($tag,$sep);
@@ -883,6 +883,9 @@ public function ViewTemplate($name,$vars = []) {
 							$cmp2 = intval($m[1]);
 							$cmp1 = intval($cmp1);
 	                        $checked = $check_func(($cmp1 & $cmp2)!==0);
+						} else if(mb_substr($cmp2,0,1) === '%') {	// include value check
+							$cmp2 = mb_substr($cmp2,1);
+							$checked = $check_func(mb_strpos($cmp1,$cmp2) !== FALSE);
 						} else $checked = $check_func($cmp1 === $cmp2);
                     } else $checked = $check_func(!empty($val));
                 } else if($key[0]==='@') {

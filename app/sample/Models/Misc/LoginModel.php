@@ -6,13 +6,13 @@ class LoginModel extends LoginClass {
         'Handler' => 'SQLite',
         'DataTable' => 'users',
         'Primary' => 'id',
-        'LoginID' => 'username',
+        'LoginID' => 'username:password',
         'Schema' => [
             'id'        => ['',0],
             'roll'      => ['',0],
             'active'    => ['',0],
             'username'  => ['',0],
-            'password'  => ['',0],
+            'password'  => ['',-1],	// encrypt
             'email'     => ['',0],
             'note'      => ['',0],
             'lastlogin' => ['',0],
