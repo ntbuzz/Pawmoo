@@ -94,6 +94,7 @@ public function ResetSchema() {
             array_push($defs,0,NULL,NULL);
             $ref_key = $key;
             list($disp_name,$disp_flag,$width,$relations,$binds) = $defs;
+			if($disp_flag < 0) continue;
             list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
             if(!empty($relations)) {
                 $relation[$key] = $relations;
