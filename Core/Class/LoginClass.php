@@ -11,6 +11,16 @@ abstract class LoginClass extends AppModel {
     static public $LoginUser;
     public $error_type;
 //==============================================================================
+//	Class-Initialize after __construct()
+	public function class_startup() {
+        parent::class_initialize();
+		if(isset($this->LoginID)) {
+			list($uid,$pwid) = explode(':',"{$this->LoginID}:");
+			$this->LoginID = $uid;
+			$this->PasswdID = empty($pid) ? 'password' : $pid;
+		}
+	}
+//==============================================================================
 //　Default User Info for CLI Debug
 public function defaultUser() {
 	static::$LoginUser = [
@@ -59,15 +69,32 @@ public function is_validLogin($values) {
         $xkey = $this->get_post_field($key);
         if(array_key_exists($xkey,$this->Schema)) {     // pickup exists field name
             list($disp,$flag) = $this->Schema[$xkey];   // need encrypt password
-            $dval = ($flag === 1) ? passwd_encrypt($val) : $val;
+            $dval = ($flag === -1) ? passwd_encrypt($val) : $val;
             $Login[$xkey] = $dval;    // accepta NULL value
         }
     }
     $this->error_type = NULL;
     if(!array_key_exists($this->LoginID,$Login)) return NULL;
-	$passwd = $Login['password'];
+	$passwd = $Login[$this->PasswdID];
 	if(empty($passwd)) $passwd = '*';
     return $this->is_validUser($Login[$this->LoginID],$passwd);
+}
+//==============================================================================
+// Recieved LOGIN POST FORM, do accept USER LOGIN correct
+public function reset_password($userid,$maxlen = 8) {
+	$passwd = '';
+    if(array_key_exists($this->PasswdID,$this->Schema)) {     	// exist password field
+    	$data = $this->getRecordBy($this->LoginID,$userid);		// check userid
+		if(!empty($data)) {
+			list($disp,$flag) = $this->Schema[$this->PasswdID];   // need encrypt password
+			$passwd = passwd_random($maxlen);
+			$dval = ($flag === -1) ? passwd_encrypt($passwd) : $passwd;
+			$id = $data[$this->Primary];
+			$row[$this->PasswdID] = $dval;
+			$this->UpdateRecord($id,$row);
+		}
+    }
+	return $passwd;
 }
 
 }

@@ -11,7 +11,8 @@ class AppController extends AppObject {
 	protected $aliasAction = [];		// Action Method Alias [ Alias => Real,... ]
 	protected $discardParams = [];		// Params Discard method
     protected $noLogging = NULL;		// execute log save exception method list ex. [ 'List',... ]
-	protected $LoggingMethod = NULL;	// execute log sabe Model "class.method". ex. 'Access.Logging'
+	protected $LoggingMethod = NULL;	// execute log save Model "class.method". ex. 'Access.Logging'
+	protected $BypassMethod = '';		// Login bypass method,if NEDD LOGIN(ex.Logout)
 //==============================================================================
 // constructor: create MODEL, VIEW(with HELPER)
 	function __construct($owner = NULL){
@@ -84,7 +85,9 @@ public function is_authorised($method) {
 		$model = LOGIN_CLASS . 'Model';
 		$Login = $this->$model;
 		$login_key = isset($Login->LoginID) ? $Login->LoginID:'login-user';
-		if($this->needLogin && $method !== 'Logout') {
+		$bypass_method = (is_array($this->BypassMethod)) ? $bypass_method : [$bypass_method];
+		$bypass_method[] = 'Logout';	// must be append LogoutAction
+		if($this->needLogin && !in_array($method,$bypass_method)) {
 			if(CLI_DEBUG) {
 				$Login->defaultUser();
 				return TRUE;
