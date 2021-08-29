@@ -362,6 +362,7 @@
             有効にするとロケール名の付加されたフィールドがR/W対象となります。
             ただしテーブルにロケール名のついた列が定義されていないときは無効となります。
               field::contents   =    0 → contents,  1 → contents_en (ロケールが en_US の時)
+			パスワードカラムに制御フラグを -1 に設定すると、opensslによる暗号化で書き込みます。
   表示幅              カラム表示幅を制御したいときに使用します(HeaderSchemaの4番目の要素に記憶される)
   JOIN定義            フィールド名にリレーションする「モデル名.カラム名.取得カラム名」を指定します
             複数のカラムを取得する場合は「モデル名.カラム名」をキー名とする連想配列で定義する
@@ -1159,13 +1160,14 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 ・ログインクラス(LoginClass)
   LoginModel を実装するための基底クラス。AppModelから派生しています。
   このクラスではテーブルにユーザーID、パスワード、ユーザー言語の列が必要です。
-    ユーザーID(任意)        // LoginID プロパティで指定できます
-    'password'              // パスワード openssl_encrypt() で暗号化したもの
+    ユーザーID(任意)        // LoginID プロパティでユーザーID列名とパスワード列名を指定します
+    パスワードID            // ex.  LoginID = 'userid:passwd'
     'language'              // ユーザー言語(ja;en)
 
 ・クラスメソッド
   is_validUser($userid,$passwd) // ユーザデータを読み込んで検証する
   is_validLogin(POST変数)       // POSTされたログイン情報からユーザー情報を検証する
+  reset_password($userid,$maxlen)	// ユーザーIDのパスワードを maxlen桁で乱数設定し値を返す
 
 ・ファイルフォルダークラス(FlatFolder)
   フォルダリストやファイルリストを管理するクラスです。
@@ -1195,8 +1197,12 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     $defaultAction                //  デフォルトのアクション
     $defaultFilter                //  デフォルトのフィルター
     $disableAction                // 禁止する継承元のアクション
-    * $needLogin                    // ログイン要求の有無(デフォルト:FALSE)
     * $aliasAction                  // アクションメソッドの別名呼出し配列
+    * $needLogin                    // ログイン要求の有無(デフォルト:FALSE)
+	* $BypassMethod					// ログイン要求をバイパスするメソッド名配列
+	* $LoggingMethod				// アクセスログの保存コントローラメソッド(ex. 'Access.Logging')
+    * $noLogging					// ログ保存除外のメソッド配列
+	* $discardParams				// メソッド呼出し前に Params を消去するメソッド名の配列
 
   ・クラスメソッド
     * ActionPreProcess(action)      // アクション実行前に呼び出すメソッド、FALSEを返すとアクションをキャンセルします。
