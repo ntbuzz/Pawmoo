@@ -173,7 +173,8 @@ function debug_log($lvl,...$items) {
                 if(array_key_exists($key,EXCLUSION)) continue;      // not dump element check
                 $dmp .= str_repeat(' ',$indent*2) . "[{$key}] = ";
                 if(gettype($val)==='object') {
-                    $dmp .= "[{$val->ClassName}]\n"; // print_r($val,true);
+					$clsnm = get_class($val);
+                    $dmp .= "[{$clsnm}]\n"; // print_r($val,true);
                 } else if(empty($val)) {
                     $dmp .= get_null_value($val);
                 } else if(is_array($val)) {
@@ -201,7 +202,8 @@ function debug_log($lvl,...$items) {
                         $msg = LangUI::get_value('debug',$msg);
                     }
                     if(gettype($obj)==='object') {
-                        $dmp_msg .= "{$msg} : Class[{$obj->ClassName}]\n";// . print_r($obj,true);
+						$clsnm = get_class($obj);
+                        $dmp_msg .= "{$msg} : Class[{$clsnm}]\n";// . print_r($obj,true);
                     } else if(empty($obj)) {
                         $dmp_msg .= "{$msg} : " . get_null_value($obj);
                     } else if(is_scalar($obj)) {
