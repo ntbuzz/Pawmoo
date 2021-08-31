@@ -25,43 +25,58 @@ abstract class LoginClass extends AppModel {
 public function defaultUser() {
 	static::$LoginUser = [
 		'userid'	=>	'guest',
-		'roll'		=>	'Guest',
+		'role'		=>	'Guest',
 		'language'	=>	'ja',
 		'full_name'	=>	'Guest User',
 		'email'		=>	'no-mail@localhost',
 	];
 }
 //==============================================================================
+//　Default User Info for CLI Debug
+public function reload_userdata($udata) {
+	list($uid,$lang,$region) = $udata;
+	if($lang !== LangUI::$LocaleName) {
+		// Reload UserDataa when User Locale not match current Locale
+		LangUI::SwitchLangs($lang);
+		$this->ResetSchema();
+	}
+	$data = $this->getRecordBy($this->LoginID,$uid);
+	static::$LoginUser = $data;
+}
+//==============================================================================
 //　ユーザーIDの妥当性を検証する
+//	失敗: FALSE
+//	成功: [ID,LANG,REGION]
 public function is_validUser($userid,$passwd = NULL) {
     $this->error_type = $this->__('Login.NeedLogin');
-    if(empty($userid)) return NULL;
+    if(empty($userid)) return FALSE;
     $data = $this->getRecordBy($this->LoginID,$userid);
     if($userid === $data[$this->LoginID]) {
         // $passwd != NULL ならここでパスワードチェックをする
         if($passwd !== NULL) {
 		    $this->error_type = $this->__('Login.PassError');
             $user_pass = $data['password'];
-            if($passwd !== $user_pass) return NULL;
+            if($passwd !== $user_pass) return FALSE;
         }
         $this->error_type = '';
 		$user_lang = array_filter_values($data,['language','region'],[DEFAULT_LANG,DEFAULT_REGION]);
 		list($lang,$region) = array_filter_values(App::$Query,['lang','region'],$user_lang);
+        static::$LoginUser = $data;
+		$udata = [$userid,$lang,$region];
 		if($lang !== LangUI::$LocaleName) {
 			// Reload UserDataa when User Locale not match current Locale
-			LangUI::SwitchLangs($lang);
-			$this->ResetSchema();
-		    $data = $this->getRecordBy($this->LoginID,$userid);
-			debug_log(DBMSG_SYSTEM,['Language Switch'=>$lang]);
+			$this->reload_userdata($udata);
 		}
-        static::$LoginUser = $data;
-        return [$userid,$lang,$region];
+        return $udata;
     }
     $this->error_type = $this->__('Login.UnknownUser').": '{$userid}'";
-    return NULL;
+    return FALSE;
 }
 //==============================================================================
 // Recieved LOGIN POST FORM, do accept USER LOGIN correct
+//	Success: [ID,LANG,REGION]
+//	NO-POST: NULL
+//	VALID FAIL: FALSE
 public function is_validLogin($values) {
     $Login = [];
     foreach($values as $key => $val) {

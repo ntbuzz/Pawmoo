@@ -101,9 +101,10 @@ public function execute($cmd) {
 		'viewtest' =>	-1,	// view test-mode
 		'test' =>	0,		// create test-mode
 		'new' =>	1,		// re-create table & view
-		'view' =>	2,		// re-create view only
-		'csv' =>	3,		// tCSV import
 		'renew' =>	1,		// 'new' alias
+		'view' =>	2,		// re-create view only
+		'csv' =>	3,		// self model CSV import 
+		'self' =>	4,		// re-create self VIEW only
 	];
 	if(array_key_exists($cmd,$exec_types)) {
 		$exeType  = $exec_types[$cmd];
@@ -112,14 +113,19 @@ public function execute($cmd) {
 		echo "BAD Command({$cmd})\n";
 		return;
 	}
+	if($exeType === 3) {
+		$this->createTableSet($exec,TRUE);
+		return;
+	}
 	$setupLinks = array_reverse($this->DependView([]));	// associate array topdown seq change to bottomup seq.
 	$setupLinks[$this->ClassName] = NULL;	// except SELF Class for after process
+	if($exeType >= 4) $setupLinks = [];		// Self Only, don't exec Depend class
 	debug_dump(['SETUP'=>$setupLinks]);
 	// DROP in ViewSet views CASCADE for SQLite3
 	$this->dropViewCascade($exec,$setupLinks);
 	// execute if TABLE modified command
 	if(in_array($exeType, [0,1,3] )) {	// re-create or TEST mode
-		$this->createTableSet($exec,($exeType === 3),$setupLinks);
+		$this->createTableSet($exec,FALSE,$setupLinks);
 	}
 	// RE-CREATE VIEW
 	$this->createViewSet($exec,$setupLinks);

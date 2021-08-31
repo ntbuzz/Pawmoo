@@ -219,8 +219,9 @@ function is_tag_identifier($str) {
     // token is scalar string
 	if(is_scalar($str)) {
 		$tokens = [
-			'/^([\*&@\+<\?%\-])(?!\1|$)/' => 2,				// command-token (not repeat char)
-			'/^\$\w+$/' => 3,							   // variable-token
+			'/^([\*]).*$/' => 2,					// single or repeat char command available
+			'/^([&@\+<\?%\-])(?!\1|$)/' => 2,		// command-token (not repeat char)
+			'/^\$\w+$/' => 3,						// variable-token
 			// dirty pattern for TAG-token
 			'/^(?:[a-zA-Z_]*)(?:[\.#][a-zA-Z_\-\s]*)+(?:\:\d+)?(?:[\{\(\[].+?[\}\)\]])*$/' => 1,
 		];

@@ -26,6 +26,7 @@ Stylesheet => [
     ]
     checklist => [			// debug
         +import => [
+            bodystyle.css        // Template Default Style
             libstyle.css
             context.css
             floatwin.css
