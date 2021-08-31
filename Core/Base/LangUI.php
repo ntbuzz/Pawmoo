@@ -24,10 +24,12 @@ class LangUI {
 //==============================================================================
 //  言語ファイルの切替え
 public static function SwitchLangs($newlang) {
-    $default = static::$LangDir;      // ロード先を保存
+//debug_dump(['SET-LOCALE'=>$newlang]);
 	$langs = get_locale_lang($newlang);
-	if(empty($langs)) $langs = (defined('DEFAULT_LANG')) ? DEFAULT_LANG : 'ja';
-    static::$Locale = ".{$langs}";            // 言語識別文字を付加
+	if(empty($langs)) $langs = DEFAULT_LANG;
+	if(static::$Locale === ".{$langs}") return;	// 同じ言語ならリロードしない
+    $default = static::$LangDir;      // ロード先を保存
+    static::$Locale = ".{$langs}";    // 言語識別文字を付加
     static::$LocaleName = $langs;
     static::$STRINGS = [];
     // ディレクトリが NULL ならログ処理の最中
