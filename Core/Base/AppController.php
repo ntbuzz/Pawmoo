@@ -77,6 +77,7 @@ public function is_enable_action($action) {
 		];
 		if($loginkey !== NULL) $login_data[$loginkey] = $userdata[$loginkey];
 		MySession::set_LoginValue($login_data);
+		$this->Model->ResetSchema();
 	}
 //==============================================================================
 // authorised login mode, if need view LOGIN form, return FALSE
@@ -94,13 +95,10 @@ public function is_authorised($method) {
 			}
 			// new login request POST check
 			$data = $Login->is_validLogin(MySession::$ReqData);
-			if($data === NULL) {		// non-request NEW LOGIN POST
-				// check ALREADY LOGIN information if EXIST
-				if($Login->error_type === NULL) {		// NO-POST LOGIN
-					$userid = MySession::get_LoginValue($login_key);
-					$data = $Login->is_validUser($userid);		// is_enabled account
-				} else $userid = MySession::getPostData($login_key);
-				if($data === NULL) {
+			if(is_array($data)) {	// POST data Login Success
+				$this->setup_user_lang_region($data,$model::$LoginUser,$login_key);
+			} else {	// No-POST or Login FAIL
+				if($data === FALSE) {	// LOGIN-FAIL
 					$msg = $this->__('.Login');
 					$err_msg = $Login->error_type;
 					$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
@@ -112,21 +110,20 @@ public function is_authorised($method) {
 						'send_button'	=> $this->__('Login.LOGIN'),
 						'msg_body'		=> $Login->error_type,
 						'login_user'	=> $userid,
-					]);     // LOGIN PAGE Response
+					]);     // LOGIN PAGE Response, NO returned HERE!
 				}
-			} else {
-				$this->setup_user_lang_region($data,$model::$LoginUser,$login_key);
-			}
-			LockDB::SetOwner($userid);
-		} else {
-			$userid = MySession::get_LoginValue($login_key);
-			// already login and empty UserData
-			if(!empty($userid) && !isset($model::$LoginUser)) {
-				// Reload UserData
-				$data = $Login->is_validUser($userid);
-				$this->setup_user_lang_region($data,$model::$LoginUser);
 			}
 		}
+		// Login-Success or NoNEED or BYPASS-METHOD reached HERE
+		$data = MySession::get_LoginValue([$login_key,'LANG','REGION']);
+		$userid = $data[0];
+		// Check Already Logined
+		if(!empty($userid) && !isset($model::$LoginUser)) {
+			// Reload UserData, bu LANG & REGION is remind in SESSION
+			$Login->reload_userdata($data);
+			$this->setup_user_lang_region($data,$model::$LoginUser);
+		}
+		LockDB::SetOwner($userid);
 	}
 	return TRUE;
 }
