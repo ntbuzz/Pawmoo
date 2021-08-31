@@ -98,12 +98,8 @@ public function is_authorised($method) {
 			if(is_array($data)) {	// POST data Login Success
 				$this->setup_user_lang_region($data,$model::$LoginUser,$login_key);
 			} else {	// No-POST or Login FAIL
-<<<<<<< HEAD
-				if($data === FALSE) {	// LOGIN-FAIL
-=======
 				$userid = MySession::get_LoginValue($login_key);
 				if($data === FALSE || empty($userid)) {	// LOGIN-FAIL or Not LOGIN
->>>>>>> dev/master
 					$msg = $this->__('.Login');
 					$err_msg = $Login->error_type;
 					$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
