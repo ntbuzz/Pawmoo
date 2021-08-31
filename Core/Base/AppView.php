@@ -383,7 +383,7 @@ public function ViewTemplate($name,$vars = []) {
     // HTML Comment TAG
     // *Comment, * => [ array-text ]
     private function sec_comment($tag,$attrs,$sec,$vars) {
-        $txt = array_to_text($sec,'');
+        $txt = array_to_text($sec,'',FALSE);
         echo "<!-- {$tag}{$txt} -->\n";
     }
     //==========================================================================
@@ -407,7 +407,7 @@ public function ViewTemplate($name,$vars = []) {
 			} else {
 				list($cont,$act) = $tmp;			// other module method CALL
 				$class = "{$cont}Controller";
-				$method = "{$act}Action";
+				$method = "{$act}View";
 				$this->$class->$method($vars);
 			}
         }
