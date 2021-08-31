@@ -282,9 +282,10 @@ static function get_LoginValue($id = NULL) {
 	if(array_key_exists('Login',static::$EnvData)) {
 		$LoginData = static::$EnvData['Login'];
 		if($id === NULL) return $LoginData;
-		if(array_key_exists($id,$LoginData)) return $LoginData[$id];
+		if(is_array($id)) return array_filter_values($LoginData,$id);
+		else if(array_key_exists($id,$LoginData)) return $LoginData[$id];
 	}
-	return '';
+	return NULL;
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // ログイン情報に書込
