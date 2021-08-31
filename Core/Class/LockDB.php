@@ -26,7 +26,7 @@ static public function LockStart($owner = NULL) {
 }
 //---------------------------------------------------------------------------------------------
 static public function SetOwner($owner) {
-    static::$owner = $owner;
+    static::$owner = (empty($owner)) ? 'Guest' : $owner;
 }
 //---------------------------------------------------------------------------------------------
 static public function GetOwner() {

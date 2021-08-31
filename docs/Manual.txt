@@ -664,6 +664,11 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   テンプレートコマンド
     @XXXXX  => [ key => Value ]             外部テンプレート呼び出し、配列は変数として引き渡し、連想配列にしなければ引数なしの呼び出し
                         ドット(.)で始まる名前はまずインラインセクション名を参照し、未定義なら外部ファイルを参照する
+    @CONT::METHOD  => [ key => Value ]      コントローラーメソッドの呼出し、METHODの実体は METHOD+View という名前で実装する
+											セクションは引数に連想配列として渡される
+											ex. @Index::Table => [ name => myTable]
+												IndexController 側では以下の定義と引数を受け取る
+													public function TableView($arg) , $arg = [ 'name' => 'myTable' ]
     &FUNCS => [ key => value ]              Helperメソッド呼び出し、連想配列にすると引数として渡すが、スカラー定義の場合は引数なしの呼び出し
 
     $varname => VALUE                       サブセクション内だけで有効なローカル変数に値を代入します

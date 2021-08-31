@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2021 by nTak
  * @license    MIT
- * @version 0.84.0, 2021-08-29
+ * @version 0.85.0, 2021-08-31
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,14 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 変更履歴
+【0.85.0】2021/08/31
+	・AppControllerのログイン処理で言語設定不具合を修正
+	・テンプレートからのコントローラーメソッド呼び出し名を "*View"に変更
+	・AppDatabaseでCSV読込みとView設定での依存呼出しをしないコマンドを追加
+	・get_LoginValueでキー不在時の戻り値を空文字からNULLへ変更
+	・LoginClassのバリデーション戻り値をNULLからFALSE(失敗)またはNULL(POST無)に変更
+	・その他いくつかのバグ修正
+
 【0.84.0】2021/08/29
 	・AppDatabase のテーブル・ビューの生成手順を再帰呼出しに変更
 	・LoginIDの指定にパスワードフィールドを付加
