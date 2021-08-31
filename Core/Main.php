@@ -61,8 +61,10 @@ require_once('Base/AppModel.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
 
-// Check URI-Redirect direction
+// Check Default defined CONST
 if(!defined('FORCE_REDIRECT')) define('FORCE_REDIRECT', FALSE);
+if(!defined('DEFAULT_LANG')) define('DEFAULT_LANG', 'ja');				// Language
+if(!defined('DEFAULT_REGION')) define('DEFAULT_REGION', 'jp');			// Region code
 
 if(!is_extst_module($appname,$controller,'Controller')) {
     // if BAD controller name, try DEFAULT CONTROLLER and shift follows
