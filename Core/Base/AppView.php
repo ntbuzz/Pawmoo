@@ -205,7 +205,8 @@ public function ViewTemplate($name,$vars = []) {
             $cmp_val = str_replace(["\n","\r"],'',$key);
 			$default = NULL;
             foreach($sec as $check => $value) {
-				if(is_numeric($check)) $default = $value;
+				if(mb_substr($check,0,1)==='\\') $check = mb_substr($check,1);
+				if(is_int($check)) $default = $value;
                 else if($check === '') $result = ($cmp_val==='');            // is_empty ?
                 else if($check === '*') $result = ($cmp_val !== '');     // is_notempty ?
                 else if(is_numeric($check)) $result = intval($check) === intval($cmp_val);
