@@ -36,7 +36,7 @@ public function defaultUser() {
 public function reload_userdata($udata) {
 	list($uid,$lang,$region) = $udata;
 	if($lang !== LangUI::$LocaleName) {
-		// Reload UserDataa when User Locale not match current Locale
+		// Reload UserData when User Locale not match current Locale
 		LangUI::SwitchLangs($lang);
 		$this->ResetSchema();
 	}
