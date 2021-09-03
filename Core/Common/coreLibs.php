@@ -27,7 +27,7 @@ function get_routing_path($root) {
     $params = array_filter($pp,
         function($v) use(&$filename) {
             $ext = extract_extension($v);
-            if(in_array($ext,['html','htm','php','cgi','js','css','inc'])) {
+            if(in_array($ext,['html','htm','php','xml', 'cgi','js','css','inc'])) {
                 $filename = $v;
                 return FALSE;
             }
@@ -45,8 +45,8 @@ function get_routing_path($root) {
         array_intval_recursive($params),
     );
     $ret = [$appname,$app_uri,$module,$q_str];
-    debug_log(FALSE, [
-        'Framework Information' => [
+    debug_nodump([
+		'Framework Information' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
             "app_uri"=> $app_uri,
             "appname"=> $appname,
@@ -372,6 +372,9 @@ function expand_text($class,$str,$recdata,$vars,$match_all = false) {
                     $var = mb_substr($var,1);
                     $var = 'Transfer.'.trim($recdata[$var]);
                     $allow = FALSE;
+                } else if($var[0]==='$') {                 // INDIRECT Transfer from VAR
+                    $val = '${'.mb_substr($var,1).'}';
+					$var = expand_text($class,$val,$recdata,$vars,true);
                 } else {
                     $allow = ($var[0] === '#');         // allow array
                     if($allow) $var = mb_substr($var,1);

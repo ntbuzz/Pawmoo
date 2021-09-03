@@ -99,7 +99,7 @@ public function is_authorised($method) {
 				$this->setup_user_lang_region($data,$model::$LoginUser,$login_key);
 			} else {	// No-POST or Login FAIL
 				$userid = MySession::get_LoginValue($login_key);
-				if($data === FALSE || empty($userid)) {	// LOGIN-FAIL or Not LOGIN
+				if($data === FALSE || $userid === NULL) {	// LOGIN-FAIL or Not LOGIN
 					$msg = $this->__('.Login');
 					$err_msg = $Login->error_type;
 					$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
@@ -108,7 +108,7 @@ public function is_authorised($method) {
 						'msg_title'		=> $this->__('Login.LoginTitle'),
 						'user_title'	=> $this->__('Login.UserName'),
 						'pass_title'	=> $this->__('Login.Password'),
-						'send_button'	=> $this->__('Login.LOGIN'),
+						'send_button'	=> $this->__('Login.Submit'),
 						'msg_body'		=> $Login->error_type,
 						'login_user'	=> $userid,
 					]);     // LOGIN PAGE Response, NO returned HERE!

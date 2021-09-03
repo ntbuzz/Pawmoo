@@ -35,7 +35,7 @@ public static function SwitchLangs($newlang) {
     // ディレクトリが NULL ならログ処理の最中
     if($default !== NULL) {
         log_reset(DBMSG_LOCALE);
-        debug_log(DBMSG_LOCALE,["言語リスト" => $newlang]);
+        debug_log(DBMSG_LOCALE,["言語リスト" => static::$Locale]);
     }
     // フレームワークの言語リソースを読込む
     self::LangFiles('Core/Template/lang/','core');

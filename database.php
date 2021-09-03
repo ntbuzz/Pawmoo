@@ -11,6 +11,7 @@ $_SERVER['LOCAL_ADDR'] = $_SERVER['SERVER_NAME'];
 $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'ja;en;ja';		// 言語受け入れリスト
 $_SERVER['HTTP_REFERER'] = "localhost";
 $_SERVER['SERVER_PORT'] = '';
+$_SERVER['HTTP_HOST'] = 'localhost';
 
 require_once('Core/Config/appConfig.php');
 if(!defined('CLI_DEBUG')) define('CLI_DEBUG',FALSE);

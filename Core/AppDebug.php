@@ -134,6 +134,7 @@ function get_null_value($arg) {
 function debug_dump($items) {
 	sysLog::dump($items);
 }
+function debug_nodump($items) {}
 function debug_die($items) {
 	sysLog::halt($items);
 }

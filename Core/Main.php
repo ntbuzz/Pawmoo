@@ -39,10 +39,10 @@ list($appname,$app_uri,$module,$q_str) = get_routing_path($root);
 list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filters,$params) = $module;
 
-if(strpos($method,'.')!==FALSE) {
-    list($method,$filter) = extract_base_name($method);
-    $method = ucfirst(strtolower($method));
-} else $filter = empty($filters) ? '': $filters[0];
+// if(strpos($method,'.')!==FALSE) {
+//     list($method,$filter) = extract_base_name($method);
+//     $method = ucfirst(strtolower($method));
+// } else $filter = empty($filters) ? '': $filters[0];
 parse_str($q_str, $query);
 if(!empty($q_str)) $q_str = "?{$q_str}";
 
@@ -69,12 +69,15 @@ if(!defined('DEFAULT_REGION')) define('DEFAULT_REGION', 'jp');			// Region code
 if(!is_extst_module($appname,$controller,'Controller')) {
     // if BAD controller name, try DEFAULT CONTROLLER and shift follows
     $cont = (DEFAULT_CONTROLLER === '') ? $appname : DEFAULT_CONTROLLER;
-    array_unshift($filters,strtolower($method));    // move method to 0filters
-    $module[0] = ucfirst(strtolower($cont));
-    $module[1] = $controller;
-    $module[2] = $filters;
-//    $module[3] = $params;
-    list($controller,$method) = $module;
+	if(empty($controller)) {
+	    $module[0] = $controller = ucfirst(strtolower($cont));
+	} else {
+		array_unshift($filters,strtolower($method));    // move method to 0filters
+		$module[0] = ucfirst(strtolower($cont));
+		$module[1] = $controller;
+		$module[2] = $filters;
+		list($controller,$method) = $module;
+	}
     // RE-TRY DEFAULT CONTROLLER,if FAILED,then NOT FOUND
     if(!is_extst_module($appname,$controller,'Controller')) {
         error_response('page-404.php',$appname,$app_uri,$module);
@@ -121,6 +124,7 @@ foreach(['lang'=>$_SERVER['HTTP_ACCEPT_LANGUAGE'], 'region'=>'jp'] as $key => $v
 }
 // INITIALIZED App static class.
 App::__Init($appname,$app_uri,$module,$query,$requrl);
+$method = App::$Method;
 // Load Application Common library
 $libs = get_php_files(App::Get_AppPath("common/"));
 foreach($libs as $files) {
