@@ -203,8 +203,10 @@ public function ViewTemplate($name,$vars = []) {
             }
             $key = $this->expand_Strings($key,$vars);
             $cmp_val = str_replace(["\n","\r"],'',$key);
+			$default = NULL;
             foreach($sec as $check => $value) {
-                if($check === '') $result = ($cmp_val==='');            // is_empty ?
+				if(is_numeric($check)) $default = $value;
+                else if($check === '') $result = ($cmp_val==='');            // is_empty ?
                 else if($check === '*') $result = ($cmp_val !== '');     // is_notempty ?
                 else if(is_numeric($check)) $result = intval($check) === intval($cmp_val);
                 else if(mb_strpos($check,'...') !== false) {			// range comapre 1...9
@@ -221,7 +223,7 @@ public function ViewTemplate($name,$vars = []) {
                 }
                 if($result) return $value;
             }
-            return [];
+            return ($default === NULL) ? [] : $default;
         };
         $wd = [];       // re-build array
         foreach($arr as $key => $val) {
@@ -406,9 +408,14 @@ public function ViewTemplate($name,$vars = []) {
 	            $this->ViewTemplate($tag,$vars);
 			} else {
 				list($cont,$act) = $tmp;			// other module method CALL
-				$class = "{$cont}Controller";
+				// empty Controller is self-owner class
+				$class = (empty($cont)) ? $this->AOwner->ClassName : "{$cont}Controller";
 				$method = "{$act}View";
-				$this->$class->$method($vars);
+				if(class_exists($class)) {
+					$viewer = $this->$class;
+					if(method_exists($viewer,$method)) $viewer->$method($vars);
+					else echo "Bad Viewer Method:: {$method}\n";
+				} else echo "Bad ClassName:: {$cont}\n";
 			}
         }
     }
