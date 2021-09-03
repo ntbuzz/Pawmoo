@@ -132,7 +132,7 @@ calendarTitle =>[
 		.ja=> パスワード
 		.en=> Password
 	]
-	LOGIN=>[
+	Submit=>[
 		.ja=> ログイン
 		.en=> Login
 	]
