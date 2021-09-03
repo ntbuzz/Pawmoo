@@ -28,14 +28,14 @@ class ClassLoader {
 public static function Setup($appname,$controller=NULL) {
     static::$LoadDirs = [
         'Core/Class',
+        "app/.share/Class",
+        "app/.share/extends",
+        "app/.share/Models",
         "app/{$appname}/Class",
         "app/{$appname}/extends",
         "app/{$appname}/Models",
         "app/{$appname}/Models/Asst",
         "app/{$appname}/Models/Misc",
-        "app/.share/Class",
-        "app/.share/extends",
-        "app/.share/Models",
     ];
 	if($controller !== NULL) static::$LoadDirs[] = "app/{$appname}/modules/{$controller}";
     spl_autoload_register(array('ClassLoader','loadClass'));
