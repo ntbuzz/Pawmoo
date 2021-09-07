@@ -762,7 +762,8 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     +recordset => [ Section ]               読み込んだレコードごとに Section を繰り返す
                                             name属性に：をつけるとモデルクラスのプロパティ変数で繰り返す
                                               ex. +recordset[:Outline] => [ Section ]
-    +tabset => [                            ul タグを使ったタブセットの出力
+    +tabset.class(seltab) => [              ul タグを使ったタブセットの出力 seltab で最初の選択タブを指定できる
+											seltab を指定しなければタブラベルに selected クラス名が指定されたタブを選択する
       Title1 => [ Section ]                   テンプレート内の tabset.css を読み込むことでタブコントロール表示する
         ...                                   タブ切替え時に独自の処理が不要なら、テンプレートの tabset.js を読み込む
       ]										クラスに .slider-[top|bottom|left|right] を付加するとタブスライダーを表示する。

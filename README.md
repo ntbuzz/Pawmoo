@@ -43,8 +43,19 @@ Controllers, Views, and Models are managed as a group in a Module folder for eac
 ```
 (pawmoo) Framework body
   ├ app
+  │ ├─ .share		  Application Share Classes
+  │ │ ├── common      Share basic function library
+  │ │ ├── Class       Share Class for each Application
+  │ │ ├── extends     Expand Base class for each Application
+  │ │ └── Models      Share Model class for each Application
+  │ │
   │ ├─ (Application-1)
-  │ │ ├─┬ Module folders (Index, Sample, etc,...)
+  │ │ ├── Config    Configuration parameter
+  │ │ ├── common    Basic function library
+  │ │ ├── extends   Expand Base class for application uniq
+  │ │ ├── Models    Only Model Class without Controller
+  │ │ ├─┬ modules   eaach Module folders (Index, Sample, etc,...)
+  │ │ │  ├ Index		Index Module
   │ │ │  ├…
   │ │ │
   │ │ ├── View     Common View Template for each Modules
