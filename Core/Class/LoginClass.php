@@ -27,9 +27,12 @@ public function defaultUser() {
 		'userid'	=>	'guest',
 		'role'		=>	'Guest',
 		'language'	=>	'ja',
+		'region'	=>	'jp',
 		'full_name'	=>	'Guest User',
 		'email'		=>	'no-mail@localhost',
 	];
+	$udate = array_filter_values(static::$LoginUser,['userid','language','region']);
+	return $udata;
 }
 //==============================================================================
 //　Default User Info for CLI Debug
