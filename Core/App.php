@@ -137,10 +137,10 @@ public static function Get_AppPath($path) {
 }
 //==============================================================================
 // アプリケーションド共通アプロードフォルダ
-public static function Get_appCommonPath($path = '') {
+public static function Get_shareFilesPath($path = '') {
     $docroot = dirname(__DIR__);        // Framework Folder
     if(!empty($path)) $path = "{$path}/";
-    return  "{$docroot}/app/.share/common/{$path}";
+    return  "{$docroot}/app/.share/files/{$path}";
 }
 //==============================================================================
 // アプリケーションドキュメントフォルダ
