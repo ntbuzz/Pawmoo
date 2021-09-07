@@ -721,8 +721,8 @@ public function ViewTemplate($name,$vars = []) {
 		echo $combo;
     }
     //--------------------------------------------------------------------------
-    // +tabset.classname => [
-    //      Menu1.selected => [ Contents1 ]
+    // +tabset.classname(default-tab) => [		// default-tab is integer(based 0) or label string
+    //      Menu1.selected => [ Contents1 ]		// selected tab,if default-tab is empty
     //      Menu2 => [ Contents2 ] ...
     //  ]
 	// classname will be 'slider-[top|bottom|right|left]', its slider-panel convert
@@ -742,12 +742,27 @@ public function ViewTemplate($name,$vars = []) {
 			$contents='<ul class="tabcontents">';
 		}
         $attrs['class'] = rtrim($mycls);
+        $tabs = array_keys($sec);
+		if(array_key_exists('value',$attrs)) {
+			$default_tab = $attrs['value'];
+			unset($attrs['value']);
+			if(is_numeric($default_tab)) $default_tab = $tabs[intval($default_tab)];
+		} else $default_tab = NULL;
+		// re-builde class in attrs
+		$default_tabset = function($default_tab,$tabs,$attrs) {
+			if($default_tab === NULL) return $attrs;
+			$cls = (array_key_exists('class',$attrs)) ? str_replace('selected','',$attrs['class']) :'';	// remove selected
+			if($default_tab === $tabs) $cls = "{$cls} selected";
+			if(empty($cls)) unset($attrs['class']);
+			else $attrs['class'] = trim($cls);
+			return $attrs;
+		};
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<div{$attr}>\n{$tabset}\n";
         // create tabset
-        $tabs = array_keys($sec);
         foreach($tabs as $key_val) {
             list($tag,$attrs) = $this->tag_Separate($key_val,$vars);
+			$attrs = $default_tabset($default_tab,$tag,$attrs);
             $attr = $this->gen_Attrs($attrs,$vars);
             echo "<li{$attr}>{$tag}</li>\n";
         }
@@ -757,6 +772,7 @@ public function ViewTemplate($name,$vars = []) {
             list($tag,$attrs) = $this->tag_Separate($key,$vars);
             if(is_array($val)) list($attrs,$text,$val) = $this->subsec_separate($val,$attrs,$vars);
             else $text = '';
+			$attrs = $default_tabset($default_tab,$tag,$attrs);
             $attr = $this->gen_Attrs($attrs,$vars);
             echo "<li{$attr}>{$text}";
             $this->sectionAnalyze($val,$vars);
