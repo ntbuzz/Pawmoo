@@ -62,9 +62,10 @@ require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
 
 // Check Default defined CONST
-if(!defined('FORCE_REDIRECT')) define('FORCE_REDIRECT', FALSE);
-if(!defined('DEFAULT_LANG')) define('DEFAULT_LANG', 'ja');				// Language
-if(!defined('DEFAULT_REGION')) define('DEFAULT_REGION', 'jp');			// Region code
+if(!defined('FORCE_REDIRECT'))	 define('FORCE_REDIRECT', FALSE);
+if(!defined('DEFAULT_LANG'))	 define('DEFAULT_LANG', 'ja');				// Language
+if(!defined('DEFAULT_REGION'))	 define('DEFAULT_REGION', 'jp');			// Region code
+if(!defined('SHARE_FOLDER_USE')) define('SHARE_FOLDER_USE',false);			// autoload on .share
 
 if(!is_extst_module($appname,$controller,'Controller')) {
     // if BAD controller name, try DEFAULT CONTROLLER and shift follows
@@ -109,7 +110,7 @@ MySession::set_paramIDs('sysinfo',[
     'version'   => CURRENT_VERSION,  // framework version
 ]);
 // LANG and REGION parameter in URL query.
-foreach(['lang'=>$_SERVER['HTTP_ACCEPT_LANGUAGE'], 'region'=>'jp'] as $key => $val) {
+foreach(['lang'=>$_SERVER['HTTP_ACCEPT_LANGUAGE'], 'region'=>'?'] as $key => $val) {
 	$uname = strtoupper($key);
 	if(array_key_exists($key, $query)) {
 		$def = $query[$key];
@@ -125,6 +126,13 @@ foreach(['lang'=>$_SERVER['HTTP_ACCEPT_LANGUAGE'], 'region'=>'jp'] as $key => $v
 // INITIALIZED App static class.
 App::__Init($appname,$app_uri,$module,$query,$requrl);
 $method = App::$Method;
+// Load if .SHARE use, common library load
+if(SHARE_FOLDER_USE) {
+	$libs = get_php_files("app/.share/common/");
+	foreach($libs as $files) {
+		require_once $files;
+	}
+}
 // Load Application Common library
 $libs = get_php_files(App::Get_AppPath("common/"));
 foreach($libs as $files) {
