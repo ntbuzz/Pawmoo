@@ -5,17 +5,19 @@
  */
 if(!defined('DEBUG_LEVEL')) define('DEBUG_LEVEL', 10);
 
-define('DBMSG_SYSTEM',  106);      // for Main, App, Controller
-define('DBMSG_LOCALE',  105);      // for LangUI
-define('DBMSG_VIEW',    104);      // for View, Helper
-define('DBMSG_MODEL',   103);      // for Model
-define('DBMSG_HANDLER', 102);      // for DB-Handler
-define('DBMSG_RESOURCE',101);      // for Style/Script
-define('DBMSG_ERROR',   100);      // for ERROR
 define('DBMSG_LEVEL',   100);      // logging level
-define('DBMSG_DUMP',    107);      // DUMP ONLY
-define('DBMSG_NOLOG',   108);      // CLI dump ONLY
-define('DBMSG_STDERR',  109);      // STDERR output
+define('DBMSG_ERROR',   100);      // for ERROR
+define('DBMSG_DEBUG',	108);      // for Temporary DEBUG Message
+define('DBMSG_HELPER',	109);      // for Helper
+define('DBMSG_RESOURCE',110);      // for Style/Script
+define('DBMSG_HANDLER', 111);      // for DB-Handler
+define('DBMSG_MODEL',   112);      // for Model
+define('DBMSG_VIEW',    113);      // for View, Helper
+define('DBMSG_LOCALE',  114);      // for LangUI
+define('DBMSG_SYSTEM',  115);      // for Main, App, Controller
+define('DBMSG_DUMP',    116);      // DUMP ONLY
+define('DBMSG_NOLOG',   117);      // CLI dump ONLY
+define('DBMSG_STDERR',  118);      // STDERR output
 define('DBMSG_DIE',     119);      // die message
 define('DBMSG_NONE',    false);    // none
 define('DBMSG_CLI',     256);      // CLI BIT Mask for CLI_DEBUG
