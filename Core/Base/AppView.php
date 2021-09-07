@@ -41,6 +41,7 @@ class AppView extends AppObject {
             'recordset' => 'cmd_recordset',
             'tabset'    => 'cmd_tabset',
             'floatwin'  => 'cmd_floatwin',
+            'hidden'    => 'cmd_hidden',
             'textbox'   => 'cmd_textbox',
             'datebox'   => 'cmd_datebox',
             'textedit' 	=> 'cmd_textedit',
@@ -796,28 +797,36 @@ public function ViewTemplate($name,$vars = []) {
         echo "</TABLE>";
     }
     //--------------------------------------------------------------------------
-    //  INPUT TEXT OUTPUT for CALENDAR
-    // +datebox:size[name] => [  attribute => value value    ]
-    private function cmd_datebox($tag,$attrs,$sec,$vars) {
+    //  INPUT TAG OUTPUT
+    private function input_common($type,$tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
 		array_set_element($attrs,'value',$innerText);
-		$class = ['calendar'=>1];
-		if(array_key_exists('class',$attrs))
-			foreach(explode(' ',$attrs['class']) as $val) $class[$val] = 1;
-		$attrs['class'] = implode(' ',array_keys($class));
 		$attrs = attr_sz_xchange($attrs);
         $attr = $this->gen_Attrs($attrs,$vars);
-        echo "<INPUT TYPE='text'{$attr}>\n";
+        echo "<INPUT TYPE='{$type}'{$attr}>\n";
     }
     //--------------------------------------------------------------------------
-    //  INPUT TEXT OUTPUT
+    //  INPUT TEXT for CALENDAR
+    // +datebox:size[name] => [  attribute => value value    ]
+    private function cmd_datebox($tag,$attrs,$sec,$vars) {
+		$class = ['calendar'=>1];
+		if(array_key_exists('class',$attrs)) {
+			foreach(explode(' ',$attrs['class']) as $val) $class[$val] = 1;
+		}
+		$attrs['class'] = implode(' ',array_keys($class));
+		$this->input_common('text',$tag,$attrs,$sec,$vars);
+    }
+    //--------------------------------------------------------------------------
+    //  INPUT TEXT
     // +textbox:size[name] => [  attribute => value value    ]
     private function cmd_textbox($tag,$attrs,$sec,$vars) {
-        list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
-		array_set_element($attrs,'value',$innerText);
-		$attrs = attr_sz_xchange($attrs);
-        $attr = $this->gen_Attrs($attrs,$vars);
-        echo "<INPUT TYPE='text'{$attr}>\n";
+		$this->input_common('text',$tag,$attrs,$sec,$vars);
+    }
+    //--------------------------------------------------------------------------
+    //  INPUT HIDDEN
+    // +hidden[name](value)
+    private function cmd_hidden($tag,$attrs,$sec,$vars) {
+		$this->input_common('hidden',$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------
     //  TEXTAREA
