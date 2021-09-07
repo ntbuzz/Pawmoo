@@ -15,8 +15,7 @@ require_once('Base/LangUI.php');           // static class
 
 date_default_timezone_set('Asia/Tokyo');
 $root = basename(dirname(__DIR__));        // Framework Folder
-list($appname,$app_uri,$module,$q_str) = get_routing_path($root);
-parse_str($q_str, $query);
+list($appname,$app_uri,$module,$query) = get_routing_path($root);
 // URI: /logs/appname/cont
 list($appname,$cont,$filter) = $module;
 MySession::InitSession($appname,$cont);

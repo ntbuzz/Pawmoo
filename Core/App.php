@@ -9,7 +9,7 @@ class App {
     public static $AppName;         // アプリケーション名
     public static $DocRoot;         // DOCUMENT_ROOT 変数
     public static $Referer;         // HTTP_REFERER 変数
-    public static $Query;           // urlのクエリー文字列の連想配列
+    public static $Query;           // urlのクエリー文字列の連想配列 = $_GET
     public static $Filter;          // メソッドのフィルタ配列の先頭
     public static $Filters;         // メソッドのフィルタ配列
     public static $Params;          // メソッドの数値パラメータ配列
@@ -30,6 +30,7 @@ class App {
 
         static::$DocRoot = (empty($_SERVER['DOCUMENT_ROOT'])) ? '' : $_SERVER['DOCUMENT_ROOT'];
         static::$Referer = (empty($_SERVER['HTTP_REFERER'])) ? '' : $_SERVER['HTTP_REFERER'];
+		static::$Query	 = $query;
 
         if(strpos($method,'.')!==FALSE) {
             list($method,static::$MethodExtention) = extract_base_name($method);
@@ -48,6 +49,7 @@ class App {
         static::$SysVAR = array(
             'SERVER' => $_SERVER['SERVER_NAME'],
             'REFERER' => static::$Referer,
+            'REQURI' => $uri . array_to_query($query),
             'URI' => $uri,
             'SYSROOT' => static::$sysRoot,
             'APPNAME' => static::$AppName,
@@ -57,11 +59,10 @@ class App {
             'extention' => static::$MethodExtention,
             'filter' => static::$Filter,  // ucfirst(static::$Filter),
             'params' => static::$Params,
-
         );
 		static::$Controller  = $controller;
 		static::$Method= $method;
-        static::$Query = array_intval_recursive($query);
+//        static::$Query = array_intval_recursive($query);
         // メソッドの書き換えによるアドレスバー操作用
         static::$ReLocate = FALSE;        // URLの書き換え
         static::$execURI = array(
@@ -74,7 +75,8 @@ class App {
         // リクエスト情報を記憶
         MySession::setEnvVariables([
 			'sysVAR'	=> static::$SysVAR,
-			'QUERY'		=> static::$Query,
+//			'QUERY'		=> static::$Query,
+//			'POST'		=> MySession::$ReqData,
 		]);
     }
 //==============================================================================
@@ -105,7 +107,8 @@ public static function Get_PagingPath() {
 			static::$execURI['method'],
 			static::$execURI['filter']
 		],
-		array_key_value(static::$Query,'&'));
+//		array_key_value(static::$Query,'&')
+		);
 }
 //==============================================================================
 // メソッドとクエリ文字列の置換後のURLを返す
