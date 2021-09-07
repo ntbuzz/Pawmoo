@@ -41,6 +41,7 @@ class AppView extends AppObject {
             'recordset' => 'cmd_recordset',
             'tabset'    => 'cmd_tabset',
             'floatwin'  => 'cmd_floatwin',
+            'hidden'    => 'cmd_hidden',
             'textbox'   => 'cmd_textbox',
             'datebox'   => 'cmd_datebox',
             'textedit' 	=> 'cmd_textedit',
@@ -720,8 +721,8 @@ public function ViewTemplate($name,$vars = []) {
 		echo $combo;
     }
     //--------------------------------------------------------------------------
-    // +tabset.classname => [
-    //      Menu1.selected => [ Contents1 ]
+    // +tabset.classname(default-tab) => [		// default-tab is integer(based 0) or label string
+    //      Menu1.selected => [ Contents1 ]		// selected tab,if default-tab is empty
     //      Menu2 => [ Contents2 ] ...
     //  ]
 	// classname will be 'slider-[top|bottom|right|left]', its slider-panel convert
@@ -741,12 +742,27 @@ public function ViewTemplate($name,$vars = []) {
 			$contents='<ul class="tabcontents">';
 		}
         $attrs['class'] = rtrim($mycls);
+        $tabs = array_keys($sec);
+		if(array_key_exists('value',$attrs)) {
+			$default_tab = $attrs['value'];
+			unset($attrs['value']);
+			if(is_numeric($default_tab)) $default_tab = $tabs[intval($default_tab)];
+		} else $default_tab = NULL;
+		// re-builde class in attrs
+		$default_tabset = function($default_tab,$tabs,$attrs) {
+			if($default_tab === NULL) return $attrs;
+			$cls = (array_key_exists('class',$attrs)) ? str_replace('selected','',$attrs['class']) :'';	// remove selected
+			if($default_tab === $tabs) $cls = "{$cls} selected";
+			if(empty($cls)) unset($attrs['class']);
+			else $attrs['class'] = trim($cls);
+			return $attrs;
+		};
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<div{$attr}>\n{$tabset}\n";
         // create tabset
-        $tabs = array_keys($sec);
         foreach($tabs as $key_val) {
             list($tag,$attrs) = $this->tag_Separate($key_val,$vars);
+			$attrs = $default_tabset($default_tab,$tag,$attrs);
             $attr = $this->gen_Attrs($attrs,$vars);
             echo "<li{$attr}>{$tag}</li>\n";
         }
@@ -756,6 +772,7 @@ public function ViewTemplate($name,$vars = []) {
             list($tag,$attrs) = $this->tag_Separate($key,$vars);
             if(is_array($val)) list($attrs,$text,$val) = $this->subsec_separate($val,$attrs,$vars);
             else $text = '';
+			$attrs = $default_tabset($default_tab,$tag,$attrs);
             $attr = $this->gen_Attrs($attrs,$vars);
             echo "<li{$attr}>{$text}";
             $this->sectionAnalyze($val,$vars);
@@ -796,28 +813,36 @@ public function ViewTemplate($name,$vars = []) {
         echo "</TABLE>";
     }
     //--------------------------------------------------------------------------
-    //  INPUT TEXT OUTPUT for CALENDAR
-    // +datebox:size[name] => [  attribute => value value    ]
-    private function cmd_datebox($tag,$attrs,$sec,$vars) {
+    //  INPUT TAG OUTPUT
+    private function input_common($type,$tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
 		array_set_element($attrs,'value',$innerText);
-		$class = ['calendar'=>1];
-		if(array_key_exists('class',$attrs))
-			foreach(explode(' ',$attrs['class']) as $val) $class[$val] = 1;
-		$attrs['class'] = implode(' ',array_keys($class));
 		$attrs = attr_sz_xchange($attrs);
         $attr = $this->gen_Attrs($attrs,$vars);
-        echo "<INPUT TYPE='text'{$attr}>\n";
+        echo "<INPUT TYPE='{$type}'{$attr}>\n";
     }
     //--------------------------------------------------------------------------
-    //  INPUT TEXT OUTPUT
+    //  INPUT TEXT for CALENDAR
+    // +datebox:size[name] => [  attribute => value value    ]
+    private function cmd_datebox($tag,$attrs,$sec,$vars) {
+		$class = ['calendar'=>1];
+		if(array_key_exists('class',$attrs)) {
+			foreach(explode(' ',$attrs['class']) as $val) $class[$val] = 1;
+		}
+		$attrs['class'] = implode(' ',array_keys($class));
+		$this->input_common('text',$tag,$attrs,$sec,$vars);
+    }
+    //--------------------------------------------------------------------------
+    //  INPUT TEXT
     // +textbox:size[name] => [  attribute => value value    ]
     private function cmd_textbox($tag,$attrs,$sec,$vars) {
-        list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
-		array_set_element($attrs,'value',$innerText);
-		$attrs = attr_sz_xchange($attrs);
-        $attr = $this->gen_Attrs($attrs,$vars);
-        echo "<INPUT TYPE='text'{$attr}>\n";
+		$this->input_common('text',$tag,$attrs,$sec,$vars);
+    }
+    //--------------------------------------------------------------------------
+    //  INPUT HIDDEN
+    // +hidden[name](value)
+    private function cmd_hidden($tag,$attrs,$sec,$vars) {
+		$this->input_common('hidden',$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------
     //  TEXTAREA

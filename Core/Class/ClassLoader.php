@@ -25,19 +25,20 @@ class ClassLoader {
     }
 //==============================================================================
 // ロードパスが固定されているものを登録
-public static function Setup($appname,$controller=NULL) {
-    static::$LoadDirs = [
-        'Core/Class',
-        "app/{$appname}/Class",
-        "app/{$appname}/extends",
-        "app/{$appname}/Models",
-        "app/{$appname}/Models/Asst",
-        "app/{$appname}/Models/Misc",
-        "app/.share/Class",
-        "app/.share/extends",
-        "app/.share/Models",
-    ];
-	if($controller !== NULL) static::$LoadDirs[] = "app/{$appname}/modules/{$controller}";
+public static function Setup($appname) {
+	$auto = (SHARE_FOLDER_USE) ? [ $appname,'.share'] : [$appname];
+	$auto_folder = [
+        "Class",
+        "extends",
+        "Models",
+        "Models/Misc",
+	];
+	$folders = [];
+	foreach($auto as $key) {
+		foreach($auto_folder as $folder) $folders[] = "app/{$key}/{$folder}";
+	}
+	$folders[] = 'Core/Class';
+	static::$LoadDirs = $folders;
     spl_autoload_register(array('ClassLoader','loadClass'));
 }
 

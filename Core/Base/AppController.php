@@ -89,12 +89,7 @@ public function is_authorised($method) {
 		$bypass_method = (is_array($this->BypassMethod)) ? $bypass_method : [$bypass_method];
 		$bypass_method[] = 'Logout';	// must be append LogoutAction
 		if($this->needLogin && !in_array($method,$bypass_method)) {
-			if(CLI_DEBUG) {
-				$Login->defaultUser();
-				return TRUE;
-			}
-			// new login request POST check
-			$data = $Login->is_validLogin(MySession::$ReqData);
+			$data = (CLI_DEBUG) ? $Login->defaultUser() : $Login->is_validLogin(MySession::$ReqData);
 			if(is_array($data)) {	// POST data Login Success
 				$this->setup_user_lang_region($data,$model::$LoginUser,$login_key);
 			} else {	// No-POST or Login FAIL

@@ -219,7 +219,7 @@ function is_tag_identifier($str) {
     // token is scalar string
 	if(is_scalar($str)) {
 		$tokens = [
-			'/^([\*]).*$/' => 2,					// single or repeat char command available
+			'/^([\*]).+$/' => 2,					// repeat char command available
 			'/^([&@\+<\?%\-])(?!\1|$)/' => 2,		// command-token (not repeat char)
 			'/^\$\w+$/' => 3,						// variable-token
 			// dirty pattern for TAG-token

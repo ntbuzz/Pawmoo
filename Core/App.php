@@ -136,8 +136,15 @@ public static function Get_AppPath($path) {
     return "app/{$appname}/{$path}";
 }
 //==============================================================================
+// アプリケーションド共通アプロードフォルダ
+public static function Get_shareFilesPath($path = '') {
+    $docroot = dirname(__DIR__);        // Framework Folder
+    if(!empty($path)) $path = "{$path}/";
+    return  "{$docroot}/app/.share/files/{$path}";
+}
+//==============================================================================
 // アプリケーションドキュメントフォルダ
-public static function Get_DocPath($path = '') {
+public static function Get_UploadPath($path = '') {
     $docroot = dirname(__DIR__);        // Framework Folder
     $appname = static::$AppName;
     if(!empty($path)) $path = "{$path}/";

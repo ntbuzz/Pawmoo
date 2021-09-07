@@ -301,7 +301,7 @@ public function ChangeSelectCondition($name,$cond) {
 //	d. key-name => [ Model. => number.title,	[ cond ] ]		for Select() in Model [title] = number|Primary
 //	e. key-name => [ id.title,					[ cond ] ]		for Select() by SELF [title] = number|Primary
 //	f. key-name => [ Model. => [ Method => argument],[ cond ] ]		Chain() ir Select() value,depend on Model Method returned.
-public function LoadSelection($key_names) {
+public function LoadSelection($key_names, $sort_val = false) {
 	$selections = (is_array($key_names)) ? $key_names : [$key_names];
     foreach($selections as $key_name) {
 		list($target,$cond) = $this->SelectionDef[$key_name];
@@ -309,7 +309,6 @@ public function LoadSelection($key_names) {
 		if(is_int($model)) {        // self list
 			// case b., e.
 			$this->Select[$key_name] = $this->SelectFinder(is_array($target),$target,$cond);
-
 		} else if(is_array($ref_list)) {
 			// case a., f.
 			list($method,$args) = array_first_item($ref_list);
@@ -326,7 +325,9 @@ public function LoadSelection($key_names) {
 			$ref_list = array_filter(explode('.', $ref_list), "strlen" );
 			$this->Select[$key_name] = $this->$model->SelectFinder(false,$ref_list,$cond);
 		}
+		if($sort_val) asort($this->Select[$key_name]);
 	}
+	debug_log(DBMSG_MODEL,['KEYNAME'=>$key_names,'SELECTION'=>$this->Select]);
 }
 //==============================================================================
 //   Get Relation Table fields data list.

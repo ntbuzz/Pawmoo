@@ -38,13 +38,13 @@ public function Logged($instance,$action) {
 //==============================================================================
 private function Logging($module,$method,$rec_id) {
 	$logtime = time();
-	$now	= date('H:i:s',$logtime);
+	$now	= date($this->TimeFormat ,$logtime);
 	$query	= array_key_value(App::$Query,'&');
 	$post	= array_key_value(MySession::$ReqData,'&');
 	if($rec_id === 0) $rec_id = '';
 	// 記録ログレコードを作成
 	$row = [
-			'logdate'	=> date('Y-m-d',$logtime),
+			'logdate'	=> date($this->DateFormat,$logtime),
 			'access'	=> $now,
 			'last_access'=> $now,
 			'userid'	=> MySession::get_LoginValue('userid'),
@@ -57,7 +57,7 @@ private function Logging($module,$method,$rec_id) {
 			'post'		=> $post,
 	];
 	// 繰り返しアクセスされたときにリピート数を更新する
-	$period = date('H:i:s',$logtime - self::same_access)."...".date('H:i:s',$logtime);
+	$period = date($this->TimeFormat ,$logtime - self::same_access)."...".date($this->TimeFormat ,$logtime);
 	$cond 	= [
 			'logdate='	=> $row['logdate'],
 			'userid='	=> $row['userid'],
@@ -92,7 +92,7 @@ public function LogRanking($max = 0) {
 	];
 	$today = time();
 	$start = $today - self::aggregate_period;
-	$period = date('Y-m-d',$start)."...".date('Y-m-d',$today);
+	$period = date($this->DateFormat,$start)."...".date($this->DateFormat,$today);
 	$cond = ['logdate' => $period];
 	$this->tableAggregate($cond,$groups,$calc,NULL,$sortby,$max);
 }
