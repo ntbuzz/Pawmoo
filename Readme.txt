@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2021 by nTak
  * @license    MIT
- * @version 0.87.0, 2021-09-07
+ * @version 0.88.0, 2021-09-11
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,13 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 変更履歴
+【0.88.0】2021/09/11
+	・バルーンの吹き出し位置を改良
+	・+hidden, +submit コマンドの追加
+	・ALink() メソッド引数を変更($attrs)
+	・Select[] の数字列を INTEGER 化
+	・その他、ミスタイプや細かいバグの修正
+
 【0.87.0】2021/09/07
 	・+tabsetコマンドにデフォルトタブ指定を追加
 	・+hiddenコマンドを追加
