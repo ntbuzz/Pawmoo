@@ -41,6 +41,8 @@ class AppView extends AppObject {
             'recordset' => 'cmd_recordset',
             'tabset'    => 'cmd_tabset',
             'floatwin'  => 'cmd_floatwin',
+            'button'    => 'cmd_button',
+            'submit'    => 'cmd_submit',
             'hidden'    => 'cmd_hidden',
             'textbox'   => 'cmd_textbox',
             'datebox'   => 'cmd_datebox',
@@ -246,7 +248,7 @@ public function ViewTemplate($name,$vars = []) {
 // Analyzed Token-Section NEW VERSION
     private function sectionAnalyze($divSection,$vars) {
         if(is_scalar($divSection)) {
-            echo $divSection;
+            echo "SECTION: {$divSection}\n";
             echo "DIE!!!!!!!!!!!!\n";
             return;
         }
@@ -439,16 +441,22 @@ public function ViewTemplate($name,$vars = []) {
     }
     //==========================================================================
     // ALink Hyperlink
-    //  %link => [ A-Text => URL ... ], %A-Text => URL
+    //  %link.commonclass{target} => [ A-Text.opt-class{target} => URL ... ],
+	//  %A-Text.class{target} => URL
     private function sec_link($tag,$attrs,$sec,$vars) {
         $sec = $this->expand_SectionVar($sec,$vars,TRUE);
-        $cls = (isset($attrs['class'])) ? $attrs['class'] : false;
+		array_key_rename($attrs,'data-element','target');
         if($tag === 'link') {
             if(is_array($sec)) {
-                foreach($sec as $kk => $vv) $this->Helper->ALink($vv,$kk,$cls);
+                foreach($sec as $token => $href) {
+            		list($token,$opt_attrs) = $this->tag_Separate($token,$vars);
+					array_key_rename($opt_attrs,'data-element','target');
+					$opt_attrs = array_override($attrs,$opt_attrs);
+					$this->Helper->ALink($href,$token,$opt_attrs);
+				}
             } else echo "{$tag} bad argument.\n";
         } else if(is_scalar($sec)) {
-            $this->Helper->ALink($sec,$tag,$cls);
+            $this->Helper->ALink($sec,$tag,$attrs);
         } else echo "tag '{$tag}' not for feature.\n";
     }
     //==========================================================================
@@ -696,7 +704,6 @@ public function ViewTemplate($name,$vars = []) {
         $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
         $opt_val = array_flat_reduce($this->expand_SectionVar($opt_val,$vars));
         echo "<{$tag}{$attr}>\n";
-//		if(!in_array($sel_item,$opt_val)) echo "<OPTION> [SELECT ONE] </OPTION>\n";
 		foreach($opt_val as $opt => $val) {
 			$sel = ($val == $sel_item) ? ' selected':'';	// allow digit-string compare
 			echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
@@ -722,6 +729,8 @@ public function ViewTemplate($name,$vars = []) {
     }
     //--------------------------------------------------------------------------
     // +tabset.classname(default-tab) => [		// default-tab is integer(based 0) or label string
+	//		data-menu => tab-menu additional class
+	//		data-content => tab-contents additional class
     //      Menu1.selected => [ Contents1 ]		// selected tab,if default-tab is empty
     //      Menu2 => [ Contents2 ] ...
     //  ]
@@ -729,28 +738,32 @@ public function ViewTemplate($name,$vars = []) {
     private function cmd_tabset($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
         list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
-        $mycls = (isset($attrs['class']))? $attrs['class'] :'';
+		list($mycls,$ulcls,$ulcont,$default_tab) = array_map(function($v) { return (empty($v))?'':" {$v}";},array_filter_values($attrs,['class','data-menu','data-content','value']));
+		$default_tab = trim($default_tab);
+		unset($attrs['data-menu'],$attrs['data-content'],$attrs['value']);
 		if(strpos($mycls,'slider-') !== false) {
-			$mycls = "slide-panel {$mycls}";
-			$tabset = '<ul class="slide-tab">';
+			$mycls = "slide-panel{$mycls}";
+			$tabset = "<ul class='slide-tab{$ulcls}'>";
 			$tabend = '</ul>';
-			$contents='<ul class="slide-contents">';
+			$contents="<ul class='slide-contents{$ulcont}'>";
 		} else {
-			$mycls = "tabControll {$mycls}";
-			$tabset = '<div class="tabPanel"><ul class="tabmenu">';
+			$mycls = "tabControll{$mycls}";
+			$tabset = "<div class='tabPanel'><ul class='tabmenu{$ulcls}'>";
 			$tabend = '</ul></div>';
-			$contents='<ul class="tabcontents">';
+			$contents="<ul class='tabcontents{$ulcont}'>";
 		}
-        $attrs['class'] = rtrim($mycls);
+debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$contents]]);
+        $attrs['class'] = $mycls;
         $tabs = array_keys($sec);
-		if(array_key_exists('value',$attrs)) {
-			$default_tab = $attrs['value'];
-			unset($attrs['value']);
-			if(is_numeric($default_tab)) $default_tab = $tabs[intval($default_tab)];
-		} else $default_tab = NULL;
+		if(is_numeric($default_tab)) {
+			// maybe .selected or other class name additional, need TAG Only
+			$n = intval($default_tab);
+			if($n < count($tabs)) list($default_tab,$tmp) = $this->tag_Separate($tabs[$n],$vars);
+			else $default_tab = NULL;
+		}
 		// re-builde class in attrs
 		$default_tabset = function($default_tab,$tabs,$attrs) {
-			if($default_tab === NULL) return $attrs;
+			if(empty($default_tab)) return $attrs;
 			$cls = (array_key_exists('class',$attrs)) ? str_replace('selected','',$attrs['class']) :'';	// remove selected
 			if($default_tab === $tabs) $cls = "{$cls} selected";
 			if(empty($cls)) unset($attrs['class']);
@@ -843,6 +856,18 @@ public function ViewTemplate($name,$vars = []) {
     // +hidden[name](value)
     private function cmd_hidden($tag,$attrs,$sec,$vars) {
 		$this->input_common('hidden',$tag,$attrs,$sec,$vars);
+    }
+    //--------------------------------------------------------------------------
+    //  INPUT BUTTON
+    // +hidden[name](value)
+    private function cmd_button($tag,$attrs,$sec,$vars) {
+		$this->input_common('button',$tag,$attrs,$sec,$vars);
+    }
+    //--------------------------------------------------------------------------
+    //  INPUT SUBMIT
+    // +hidden[name](value)
+    private function cmd_submit($tag,$attrs,$sec,$vars) {
+		$this->input_common('submit',$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------
     //  TEXTAREA
