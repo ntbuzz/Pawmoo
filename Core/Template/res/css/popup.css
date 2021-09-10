@@ -16,88 +16,121 @@
 .baloon-BK:not(:target) {height:100%\9} /* IE9,10 */
 /*    ポップアップ吹き出し */
 .popup-baloon {
-    z-index:2;
+    z-index:101;
     position:fixed;
     top:0;
     left:0;
     display:none;
     margin-top: 16px;
     padding: 10px;
-    border: 1px solid gray;
-    border-radius:12px;
-    background: lightyellow;
     font-size:10pt;
-    color:black;
+    border: 2px solid #999;
+    border-radius:12px;
+    color:#333;
+    background: lightyellow;
+}
+/* 上中央フキダシ部分を作成 */
+.baloon-top-center:before {
+    content: "";
+    position: absolute;
+    top:-20px;
+    left:47%;
+    border: 8px solid transparent;
+    border-bottom: 12px solid #999;
+}
+.baloon-top-center:after {
+    content: "";
+    position: absolute;
+    top:-17px;
+    left:47%;
+    border: 8px solid transparent;
+    border-bottom: 12px solid lightyellow;
 }
 /* 左上フキダシ部分を作成 */
 .baloon-top-left:before {
     content: "";
     position: absolute;
-    top:-15px;
-    left:8px;
-    border-top: 15px solid transparent;
-    border-left: 12px solid gray;
+    top:-13px;
+    left:4px;
+    border-top: 13px solid transparent;
+    border-left: 18px solid #999;
 }
 .baloon-top-left:after {
     content: "";
     position: absolute;
-    top:-13px;
-    left:9px;
-    border-top: 15px solid transparent;
-    border-left: 12px solid lightyellow;
+    top:-9px;
+    left:6px;
+    border-top: 13px solid transparent;
+    border-left: 18px solid lightyellow;
 }
 /* 右上フキダシ部分を作成 */
 .baloon-top-right:before {
     content: "";
     position: absolute;
-    top:-15px;
-    right:18px;
-    border-top: 15px solid transparent;
-    border-right: 12px solid gray;
+    top:-13px;
+    right:4px;
+    border-top: 12px solid transparent;
+    border-right: 18px solid #999;
 }
 .baloon-top-right:after {
     content: "";
     position: absolute;
-    top:-13px;
-    right:19px;
-    border-top: 15px solid transparent;
-    border-right: 12px solid lightyellow;
+    top:-9px;
+    right:6px;
+    border-top: 13px solid transparent;
+    border-right: 18px solid lightyellow;
+}
+/* 下中央フキダシ部分を作成 */
+.baloon-bottom-center:before {
+    content: "";
+    position: absolute;
+    bottom:-20px;
+    left:47%;
+    border: 8px solid transparent;
+    border-top: 12px solid #999;
+}
+.baloon-bottom-center:after {
+    content: "";
+    position: absolute;
+    bottom:-17px;
+    left:47%;
+    border: 8px solid transparent;
+    border-top: 12px solid lightyellow;
 }
 /* 左下フキダシ部分を作成 */
 .baloon-bottom-left:before {
     content: "";
     position: absolute;
-    bottom:-15px;
-    left:8px;
-    border-bottom: 15px solid transparent;
-    border-left: 12px solid gray;
+    bottom:-13px;
+    left:4px;
+    border-bottom: 13px solid transparent;
+    border-left: 18px solid #999;
 }
 .baloon-bottom-left:after {
     content: "";
     position: absolute;
-    bottom:-13px;
-    left:9px;
-    border-bottom: 15px solid transparent;
-    border-left: 12px solid lightyellow;
+    bottom:-9px;
+    left:6px;
+    border-bottom: 13px solid transparent;
+    border-left: 18px solid lightyellow;
 }
 /* 右フキダシ部分を作成 */
 .baloon-bottom-right:before {
     content: "";
     position: absolute;
-    bottom:-15px;
-    right:18px;
-    border-bottom: 15px solid transparent;
-    border-right: 12px solid gray;
+    bottom:-13px;
+    right:4px;
+    border-bottom: 12px solid transparent;
+    border-right: 18px solid #999;
 }
 .baloon-bottom-right:after {
     content: "";
     position: absolute;
-    bottom:-13px;
-    right:19px;
-    border-bottom: 15px solid transparent;
-    border-right: 12px solid lightyellow;
+    bottom:-9px;
+    right:6px;
+    border-bottom: 13px solid transparent;
+    border-right: 18px solid lightyellow;
 }
-
 /*==============================================================================
     ポップアップボックス
 */
