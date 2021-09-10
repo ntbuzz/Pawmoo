@@ -107,7 +107,7 @@ public static function Get_PagingPath() {
 			static::$execURI['method'],
 			static::$execURI['filter']
 		],
-//		array_key_value(static::$Query,'&')
+		array_key_value(static::$Query,'&')
 		);
 }
 //==============================================================================
@@ -182,6 +182,16 @@ public static function Get_SysRoot($path = '',$lower = FALSE) {
 public static function Get_AppRoot($path = '',$lower = FALSE) {  
     if(mb_substr($path,0,1) === '/') $path = mb_substr($path,1);
     return static::$appRoot . (($lower)?strtolower($path):$path);
+}
+//==============================================================================
+// アプリケーションのトップパスに付加パスを付けた文字列
+public static function Get_ActionRoot($path = '',$lower = FALSE) {  
+	$URI = [
+		'/'.static::$AppName,
+		static::$Controller,
+		trim((($lower)?strtolower($path):$path),'/'),
+	];
+	return implode('/',$URI);
 }
 //==============================================================================
 // cdd/js/icoファイルの読込タグ出力（単独）

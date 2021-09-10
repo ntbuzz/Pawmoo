@@ -31,7 +31,7 @@ public function defaultUser() {
 		'full_name'	=>	'Guest User',
 		'email'		=>	'no-mail@localhost',
 	];
-	$udate = array_filter_values(static::$LoginUser,['userid','language','region']);
+	$udata = array_filter_values(static::$LoginUser,['userid','language','region']);
 	return $udata;
 }
 //==============================================================================

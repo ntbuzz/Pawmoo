@@ -180,6 +180,7 @@ if($controllerInstance->is_authorised($method)) {
             "Re-Location" => App::Get_RelocateURL(),
         ],
         "QUERY"	=> App::$Query,
+        "POST"	=> MySession::$ReqData,
         "SESSION Variables" => [
             "SESSION_ID"=> MySession::$MY_SESSION_ID,
             "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
