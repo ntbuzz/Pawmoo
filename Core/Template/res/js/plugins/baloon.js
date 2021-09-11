@@ -62,11 +62,10 @@ $.fn.PopupBaloonSetup = function () {
 							this.vertical = "bottom-";
 							this.top = target.top - this.height - 9;
 						};
-						return 'popup-baloon baloon-' + this.vertical + this.horizontal
-					}
+						return 'baloon-' + this.vertical + this.horizontal;
+					},
 				};
-				var cls = Balloon.outRange();
-//				alert(cls);
+				var cls = 'popup-baloon ' + Balloon.outRange();
 				self.attr('class', cls);
 				self.css({
 					'left': Balloon.left + 'px',
