@@ -84,24 +84,23 @@ public function expand_locale($str) {
 }
 //==============================================================================
 // Make HYPER-Link
-public function ALink($lnk,$txt,$under=false) {
-	echo $this->ALink_str($lnk,$txt,$under);
+public function ALink($lnk,$txt,$attrs = NULL) {
+	echo $this->ALink_str($lnk,$txt,$attrs);
 }
 //==============================================================================
 // Make HYPER-Link
-public function ALink_str($lnk,$txt,$under=false) {
+public function ALink_str($lnk,$txt,$attrs=false) {
 	if(mb_substr($txt,0,1) === '#') {
 		$txt = mb_substr($txt,1);
 		$txt = $this->_($txt);
 	}
 	$href = make_hyperlink($lnk,$this->ModuleName);
-	if(is_array($under)) {
-		$uline = ' class="'.implode(' ',$under).'"';
-	} else if(is_string($under)) {
-		$uline = (empty($under)) ? '' : " class='{$under}'";
-	} else $uline = ($under) ? '' : ' class="nounder"';
-	$target = (get_protocol($href) !== NULL) ? ' target=_blank':'';
-	return "<a{$uline} href='{$href}'{$target}>{$txt}</a>";
+	if(empty($attrs)) $attrs = ['class' => 'nounder'];
+	else if(is_string($attrs)) $attrs = ['class' => $attrs];
+	else if(!is_array($attrs)) $attrs = [];
+	if(get_protocol($href) !== NULL) $attrs['target'] = '_blank';
+	$attr = array_key_value($attrs,' ',"'");
+	return "<a{$uline} href='{$href}'{$attr}>{$txt}</a>";
 }
 //==============================================================================
 // generate Page Button LABEL Tag
@@ -311,6 +310,7 @@ public function Select($key,$name) {
 //==============================================================================
 // Create Select Tag strings
 public function Select_str($key,$name) {
+	if(!array_key_exists($key,$this->MyModel->Select)) return '';
     $dat = intval($this->MyModel->RecData[$name]);	// NULL is ZERO(0)
     $select = "<SELECT name='{$name}'>";
     foreach($this->MyModel->Select[$key] as $ttl => $id) {

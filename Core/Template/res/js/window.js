@@ -18,7 +18,9 @@ $(window).resize(function () {
 	$('body').fitWindow();
 });
 // マークダウン外部リンク
-$('.easy_markdown a[href^=http]:not(:has(img))').addClass("externalLink").attr('target', '_blank');
+$('.easy_markdown a[href^=http]:not(:has(img))').addClass("externalLink");
+// externalLinkを別ウィンドウ表示
+$('.externalLink').attr('target', '_blank');
 
 $("body").InitPopupSet();
 // コンボボックスの処理

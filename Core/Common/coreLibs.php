@@ -11,6 +11,7 @@ require_once('arrayLibs.php');
 function get_routing_path($root) {
     $vv = $_SERVER['REQUEST_URI'];
     list($requrl,$q_str) = (mb_strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
+	$query	 = xchange_Boolean($_GET);				// same as query string
     $argv = explode('/', trim($requrl,'/'));
     if($root === $argv[0]) {
         array_shift($argv);         // retrieve application name
@@ -44,18 +45,44 @@ function get_routing_path($root) {
         $filters,
         array_intval_recursive($params),
     );
-    $ret = [$appname,$app_uri,$module,$q_str];
-    debug_nodump([
+    $ret = [$appname,$app_uri,$module,$query];
+    debug_xdump([
 		'Framework Information' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
             "app_uri"=> $app_uri,
             "appname"=> $appname,
             "Module"=> $module,
-            "query"=> $q_str,
+            "query"=> $query,
         ],
         "RET" => $ret,
     ]);
     return $ret;
+}
+//==============================================================================
+// GET/POST array boolean change
+function xchange_Boolean($arr) {
+	$data = [];
+	$bool_value = [ 'on' => TRUE,'off' => FALSE,'t' => TRUE,'f' => FALSE];
+	foreach($arr as $key => $val) {		// GET parameter will be check query
+		if(array_key_exists($val,$bool_value)) $val = $bool_value[$key];
+		else if(is_numeric($val)) $val = intval($val);
+		if(ctype_alnum(str_replace(['-','_'],'', $key))) $data[$key] = $val;
+	}
+	return $data;
+}
+//==============================================================================
+// Generate URI from array, even when there is an array in the element
+function array_to_query($query) {
+	if(empty($query)) return '';
+	$q_str = '?';
+   foreach($query as $key => $val) {
+		if($val === TRUE) $val = 't';
+		else if($val === FALSE) $val = 'f';
+		else $val = urlencode($val);
+		$q_str = "{$q_str}{$key}={$val}&";
+    }
+	$q_str = rtrim($q_str,'&');
+	return $q_str;
 }
 //==============================================================================
 // Output 404 ERROR PAGE
@@ -222,7 +249,8 @@ function is_tag_identifier($str) {
 			'/^([\*]).+$/' => 2,					// repeat char command available
 			'/^([&@\+<\?%\-])(?!\1|$)/' => 2,		// command-token (not repeat char)
 			'/^\$\w+$/' => 3,						// variable-token
-			// dirty pattern for TAG-token
+			'/^\\\d+$/' => 1,						// escape digit
+			// dirty pattern for TAG-token tag.class#id:size[name](value)<data-value>{data-element}
 			'/^(?:[a-zA-Z_]*)(?:[\.#][a-zA-Z_\-\s]*)+(?:\:\d+)?(?:[\{\(\[].+?[\}\)\]])*$/' => 1,
 		];
 		foreach($tokens as $pattern => $ret_val) {
@@ -515,3 +543,4 @@ function attr_sz_xchange($attrs) {
 	if(!empty($style_str)) $attrs['style'] = "\"{$style_str};\"";
 	return $attrs;
 }
+

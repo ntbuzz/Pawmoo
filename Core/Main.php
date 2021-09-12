@@ -35,16 +35,9 @@ date_default_timezone_set(TIME_ZONE);
 $redirect = false;      // Redirect flag
 $root = basename(dirname(__DIR__));        // Framework Folder
 // REQUEST_URI analyze
-list($appname,$app_uri,$module,$q_str) = get_routing_path($root);
+list($appname,$app_uri,$module,$query) = get_routing_path($root);
 list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filters,$params) = $module;
-
-// if(strpos($method,'.')!==FALSE) {
-//     list($method,$filter) = extract_base_name($method);
-//     $method = ucfirst(strtolower($method));
-// } else $filter = empty($filters) ? '': $filters[0];
-parse_str($q_str, $query);
-if(!empty($q_str)) $q_str = "?{$q_str}";
 
 // is enabled application name
 if(empty($appname) || !file_exists("app/$appname")) {
@@ -89,7 +82,7 @@ if($redirect) $module[0] = $controller;
 $ReqCont = [
     'root' => $approot,
     'module' => $module,
-    'query' => $q_str,
+//    'query' => array_to_query($query),
 ];
 $requrl = array_to_URI($ReqCont);
 if($redirect) {
@@ -176,7 +169,6 @@ if($controllerInstance->is_authorised($method)) {
             "DOCROOT"   => App::$DocRoot,
             "REQ_URI"   => $_SERVER['REQUEST_URI'],
             "REFERER"   => App::$Referer,
-            "QUERY"     => App::$Query,
         ],
         '#DebugInfo' => [
             "AppName"       => App::$AppName,
@@ -187,10 +179,11 @@ if($controllerInstance->is_authorised($method)) {
     //        "Param"         => App::$Params,
             "Re-Location" => App::Get_RelocateURL(),
         ],
+        "QUERY"	=> App::$Query,
+        "POST"	=> MySession::$ReqData,
         "SESSION Variables" => [
             "SESSION_ID"=> MySession::$MY_SESSION_ID,
             "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
-            "POST"      => MySession::$ReqData,     // Hide debuglog,password
         ],
         'LockDB OWNER' => LockDB::GetOwner(),
     ]);

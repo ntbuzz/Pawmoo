@@ -189,8 +189,10 @@ function array_flat_reduce($arr) {
             foreach($arr as $key => $val) {
                 if(is_array($val)) {
                     $reduce_array($val);
-                } else if(is_numeric($key)) {
+                } else if(isset($wx[$key])) {
                     $wx[] = $val;
+                // } else if(is_numeric($key)) {
+                //     $wx[] = $val;
                 } else {
                     $wx[$key] = $val;
                 }
@@ -231,6 +233,14 @@ function array_concat_keys(&$arr,$keys) {
 function array_set_element(&$arr,$name,$val) {
 	if(!empty($val)) $arr[$name] = $val;
 	else if(!array_key_exists($name,$arr)) $arr[$name] = '""';
+}
+//==============================================================================
+// set array element
+function array_key_rename(&$arr,$from,$to) {
+	if(isset($arr[$from])) {
+		$arr[$to] = $arr[$from];
+		unset($arr[$from]);
+	}
 }
 //==============================================================================
 // set array element

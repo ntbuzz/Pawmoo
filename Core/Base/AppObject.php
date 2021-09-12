@@ -64,7 +64,7 @@ class AppObject {
 //==============================================================================
 //	setup objerct property
     protected function setProperty($props) {
-		debug_log(DBMSG_DEBUG,['SET-PROPERTY'=>['MODULE'=>$this->ClassName,'PROP'=>$props]]);
+//		debug_log(DBMSG_DEBUG,['SET-PROPERTY'=>['MODULE'=>$this->ClassName,'PROP'=>$props]]);
         foreach($props as $key => $val) {
             $this->$key = $val;
         }

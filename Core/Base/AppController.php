@@ -86,7 +86,7 @@ public function is_authorised($method) {
 		$model = LOGIN_CLASS . 'Model';
 		$Login = $this->$model;
 		$login_key = isset($Login->LoginID) ? $Login->LoginID:'login-user';
-		$bypass_method = (is_array($this->BypassMethod)) ? $bypass_method : [$bypass_method];
+		$bypass_method = (is_array($this->BypassMethod)) ? $this->BypassMethod : [$this->BypassMethod];
 		$bypass_method[] = 'Logout';	// must be append LogoutAction
 		if($this->needLogin && !in_array($method,$bypass_method)) {
 			$data = (CLI_DEBUG) ? $Login->defaultUser() : $Login->is_validLogin(MySession::$ReqData);
@@ -181,18 +181,16 @@ public function AutoPaging($cond, $max_count = 100) {
 	if($num === 0) $num = 1;
 	$cond = re_build_array($cond);
 	$Page = MySession::getPagingIDs('Setup');
-//	debug_log(DBMSG_SYSTEM, ['COND' => $cond,"Page"  => $Page ]);
-	$sCond = $Page['Cond'];
-	$sSize = $Page['Size'];
+	list($sCond,$sSize,$sURI) = array_filter_values($Page,['Cond','Size','URI']);
 	$uri = App::Get_PagingPath();
-	if($uri === $Page['URI'] && empty(MySession::$ReqData)) {
+	if($uri === $sURI && empty(MySession::$ReqData)) {
 		$cond = $sCond;			// same condition
 	} else {
 		$Page['Cond'] = $cond;
 		$Page['URI'] = $uri;
 	}
-	if(isset($Page['Size']) && $size === 0) {
-		$size = intval($Page['Size']);
+	if(!empty($sSize) && $size === 0) {
+		$size = intval($sSize);
 	}
 	$cnt = $this->Model->getCount($cond);
 	if($cnt < $size )  $size = 0;
@@ -203,11 +201,12 @@ public function AutoPaging($cond, $max_count = 100) {
 		$this->Model->SetPage($size,$num);
 	} else $Page = NULL;	// remove Paging.Setup
 	MySession::setPagingIDs('Setup',$Page);
+	return $cond;
 }
 //==============================================================================
 // Auto Paging, and Model Finder
 public function PagingFinder($cond, $max_count=100,$filter=[],$sort=[]) {
-	$this->AutoPaging($cond, $max_count);
+	$cond = $this->AutoPaging($cond, $max_count);
 	$this->Model->RecordFinder(NULL,$filter,$sort);
 }
 //==============================================================================

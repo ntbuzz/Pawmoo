@@ -13,7 +13,7 @@ RewriteRule ^res/(css|js|images)/(.*)$   Core/Template/webroot/$1/$2 [END]
 
 # アプリごとに異なるリダイレクト
 # app/css|js|images/
-RewriteRule ^([^/]+)/(/.+)?/css/img/(.*)$ app/$1/webroot/cssimg/$3 [END]
+RewriteRule ^([^/]+)/(.+/)?css/img/(.*)$ app/$1/webroot/cssimg/$3 [END]
 RewriteRule ^([^/]+)/images/(.*)$   app/$1/webroot/images/$2 [END]
 RewriteRule ^([^/]+)/files/(.*)$  app/$1/upload_files/$2 [END]
 

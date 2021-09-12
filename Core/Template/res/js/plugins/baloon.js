@@ -28,11 +28,15 @@ $.fn.PopupBaloonSetup = function () {
 					top: parseInt(icon_obj.offset().top, 10),
 					left: parseInt(icon_obj.offset().left, 10),
 					width: parseInt(icon_obj.outerWidth(), 10),
-					height: parseInt(icon_obj.outerHeight(), 10)
+					height: parseInt(icon_obj.outerHeight(), 10),
+					centerX: function () {return this.left + (this.width / 2);},
+					centerY: function () {return this.top + (this.height / 2);},
 				};
 				var Balloon = {
-					top: target.top + (target.height/2),
-					left: target.left + (target.width/2),
+					horizontal: "center",
+					vertical: "top-",
+					top: target.centerY(),
+					left: target.centerX() - (parseInt(self.outerWidth(true), 10)/2),
 					width: parseInt(self.outerWidth(true), 10),
 					height: parseInt(self.outerHeight(true), 10),
 					inBound: function (x, y) {
@@ -45,22 +49,28 @@ $.fn.PopupBaloonSetup = function () {
 						this.width = Math.max(this.left+this.width, e.left+e.width)-this.left;
 						this.height = Math.max(this.top+this.height, e.top+e.height)-this.top;
 					},
-					outRangeX: function () {
-						if ((this.left + this.width) <= $(window).width()) return false;
-						this.left = target.left - this.width + target.width;
-						return true;
-					},
-					outRangeY: function () {
-						if ((this.top + this.height) <= $(window).height()) return false;
-						this.top = target.top - this.height - (target.height/2);
-						return true;
+					outRange: function () {
+						if ((this.left + this.width) > $(window).width()) {
+							this.horizontal = "right";
+							this.left = target.centerX() - this.width+4;
+						};
+						if (this.left < 0) {
+							this.horizontal = "left";
+							this.left = target.centerX() - 4;
+						};
+						if ((this.top + this.height) > $(window).height()) {
+							this.vertical = "bottom-";
+							this.top = target.top - this.height - 9;
+						};
+						return 'baloon-' + this.vertical + this.horizontal;
 					},
 				};
-				var cls = 'popup-baloon baloon-';
-				cls = cls + ((Balloon.outRangeY()) ? 'bottom-' : 'top-');
-				cls = cls + ((Balloon.outRangeX()) ? 'right' : 'left');
+				var cls = 'popup-baloon ' + Balloon.outRange();
 				self.attr('class', cls);
-				self.css({'left': Balloon.left + 'px','top': Balloon.top + 'px'});
+				self.css({
+					'left': Balloon.left + 'px',
+					'top': Balloon.top + 'px'
+				});
 				self.fadeIn('fast');
 				Balloon.expand(target);
 				$('.baloon-BK').off().mousemove(function (e) {

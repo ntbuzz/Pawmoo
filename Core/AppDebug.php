@@ -136,13 +136,16 @@ function get_null_value($arg) {
 function debug_dump($items) {
 	sysLog::dump($items);
 }
-function debug_nodump($items) {}
 function debug_die($items) {
 	sysLog::halt($items);
 }
 function stderr($str) {
 	fputs(STDERR,"{$str}\n");
 }
+// dummy function
+function debug_xdump($items) {}
+function debug_xdie($items) {}
+function debug_xlog($items) {}
 //==========================================================================
 // ログの記録または表示
 function debug_log($lvl,...$items) {

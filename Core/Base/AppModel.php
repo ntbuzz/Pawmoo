@@ -396,10 +396,13 @@ public function SelectFinder($chain, $filter, $cond) {
 				$id = $this->Primary;
 			}
 			$pval = (empty($pid)) ? 0 : $fields[$pid];
+			if(is_numeric($pval)) $pval = intval($pval);
 			$data[] = [ $fields[$id], $fields[$fn], $pval];
 		} else {
 			$key = (empty($fn)) ? $fields[$id] : $fields[$fn];
-			$data[$key] = $fields[$id];
+			$pval = $fields[$id];
+			if(is_numeric($pval)) $pval = intval($pval);
+			$data[$key] = $pval;
 		}
 	}
 	if(!$chain) ksort($data,SORT_FLAG_CASE|SORT_STRING);

@@ -16,7 +16,7 @@ $_SERVER['HTTP_HOST'] = 'localhost';
 $uri = $_SERVER['REQUEST_URI'];
 list($url,$q_str) = (strpos($uri,'?')!==FALSE)?explode('?',$uri):[$uri,''];
 parse_str($q_str, $query);
-$_REQUEST =  $query;
+$_GET =  $query;
 
 $ln = str_repeat("=", 50);
 print_r($argv);
