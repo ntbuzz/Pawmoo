@@ -55,6 +55,7 @@ $.fn.PopupBaloonSetup = function () {
 					},
 					RangeSetup: function () {
 						target.fixPosition();
+						var rmargin = 4;
 						if (onside) {
 							var hz = "left";
 							var vt = "";
@@ -63,7 +64,7 @@ $.fn.PopupBaloonSetup = function () {
 							if (this.top < 0 || (this.top + this.height) > $(window).height()) {
 								hz = "center";
 								this.left = target.pointX - (this.width / 2);
-							};
+							} else rmargin = -8;
 						} else {
 							var hz = "center";
 							var vt = "top-";
@@ -83,7 +84,7 @@ $.fn.PopupBaloonSetup = function () {
 							this.left = target.pointX - 4;
 						} else if ((this.left + this.width) > $(window).width()) {
 							hz = "right";
-							this.left = target.pointX - this.width + 4;
+							this.left = target.pointX - this.width + rmargin;
 						};
 						var cls = vt + hz;
 						this.setBoundBox(target.pointX, target.pointY);
