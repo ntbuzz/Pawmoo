@@ -27,6 +27,12 @@ String.prototype.startOfString = function (arr) {
 	return exists;
 };
 //====================================================
+// start of strings in array values
+String.prototype.existsWord = function (str) {
+	var wd_arr = this.split(' ');	// separate space
+	return wd_arr.is_exists(str);
+};
+//====================================================
 // element search: IE-11 is not have includes() method.
 Array.prototype.is_exists = function (v) {
 	var exists = false;
