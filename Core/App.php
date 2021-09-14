@@ -106,8 +106,8 @@ public static function Get_PagingPath() {
 			static::$execURI['controller'],
 			static::$execURI['method'],
 			static::$execURI['filter']
-		],
-		array_key_value(static::$Query,'&')
+		], NULL
+//		array_key_value(static::$Query,'&')
 		);
 }
 //==============================================================================
@@ -184,7 +184,7 @@ public static function Get_AppRoot($path = '',$lower = FALSE) {
     return static::$appRoot . (($lower)?strtolower($path):$path);
 }
 //==============================================================================
-// アプリケーションのトップパスに付加パスを付けた文字列
+// コントローラーパスにアクションパスを付けた文字列
 public static function Get_ActionRoot($path = '',$lower = FALSE) {  
 	$URI = [
 		'/'.static::$AppName,

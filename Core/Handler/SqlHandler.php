@@ -22,6 +22,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private $LastSQL;		// Last Query WHERE term
 	protected $LastCond;	// for DEBUG
 	protected $LastBuild;	// for DEBUG
+	protected $LIKE_opt = 'LIKE';		// Ignore Upper/Lower case LIKE
 //==============================================================================
 //	abstruct method
 	abstract protected function Connect($table);
@@ -333,8 +334,8 @@ protected function sql_safequote(&$value) {
 			$like_opstr = function($v) {
 				if($v[0] == '-' && strlen($v) > 1) {
 					$v = mb_substr($v,1);
-					$op = 'NOT LIKE';
-				} else $op = 'LIKE';
+					$op = "NOT {$this->LIKE_opr}";
+				} else $op = $this->LIKE_opr;
 				if(mb_strpos($v,'%') === FALSE) $v = "%{$v}%";
 				return ["'{$v}'",$op];
 			};

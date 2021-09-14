@@ -154,34 +154,52 @@ public static function LangDebug() {
 // ネストされた配列変数を取得する、要素名はピリオドで連結したキー名
 //  ex. Menu.File.OPEN  大文字小文字は区別される
 public static function get_value($mod, $id, $allow = FALSE) {
-    //-----------------------------------------
-    // 無名関数を定義して配列内の探索を行う
-    $array_finder = function ($lst, $arr, $allow) {
-            foreach($lst as $val) {
-                if(is_array($arr) && array_key_exists($val, $arr)) {
-                    $val = str_replace(['　',' '],'',$val);
-                    $arr = $arr[$val];
-                } else return FALSE;        // 見つからなかった時
-            }
-            if(is_array($arr)) {          // 見つけた要素が配列なら
-                return ($allow) ? $arr :    // 配列を要求されていれば配列で返す
-                    ( (isset($arr[0])) ? $arr[0] :     // 0番目の要素があれば値を返す
-                                        FALSE);         // そうでなければエラー
-            }
-            return $arr;        // スカラー値はそのまま返す
-        };
-    //-----------------------------------------
-    if($id[0] === '.') {        // 相対検索ならモジュール名を使う
-        $lst = explode('.', "{$mod}{$id}");
-        if( ($a=$array_finder($lst,static::$STRINGS,$allow)) !== FALSE) {
-            return $a;
-        }
-        array_shift($lst);      // 先頭のモジュール名要素を消す
-    } else $lst = explode('.', $id);    // 絶対検索
-    if( ($a=$array_finder($lst,static::$STRINGS,$allow)) !== FALSE) {     // 
-        return $a;
-    }
-    return array_pop($lst);     // 見つからなければ識別子の末尾要素を返す
+    $expand_id = function ($mod, $id, $allow) {
+		//-----------------------------------------
+		// 無名関数を定義して配列内の探索を行う
+		$array_finder = function ($lst, $arr, $allow) {
+				foreach($lst as $val) {
+					if(is_array($arr) && array_key_exists($val, $arr)) {
+						$val = str_replace(['　',' '],'',$val);
+						$arr = $arr[$val];
+					} else return FALSE;        // 見つからなかった時
+				}
+				if(is_array($arr)) {          // 見つけた要素が配列なら
+					return ($allow) ? $arr :    // 配列を要求されていれば配列で返す
+						( (isset($arr[0])) ? $arr[0] :     // 0番目の要素があれば値を返す
+											FALSE);         // そうでなければエラー
+				}
+				return $arr;        // スカラー値はそのまま返す
+			};
+		//-----------------------------------------
+		if($id[0] === '.') {        // 相対検索ならモジュール名を使う
+			$lst = explode('.', "{$mod}{$id}");
+			if( ($a=$array_finder($lst,static::$STRINGS,$allow)) !== FALSE) {
+				return $a;
+			}
+			array_shift($lst);      // 先頭のモジュール名要素を消す
+		} else $lst = explode('.', $id);    // 絶対検索
+		if( ($a=$array_finder($lst,static::$STRINGS,$allow)) !== FALSE) {     // 
+			return $a;
+		}
+		return FALSE;
+	};
+    $a = $expand_id($mod, $id, $allow);
+	if($a === FALSE) {
+		$lst = explode('.', $id);   // 見つからなければ識別子の末尾要素を返す
+	    return array_pop($lst); 
+	}
+	// 2段階展開を許可
+	$a = preg_replace_callback('/(\$\{([^\}]+?)\})/',
+			function($mm) use(&$mod,&$expand_id)  {
+				$b = $expand_id($mod, $mm[2],false);
+				if($b === FALSE) {
+					$lst = explode('.', $mm[2]);   // 見つからなければ識別子の末尾要素を返す
+					$b = array_pop($lst); 
+				}
+				return $b;
+			},$a);
+	return $a;
 }
 //==============================================================================
 // ネストされた配列変数を取得する、要素名はピリオドで連結したキー名
