@@ -49,7 +49,7 @@ protected function reset_seq($table,$primary) {
 //==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
-//	debug_log(DBMSG_HANDLER,['SQL' => $sql]);
+	debug_dump(['SQL' => $sql]);
 	$this->rows = $this->dbb->query($sql);
 	return $this->rows;
 }

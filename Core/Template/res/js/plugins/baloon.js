@@ -7,18 +7,19 @@ $.fn.PopupBaloonSetup = function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var onside = self.attr("class").existsWord('onside');
 		var ref = self.attr("data-element");  // 紐付けるID
-		var act = ref.slice(0, 1);            // 先頭が＠ならmouseover
-		if (act == "@") ref = ref.slice(1);
-		var ev = (act == '@') ? "mouseover" : "click";
+		var act = ref.slice(0, 1);
+		var on_mouseover = (act == "@");	    // 先頭が＠ならmouseover
+		if (on_mouseover) ref = ref.slice(1);
+		var ev = (on_mouseover) ? "mouseover" : "click";
 		if (ref != "") {
 			var tag = ref.slice(0, 1);
-			if (tag == "!") ref = ref.slice(1); // 先頭が！ならアイコン追加しない
-			var icon = (tag == "!") ? ref : ref + "-help";
+			var no_icon = (tag == "!");			 // 先頭が！ならアイコン追加しない
+			if (no_icon) ref = ref.slice(1);
+			var icon = (no_icon) ? ref : ref + "-help";
 			if ($('#' + icon).length == 0) {
 				$('#' + ref).after('<span class="help_icon" id="' + icon + '"></span>')
 							.css("margin-right", '2px');
-				ev = 'mouseover';   // ポップアップイベントが登録されていることがあるので、強制的にマウスオーバーにする
-			};
+			}; //else ev = 'mouseover';   // 既存要素の場合、clickイベントが登録されているかもしれない
 			var icon_obj = $('#' + icon);
 			if (ev == "click") icon_obj.css("cursor", "help");
 			icon_obj.off(ev).on(ev, function () {
