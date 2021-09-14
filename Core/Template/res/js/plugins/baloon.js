@@ -26,16 +26,15 @@ $.fn.PopupBaloonSetup = function () {
 				$('body').append('<div class="baloon-BK"></div>');
 				$('.baloon-BK').fadeIn('fast');
 				var target = {
-					top: parseInt(icon_obj.offset().top, 10),
-					left: parseInt(icon_obj.offset().left, 10),
 					width: parseInt(icon_obj.outerWidth(), 10)/2,
 					height: parseInt(icon_obj.outerHeight(), 10)/2,
 					fixPosition: function () {
+						this.top = parseInt(icon_obj.offset().top, 10);
+						this.left = parseInt(icon_obj.offset().left, 10);
 						this.pointX = this.left + this.width - $(window).scrollLeft();
 						this.pointY = this.top  + this.height - $(window).scrollTop();
 					},
 				};
-//				target.fixPosition();
 				var Balloon = {
 					width: parseInt(self.outerWidth(true), 10),
 					height: parseInt(self.outerHeight(true), 10),
@@ -50,8 +49,8 @@ $.fn.PopupBaloonSetup = function () {
 					setBoundBox: function (x,y) {
 						this.boundBox.top	= Math.min(this.top, y) - this.boundBox.margin;
 						this.boundBox.left	= Math.min(this.left, x) - this.boundBox.margin;
-						this.boundBox.right	= Math.max(this.left+this.width, x+this.width) + this.boundBox.margin;
-						this.boundBox.bottom= Math.max(this.top+this.height, y+this.height)+ this.boundBox.margin;
+						this.boundBox.right	= Math.max(this.left+this.width, x) + this.boundBox.margin;
+						this.boundBox.bottom= Math.max(this.top+this.height, y) + this.boundBox.margin;
 					},
 					RangeSetup: function () {
 						target.fixPosition();
@@ -97,6 +96,16 @@ $.fn.PopupBaloonSetup = function () {
 				};
 				Balloon.RangeSetup();
 				self.fadeIn('fast');
+				// リサイズは処理完了後に位置移動する
+			    var resizeTimer = null;
+				$(window).on('resize.balloon', function () {
+					clearTimeout(resizeTimer);
+					resizeTimer = setTimeout(function() {
+						// リサイズ完了後の処理
+						Balloon.RangeSetup();
+					}, 200);
+				});
+				// スクロールはリアルタイムで位置移動
 				$(window).on('scroll.balloon', function () {
 					Balloon.RangeSetup();
 				});
@@ -105,7 +114,7 @@ $.fn.PopupBaloonSetup = function () {
             		e.preventDefault();
 					if (!Balloon.boundBox.inBound(e.clientX, e.clientY)) {
 						self.fadeOut('fast');
-						$(window).off('scroll.balloon');
+						$(window).off('scroll.balloon resize.balloon');
 						$('.baloon-BK').fadeOut('fast',function(){
 							$('.baloon-BK').remove();
 						});
