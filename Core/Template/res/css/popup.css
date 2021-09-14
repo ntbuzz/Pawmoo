@@ -263,9 +263,9 @@ opacity: 0.25; */
 /* ヘルプアイコン */
 .help_icon {
 	display:inline-block;
-    width:17px;
-    height:15px;
-    background: url(res/img/pop_help_c.png) no-repeat left bottom;
+    width:18px;
+    height:18px;
+    background: url(res/img/round-help.png) no-repeat left bottom;
 }
 /*==============================================================================
 インフォボックス

@@ -56,32 +56,36 @@ $.fn.PopupBaloonSetup = function () {
 					RangeSetup: function () {
 						target.fixPosition();
 						if (onside) {
-							var cls = "left";
+							var hz = "left";
+							var vt = "";
 							this.top = target.pointY - (this.height/2) - 8;
 							this.left = target.pointX + 8;
-							if ((this.left + this.width) > $(window).width()) {
-								cls = "right";
-								this.left = target.pointX - this.width - 12;
+							if (this.top < 0 || (this.top + this.height) > $(window).height()) {
+								hz = "center";
+								this.left = target.pointX - (this.width / 2);
 							};
 						} else {
 							var hz = "center";
 							var vt = "top-";
 							this.top = target.pointY;
 							this.left = target.pointX - (this.width/2);
-							if ((this.left + this.width) > $(window).width()) {
-								hz = "right";
-								this.left = target.pointX - this.width+4;
-							};
-							if (this.left < 0) {
-								hz = "left";
-								this.left = target.pointX - 4;
-							};
-							if ((this.top + this.height) > $(window).height()) {
-								vt = "bottom-";
-								this.top = target.pointY - this.height - 9;
-							};
-							var cls = vt + hz;
 						};
+						// onside , free 共通
+						if (this.top < 0) {
+							vt = "top-";
+							this.top = target.pointY;
+						} else if ((this.top + this.height) > $(window).height()) {
+							vt = "bottom-";
+							this.top = target.pointY - this.height - 9;
+						};
+						if (this.left < 0) {
+							hz = "left";
+							this.left = target.pointX - 4;
+						} else if ((this.left + this.width) > $(window).width()) {
+							hz = "right";
+							this.left = target.pointX - this.width + 4;
+						};
+						var cls = vt + hz;
 						this.setBoundBox(target.pointX, target.pointY);
 						self.attr('class', 'popup-baloon baloon-' + cls);
 						self.css({
