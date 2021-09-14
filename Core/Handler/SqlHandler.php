@@ -22,7 +22,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private $LastSQL;		// Last Query WHERE term
 	protected $LastCond;	// for DEBUG
 	protected $LastBuild;	// for DEBUG
-	protected $LIKE_opt = 'LIKE';		// Ignore Upper/Lower case LIKE
+	protected $LIKE_opr = 'LIKE';		// Ignore Upper/Lower case LIKE
 //==============================================================================
 //	abstruct method
 	abstract protected function Connect($table);
