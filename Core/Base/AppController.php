@@ -181,13 +181,16 @@ public function AutoPaging($cond, $max_count = 100) {
 	if($num === 0) $num = 1;
 	$cond = re_build_array($cond);
 	$Page = MySession::getPagingIDs('Setup');
-	list($sCond,$sSize,$sURI) = array_filter_values($Page,['Cond','Size','URI']);
+	list($sCond,$sSize,$sURI,$sQuery) = array_filter_values($Page,['Cond','Size','URI','QUERY']);
 	$uri = App::Get_PagingPath();
-	if($uri === $sURI && empty(MySession::$ReqData)) {
+	if($uri === $sURI && empty($_REQUEST)) {	// POST & GET nothing
 		$cond = $sCond;			// same condition
+//		App::$Query = $sQuery;
+		$this->SetHelperProps(['QUERY' => $sQuery]);
 	} else {
 		$Page['Cond'] = $cond;
 		$Page['URI'] = $uri;
+		$Page['QYERY'] = App::$Query;
 	}
 	if(!empty($sSize) && $size === 0) {
 		$size = intval($sSize);
