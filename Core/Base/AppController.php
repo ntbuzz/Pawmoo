@@ -190,7 +190,7 @@ public function AutoPaging($cond, $max_count = 100) {
 	} else {
 		$Page['Cond'] = $cond;
 		$Page['URI'] = $uri;
-		$Page['QYERY'] = App::$Query;
+		$Page['QUERY'] = App::$Query;
 	}
 	if(!empty($sSize) && $size === 0) {
 		$size = intval($sSize);
