@@ -304,7 +304,13 @@ public function ViewTemplate($name,$vars = []) {
             list($sep,$tsep) = str_split($seps);
             $n = strrpos($tag,$sep);
             while( $n !== FALSE) {
-				if(mb_strcut($tag,$n-1,2) === $seps) break;	// empty element
+				$pre_ch = mb_strcut($tag,$n-1,1);
+				if($pre_ch === '\\') {			// escape char
+	                $tag = mb_strcut($tag,0,$n-1) . mb_strcut($tag,$n+1);
+					break 2;			// break on foreach()
+				}
+				if($pre_ch === $sep) --$n;	// same-char of beg-end (size,id,class)
+				if(mb_strcut($tag,$n,2) === $seps) break;		// empty item, go next
                 $m = strrpos($tag,$tsep);
                 $str = ($m === FALSE || $m === $n) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
                 $tag = mb_strcut($tag,0,$n);
@@ -329,15 +335,17 @@ public function ViewTemplate($name,$vars = []) {
                 foreach($section as $token => $sec) {
                     if(is_numeric($token)) {
                         if(is_scalar($sec)) {
+/*
                             if(is_tag_identifier($sec)===2) {   // command-token @Template, etc...
                                 set_array_key_unique($subsec,$sec,[]);
                             } else {
+*/
                                 // separate attribute
                                 $p = '/^([a-zA-Z][a-zA-Z\-]+[^\\\]):(.*)$/';
                                 if(preg_match($p,$sec,$m) === 1) {
                                     $attrList[$m[1]] = ($m[2]==='') ? NULL : trim($m[2],"\"'");   // quote-char trim
                                 } else $innerText .= $sec;
-                            }
+//                            }
                         } else $subsec[] = $sec;
                     } else {
                         $token = $this->expand_Strings(tag_body_name($token),$vars);

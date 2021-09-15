@@ -122,6 +122,7 @@ debug_xlog(DBMSG_DEBUG,['PARSE' => $this->wordlist]);
                         $arr[$wd] = '';
                         break;
                 case 0: 
+					if(mb_substr($wd,0,1) === '\\') $wd = mb_substr($wd,1);
                     $arr[] = $wd; break;
                 }
             }
