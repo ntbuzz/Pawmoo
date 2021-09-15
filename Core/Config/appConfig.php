@@ -34,3 +34,11 @@ define('S_ENV',TRUE);		// App::$EnvData
 define('S_REQ',FALSE);		// App::$ReqData
 
 define('SECTION_TOKEN','<@&+*%-${[');
+
+const LocaleRegion = [
+	'ja'	=> 'ja.jp',			// Japan
+	'en'	=> 'en.us',			// United State
+	'fr'	=> 'en.fr',			// France
+	'de'	=> 'en.de',			// German
+	'zh'	=> 'en.cn',			// Chinese
+];

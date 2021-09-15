@@ -103,7 +103,9 @@ MySession::set_paramIDs('sysinfo',[
     'version'   => CURRENT_VERSION,  // framework version
 ]);
 // LANG and REGION parameter in URL query.
-foreach(['lang'=>$_SERVER['HTTP_ACCEPT_LANGUAGE'], 'region'=>'?'] as $key => $val) {
+$lng = get_locale_lang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+list($lang,$region) = explode('.',(array_key_exists($lng,LocaleRegion))?LocaleRegion[$lng]:'en.?');
+foreach(['lang'=>$lang, 'region'=>$region] as $key => $val) {
 	$uname = strtoupper($key);
 	if(array_key_exists($key, $query)) {
 		$def = $query[$key];
