@@ -219,7 +219,13 @@ private function loadCSV($filename) {
 		while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
 			if(count($data) !== count($row_columns)) {
 				debug_die(['CHECK-CSV'=>['FILE'=>$path,'COL'=>$row_columns,'CSV'=>$data]]);
-			} else if(array_diff($data, $row_columns) === []) continue;	// maybe CSV field HEADER
+			} else {
+				$diff_arr = array_diff($data,$row_columns);
+				if(empty($diff_arr)) continue;	// maybe CSV Header line
+				if(count($diff_arr) !== count($row_columns)) {
+					debug_die(['CHECK-HEADER'=>['FILE'=>$path,'HEAD'=>$diff_arr,'COL'=>$row_columns]]);
+				}
+			}
 			$row = array_combine($row_columns,$data);
 			$this->dbDriver->insertRecord($row);
 		}
