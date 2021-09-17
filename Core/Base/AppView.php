@@ -305,8 +305,8 @@ public function ViewTemplate($name,$vars = []) {
             $n = strrpos($tag,$sep);
             while( $n !== FALSE) {
 				$pre_ch = mb_strcut($tag,$n-1,1);
-				if($pre_ch === '\\') {			// escape char
-	                $tag = mb_strcut($tag,0,$n-1) . mb_strcut($tag,$n+1);
+				if($pre_ch === '\\') {			// escape break
+	                $tag = mb_strcut($tag,0,$n-1) . mb_strcut($tag,$n);
 					break 2;			// break on foreach()
 				}
 				if($pre_ch === $sep) --$n;	// same-char of beg-end (size,id,class)

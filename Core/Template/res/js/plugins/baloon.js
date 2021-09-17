@@ -73,7 +73,7 @@ $.fn.PopupBaloonSetup = function () {
 								this.top = target.pointY;
 							} else {
 								var vt = "bottom-";
-								this.top = target.pointY - thi.height - 9;
+								this.top = target.pointY - this.height - 9;
 							}
 						};
 						// onside , free 共通
