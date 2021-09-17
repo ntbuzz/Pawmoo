@@ -59,17 +59,22 @@ $.fn.PopupBaloonSetup = function () {
 						if (onside) {
 							var hz = "left";
 							var vt = "";
-							this.top = target.pointY - (this.height/2) - 8;
+							this.top = target.pointY - parseInt(this.height/2) - 8;
 							this.left = target.pointX + 8;
 							if (this.top < 0 || (this.top + this.height) > $(window).height()) {
 								hz = "center";
-								this.left = target.pointX - (this.width / 2);
+								this.left = target.pointX - parseInt(this.width / 2);
 							} else rmargin = -8;
 						} else {
 							var hz = "center";
-							var vt = "top-";
-							this.top = target.pointY;
-							this.left = target.pointX - (this.width/2);
+							this.left = target.pointX - parseInt(this.width/2);
+							if (target.pointY < parseInt($(window).height() / 2)) {
+								var vt = "top-";
+								this.top = target.pointY;
+							} else {
+								var vt = "bottom-";
+								this.top = target.pointY - this.height - 9;
+							}
 						};
 						// onside , free 共通
 						if (this.top < 0) {

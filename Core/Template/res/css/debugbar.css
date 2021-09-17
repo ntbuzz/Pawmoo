@@ -1,6 +1,6 @@
 /* デバッグツール用のスタイル */
 .debugBar {
-    z-index:9990;
+    z-index:99999;
     position:fixed;
     float:right;
     overflow: hidden;
