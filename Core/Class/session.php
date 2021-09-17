@@ -35,7 +35,6 @@ class MySession {
 static function InitSession($appname = 'default',$controller='',$unset_param = FALSE) {
 	// アプリケーション毎の有効期限を計算する
 	$limit_time = (defined('SESSION_LIMIT')) ? SESSION_LIMIT : SESSION_DEFAULT_LIMIT;
-	$limit_time = 'now +5 minute';	// for DEBUG
 	$session_limit_time = strtotime($limit_time);
 
 	$appname = strtolower($appname);
