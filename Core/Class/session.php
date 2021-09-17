@@ -3,14 +3,18 @@
  * PHPフレームワーク
  * 	MySession:	Management SESSION variable, POST/GET variables
  */
-//セッションの有効期限を5分に設定
+define('SESSION_DEFAULT_LIMIT','tomorrow 03:00:00');
+
 if(CLI_DEBUG) $_SESSION = [];
 else {
-	$limit_time = strtotime('tomorrow') + (3*60*60);	// tomorrow AM 3:00
+	// セッション全体の有効期限
+	$limit_time = strtotime(SESSION_DEFAULT_LIMIT);	// tomorrow AM 3:00
 	$session_time = $limit_time - time();	// SESSION KEEP as NOW - AM 3:00
 	ini_set('session.gc_maxlifetime',"{$session_time}");
  	ini_set('session.gc_probability','1');
 	ini_set('session.gc_divisor','1');
+//	session_cache_limiter('nocache');				// 
+//	session_save_path('c:/Windows/tmp/pawmoo');		// for windows
 	session_start();
 }
 define('PARAMS_NAME','AppData');
@@ -20,23 +24,34 @@ define('RESOURCE_ID','Resource');
 class MySession {
 	public static $EnvData;
 	public static $ReqData;
+	public static $is_EmptyData;	// is empty GET and POST
 	public static $MY_SESSION_ID;
+	public static $SESSION_LIFE;
 	private static $SYS_SESSION_ID;
 	public static $SysData;			// for SysLog, Resource Push
 	private static $Controller;
 //==============================================================================
 // static クラスにおける初期化処理
 static function InitSession($appname = 'default',$controller='',$unset_param = FALSE) {
+	// アプリケーション毎の有効期限を計算する
+	$limit_time = (defined('SESSION_LIMIT')) ? SESSION_LIMIT : SESSION_DEFAULT_LIMIT;
+	$limit_time = 'now +5 minute';	// for DEBUG
+	$session_limit_time = strtotime($limit_time);
+
 	$appname = strtolower($appname);
 	static::$Controller = (empty($controller)) ? 'Res' : $controller;
-	$session_id = SESSION_PREFIX . "_{$appname}";
-	$session_sys="{$session_id}_sys";
-//	unset($_SESSION[$session_id]);
-	static::$MY_SESSION_ID = $session_id;
-	static::$SYS_SESSION_ID = $session_sys;
+	static::$MY_SESSION_ID = $session_id = SESSION_PREFIX . "_{$appname}";
+	static::$SYS_SESSION_ID= $session_sys="{$session_id}_sys";
+	// 有効期限を確認
+	$session_life = "{$session_id}_life";
+	$session_limit= (array_key_exists($session_life,$_SESSION)) ? $_SESSION[$session_life] : 0;
+	if($session_limit > time()) {
+		static::$EnvData = (array_key_exists($session_id,$_SESSION)) ? $_SESSION[$session_id] : [];
+		static::$SysData = (array_key_exists($session_sys,$_SESSION)) ? $_SESSION[$session_sys] : [];
+	} else {
+		self::ClearSession();
+	}
 	// セッションキーがあれば読み込む
-	static::$EnvData = (array_key_exists($session_id,$_SESSION)) ? $_SESSION[$session_id] : [];
-	static::$SysData = (array_key_exists($session_sys,$_SESSION)) ? $_SESSION[$session_sys] : [];
 	// for Login skip on CLI debug.php processing
 	if(CLI_DEBUG) {
 		static::$EnvData['Login'] = [];
@@ -53,9 +68,9 @@ static function InitSession($appname = 'default',$controller='',$unset_param = F
 	if($unset_param) {
 		unset(static::$EnvData[PARAMS_NAME]);           	// Delete Style Parameter for AppStyle
 		unset(static::$SysData[SYSLOG_ID][$controller]);	// delete contoller LOG
-//		static::$EnvData = [];		// for DEBUG
-//		static::$SysData = [];		// for DEBUG
 	}
+	static::$is_EmptyData = empty($_POST) && empty($_GET);
+	$_SESSION[$session_life] = static::$SESSION_LIFE = $session_limit_time;
 }
 //==============================================================================
 // セッション保存の変数を破棄
