@@ -325,7 +325,11 @@ public function LoadSelection($key_names, $sort_val = false) {
 			$ref_list = array_filter(explode('.', $ref_list), "strlen" );
 			$this->Select[$key_name] = $this->$model->SelectFinder(false,$ref_list,$cond);
 		}
-		if($sort_val) asort($this->Select[$key_name]);
+		switch($sort_val) {
+		case true:
+		case SORTBY_ASCEND:	asort($this->Select[$key_name]); break;
+		case SORTBY_DESCEND:arsort($this->Select[$key_name]); break;
+		}
 	}
 	debug_log(DBMSG_MODEL,['KEYNAME'=>$key_names,'SELECTION'=>$this->Select]);
 }
