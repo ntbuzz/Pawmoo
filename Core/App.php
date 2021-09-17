@@ -90,41 +90,51 @@ public static function ChangeMethod($module,$method,$change_filter=[], $relocate
 //==============================================================================
 // パラメータパスの置換
 public static function ChangeParams($params,$relocate = TRUE) { 
-    static::$execURI['params'] = $params;
+    $params = array_values( array_slice($params + array_fill(0,10,0), 0, 10));
+    static::$execURI['params'] = static::$Params = $params;
     static::$ReLocate = $relocate;        // URLの書き換え
 }
 //==============================================================================
 // パラメータの消去
 public static function CleareParams() {
-	for($i=0;$i < count(static::$Params);++$i) static::$Params[$i] = NULL;
+	static::$execURI['params'] = static::$Params = array_fill(0,10,NULL);
+//	for($i=0;$i < count(static::$Params);++$i) static::$Params[$i] = NULL;
+}
+//==============================================================================
+// メソッドとクエリ文字列の置換後のURLを返す
+private static function get_extensionURL() { 
+	if(static::$MethodExtention !== FALSE) {
+		$execurl = array_filter(static::$execURI,function($v,$k) { return ($k !== "method");},ARRAY_FILTER_USE_BOTH);
+		$execurl[] = static::$execURI['method'] . "." . static::$MethodExtention;
+	} else 	$execurl = static::$execURI;
+    return array_to_URI($execurl);
 }
 //==============================================================================
 // パラメータ無しのパス
 public static function Get_PagingPath() { 
-	return array_to_URI([
+	$path_arr = [
 			static::$execURI['root'],
 			static::$execURI['controller'],
 			static::$execURI['method'],
-			static::$execURI['filter']
-		], NULL
-//		array_key_value(static::$Query,'&')
-		);
+			static::$execURI['filter'],
+		];
+	// if(!empty(static::$MethodExtention)) {
+	// 	$method = $path_arr[2];
+	// 	$path_arr[2] = $path_arr[3];
+	// 	$path_arr[2] = "{$method}." . static::$MethodExtention;
+	// }
+	return array_to_URI($path_arr,NULL);
+//		,array_key_value(static::$Query,'&');
 }
 //==============================================================================
 // メソッドとクエリ文字列の置換後のURLを返す
 public static function Get_RelocateURL($force=FALSE,$query=NULL) { 
     if(static::$ReLocate === FALSE && $force===FALSE) return NULL;
-	if(static::$MethodExtention !== FALSE) {
-		$execurl = array_filter(static::$execURI,function($v,$k) { return ($k !== "method");},ARRAY_FILTER_USE_BOTH);
-		$execurl[] = static::$execURI['method'] . "." . static::$MethodExtention;
-	} else 	$execurl = static::$execURI;
-    $url = array_to_URI($execurl);
+	$url = self::get_extensionURL();
+	// クエリを付加
 	if(!is_array($query)) $query = static::$Query;
-    if(!empty($query)) {                  // exists QUERY strings
-        $q = http_build_query($query);
-        $url = "{$url}?{$q}";
-    }
-//    debug_log(DBMSG_SYSTEM, ["RE-LOCATE-JMP" => static::$execURI,'URI'=>$url]);
+    if(!empty($query)) $url = "{$url}?" . http_build_query($query);;
+    debug_xdump(["RE-LOCATE-JMP" => static::$execURI,'URI'=>$url]);
     return "/{$url}";
 }
 //==============================================================================

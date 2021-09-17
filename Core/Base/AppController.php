@@ -183,14 +183,15 @@ public function AutoPaging($cond, $max_count = 100) {
 	$Page = MySession::getPagingIDs('Setup');
 	list($sCond,$sSize,$sURI,$sQuery) = array_filter_values($Page,['Cond','Size','URI','QUERY']);
 	$uri = App::Get_PagingPath();
-	if($uri === $sURI && empty($_REQUEST)) {	// POST & GET nothing
+	if($uri === $sURI && MySession::$is_EmptyData && App::$Params[0] !== 0) {
 		$cond = $sCond;			// same condition
 //		App::$Query = $sQuery;
-		$this->SetHelperProps(['QUERY' => $sQuery]);
+		$this->SetHelperProps(['Query' => $sQuery]);
 	} else {
 		$Page['Cond'] = $cond;
 		$Page['URI'] = $uri;
 		$Page['QUERY'] = App::$Query;
+		App::ChangeParams([$num,0]);
 	}
 	if(!empty($sSize) && $size === 0) {
 		$size = intval($sSize);
@@ -200,7 +201,8 @@ public function AutoPaging($cond, $max_count = 100) {
 	else if($cnt > $max_count && $size === 0) $size = $max_count;
 	if($size > 0) {
 		$Page['Size'] = $size;
-		$Page['Page'] = App::$Params[0] = $num;
+		$Page['Page'] = $num;
+		App::ChangeParams([$num,0]);
 		$this->Model->SetPage($size,$num);
 	} else $Page = NULL;	// remove Paging.Setup
 	MySession::setPagingIDs('Setup',$Page);
