@@ -104,16 +104,13 @@ MySession::set_paramIDs('sysinfo',[
 ]);
 // LANG and REGION parameter in URL query.
 $lng = get_locale_lang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
-list($lang,$region) = explode('.',(array_key_exists($lng,LocaleRegion))?LocaleRegion[$lng]:'en.?');
+if(defined('LOCALE_REGION') && (array_key_exists($lng,LOCALE_REGION))) {
+	$locale_set = LOCALE_REGION[$lng];
+} else $locale_set = "{$lng}.??";
+list($lang,$region) = explode('.',$locale_set);
 foreach(['lang'=>$lang, 'region'=>$region] as $key => $val) {
 	$uname = strtoupper($key);
-	if(array_key_exists($key, $query)) {
-		$def = $query[$key];
-//		unset($query[$key]);
-	} else {
-//		$def = $val;
-		$def = MySession::get_LoginValue($uname);
-	}
+	$def = (array_key_exists($key, $query)) ? $query[$key] : MySession::get_LoginValue($uname);
 	if(empty($def) || $def === 'undefined') $def = $val;
 	MySession::set_LoginValue([$uname => $def]);
 	$$key = $def;
@@ -181,8 +178,12 @@ if($controllerInstance->is_authorised($method)) {
     //        "Param"         => App::$Params,
             "Re-Location" => App::Get_RelocateURL(),
         ],
-        "QUERY"	=> App::$Query,
-        "POST"	=> MySession::$ReqData,
+		'FORM' => [
+			"GET"	=> App::$Query,
+			"POST"	=> MySession::$ReqData,
+	        "EMPTY"	=> MySession::$is_EmptyData,
+		],
+        "SESSION-LIFE"	=> date('Y/m/d H:i:s',MySession::$SESSION_LIFE),
         "SESSION Variables" => [
             "SESSION_ID"=> MySession::$MY_SESSION_ID,
             "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
