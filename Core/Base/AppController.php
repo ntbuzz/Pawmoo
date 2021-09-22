@@ -148,6 +148,11 @@ protected function ActionPostProcess($action) {
 	return TRUE;
 }
 //==============================================================================
+// Spoofing the Model class in View/Helper.
+protected function SpoofingViewModel($model) {
+	$this->View->Model = $this->Helper->MyModel = $model;
+}
+//==============================================================================
 // execute log output Model call, after $action invoked.
 private function exec_Logging($action) {
 	$no_log = (in_array($this->noLogging,['*',$action],true)) ||
@@ -176,35 +181,39 @@ public function ActionDispatch($action) {
 }
 //==============================================================================
 // Auto Paging.
+// Pager Break: num == 0 && sz == 0
+//				method/filter change (PagingPath())
+//				POST/GET content exists
 public function AutoPaging($cond, $max_count = 100) {
 	list($num,$size) = array_intval(App::$Params);
-	if($num === 0) $num = 1;
 	$cond = re_build_array($cond);
 	$Page = MySession::getPagingIDs('Setup');
 	list($sCond,$sSize,$sURI,$sQuery) = array_filter_values($Page,['Cond','Size','URI','QUERY']);
 	$uri = App::Get_PagingPath();
-	if($uri === $sURI && MySession::$is_EmptyData && App::$Params[0] !== 0) {
-		$cond = $sCond;			// same condition
-//		App::$Query = $sQuery;
-		$this->SetHelperProps(['Query' => $sQuery]);
-	} else {
+	if( ($num|$size) === 0 || !MySession::$is_EmptyData || $uri !== $sURI) {
+		// NEW Paging START
+		if($num === 0) $size = 0;		//  Page# none will be Pageing-CANCEL
+		else if($size === 0) $size = $max_count;
 		$Page['Cond'] = $cond;
 		$Page['URI'] = $uri;
 		$Page['QUERY'] = App::$Query;
-		App::ChangeParams([$num,0]);
-	}
-	if(!empty($sSize) && $size === 0) {
-		$size = intval($sSize);
+	} else {	// Pager Continued
+		if($size === 0) {
+			$size = intval($sSize);		// saved Page-Size
+			if($size === 0) $size = $max_count;
+		}
+		$cond = $sCond;			// previous saved condition
+		$this->SetHelperProps(['Query' => $sQuery]);	// Query is set to HELPER Props
 	}
 	$cnt = $this->Model->getCount($cond);
-	if($cnt < $size )  $size = 0;
-	else if($cnt > $max_count && $size === 0) $size = $max_count;
-	if($size > 0) {
+	if($cnt < $size )  $Page = NULL;	// no-NEED Paging
+	else {
+		$last = ($num - 1) * $size;		// check LAST-Page#
+		if($last  > $cnt) $num = 1;
 		$Page['Size'] = $size;
-		$Page['Page'] = $num;
 		App::ChangeParams([$num,0]);
 		$this->Model->SetPage($size,$num);
-	} else $Page = NULL;	// remove Paging.Setup
+	}
 	MySession::setPagingIDs('Setup',$Page);
 	return $cond;
 }
