@@ -253,18 +253,18 @@ public function ViewTemplate($name,$vars = []) {
             return;
         }
 		$divSection = $this->array_if_selector($divSection, $vars);
-        debug_log(-999,['SEC' =>$divSection, 'VARS'=>$vars]);
         foreach($divSection as $token => $sec) {
             $sec = $this->array_if_selector($sec, $vars);
             if(is_numeric($token)) {
                 if(is_array($sec)) $this->sectionAnalyze($sec,$vars);
                 else echo $sec;
             } else {
+				$token = tag_body_name($token);
                 list($tag,$attrs) = $this->tag_Separate($token,$vars);
                 switch(is_tag_identifier($token)) {
                 case 3:     // set local variable
-                        $token = mb_substr($token,1);   // delete '$' top-char
-                        $vars[$token] = $this->expand_SectionVar($sec,$vars,TRUE);
+                        $tag = mb_substr($tag,1);   // delete '$' top-char
+                        $vars[$tag] = $this->expand_SectionVar($sec,$vars,TRUE);
                         break;
                 case 0: if(empty($sec)) break;
                 case 1:         // tag-section
