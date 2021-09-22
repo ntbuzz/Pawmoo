@@ -13,8 +13,8 @@ else {
 	ini_set('session.gc_maxlifetime',"{$session_time}");
  	ini_set('session.gc_probability','1');
 	ini_set('session.gc_divisor','1');
-//	session_cache_limiter('nocache');				// 
-//	session_save_path('c:/Windows/tmp/pawmoo');		// for windows
+//	session_cache_limiter('none');				// 
+//	session_save_path('c:/Windows/temp/pawmoo');		// for windows
 	session_start();
 }
 define('PARAMS_NAME','AppData');
