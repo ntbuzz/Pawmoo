@@ -1139,7 +1139,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   MySession::$MY_SESSION_ID;            // セッション変数内のアプリ固有キー
 
 ・静的メソッド
-  MySession::InitSession()              // セッション変数を初期化する(Main.phpのみで使用)
+  MySession::InitSession()              // セッション変数を初期化する(Main/resource/debuglogのスタートアップのみで使用)
   MySession::CloseSession()             // セッション変数を書き戻す(Main.phpのみで使用)
   MySession::ClearSession()             // セッションに保存する変数を消去(Logoutメソッド)
   MySession::preservReqData(...$keys)   // REQUEST変数から環境変数に移動する

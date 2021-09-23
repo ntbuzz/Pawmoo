@@ -59,3 +59,11 @@ LocalInfo => [
 	.ja => ロケール情報
     .en => Locale
 ]
+Opening => [
+	.ja => "メソッド開始環境"
+    .en => "INPUT METHOD Enviroment"
+]
+Closing => [
+	.ja => クロージング情報
+    .en => "AFTER METHOD"
+]

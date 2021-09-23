@@ -174,26 +174,31 @@ function debug_log($lvl,...$items) {
         $dmp_msg = "TRACE:: {$trace}\n";
         // 子要素のオブジェクトをダンプする関数
         $dump_object = function ($obj,$indent) use (&$dump_object) {
-            $dmp = "";
-            foreach($obj as $key => $val) {
-                if(array_key_exists($key,EXCLUSION)) continue;      // not dump element check
-                $dmp .= str_repeat(' ',$indent*2) . "[{$key}] = ";
-                if(gettype($val)==='object') {
-					$clsnm = get_class($val);
-                    $dmp .= "[{$clsnm}]\n"; // print_r($val,true);
-                } else if(empty($val)) {
-                    $dmp .= get_null_value($val);
-                } else if(is_array($val)) {
-                    $dmp .= "array(" . count($val) . ")\n";
-                    $dmp .= $dump_object($val,$indent+1);
-                } else if(is_scalar($val)) {
-                    if(is_int($val)) $dmp .= "{$val}\n";
-                    else if(is_bool($val)) $dmp .= "TRUE\n";
-					else {
-                        $val = htmlspecialchars(control_escape($val));
-                        $dmp .= "'{$val}'\n";
-                    }
-                }
+			if(array_values($obj) === $obj) {
+				$vals = implode(", ",array_map(function($v) { return is_string($v) ? "'{$v}'" : $v;}, $obj));
+				$dmp = str_repeat(' ',$indent*2) . "[ {$vals} ]\n";
+			} else {
+	            $dmp = "";
+				foreach($obj as $key => $val) {
+					if(array_key_exists($key,EXCLUSION)) continue;      // not dump element check
+					$dmp .= str_repeat(' ',$indent*2) . "[{$key}] = ";
+					if(gettype($val)==='object') {
+						$clsnm = get_class($val);
+						$dmp .= "[{$clsnm}]\n"; // print_r($val,true);
+					} else if(empty($val)) {
+						$dmp .= get_null_value($val);
+					} else if(is_array($val)) {
+						$dmp .= "array(" . count($val) . ")\n";
+						$dmp .= $dump_object($val,$indent+1);
+					} else if(is_scalar($val)) {
+						if(is_int($val)) $dmp .= "{$val}\n";
+						else if(is_bool($val)) $dmp .= "TRUE\n";
+						else {
+							$val = htmlspecialchars(control_escape($val));
+							$dmp .= "'{$val}'\n";
+						}
+					}
+				}
             }
             return $dmp;
         };
@@ -203,25 +208,34 @@ function debug_log($lvl,...$items) {
                 $dmp_msg .= "{$arg}\n";
             } else if(is_array($arg)) {                        // 配列要素の出力
                 foreach($arg as $msg => $obj) {
-                    if(mb_substr($msg,0,1) === '#') {
-                        $msg[0] = '.';
-                        $msg = LangUI::get_value('debug',$msg);
-                    }
-                    if(gettype($obj)==='object') {
-						$clsnm = get_class($obj);
-                        $dmp_msg .= "{$msg} : Class[{$clsnm}]\n";// . print_r($obj,true);
-                    } else if(empty($obj)) {
-                        $dmp_msg .= "{$msg} : " . get_null_value($obj);
-                    } else if(is_scalar($obj)) {
-                        $dmp_msg .= "{$msg} : {$obj}\n";
-                    } else if(is_array($obj)) {
-                        $dmp_msg .= "===== {$msg} =====\n";
-                        if(empty($obj)) $dmp_msg .= EMPTY_MSG;
-                        else $dmp_msg .= $dump_object($obj,1);
-                    } else {
-                        $dmp_msg .= "{$msg} : Object=".gettype($obj)."\n";
-                        $dmp_msg .= print_r($obj,TRUE);
-                    }
+					if(is_int($msg) && $msg < 0 && is_scalar($obj)) {
+						if(mb_substr($obj,0,1) === '#') {
+							$obj[0] = '.';
+							$obj = LangUI::get_value('debug',$obj);
+						}
+                        $dmp_msg .= "********* {$obj} *********\n";
+//						$dmp_msg .= str_repeat("-", 40)."\n";
+					} else {
+						if(mb_substr($msg,0,1) === '#') {
+							$msg[0] = '.';
+							$msg = LangUI::get_value('debug',$msg);
+						}
+						if(gettype($obj)==='object') {
+							$clsnm = get_class($obj);
+							$dmp_msg .= "{$msg} : Class[{$clsnm}]\n";// . print_r($obj,true);
+						} else if(empty($obj)) {
+							$dmp_msg .= "{$msg} : " . get_null_value($obj);
+						} else if(is_scalar($obj)) {
+							$dmp_msg .= "{$msg} : {$obj}\n";
+						} else if(is_array($obj)) {
+							$dmp_msg .= "===== {$msg} =====\n";
+							if(empty($obj)) $dmp_msg .= EMPTY_MSG;
+							else $dmp_msg .= $dump_object($obj,1);
+						} else {
+							$dmp_msg .= "{$msg} : Object=".gettype($obj)."\n";
+							$dmp_msg .= print_r($obj,TRUE);
+						}
+					}
                 }
             }
         }

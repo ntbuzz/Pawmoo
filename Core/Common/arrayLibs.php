@@ -134,8 +134,9 @@ function array_key_value($arr,$sep=',',$quote='') {
 function array_filter_values($arr,$filter,$alt=[]) {
 	$val = [];
 	if(is_array($arr)) {
-		$alt = array_combine($filter,array_alternative($alt,count($filter)));
-		foreach($filter as $key) $val[] = (array_key_exists($key,$arr)) ? $arr[$key] : $alt[$key];
+		$alt_filter = array_combine($filter,array_alternative($alt,count($filter)));
+		foreach($alt_filter as $key => $alt_val)
+			$val[] = (array_key_exists($key,$arr)) ? $arr[$key] : $alt_val;
 	} else {
 		$val = array_fill(0,count($filter),NULL);
 	}
