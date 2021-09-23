@@ -166,6 +166,7 @@ if($controllerInstance->is_authorised($method)) {
     // Debugging Message
 	$life_time = MySession::$SESSION_LIFE;
     debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
+		-1 => "#Opening",
         '#PathInfo' => [
             'SERVER'    => $_SERVER['SERVER_NAME'],
             "DOCROOT"   => App::$DocRoot,
@@ -186,7 +187,7 @@ if($controllerInstance->is_authorised($method)) {
 			"POST"	=> MySession::$ReqData,
 	        "EMPTY"	=> MySession::$is_EmptyData,
 		],
-        "SESSION-LIMIT"	=> date('Y/m/d H:i:s',$life_time)." ({$life_time})",
+        "SESSION-ALIVE"	=> date('Y/m/d H:i:s',$life_time)." ({$life_time})",
         "SESSION Variables" => [
             "SESSION_ID"=> MySession::$MY_SESSION_ID,
             "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
@@ -197,12 +198,9 @@ if($controllerInstance->is_authorised($method)) {
     $controllerInstance->ActionDispatch($method);
 }
 debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
+	-1 => "#Closing",
     "CLASS-MANAGER" => ClassManager::DumpObject(),
-    "SAVE-AppData"  => MySession::getEnvIDs('AppData',false),     // included App::[sysVAR]
-    "SESSION Resource"  => MySession::syslog_GetData('',TRUE),	// MySession::$SysData[RESOURCE_ID],
-    "Paging"  => MySession::getEnvIDs('Paging',false),
-     "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
-//    "SESSION LOG"  => MySession::$SysData[SYSLOG_ID],
+     "#SessionClose"  => MySession::$EnvData,     // included App::[sysVAR]
 ]);
 sysLog::run_time(DBMSG_CLI|DBMSG_SYSTEM);
 MySession::CloseSession();
