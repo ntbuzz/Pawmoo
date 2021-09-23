@@ -1,4 +1,6 @@
 <?php
+// session start parameter setup
+define('SESSION_INI_MODIFIED', TRUE);
 /* -------------------------------------------------------------
  * Object-orientation PHP mini_framework
  *   Main: routing and redirection process
@@ -95,7 +97,7 @@ if($redirect) {
 }
 require_once('Class/ClassLoader.php');
 ClassLoader::Setup($appname);   // AutoLoader for Application folder
-MySession::InitSession($appname,$controller,TRUE);         // Session Variable SETUP
+MySession::InitSession($appname,$controller,SESSION_ENV_EXEC_ALL);         // Session Variable SETUP
 MySession::set_paramIDs('debugger',DEBUGGER);  // SET DEBUGGER
 MySession::set_paramIDs('sysinfo',[
     'platform'  => PLATFORM_NAME,
@@ -162,6 +164,7 @@ LockDB::LockStart();
 // Login unnecessary, or Login success returned TRUE.
 if($controllerInstance->is_authorised($method)) {
     // Debugging Message
+	$life_time = MySession::$SESSION_LIFE;
     debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
         '#PathInfo' => [
             'SERVER'    => $_SERVER['SERVER_NAME'],
@@ -183,7 +186,7 @@ if($controllerInstance->is_authorised($method)) {
 			"POST"	=> MySession::$ReqData,
 	        "EMPTY"	=> MySession::$is_EmptyData,
 		],
-        "SESSION-LIFE"	=> date('Y/m/d H:i:s',MySession::$SESSION_LIFE),
+        "SESSION-LIMIT"	=> date('Y/m/d H:i:s',$life_time)." ({$life_time})",
         "SESSION Variables" => [
             "SESSION_ID"=> MySession::$MY_SESSION_ID,
             "ENV"       => MySession::$EnvData,     // included App::[sysVAR]

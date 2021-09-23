@@ -35,3 +35,12 @@ define('S_REQ',FALSE);		// App::$ReqData
 
 define('SECTION_TOKEN','<@&+*%-${[');
 
+define('SESSION_PARAMS_CLEAR',	01);
+define('SESSION_LIFE_LIMIT',	02);
+
+define('SESSION_ENV_NOP',			0b0000);
+define('SESSION_ENV_UNSET_PARAMS',	0b0001);
+define('SESSION_ENV_LIFE_LIMIT',	0b0010);
+define('SESSION_ENV_PICKUP_POST',	0b0100);
+define('SESSION_ENV_RESERVED_1',	0b1000);
+define('SESSION_ENV_EXEC_ALL',		0b1111);

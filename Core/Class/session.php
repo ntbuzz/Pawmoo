@@ -3,16 +3,18 @@
  * PHPフレームワーク
  * 	MySession:	Management SESSION variable, POST/GET variables
  */
-define('SESSION_DEFAULT_LIMIT','tomorrow 03:00:00');
+define('SESSION_DEFAULT_LIMIT','tomorrow 05:00:00');
 
 if(CLI_DEBUG) $_SESSION = [];
 else {
-	// セッション全体の有効期限
-	$limit_time = strtotime(SESSION_DEFAULT_LIMIT);	// tomorrow AM 3:00
-	$session_time = $limit_time - time();	// SESSION KEEP as NOW - AM 3:00
-	ini_set('session.gc_maxlifetime',"{$session_time}");
- 	ini_set('session.gc_probability','1');
-	ini_set('session.gc_divisor','1');
+	// GLOBAL SESSION LIFE LIMIT
+	if(defined(SESSION_INI_MODIFIED)) {
+		$global_limit_time = strtotime(SESSION_DEFAULT_LIMIT);	// tomorrow AM 3:00
+		$global_session_time = $global_limit_time - time();	// SESSION KEEP as NOW - AM 3:00
+		ini_set('session.gc_maxlifetime',"{$global_session_time}");
+		ini_set('session.gc_probability','1');
+		ini_set('session.gc_divisor','1');
+	}
 //	session_cache_limiter('none');				// 
 //	session_save_path('c:/Windows/temp/pawmoo');		// for windows
 	session_start();
@@ -24,52 +26,52 @@ define('RESOURCE_ID','Resource');
 class MySession {
 	public static $EnvData;
 	public static $ReqData;
-	public static $is_EmptyData;	// is empty GET and POST
-	public static $MY_SESSION_ID;
-	public static $SESSION_LIFE;
-	private static $SYS_SESSION_ID;
 	public static $SysData;			// for SysLog, Resource Push
+	public static $is_EmptyData;	// is empty GET and POST
+	public static $SESSION_LIFE;	// session data alived limit time
+	public static $MY_SESSION_ID;	// public prop is DEBUG for Main.php
+	private static $SYS_SESSION_ID;
 	private static $Controller;
 //==============================================================================
 // static クラスにおける初期化処理
-static function InitSession($appname = 'default',$controller='',$unset_param = FALSE) {
-	// アプリケーション毎の有効期限を計算する
-	$limit_time = (defined('SESSION_LIMIT')) ? SESSION_LIMIT : SESSION_DEFAULT_LIMIT;
-	$session_limit_time = strtotime($limit_time);
+static function InitSession($appname = 'default',$controller='',$flags = 0) {
+	$env_unset_param = ($flags & SESSION_ENV_UNSET_PARAMS) !== 0;
+	$env_life_limit  = ($flags & SESSION_ENV_LIFE_LIMIT) !== 0;
+	$env_post_data  = ($flags & SESSION_ENV_PICKUP_POST) !== 0;
 
 	$appname = strtolower($appname);
 	static::$Controller = (empty($controller)) ? 'Res' : $controller;
 	static::$MY_SESSION_ID = $session_id = SESSION_PREFIX . "_{$appname}";
 	static::$SYS_SESSION_ID= $session_sys="{$session_id}_sys";
-	// 有効期限を確認
 	$session_life = "{$session_id}_life";
-	$session_limit= (array_key_exists($session_life,$_SESSION)) ? $_SESSION[$session_life] : 0;
-	if($session_limit > time()) {
-		static::$EnvData = (array_key_exists($session_id,$_SESSION)) ? $_SESSION[$session_id] : [];
-		static::$SysData = (array_key_exists($session_sys,$_SESSION)) ? $_SESSION[$session_sys] : [];
-	} else {
-		self::ClearSession();
-	}
-	// セッションキーがあれば読み込む
-	// for Login skip on CLI debug.php processing
-	if(CLI_DEBUG) {
-		static::$EnvData['Login'] = [];
-	}
-	// overwrite real POST/GET variables
+	list($s_limit,$env,$sys) = array_filter_values($_SESSION,[$session_life,$session_id,$session_sys],[0,[],[]]);
+	static::$EnvData = array_intval_recursive($env);
+	static::$SysData = $sys;
 	static::$ReqData = [];
-	$bool_value = [ 'on' => TRUE,'off' => FALSE,'t' => TRUE,'f' => FALSE,'1' => TRUE,'0' => FALSE];
-	foreach($_POST as $key => $val) {		// GET parameter will be check query
-		if(array_key_exists($key,$bool_value)) $val = $bool_value[$key];
-		if(ctype_alnum(str_replace(['-','_'],'', $key))) static::$ReqData[$key] = $val;
+	// for Login skip on CLI debug.php processing
+	if(CLI_DEBUG) static::$EnvData['Login'] = [];
+	// call from Main.php must be application session limit refresh
+	if($env_life_limit) {
+		$limit_time = (defined('SESSION_LIMIT')) ? SESSION_LIMIT : SESSION_DEFAULT_LIMIT;
+		$session_limit_time = strtotime($limit_time);
+		$now_time = time();
+		if($s_limit <= $now_time) self::ClearSession();
+		$_SESSION[$session_life] = static::$SESSION_LIFE = $session_limit_time;
 	}
-	static::$ReqData = array_intval_recursive(static::$ReqData);
-	static::$EnvData = array_intval_recursive(static::$EnvData);
-	if($unset_param) {
+	// POST variables pickup to $ReqData
+	if($env_post_data) {
+		$bool_value = [ 'on' => TRUE,'off' => FALSE,'t' => TRUE,'f' => FALSE,'1' => TRUE,'0' => FALSE];
+		foreach($_POST as $key => $val) {		// GET parameter is set to App::$Query by App class initializ
+			if(array_key_exists($key,$bool_value)) $val = $bool_value[$key];
+			if(ctype_alnum(str_replace(['-','_'],'', $key))) static::$ReqData[$key] = $val;
+		}
+		static::$ReqData = array_intval_recursive(static::$ReqData);
+	}
+	if($env_unset_param) {
 		unset(static::$EnvData[PARAMS_NAME]);           	// Delete Style Parameter for AppStyle
 		unset(static::$SysData[SYSLOG_ID][$controller]);	// delete contoller LOG
 	}
 	static::$is_EmptyData = empty($_POST) && empty($_GET);
-	$_SESSION[$session_life] = static::$SESSION_LIFE = $session_limit_time;
 }
 //==============================================================================
 // セッション保存の変数を破棄
