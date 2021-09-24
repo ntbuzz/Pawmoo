@@ -11,6 +11,7 @@ class App {
     public static $Referer;         // HTTP_REFERER 変数
     public static $Query;           // urlのクエリー文字列の連想配列 = $_GET
     public static $Post;            // FORM POSTの連想配列 = $_POST
+	public static $emptyRequest;	// GET/POST のデータ無しフラグ
     public static $Filter;          // メソッドのフィルタ配列の先頭
     public static $Filters;         // メソッドのフィルタ配列
     public static $Params;          // メソッドの数値パラメータ配列
@@ -35,6 +36,7 @@ class App {
 
 		static::$Query	 = xchange_Boolean($_GET);				// same as query string
 		static::$Post	 = xchange_Boolean($_POST);				// same as form POST string
+		static::$emptyRequest = empty($_POST) && empty($_GET);
 		// フィルタ先頭だけ取り出しておく
         static::$Filter = empty($filters) ? '': $filters[0];
         // メソッドの書き換えによるアドレスバー操作用
@@ -61,12 +63,12 @@ class App {
         );
         // リクエスト情報を記憶
         MySession::setEnvVariables([
-			'AppProperty' => [
-				'QUERY' => static::$Query,
-				'POST' => static::$Post,
-				'CONTROLLER' => static::$Controller,
-				'METHOD' => static::$Method,
-			],
+			// 'AppProperty' => [
+			// 	'QUERY' => static::$Query,
+			// 	'POST' => static::$Post,
+			// 	'CONTROLLER' => static::$Controller,
+			// 	'METHOD' => static::$Method,
+			// ],
 			'sysVAR'	=> static::$SysVAR,
 		]);
     }
