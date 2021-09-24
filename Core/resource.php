@@ -30,7 +30,8 @@ require_once('Base/LangUI.php');           // static class
 
 date_default_timezone_set('Asia/Tokyo');
 $root = basename(dirname(__DIR__));        // Framework Folder
-list($appname,$app_uri,$module,$query) = get_routing_path($root);
+list($appname,$app_uri,$module) = get_routing_path($root);
+$query	 = xchange_Boolean($_GET);		// query string into $_GET
 
 require_once("app/{$appname}/Config/config.php");
 

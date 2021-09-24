@@ -37,7 +37,7 @@ date_default_timezone_set(TIME_ZONE);
 $redirect = false;      // Redirect flag
 $root = basename(dirname(__DIR__));        // Framework Folder
 // REQUEST_URI analyze
-list($appname,$app_uri,$module,$query) = get_routing_path($root);
+list($appname,$app_uri,$module) = get_routing_path($root);
 list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filters,$params) = $module;
 
@@ -81,13 +81,9 @@ if(!is_extst_module($appname,$controller,'Controller')) {
 }
 // need REDIRECT, will be Controller name changed.
 if($redirect) $module[0] = $controller;
-$ReqCont = [
-    'root' => $approot,
-    'module' => $module,
-//    'query' => array_to_query($query),
-];
-$requrl = array_to_URI($ReqCont);
+
 if($redirect) {
+	$requrl = array_to_URI([ $approot, $module ]);
     if(CLI_DEBUG) {
         echo "Location:{$requrl}/";
     } else {
@@ -104,6 +100,8 @@ MySession::set_paramIDs('sysinfo',[
     'copyright' => COPYTIGHT,
     'version'   => CURRENT_VERSION,  // framework version
 ]);
+// INITIALIZED App static class.
+App::__Init($appname,$app_uri,$module);
 // LANG and REGION parameter in URL query.
 $lng = get_locale_lang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 if(defined('LOCALE_REGION') && (array_key_exists($lng,LOCALE_REGION))) {
@@ -112,14 +110,12 @@ if(defined('LOCALE_REGION') && (array_key_exists($lng,LOCALE_REGION))) {
 list($lang,$region) = explode('.',$locale_set);
 foreach(['lang'=>$lang, 'region'=>$region] as $key => $val) {
 	$uname = strtoupper($key);
-	$def = (array_key_exists($key, $query)) ? $query[$key] : MySession::get_LoginValue($uname);
+	$def = App::QueryElements($key);
+	if($def === NULL) $def = MySession::get_LoginValue($uname);
 	if(empty($def) || $def === 'undefined') $def = $val;
 	MySession::set_LoginValue([$uname => $def]);
 	$$key = $def;
 }
-// INITIALIZED App static class.
-App::__Init($appname,$app_uri,$module,$query,$requrl);
-$method = App::$Method;
 // Load if .SHARE use, common library load
 if(SHARE_FOLDER_USE) {
 	$libs = get_php_files("app/.share/common/");
@@ -139,30 +135,28 @@ LangUI::construct($lang,App::Get_AppPath("View/lang/"),['#common',$controller]);
 App::LoadModuleFiles($controller);
 $ContClass = "{$controller}Controller";
 // Create Controller CLASS
-//$controllerInstance = new $ContClass();
 $controllerInstance = ClassManager::Create($ContClass,$ContClass,NULL);
 
 // Method existance Check
-if(!$controllerInstance->is_enable_action($method)) {
+$exemethod = App::$Method;
+if(!$controllerInstance->is_enable_action($exemethod)) {
     if(FORCE_REDIRECT || $method==='') {
-        $method = $controllerInstance->defaultAction;   // get DEFAULT method
+        $exemethod = $method = $controllerInstance->defaultAction;   // get DEFAULT method
     } else {
         $module[0] = $controller;       // may-be rewrited
-        $module[1] = $method;           // may-be rewrited
+        $module[1] = $method;           // may-be rewrited virtual method
         error_response('page-404.php',$appname,$app_uri,$module);
     }
 }
-if(strcasecmp($appname,$controller) === 0) {
-    App::ChangeMethod('',$method,false);     // hide controller in URI
-} else {
-    App::ChangeMethod($controller,$method,false);
-}
-sysLog::__Init($appname,$controller,$method);
+$hide_cont = (strcasecmp($appname,$controller) === 0) ? '' : $controller;
+App::SetModuleExecution($hide_cont,$method, NULL, FALSE);
+
+sysLog::__Init($appname,$controller,$exemethod);
 //=================================
 sysLog::run_start();
 LockDB::LockStart();
 // Login unnecessary, or Login success returned TRUE.
-if($controllerInstance->is_authorised($method)) {
+if($controllerInstance->is_authorised($exemethod)) {
     // Debugging Message
 	$life_time = MySession::$SESSION_LIFE;
     debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
@@ -179,8 +173,8 @@ if($controllerInstance->is_authorised($method)) {
             "Controller"    => App::$Controller,
             "Action"        => App::$Method,
             "Filters"       => App::$Filters,
-    //        "Param"         => App::$Params,
-            "Re-Location" => App::Get_RelocateURL(),
+            "Re-Location"	=> App::Get_RelocateURL(),
+    		"Execution"		=> App::$execURI,
         ],
 		'FORM' => [
 			"GET"	=> App::$Query,
@@ -195,12 +189,13 @@ if($controllerInstance->is_authorised($method)) {
         'LockDB OWNER' => LockDB::GetOwner(),
     ]);
     // Controller Method Dispacher
-    $controllerInstance->ActionDispatch($method);
+    $controllerInstance->ActionDispatch($exemethod);
 }
 debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
 	-1 => "#Closing",
     "CLASS-MANAGER" => ClassManager::DumpObject(),
      "#SessionClose"  => MySession::$EnvData,     // included App::[sysVAR]
+//	'SESSION'	=> $_SESSION,
 ]);
 sysLog::run_time(DBMSG_CLI|DBMSG_SYSTEM);
 MySession::CloseSession();
