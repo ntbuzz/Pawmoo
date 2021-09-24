@@ -25,7 +25,7 @@ const IgnoreFiles =[
 		'$RECYCLE.BIN','System Volume Information'
 ];
 if(php_sapi_name() === 'cli') {
-	define('CLI_DEBUG',TRUE);
+	define('CLI_DEBUG',true);
 } else {
 	define('CLI_DEBUG',FALSE);
 }
