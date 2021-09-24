@@ -25,9 +25,7 @@ define('RESOURCE_ID','Resource');
 
 class MySession {
 	public static $EnvData;
-	public static $ReqData;
 	public static $SysData;			// for SysLog, Resource Push
-	public static $is_EmptyData;	// is empty GET and POST
 	public static $SESSION_LIFE;	// session data alived limit time
 	public static $MY_SESSION_ID;	// public prop is DEBUG for Main.php
 	private static $SYS_SESSION_ID;
@@ -37,7 +35,6 @@ class MySession {
 static function InitSession($appname = 'default',$controller='',$flags = 0) {
 	$env_unset_param = ($flags & SESSION_ENV_UNSET_PARAMS) !== 0;
 	$env_life_limit  = ($flags & SESSION_ENV_LIFE_LIMIT) !== 0;
-	$env_post_data  = ($flags & SESSION_ENV_PICKUP_POST) !== 0;
 
 	$appname = strtolower($appname);
 	static::$Controller = (empty($controller)) ? 'Res' : $controller;
@@ -47,7 +44,6 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 	list($s_limit,$env,$sys) = array_filter_values($_SESSION,[$session_life,$session_id,$session_sys],[0,[],[]]);
 	static::$EnvData = array_intval_recursive($env);
 	static::$SysData = $sys;
-	static::$ReqData = [];
 	// for Login skip on CLI debug.php processing
 	if(CLI_DEBUG) static::$EnvData['Login'] = [];
 	// call from Main.php must be application session limit refresh
@@ -58,20 +54,11 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 		if($s_limit <= $now_time) self::ClearSession();
 		$_SESSION[$session_life] = static::$SESSION_LIFE = $session_limit_time;
 	}
-	// POST variables pickup to $ReqData
-	if($env_post_data) {
-		$bool_value = [ 'on' => TRUE,'off' => FALSE,'t' => TRUE,'f' => FALSE,'1' => TRUE,'0' => FALSE];
-		foreach($_POST as $key => $val) {		// GET parameter is set to App::$Query by App class initializ
-			if(array_key_exists($key,$bool_value)) $val = $bool_value[$key];
-			if(ctype_alnum(str_replace(['-','_'],'', $key))) static::$ReqData[$key] = $val;
-		}
-		static::$ReqData = array_intval_recursive(static::$ReqData);
-	}
+	// POST variables moved App CLASS
 	if($env_unset_param) {
 		unset(static::$EnvData[PARAMS_NAME]);           	// Delete Style Parameter for AppStyle
 		unset(static::$SysData[SYSLOG_ID][$controller]);	// delete contoller LOG
 	}
-	static::$is_EmptyData = empty($_POST) && empty($_GET);
 }
 //==============================================================================
 // セッション保存の変数を破棄
