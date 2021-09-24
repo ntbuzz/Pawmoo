@@ -1112,7 +1112,8 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   App::Get_AppRoot(付加パス)             // アプリケーションのトップパスに付加パスを付けた文字列
   App::WebInclude(読込み配列)            //  css/js/icoファイルの読込タグ出力（単独）
   App::ImageSRC(ファイル名, 属性)        // imagesのインクルードタグ出力
-  App::preservReqData(...$keys)   		// POST変数からセッション変数に移動する
+  App::preservReqData(...$keys)   	 	 // POST変数からセッション変数に移動する
+  App::rollbackReqData(...$keys)  		 // SESSION変数からPOSTに移動する
 
 ◆ デバッガー関数
   デバッグメッセージはオンメモリに展開しているので、大量のメッセージ出力は避けてください。
@@ -1144,7 +1145,6 @@ static::$appRoot
   MySession::InitSession()              // セッション変数を初期化する(Main/resource/debuglogのスタートアップのみで使用)
   MySession::CloseSession()             // セッション変数を書き戻す(Main.phpのみで使用)
   MySession::ClearSession()             // セッションに保存する変数を消去(Logoutメソッド)
-  MySession::rollbackReqData(...$keys)  // SESSION変数からREQUESTに移動する
   MySession::getVariables($tt,...$arr)  // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から値を取得した配列で返す
   MySession::setVariables($tt,$arr)     // ENV(tt=TRUE) または REQ(tt=FALSE) 変数に値をセット
   MySession::set_if_empty($tt,$arr)     // setVariables と同じだが、未定義キーだけを値セットする
