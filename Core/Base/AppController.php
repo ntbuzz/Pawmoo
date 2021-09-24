@@ -191,7 +191,7 @@ public function AutoPaging($cond, $max_count = 100) {
 	$Page = MySession::getPagingIDs('Setup');
 	list($sCond,$sSize,$sURI,$sQuery) = array_filter_values($Page,['Cond','Size','URI','QUERY']);
 	$uri = App::Get_PagingPath();
-	if( ($num|$size) === 0 || !MySession::$is_EmptyData || $uri !== $sURI) {
+	if( ($num|$size) === 0 || !App::$emptyRequest  || $uri !== $sURI) {
 		// NEW Paging START
 		if($num === 0) $size = 0;		//  Page# none will be Pageing-CANCEL
 		else if($size === 0) $size = $max_count;
