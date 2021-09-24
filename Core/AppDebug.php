@@ -146,6 +146,10 @@ function stderr($str) {
 function debug_xdump($items) {}
 function debug_xdie($items) {}
 function debug_xlog($items) {}
+function reuire_debugbar() {
+	$debug = __DIR__ . '/Template/View/debugbar.php';
+	require_once($debug);
+}
 //==========================================================================
 // ログの記録または表示
 function debug_log($lvl,...$items) {
@@ -174,7 +178,11 @@ function debug_log($lvl,...$items) {
         $dmp_msg = "TRACE:: {$trace}\n";
         // 子要素のオブジェクトをダンプする関数
         $dump_object = function ($obj,$indent) use (&$dump_object) {
-			if(array_values($obj) === $obj) {
+			$is_scalar_array = function($arr) {
+				foreach($arr as $element) if(!is_scalar($element)) return FALSE;
+				return TRUE;
+			};
+			if(array_values($obj) === $obj && $is_scalar_array($obj)) {
 				$vals = implode(", ",array_map(function($v) { return is_string($v) ? "'{$v}'" : $v;}, $obj));
 				$dmp = str_repeat(' ',$indent*2) . "[ {$vals} ]\n";
 			} else {

@@ -107,6 +107,7 @@ public function is_authorised($method) {
 						'msg_body'		=> $Login->error_type,
 						'login_user'	=> $userid,
 					]);     // LOGIN PAGE Response, NO returned HERE!
+					return FALSE;
 				}
 			}
 		}

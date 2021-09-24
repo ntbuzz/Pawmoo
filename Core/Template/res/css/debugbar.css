@@ -17,6 +17,7 @@
 .debugtab ul#debugMenu {
     bottom:0;
     min-width: 800px;
+	margin:0;
     padding-left:28px;
     user-select: none;
     overflow: hidden;
@@ -48,6 +49,10 @@
 }
 
 /* メッセージ表示パネル */
+.debug-panel ul.dbcontent  {
+	margin:0;
+	padding:0;
+}
 .debug-panel ul.dbcontent li {
     display:none;
 }
