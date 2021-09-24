@@ -178,7 +178,7 @@ if($controllerInstance->is_authorised($exemethod)) {
         ],
 		'FORM' => [
 			"GET"	=> App::$Query,
-			"POST"	=> MySession::$ReqData,
+			"POST"	=> App::$Post,
 	        "EMPTY"	=> MySession::$is_EmptyData,
 		],
         "SESSION-ALIVE"	=> date('Y/m/d H:i:s',$life_time)." ({$life_time})",

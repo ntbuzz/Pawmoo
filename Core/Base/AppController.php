@@ -89,7 +89,7 @@ public function is_authorised($method) {
 		$bypass_method = (is_array($this->BypassMethod)) ? $this->BypassMethod : [$this->BypassMethod];
 		$bypass_method[] = 'Logout';	// must be append LogoutAction
 		if($this->needLogin && !in_array($method,$bypass_method)) {
-			$data = (CLI_DEBUG) ? $Login->defaultUser() : $Login->is_validLogin(MySession::$ReqData);
+			$data = (CLI_DEBUG) ? $Login->defaultUser() : $Login->is_validLogin(App::$Post);
 			if(is_array($data)) {	// POST data Login Success
 				$this->setup_user_lang_region($data,$model::$LoginUser,$login_key);
 			} else {	// No-POST or Login FAIL
@@ -281,7 +281,7 @@ public function ContentsAction() {
 // Default Add Record Action
 public function AddAction() {
 	$url = App::$Referer;
-	$this->Model->AddRecord(MySession::$ReqData);
+	$this->Model->AddRecord(App::$Post);
 	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
 	header('Location:' . $url);
 //	echo App::$Referer;
@@ -292,7 +292,7 @@ public function UpdateAction() {
 	$num = App::$Params[0];
 	$url = App::$Referer;
 	MySession::setEnvVariables(['RecordNo' => $num]);
-	$this->Model->UpdateRecord($num,MySession::$ReqData);
+	$this->Model->UpdateRecord($num,App::$Post);
 	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
 	header('Location:' . $url);
 }

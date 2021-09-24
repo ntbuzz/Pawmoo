@@ -528,8 +528,9 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     ${$SERVER$}      サーバー名
     ${$SYSROOT$}     フレームワークのトップURL
     ${$APPNAME$}     アプリケーション名
-    ${$URIROOT$}     アプリケーションURLのトップ
-    ${$URI$}         リクエストされたURI
+    ${$APPROOT$}     アプリケーションURLのトップ
+    ${$REQURI$}      リクエストされたURI
+    ${$URI$}         リクエストされたURIからクエリを除いた文字列
     ${$REFERER$}     リファラー
     ${$controller$}  コントローラ名
     ${$method$}      メソッド名 (Actionを付加する前)
@@ -1096,7 +1097,8 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   App::$AppName;                // アプリケーション名
   App::$DocRoot;                // DOCUMENT_ROOT 変数
   App::$Referer;                // HTTP_REFERER
-  App::$Query;                  // urlのクエリー文字列の連想配列
+  App::$Query;                  // $_GET 変数の連想配列
+  App::$Post;                   // $_POST 変数の連想配列
   App::$Filter;                 // メソッドのフィルタ指示
   App::$Filters;                // マルチフィルタのフィルタ配列
   App::$Params;                 // メソッドの数値パラメータ配列、または拡張子付きのファイル名
@@ -1110,6 +1112,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   App::Get_AppRoot(付加パス)             // アプリケーションのトップパスに付加パスを付けた文字列
   App::WebInclude(読込み配列)            //  css/js/icoファイルの読込タグ出力（単独）
   App::ImageSRC(ファイル名, 属性)        // imagesのインクルードタグ出力
+  App::preservReqData(...$keys)   		// POST変数からセッション変数に移動する
 
 ◆ デバッガー関数
   デバッグメッセージはオンメモリに展開しているので、大量のメッセージ出力は避けてください。
@@ -1135,14 +1138,12 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 ◆ MySession クラス
 ・静的変数
   MySession::$EnvData;                  // セッションに記憶する環境変数
-  MySession::$ReqData;                  // REQUEST されてきた変数(POST/GET)
   MySession::$MY_SESSION_ID;            // セッション変数内のアプリ固有キー
-
+static::$appRoot
 ・静的メソッド
   MySession::InitSession()              // セッション変数を初期化する(Main/resource/debuglogのスタートアップのみで使用)
   MySession::CloseSession()             // セッション変数を書き戻す(Main.phpのみで使用)
   MySession::ClearSession()             // セッションに保存する変数を消去(Logoutメソッド)
-  MySession::preservReqData(...$keys)   // REQUEST変数から環境変数に移動する
   MySession::rollbackReqData(...$keys)  // SESSION変数からREQUESTに移動する
   MySession::getVariables($tt,...$arr)  // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から値を取得した配列で返す
   MySession::setVariables($tt,$arr)     // ENV(tt=TRUE) または REQ(tt=FALSE) 変数に値をセット

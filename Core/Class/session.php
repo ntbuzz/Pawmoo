@@ -86,44 +86,33 @@ static function CloseSession() {
 	$_SESSION[static::$SYS_SESSION_ID] = static::$SysData;
 }
 //==============================================================================
-// REQUEST変数から環境変数に移動する
-static function preservReqData($envKey,...$keys) {
-	foreach($keys as $nm) {
-		if(array_key_exists($nm,static::$ReqData)) {
-			static::$EnvData[$envKey][$nm] = static::$ReqData[$nm];
-			unset(static::$ReqData[$nm]);
-		}
-	}
-}
-//==============================================================================
-// SESSION変数からREQUESTに移動する
-static function rollbackReqData($envKey,...$keys) {
-	foreach($keys as $nm) {
-		if(array_key_exists($nm,static::$EnvData[$envKey])) {
-			static::$ReqData[$nm] = static::$EnvData[$envKey][$nm];
-//			unset(static::$EnvData[$envKey][$nm]);
-		}
-		unset(static::$EnvData[$envKey]);
-	}
-}
-//==============================================================================
 // ENV変数値を返す
 static function getEnvValues(...$keys) {
-	if(count($keys)===1) $keys = $keys[0];
-	return self::getVariables2(static::$EnvData,$keys);
+//debug_dump(["KEYS"=>$keys]);
+	if(count($keys)===1) {
+		$keys = $keys[0];
+		return (array_key_exists($keys,static::$EnvData)) ? static::$EnvData[$keys] : NULL;
+	}
+	$result = [];
+	foreach($keys as $nm) $result[] = (array_key_exists($nm,static::$EnvData)) ? static::$EnvData[$nm] : '';
+	return $result;
 }
-static function getEnvData($keys) {
-	return self::getValue2(static::$EnvData,$keys);
-}
+// 廃止　→ getEnvValues() の引数ひとつで代用可
+// static function getEnvData($keys) {
+// 	return (array_key_exists($key,static::$EnvData)) ? static::$EnvData[$key] : NULL;
+// }
 //==============================================================================
 // ENV変数に値をセット
 static function setEnvVariables($arr) {
-	self::setVariables2(static::$EnvData,$arr);
+	foreach($arr as $key => $val) static::$EnvData[$key] = $val;
 }
 //==============================================================================
 // setVariables と同じだが、未定義キーだけを値セットする
+// 冗長だが PHP5.6 でも動作する方法をとる
 static function setEnv_if_empty($arr) {
-	self::set_if_empty2(static::$EnvData,$arr);
+	foreach($arr as $key => $val) {
+		if(!array_key_exists($key,static::$EnvData)) static::$EnvData[$key] = $val;
+	}
 }
 //==============================================================================
 // ドット識別子指定はENV変数のみ
@@ -186,54 +175,6 @@ static function setPagingIDs($id,$val) {
     }
 	$ee = $val;
 	static::$EnvData['Paging'][static::$Controller] = $page;
-}
-//==============================================================================
-// REQ変数操作、REQ変数はフラットな連想配列構造なので、ドット識別子IFは不要
-//==============================================================================
-// POST変数値を返す
-static function getPostValues(...$keys) {
-	if(count($keys)===1) $keys = $keys[0];
-	return self::getVariables2(static::$ReqData,$keys);
-}
-static function getPostData($keys) {
-	return self::getValue2(static::$ReqData,$keys);
-}
-//==============================================================================
-// POST変数に値をセット
-static function setPostVariables($arr) {
-	self::setVariables2(static::$ReqData,$arr);
-}
-//==============================================================================
-// setVariables と同じだが、未定義キーだけを値セットする
-static function setPost_if_empty($arr) {
-	self::set_if_empty2(static::$ReqData,$arr);
-}
-//==============================================================================
-// 連想配列から変数値を返す
-private static function getValue2($varData,$key) {
-	return (array_key_exists($key,$varData)) ? $varData[$key] : NULL;
-}
-//==============================================================================
-// 連想配列から変数配列を返す
-private static function getVariables2($varData,$arr) {
-	$result = is_array($arr) ? [] : NULL;
-	if(is_array($arr))  {
-		foreach($arr as $nm) $result[] = (array_key_exists($nm,$varData)) ? $varData[$nm] : '';
-		return $result;
-	} else 	return (array_key_exists($arr,$varData)) ? $varData[$arr] : NULL;
-}
-//==============================================================================
-// 連想配列に値をセット
-private static function setVariables2(&$varData,$arr) {
-	foreach($arr as $key => $val) $varData[$key] = $val;
-}
-//==============================================================================
-// setVariables と同じだが、未定義キーだけを値セットする
-// 冗長だが PHP5.6 でも動作する方法をとる
-private static function set_if_empty2(&$data,$arr) {
-	foreach($arr as $key => $val) {
-		if(!array_key_exists($key,$data)) $data[$key] = $val;
-	}
 }
 //==============================================================================
 // ENV変数にアプリケーションパラメータを識別子指定で設定する
@@ -322,37 +263,16 @@ static function setup_Login($login=NULL) {
 }
 /*
 ==============================================================================
-	旧メソッドから新メソッドへの読替え
-PostToEnv($keys)	=>	preservReqData($envKey,...$keys)	// REQUEST変数から環境変数に移動する
-						rollbackReqData($envKey,...$keys)	// SESSION変数からREQUESTに移動する
-PostVars(...$arr)	=> 	getPostValues(...$keys)				// 複数のPOST変数値を返す
-						getPostData($keys)					// POST変数値
-SetPostVars($arr)  	=> 	setPostVariables($arr)				// POST変数に値をセット
-						setPost_if_empty($arr)				// 未定義キーだけを値セットする
-EnvVars(...$arr)	=> 	getEnvValues(...$keys)				// 複数のENV変数値を返す
-						getEnvData($keys)					// ENV変数値
-SetEnvVar($nm,$val) =>	setEnvVariables($arr)				// 複数のENV変数に値をセット
-SetDefault($nm,$val)=> 	setEnv_if_empty($arr)				// 未定義キーだけを値セットする
-get_envVars($names) =>	getEnvIDs($id_name,$scalar)			// ドット識別子指定でENV変数を取得
-						setEnvIDs($nameID,$val,$append )	// ENV変数にドット識別子指定で保存する
-						set_paramIDs($names,$val)			// AddData変数にnames識別子指定で設定する
-						get_paramIDs($names)				// AppData変数からname識別子指定で値を取得
-UnsetEnvData($arr) 	=> 	rm_EnvData(...$arr)					// ENV変数をクリア
-						rmEnvIDs($nameID)					// ドット識別子指定でENV変数を削除
-getLoginValue($id)		=> get_LoginValue($id)				// ログイン情報を取得
-setLoginValue($id,$val) => get_LoginValue($arr)				// ログイン情報に書込
-getLoginInfo() 			=> get_LoginValue(NULL)				// ログイン配列を取得
-SetLogin($login) 		=> setup_Login($login)				// ログイン情報を置換
-ClearLogin()  			=> setup_Login(NULL)				// ログイン情報を消去
-=================================================================
-以下は新メソッドのみ
-	ページング情報のR/W
-		assignPagingIDs($id,$val)
-		getPagingIDs($id)
-		setPagingIDs($id,$val)
-	システムログの操作
-		syslog_SetData($names,$val,$append,$resource)		// システムログを格納
-		syslog_GetData($names,$resource)					// システムログを取得
-		syslog_RenameID($trans)								// システムログのID名変更
+POST変数値の操作は App クラスへ移動
+==============================================================================
+		App::PostElements($filter)				getPostValues(...$keys)
+												getPostData($keys)
+		App::setPostElements($arr)				setPostVariables($arr)
+		App::set_if_empty($arr)					setPost_if_empty($arr)
+		App::preservReqData($envKey,...$keys)	preservReqData($envKey,...$keys)
+		App::rollbackReqData($envKey,...$keys)	rollbackReqData($envKey,...$keys)
+-------------------------
+	旧メソッド読み替えコメントは終了
+==============================================================================
 */
 

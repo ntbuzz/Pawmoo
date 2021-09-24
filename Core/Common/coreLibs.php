@@ -454,7 +454,8 @@ function expand_text($class,$str,$recdata,$vars,$match_all = false) {
                         $val = MySession::getEnvIDs($var,true);	// scalar-Get
                         if($val !== '') break;
                     }
-					$val = ($tt==="'") ? MySession::getEnvIDs($var,true) : MySession::getPostValues($var);
+//					$val = ($tt==="'") ? MySession::getEnvIDs($var,true) : MySession::getPostValues($var);
+					$val = ($tt==="'") ? MySession::getEnvIDs($var,true) : App::PostElements($var);
                 }
                 break;
 			// cannot use in RESOURCE (AppStyle)

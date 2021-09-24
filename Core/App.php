@@ -235,6 +235,40 @@ public static function PostElements($filter) {
 	return self::query_element(static::$Post,$filter);
 }
 //==============================================================================
+// POST変数に値をセット
+static function setPostElements($arr) {
+	foreach($arr as $key => $val) static::$Post[$key] = $val;
+}
+//==============================================================================
+// setPostElements と同じだが、未定義キーだけを値セットする
+// 冗長だが PHP5.6 でも動作する方法をとる
+private static function set_if_empty($arr) {
+	foreach($arr as $key => $val) {
+		if(!array_key_exists($key,static::$Post)) static::$Post[$key] = $val;
+	}
+}
+//==============================================================================
+// POST変数から環境変数に移動する
+static function preservReqData($envKey,...$keys) {
+	foreach($keys as $nm) {
+		if(array_key_exists($nm,static::$Post)) {
+			MySession::$EnvData[$envKey][$nm] = static::$Post[$nm];
+			unset(static::$Post[$nm]);
+		}
+	}
+}
+//==============================================================================
+// SESSION変数からPOSTに移動する
+static function rollbackReqData($envKey,...$keys) {
+	foreach($keys as $nm) {
+		if(array_key_exists($nm,MySession::$EnvData[$envKey])) {
+			static::$Post[$nm] = MySession::$EnvData[$envKey][$nm];
+			unset(MySession::$EnvData[$envKey][$nm]);
+		}
+//		unset(MySession::$EnvData[$envKey]);
+	}
+}
+//==============================================================================
 // cdd/js/icoファイルの読込タグ出力（単独）
     private static function includeTag($tagfile) {
         if(is_array($tagfile)) {
