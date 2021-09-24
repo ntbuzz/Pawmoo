@@ -40,7 +40,7 @@ private function Logging($module,$method,$rec_id) {
 	$logtime = time();
 	$now	= date($this->TimeFormat ,$logtime);
 	$query	= array_key_value(App::$Query,'&');
-	$post	= array_key_value(MySession::$ReqData,'&');
+	$post	= array_key_value(App::$Post,'&');
 	if($rec_id === 0) $rec_id = '';
 	// 記録ログレコードを作成
 	$row = [
