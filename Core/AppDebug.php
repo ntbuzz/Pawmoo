@@ -183,7 +183,9 @@ function debug_log($lvl,...$items) {
 				return TRUE;
 			};
 			if(array_values($obj) === $obj && $is_scalar_array($obj)) {
-				$vals = implode(", ",array_map(function($v) { return is_string($v) ? "'{$v}'" : $v;}, $obj));
+				$vals = implode(", ",array_map(function($v) {
+					return (is_string($v)) ? str_replace(["\r\n","\r","\n","\t"],['\r\n', '\r', '\n', '\t'], $v) :$v;
+				}, $obj));
 				$dmp = str_repeat(' ',$indent*2) . "[ {$vals} ]\n";
 			} else {
 	            $dmp = "";
@@ -254,7 +256,8 @@ function debug_log($lvl,...$items) {
     if(!empty($dmp_info)) {
         switch($lvl) {
         case -DBMSG_STDERR:  stderr($dmp_info); break;
-        case -DBMSG_DIE:     die("<pre>\n{$dmp_info}\n</pre>\n");
+        case -DBMSG_DIE:    //ySession::CloseSession(); // Session Close before die();
+							die("<pre>\n{$dmp_info}\n</pre>\n");
         case -DBMSG_DUMP:    echo "<pre>\n{$dmp_info}\n</pre>\n"; break;
         case -DBMSG_NOLOG:   $lvl  = -99;
         default:
