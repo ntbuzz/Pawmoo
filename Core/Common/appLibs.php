@@ -114,9 +114,9 @@ function json_escape($a) {
             $n = strlen($m[0]);
 			return str_repeat("\\", $n*2);
         },
-        "/\r\n|\r|\n|\t|\f|\b/"		=> function($m) {		// controll-char \r\n\t
+        "/(\r\n|\r|\n|\t|\f)/"		=> function($m) {		// controll-char \r\n\t
 			$ctrl = ["\r\n"=>'\n', "\r"=>'\n', "\n"=>'\n', "\t"=>'\t', "\f"=>'\f', "\b"=>'\b'];
-			return $ctrl[$m[0]];
+			return $ctrl[$m[1]];
         },
         "/[\"\/]/"	=> function($m) {		// not escape " , / 
             return "\\{$m[0]}";
