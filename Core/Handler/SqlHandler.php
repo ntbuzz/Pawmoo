@@ -275,8 +275,8 @@ public function deleteRecord($wh) {
 protected function sql_safequote(&$value) {
 	foreach($value as $key => $val) {
 		if(gettype($val) === 'string') {
-//			$value[$key] = str_replace(["'",'\\'],["''",'\\\\'],$val);
-			$value[$key] = str_replace("'","''",$val);
+			$value[$key] = str_replace(["'",'\\'],["''",'\\\\'],$val);
+//			$value[$key] = str_replace("'","''",$val);
 		}
 	}
 }
