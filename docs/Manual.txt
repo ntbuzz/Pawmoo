@@ -1159,7 +1159,7 @@ static::$appRoot
   MySession::set_LoginValue($arr)       // ログイン情報に書込
   MySession::setup_Login($login=NULL)   // ログイン情報を置換
 
-  MySession::assignPagingIDs($id,$val)	// $valに値が設定されていればPaging情報の$idに書込
+  MySession::assignPagingIDs($id,$val)	// $valが"FALSE"ならid値を返し、値が設定されていればidに書込む
   MySession::getPagingIDs($id) 			// Paging情報の $id 名を取得
   MySession::setPagingIDs($id,$val)		// Paging情報の $id 名に書込,$val === NULL なら削除
 
