@@ -190,7 +190,7 @@ public function createTableSet($exec,$csv_only,$depend=[]) {
 	if(isset($this->InitCSV)) {
 		$sql = $this->dbDriver->truncate_sql($this->MyTable);
 		$this->doSQL($exec,$sql);
-		debug_log(DBMSG_NOLOG,["INITIAL DATA" => $this->InitCSV]);
+		debug_sump(["INITIAL DATA" => $this->InitCSV]);
 		if(is_array($this->InitCSV)) {
 			if($exec) {
 				$row_columns = array_keys($this->Schema);

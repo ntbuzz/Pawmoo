@@ -3,7 +3,7 @@
  * Object Oriented PHP MVC Framework
  *  appConfig: Framework Configuration
  */
-define('CURRENT_VERSION','0.90 2021-09-17');
+define('CURRENT_VERSION','0.92 2021-09-28');
 define('COPYTIGHT','Copyright (c) 2017 - 2021 by nTak');
 define('PLATFORM_NAME','pawmoo');
 define('SESSION_PREFIX','_minimvc_pawmoo_maps');
@@ -25,7 +25,7 @@ const IgnoreFiles =[
 		'$RECYCLE.BIN','System Volume Information'
 ];
 if(php_sapi_name() === 'cli') {
-	define('CLI_DEBUG',TRUE);
+	define('CLI_DEBUG',true);
 } else {
 	define('CLI_DEBUG',FALSE);
 }

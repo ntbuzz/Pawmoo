@@ -175,6 +175,7 @@ function array_intval($arr) {
 //==============================================================================
 // convert to num STRING to INTEGER
 function array_intval_recursive($arr) {
+	if($arr === NULL) return NULL;
     if(is_scalar($arr)) return (is_numeric($arr))?intval($arr):$arr;
     return array_map(function($v) {
         if(is_array($v)) return array_intval_recursive($v);

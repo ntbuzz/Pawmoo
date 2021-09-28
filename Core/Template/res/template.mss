@@ -24,6 +24,12 @@ Stylesheet => [
             @debugger:debugbar.css   // use DEBUGGER,if AppData['debugger'] in SESSION is not FLASE
         ]
     ]
+	debugbar => [
+        +import => [
+            libstyle.css        // Template Default Style
+            debugbar.css
+        ]
+	]
     checklist => [			// debug
         +import => [
             bodystyle.css        // Template Default Style
@@ -60,6 +66,14 @@ Javascript => [
             funcs.js                // common function/prototype
         ]
     ]
+	debugbar => [
+        +jquery => [
+			plugins => [
+				misc.js             	// miscellaneous plugin
+			]
+            debugbar.js
+        ]
+	]
     checklist => [			// debug
         +jquery => [
 			plugins => [

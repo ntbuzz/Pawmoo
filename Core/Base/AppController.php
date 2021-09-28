@@ -89,7 +89,7 @@ public function is_authorised($method) {
 		$bypass_method = (is_array($this->BypassMethod)) ? $this->BypassMethod : [$this->BypassMethod];
 		$bypass_method[] = 'Logout';	// must be append LogoutAction
 		if($this->needLogin && !in_array($method,$bypass_method)) {
-			$data = (CLI_DEBUG) ? $Login->defaultUser() : $Login->is_validLogin(MySession::$ReqData);
+			$data = (CLI_DEBUG) ? $Login->defaultUser() : $Login->is_validLogin(App::$Post);
 			if(is_array($data)) {	// POST data Login Success
 				$this->setup_user_lang_region($data,$model::$LoginUser,$login_key);
 			} else {	// No-POST or Login FAIL
@@ -107,6 +107,7 @@ public function is_authorised($method) {
 						'msg_body'		=> $Login->error_type,
 						'login_user'	=> $userid,
 					]);     // LOGIN PAGE Response, NO returned HERE!
+					return FALSE;
 				}
 			}
 		}
@@ -181,28 +182,29 @@ public function ActionDispatch($action) {
 }
 //==============================================================================
 // Auto Paging.
-// Pager Break: num == 0 && sz == 0
-//				method/filter change (PagingPath())
-//				POST/GET content exists
+// Pager Break: URI != prev-URI
+//				Saved-COND === NULL
+//				COND not NULL AND Saved-COND != COND
+//				COND Record-Count < page-size
+// Page-Size param POST, it willbe setup App::$Params[1]
+//
 public function AutoPaging($cond, $max_count = 100) {
-	list($num,$size) = array_intval(App::$Params);
-	$cond = re_build_array($cond);
+	list($num,$size) = array_intval(App::$Params);		// from URL parameter .../page#/size#
+	// check SAVED Paging-Param
 	$Page = MySession::getPagingIDs('Setup');
 	list($sCond,$sSize,$sURI,$sQuery) = array_filter_values($Page,['Cond','Size','URI','QUERY']);
-	$uri = App::Get_PagingPath();
-	if( ($num|$size) === 0 || !MySession::$is_EmptyData || $uri !== $sURI) {
-		// NEW Paging START
-		if($num === 0) $size = 0;		//  Page# none will be Pageing-CANCEL
-		else if($size === 0) $size = $max_count;
+	if($num === 0) $num = 1;
+	if($size === 0) {
+		$size = intval($sSize);
+		if($size === 0) $size = $max_count;
+	}
+	if($uri !== $sURI || empty($sCond) || (!empty($cond) && $sCond !== $cond))  {
 		$Page['Cond'] = $cond;
 		$Page['URI'] = $uri;
 		$Page['QUERY'] = App::$Query;
-	} else {	// Pager Continued
-		if($size === 0) {
-			$size = intval($sSize);		// saved Page-Size
-			if($size === 0) $size = $max_count;
-		}
-		$cond = $sCond;			// previous saved condition
+	} else {
+		$cond = $sCond;				// repeat by saved condition
+		if($size !== intval($sSize)) $num = 1;	// different size must be jump to Page-1
 		$this->SetHelperProps(['Query' => $sQuery]);	// Query is set to HELPER Props
 	}
 	$cnt = $this->Model->getCount($cond);
@@ -232,8 +234,9 @@ public function ListAction() {
 //==============================================================================
 // Default Page Action
 public function PageAction() {
-	$this->AutoPaging([],50);
-	$this->ListAction();
+	$cond = $this->AutoPaging([], 50);
+	$this->Model->RecordFinder($cond,NULL);
+	$this->View->PutLayout();
 }
 //==============================================================================
 // Default Find Action
@@ -280,7 +283,7 @@ public function ContentsAction() {
 // Default Add Record Action
 public function AddAction() {
 	$url = App::$Referer;
-	$this->Model->AddRecord(MySession::$ReqData);
+	$this->Model->AddRecord(App::$Post);
 	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
 	header('Location:' . $url);
 //	echo App::$Referer;
@@ -291,7 +294,7 @@ public function UpdateAction() {
 	$num = App::$Params[0];
 	$url = App::$Referer;
 	MySession::setEnvVariables(['RecordNo' => $num]);
-	$this->Model->UpdateRecord($num,MySession::$ReqData);
+	$this->Model->UpdateRecord($num,App::$Post);
 	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
 	header('Location:' . $url);
 }

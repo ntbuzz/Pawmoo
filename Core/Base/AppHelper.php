@@ -100,7 +100,7 @@ public function ALink_str($lnk,$txt,$attrs=false) {
 	else if(!is_array($attrs)) $attrs = [];
 	if(get_protocol($href) !== NULL) $attrs['target'] = '_blank';
 	$attr = array_key_value($attrs,' ',"'");
-	return "<a{$uline} href='{$href}'{$attr}>{$txt}</a>";
+	return "<a href='{$href}'{$attr}>{$txt}</a>";
 }
 //==============================================================================
 // generate Page Button LABEL Tag
@@ -118,7 +118,7 @@ public function ALink_str($lnk,$txt,$attrs=false) {
 	}
 //==============================================================================
 // Pager Buttons
-public function MakePageLinks() {
+public function MakePageLinks($args) {
 	if($this->MyModel->pagesize == 0) return;
 	$npage = intval(($this->MyModel->record_max+$this->MyModel->pagesize-1)/$this->MyModel->pagesize);
 	$pnum = $this->MyModel->page_num;

@@ -30,7 +30,8 @@ require_once('Base/LangUI.php');           // static class
 
 date_default_timezone_set('Asia/Tokyo');
 $root = basename(dirname(__DIR__));        // Framework Folder
-list($appname,$app_uri,$module,$query) = get_routing_path($root);
+list($appname,$app_uri,$module) = get_routing_path($root);
+$query	 = xchange_Boolean($_GET);		// query string into $_GET
 
 require_once("app/{$appname}/Config/config.php");
 
@@ -47,7 +48,7 @@ if(array_key_exists('lang', $query)) {
     $lang = MySession::get_LoginValue('LANG');
     if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 }
-$contfiles = ($controller=='Res')?'resource':['resource',$controller];
+$contfiles = ($controller=='Res')?'#resource':['#resource',$controller];
 LangUI::construct($lang,"app/{$appname}/View/lang/",$contfiles);    // Load CORE lang and SET app-Folder
 // モジュール名と拡張子を使いテンプレートを決定する
 $AppStyle = new AppStyle($appname,$app_uri, $controller, $filename, $ext);

@@ -11,7 +11,6 @@ require_once('arrayLibs.php');
 function get_routing_path($root) {
     $vv = $_SERVER['REQUEST_URI'];
     list($requrl,$q_str) = (mb_strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
-	$query	 = xchange_Boolean($_GET);				// same as query string
     $argv = explode('/', trim($requrl,'/'));
     if($root === $argv[0]) {
         array_shift($argv);         // retrieve application name
@@ -45,14 +44,13 @@ function get_routing_path($root) {
         $filters,
         array_intval_recursive($params),
     );
-    $ret = [$appname,$app_uri,$module,$query];
+    $ret = [$appname,$app_uri,$module];
     debug_xdump([
 		'Framework Information' => [
             "SERVER" => $_SERVER['REQUEST_URI'],
             "app_uri"=> $app_uri,
             "appname"=> $appname,
             "Module"=> $module,
-            "query"=> $query,
         ],
         "RET" => $ret,
     ]);
@@ -96,7 +94,8 @@ function error_response($error_page,$app_name, $app_uri, $module) {
         return (gettype($a) === 'string')?strtolower($a):'';},$module);
     list($sys_root,$app_root) = $app_uri;
     require_once("Core/error/{$error_page}");
-    exit;
+	require_once('Core/Template/View/debugbar.php');
+//    exit;
 }
 //==============================================================================
 // Output Message Page
@@ -116,7 +115,8 @@ function page_response($app_page,$msg_array) {
             break;
         }
     }
-    exit;
+	require_once('Core/Template/View/debugbar.php');
+//    exit;
 }
 //==============================================================================
 // check exist of CONTOLLER folder
@@ -454,7 +454,7 @@ function expand_text($class,$str,$recdata,$vars,$match_all = false) {
                         $val = MySession::getEnvIDs($var,true);	// scalar-Get
                         if($val !== '') break;
                     }
-					$val = ($tt==="'") ? MySession::getEnvIDs($var,true) : MySession::getPostValues($var);
+					$val = ($tt==="'") ? MySession::getEnvIDs($var,true) : App::PostElements($var);
                 }
                 break;
 			// cannot use in RESOURCE (AppStyle)

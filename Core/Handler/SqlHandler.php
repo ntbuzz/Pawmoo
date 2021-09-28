@@ -271,10 +271,13 @@ public function deleteRecord($wh) {
 		return "SELECT * FROM {$this->table} WHERE {$sql};";
 	}
 //==============================================================================
-// escape to single-quote('), (\)
+// escape to single-quote(')
 protected function sql_safequote(&$value) {
 	foreach($value as $key => $val) {
-		if(gettype($val) === 'string') $value[$key] = str_replace(["'",'\\'],["''",'\\\\'],$val);
+		if(gettype($val) === 'string') {
+			$value[$key] = str_replace(["'",'\\'],["''",'\\\\'],$val);
+//			$value[$key] = str_replace("'","''",$val);
+		}
 	}
 }
 //==============================================================================

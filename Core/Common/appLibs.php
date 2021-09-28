@@ -108,7 +108,20 @@ function echo_safe($atext,$is_safe = TRUE) {
 //==============================================================================
 // escape char for JSON value
 function json_escape($a) {
-    $vv = str_replace(["\\","/","\r\n", "\r", "\n","\"","\t"],["\\\\","\\/","\\n","\\n","\\n","\\\"","\\t"], $a);
+	// controll-code change
+    $vv = preg_replace_callback_array([
+        "/\\\\+/"				=> function($m) {		// back-slash
+            $n = strlen($m[0]);
+			return str_repeat("\\", $n*2);
+        },
+        "/(\r\n|\r|\n|\t|\f)/"		=> function($m) {		// controll-char \r\n\t
+			$ctrl = ["\r\n"=>'\n', "\r"=>'\n', "\n"=>'\n', "\t"=>'\t', "\f"=>'\f', "\b"=>'\b'];
+			return $ctrl[$m[1]];
+        },
+        "/[\"\/]/"	=> function($m) {		// not escape " , / 
+            return "\\{$m[0]}";
+        },
+	],$a);
     return $vv;
 }
 //==============================================================================
