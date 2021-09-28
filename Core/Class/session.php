@@ -44,8 +44,6 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 	list($s_limit,$env,$sys) = array_filter_values($_SESSION,[$session_life,$session_id,$session_sys],[0,[],[]]);
 	static::$EnvData = array_intval_recursive($env);
 	static::$SysData = $sys;
-	// for Login skip on CLI debug.php processing
-	if(CLI_DEBUG) static::$EnvData['Login'] = [];
 	// call from Main.php must be application session limit refresh
 	if($env_life_limit) {
 		$limit_time = (defined('SESSION_LIMIT')) ? SESSION_LIMIT : SESSION_DEFAULT_LIMIT;
@@ -54,6 +52,8 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 		if($s_limit <= $now_time) self::ClearSession();
 		$_SESSION[$session_life] = static::$SESSION_LIFE = $session_limit_time;
 	}
+	// for Login skip on CLI debug.php processing
+	if(!isset(static::$EnvData['Login'])) static::$EnvData['Login'] = [];
 	// POST variables moved App CLASS
 	if($env_unset_param) {
 		unset(static::$EnvData[PARAMS_NAME]);           	// Delete Style Parameter for AppStyle
@@ -144,12 +144,6 @@ static function getPagingIDs($id) {
 	$id_name = self::PagingIDs($id);
 	return array_member_value(static::$EnvData,$id_name);
 }
-static function assignPagingIDs($id,$val) {
-	$id_name = self::PagingIDs($id);
-	if($val==='') return array_member_value(static::$EnvData,$id_name);
-	self::setPagingIDs($id,$val);
-	return $val;
-}
 static function setPagingIDs($id,$val) {
 	$mod = "Paging." . static::$Controller;
 	$page = array_member_value(static::$EnvData,$mod);
@@ -162,6 +156,13 @@ static function setPagingIDs($id,$val) {
     }
 	$ee = $val;
 	static::$EnvData['Paging'][static::$Controller] = $page;
+}
+// 値の取得(value===false) または設定
+static function assignPagingIDs($id,$val) {
+	$id_name = self::PagingIDs($id);
+	if($val === false ) return array_member_value(static::$EnvData,$id_name);
+	self::setPagingIDs($id,$val);
+	return $val;
 }
 //==============================================================================
 // ENV変数にアプリケーションパラメータを識別子指定で設定する
