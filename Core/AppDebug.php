@@ -92,10 +92,10 @@ public static function dump($items) {
 }
 //==========================================================================
 // コマンドラインログの表示
-public static function debug(...$items) {
+public static function debug($items) {
     debug_log(DBMSG_CLI,$items);
 }
-public static function halt(...$items) {
+public static function halt($items) {
     debug_log(DBMSG_DIE,$items);
 }
 
@@ -182,7 +182,7 @@ function debug_log($lvl,...$items) {
 				foreach($arr as $element) if(!is_scalar($element)) return FALSE;
 				return TRUE;
 			};
-			if(array_values($obj) === $obj && $is_scalar_array($obj)) {
+			if(array_values($obj) === $obj && $is_scalar_array($obj) && $indent>1) {
 				$vals = implode(", ",array_map(function($v) {
 					return (is_string($v)) ? str_replace(["\r\n","\r","\n","\t"],['\r\n', '\r', '\n', '\t'], $v) :$v;
 				}, $obj));
