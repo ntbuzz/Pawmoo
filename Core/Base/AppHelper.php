@@ -118,7 +118,7 @@ public function ALink_str($lnk,$txt,$attrs=false) {
 	}
 //==============================================================================
 // Pager Buttons
-public function MakePageLinks() {
+public function MakePageLinks($args) {
 	if($this->MyModel->pagesize == 0) return;
 	$npage = intval(($this->MyModel->record_max+$this->MyModel->pagesize-1)/$this->MyModel->pagesize);
 	$pnum = $this->MyModel->page_num;
