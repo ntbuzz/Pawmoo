@@ -39,6 +39,7 @@ class App {
 		static::$emptyRequest = empty($_POST) && empty($_GET);
 		// フィルタ先頭だけ取り出しておく
         static::$Filter = empty($filters) ? '': $filters[0];
+        static::$Filters= $filters;
         // メソッドの書き換えによるアドレスバー操作用
         static::$execURI = [ 'root' => static::$appRoot ];
 		self::SetModuleExecution($controller,$method,$filters,false);
@@ -217,24 +218,24 @@ public static function Get_ActionRoot($path = '',$lower = FALSE) {
 }
 //==============================================================================
 // POST/GET変数の要素名による取得
-private static function query_element($arr,$filter) {
+private static function query_element($arr,$filter,$default_value) {
 	if(is_array($filter)) {
 		$val = [];
-		foreach($filter as $key) $val[] = (array_key_exists($key,$arr)) ? $arr[$key] : NULL;
+		foreach($filter as $key) $val[] = (array_key_exists($key,$arr)) ? $arr[$key] : $default_value;
 	} else {
-		$val = (array_key_exists($filter,$arr)) ? $arr[$filter] : NULL;
+		$val = (array_key_exists($filter,$arr)) ? $arr[$filter] : $default_value;
 	}
 	return $val;
 }
 //==============================================================================
 // クエリ変数の要素名による取得
-public static function QueryElements($filter) {
-	return self::query_element(static::$Query,$filter);
+public static function QueryElements($filter,$default_value = NULL) {
+	return self::query_element(static::$Query,$filter,$default_value);
 }
 //==============================================================================
 // POST変数の要素名による取得
-public static function PostElements($filter) {
-	return self::query_element(static::$Post,$filter);
+public static function PostElements($filter,$default_value = NULL) {
+	return self::query_element(static::$Post,$filter,$default_value);
 }
 //==============================================================================
 // POST変数に値をセット
