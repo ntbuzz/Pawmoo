@@ -151,7 +151,7 @@ protected function ActionPostProcess($action) {
 //==============================================================================
 // Spoofing the Model class in View/Helper.
 protected function SpoofingViewModel($model) {
-	$this->View->Model = $this->Helper->MyModel = $model;
+	$this->View->Model = $this->Helper->MyModel = $this->Model = $model;
 }
 //==============================================================================
 // execute log output Model call, after $action invoked.
