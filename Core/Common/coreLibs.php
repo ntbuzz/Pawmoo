@@ -361,7 +361,7 @@ function fcsvget($handle) {
 //==============================================================================
 //  variable format convert
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
-function expand_text($class,$str,$recdata,$vars,$match_all = false) {
+function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
     $expand_Walk = function(&$val, $key, $vars) use(&$recdata,&$class) {
         if($val[0] === '$') {           // top char is variable mark
             $var = mb_substr($val,1);
