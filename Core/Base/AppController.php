@@ -13,13 +13,14 @@ class AppController extends AppObject {
     protected $noLogging = NULL;		// execute log save exception method list ex. [ 'List',... ]
 	protected $LoggingMethod = NULL;	// execute log save Model "class.method". ex. 'Access.Logging'
 	protected $BypassMethod = '';		// Login bypass method,if NEDD LOGIN(ex.Logout)
+	private $orgModel;					// save original Model Class for Spoofing
 //==============================================================================
 // constructor: create MODEL, VIEW(with HELPER)
 	function __construct($owner = NULL){
 		parent::__construct($owner);
 		$model = "{$this->ModuleName}Model";
 		$model_class = (class_exists($model)) ? $model : 'AppModel';	// file not exists, Use basic Class
-		$this->Model = ClassManager::Create($model,$model_class,$this);
+		$this->orgModel = $this->Model = ClassManager::Create($model,$model_class,$this);
 		$view = "{$this->ModuleName}View";
 		$view_class = (class_exists($view)) ? $view : 'AppView';		// file not exists, Use basic Class
 		$this->View = ClassManager::Create($view,$view_class,$this);
@@ -93,7 +94,7 @@ public function is_authorised($method) {
 			if(is_array($data)) {	// POST data Login Success
 				$this->setup_user_lang_region($data,$model::$LoginUser,$login_key);
 			} else {	// No-POST or Login FAIL
-				$userid = MySession::get_LoginValue($login_key);
+				$userid = (isset(App::$Post[$login_key])) ? App::$Post[$login_key] : MySession::get_LoginValue($login_key);
 				if($data === FALSE || $userid === NULL) {	// LOGIN-FAIL or Not LOGIN
 					$msg = $this->__('.Login');
 					$err_msg = $Login->error_type;
@@ -149,9 +150,14 @@ protected function ActionPostProcess($action) {
 	return TRUE;
 }
 //==============================================================================
-// Spoofing the Model class in View/Helper.
+// Spoofing the Model class in self/View/Helper.
 protected function SpoofingViewModel($model) {
 	$this->View->Model = $this->Helper->MyModel = $this->Model = $model;
+}
+//==============================================================================
+// Restore Original Model Class
+protected function SpoofingRestore($model) {
+	$this->View->Model = $this->Helper->MyModel = $this->Model = $this->orgModel;
 }
 //==============================================================================
 // execute log output Model call, after $action invoked.
