@@ -140,6 +140,10 @@ calendarTitle =>[
 		.ja=> パスワードが違います
 		.en=> 'Password Missing'
 	]
+	EmptyPass=>[
+		.ja=> パスワードが未登録です
+		.en=> "Password EMPTY"
+	]
 	NeedLogin=>[
 		.ja=> ログインしてください
 		.en=> "Please Login"
