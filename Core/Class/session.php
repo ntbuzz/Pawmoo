@@ -8,7 +8,7 @@ define('SESSION_DEFAULT_LIMIT','tomorrow 05:00:00');
 if(CLI_DEBUG) $_SESSION = [];
 else {
 	// GLOBAL SESSION LIFE LIMIT
-	if(defined(SESSION_INI_MODIFIED)) {
+	if(defined('SESSION_INI_MODIFIED')) {
 		$global_limit_time = strtotime(SESSION_DEFAULT_LIMIT);	// tomorrow AM 3:00
 		$global_session_time = $global_limit_time - time();	// SESSION KEEP as NOW - AM 3:00
 		ini_set('session.gc_maxlifetime',"{$global_session_time}");
