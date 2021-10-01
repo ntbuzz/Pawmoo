@@ -105,6 +105,7 @@ public function is_authorised($method) {
 						'user_title'	=> $this->__('Login.UserName'),
 						'pass_title'	=> $this->__('Login.Password'),
 						'send_button'	=> $this->__('Login.Submit'),
+						'reset_button'	=> $this->__('Login.Reset'),
 						'msg_body'		=> $Login->error_type,
 						'login_user'	=> $userid,
 					]);     // LOGIN PAGE Response, NO returned HERE!
