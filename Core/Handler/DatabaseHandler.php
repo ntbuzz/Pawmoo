@@ -30,7 +30,8 @@ public function GetAlias() {
 //==============================================================================
 // check exists Locale ALIAS field
 public function exists_locale($field_name) {
-    return (array_key_exists($field_name,$this->lang_alias));
+    return (in_array($field_name,$this->lang_alias));
+//    return (array_key_exists($field_name,$this->lang_alias));
 }
 //==============================================================================
 // check exists Locale BIND field
