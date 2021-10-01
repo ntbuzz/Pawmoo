@@ -1,2 +1,2 @@
 <!DOCTYPE html>
-<html lang="<?= MySession::get_LoginValue('LANG'); ?>">
+<html lang="<?= LangUI::$LocaleName; ?>">

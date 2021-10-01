@@ -186,9 +186,8 @@ public function ResetSchema() {
                 $alias_name = "{$base_name}_".id_relation_name($refer);
                 $this->FieldSchema[$alias_name] = NULL;   // $key; import MUST!
                 // locale if exist in relation-db
-                if($this->$model->dbDriver->fieldAlias->exists_locale($refer)) {
-                    $ref_name = "{$refer}_" . LangUI::$LocaleName;
-                } else $ref_name = $refer;
+                $ref_name = "{$refer}_" . LangUI::$LocaleName;
+                if(!$this->$model->dbDriver->fieldAlias->exists_locale($ref_name)) $ref_name = $refer;
                 $sub_rel[$alias_name] = (is_array($sub_ref)) ? $sub_ref : "{$link}.{$ref_name}";
             }
             $new_Relations[$key] =  $sub_rel;
