@@ -109,13 +109,20 @@ if(defined('LOCALE_REGION') && (array_key_exists($lng,LOCALE_REGION))) {
 } else $locale_set = "{$lng}.??";
 list($lang,$region) = explode('.',$locale_set);
 // config => SESSION => GET => POST
-$defs = array_filter_import(false,['lang','region'],	//'REGION','LANG',
+$defs = array_filter_import(true,['lang','region'],	//'REGION','LANG',
 			['lang'=>$lang, 'region'=>$region],	// BROWSER config
-			MySession::get_LoginValue(),	// LANG,REGION
+			MySession::get_LoginValue(),	// LANG,REGION LOGIN
 			App::$Query,					// ?lang=&region=
 			App::$Post						// lang=&region=
 		);
+debug_xdump([
+	'CONFIG'=> [$lang,$region],
+	'SESSION'=> MySession::get_LoginValue(),
+	'QUERY' =>App::$Query,
+	'POST'	=> App::$Post
+]);
 list($lang,$region) = $defs;
+//if(empty($lang)) $lang = DEFAULT_LANG;
 MySession::set_LoginValue(['LANG'=>$lang, 'REGION'=>$region]);
 // Load if .share folder use, common library load
 if(SHARE_FOLDER_USE) {
@@ -129,7 +136,6 @@ $libs = get_php_files(App::Get_AppPath("common/"));
 foreach($libs as $files) {
     require_once $files;
 }
-if(empty($lang)) $lang = DEFAULT_LANG;
 // Load Common Locale tranlate parameter
 LangUI::construct($lang,App::Get_AppPath("View/lang/"),['#common',$controller]);
 // Load Application MODULE files. (Controller,Model,View,Helpe)
