@@ -243,6 +243,12 @@ static function setPostElements($arr) {
 	foreach($arr as $key => $val) static::$Post[$key] = $val;
 }
 //==============================================================================
+// GET/POST変数の要素名による取得
+public static function GetPostElements($filter) {
+	$val = array_filter_import($filter,static::$Query,static::$Post);
+	return $val;
+}
+//==============================================================================
 // setPostElements と同じだが、未定義キーだけを値セットする
 // 冗長だが PHP5.6 でも動作する方法をとる
 private static function set_if_empty($arr) {

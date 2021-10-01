@@ -143,6 +143,26 @@ function array_filter_values($arr,$filter,$alt=[]) {
 	return $val;
 }
 //==============================================================================
+function array_filter_import($ignore,$filter,...$items) {
+	$new_filter = [];
+	foreach($filter as $key) {
+		if($ignore) $new_filter[strtolower($key)] = strtoupper($key);
+		else $new_filter[$key] = NULL;
+	}
+	$n = count($new_filter);
+	$vals = array_combine(array_keys($new_filter),array_fill(0,$n,NULL));
+	foreach($items as $arr)
+		if(is_array($arr) && !empty($arr)) {
+			foreach($new_filter as $key => $val) {
+				// uppercase check if ignore is TRUE
+				if($val !== NULL && array_key_exists($val,$arr)) $vals[$key] = $arr[$val];
+				// origin or lower case check
+				if(array_key_exists($key,$arr)) $vals[$key] = $arr[$key];
+			}
+		}
+	return array_values($vals);
+}
+//==============================================================================
 // Recursive call to array_key_exists
 function array_key_exists_recursive($key,$arr) {
     if(empty($arr)) return FALSE;

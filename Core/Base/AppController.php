@@ -230,7 +230,7 @@ public function AutoPaging($cond, $max_count = 100) {
 // Auto Paging, and Model Finder
 public function PagingFinder($cond, $max_count=100,$filter=[],$sort=[]) {
 	$cond = $this->AutoPaging($cond, $max_count);
-	$this->Model->RecordFinder(NULL,$filter,$sort);
+	$this->Model->RecordFinder($cond,$filter,$sort);
 }
 //==============================================================================
 // Default List Action

@@ -108,15 +108,16 @@ if(defined('LOCALE_REGION') && (array_key_exists($lng,LOCALE_REGION))) {
 	$locale_set = LOCALE_REGION[$lng];
 } else $locale_set = "{$lng}.??";
 list($lang,$region) = explode('.',$locale_set);
-foreach(['lang'=>$lang, 'region'=>$region] as $key => $val) {
-	$uname = strtoupper($key);
-	$def = App::QueryElements($key);
-	if($def === NULL) $def = MySession::get_LoginValue($uname);
-	if(empty($def) || $def === 'undefined') $def = $val;
-	MySession::set_LoginValue([$uname => $def]);
-	$$key = $def;
-}
-// Load if .SHARE use, common library load
+// config => SESSION => GET => POST
+$defs = array_filter_import(false,['lang','region'],	//'REGION','LANG',
+			['lang'=>$lang, 'region'=>$region],	// BROWSER config
+			MySession::get_LoginValue(),	// LANG,REGION
+			App::$Query,					// ?lang=&region=
+			App::$Post						// lang=&region=
+		);
+list($lang,$region) = $defs;
+MySession::set_LoginValue(['LANG'=>$lang, 'REGION'=>$region]);
+// Load if .share folder use, common library load
 if(SHARE_FOLDER_USE) {
 	$libs = get_php_files("app/.share/common/");
 	foreach($libs as $files) {
