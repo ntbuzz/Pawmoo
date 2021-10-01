@@ -86,19 +86,6 @@ public static function SetModuleExecution($module,$method,$change_filter=[],$rel
     if(is_array($change_filter)) static::$execURI['filter'] = $change_filter;
     static::$ReLocate = $relocate;
 }
-// //==============================================================================
-// // メソッドの置換
-// public static function ChangeMethod($module,$method,$change_filter=[], $relocate = TRUE) { 
-// 	if(strpos($method,'.')!==FALSE) {
-// 		list($method,static::$MethodExtention) = extract_base_name($method);
-// 	} else {
-// 		static::$MethodExtention = FALSE;
-// 	}
-//     static::$execURI['controller'] = strtolower($module);
-//     static::$execURI['method'] = strtolower($method);
-//     if(is_array($change_filter)) static::$execURI['filter'] = $change_filter;
-//     static::$ReLocate = $relocate;        // URLの書き換え
-// }
 //==============================================================================
 // パラメータパスの置換
 public static function ChangeParams($params,$relocate = TRUE) { 
@@ -241,6 +228,12 @@ public static function PostElements($filter,$default_value = NULL) {
 // POST変数に値をセット
 static function setPostElements($arr) {
 	foreach($arr as $key => $val) static::$Post[$key] = $val;
+}
+//==============================================================================
+// GET/POST変数の要素名による取得
+public static function GetPostElements($filter) {
+	$val = array_filter_import($filter,static::$Query,static::$Post);
+	return $val;
 }
 //==============================================================================
 // setPostElements と同じだが、未定義キーだけを値セットする
