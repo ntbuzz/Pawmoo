@@ -136,9 +136,17 @@ calendarTitle =>[
 		.ja=> ログイン
 		.en=> Login
 	]
+	Reset=>[
+		.ja=> リセット
+		.en=> RESET
+	]
 	PassError=>[
 		.ja=> パスワードが違います
 		.en=> 'Password Missing'
+	]
+	EmptyPass=>[
+		.ja=> パスワードが未登録です
+		.en=> "Password EMPTY"
 	]
 	NeedLogin=>[
 		.ja=> ログインしてください

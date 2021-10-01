@@ -16,5 +16,9 @@
     background-color: whitesmoke;
 }
 .message_box table th {
+	vertical-align: top;
     white-space: nowrap;
+}
+.message_box table td {
+	vertical-align: top;
 }

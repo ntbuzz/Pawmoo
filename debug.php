@@ -14,12 +14,23 @@ $_SERVER['SERVER_PORT'] = '';
 $_SERVER['HTTP_HOST'] = 'localhost';
 
 $uri = $_SERVER['REQUEST_URI'];
+// command line parameter: app/module/method/param?QUERY??POST
+// POST check
+list($url,$p_str) = (strpos($uri,'??')!==FALSE)?explode('??',$uri):[$uri,''];
+parse_str($p_str, $post);
+$_POST = $post;
+// GET check
 list($url,$q_str) = (strpos($uri,'?')!==FALSE)?explode('?',$uri):[$uri,''];
 parse_str($q_str, $query);
 $_GET =  $query;
 
 $ln = str_repeat("=", 50);
-print_r($argv);
+$debvug_dump = [
+	'ARG' => $argv,
+	'GET' => $_GET,
+	'POST' => $_POST,
+];
+print_r($debvug_dump);
 echo "{$ln} START HERE ${ln}\n";
 
 require_once('index.php');		// リソース呼出しとの振分けも行う
