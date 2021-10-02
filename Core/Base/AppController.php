@@ -91,11 +91,12 @@ public function is_authorised($method) {
 		$bypass_method[] = 'Logout';	// must be append LogoutAction
 		if($this->needLogin && !in_array($method,$bypass_method)) {
 			$data = (CLI_DEBUG) ? $Login->defaultUser() : $Login->is_validLogin(App::$Post);
-			if(is_array($data)) {	// POST data Login Success
-				$this->setup_user_lang_region($data,$model::$LoginUser,$login_key);
-			} else {	// No-POST or Login FAIL
-				$userid = (isset(App::$Post[$login_key])) ? App::$Post[$login_key] : MySession::get_LoginValue($login_key);
-				if($data === FALSE || $userid === NULL) {	// LOGIN-FAIL or Not LOGIN
+			if(is_array($data)) {		// Login Success
+ 				$this->setup_user_lang_region($data,$model::$LoginUser,$login_key);
+			} else {	// LOGIN-FAIL or Already Logged-In
+				$userid = MySession::get_LoginValue($login_key);	// already-logged-in check
+				if(empty($userid)) {		// not LOGGED-IN
+					$userid = (isset(App::$Post[$login_key])) ? App::$Post[$login_key] : '';
 					$msg = $this->__('.Login');
 					$err_msg = $Login->error_type;
 					$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
@@ -153,12 +154,12 @@ protected function ActionPostProcess($action) {
 //==============================================================================
 // Spoofing the Model class in self/View/Helper.
 protected function SpoofingViewModel($model) {
-	$this->View->Model = $this->Helper->MyModel = $this->Model = $model;
+	$this->View->Model = $this->Helper->Model = $this->Model = $model;
 }
 //==============================================================================
 // Restore Original Model Class
 protected function SpoofingRestore($model) {
-	$this->View->Model = $this->Helper->MyModel = $this->Model = $this->orgModel;
+	$this->View->Model = $this->Helper->Model = $this->Model = $this->orgModel;
 }
 //==============================================================================
 // execute log output Model call, after $action invoked.
