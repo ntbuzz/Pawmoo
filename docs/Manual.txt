@@ -1341,7 +1341,7 @@ static::$appRoot
     Resource ($res)             // リソースの出力
     ALink ($lnk,$txt)           // ハイパーリンクの生成, 言語IDを参照するには$txtを＃文字で始める
                   // $lnk を / で始めるとフレームワークのTOP、:で始めるとサイトのTOPへリンクする
-    MakePageLinks()             // ページング用のリンクボタンを生成する
+    MakePageLinks($args)        // ページング用のリンクボタンを生成する
     MakeListTable ($deftab)     // ヘッダー付きのテーブルリスト表示、$deftabにはパラメータ
                   // $deftab['category'] = テーブルクラス
                   // $deftab['tableId']  = テーブルID 指定無しは "_TableList"
