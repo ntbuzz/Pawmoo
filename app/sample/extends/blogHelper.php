@@ -6,7 +6,7 @@ class blogHelper extends AppHelper {
 public function TitleList() {
     echo "<dl class='content'>\n";
     $n = 0;
-    foreach($this->MyModel->Records as $columns) {
+    foreach($this->Model->Records as $columns) {
         $jmp = "./view/{$columns['id']}";
         $pub = ($columns['published']==='t') ? '' :' 【非公開】';
         $cls = ($columns['published']==='t') ? 'public' :'secret';
@@ -20,16 +20,16 @@ public function TitleList() {
 }
 //==============================================================================
 public function CategorySelect() {
-    $this->MyModel->GetValueList();
-    echo $this->Select_str('category','category_id',$this->MyModel->RecData['category_id']);
+    $this->Model->GetValueList();
+    echo $this->Select_str('category','category_id',$this->Model->RecData['category_id']);
 }
 //==============================================================================
 public function BlogTOC() {
-    $body = $this->MyModel->RecData;
+    $body = $this->Model->RecData;
     // 目次を作る
     if($body['toc_gen']==='t') {
         $toc = [];
-        foreach($this->MyModel->BlogContents as $sec_data) {
+        foreach($this->Model->BlogContents as $sec_data) {
             $section = $sec_data['sec'];
             if($section['published'] === 't') {
                 $key = $section['title'];
@@ -67,7 +67,7 @@ public function BlogWALK() {
     echo "<table class='prev_next'>";
     echo "<tr><th{$th_width}>{$_('.PREV')}</th>";
     $text_align = ['left','right'];
-    foreach($this->MyModel->NearData as $id => $val) {
+    foreach($this->Model->NearData as $id => $val) {
         $cls = $text_align[$id];
         echo "<td style='text-align:{$cls};'>";
         if(!empty($val)) {

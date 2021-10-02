@@ -106,22 +106,22 @@ public function ALink_str($lnk,$txt,$attrs=false) {
 // generate Page Button LABEL Tag
 	private function get_PageButton($n, $anchor, $npage) {
 		$anchor = substr("00{$anchor}", ($anchor>=100)?-3:-2);
-		$cls = (($n == $this->MyModel->page_num) || ($n == 0) || ($n > $npage)) ? 'active' : 'jump';
+		$cls = (($n == $this->Model->page_num) || ($n == 0) || ($n > $npage)) ? 'active' : 'jump';
 		return "<span class='{$cls}' value='{$n}'>{$anchor}</span>";
 	}
 //==============================================================================
 // Page Move up/down link
 	private function get_MoveButton($move, $anchor, $npage) {
-		$n = $this->MyModel->page_num + $move;
+		$n = $this->Model->page_num + $move;
 		$cls = ( ($n <= 0) || ($n > $npage)) ? 'disable' : 'move';
 		return "<span class='{$cls}' value='{$n}'>{$anchor}</span>";
 	}
 //==============================================================================
 // Pager Buttons
 public function MakePageLinks($args) {
-	if($this->MyModel->pagesize == 0) return;
-	$npage = intval(($this->MyModel->record_max+$this->MyModel->pagesize-1)/$this->MyModel->pagesize);
-	$pnum = $this->MyModel->page_num;
+	if($this->Model->pagesize == 0) return;
+	$npage = intval(($this->Model->record_max+$this->Model->pagesize-1)/$this->Model->pagesize);
+	$pnum = $this->Model->page_num;
 	$bound = 7;
 	$begp = max( 2, min( $npage - 1, $pnum + intval($bound/2)) - $bound);
 	$endp = min($npage - 1, $begp + $bound);
@@ -145,7 +145,7 @@ public function MakePageLinks($args) {
 		echo $this->get_PageButton($npage,$npage,$npage);
 	}
 	$fmt = $this->__(".Total", FALSE);
-	$total = sprintf($fmt,$this->MyModel->record_max);
+	$total = sprintf($fmt,$this->Model->record_max);
 	echo "<span class='pager_message'>{$total}</span>";
 	echo "</div>\n";
 	// Change Page item Count
@@ -154,7 +154,7 @@ public function MakePageLinks($args) {
 	$dsp = "<span id='size_selector'>".$this->__(".Display", FALSE)."</span>";
 	echo "<div class='rightalign'>{$dsp}<SELECT id='pagesize'>";
 	foreach(array(5,10,15,20,25,50,100) as $val) {
-		$sel = ($val == $this->MyModel->pagesize) ? " selected" : "";
+		$sel = ($val == $this->Model->pagesize) ? " selected" : "";
 		echo "<OPTION value='{$val}'{$sel}>{$val}</OPTION>\n";
 	}
 	echo "</SELECT></div>\n";
@@ -164,7 +164,7 @@ public function MakePageLinks($args) {
 // PUT TABLE List Header
 	protected function putTableHeader() {
 		echo '<tr>';
-		foreach($this->MyModel->HeaderSchema as $key => $val) {
+		foreach($this->Model->HeaderSchema as $key => $val) {
 			list($alias,$align,$flag,$wd) = $val;
 			$tsort = ($flag==2) ? '' : ' class="sorter-false"';
 			$style = ($wd==0) ? '' : " style='min-width:{$wd}px;max-width:{$wd}px;'";
@@ -176,7 +176,7 @@ public function MakePageLinks($args) {
 // Put Each record columns
 	protected function putColumnData($lno,$columns) {
 		echo "<tr class='item' id='{$columns->Primary}'>";
-		foreach($this->MyModel->HeaderSchema as $key => $val) {
+		foreach($this->Model->HeaderSchema as $key => $val) {
 			list($alias,$align,$flag,$c_wd) = $val;
 //			$style = ($c_wd > 0) ? " style='width:{$c_wd}px;'":'';
 			$style = '';
@@ -191,8 +191,8 @@ public function MakeListTable($deftab) {
 	// デバッグ情報
 	debug_log(DBMSG_VIEW,[
 		'deftab' => $deftab,
-		'Page' => $this->MyModel->page_num,
-		'Size' => $this->MyModel->pagesize,
+		'Page' => $this->Model->page_num,
+		'Size' => $this->Model->pagesize,
 	]);
 	if(array_key_exists('pager',$deftab) && $deftab['pager'] == 'true') $this->MakePageLinks();
 	if(is_array($deftab)) {
@@ -205,9 +205,9 @@ public function MakeListTable($deftab) {
 	$this->putTableHeader($tab);
 	echo "</thead>\n<tbody>\n";
 	$col = new RecordColumns();
-	$lno = ($this->MyModel->page_num-1)*$this->MyModel->pagesize + 1;
-	foreach($this->MyModel->Records as $columns) {
-		$col->SetColumns($this->MyModel->Primary,$columns);
+	$lno = ($this->Model->page_num-1)*$this->Model->pagesize + 1;
+	foreach($this->Model->Records as $columns) {
+		$col->SetColumns($this->Model->Primary,$columns);
 		$this->putColumnData($lno++, $col);
 	}
 	echo "</tbody></table>";
@@ -216,7 +216,7 @@ public function MakeListTable($deftab) {
 // Output Table List for ContentsView
 public function TableListView($header,$primary,$Records=NULL,$max=0) {
 	if($Records===NULL) {
-		$Records = $this->MyModel->Records;
+		$Records = $this->Model->Records;
 		$max = count($Records);
 	}
 	$cnt = count($Records);
@@ -270,7 +270,7 @@ public function SelectObject($args) {
 	list($selname,$select_one) = (is_array($args)) ? $args : [$args,NULL];
 	if(empty($select_one)) $select_one = 'true';
 	$object = "{$selname}: {\n\tselect_one: {$select_one},\n\tsel_list: [\n";
-   	foreach($this->MyModel->Select[$selname] as $valset) {
+   	foreach($this->Model->Select[$selname] as $valset) {
 		$new_map = array_map(function($v) {
 			return (is_numeric($v)) ? $v :"'{$v}'";
 		},$valset);
@@ -299,7 +299,7 @@ public function Form($act, $attr) {
 // Create Select Tag strings from ChainLink Array
 public function SelectChain($key) {
 	$arr = [];
-    foreach($this->MyModel->Select[$key] as $val) $arr[$val[1]] = $val[0];
+    foreach($this->Model->Select[$key] as $val) $arr[$val[1]] = $val[0];
 	return $arr;
 }
 //==============================================================================
@@ -310,10 +310,10 @@ public function Select($key,$name) {
 //==============================================================================
 // Create Select Tag strings
 public function Select_str($key,$name) {
-	if(!array_key_exists($key,$this->MyModel->Select)) return '';
-    $dat = intval($this->MyModel->RecData[$name]);	// NULL is ZERO(0)
+	if(!array_key_exists($key,$this->Model->Select)) return '';
+    $dat = intval($this->Model->RecData[$name]);	// NULL is ZERO(0)
     $select = "<SELECT name='{$name}'>";
-    foreach($this->MyModel->Select[$key] as $ttl => $id) {
+    foreach($this->Model->Select[$key] as $ttl => $id) {
         $sel = ($id == $dat) ? " selected" : "";	// digit-str or int
         $select .= "<OPTION value='{$id}'{$sel}>{$ttl}</option>\n";
     }

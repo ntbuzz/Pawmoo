@@ -50,6 +50,13 @@ function __construct($table,$handler) {
 		$this->fieldAlias = new fieldAlias();
 	}
 //==============================================================================
+// DEBUGGING for SQL Execute
+	private function SQLdebug($cond,$sql,$where) {
+    	$dbg = debug_backtrace();
+    	$func = $dbg[1]['function'];
+		debug_log(DBMSG_HANDLER,["SQL-Execute ({$func})"=> [ 'COND'=>$cond,'ReBUILD' => $this->LastBuild,'SQL' => $sql,'WHERE'=>$where]]);
+	}
+//==============================================================================
 // setupRelations: relation table reminder
 public function setupRelations($relations) {
 	$this->relations = $relations;
@@ -79,7 +86,7 @@ public function fetch_locale() {
 }
 //==============================================================================
 // fetchDB: get record data , and replace alias and bind column
-public function execSQL($sql,$logs = TRUE) {
+public function execSQL($sql,$logs = false) {
 	if($logs) debug_log(DBMSG_HANDLER,['SQL' => $sql]);
 	$this->doQuery($sql);
 }
@@ -121,6 +128,7 @@ public function SetPaging($pagesize, $pagenum) {
 public function getRecordCount($cond) {
 	$where = $this->sql_makeWHERE($cond);	// 検索条件
 	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
+	$this->SQLdebug($cond,$sql,$where);
 	$this->execSQL("{$sql}{$where};");
 	$field = $this->fetch_array();
 	return ($field) ? intval($field["total"]) : 0;
@@ -133,6 +141,7 @@ public function getRecordValue($cond,$use_relations) {
 	$where = $this->sql_makeWHERE($cond);		// 検索条件
 	$sql = $this->sql_JoinTable($use_relations);
 	$where .= ($this->is_offset) ? " offset 0 limit 1" : " limit 0,1";
+	$this->SQLdebug($cond,$sql,$where);
 	$sql .= "{$where};";
 	$this->execSQL($sql);
 	$row = $this->fetchDB();
@@ -208,6 +217,7 @@ public function findRecord($cond,$use_relations = FALSE,$sort = []) {
 			$where .= " limit {$this->startrec},{$this->limitrec}";
 		}
 	}
+	$this->SQLdebug($cond,$sql,$where);
 	$sql .= "{$where};";
 	$this->execSQL($sql);
 }
@@ -227,6 +237,7 @@ public function firstRecord($cond,$use_relations = FALSE,$sort) {
 		$where .=  " ORDER BY ".trim($orderby,",");
 	}
 	$where .= " limit 1";
+	$this->SQLdebug($cond,$sql,$where);
 	$sql .= "{$where};";
 	$this->execSQL($sql);
 	$row = $this->fetchDB();
@@ -257,6 +268,7 @@ public function deleteRecord($wh) {
 		},array_keys($alias),array_values($alias));
 		$sql = implode(',',$fields);
 //		$groupby = (empty($grp)) ? '' : " GROUP BY \"{$grp}\"";
+		$this->SQLdebug(NULL,$sql,$where);
 		$sql = "SELECT {$sql} FROM {$table}{$where} ORDER BY \"{$id}\";";
 		return $sql;
 	}
@@ -321,7 +333,6 @@ protected function sql_safequote(&$value) {
 		$this->LastBuild= $new_cond = re_build_array($cond);
 		$sql = $this->makeExpr($new_cond,$target_table);
 		if(strlen($sql)) $sql = ' WHERE '.$sql;
-		debug_log(DBMSG_HANDLER,['COND-INPUT'=>$cond,'RE-BUILD' => $new_cond,'WHERE' => $sql]);
 		return ($this->LastSQL = $sql);
 	}
 //==============================================================================

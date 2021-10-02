@@ -92,7 +92,7 @@ public function is_validLogin($values) {
         }
     }
     $this->error_type = NULL;
-    if(!array_key_exists($this->LoginID,$Login)) return NULL;
+    if(!array_key_exists($this->LoginID,$Login)) return FALSE;
 	$passwd = $Login[$this->PasswdID];
 	if(empty($passwd)) $passwd = '*';
     return $this->is_validUser($Login[$this->LoginID],$passwd);

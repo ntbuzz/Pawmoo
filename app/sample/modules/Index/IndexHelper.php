@@ -7,7 +7,7 @@ class IndexHelper extends blogHelper {
 
 //==============================================================================
 public function BlogHeading() {
-    $body = $this->MyModel->RecData;
+    $body = $this->Model->RecData;
     $itemdate = (empty($body['edit_date'])) ? $body['post_date']: "{$body['post_date']} 更新:{$body['edit_date']}";
     // ブログのタイトルとリード文
     $body_header = (empty($body['preface']))?'':pseudo_markdown($body['preface']);
@@ -23,7 +23,7 @@ EOF;
 }
 //==============================================================================
 public function BlogBody() {
-    $Contents = $this->MyModel->BlogContents;
+    $Contents = $this->Model->BlogContents;
     // 本文のセクション
     foreach($Contents as $sec_data) {
         $section = $sec_data['sec'];
@@ -56,7 +56,7 @@ EOF;
         echo "</div>\n";
     }
     echo "<br><hr>";
-    echo $this->_('.Category') . $this->MyModel->RecData['category'];
+    echo $this->_('.Category') . $this->Model->RecData['category'];
     $this->BlogWALK();
 }
 //==============================================================================

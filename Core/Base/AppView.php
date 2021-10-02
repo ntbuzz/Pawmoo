@@ -60,7 +60,7 @@ class AppView extends AppObject {
         $helper = "{$this->ModuleName}Helper";
         $helper_class = (class_exists($helper)) ? $helper:'AppHelper';
 		$this->Helper = ClassManager::Create($helper,$helper_class,$this);
-        $this->Helper->MyModel = $this->Model;
+        $this->Helper->Model = $this->Model;
     }
     //==========================================================================
     // Class Initialized
