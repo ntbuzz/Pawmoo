@@ -198,6 +198,8 @@ public function ActionDispatch($action) {
 //
 public function AutoPaging($cond, $max_count = 100) {
 	list($num,$size) = array_intval(App::$Params);		// from URL parameter .../page#/size#
+	$cond = re_build_array($cond);
+	$uri = App::Get_PagingPath();
 	// check SAVED Paging-Param
 	$Page = MySession::getPagingIDs('Setup');
 	list($sCond,$sSize,$sURI,$sQuery) = array_filter_values($Page,['Cond','Size','URI','QUERY']);
