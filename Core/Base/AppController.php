@@ -183,7 +183,11 @@ public function ActionDispatch($action) {
 			$action = $this->aliasAction[$action];
 		}
 		$method = "{$action}Action";
-		$this->$method();
+		if(method_exists($this,$method)) {
+			$this->$method();
+		} else {
+            stderr("Controller Method:'{$method}' not found. Please Create this method.\n");
+		}
 		$this->ActionPostProcess($action);
 		$this->exec_Logging($action);
 	}
