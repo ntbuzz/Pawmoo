@@ -32,6 +32,7 @@ public static function Setup($appname) {
         "extends",
         "Models",
         "Models/Misc",
+        "Models/Common",
 	];
 	$folders = [];
 	foreach($auto as $key) {
