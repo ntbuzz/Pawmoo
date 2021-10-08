@@ -204,7 +204,7 @@ function debug_log($lvl,...$items) {
 						if(is_int($val)) $dmp .= "{$val}\n";
 						else if(is_bool($val)) $dmp .= "TRUE\n";
 						else {
-							$val = htmlspecialchars(control_escape($val));
+//							$val = htmlspecialchars(control_escape($val));
 							$dmp .= "'{$val}'\n";
 						}
 					}
