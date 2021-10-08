@@ -284,10 +284,10 @@ public function deleteRecord($wh) {
 	}
 //==============================================================================
 // escape to single-quote(')
-protected function sql_safequote(&$value) {
+protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 	foreach($value as $key => $val) {
 		if(gettype($val) === 'string') {
-			$value[$key] = str_replace(["'",'\\'],["''",'\\\\'],$val);
+			$value[$key] = str_replace($find,$rep,$val);
 //			$value[$key] = str_replace("'","''",$val);
 		}
 	}

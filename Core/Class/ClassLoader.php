@@ -31,11 +31,15 @@ public static function Setup($appname) {
         "Class",
         "extends",
         "Models",
+        "Models/Common",
         "Models/Misc",
 	];
 	$folders = [];
 	foreach($auto as $key) {
-		foreach($auto_folder as $folder) $folders[] = "app/{$key}/{$folder}";
+		foreach($auto_folder as $folder) {
+			$dir = "app/{$key}/{$folder}";
+			if(is_dir($dir)) $folders[] = $dir;		// フォルダがあるか確かめる
+		}
 	}
 	$folders[] = 'Core/Class';
 	static::$LoadDirs = $folders;

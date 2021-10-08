@@ -13,10 +13,8 @@ if (!function_exists('preg_replace_callback_array')) {
 // Like a MarkDown Description
 // Markdown syntax is the original syntax other than the general one.
 function pseudo_markdown($atext, $md_class = '') {
-    $md_class = get_class_names("easy_markdown.{$md_class}");
+	if($md_class !== false) $md_class = get_class_names("easy_markdown.{$md_class}");
     $replace_defs = [
-//        '/\[([^\]]+)\]\(([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/'    => '<a href="\\2">\\1</a>',
-//		'/\[([^\]]+)\]\(([^\)\s]+)(\s[^\)]+)*\)/' => '<a href="\\2"\\3>\\1</a>',
         "/\s\*\*(.+?)\*\*\s/" => '<strong>\\1</strong>',  // BOLD
         "/\s__(.+?)__\s/"     => '<em>\\1</em>',   // BOLD
         "/\s--(.+?)--\s/"   => '<del>\\1</del>', // STRIKEOUT
@@ -48,10 +46,11 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<dl class='dl_list'>".implode("\n",$dtdd)."</dl>";
         }],$atext);
     // ul/ol/blockquote processing
-    $p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)\n{2}/s';
+    $p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)(?:\n((?:\.[\w\-]+)*)\n|$)/s';
     $atext = preg_replace_callback($p,function($matches) {
         $txt = $matches[1];
-        $user_func = function($text) {
+		$usr_cls = (count($matches)===4) ? $matches[3] : '';
+        $user_func = function($text) use(&$usr_cls) {
             $tags = array(
                 '- ' => ['ul','ul_list',true],
                 '1.' => ['ol','ol_list',true],
@@ -81,6 +80,7 @@ function pseudo_markdown($atext, $md_class = '') {
             $arr = $call_func(explode("\n", $text));			// Make Level array
             $key = array_key_first($arr);
             list($ptag,$ptagcls,$islist) = $tags[$key]; 
+			if(!empty($usr_cls)) $ptagcls = $usr_cls;
             $ptag_start = (empty($ptagcls)) ? "<{$ptag}>" : "<{$ptag} class='{$ptagcls}'>";
             $ptag_close = "</{$ptag}>";
             $ul_text = function($array,$n) use(&$ul_text,&$ptag,&$ptag_start,&$ptag_close,$islist) {
@@ -91,10 +91,13 @@ function pseudo_markdown($atext, $md_class = '') {
                         $low = $ul_text($val,$n+1);
                         $res .= "{$spc}<{$ptag}>{$low}{$spc}{$ptag_close}";
                         if($n > 0 && $islist)	$res .= "</li>";
-                    } else if($islist) {
-                        $res .= (is_array(next($array)))?"{$spc}<li>{$val}":"{$spc}<li>{$val}</li>";
                     } else {
-                        $res .= "{$spc}{$val}<br>\n";
+						$val = pseudo_markdown($val,false);
+						if($islist) {
+                        	$res .= (is_array(next($array)))?"{$spc}<li>{$val}":"{$spc}<li>{$val}</li>";
+                    	} else {
+	                        $res .= "{$spc}{$val}<br>\n";
+						}
                     }
                 }
                 return $res;
@@ -147,6 +150,7 @@ function pseudo_markdown($atext, $md_class = '') {
                         break;
                 }
                 if(!empty($style)) $style =" style='{$style}'";
+				$col = pseudo_markdown($col,false);
                 $ln .= "<{$tag}{$attrs}{$style}>{$col}</{$tag}>";
             }
             return "<tr>{$ln}</tr>";
@@ -167,7 +171,7 @@ function pseudo_markdown($atext, $md_class = '') {
         }
         return $a;
     };
-    $atext = preg_replace_callback_array([
+	$atext = preg_replace_callback_array([
 //------- HEAD(#) TAG
         '/^(#{1,6})((?:\.[\w\-]+)*) (.+?)$/m' => function($m) {
             $n = strlen($m[1]);
@@ -175,6 +179,21 @@ function pseudo_markdown($atext, $md_class = '') {
             return "<h{$n}{$cls}>{$m[3]}</h{$n}>";
         },
         '/^(?:---|___|\*\*\*)$/m'     => function($m) { return "<hr>"; },
+//------- ![alt-text](URL) IMAGE TAG /multi-pattern replace
+        '/!\[([^:\]]+)(?::(\d+,\d+))?\]\(([!:])?([^\)]+)\)/' => function ($m) use(&$item_array) {
+            $alt = $m[1];
+            if($m[2]==='') $sz = '';
+            else {
+                list($wd,$ht) = $item_array(',',$m[2],2);
+                $sz = " width='{$wd}' height='{$ht}'";
+            }
+            switch($m[3]) {
+            case '!': $src = App::Get_AppRoot()."images/{$m[4]}"; break;
+            case ':': $src = "/images/{$m[4]}";break;
+            default: $src = $m[4];
+            }
+            return "<img src='{$src}' alt='{$alt}'{$sz} />";
+        },
 //------- [text](URL) HYPER LINK
 //			!(URL)	Target = NEW
 //			^(URL)	Target = TOP
@@ -191,29 +210,14 @@ function pseudo_markdown($atext, $md_class = '') {
 			$attr = empty($arr) ? '': ' '.implode(' ',$arr);
 			return "<a href='{$url}'{$attr}>{$txt}</a>";
 		},
-//------- ![alt-text](URL) IMAGE TAG /multi-pattern replace
-//        '/!\[([^:\]]+)(?::(\d+,\d+))?\]\(([!:])?([-_.!~*\'()\w;\/?:@&=+\$,%#]+)\)/' => function ($m) use(&$item_array) {
-        '/!\[([^:\]]+)(?::(\d+,\d+))?\]\(([!:])?([^\)]+)\)/' => function ($m) use(&$item_array) {
-            $alt = $m[1];
-            if($m[2]==='') $sz = '';
-            else {
-                list($wd,$ht) = $item_array(',',$m[2],2);
-                $sz = " width='{$wd}' height='{$ht}'";
-            }
-            switch($m[3]) {
-            case '!': $src = App::Get_AppRoot()."images/{$m[4]}"; break;
-            case ':': $src = "/images/{$m[4]}";break;
-            default: $src = $m[4];
-            }
-            return "<img src='{$src}' alt='{$alt}'{$sz} />";
-        },
 //------- ..class#id(value){TEXT} CLASS/ID/VALUE attributed SPAN/P replacement
-        '/\s\.\.([\w\-]+(?:\.[\w\-]+)*)?(?:#([\-\w]+))?(?:\(([^\)]+)\))?(:)?\{(.*?)\}\s/s' => function ($m) {
+        '/(?:^|\s)\.\.([\w\-]+(?:\.[\w\-]+)*)?(?:#([\w\-]+))?(?:\(([^\)]+)\))?(:)?\{((?:\$\{[^\}\s]+\}|\\\}|.)*?)\}(?:$|\s)/s' => function ($m) {
 			list($mm,$cls,$ids,$val,$tag,$txt) = $m;
             $cls = get_class_names($cls);
             $ids = ($ids==='') ? '' : " id='{$ids}'";
             $val = ($val==='') ? '' : " value='{$val}'";
             $tag = ($tag==='') ? 'span' : 'p';
+			if(strpos($txt ,'\\}')) $txt = str_replace('\\}','}',$txt);
             return "<{$tag}{$cls}{$ids}{$val}>{$txt}</{$tag}>";
         },
 //------- ...!{ TEXT }... NL change <br> tag in div-indent class
@@ -240,9 +244,10 @@ function pseudo_markdown($atext, $md_class = '') {
 //  select      => ^[name]%{select-val:option1=val1,option2=val2,...}
 //  combobox    => ^[name]+{select-val:option1=val1,option2=val2,...:size}
 //		Grant class & id name,description between '^' and '[', like ^class#id[name]...
-        '/(\s)\^([\w\-\.]+)?(?:#([\w\-]+))?\[([\w\-]+)?\]([@:!=%+])\{((?:\$\{[^\}]+?\}|[^\}])+?|)\}/s' => function ($m) use(&$item_array) {
+        '/(\s)\^([\w\-\.]+)?(?:#([\w\-]+))?\[([\w\-]+)?\]([@:!=%+])\{((?:\$\{[^\}\s]+\}|\\\}|.)*?)\}/s' => function ($m) use(&$item_array) {
             $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea','%' => 'select','+' => 'combo'];
 			list($tmp,$spc,$cls,$id,$nm,$kind,$val) = $m;
+			if(strpos($val,'\\}')) $val = str_replace('\\}','}',$val);
             $vv = $type[$kind];
 			$nm = (empty($nm)) ? '' : " name='{$nm}'";
 			if(!empty($cls)) {
@@ -309,7 +314,6 @@ function pseudo_markdown($atext, $md_class = '') {
                     } else $sz = '';
 					if(!empty($sz)) $sz = " {$sz}";
                     // restore if ...{ TEXT }... mark converted.
-//                    $txt = rtrim(str_replace(["<BR>\n","<br>\n","<BR />\n","<br />\n"],"\n", "{$vv[0]}\n"));
                     $txt = rtrim(preg_replace('/(?:<br>|<br \/>)\n/i',"\n","{$vv[0]}\n"));
                     $txt = htmlspecialchars($txt);
                     $tag = "{$spc}<textarea{$attr}{$sz}>{$txt}</textarea>";
@@ -322,7 +326,7 @@ function pseudo_markdown($atext, $md_class = '') {
             }
             return $tag;
         },
-    ],$atext);
+	],$atext);
     // replace other PATTERN values
     $replace_keys   = array_keys($replace_defs);
     $replace_values = array_values($replace_defs);
@@ -330,5 +334,5 @@ function pseudo_markdown($atext, $md_class = '') {
     // Returns the escaped character to the character before escaping.
     $p = '/\\\([~\-_<>\^\[\]`*#|\(\.{}])/s';
     $atext = preg_replace_callback($p,function($matches) {return $matches[1];}, $atext);
-    return "<div{$md_class}>{$atext}</div>\n";
+    return ($md_class === false) ? $atext : "<div{$md_class}>{$atext}</div>\n";
 }

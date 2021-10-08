@@ -68,7 +68,7 @@ public function getLastError() {
 //	レコードの追加 
 //==============================================================================
 public function insertRecord($row) {
-	$this->sql_safequote($row);
+	$this->sql_safequote($row,"'","''");
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
 	$vstr = "'" . implode("','", $row) . "'";
@@ -88,7 +88,7 @@ public function insertRecord($row) {
 //	レコードの更新 $row[key] value
 //==============================================================================
 public function updateRecord($wh,$row) {
-	$this->sql_safequote($row);
+	$this->sql_safequote($row,"'","''");
 	list($pkey,$pval) = array_first_item($wh);
 	unset($row[$pkey]);			// プライマリキーは削除しておく
 	$where = " WHERE \"{$pkey}\"={$pval}";		// プライマリキー名を取得

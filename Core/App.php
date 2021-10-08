@@ -251,7 +251,7 @@ public static function GetPostElements($filter) {
 //==============================================================================
 // setPostElements と同じだが、未定義キーだけを値セットする
 // 冗長だが PHP5.6 でも動作する方法をとる
-private static function set_if_empty($arr) {
+public static function set_if_empty($arr) {
 	foreach($arr as $key => $val) {
 		if(!array_key_exists($key,static::$Post)) static::$Post[$key] = $val;
 	}
