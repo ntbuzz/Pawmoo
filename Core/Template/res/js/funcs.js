@@ -68,9 +68,9 @@ Array.prototype.mymerged = function (b) {
 };
 //====================================================
 // customize location object class for this framework
-const LOC_FULL      = 3;     // :url     http://host/url
-const LOC_SYS       = 2;     // /url     http://host/sysRoot/url
-const LOC_APPNEW    = 1;     // ./url    http://host/appRoot/url
+const LOC_FULL    = 3;     // :url     http://host/url
+const LOC_SYS     = 2;     // /url     http://host/sysRoot/url
+const LOC_APPNEW  = 1;     // ./url    http://host/appRoot/url
 const LOC_APPSELF = 0;     // url .url http://host/appRoot/url
 //=====================================================
 // URIの操作

@@ -151,10 +151,10 @@ function get_protocol($href) {
 //==============================================================================
 // Generate HYPER_LINK string
 //  http～  Direct URL
-// :xxx     /xxx
+// :xxx     /xxx		same as /xxx no-use!
 // /xxx     sysRoot/xxx
-// ./xxx    appRoot/modname/xxx
 // xxx      appRoot/xxx
+// ./xxx    appRoot/modname/xxx
 // !!xxx    https://SERVER/xxx
 // !:xxx    http://SERVER/xxx
 function make_hyperlink($lnk,$modname) {
