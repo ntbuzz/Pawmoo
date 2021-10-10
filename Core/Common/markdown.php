@@ -222,11 +222,12 @@ function pseudo_markdown($atext, $md_class = '') {
         },
 //------- ...!{ TEXT }... NL change <br> tag in div-indent class
         '/\s\.\.\.([\w\-]+(?:\.[\w\-]+)*)?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
+			$txt = pseudo_markdown($m[3],false);
             if($m[2]==='!') {
-                $txt = nl2br($m[3]);
+                $txt = nl2br($txt);
                 // restore HTML-tag(</h1>) after <BR>
                 $txt = rtrim(preg_replace('/(<\/h\d>)(?:<br>|<br \/>)\n/i',"\\1\n","{$txt}\n"));
-            } else $txt = trim($m[3]);
+            } else $txt = trim($txt);
             $cls = ($m[1]==='')?'indent':get_class_names($m[1],false);
             return "\n<div class='{$cls}'>{$txt}</div>";
         },
