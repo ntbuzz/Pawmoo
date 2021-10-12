@@ -211,14 +211,16 @@ function pseudo_markdown($atext, $md_class = '') {
 			return "<a href='{$url}'{$attr}>{$txt}</a>";
 		},
 //------- ..class#id(value){TEXT} CLASS/ID/VALUE attributed SPAN/P replacement
-        '/(?:^|\s)\.\.([\w\-]+(?:\.[\w\-]+)*)?(?:#([\w\-]+))?(?:\(([^\)]+)\))?(:)?\{((?:\$\{[^\}\s]+\}|\\\}|.)*?)\}(?:$|\s)/s' => function ($m) {
-			list($mm,$cls,$ids,$val,$tag,$txt) = $m;
+        '/(\s)\.((?:\.[\w\-]+)+)(?:#([\w\-]+))?(?:\(([^\)]+)\))?(:)?\{((?:\$\{[^\}\s]+\}|\\\}|.)*?)\}($|\s)/s' => function ($m) {
+			list($mm,$pre,$cls,$ids,$val,$tag,$txt,$post) = $m;
             $cls = get_class_names($cls);
             $ids = ($ids==='') ? '' : " id='{$ids}'";
             $val = ($val==='') ? '' : " value='{$val}'";
             $tag = ($tag==='') ? 'span' : 'p';
+			if($pre !== "\n") $pre = '';				// KEEP NL(\n), for previous line last DBL-SPC to <BR> tag
+			if($post !== "\n") $post = '';				// KEEP NL(\n), for next line markdown
 			if(strpos($txt ,'\\}')) $txt = str_replace('\\}','}',$txt);
-            return "<{$tag}{$cls}{$ids}{$val}>{$txt}</{$tag}>";
+            return "{$pre}<{$tag}{$cls}{$ids}{$val}>{$txt}</{$tag}>{$post}";
         },
 //------- ...!{ TEXT }... NL change <br> tag in div-indent class
         '/\s\.\.\.([\w\-]+(?:\.[\w\-]+)*)?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
