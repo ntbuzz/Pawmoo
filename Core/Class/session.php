@@ -75,7 +75,6 @@ static function CloseSession() {
 //==============================================================================
 // ENV変数値を返す
 static function getEnvValues(...$keys) {
-//debug_dump(["KEYS"=>$keys]);
 	if(count($keys)===1) {
 		$keys = $keys[0];
 		return (array_key_exists($keys,static::$EnvData)) ? static::$EnvData[$keys] : NULL;

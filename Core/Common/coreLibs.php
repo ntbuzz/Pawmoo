@@ -45,15 +45,6 @@ function get_routing_path($root) {
         array_intval_recursive($params),
     );
     $ret = [$appname,$app_uri,$module];
-    debug_xdump([
-		'Framework Information' => [
-            "SERVER" => $_SERVER['REQUEST_URI'],
-            "app_uri"=> $app_uri,
-            "appname"=> $appname,
-            "Module"=> $module,
-        ],
-        "RET" => $ret,
-    ]);
     return $ret;
 }
 //==============================================================================

@@ -147,7 +147,6 @@ public static function Get_RelocateURL($force=FALSE,$query=NULL) {
 	// クエリを付加
 	if(!is_array($query)) $query = static::$Query;
     if(!empty($query)) $url = "{$url}?" . http_build_query($query);;
-    debug_xdump(["RE-LOCATE-JMP" => static::$execURI,'URI'=>$url]);
     return "/{$url}";
 }
 //==============================================================================

@@ -24,7 +24,6 @@ class LangUI {
 //==============================================================================
 //  言語ファイルの切替え
 public static function SwitchLangs($newlang) {
-//debug_dump(['SET-LOCALE'=>$newlang]);
 	$langs = get_locale_lang($newlang);
 	if(empty($langs)) $langs = DEFAULT_LANG;
 	if(static::$Locale === ".{$langs}") return;	// 同じ言語ならリロードしない

@@ -49,7 +49,6 @@ protected function reset_seq($table,$primary) {
 //==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
-	debug_xdump(['SQL' => $sql]);
 	$this->rows = $this->dbb->query($sql);
 	return $this->rows;
 }

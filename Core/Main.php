@@ -115,12 +115,6 @@ $defs = array_filter_import(true,['lang','region'],	//'REGION','LANG',
 			App::$Query,					// ?lang=&region=
 			App::$Post						// lang=&region=
 		);
-debug_xdump([
-	'CONFIG'=> [$lang,$region],
-	'SESSION'=> MySession::get_LoginValue(),
-	'QUERY' =>App::$Query,
-	'POST'	=> App::$Post
-]);
 list($lang,$region) = $defs;
 //if(empty($lang)) $lang = DEFAULT_LANG;
 MySession::set_LoginValue(['LANG'=>$lang, 'REGION'=>$region]);
