@@ -116,6 +116,7 @@ $.fn.LoadContents = function () {
 	var self = this;	// Reminder jQuery Self Object
 	var target = {
 		url: '',
+		async: false,		// asunc mode
 		postObj: null,
 		fitWin: null,
 		callback: null,
