@@ -650,10 +650,10 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 
   【ハイパーリンク省略形】
     http://～         URLの直接指定
-    :xxx              http://(ホスト名)/xxx
-    /xxx              /(フレームワークトップ)xxx～
+    /xxx              /(サーバートップ)/xxx～
+    :xxx              (アプリトップ)/xxx
     ./xxx             /(アプリトップ)/(モジュール名)/xxx
-    xxx               /(アプリトップ)/xxx
+    xxx               xxx (カレントパスへの相対指定)
     !!xxx             http://SERVER/xxx
     !:xxx             https://SERVER/xxx
 
@@ -721,7 +721,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     +jquery => [ value, ... ]               value のリストをJQuery関数として出力する
     +img => [ attr => value, src ]          imageタグの簡易出力書式, class,id以外の属性を指定しない場合はスカラー値で定義できる
     +img => src
-    +ul/ol => [ attr => value , items ]     UL/OLタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
+    +ul/+ol => [ attr => value , items ]    UL/OLタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
       items :=                                リスト項目は次の要素から構成する
         [ list-section ],           　          配列要素：　セクション項目
         .XXXX#DDDD => [ list-section ]          クラス名(XXXX)、ID名(DDDD)付のリストセクション項目
@@ -771,6 +771,8 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     %link => [ link_str => href, ... ]      ハイパーリンク link_str に href のリンクを設定,Helper->ALinkを呼び出す
                                             単独タグの場合は省略形として以下の書式も使用できる
                                               %link_str => href
+											%link および link_str には中括弧で  target 属性を付加することができる
+											%link コマンドに付加した属性は全ての要素に適用され、link_str は個々の要素に適用される
     +inline.SecName => [ ... ]              インラインのレイアウトセクション定義。テンプレート呼出しで再利用ができる
     +markdown => Text                       Text を簡易マークダウンとして整形したものを出力する、セクション変数は整形後に展開する
                                             クラス属性を指定するとマークダウンのクラス名とする
@@ -851,6 +853,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 					!(URL)		=> target="_blank"
 					^(URL)		=> target="_top"
 					:(URL)		=> target="_self"
+				URLはセクション形式のハイパーリンク形式と同じ省略形が使用できる
     [テキスト]^(URL)            // ハイパーリンク(新規ウィンドウ)
     ![ALTテキスト](URL)         // URLへの画像リンク
                   以下は独自仕様
