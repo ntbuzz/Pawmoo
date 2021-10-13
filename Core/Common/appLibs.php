@@ -151,19 +151,20 @@ function get_protocol($href) {
 //==============================================================================
 // Generate HYPER_LINK string
 //  http～  Direct URL
-// :xxx     /xxx		same as /xxx no-use!
-// /xxx     sysRoot/xxx
-// xxx      appRoot/xxx
-// ./xxx    appRoot/modname/xxx
+// :xxx     appRoot/xxx			controller(xxx) exchange
+// /xxx     sysRoot/xxx			app(xxx) exchange
+// xxx      appRoot/xxx			current path
+// ./xxx    appRoot/module/xxx	method(xxx) exchange
 // !!xxx    https://SERVER/xxx
 // !:xxx    http://SERVER/xxx
-function make_hyperlink($lnk,$modname) {
+function make_hyperlink($lnk,$modname=NULL) {
     if(get_protocol($lnk) === NULL) {
         // check on TOP-CHAR
         switch(mb_substr($lnk,0,1)) {
         case '#':
         case '?': break;        // label or query
-        case ':': $lnk[0] = '/'; break;
+//        case ':': $lnk[0] = '/'; break;
+        case ':': $lnk = App::Get_AppRoot(mb_substr($lnk,1)); break;
         case '/': $lnk = App::Get_SysRoot($lnk); break;
         case '!':
             $protocols = [ '!!' => 'https://', '!:' => ' http://' ];
@@ -176,10 +177,11 @@ function make_hyperlink($lnk,$modname) {
             break;
         default:
             if(mb_substr($lnk,0,2) === './') {
+				if($modname === NULL) $modname = App::$Controller;
                 $lnk = substr_replace($lnk, strtolower($modname), 0, 1);
                 $lnk = App::Get_AppRoot($lnk);
-            } else  {
-                $lnk = App::Get_AppRoot($lnk);
+            // } else  {
+            //     $lnk = App::Get_AppRoot($lnk);
             }
         }
     }

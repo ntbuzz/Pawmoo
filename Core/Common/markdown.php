@@ -207,6 +207,7 @@ function pseudo_markdown($atext, $md_class = '') {
             case '^': $arr[] = 'target="_top"'; break;
             case ':': $arr[] = 'target="_self"'; break;
             }
+			$url = make_hyperlink($url);
 			$attr = empty($arr) ? '': ' '.implode(' ',$arr);
 			return "<a href='{$url}'{$attr}>{$txt}</a>";
 		},
