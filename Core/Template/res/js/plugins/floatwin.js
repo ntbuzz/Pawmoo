@@ -15,18 +15,7 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 	var id_name = function (obj) {
 		return obj.prop('tagName')+'.'+obj.prop('class')+'#'+obj.prop('id');
 	};
-//	操作ボタンパーツを追加
-    var controlls = ["close:${#core.Close}", "fw_resize:${#core.Resize}", "fw_resize_message:${#core.SizeDisplay}"];
-    controlls.forEach(function (value) {
-		var cls = value.split(':');
-		var clsname = "span." + cls[0];
-		var btn = self.find(clsname);
-        if (btn.length === 0) {
-            var alt = (cls[1] != '') ? '" alt="' + cls[1] : '';
-            $('<span class="'+cls[0]+alt+'"></span>').appendTo(self);
-		};
-    });
-//  標準ボタンパーツを追加
+//  ユーザー定義ボタンパーツを追加
 	if (buttons.length && self.find(".center").length===0) {
         var buttontag = "<div class='center'><hr>";
         var buttonClass = [ "execButton", "closeButton"];
@@ -40,6 +29,17 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
         buttontag = buttontag+"</div>";
         self.find('dd').append(buttontag);
 	};
+//	操作ボタンパーツを追加
+    var controlls = ["close:${#core.Close}", "fw_resize:${#core.Resize}", "fw_resize_message:${#core.SizeDisplay}"];
+    controlls.forEach(function (value) {
+		var cls = value.split(':');
+		var clsname = "span." + cls[0];
+		var btn = self.find(clsname);
+        if (btn.length === 0) {
+            var alt = (cls[1] != '') ? '" alt="' + cls[1] : '';
+            $('<span class="'+cls[0]+alt+'"></span>').appendTo(self);
+		};
+    });
 	self.find('dl dt').text(title);
 	// 背景をクリックできなくする
 	var backwall = $('<div class="floatWin-BK"></div>');
