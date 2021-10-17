@@ -451,15 +451,18 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
 			// cannot use in RESOURCE (AppStyle)
             case '&':       // Helper Method CALL
 				if(isset($class)) {
-                   	$p = '/&(\w+)(?:\(([^\)]+)\))?/';
-                    preg_match($p,$var,$m);
-                    $var = $m[1];
-                    $arg = (count($m)===3) ? $m[2]:NULL;
-                    if(method_exists($class->Helper,$var)) {
-						$arr = explode(',',$arg);
-						$arg = (count($arr)===1) ? $arg : $arr;
-                        $val = $class->Helper->$var($arg);
-                    } else $val = "NOT-FOUND({$var})";
+                   	$p = '/&(\w*)(?:\(([^\)]+)\))?/';
+                    if(preg_match($p,$var,$m)===1) {
+						list($mm,$method,$arg) = $m;
+						if(empty($method)) {
+							$method = (defined('HELPER_EXPAND')) ? HELPER_EXPAND : DEFAULT_HELPER_EXPAND;
+						}
+						if(method_exists($class->Helper,$method)) {
+							$arr = explode(',',$arg);
+							$arg = (count($arr)===1) ? $arg : $arr;
+							$val = $class->Helper->$method($arg);
+						} else $val = "NOT-FOUND({$method})";
+					}
 				}
 				break;
             default:
