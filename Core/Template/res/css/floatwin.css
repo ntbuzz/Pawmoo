@@ -26,7 +26,7 @@
 .floatWindow dl dd {
     width:100%;
     height:calc(100% - 36px);   /* タイトル:25px＋ リサイズアイコン:11px */
-    margin-bottom:11px;
+    /* margin-bottom:11px; */
     overflow-x:hidden;
     overflow-y:auto;
 }
@@ -140,14 +140,11 @@
 	padding: 6px 10px 4px;  
 }
 .floatWindow .center {
-    margin-top:10px;
+	z-index:1;
+	position:absolute;
+	bottom:6px;
     width:100%;
+	height:36px;
+	padding-top:10px;
     text-align: center;
-}
-.floatWindow .center hr {
-    width:90%;
-    height:1px;
-    border:none;
-    border-top:dashed 1px gray;
-    margin:10px auto;
 }

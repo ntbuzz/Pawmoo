@@ -17,7 +17,7 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 	};
 //  ユーザー定義ボタンパーツを追加
 	if (buttons.length && self.find(".center").length===0) {
-        var buttontag = "<div class='center'><hr>";
+        var buttontag = "<div class='center'>";
         var buttonClass = [ "execButton", "closeButton"];
 		$.each(buttons, function (index, val) {
 			var label_array = val.split(":");
@@ -26,8 +26,11 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 			if(action === undefined || action === "") action = buttonClass[index];
 			buttontag = buttontag + '<span class="Button ' + action + '">' + btn_label + '</span>';
         });
-        buttontag = buttontag+"</div>";
-        self.find('dd').append(buttontag);
+		buttontag = buttontag + "</div>";
+		var button_bar = $(buttontag);
+		self.append(button_bar);
+		// 高さの調整
+		self.find('dd').css('height', 'calc(100% - ' + (button_bar.outerHeight()+36) +'px)');
 	};
 //	操作ボタンパーツを追加
     var controlls = ["close:${#core.Close}", "fw_resize:${#core.Resize}", "fw_resize_message:${#core.SizeDisplay}"];
@@ -36,7 +39,7 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 		var clsname = "span." + cls[0];
 		var btn = self.find(clsname);
         if (btn.length === 0) {
-            var alt = (cls[1] != '') ? '" alt="' + cls[1] : '';
+			var alt = (cls[1] != '') ? '" alt="' + cls[1] : '';
             $('<span class="'+cls[0]+alt+'"></span>').appendTo(self);
 		};
     });
