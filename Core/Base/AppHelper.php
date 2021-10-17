@@ -83,6 +83,9 @@ public function expand_locale($str) {
 	return str_replace($varList,$values,$str);
 }
 //==============================================================================
+// Transfer LOCALE varible by $id
+public function __x($id) { return $id; }
+//==============================================================================
 // Make HYPER-Link
 public function ALink($lnk,$txt,$attrs = NULL) {
 	echo $this->ALink_str($lnk,$txt,$attrs);
