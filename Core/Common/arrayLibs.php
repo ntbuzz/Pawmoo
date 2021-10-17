@@ -294,3 +294,20 @@ function condition_array($keyset,$keystr) {
     }
     return $cond;
 }
+//==============================================================================
+// get AND condition array by separate SPC word from find keyword
+function condition_array_multi($keyset,$keystr) {
+	$and_str = explode(' ',str_replace(['　','  '],' ',$keystr));
+	$and_cond = [];
+    foreach($and_str as $and_val) {
+		$cond = [];
+		foreach(explode('|',$and_val) as $val) {
+			if(mb_substr($val,0,1)==='-') {
+				$val = mb_substr($val,1);
+				$cond[] = ['NOT' => [$keyset => $val]];
+			} else  $cond[] = [$keyset => $val];
+		}
+		$and_cond[] = ['OR'=>$cond];
+	}
+    return $and_cond;
+}
