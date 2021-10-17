@@ -17,6 +17,16 @@
  *      module => module oe res
  *      method => css|js
  *      filter => xxxx.css|.js
+静的リダイレクト
+	/(css|js|images)/*				vendor/webroot/$1/*
+	/res/images/*					Core/webroot/images/*
+	/res/css/img/*					Core/webroot/cssimg/*
+	/app/css/(css|js|images)/*		app/webroot/cssimg/*
+	/app/.../css/img/*				app/webroot/cssimg/*
+動的リダイレクト (本スクリプトで処理)
+	/res/(css|js)/*					Core/Template/res or Core/webroot/$1/*
+	/app/(css|js)/*					app/View/res
+	/res/module/(css|js)/*			app/module/res
  */
 // デバッグ用のクラス
 require_once('AppDebug.php');
@@ -32,14 +42,17 @@ date_default_timezone_set('Asia/Tokyo');
 $root = basename(dirname(__DIR__));        // Framework Folder
 list($appname,$app_uri,$module) = get_routing_path($root);
 $query	 = xchange_Boolean($_GET);		// query string into $_GET
-
-require_once("app/{$appname}/Config/config.php");
-
 list($fwroot,$appRoot) = $app_uri;
 list($controller,$files) = $module;
-//$files = $module[3][0];        // ファイル名はパラメータに入る
 // ファイル名を拡張子と分離する
 list($filename,$ext) = extract_base_name($files);
+if($appname === 'res') {
+	$contfiles = '#resource';
+	$controller = '';
+} else {
+	$contfiles = ($controller=='Res')?'#resource':['#resource',$controller];
+	require_once("app/{$appname}/Config/config.php");
+}
 MySession::InitSession($appname,$controller);
 // 言語ファイルの対応
 if(array_key_exists('lang', $query)) {
@@ -48,7 +61,6 @@ if(array_key_exists('lang', $query)) {
     $lang = MySession::get_LoginValue('LANG');
     if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 }
-$contfiles = ($controller=='Res')?'#resource':['#resource',$controller];
 LangUI::construct($lang,"app/{$appname}/View/lang/",$contfiles);    // Load CORE lang and SET app-Folder
 // モジュール名と拡張子を使いテンプレートを決定する
 $AppStyle = new AppStyle($appname,$app_uri, $controller, $filename, $ext);
