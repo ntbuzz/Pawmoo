@@ -300,7 +300,7 @@ public function ViewTemplate($name,$vars = []) {
         $attrList = [];
         if($tag[0]==='<') return array($tag,$attrList); // html tag will be not separate
         // allow multi attribute, and separater not space
-        foreach(['data-element' => '{}', 'data-value' => '<>', 'value' => '()', 'name' => '[]', 'size' => '::', 'id' => '##', 'class' => '..'] as $key => $seps) {
+        foreach(['style'=>'||','data-element' => '{}', 'data-value' => '<>', 'value' => '()', 'name' => '[]', 'size' => '::', 'id' => '##', 'class' => '..'] as $key => $seps) {
             list($sep,$tsep) = str_split($seps);
             $n = strrpos($tag,$sep);
             while( $n !== FALSE) {
@@ -378,6 +378,7 @@ public function ViewTemplate($name,$vars = []) {
 					$str = $this->expand_Strings($str,$vars);
 					$quote = mb_substr($str,0,1).mb_substr($str,-1);
 					$q = ($quote !== '""' && $quote !== "''") ? '"' : '';
+					if($name === 'style' && mb_substr($str,-1) !== ';') $str .= ';';
 					$attr .= (is_numeric($name)) ? " {$str}" : " {$name}={$q}{$str}{$q}";
 				}
             }
