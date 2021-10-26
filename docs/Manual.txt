@@ -1633,6 +1633,9 @@ static::$appRoot
   コールバック関数は最下層のSelectタグ変更時に呼び出します。
   最下層の前までのSELECTタグにコールバックを設定するときは InProgress()メソッドで処理します。
   ('#sel').ChainSelect(selObj,0, callback_func).InProgress(callback_func);
+	コールバック関数の引数は、中間コールバックと最終コールバックで異なります。
+	中間コールバック	callback_func(value値, id名)
+	最終コールバック	callback_func(value値, ラベルテキスト, id名)
 
 
 ・ドラッグドロップアップロード
