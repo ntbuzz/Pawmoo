@@ -130,7 +130,7 @@ function PawmooLocations() {
 // Nested SELECT revised edition
 function SelectLink(setupobj, id, first_call, callback) {
 	var self = this;
-	var callback_call = first_call;
+	var callback_call = true;//first_call;
 	var self_obj = $('#' + id);
 	var my_prop = self_obj.attr('data-value');
 	if (my_prop === undefined) my_prop = id;
@@ -138,54 +138,72 @@ function SelectLink(setupobj, id, first_call, callback) {
 	var child_id = self_obj.attr('data-element');
 	if($('#'+child_id).length === 0) child_id = null;
 	var select_me = '<option value="0">${#.core.SelectMe}</option>';
-	var child_obj = (child_id === null) ? null : new SelectLink(setupobj, child_id, first_call, callback);
+	// 末端の子要素オブジェクト
+	var child_term = {
+		selfList: function () {return false;},
+		Select: function (val) {return val;},
+		hideChildren: function () {return false;},
+	};
+	var child_obj = (child_id === null) ? child_term : new SelectLink(setupobj, child_id, first_call, callback);
+	// 子要素を全て隠す
+	self.hideChildren = function () {
+		child_obj.hideChildren();	// 子要素以下を隠す
+		self_obj.hide();			// 自身の要素を隠す
+	};
+	// 自身のOPTIONタグを生成し、指定値にselect属性を付ける
 	self.selfList = function (val, grp) {
 		self_obj.empty();
-		var opt = 0;
-		if (my_obj.select_one) { self_obj.append(select_me); ++opt; };
+		var opt = 0;var selected = false;
+		if (my_obj.select_one) { self_obj.append(select_me); };
 		$.each(my_obj.sel_list, function (key, value) {
 			if (value[2] === undefined || parseInt(value[2]) === parseInt(grp)) {
-				var sel = (value[0] === val) ? ' selected' : '';
+				var sel = '';
+				if(value[0] === val) {
+					selected = true;
+					sel = ' selected';
+				}
 				self_obj.append('<option value="' + value[0] + '"' + sel + '>' + value[1] + '</option>');
 				++opt;
 			};
 		});
-		if (opt === 0) self_obj.append(select_me);
-	};
-    self.defaultList = function(val,grp) {
-		self.selfList(val, grp);
-		child_grp = self_obj.find('option:selected').val();
-        if(child_obj !== null) child_obj.defaultList(0,child_grp);
-	};
-	// suppress change() event 
-	self.SetSelect = function (my_val) {
-		if (child_obj !== null) child_obj.defaultList(0, my_val);
-		 else if (typeof callback === 'function') {
-			var my_txt = self_obj.children(':selected').text();
-			if (callback_call) callback.call(this, my_val, my_txt, id);
-			callback_call = true;
+		if (setupobj.autohide) {
+			if(opt===0) self.hideChildren();
+			else {
+				self_obj.show();
+				if(selected === false) child_obj.hideChildren();
+			};
 		};
+		return (opt > 0);		// SELECT 要素があるかどうかを返す
 	};
-	self.Select = function (val,in_progress) {
-        if(child_obj !== null) val = child_obj.Select(val);
-		var grp = val;
+	// 指定値を選択
+	self.Select = function (val, in_progress) {
+		// 子要素のリストを作成し、その親ID(=自分のselectID)を貰う
+		val = child_obj.Select(val, in_progress);
+		// 自分の親IDを探す
+		var pid = val;
 		$.each(my_obj.sel_list, function (key, value) {
 			if (value[0] === val) {
-				grp = (value[2] === undefined) ? 0 : value[2];
+				pid = (value[2] === undefined) ? 0 : value[2];
 				return false;	// exit .each()
 			};
 			return true;
 		});
-        self.selfList(val, grp);
+//	debugDump({val:val,pid:pid});
+        self.selfList(val, pid);	// 自分と同じ親IDの仲間リストを作成
 		self_obj.off().change(function () {
 			var my_val = $(this).val();
-			if (child_obj !== null && typeof in_progress === "function") {
-				in_progress.call(this, my_val, id);
+			// 自分が親になっている子要素を更新
+			if (child_obj.selfList(-1, my_val)) {	// 子要素のリストが存在するなら
+				if (typeof in_progress === "function") {	// 中間コールバック関数
+					in_progress.call(this, my_val, id);
+				}
+			} else if (typeof callback === "function") {	// 最終コールバック関数
+				var my_txt = self_obj.children(':selected').text();
+				if (callback_call) callback.call(this, my_val, my_txt, id);
+				callback_call = true;
 			};
-			self.SetSelect(my_val);
 		});
-		if (child_obj === null) self.SetSelect(val);
-        return grp;
+        return pid;
     };
 };
 //====================================================
@@ -203,7 +221,65 @@ var formSubmit = function (obj, url) {
 	form.attr('action', url).appendTo('body').submit();
 };
 //====================================================
+//  Check CLIENT BROWSER Javascript version
+function get_browserInfo() {
+	var agent = window.navigator.userAgent.toLowerCase();
+	var browsObj = {
+		'Internet Explorer': [ 'msie,trident',false],
+		'Edge':				 [ 'edge,edg',	true],
+		'Google Chrome':	 [ 'chrome',	true],
+		'Safari':			 [ 'safari',	false],
+		'FireFox':			 [ 'firefox',	false],
+		'Opera':			 [ 'opera',		false],
+	};
+	for(var name in browsObj) {
+		var element = browsObj[name];
+		var id = element[0].split(",");
+		for(var i=0;i<id.length;++i) {
+			var v = id[i];
+			if(agent.indexOf(v) != -1) {
+				return {Name:name, Allow:element[1]};
+			};
+		};
+	};
+	return {Name:'Unknown',Allow:false};
+};
+//====================================================
 // for DEBUG dump Object
+var debugDump = function() {
+	var Dump = function(obj, rIndent) {
+		if (!obj) return '';
+		 var result = '', indent = '  ', br = '\n';
+		 if (rIndent) indent += rIndent;
+		 if (typeof obj === 'object' && !obj.tagName) {
+			result += 'Object=>{' + br;
+			for (var key in obj) {
+				result += indent + key + ' = ';
+				if (obj[key] instanceof jQuery) {
+					result += key +" is jQuery Object" + br;
+				} else if (typeof obj[key] === 'function') {
+					result += key +" is function()" + br;
+				} else if (typeof obj[key] === 'object') {
+					result += Dump(obj[key], indent);
+				} else {
+					result += obj[key] + br;
+				};
+			 };
+			result += '}' + br;
+		} else {
+			result = obj;
+		};
+		 result = String(result);
+		 return result;
+	};
+	// 可変引数を解析
+	var str = "";
+	$.each(arguments,function (index,argv) {
+		if (typeof argv === 'object') str += Dump(argv)+"\n";
+		else str += argv+"\n";
+	});
+	alert(str);
+};
 var objDump = function(obj, rIndent) {
     if (!obj) return '';
      var result = '', indent = '  ', br = '\n';
