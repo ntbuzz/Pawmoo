@@ -21,12 +21,11 @@
 }
 .floatWindow dl {
     width:100%;
-    height:100%;
+    height:calc(100% - 11px);   /* リサイズアイコン:11px */
 }
 .floatWindow dl dd {
     width:100%;
-    height:calc(100% - 36px);   /* タイトル:25px＋ リサイズアイコン:11px */
-    /* margin-bottom:11px; */
+    height:calc(100% - 25px);   /* DTタイトル:25px */
     overflow-x:hidden;
     overflow-y:auto;
 }
