@@ -279,6 +279,16 @@ public function getRecordBy($key,$value) {
     return $this->fields;
 }
 //==============================================================================
+// Get Primary Value by Field Name
+// Result:   Primary Value or FALSE
+public function getPrimaryOf($key,$value,$default=false) {
+	if(empty($value)) return 0;		// not-allow NULL value
+	$row = $this->dbDriver->doQueryBy($key,$value);
+	if($row === false) return $default;
+    $ret = $row[$this->Primary];
+	return (is_numeric($ret)) ? intval($ret) : $ret;
+}
+//==============================================================================
 // Get Record Data by primary-key,and JOIN data by $join is TRUE.
 // Result:   $this->RecData in Column Data
 public function GetRecord($num,$join=FALSE,$values=FALSE) {
