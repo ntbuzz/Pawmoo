@@ -39,7 +39,7 @@ public static function SwitchLangs($newlang) {
     // フレームワークの言語リソースを読込む
     self::LangFiles('Core/Template/lang/','core');
     // アプリケーションの言語リソースパス
-    self::LangFiles($default,static::$controllers);
+	if(!empty($default)) self::LangFiles($default,static::$controllers);
     self::LangDebug();
 }
 //==============================================================================
