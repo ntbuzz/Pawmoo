@@ -111,7 +111,8 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 		if (e.key === 'Enter') {
 			e.stopPropagation();
 			e.preventDefault();
-			$('.execButton').click();
+//			$('.execButton').click();
+			$(callbackBtn).click();
 		};
 	});
     // タイトルバーのドラッグ
