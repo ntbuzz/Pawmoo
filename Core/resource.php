@@ -43,14 +43,17 @@ $root = basename(dirname(__DIR__));        // Framework Folder
 list($appname,$app_uri,$module) = get_routing_path($root);
 $query	 = xchange_Boolean($_GET);		// query string into $_GET
 list($fwroot,$appRoot) = $app_uri;
-list($controller,$files) = $module;
+list($controller,$files) = $module;		// 拡張子付きファイル名はメソッド位置に返る
+debug_xdie(['MOD'=>[$appname,$app_uri,$module]]);
 // ファイル名を拡張子と分離する
 list($filename,$ext) = extract_base_name($files);
-if($appname === 'res') {
-	$contfiles = '#resource';
+if($appname === 'res') {		// template rsource-direct
 	$controller = '';
+	$contfiles = '#resource';
+	$default_dir = "";
 } else {
 	$contfiles = ($controller=='Res')?'#resource':['#resource',$controller];
+	$default_dir = "app/{$appname}/View/lang/";
 	require_once("app/{$appname}/Config/config.php");
 }
 MySession::InitSession($appname,$controller);
@@ -61,7 +64,7 @@ if(array_key_exists('lang', $query)) {
     $lang = MySession::get_LoginValue('LANG');
     if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 }
-LangUI::construct($lang,"app/{$appname}/View/lang/",$contfiles);    // Load CORE lang and SET app-Folder
+LangUI::construct($lang,$default_dir,$contfiles);    // Load CORE lang and SET app-Folder
 // モジュール名と拡張子を使いテンプレートを決定する
 $AppStyle = new AppStyle($appname,$app_uri, $controller, $filename, $ext);
 // ヘッダの出力
