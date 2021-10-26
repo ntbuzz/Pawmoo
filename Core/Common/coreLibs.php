@@ -516,6 +516,23 @@ function make_combobox($sel_item,$opt_list,$size) {
 	return $tag;
 }
 //==============================================================================
+//  add classname into attr[class] 
+// and removed classname,if instructed.
+function attr_addrmclass($attrs,$add,$rm=NULL) {
+	$base = (isset($attrs['class'])) ? $attrs['class'] :'';
+	if(!empty($rm)) $base = str_replace($rm,'',$base);
+    return ltrim("{$base} {$add}");
+}
+//==============================================================================
+//  add classname into attr[class] 
+// and removed classname,if instructed.
+function attr_extract_element(&$attrs,$name,$isempty='',$isexists='%s') {
+	$item_name = (isset($attrs[$name])) ? $attrs[$name]:'';
+	unset($attrs[$name]);
+	if(empty($item_name)) return $isempty;
+	return str_replace('%s',$item_name,$isexists);
+}
+//==============================================================================
 //  textbox, textedit size attribute convert
 // allow ??px, ??em, ??%
 function attr_sz_xchange($attrs) {
@@ -538,4 +555,25 @@ function attr_sz_xchange($attrs) {
 	if(!empty($style_str)) $attrs['style'] = "\"{$style_str};\"";
 	return $attrs;
 }
-
+//==============================================================================
+//  Check CLIENT BROWSER PHP version
+function client_Browser() {
+	$agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+	$browers = [
+		'Internet Explorer' => [ 'msie,trident',false],
+		'Edge'				=> [ 'edge,edg' , 	false],
+		'Google Chrome'		=> [ 'chrome', 		true],
+		'Safari'			=> [ 'safari',		true],
+		'FireFox'			=> [ 'firefox',		true],
+		'Opera'				=> [ 'opera',		true],
+	];
+	foreach($browers as $name => $element) {
+		$idset = explode(',',$element[0]);
+		foreach($idset as $key) {
+			if(strpos($agent,$key) !== false) {
+				return [$name, $element[1] ];
+			}
+		}
+	}
+	return [ 'Unknown',false];
+};
