@@ -237,6 +237,146 @@ $.dialogBox = function (title, msg, callback) {
 		callback(false);
 	});
 };
+// ポップアップメニューボックスを表示する
+$.fn.PopupMenuSetup = function () {
+	this.find('.navi-menubox').each(function () {
+		var self = $(this); // jQueryオブジェクトを変数に代入しておく
+		var ref = "#" + self.attr("data-element");  // 紐付けるID
+		var target = "#" + self.attr("data-value");  // 書き込むID
+		var ref_obj = $(ref);
+		ref_obj.css("cursor", "pointer");
+		ref_obj.off('click').on('click', function () {
+			// メニューを消すための領域を定義
+			var backwall = $('<div class="popup-BK"></div>');
+			$('body').append(backwall);
+			backwall.fadeIn('fast');
+			// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
+			self.off('close-me').on('close-me', function (e) {
+				self.fadeOut('fast');
+				$(window).off('scroll.drop-menu');
+				$('.popup-BK').remove();
+			});
+			backwall.click( function() {
+				self.trigger('close-me');
+			});
+			var menuPos = {
+				left: ref_obj.offset().left + ref_obj.width() - self.width(),
+				top:  ref_obj.offset().top  + ref_obj.height(),
+				scrollPos: function () {
+					var x = this.left - $(window).scrollLeft();
+					var y = this.top  - $(window).scrollTop();
+					return {x:x,y:y};
+				},
+			};
+			// スクロールはリアルタイムで位置移動
+			$(window).on('scroll.drop-menu', function () {
+				var pp = menuPos.scrollPos();
+				self.css({'left': pp.x + 'px','top': pp.y + 'px'});
+			});
+			// メニューコンテンツの表示位置をリンク先から取得して設定
+			var pp = menuPos.scrollPos();
+			self.css({'left': pp.x + 'px','top': pp.y + 'px'});
+			self.fadeIn('fast');
+			self.off('click').on('click','.item',function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+//				alert($(this).text());
+				$(target).val($(this).text());
+				self.trigger('close-me');
+			});
+		});
+	});
+	return this;
+};
+// ポップアップメニューボックスを表示する
+$.fn.PopupCheckListSetup = function () {
+	this.find('.navi-checklist').each(function () {
+		var self = $(this); // jQueryオブジェクトを変数に代入しておく
+		var ref_obj = $("#" + self.attr("data-element"));  // 紐付けるID
+		var target = $('[name="' + ref_obj.attr("data-element") + '"');  	// 書き込むID
+		var active_tab = self.find('.check-itemset:first');
+		ref_obj.css("cursor", "pointer");
+		ref_obj.off('click').on('click', function () {
+			// チェック項目をリストアップしておく
+			var all_items = self.find('.check-item').map(function () { return $(this).val(); }).get();
+			// 入力値をチェックリストに反映する
+			var current = target.val();		// 現在の入力値
+			self.find('.check-item').map(function () {
+				$(this).prop('checked', (current.indexOf($(this).val()) !== -1));
+			});
+			// メニューを消すための領域を定義
+			var backwall = $('<div class="popup-BK"></div>');
+			$('body').append(backwall);
+			backwall.fadeIn('fast').click(function() {
+				self.trigger('close-me');
+			});
+			// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
+			self.off('close-me').on('close-me', function (e) {
+				self.fadeOut('fast');
+				$(window).off('scroll.drop-menu');
+				$('.popup-BK').remove();
+			});
+			var menuPos = {
+				left: ref_obj.offset().left,
+				top:  ref_obj.offset().top  + ref_obj.height(),
+				scrollPos: function () {
+					var x = this.left - $(window).scrollLeft();
+					var y = this.top  - $(window).scrollTop();
+					return {x:x,y:y};
+				},
+			};
+			// スクロールはリアルタイムで位置移動
+			$(window).on('scroll.drop-menu', function () {
+				var pp = menuPos.scrollPos();
+				self.css({'left': pp.x + 'px','top': pp.y + 'px'});
+			});
+			// アイテムにチェックがあれば全チェックに反映する
+			self.off('check-flip').on('check-flip', function () {
+				var all_check = (active_tab.find('.check-item:checked').length !== 0);
+				$('.flip_all').prop('checked', all_check);
+			});
+			// 全チェックのフラグをアイテムに反映する
+			$('.flip_all').off('change').on('change', function () {
+				active_tab.find('.check-item').prop('checked', $(this).prop('checked'));
+				self.trigger('values-set');
+			});
+			// 全てのタブ内のチェック項目をリスト結合してターゲットに入力する
+			self.off('values-set').on('values-set', function () {
+				// 入力値がリストにあるかチェックし無ければ先頭にアイテム挿入
+				var current = target.val().split(" ");		// 区切り文字に置換予定
+				var direct_data = current.filter(function (i) { return all_items.indexOf(i) === -1 });
+				var vals = self.find('.check-item:checked').map(function () { return $(this).val(); }).get();
+				vals = direct_data.concat(vals);
+				// IEでも動くようにfilterで重複を削除して結合
+				uniq = vals.filter(function (x, i, self) { return self.indexOf(x) === i; }).join(" ");
+				target.val(uniq);
+			});
+			// タブ切り替えを処理
+			self.find('.tabmenu>li').on('click').on('click', function () {
+				var control = $(this).closest('div');
+				var menu = control.children('.tabmenu').children('li');
+				var cont = control.children('.tabcontents').children('li');
+				var index = menu.index($(this));
+				active_tab = cont.eq(index);
+				menu.removeClass('selected');		// TabMenu selected delete
+				$(this).addClass('selected');		// switch click TAB selected
+				cont.removeClass('selected');		// TabContents selected delete
+				active_tab.addClass('selected').fitWindow();	// switch TAB selected Contents
+				self.trigger('check-flip');
+			});
+			// メニューコンテンツの表示位置をリンク先から取得して設定
+			var pp = menuPos.scrollPos();
+			self.css({'left': pp.x + 'px','top': pp.y + 'px'});
+			self.fadeIn('fast');
+			// チェックアイテムがクリックされたら
+			self.find('input.check-item').off('change').on('change', function (e) {
+//				debugDump({check:$(this).attr('value')});
+				self.trigger('values-set');
+			});
+		});
+	});
+	return this;
+};
 // 動的コンテンツに対して、プラグイン要素を初期化する
 $.fn.InitPopupSet = function () {
 	// カレンダー設定
@@ -261,7 +401,7 @@ $.fn.InitPopupSet = function () {
 		};
 		self.datepicker(date_form);
 	});
-	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup();
+	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().PopupMenuSetup().PopupCheckListSetup();
 };
 // FormSubmit用のオブジェクトを生成
 $.fn.submitObject = function (false_check,callback,is_parent) {
