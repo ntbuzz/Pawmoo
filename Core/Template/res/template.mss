@@ -30,7 +30,7 @@ Stylesheet => [
             debugbar.css
         ]
 	]
-    checklist => [			// debug
+    testmode => [			// debug
         +import => [
             bodystyle.css        // Template Default Style
             libstyle.css
@@ -41,6 +41,7 @@ Stylesheet => [
             popup.css
 			checklist.css
             debugbar.css
+			tabset.css
         ]
     ]
 ]
@@ -74,14 +75,24 @@ Javascript => [
             debugbar.js
         ]
 	]
-    checklist => [			// debug
+    testmode => [			// debug
         +jquery => [
 			plugins => [
+				misc.js             	// miscellaneous plugin
+				baloon.js               // Balloon Help
+				floatwin.js             // inner window 
+				info-box.js             // info-box for cannot move/resize
+				popup-box.js            // popup-box 
 				checkselect.js
 			]
+            context.js              // context menu popup
+            pagerscript.js          // pager button
+            slide-panel.js          // Slide-Panel
+			tabset.js
+            window.js               // JQuery-Plugins
         ]
         +import => [
-            funcs.js
+            funcs.js                // common function/prototype
         ]
 	]
 ]
