@@ -80,7 +80,7 @@ function pseudo_markdown($atext, $md_class = '') {
             $arr = $call_func(explode("\n", $text));			// Make Level array
             $key = array_key_first($arr);
             list($ptag,$ptagcls,$islist) = $tags[$key]; 
-			if(!empty($usr_cls)) $ptagcls = $usr_cls;
+			if(!empty($usr_cls)) $ptagcls = get_class_names($usr_cls,false);
             $ptag_start = (empty($ptagcls)) ? "<{$ptag}>" : "<{$ptag} class='{$ptagcls}'>";
             $ptag_close = "</{$ptag}>";
             $ul_text = function($array,$n) use(&$ul_text,&$ptag,&$ptag_start,&$ptag_close,$islist) {
