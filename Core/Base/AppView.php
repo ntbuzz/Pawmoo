@@ -378,7 +378,9 @@ public function ViewTemplate($name,$vars = []) {
 					$str = $this->expand_Strings($str,$vars);
 					$quote = mb_substr($str,0,1).mb_substr($str,-1);
 					$q = ($quote !== '""' && $quote !== "''") ? '"' : '';
-					if($name === 'style' && mb_substr($str,-1) !== ';') $str .= ';';
+					if($name === 'style') {
+						if(strpos(';"',mb_substr($str,-1)) === false) $str .= ';';
+					}
 					$attr .= (is_numeric($name)) ? " {$str}" : " {$name}={$q}{$str}{$q}";
 				}
             }
