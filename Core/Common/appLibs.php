@@ -213,3 +213,26 @@ function passwd_encrypt($str) {
 function passwd_random($n = 8) {
     return substr(base_convert(bin2hex(openssl_random_pseudo_bytes($n)),16,36),0,$n);
 }
+// １段めのメニューを作成
+function menu_box($menu,$label=true,$cls='') {
+	echo "<ul class='{$cls}'>\n";
+	foreach($menu as $key => $val) {
+		if(is_array($val)) {
+			echo "<li><a class='label'>{$key}</a>\n";
+			echo "<ul class='navi-sub'>\n";
+			foreach($val as $kk => $vv) {
+				$ttl = (is_numeric($kk) || $label === false) ? '<li>':"<li class='label'><span>{$kk}</span>";
+				echo "{$ttl}\n";
+				menu_box($vv,$label);
+				echo "</li>\n";
+			}
+			echo "</ul>\n";
+		} else if(is_numeric($key)) {
+			echo "<li><a class='item'>{$val}</a></li>\n";
+		} else {
+			if($val === -1) echo "<li class='label'><span>{$key}</span>\n";
+			else echo "<li><a class='item'>{$key}</a></li>\n";
+		}
+	}
+	echo "</ul>\n";
+};
