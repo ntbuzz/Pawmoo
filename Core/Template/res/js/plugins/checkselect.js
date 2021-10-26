@@ -28,7 +28,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 	var tag_name = this.attr('data-element');
 	var tag_obj = this.find('[name='+tag_name+']');
 	if (tag_obj.length == 0) {
-		alert("NOT FOUND ERROR:"+tag_name);
+		alert("CheckList:NOT FOUND="+tag_name);
 		return false;
 	};
 	tag_obj.css("padding", "0 5px");
@@ -88,7 +88,8 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 				label_val[label] = value;
 			});
 			// make check-list by label object element.
-			for (const [label, value] of Object.entries(label_val)) {
+			for (label in label_val) {		// for...of の使えないIE11への対応
+				var value = label_val[label];
 				var li_tag = $('<li></li>').appendTo(check_list);
 				if (parseInt(value) < 0) {
 					li_tag.append('<hr>');		// separator
