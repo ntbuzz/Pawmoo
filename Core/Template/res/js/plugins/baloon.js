@@ -7,6 +7,7 @@ $.fn.PopupBaloonSetup = function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var onside = self.attr("class").existsWord('onside');
 		var ref = self.attr("data-element");  // 紐付けるID
+		var dynamic = self.attr("data-value");  // 動的切替え
 		var act = ref.slice(0, 1);
 		var on_mouseover = (act == "@");	    // 先頭が＠ならmouseover
 		if (on_mouseover) ref = ref.slice(1);
@@ -20,9 +21,17 @@ $.fn.PopupBaloonSetup = function () {
 				$('#' + ref).after('<span class="help_icon" id="' + icon + '"></span>')
 							.css("margin-right", '2px');
 			}; //else ev = 'mouseover';   // 既存要素の場合、clickイベントが登録されているかもしれない
+			var ref_obj = $('#' + ref);
 			var icon_obj = $('#' + icon);
 			if (ev == "click") icon_obj.css("cursor", "help");
 			icon_obj.off(ev).on(ev, function () {
+				if (dynamic) {
+					var disp_class = ref_obj.attr('data-value');		// 表示するタグID
+					if (typeof disp_class === 'string') {
+						self.children().hide();			// 直下の要素を全て隠す
+						self.find("#" + disp_class).show();	// 指定のタグIDのみ表示する
+					};
+				};
 				// バルーンを消すための領域を定義
 				$('body').append('<div class="baloon-BK"></div>');
 				$('.baloon-BK').fadeIn('fast');
