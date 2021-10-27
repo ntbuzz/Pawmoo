@@ -242,8 +242,8 @@ function is_tag_identifier($str) {
 			'/^([&@\+<\?%\-])(?!\1|$)/' => 2,		// command-token (not repeat char)
 			'/^\$\w+$/' => 3,						// variable-token
 			'/^\\\d+$/' => 1,						// escape digit
-			// dirty pattern for TAG-token tag.class#id:size[name](value)<data-value>{data-element}
-			'/^(?:[a-zA-Z_]*)(?:[\.#][a-zA-Z_\-\s]*)+(?:\:\d+)?(?:[\{\(\[].+?[\}\)\]])*$/' => 1,
+			// dirty pattern for TAG-token tag.class#id:size[name](value)<data-value>{data-element}|style|
+			'/^[a-zA-Z_]*(?:[\.#][a-zA-Z_\-\s]*)+(?:\:\d+)?(?:[\[\(\<\{\|].+?[\|\}\>\)\]])*$/' => 1,
 		];
 		foreach($tokens as $pattern => $ret_val) {
 			if(preg_match($pattern,$str)) return $ret_val;
