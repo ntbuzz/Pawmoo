@@ -580,6 +580,7 @@ public function ViewTemplate($name,$vars = []) {
     //  +markdown.classname => scalar-markdown-text-direct or [ sectionn-variables ... ]
     private function cmd_markdown($tag,$attrs,$sec,$vars) {
         $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
+		if(strtolower($cls) === 'false') $cls = false;
 		if(is_array($sec)) {
 	        $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
 			// expand section variable before markdown
