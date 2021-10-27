@@ -56,6 +56,11 @@ Array.prototype.delete_exists = function (val) {
 	return false;
 };
 //====================================================
+// pickup uniq element
+Array.prototype.uniq = function () {
+	return this.filter(function (x, i, self) { return (self.indexOf(x) === i); });
+};
+//====================================================
 // array merge: exclude duplicate element
 Array.prototype.mymerged = function (b) {
 	var new_array =  this.slice();	// 配列コピー
