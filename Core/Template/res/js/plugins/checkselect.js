@@ -164,7 +164,8 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 		close_btn.click(function (e) {
 			if (setting.MultiSelect === true) {
 				vals = $('.multi-check:checked').map(function () { return $(this).val(); }).get();
-				uniq = Array.from(new Set(vals)).join(CheckListOption.Separate);	// 重複を削除して結合
+				// IE11でも動作するようにprottype宣言の重複削除を使う
+				uniq = vals.uniq().join(CheckListOption.Separate);	// 重複を削除して結合
 			} else {
 				uniq = $('input[name="'+tag_name+'"]:checked').val();
 			};
