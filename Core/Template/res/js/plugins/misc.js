@@ -241,9 +241,8 @@ $.dialogBox = function (title, msg, callback) {
 $.fn.PopupMenuSetup = function () {
 	this.find('.navi-menubox').each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
-		var ref = "#" + self.attr("data-element");  // 紐付けるID
-		var target = "#" + self.attr("data-value");  // 書き込むID
-		var ref_obj = $(ref);
+		var ref_obj = $("#" + self.attr("data-element"));  // 紐付けるID
+		var target = $('[name="'+ref_obj.attr('data-element')+'"');  // 書き込むID
 		ref_obj.css("cursor", "pointer");
 		ref_obj.off('click').on('click', function () {
 			// メニューを消すための領域を定義
@@ -260,8 +259,8 @@ $.fn.PopupMenuSetup = function () {
 				self.trigger('close-me');
 			});
 			var menuPos = {
-				left: ref_obj.offset().left + ref_obj.width() - self.width(),
-				top:  ref_obj.offset().top  + ref_obj.height(),
+				left: target.offset().left + Math.max(0,target.innerWidth() - self.width()),
+				top:  target.offset().top  + target.outerHeight(),
 				scrollPos: function () {
 					var x = this.left - $(window).scrollLeft();
 					var y = this.top  - $(window).scrollTop();
@@ -280,8 +279,7 @@ $.fn.PopupMenuSetup = function () {
 			self.off('click').on('click','.item',function(e) {
 				e.stopPropagation();
 				e.preventDefault();
-//				alert($(this).text());
-				$(target).val($(this).text());
+				target.val($(this).text());
 				self.trigger('close-me');
 			});
 		});
@@ -304,12 +302,14 @@ $.fn.PopupCheckListSetup = function () {
 			self.find('.check-item').map(function () {
 				$(this).prop('checked', (current.indexOf($(this).val()) !== -1));
 			});
+			self.trigger('check-flip');
 			// メニューを消すための領域を定義
 			var backwall = $('<div class="popup-BK"></div>');
 			$('body').append(backwall);
-			backwall.fadeIn('fast').click(function() {
-				self.trigger('close-me');
-			});
+			// 背景をクリックした閉じる
+			backwall.fadeIn('fast').click(function() {self.trigger('close-me');});
+			// close ボタンが定義されているときの処理
+			self.find('.close').on('click', function () { self.trigger('close-me');	});
 			// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
 			self.off('close-me').on('close-me', function (e) {
 				self.fadeOut('fast');
@@ -370,7 +370,6 @@ $.fn.PopupCheckListSetup = function () {
 			self.fadeIn('fast');
 			// チェックアイテムがクリックされたら
 			self.find('input.check-item').off('change').on('change', function (e) {
-//				debugDump({check:$(this).attr('value')});
 				self.trigger('values-set');
 			});
 		});
