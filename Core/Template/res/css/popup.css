@@ -265,6 +265,7 @@ opacity: 0.25; */
 	display:inline-block;
     width:18px;
     height:19px;
+	vertical-align: middle;
     background: url(res/img/help-icon.png) no-repeat left bottom;
 }
 /*==============================================================================
@@ -382,13 +383,12 @@ opacity: 0.25; */
     margin-top:-1px;
 }
 /* サブメニューの幅 */
-.navi-menubox ul.navi-sub li {
+.navi-menubox .navi-sub li {
 	width: 12em;
 }
 /* ラベル行は少し高さを抑える */
-.navi-menubox ul.navi-sub li.label {
+.navi-menubox .navi-sub li.label {
     line-height: 20px;
-    margin-left:1px;
 }
 .navi-menubox li>span {
 	border:1px solid gray;
@@ -401,15 +401,15 @@ opacity: 0.25; */
 	white-space: nowrap;
 	overflow: hidden;
 }
-.navi-menubox li ul.navi-sub {
+.navi-menubox li .navi-sub {
     z-index:1;
     display:none;
     left:100%;
     position:absolute;
-    margin-left:-1px;
-	margin-top:-30px;
+    margin-left:-1px;	/* border幅分ずらす */
+	margin-top:-30px;	/* line-height分上に移動 */
 }
-.navi-menubox li:hover > ul.navi-sub {
+.navi-menubox li:hover > .navi-sub {
     display:flex;
 }
 .navi-menubox li a {
@@ -424,15 +424,11 @@ opacity: 0.25; */
 	white-space: nowrap;
 	overflow: hidden;
 }
-.navi-menubox ul.navi-menu>li>a {
-	color:black;
-    background: linear-gradient(to bottom,whitesmoke, silver );
-}
 .navi-menubox li a:hover {
     background: yellow;
     color:black;
 }
-/*リストに「▼」を付ける*/
+/* リストに「▶」を付ける*/
 .navi-menubox li a.label:after {
     position: absolute;
     right: 0px;
@@ -442,12 +438,14 @@ opacity: 0.25; */
     content: "";
     transform: translateY(-50%);
 }
+/* リストに「▼」を付ける */
+.dropdown-arrow { display:flex; }	/* IE11ではこうしないと並ばない */
 .dropdown-arrow:after {
 	position:relative;
 	top:0.5em;
-	right:7px;
+	right:1em;
 	border: 5px solid transparent;
-	border-top: 8px solid gray;
+	border-top: 10px solid gray;
 	content: "";
 }
 /*==============================================================================
@@ -490,9 +488,6 @@ opacity: 0.25; */
 	font-weight: bold;
 	background-color: whitesmoke;
 }
-/* .navi-checklist .tabcontents {
-	margin:5px 10px;
-} */
 .navi-checklist .tabcontents>li {
 	display:none;
 }
@@ -500,10 +495,11 @@ opacity: 0.25; */
 	display:block;
 }
 .navi-checklist .check-all {
-	padding:0 10px;
+	padding:5px 10px;
 	border-top:1px dashed gray;
 	text-align:right;
 }
+/*
 .navi-checklist .col2 { column-count: 2; }
 .navi-checklist .col3 { column-count: 3; }
 .navi-checklist .col4 { column-count: 4; }
@@ -512,12 +508,22 @@ opacity: 0.25; */
 .navi-checklist .col7 { column-count: 7; }
 .navi-checklist .col8 { column-count: 8; }
 .navi-checklist .col9 { column-count: 9; }
-
-.navi-checklist .check-itemset {
-	padding:5px 10px;
-}
 .navi-checklist .check-itemset > div { bre0ak-inside: avoid; }
-
+*/
+/* 段組みは flex を使って独自に行う */
+.navi-checklist .check-itemset {
+	display: flex;
+}
+.navi-checklist .check-itemset > div {
+	margin: 5px 10px;
+}
+.navi-checklist .v-splitter {
+	width:1px;
+	border-left: 1px dotted silver;
+	height: calc(100% - 10);
+	margin: 5px 0;
+}
+/* テキストとチェックボックスの位置揃え */
 .navi-checklist input,
 .navi-checklist select{
 	vertical-align:middle;
