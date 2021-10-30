@@ -237,6 +237,23 @@ $.dialogBox = function (title, msg, callback) {
 		callback(false);
 	});
 };
+// ターゲット位置を元に自身のポジションを決定する
+function calcPosition(target, self) {
+	var target_left = target.offset().left;
+	var target_width = target.innerWidth();
+	var self_width = self.width();
+	if ((target_left + self_width) > $(window).innerWidth()) {
+		this.left = target_left + target_width - self_width;
+	} else {
+		this.left = target_left + Math.max(0,target_width - self_width);
+	}
+	this.top = target.offset().top + target.outerHeight();
+	this.scrollPos = function () {
+		var x = this.left - $(window).scrollLeft();
+		var y = this.top - $(window).scrollTop();
+		return { x: x, y: y };
+	};
+};
 // ポップアップメニューボックスを表示する
 $.fn.PopupMenuSetup = function () {
 	this.find('.navi-menubox').each(function () {
@@ -244,6 +261,7 @@ $.fn.PopupMenuSetup = function () {
 		var ref_obj = $("#" + self.attr("data-element"));  // 紐付けるID
 		var target = $('[name="'+ref_obj.attr('data-element')+'"');  // 書き込むID
 		ref_obj.css("cursor", "pointer");
+		var menuPos = new calcPosition(target, self);
 		ref_obj.off('click').on('click', function () {
 			// メニューを消すための領域を定義
 			var backwall = $('<div class="popup-BK"></div>');
@@ -258,15 +276,6 @@ $.fn.PopupMenuSetup = function () {
 			backwall.click( function() {
 				self.trigger('close-me');
 			});
-			var menuPos = {
-				left: target.offset().left + Math.max(0,target.innerWidth() - self.width()),
-				top:  target.offset().top  + target.outerHeight(),
-				scrollPos: function () {
-					var x = this.left - $(window).scrollLeft();
-					var y = this.top  - $(window).scrollTop();
-					return {x:x,y:y};
-				},
-			};
 			// スクロールはリアルタイムで位置移動
 			$(window).on('scroll.drop-menu', function () {
 				var pp = menuPos.scrollPos();
@@ -281,6 +290,7 @@ $.fn.PopupMenuSetup = function () {
 				e.preventDefault();
 				target.val($(this).text());
 				self.trigger('close-me');
+				target.trigger('selected');
 			});
 		});
 	});
@@ -294,6 +304,7 @@ $.fn.PopupCheckListSetup = function () {
 		var target = $('[name="' + ref_obj.attr("data-element") + '"');  	// 書き込むID
 		var active_tab = self.find('.check-itemset:first');
 		ref_obj.css("cursor", "pointer");
+		var menuPos = new calcPosition(target, self);
 		ref_obj.off('click').on('click', function () {
 			// チェック項目をリストアップしておく
 			var all_items = self.find('.check-item').map(function () { return $(this).val(); }).get();
@@ -316,15 +327,6 @@ $.fn.PopupCheckListSetup = function () {
 				$(window).off('scroll.drop-menu');
 				$('.popup-BK').remove();
 			});
-			var menuPos = {
-				left: ref_obj.offset().left,
-				top:  ref_obj.offset().top  + ref_obj.height(),
-				scrollPos: function () {
-					var x = this.left - $(window).scrollLeft();
-					var y = this.top  - $(window).scrollTop();
-					return {x:x,y:y};
-				},
-			};
 			// スクロールはリアルタイムで位置移動
 			$(window).on('scroll.drop-menu', function () {
 				var pp = menuPos.scrollPos();
@@ -343,12 +345,17 @@ $.fn.PopupCheckListSetup = function () {
 			// 全てのタブ内のチェック項目をリスト結合してターゲットに入力する
 			self.off('values-set').on('values-set', function () {
 				// 入力値がリストにあるかチェックし無ければ先頭にアイテム挿入
-				var current = target.val().split(" ");		// 区切り文字に置換予定
-				var direct_data = current.filter(function (i) { return all_items.indexOf(i) === -1 });
-				var vals = self.find('.check-item:checked').map(function () { return $(this).val(); }).get();
-				vals = direct_data.concat(vals);
-				// IEでも動くようにfilterで重複を削除して結合
-				uniq = vals.filter(function (x, i, self) { return self.indexOf(x) === i; }).join(" ");
+				var check_obj = self.find('.check-item:checked');
+				if (check_obj.attr('type') === 'radio') {
+					uniq = check_obj.val();
+				} else {
+					var current = target.val().split(" ");		// 区切り文字に置換予定
+					var direct_data = current.filter(function (i) { return all_items.indexOf(i) === -1 });
+					var vals = check_obj.map(function () { return $(this).val(); }).get();
+					vals = direct_data.concat(vals);
+					// IEでも動くようにfilterで重複を削除して結合
+					uniq = vals.filter(function (x, i, self) { return self.indexOf(x) === i; }).join(" ");
+				};
 				target.val(uniq);
 			});
 			// タブ切り替えを処理
