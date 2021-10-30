@@ -23,15 +23,38 @@ opacity: 0.25; */
     top:0;
     left:0;
     display:none;
-    margin-top: 16px;
     padding: 10px;
+	margin:0;
     font-size:10pt;
     border: 2px solid #999;
     border-radius:12px;
     color:#333;
     background: lightyellow;
 }
+/*    マルチタイプポップアップ吹き出し */
+.multi-balloon {
+	position: fixed;
+	top:0;
+	left:0;
+	width:0;
+	height:0;
+    z-index:101;
+}
+.multi-balloon>div {
+    display:none;
+}
+/* スイッチバルーンのコンテナスタイル */
+.multi-balloon>div.container {
+    display:block;
+	width:0;
+	height:0;
+}
+/* スイッチバルーン要素は非表示 */
+.multi-balloon>div.container>div {
+    display:none;
+}
 /* 上中央フキダシ部分を作成 */
+.baloon-top-center { margin-top: 12px; }
 .baloon-top-center:before {
     content: "";
     position: absolute;
@@ -49,6 +72,7 @@ opacity: 0.25; */
     border-bottom: 12px solid lightyellow;
 }
 /* 左上フキダシ部分を作成 */
+.baloon-top-left { margin-top: 13px; margin-left:-4px; }
 .baloon-top-left:before {
     content: "";
     position: absolute;
@@ -66,12 +90,13 @@ opacity: 0.25; */
     border-left: 18px solid lightyellow;
 }
 /* 右上フキダシ部分を作成 */
+.baloon-top-right { margin-top: 13px; margin-right:-4px; }
 .baloon-top-right:before {
     content: "";
     position: absolute;
     top:-13px;
     right:4px;
-    border-top: 12px solid transparent;
+    border-top: 13px solid transparent;
     border-right: 18px solid #999;
 }
 .baloon-top-right:after {
@@ -83,11 +108,12 @@ opacity: 0.25; */
     border-right: 18px solid lightyellow;
 }
 /* 下中央フキダシ部分を作成 */
+.baloon-bottom-center { margin-bottom: 12px;}
 .baloon-bottom-center:before {
     content: "";
     position: absolute;
     bottom:-20px;
-    left:47%;
+    left:calc(50% - 8px);
     border: 8px solid transparent;
     border-top: 12px solid #999;
 }
@@ -95,11 +121,12 @@ opacity: 0.25; */
     content: "";
     position: absolute;
     bottom:-17px;
-    left:47%;
+    left:calc(50% - 8px);
     border: 8px solid transparent;
     border-top: 12px solid lightyellow;
 }
 /* 左下フキダシ部分を作成 */
+.baloon-bottom-left { margin-bottom: 13px; margin-left:-4px; }
 .baloon-bottom-left:before {
     content: "";
     position: absolute;
@@ -117,6 +144,7 @@ opacity: 0.25; */
     border-left: 18px solid lightyellow;
 }
 /* 右フキダシ部分を作成 */
+.baloon-bottom-right { margin-bottom: 13px; margin-right:-4px; }
 .baloon-bottom-right:before {
     content: "";
     position: absolute;
@@ -134,6 +162,7 @@ opacity: 0.25; */
     border-right: 18px solid lightyellow;
 }
 /* 左フキダシ部分を作成 */
+.baloon-left { margin-left: 12px;}
 .baloon-left:before {
     content: "";
     position: absolute;
@@ -151,6 +180,7 @@ opacity: 0.25; */
     border-right: 12px solid lightyellow;
 }
 /* 右フキダシ部分を作成 */
+.baloon-right { margin-right: 12px;}
 .baloon-right:before {
     content: "";
     position: absolute;
@@ -381,6 +411,7 @@ opacity: 0.25; */
     line-height: 30px;
     width:15em;
     margin-top:-1px;
+	white-space: nowrap;
 }
 /* サブメニューの幅 */
 .navi-menubox .navi-sub li {
@@ -406,7 +437,7 @@ opacity: 0.25; */
     display:none;
     left:100%;
     position:absolute;
-    margin-left:-1px;	/* border幅分ずらす */
+    margin-left:1px;	/* border幅分ずらす */
 	margin-top:-30px;	/* line-height分上に移動 */
 }
 .navi-menubox li:hover > .navi-sub {
@@ -424,7 +455,7 @@ opacity: 0.25; */
 	white-space: nowrap;
 	overflow: hidden;
 }
-.navi-menubox li a:hover {
+.navi-menubox li>a:hover {
     background: yellow;
     color:black;
 }
@@ -463,6 +494,7 @@ opacity: 0.25; */
 }
 .navi-checklist li {
 	list-style-type: none;
+	white-space: nowrap;
 }
 /* checklist tabset */
 .navi-checklist .tabmenu {
@@ -516,6 +548,10 @@ opacity: 0.25; */
 }
 .navi-checklist .check-itemset > div {
 	margin: 5px 10px;
+}
+.navi-checklist .check-itemset > p {
+	margin: 5px 10px;
+	white-space: nowrap;
 }
 .navi-checklist .v-splitter {
 	width:1px;

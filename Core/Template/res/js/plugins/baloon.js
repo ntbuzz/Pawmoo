@@ -1,142 +1,229 @@
 //
+/* デバッグ用関数
+function dump_size(method,obj) {
+	debugDump({ method:method, w:obj.outerWidth(),h:obj.outerHeight() });
+}
+function ParentScroll(obj) {
+	if (obj.prop('tagName') === 'BODY') return { x: 0, y: 0 };
+	var pscroll = ParentScroll(obj.parent());
+	var scroll = {
+		x: obj.scrollLeft() + pscroll.x,
+		y: obj.scrollTop() + pscroll.y,
+	};
+	return scroll;
+};
+*/
 // バルーンヘルプの表示
-// jquery => コマンドでインクルードすること
-// ポップアップセレクター
+// ターゲット位置を元に自身のポジションを決定する
+function balloonPosition(target, onside) {
+	if (target.prop('tagName') === undefined) return;
+	// ターゲットの中心位置
+	this.pointX = parseInt(target.offset().left) + parseInt(target.outerWidth(true)/2);
+	this.pointY = parseInt(target.offset().top) + parseInt(target.outerHeight(true) / 2);
+	this.Box = { left: 0, top: 0, right: 0, bottom: 0 };
+	this.Onside = onside;
+	var bBox = {
+		width: 0, height: 0,
+		left: 0, top: 0, right: 0, bottom: 0 ,
+		LeftPos: function (x) {
+			this.left = x;
+			this.right = x + this.width;
+		},
+		TopPos: function (y) {
+			this.top = y;
+			this.bottom = y + this.height;
+		},
+		TopLeft: function (x, y) {
+			if (x < 0 || (x + this.width) > $(window).width()) return false;
+			if (y < 0 || (y + this.height) > $(window).height()) return false;
+			this.LeftPos(x);
+			this.TopPos(y);
+			return true;
+		},
+		setBound: function (x, y, w, h) {
+			this.width = w;
+			this.height = h;
+			this.TopPos(y);
+			this.LeftPos(x);
+		},
+	};
+	// スクロール量を考慮
+	this.scrollPos = function () {
+		var x = this.pointX - $(window).scrollLeft();
+		var y = this.pointY - $(window).scrollTop();
+		return { x: x, y: y };
+	};
+	this.calcPosition = function (obj,margin) {
+		var w = parseInt(obj.outerWidth());
+		var hw = parseInt(w / 2);
+		var h = parseInt(obj.outerHeight());
+		var hh = parseInt(h / 2);
+		var Pos = this.scrollPos();
+		// default top-center default
+		var hz = "center";
+		var vt = "top-";
+		bBox.setBound(Pos.x - hw, Pos.y, w, h);
+		if (onside) {
+			if (bBox.TopLeft(Pos.x, Pos.y - hh)) {
+				hz = "left";
+				vt = "";
+			};
+		} else if (Pos.y > parseInt($(window).height() / 2)) {
+			vt = "bottom-";
+			bBox.TopPos(Pos.y - h);
+		};
+		// onside , free 共通
+		if (bBox.top < 0) {
+			vt = "top-";
+			bBox.TopPos(Pos.y);
+		} else if (bBox.bottom > $(window).height()) {
+			vt = "bottom-";
+			bBox.TopPos(Pos.y - h);
+		};
+		if (bBox.left < 0) {
+			hz = "left";
+			bBox.LeftPos(Pos.x);
+		} else if (bBox.right > $(window).width()) {
+			hz = "right";
+			bBox.LeftPos(Pos.x - w);
+		};
+		this.Box = {
+			left: bBox.left - margin,
+			top: bBox.top - margin,
+			right: bBox.right + margin,
+			bottom: bBox.bottom + margin
+		};
+		this.balloon = 'baloon-' + vt + hz;
+		obj.addClass(this.balloon);
+		// マージン分移動する
+		bBox.left = bBox.left - parseInt(obj.css('margin-right'));
+		bBox.top = bBox.top - parseInt(obj.css('margin-bottom'));
+		obj.css({'left': bBox.left + 'px','top': bBox.top + 'px'});
+	};
+	this.inBalloon = function (x, y) {
+		return (x >= this.Box.left) && (x <= this.Box.right)
+				&& (y >= this.Box.top) && (y <= this.Box.bottom);
+	};
+};
+//==============================================================================================
+// ポップアップバルーンセットアップ
 $.fn.PopupBaloonSetup = function () {
+// 旧バルーンヘルプ
+// .popup-balloon.onside{@!item-id} => [
+//		Balloon Message
+// ]
 	this.find(".popup-baloon").each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
-		var onside = self.attr("class").existsWord('onside');
+		var onside = self.attr('class').existsWord('onside');
 		var ref = self.attr("data-element");  // 紐付けるID
-		var dynamic = self.attr("data-value");  // 動的切替え
-		var act = ref.slice(0, 1);
-		var on_mouseover = (act == "@");	    // 先頭が＠ならmouseover
-		if (on_mouseover) ref = ref.slice(1);
-		var ev = (on_mouseover) ? "mouseover" : "click";
-		if (ref != "") {
-			var tag = ref.slice(0, 1);
-			var no_icon = (tag == "!");			 // 先頭が！ならアイコン追加しない
-			if (no_icon) ref = ref.slice(1);
-			var icon = (no_icon) ? ref : ref + "-help";
-			if ($('#' + icon).length == 0) {
-				$('#' + ref).after('<span class="help_icon" id="' + icon + '"></span>')
+		if (ref === undefined) return true;	// continue
+		var ev = 'click';
+		if (ref.charAt(0) == '@') { 
+			ref = ref.slice(1);
+			ev = 'mouseover';
+		};
+		if (ref.charAt(0) == '!') {		// ヘルプを付けない
+			ref = ref.slice(1);
+			var icon = ref;
+		} else {
+			icon = ref + "-help";
+			$('#' + ref).after('<span class="help_icon" id="' + icon + '"></span>')
 							.css("margin-right", '2px');
-			}; //else ev = 'mouseover';   // 既存要素の場合、clickイベントが登録されているかもしれない
+		};
+		var icon_obj = $('#' + icon);
+		if (ev == "click") icon_obj.css("cursor", "help");
+		icon_obj.off(ev).on(ev, function () {
+			var Balloon = new balloonPosition (icon_obj,onside);
+			self.fadeIn('fast');
+			Balloon.calcPosition(self, 10);
+			// リサイズは処理完了後に位置移動する
+			var resizeTimer = null;
+			$(window).on('resize.balloon', function () {
+				clearTimeout(resizeTimer);
+				resizeTimer = setTimeout(function() {
+					// リサイズ完了後の処理
+					Balloon.calcPosition(self,10);
+				}, 200);
+			});
+			// スクロールはリアルタイムで位置移動
+			$(window).on('scroll.balloon', function () {
+				Balloon.calcPosition(self,10);
+			});
+			$(window).off('mousemove.balloon').on('mousemove.balloon',function (e) {
+				e.stopPropagation();
+				e.preventDefault();
+				if (!Balloon.inBalloon(e.clientX, e.clientY)) {
+					self.fadeOut('fast');
+					self.removeClass(Balloon.balloon);
+					$(window).off('scroll.balloon resize.balloon mousemove.balloon');
+				};
+			});
+		});
+	});
+// 新バルーンヘルプ: マルチ・バルーン
+// .multi-balloon => [
+//		.onside{center-item} => [	 Balloon Message	]
+//		.{right-item} => [	//  #right-item には 'sw1','sw2' を data-value に定義する
+//			#sw1 => [ 	Balloon Message	]
+//			#sw2 => [ 	Balloon Message	]
+//		]
+// ]
+	this.find('.multi-balloon').each(function () {
+		$(this).children().each(function () {
+			var self = $(this); // jQueryオブジェクトを変数に代入しておく
+			var cls = self.attr('class');
+			var onside = (cls == undefined) ? false : cls.existsWord('onside');
+			var ref = self.attr("data-element");  // 紐付けるID
+			if (ref === undefined) return true;	// continue
+			var ev = 'click';
+			if (ref.charAt(0) == '@') { 
+				ref = ref.slice(1);
+				ev = 'mouseover';
+			};
+			if (ref.charAt(0) == '!') {		// ヘルプを付けない
+				ref = ref.slice(1);
+				var icon = ref;
+			} else {
+				icon = ref + "-help";
+				$('#' + ref).after('<span class="help_icon" id="' + icon + '"></span>')
+								.css("margin-right", '2px');
+			};
 			var ref_obj = $('#' + ref);
 			var icon_obj = $('#' + icon);
 			if (ev == "click") icon_obj.css("cursor", "help");
 			icon_obj.off(ev).on(ev, function () {
-				if (dynamic) {
-					var disp_class = ref_obj.attr('data-value');		// 表示するタグID
-					if (typeof disp_class === 'string') {
-						self.children().hide();			// 直下の要素を全て隠す
-						self.find("#" + disp_class).show();	// 指定のタグIDのみ表示する
-					};
-				};
-				// バルーンを消すための領域を定義
-				$('body').append('<div class="baloon-BK"></div>');
-				$('.baloon-BK').fadeIn('fast');
-				var target = {
-					width: parseInt(icon_obj.outerWidth(), 10)/2,
-					height: parseInt(icon_obj.outerHeight(), 10)/2,
-					fixPosition: function () {
-						this.top = parseInt(icon_obj.offset().top, 10);
-						this.left = parseInt(icon_obj.offset().left, 10);
-						this.pointX = this.left + this.width - $(window).scrollLeft();
-						this.pointY = this.top  + this.height - $(window).scrollTop();
-					},
-				};
-				var Balloon = {
-					width: parseInt(self.outerWidth(true), 10),
-					height: parseInt(self.outerHeight(true), 10),
-					boundBox: {
-						margin: 10,
-						top: 0, left: 0, right: 0, bottom: 0,
-						inBound: function (x, y) {
-								return (x >= this.left) && (x <= this.right)
-										&& (y >= this.top) && (y <= this.bottom);
-						},
-					},
-					setBoundBox: function (x,y) {
-						this.boundBox.top	= Math.min(this.top, y) - this.boundBox.margin;
-						this.boundBox.left	= Math.min(this.left, x) - this.boundBox.margin;
-						this.boundBox.right	= Math.max(this.left+this.width, x) + this.boundBox.margin;
-						this.boundBox.bottom= Math.max(this.top+this.height, y) + this.boundBox.margin;
-					},
-					RangeSetup: function () {
-						target.fixPosition();
-						var rmargin = 4;
-						if (onside) {
-							var hz = "left";
-							var vt = "";
-							this.top = target.pointY - parseInt(this.height/2) - 8;
-							this.left = target.pointX + 8;
-							if (this.top < 0 || (this.top + this.height) > $(window).height()) {
-								hz = "center";
-								this.left = target.pointX - parseInt(this.width / 2);
-							} else rmargin = -8;
-						} else {
-							var hz = "center";
-							this.left = target.pointX - parseInt(this.width/2);
-							if (target.pointY < parseInt($(window).height() / 2)) {
-								var vt = "top-";
-								this.top = target.pointY;
-							} else {
-								var vt = "bottom-";
-								this.top = target.pointY - this.height - 9;
-							}
-						};
-						// onside , free 共通
-						if (this.top < 0) {
-							vt = "top-";
-							this.top = target.pointY;
-						} else if ((this.top + this.height) > $(window).height()) {
-							vt = "bottom-";
-							this.top = target.pointY - this.height - 9;
-						};
-						if (this.left < 0) {
-							hz = "left";
-							this.left = target.pointX - 4;
-						} else if ((this.left + this.width) > $(window).width()) {
-							hz = "right";
-							this.left = target.pointX - this.width + rmargin;
-						};
-						var cls = vt + hz;
-						this.setBoundBox(target.pointX, target.pointY);
-						self.attr('class', 'popup-baloon baloon-' + cls);
-						self.css({
-							'left': this.left + 'px',
-							'top': this.top + 'px'
-						});
-					},
-				};
-				Balloon.RangeSetup();
-				self.fadeIn('fast');
+				var Balloon = new balloonPosition(icon_obj,onside);
+				var disp_class = ref_obj.attr('data-value');		// 表示するタグID
+				// 選択タグがあればそれをバルーンにする、なければ自身がバルーン
+				ballon_obj = (typeof disp_class === 'string') ? self.find('#' + disp_class) : self;
+				ballon_obj.addClass('popup-baloon');		// popup-baloon のスタイルを適用する
+				ballon_obj.fadeIn('fast');		// dusplay:block でないとサイズが取得できない
+				Balloon.calcPosition(ballon_obj, 10);
 				// リサイズは処理完了後に位置移動する
-			    var resizeTimer = null;
+				var resizeTimer = null;
 				$(window).on('resize.balloon', function () {
 					clearTimeout(resizeTimer);
 					resizeTimer = setTimeout(function() {
 						// リサイズ完了後の処理
-						Balloon.RangeSetup();
+						Balloon.calcPosition(ballon_obj,10);
 					}, 200);
 				});
 				// スクロールはリアルタイムで位置移動
 				$(window).on('scroll.balloon', function () {
-					Balloon.RangeSetup();
+					Balloon.calcPosition(ballon_obj,10);
 				});
-				$('.baloon-BK').off().mousemove(function (e) {
+				$(window).off('mousemove.balloon').on('mousemove.balloon',function (e) {
 					e.stopPropagation();
-            		e.preventDefault();
-					if (!Balloon.boundBox.inBound(e.clientX, e.clientY)) {
-						self.fadeOut('fast');
-						$(window).off('scroll.balloon resize.balloon');
-						$('.baloon-BK').fadeOut('fast',function(){
-							$('.baloon-BK').remove();
-						});
+					e.preventDefault();
+					if (!Balloon.inBalloon(e.clientX, e.clientY)) {
+						// popup-balloon と吹き出し用のクラスを削除
+						ballon_obj.removeClass('popup-baloon ' + Balloon.balloon);
+						ballon_obj.css('display','');	// fadeInで設定されたものを削除
+						$(window).off('scroll.balloon resize.balloon mousemove.balloon');
 					};
 				});
 			});
-		};
+		});
 	});
 	return this;
 };
