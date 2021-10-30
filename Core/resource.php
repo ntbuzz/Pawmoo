@@ -44,7 +44,6 @@ list($appname,$app_uri,$module) = get_routing_path($root);
 $query	 = xchange_Boolean($_GET);		// query string into $_GET
 list($fwroot,$appRoot) = $app_uri;
 list($controller,$files) = $module;		// 拡張子付きファイル名はメソッド位置に返る
-debug_xdie(['MOD'=>[$appname,$app_uri,$module]]);
 // ファイル名を拡張子と分離する
 list($filename,$ext) = extract_base_name($files);
 if($appname === 'res') {		// template rsource-direct
