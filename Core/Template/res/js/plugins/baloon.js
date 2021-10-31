@@ -12,6 +12,16 @@ function ParentScroll(obj) {
 	};
 	return scroll;
 };
+function targetBox(obj) {
+	var top = obj.offset().top;
+	var left = obj.offset().left;
+	return {
+		left: left,
+		top: top,
+		right: left + obj.width(),
+		bottom: top + obj.height(),
+	};
+};
 */
 // バルーンヘルプの表示
 // ターゲット位置を元に自身のポジションを決定する
@@ -53,39 +63,47 @@ function balloonPosition(target, onside) {
 		var y = this.pointY - $(window).scrollTop();
 		return { x: x, y: y };
 	};
-	this.calcPosition = function (obj,margin) {
+	this.calcPosition = function (obj, margin) {
 		var w = parseInt(obj.outerWidth());
 		var hw = parseInt(w / 2);
 		var h = parseInt(obj.outerHeight());
 		var hh = parseInt(h / 2);
 		var Pos = this.scrollPos();
+		var parentBox = {
+			left: 0,top: 0,
+			right: $(window).width(),
+			bottom: $(window).height(),
+		};
 		// default top-center default
-		var hz = "center";
-		var vt = "top-";
-		bBox.setBound(Pos.x - hw, Pos.y, w, h);
 		if (onside) {
-			if (bBox.TopLeft(Pos.x, Pos.y - hh)) {
-				hz = "left";
-				vt = "";
+			var hz = "left"; var vt = "";
+			bBox.setBound(Pos.x, Pos.y - hh, w, h);
+			if (bBox.top < parentBox.left || bBox.bottom > parentBox.bottom) {
+				hz = "center";
+				bBox.LeftPos(Pos.x - hw);
+				if (bBox.top < parentBox.left) {
+					vt = "top-";
+					bBox.TopPos(Pos.y);
+				} else {
+					vt = "bottom-";
+					bBox.TopPos(Pos.y - h);
+				};
 			};
-		} else if (Pos.y > parseInt($(window).height() / 2)) {
-			vt = "bottom-";
-			bBox.TopPos(Pos.y - h);
+		} else {
+			var hz = "center";var vt = "top-";
+			bBox.setBound(Pos.x - hw, Pos.y, w, h);
+			if (bBox.bottom > parentBox.bottom) {
+				vt = "bottom-";
+				bBox.TopPos(Pos.y - h);
+			};
 		};
-		// onside , free 共通
-		if (bBox.top < 0) {
-			vt = "top-";
-			bBox.TopPos(Pos.y);
-		} else if (bBox.bottom > $(window).height()) {
-			vt = "bottom-";
-			bBox.TopPos(Pos.y - h);
-		};
-		if (bBox.left < 0) {
-			hz = "left";
-			bBox.LeftPos(Pos.x);
-		} else if (bBox.right > $(window).width()) {
+		if (bBox.right > parentBox.right) {
 			hz = "right";
 			bBox.LeftPos(Pos.x - w);
+		};
+		if (bBox.left < parentBox.left) {
+			hz = "left";
+			bBox.LeftPos(Pos.x);
 		};
 		this.Box = {
 			left: bBox.left - margin,
@@ -153,7 +171,8 @@ $.fn.PopupBaloonSetup = function () {
 				e.stopPropagation();
 				e.preventDefault();
 				if (!Balloon.inBalloon(e.clientX, e.clientY)) {
-					self.fadeOut('fast');
+					self.css('display','');	// fadeInで設定されたものを削除
+//					self.fadeOut('fast');
 					self.removeClass(Balloon.balloon);
 					$(window).off('scroll.balloon resize.balloon mousemove.balloon');
 				};
