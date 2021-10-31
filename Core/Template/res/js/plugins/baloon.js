@@ -231,14 +231,14 @@ $.fn.PopupBaloonSetup = function () {
 				$(window).on('scroll.balloon', function () {
 					Balloon.calcPosition(ballon_obj,10);
 				});
-				$(window).off('mousemove.balloon').on('mousemove.balloon',function (e) {
+				$(window).off('mousemove.mballoon').on('mousemove.mballoon',function (e) {
 					e.stopPropagation();
 					e.preventDefault();
 					if (!Balloon.inBalloon(e.clientX, e.clientY)) {
 						// popup-balloon と吹き出し用のクラスを削除
 						ballon_obj.removeClass('popup-baloon ' + Balloon.balloon);
 						ballon_obj.css('display','');	// fadeInで設定されたものを削除
-						$(window).off('scroll.balloon resize.balloon mousemove.balloon');
+						$(window).off('scroll.balloon resize.balloon mousemove.mballoon');
 					};
 				});
 			});
