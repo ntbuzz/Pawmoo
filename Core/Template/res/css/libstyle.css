@@ -107,3 +107,12 @@ ul.input-list>li>label>input {
 .vertical>ul.input-list>li {
 	display: block;
 }
+
+.loader_icon {
+	z-index: 999;
+	display:block;
+	position: fixed;
+	top:50%;
+	left:50%;
+	background: url(/images/loader_icon.gif) no-repeat;
+}
