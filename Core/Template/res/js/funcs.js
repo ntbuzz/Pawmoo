@@ -193,7 +193,7 @@ function SelectLink(setupobj, id, first_call, callback) {
 			};
 			return true;
 		});
-//	debugDump({val:val,pid:pid});
+//	alertDump({val:val,pid:pid});
         self.selfList(val, pid);	// 自分と同じ親IDの仲間リストを作成
 		self_obj.off().change(function () {
 			var my_val = $(this).val();
@@ -210,6 +210,19 @@ function SelectLink(setupobj, id, first_call, callback) {
 		});
         return pid;
     };
+};
+//====================================================
+// SYNC AJAX
+var ajaxLoadSync = function (url, obj, default_data) {
+	$.busy_cursor(true);
+	$.ajaxSetup({ async: false });
+	$.post(url,obj).done(function (data) { //リクエストが成功した際に実行する関数
+		default_data = data;
+	}).fail(function () {
+		alert("error:" + url);
+	});
+	$.busy_cursor(false);
+	return default_data;
 };
 //====================================================
 // create FORM and SUBMIT
@@ -251,13 +264,13 @@ function get_browserInfo() {
 };
 //====================================================
 // for DEBUG dump Object
-var debugDump = function() {
+var alertDump = function() {
 	var Dump = function(obj, rIndent) {
 		if (!obj) return '';
 		 var result = '', indent = '  ', br = '\n';
 		 if (rIndent) indent += rIndent;
 		 if (typeof obj === 'object' && !obj.tagName) {
-			result += 'Object=>{' + br;
+			result += ' {' + br;
 			for (var key in obj) {
 				result += indent + key + ' = ';
 				if (obj[key] instanceof jQuery) {
@@ -285,30 +298,30 @@ var debugDump = function() {
 	});
 	alert(str);
 };
-var objDump = function(obj, rIndent) {
-    if (!obj) return '';
-     var result = '', indent = '  ', br = '\n';
-     if (rIndent) indent += rIndent;
-     if (typeof obj === 'object' && !obj.tagName) {
-        result += '[ Object ] ->' + br;
-        for (var key in obj) {
-			result += indent + key + ' = ';
-			if (obj[key] instanceof jQuery) {
-                result += key +" is jQuery Object" + br;
-			} else if (typeof obj[key] === 'function') {
-                result += key +" is function()" + br;
-            } else if (typeof obj[key] === 'object') {
-                result += objDump(obj[key], indent);
-            } else {
-                result += obj[key] + br;
-			};
-		 };
-    } else {
-        result = obj;
-	};
-     result = String(result);
-     return result;
-};
+// var objDump = function(obj, rIndent) {
+//     if (!obj) return '';
+//      var result = '', indent = '  ', br = '\n';
+//      if (rIndent) indent += rIndent;
+//      if (typeof obj === 'object' && !obj.tagName) {
+//         result += '[ Object ] ->' + br;
+//         for (var key in obj) {
+// 			result += indent + key + ' = ';
+// 			if (obj[key] instanceof jQuery) {
+//                 result += key +" is jQuery Object" + br;
+// 			} else if (typeof obj[key] === 'function') {
+//                 result += key +" is function()" + br;
+//             } else if (typeof obj[key] === 'object') {
+//                 result += objDump(obj[key], indent);
+//             } else {
+//                 result += obj[key] + br;
+// 			};
+// 		 };
+//     } else {
+//         result = obj;
+// 	};
+//      result = String(result);
+//      return result;
+// };
 //====================================================
 function DebugSlider() {
     if (typeof LoadDebugBar == "function") LoadDebugBar();
