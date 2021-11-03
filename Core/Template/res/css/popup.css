@@ -2,7 +2,7 @@
 ===============================================================================
 バルーンヘルプ表示CSS
 */
-.baloon-BK,.popup-BK {
+.balloon-BK,.popup-BK {
     z-index:100;
     display:none;
     position:fixed;
@@ -15,7 +15,7 @@
 /* background-color: black;
 opacity: 0.25; */
 }
-.baloon-BK:not(:target) {height:100%\9} /* IE9,10 */
+.balloon-BK:not(:target) {height:100%\9} /* IE9,10 */
 /*    ポップアップ吹き出し */
 .popup-baloon {
     z-index:101;
@@ -469,23 +469,47 @@ opacity: 0.25; */
     content: "";
     transform: translateY(-50%);
 }
+/* ドロップダウンメニューのコンテナ */
+.dropdown-arrow {
+	display:inline-block;
+	width:100%;
+	height:1.8em;
+	white-space: nowrap;
+}
+.dropdown-arrow>text-area,
+.dropdown-arrow>input {
+	width:98%;
+	height:100%;
+	background-color: ivory;
+}
 /* リストに「▼」を付ける */
-.dropdown-arrow { display:flex; }	/* IE11ではこうしないと並ばない */
 .dropdown-arrow:after {
 	position:relative;
-	top:0.5em;
-	right:1em;
-	border: 5px solid transparent;
-	border-top: 10px solid gray;
 	content: "";
+	top:6px;
+	right:3px;
+	vertical-align: middle;
+	border: 6px solid transparent;
+	border-top: 14px solid gray;
 }
+/* リストに「X」を付ける */
+.dropdown-arrow>s {
+	position:absolute;
+    cursor: pointer;
+	top:0.5em;
+    right:12px;
+	width:11px;
+	height:11px;
+	background: url(res/img/clear_btn.png) no-repeat left top;
+}
+.dropdown-arrow>input::-ms-clear { visibility:hidden; }
 /*==============================================================================
     ポップアップナビメニュー
 */
 .navi-checklist {
     position:fixed;
     display:none;
-    z-index: 101;
+    z-index: 111;
 	font-size:10pt;
 	background-color:white;
 	box-shadow: 1px 1px 2px gray;
