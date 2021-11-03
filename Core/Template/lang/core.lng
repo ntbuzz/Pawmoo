@@ -16,7 +16,7 @@
     MoveFail    => "'%s' の移動に失敗しました"
 // チェックリストダイアログ
 	CheckList	=> チェックリスト
-	CheckALL	=> 全て:
+	CheckALL	=> 全てチェック:
 	CheckConfirm	=> 確定
 	CheckTITLE	=> チェックダイアログ
     SEND        => 送信
