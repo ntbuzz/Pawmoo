@@ -1,8 +1,8 @@
 //
 /* デバッグ用関数
 function dump_size(method,obj) {
-	debugDump({ method:method, w:obj.outerWidth(),h:obj.outerHeight() });
-}
+	alertDump({ method:method, w:obj.outerWidth(),h:obj.outerHeight() });
+};
 function ParentScroll(obj) {
 	if (obj.prop('tagName') === 'BODY') return { x: 0, y: 0 };
 	var pscroll = ParentScroll(obj.parent());
@@ -25,13 +25,14 @@ function targetBox(obj) {
 */
 // バルーンヘルプの表示
 // ターゲット位置を元に自身のポジションを決定する
-function balloonPosition(target, onside) {
+function balloonPosition(target, onside, margin) {
 	if (target.prop('tagName') === undefined) return;
 	// ターゲットの中心位置
 	this.pointX = parseInt(target.offset().left) + parseInt(target.outerWidth(true)/2);
 	this.pointY = parseInt(target.offset().top) + parseInt(target.outerHeight(true) / 2);
 	this.Box = { left: 0, top: 0, right: 0, bottom: 0 };
-	this.Onside = onside;
+	// this.Onside = onside;
+	// this.Margin = margin;
 	var bBox = {
 		width: 0, height: 0,
 		left: 0, top: 0, right: 0, bottom: 0 ,
@@ -44,8 +45,6 @@ function balloonPosition(target, onside) {
 			this.bottom = y + this.height;
 		},
 		TopLeft: function (x, y) {
-			if (x < 0 || (x + this.width) > $(window).width()) return false;
-			if (y < 0 || (y + this.height) > $(window).height()) return false;
 			this.LeftPos(x);
 			this.TopPos(y);
 			return true;
@@ -63,7 +62,7 @@ function balloonPosition(target, onside) {
 		var y = this.pointY - $(window).scrollTop();
 		return { x: x, y: y };
 	};
-	this.calcPosition = function (obj, margin) {
+	this.calcPosition = function (obj) {
 		var w = parseInt(obj.outerWidth());
 		var hw = parseInt(w / 2);
 		var h = parseInt(obj.outerHeight());
@@ -78,32 +77,54 @@ function balloonPosition(target, onside) {
 		if (onside) {
 			var hz = "left"; var vt = "";
 			bBox.setBound(Pos.x, Pos.y - hh, w, h);
-			if (bBox.top < parentBox.left || bBox.bottom > parentBox.bottom) {
-				hz = "center";
-				bBox.LeftPos(Pos.x - hw);
-				if (bBox.top < parentBox.left) {
-					vt = "top-";
-					bBox.TopPos(Pos.y);
-				} else {
+			if (bBox.right > parentBox.right || bBox.top < parentBox.top) {
+				vt = "top-"; hz = "center";
+				bBox.TopLeft(Pos.x - hw, Pos.y);
+			};
+			if (bBox.bottom > parentBox.bottom) {
+				vt = "bottom-"; hz = "center";
+				bBox.TopLeft(Pos.x - hw, Pos.y - h);
+			};
+			if (bBox.right > parentBox.right || bBox.top < parentBox.top) {
+				vt = ""; hz = "right";
+				bBox.TopLeft(Pos.x - w, Pos.y - hh);
+			};
+			if (bBox.left < parentBox.left) {
+				vt = "top-"; hz = "left";
+				bBox.TopLeft(Pos.x, Pos.y);
+				if (bBox.bottom > parentBox.bottom) {
 					vt = "bottom-";
 					bBox.TopPos(Pos.y - h);
 				};
+			} else {
+				if (bBox.bottom > parentBox.bottom) {
+					vt = "bottom-";
+					bBox.TopPos(Pos.y - h);
+				};
+				if (bBox.top < parentBox.top) {
+					vt = "top-";
+					bBox.TopPos(Pos.y);
+				};
 			};
 		} else {
-			var hz = "center";var vt = "top-";
+			var vt = "top-"; var hz = "center";
 			bBox.setBound(Pos.x - hw, Pos.y, w, h);
 			if (bBox.bottom > parentBox.bottom) {
 				vt = "bottom-";
 				bBox.TopPos(Pos.y - h);
 			};
-		};
-		if (bBox.right > parentBox.right) {
-			hz = "right";
-			bBox.LeftPos(Pos.x - w);
-		};
-		if (bBox.left < parentBox.left) {
-			hz = "left";
-			bBox.LeftPos(Pos.x);
+			if (bBox.right > parentBox.right) {
+				hz = "right";
+				bBox.LeftPos(Pos.x - w);
+			};
+			if (bBox.left < parentBox.left) {
+				hz = "left";
+				bBox.LeftPos(Pos.x);
+			};
+			if (bBox.top < parentBox.top) {
+				vt = "";
+				bBox.TopPos(Pos.y);
+			};
 		};
 		this.Box = {
 			left: bBox.left - margin,
@@ -151,30 +172,33 @@ $.fn.PopupBaloonSetup = function () {
 		var icon_obj = $('#' + icon);
 		if (ev == "click") icon_obj.css("cursor", "help");
 		icon_obj.off(ev).on(ev, function () {
-			var Balloon = new balloonPosition (icon_obj,onside);
+			// 他要素の mouseover防止とバルーンを消すための領域設定
+			var bk_panale = $('<div class="balloon-BK"></div>').appendTo('body');
+			bk_panale.fadeIn('fast');
+			var Balloon = new balloonPosition (icon_obj,onside,5);
 			self.fadeIn('fast');
-			Balloon.calcPosition(self, 10);
+			Balloon.calcPosition(self);
 			// リサイズは処理完了後に位置移動する
 			var resizeTimer = null;
 			$(window).on('resize.balloon', function () {
 				clearTimeout(resizeTimer);
 				resizeTimer = setTimeout(function() {
 					// リサイズ完了後の処理
-					Balloon.calcPosition(self,10);
+					Balloon.calcPosition(self);
 				}, 200);
 			});
 			// スクロールはリアルタイムで位置移動
 			$(window).on('scroll.balloon', function () {
-				Balloon.calcPosition(self,10);
+				Balloon.calcPosition(self);
 			});
-			$(window).off('mousemove.balloon').on('mousemove.balloon',function (e) {
+			bk_panale.off().on('mousemove',function (e) {
 				e.stopPropagation();
 				e.preventDefault();
 				if (!Balloon.inBalloon(e.clientX, e.clientY)) {
 					self.css('display','');	// fadeInで設定されたものを削除
-//					self.fadeOut('fast');
 					self.removeClass(Balloon.balloon);
-					$(window).off('scroll.balloon resize.balloon mousemove.balloon');
+					$(window).off('scroll.balloon resize.balloon');
+					bk_panale.remove();
 				};
 			});
 		});
@@ -211,34 +235,38 @@ $.fn.PopupBaloonSetup = function () {
 			var icon_obj = $('#' + icon);
 			if (ev == "click") icon_obj.css("cursor", "help");
 			icon_obj.off(ev).on(ev, function () {
-				var Balloon = new balloonPosition(icon_obj,onside);
+				// 他要素の mouseover防止とバルーンを消すための領域設定
+				var bk_panale = $('<div class="balloon-BK"></div>').appendTo('body');
+				bk_panale.fadeIn('fast');
+				var Balloon = new balloonPosition(icon_obj,onside,5);
 				var disp_class = ref_obj.attr('data-value');		// 表示するタグID
 				// 選択タグがあればそれをバルーンにする、なければ自身がバルーン
 				ballon_obj = (typeof disp_class === 'string') ? self.find('#' + disp_class) : self;
 				ballon_obj.addClass('popup-baloon');		// popup-baloon のスタイルを適用する
 				ballon_obj.fadeIn('fast');		// dusplay:block でないとサイズが取得できない
-				Balloon.calcPosition(ballon_obj, 10);
+				Balloon.calcPosition(ballon_obj);
 				// リサイズは処理完了後に位置移動する
 				var resizeTimer = null;
-				$(window).on('resize.balloon', function () {
+				$(window).on('resize.mballoon', function () {
 					clearTimeout(resizeTimer);
 					resizeTimer = setTimeout(function() {
 						// リサイズ完了後の処理
-						Balloon.calcPosition(ballon_obj,10);
+						Balloon.calcPosition(ballon_obj);
 					}, 200);
 				});
 				// スクロールはリアルタイムで位置移動
-				$(window).on('scroll.balloon', function () {
-					Balloon.calcPosition(ballon_obj,10);
+				$(window).on('scroll.mballoon', function () {
+					Balloon.calcPosition(ballon_obj);
 				});
-				$(window).off('mousemove.mballoon').on('mousemove.mballoon',function (e) {
+				bk_panale.off().on('mousemove',function (e) {
 					e.stopPropagation();
 					e.preventDefault();
 					if (!Balloon.inBalloon(e.clientX, e.clientY)) {
 						// popup-balloon と吹き出し用のクラスを削除
 						ballon_obj.removeClass('popup-baloon ' + Balloon.balloon);
 						ballon_obj.css('display','');	// fadeInで設定されたものを削除
-						$(window).off('scroll.balloon resize.balloon mousemove.mballoon');
+						$(window).off('scroll.mballoon resize.mballoon');
+						bk_panale.remove();
 					};
 				});
 			});
