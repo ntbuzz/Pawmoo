@@ -213,7 +213,13 @@ function passwd_encrypt($str) {
 function passwd_random($n = 8) {
     return substr(base_convert(bin2hex(openssl_random_pseudo_bytes($n)),16,36),0,$n);
 }
-// １段めのメニューを作成
+//==============================================================================
+// ドロップダウンメニューを作成
+// menu:		キー名 => 値(未使用)
+//				ネストするときは3次元連想配列
+//				メニューキー名 => [	グループ名 => [ キー名 => 値, ... ]	]
+// label		TRUE: グループ名をタイトルとして表示
+// cls			最外部のdivクラス名
 function menu_box($menu,$label=true,$cls='') {
 	// flexリストを出力
 	$select_list = function($title,$list,$label) use(&$select_list) {
@@ -241,4 +247,51 @@ function menu_box($menu,$label=true,$cls='') {
 	echo "<div{$cls}>\n";
 	$select_list('',$menu,$label);
 	echo "</div>\n";
+};
+//==============================================================================
+// チェックリスト・ラジオボタンのメニュー作成
+// menu:		キー名 => 値(未使用)
+//				タブを使うときは２次元連想配列
+//				タブ名 => [	キー名 => 値, ...	]
+// item_name	ラジオボタンのときは必須
+// item_type	checkbox | radio
+function check_boxmenu($menu,$item_name,$item_type) {
+	if(!empty($item_name)) $item_name = " name='{$item_name}'";
+	$tab_contents = function($subsec) use(&$item_name,&$item_type) {
+		echo "<div class='check-itemset'>";
+		echo "<div><ul>\n";
+		foreach($subsec as $label => $val) {
+			if($val === -2) echo "</ul></div><div><ul>\n";		//  break
+			else {
+				echo "<li>";
+				if($val === -1) echo "<hr>";
+				else echo "<label><input type='{$item_type}' class='check-item' value='{$label}'{$item_name} /> {$label}</label>";;
+				echo "</li>\n";
+			}
+		}
+		echo "</ul></div>\n";
+		echo "</div>";
+	};
+	$tabset = array_filter($menu,function($v) {return is_array($v);});
+	if(empty($tabset)) {			// 単一タブ＝タブなし
+		$tab_contents($menu);
+	} else {	// 複数タブ
+		echo "<ul class='tabmenu'>\n";
+		foreach($tabset as $label => $subsec) {
+			list($label,$sel) = explode('.',$label);
+			$attr = ($sel === 'selected') ? ' class="selected"':'';
+			echo "<li{$attr}>{$label}</li>\n";
+		}
+		echo "</ul>\n";
+		// タブコンテンツを表示
+		echo "<ul class='tabcontents'>\n";
+		foreach($tabset as $label => $value) {
+			list($label,$sel) = explode('.',$label);
+			$attr = ($sel === 'selected') ? ' class="selected"':'';
+			echo "<li{$attr}>\n";
+			$tab_contents($value);
+			echo "</li>\n";
+		}
+		echo "</ul>\n";
+	}
 };
