@@ -180,4 +180,144 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 	});
 	return this;
 };
-
+// 全ての子要素に対して属性値を書換える
+$.fn.changeAttrNo = function (ix) {
+	// 子要素を再帰的に呼び出す
+	this.children().each(function () {
+		$(this).changeAttrNo(ix);
+	});
+	var attrs = this.get(0).attributes;
+	for (var i = 0, len = attrs.length; i < len; i++) {
+		var val = attrs[i].value;
+		var bar = val.match(/([\w\-]+)\d+$/);
+		if (bar !== null) {
+			var key = attrs[i].name;
+			var new_attr = bar[1] + ix;
+			this.attr(key, new_attr);
+		}
+	}
+	return this;
+};
+// クラスで呼び出すとき
+$.fn.CheckRadioBox = function (checkbox_type, preload_func) {
+	this.each(function () {
+		$(this).SingleCheckBox(checkbox_type, preload_func);
+	});
+	return this;
+};
+// チェックボックスorラジオボタンのポップアプを表示する
+$.fn.SingleCheckBox = function (checkbox_type, preload_func) {
+	var self = this;
+	var setting = {
+		CheckAll: (self.attr('data-type') === 'checkbox'),
+		TargetObj: self.find('input:first-child'),	//$('[name="' + self.attr('data-value') + '"'),  	// 書き込むINPUT name
+		Template: '<div class="check-itemset"></div>',
+	};
+	if (setting.TargetObj.prop('tagName') === undefined) return this;
+	switch (typeof checkbox_type) {
+		case 'boolean': setting.CheckAll = checkbox_type; break;
+		case 'string': setting.CheckAll = (checkbox_type === 'checkbox'); break;
+		case 'object': $.each(checkbox_type, function (key, value) { setting[key] = value; }); break;
+		case 'function': setting.CheckAll = checkbox_type.call(this); break;
+	};
+	// 中間タグのセレクトコールバック
+	self.Preload = function (callback) { setting.Preload = callback; };
+	self.find('s').click(function(e){
+		e.stopPropagation();
+		e.preventDefault();
+		setting.TargetObj.val('');
+	});
+	self.SetParams = function (callback) {
+		var setobj = callback.call(this);
+		$.each(setobj, function (key, value) { setting[key] = value; });
+	};
+	self.css("cursor", "pointer").off('click').on('click', function () {
+//	alertDump({ Tag:setting.TargetObj.prop('tagName'), ID: setting.TargetObj.attr('id') });
+		// プリロード関数があれば
+		if (typeof preload_func === 'function') {
+			setting.Template = preload_func.call(this,setting.CheckAll);
+		}
+		var data = '<div class="navi-checklist">' + setting.Template;
+		if (setting.CheckAll) data = data + "<div class='check-all'>${#.core.CheckALL}<input type='checkbox' class='flip_all' /></div>";
+		var menu_box = $(data + '</div>').appendTo('body');
+		menu_box.show();
+		// 移動している可能性があるため、クリック時に位置計算
+		var menuPos = new calcPosition(setting.TargetObj, menu_box);
+		// メニューを消すための領域を定義
+		var backwall = $('<div class="popup-BK"></div>').appendTo('body');
+		backwall.fadeIn('fast');
+		// メニューボックスを表示
+		var active_tab = menu_box.find('.check-itemset:first');
+		// チェック項目をリストアップしておく
+		var all_items = menu_box.find('.check-item').map(function () { return $(this).val(); }).get();
+		// 入力値をチェックリストに反映する
+		var current = setting.TargetObj.val();		// 現在の入力値
+		menu_box.find('.check-item').map(function () {
+			$(this).prop('checked', (current.indexOf($(this).val()) !== -1));
+		});
+		// 背景をクリックした閉じる
+		backwall.click(function () { menu_box.trigger('close-me');});
+		// close ボタンが定義されているときの処理
+		menu_box.find('.close').on('click', function () { menu_box.trigger('close-me');	});
+		// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
+		menu_box.off('close-me').on('close-me', function (e) {
+			menu_box.fadeOut('fast');
+			$(window).off('scroll.drop-menu');
+			backwall.remove();
+			menu_box.remove();
+		});
+		// スクロールはリアルタイムで位置移動
+		$(window).on('scroll.drop-menu', function () {
+			menuPos.scrollPos();
+		});
+		// アイテムにチェックがあれば全チェックに反映する
+		menu_box.off('check-flip').on('check-flip', function () {
+			var all_check = (active_tab.find('.check-item:checked').length !== 0);
+			$('.flip_all').prop('checked', all_check);
+		});
+		menu_box.trigger('check-flip');
+		// 全チェックのフラグをアイテムに反映する
+		$('.flip_all').off('change').on('change', function () {
+			active_tab.find('.check-item').prop('checked', $(this).prop('checked'));
+			menu_box.trigger('values-set');
+		});
+		// 全てのタブ内のチェック項目をリスト結合してターゲットに入力する
+		menu_box.off('values-set').on('values-set', function () {
+			// 入力値がリストにあるかチェックし無ければ先頭にアイテム挿入
+			var check_obj = menu_box.find('.check-item:checked');
+			if (check_obj.attr('type') === 'radio') {
+				uniq = check_obj.val();
+			} else {
+				var current = setting.TargetObj.val().split(" ");		// 区切り文字に置換予定
+				var direct_data = current.filter(function (i) { return all_items.indexOf(i) === -1 });
+				var vals = check_obj.map(function () { return $(this).val(); }).get();
+				vals = direct_data.concat(vals);
+				// IEでも動くようにfilterで重複を削除して結合
+				uniq = vals.filter(function (x, i, menu_box) { return menu_box.indexOf(x) === i; }).join(" ");
+			};
+			setting.TargetObj.val(uniq);
+		});
+		// タブ切り替えを処理
+		menu_box.find('.tabmenu>li').on('click').on('click', function () {
+			var control = $(this).closest('div');
+			var menu = control.children('.tabmenu').children('li');
+			var cont = control.children('.tabcontents').children('li');
+			var index = menu.index($(this));
+			active_tab = cont.eq(index);
+			menu.removeClass('selected');		// TabMenu selected delete
+			$(this).addClass('selected');		// switch click TAB selected
+			cont.removeClass('selected');		// TabContents selected delete
+			active_tab.addClass('selected').fitWindow();	// switch TAB selected Contents
+			menu_box.trigger('check-flip');
+			menuPos.resizeBox();
+		});
+		// メニューコンテンツの表示位置をリンク先から取得して設定
+		menu_box.fadeIn('fast');
+		menuPos.resizeBox();
+		// チェックアイテムがクリックされたら
+		menu_box.find('input.check-item').off('change').on('change', function (e) {
+			menu_box.trigger('values-set');
+		});
+	});
+	return this;
+};

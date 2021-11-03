@@ -2,8 +2,10 @@
 // 諸々のJQueryプラグインを定義する
 // 表示切替
 $.fn.Visible = function (flag) {
-	var mode = (typeof flag === 'string') ? flag : 'none';
-	this.css('display', mode);
+	if (typeof flag === 'string') {
+		this.css('display', flag);
+	} else if (flag === true) this.show();
+	else this.hide();
 	return this;
 };
 // 連動セレクトタグ object, integer|string, boolean, function,
@@ -101,7 +103,7 @@ $.fn.fitWindow = function () {
 		var pbox = my_box.ParentRect(fit_obj);
 		var s_height = pbox.BottomRight.y - pbox.accSpace.y  - my_box.TopLeft.y;
 		var s_width  = pbox.BottomRight.x - pbox.accSpace.x  - my_box.TopLeft.x;
-//		alert("SELF:"+objDump(my_box)+"\nPARENT:"+objDump(pbox)+"\nSIZE(H: "+s_height+", W:"+s_width+")");
+//		alertDump({ SELF: my_box, PARENT: pbox, SIZE: [s_height, s_width] });
 		$(this).css({
 //			'width': s_width + "px",
 			'height': s_height + "px",
@@ -196,6 +198,8 @@ $.fn.onChangeFormItems = function(cls) {
 // カーソルを BUSY に変更
 $.busy_cursor = function (disp) {
 	$('body').css('cursor', (disp) ? 'wait' : 'default');
+	if (disp) $('body').append('<div class="loader_icon"></div>');
+	else $('.loader_icon').remove();
 };
 // Yes/No ダイアログボックスを開く
 $.dialogBox = function (title, msg, callback) {
@@ -240,32 +244,52 @@ $.dialogBox = function (title, msg, callback) {
 // ターゲット位置を元に自身のポジションを決定する
 function calcPosition(target, self) {
 	var target_left = target.offset().left;
+	var target_top = target.offset().top;
 	var target_width = target.innerWidth();
-	var self_width = self.width();
-	if ((target_left + self_width) > $(window).innerWidth()) {
-		this.left = target_left + target_width - self_width;
-	} else {
-		this.left = target_left + Math.max(0,target_width - self_width);
-	}
-	this.top = target.offset().top + target.outerHeight();
+	var target_height = target.innerHeight();
 	this.scrollPos = function () {
 		var x = this.left - $(window).scrollLeft();
 		var y = this.top - $(window).scrollTop();
-		return { x: x, y: y };
+		self.css({'left': x + 'px','top': y + 'px'});
 	};
+	this.resizeBox = function () {
+		var self_width = self.outerWidth();
+		var self_height = self.outerHeight();
+		var window_right = $(window).innerWidth() + $(window).scrollLeft(); 
+		var window_bottom = $(window).innerHeight() + $(window).scrollTop(); 
+		this.left = target_left + Math.max(0,target_width - self_width);
+		if ((this.left + self_width) > window_right) {
+			this.left = target_left + target_width - self_width;
+		};
+		this.top = target_top + target_height + 3;
+		if ((this.top + self_height) > window_bottom) {
+			this.top = target_top - self_height;
+		};
+		this.scrollPos();
+	};
+	this.resizeBox();
 };
 // ポップアップメニューボックスを表示する
 $.fn.PopupMenuSetup = function () {
 	this.find('.navi-menubox').each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var ref_obj = $("#" + self.attr("data-element"));  // 紐付けるID
-		var target = $('[name="'+ref_obj.attr('data-element')+'"');  // 書き込むID
+		var tag_element = ref_obj.attr("data-element");
+		if (tag_element === undefined) return true;		// 未定義ならスキップ
+		var target = $('[name="' + tag_element + '"');  // 書き込むID
+		// 書き込み先が存在しなければスキップ
+		if (target.prop('tagName') === undefined) return true;
+		ref_obj.find('s').click(function(e){
+			e.stopPropagation();
+			e.preventDefault();
+			target.val('');
+		});		
 		ref_obj.css("cursor", "pointer");
-		var menuPos = new calcPosition(target, self);
 		ref_obj.off('click').on('click', function () {
+			// 移動している可能性があるため、クリック時に位置計算
+			var menuPos = new calcPosition(target, self);
 			// メニューを消すための領域を定義
-			var backwall = $('<div class="popup-BK"></div>');
-			$('body').append(backwall);
+			var backwall = $('<div class="popup-BK"></div>').appendTo('body');
 			backwall.fadeIn('fast');
 			// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
 			self.off('close-me').on('close-me', function (e) {
@@ -278,12 +302,10 @@ $.fn.PopupMenuSetup = function () {
 			});
 			// スクロールはリアルタイムで位置移動
 			$(window).on('scroll.drop-menu', function () {
-				var pp = menuPos.scrollPos();
-				self.css({'left': pp.x + 'px','top': pp.y + 'px'});
+				menuPos.scrollPos();
 			});
 			// メニューコンテンツの表示位置をリンク先から取得して設定
-			var pp = menuPos.scrollPos();
-			self.css({'left': pp.x + 'px','top': pp.y + 'px'});
+			menuPos.scrollPos();
 			self.fadeIn('fast');
 			self.off('click').on('click','.item',function(e) {
 				e.stopPropagation();
@@ -301,84 +323,8 @@ $.fn.PopupCheckListSetup = function () {
 	this.find('.navi-checklist').each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var ref_obj = $("#" + self.attr("data-element"));  // 紐付けるID
-		var target = $('[name="' + ref_obj.attr("data-element") + '"');  	// 書き込むID
-		var active_tab = self.find('.check-itemset:first');
-		ref_obj.css("cursor", "pointer");
-		var menuPos = new calcPosition(target, self);
-		ref_obj.off('click').on('click', function () {
-			// チェック項目をリストアップしておく
-			var all_items = self.find('.check-item').map(function () { return $(this).val(); }).get();
-			// 入力値をチェックリストに反映する
-			var current = target.val();		// 現在の入力値
-			self.find('.check-item').map(function () {
-				$(this).prop('checked', (current.indexOf($(this).val()) !== -1));
-			});
-			self.trigger('check-flip');
-			// メニューを消すための領域を定義
-			var backwall = $('<div class="popup-BK"></div>');
-			$('body').append(backwall);
-			// 背景をクリックした閉じる
-			backwall.fadeIn('fast').click(function() {self.trigger('close-me');});
-			// close ボタンが定義されているときの処理
-			self.find('.close').on('click', function () { self.trigger('close-me');	});
-			// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
-			self.off('close-me').on('close-me', function (e) {
-				self.fadeOut('fast');
-				$(window).off('scroll.drop-menu');
-				$('.popup-BK').remove();
-			});
-			// スクロールはリアルタイムで位置移動
-			$(window).on('scroll.drop-menu', function () {
-				var pp = menuPos.scrollPos();
-				self.css({'left': pp.x + 'px','top': pp.y + 'px'});
-			});
-			// アイテムにチェックがあれば全チェックに反映する
-			self.off('check-flip').on('check-flip', function () {
-				var all_check = (active_tab.find('.check-item:checked').length !== 0);
-				$('.flip_all').prop('checked', all_check);
-			});
-			// 全チェックのフラグをアイテムに反映する
-			$('.flip_all').off('change').on('change', function () {
-				active_tab.find('.check-item').prop('checked', $(this).prop('checked'));
-				self.trigger('values-set');
-			});
-			// 全てのタブ内のチェック項目をリスト結合してターゲットに入力する
-			self.off('values-set').on('values-set', function () {
-				// 入力値がリストにあるかチェックし無ければ先頭にアイテム挿入
-				var check_obj = self.find('.check-item:checked');
-				if (check_obj.attr('type') === 'radio') {
-					uniq = check_obj.val();
-				} else {
-					var current = target.val().split(" ");		// 区切り文字に置換予定
-					var direct_data = current.filter(function (i) { return all_items.indexOf(i) === -1 });
-					var vals = check_obj.map(function () { return $(this).val(); }).get();
-					vals = direct_data.concat(vals);
-					// IEでも動くようにfilterで重複を削除して結合
-					uniq = vals.filter(function (x, i, self) { return self.indexOf(x) === i; }).join(" ");
-				};
-				target.val(uniq);
-			});
-			// タブ切り替えを処理
-			self.find('.tabmenu>li').on('click').on('click', function () {
-				var control = $(this).closest('div');
-				var menu = control.children('.tabmenu').children('li');
-				var cont = control.children('.tabcontents').children('li');
-				var index = menu.index($(this));
-				active_tab = cont.eq(index);
-				menu.removeClass('selected');		// TabMenu selected delete
-				$(this).addClass('selected');		// switch click TAB selected
-				cont.removeClass('selected');		// TabContents selected delete
-				active_tab.addClass('selected').fitWindow();	// switch TAB selected Contents
-				self.trigger('check-flip');
-			});
-			// メニューコンテンツの表示位置をリンク先から取得して設定
-			var pp = menuPos.scrollPos();
-			self.css({'left': pp.x + 'px','top': pp.y + 'px'});
-			self.fadeIn('fast');
-			// チェックアイテムがクリックされたら
-			self.find('input.check-item').off('change').on('change', function (e) {
-				self.trigger('values-set');
-			});
+		ref_obj.SingleCheckBox(false,function() {
+			return self.html();
 		});
 	});
 	return this;
