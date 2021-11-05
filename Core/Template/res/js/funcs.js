@@ -166,7 +166,7 @@ function SelectLink(setupobj, id, first_call, callback) {
 				if(value[0] === val) {
 					selected = true;
 					sel = ' selected';
-				}
+				};
 				self_obj.append('<option value="' + value[0] + '"' + sel + '>' + value[1] + '</option>');
 				++opt;
 			};
@@ -201,7 +201,7 @@ function SelectLink(setupobj, id, first_call, callback) {
 			if (child_obj.selfList(-1, my_val)) {	// 子要素のリストが存在するなら
 				if (typeof in_progress === "function") {	// 中間コールバック関数
 					in_progress.call(this, my_val, id);
-				}
+				};
 			} else if (typeof callback === "function") {	// 最終コールバック関数
 				var my_txt = self_obj.children(':selected').text();
 				if (callback_call) callback.call(this, my_val, my_txt, id);
@@ -210,6 +210,35 @@ function SelectLink(setupobj, id, first_call, callback) {
 		});
         return pid;
     };
+};
+//====================================================
+// ターゲット位置を元に自身のポジションを決定する
+function calcPosition(target, self) {
+	var target_left = target.offset().left;
+	var target_top = target.offset().top;
+	var target_width = target.innerWidth();
+	var target_height = target.innerHeight();
+	this.scrollPos = function () {
+		var x = this.left - $(window).scrollLeft();
+		var y = this.top - $(window).scrollTop();
+		self.css({'left': x + 'px','top': y + 'px'});
+	};
+	this.resizeBox = function () {
+		var self_width = self.outerWidth();
+		var self_height = self.outerHeight();
+		var window_right = $(window).innerWidth() + $(window).scrollLeft(); 
+		var window_bottom = $(window).innerHeight() + $(window).scrollTop(); 
+		this.left = target_left + Math.max(0,target_width - self_width);
+		if ((this.left + self_width) > window_right) {
+			this.left = target_left + target_width - self_width;
+		};
+		this.top = target_top + target_height + 3;
+		if ((this.top + self_height) > window_bottom) {
+			this.top = target_top - self_height;
+		};
+		this.scrollPos();
+	};
+	this.resizeBox();
 };
 //====================================================
 // SYNC AJAX
@@ -298,30 +327,6 @@ var alertDump = function() {
 	});
 	alert(str);
 };
-// var objDump = function(obj, rIndent) {
-//     if (!obj) return '';
-//      var result = '', indent = '  ', br = '\n';
-//      if (rIndent) indent += rIndent;
-//      if (typeof obj === 'object' && !obj.tagName) {
-//         result += '[ Object ] ->' + br;
-//         for (var key in obj) {
-// 			result += indent + key + ' = ';
-// 			if (obj[key] instanceof jQuery) {
-//                 result += key +" is jQuery Object" + br;
-// 			} else if (typeof obj[key] === 'function') {
-//                 result += key +" is function()" + br;
-//             } else if (typeof obj[key] === 'object') {
-//                 result += objDump(obj[key], indent);
-//             } else {
-//                 result += obj[key] + br;
-// 			};
-// 		 };
-//     } else {
-//         result = obj;
-// 	};
-//      result = String(result);
-//      return result;
-// };
 //====================================================
 function DebugSlider() {
     if (typeof LoadDebugBar == "function") LoadDebugBar();
