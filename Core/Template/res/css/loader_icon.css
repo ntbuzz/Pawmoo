@@ -1,0 +1,48 @@
+/* Loading.... ICON */
+.loader_icon {
+	z-index: 9999;
+	position: fixed;
+	top:0;
+	left:0;
+	width:100%;
+	height: 100%;
+	font-size: 12pt;
+}
+.loader_icon:after {
+	position: absolute;
+	left: 50%;
+	top:50%;
+	width:3.5em;
+	height:3.5em;
+	content:"";
+	border-top:1.2em solid rgb(0,0,0,0.2);
+	border-right:1.2em solid rgb(0,0,0,0.2);
+	border-bottom:1.2em solid rgb(0,0,0,0.2);
+	border-left:1.2em solid #2695f3;
+	-webkit-transform: translateZ(0);
+	-ms-transform: translateZ(0);
+	transform: translateZ(0);
+	-webkit-animation: load8 0.8s infinite linear;
+	animation: load8 0.8s infinite linear;
+	border-radius: 50%;
+}
+@-webkit-keyframes load8 {
+	0% {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	100% {
+		-webkit-transform: rotate(360deg);
+		transform: rotate(360deg);
+	}
+}
+@keyframes load8 {
+	0% {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	100% {
+		-webkit-transform: rotate(360deg);
+		transform: rotate(360deg);
+	}
+}

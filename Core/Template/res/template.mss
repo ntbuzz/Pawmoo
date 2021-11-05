@@ -21,6 +21,7 @@ Stylesheet => [
             slide-panel.css     // slide-panel
             pagerstyle.css      // pager button
             popup.css           // balloon/popupbox/dialog
+			loader_icon.css		// wait icon
             @debugger:debugbar.css   // use DEBUGGER,if AppData['debugger'] in SESSION is not FLASE
         ]
     ]
@@ -56,6 +57,7 @@ Javascript => [
 				floatwin.js             // inner window 
 				info-box.js             // info-box for cannot move/resize
 				popup-box.js            // popup-box 
+				checkselect.js			// popup checkbox or radio button
 			]
             context.js              // context menu popup
             pagerscript.js          // pager button
