@@ -23,9 +23,9 @@ $.fn.InfoBoxSetup = function () {
 			};
 			$(ref).on('click', function () {
 				// バルーンを消すための領域を定義
-				var backwall = $('<div class="popup-BK"></div>');
-				$('body').append(backwall);
-				backwall.fadeIn('fast');
+				var bk_panel = $('<div class="popup-BK"></div>');
+				$('body').append(bk_panel);
+				bk_panel.fadeIn('fast');
 				// バルーンコンテンツの表示位置をリンク先から取得して設定
 				var x = ($(window).innerWidth() - self.width())/2;  // 中央
 				var y = ($(window).innerHeight() - self.height())/4;    // 上部25%の位置
@@ -40,11 +40,11 @@ $.fn.InfoBoxSetup = function () {
 				self.css({'left': x + 'px','top': y + 'px'});
 				self.fadeIn('fast');
 				// クローズイベントを登録
-				backwall.click( function() {
+				bk_panel.click( function() {
 					// モーダルコンテンツとオーバーレイをフェードアウト
 					self.fadeOut('fast');
-					backwall.fadeOut('fast',function(){
-						backwall.remove();
+					bk_panel.fadeOut('fast',function(){
+						bk_panel.remove();
 					});
 				});
 			});

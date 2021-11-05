@@ -173,9 +173,10 @@ $.fn.PopupBaloonSetup = function () {
 		if (ev == "click") icon_obj.css("cursor", "help");
 		icon_obj.off(ev).on(ev, function () {
 			// 他要素の mouseover防止とバルーンを消すための領域設定
-			var bk_panale = $('<div class="balloon-BK"></div>').appendTo('body');
-			bk_panale.fadeIn('fast');
-			var Balloon = new balloonPosition (icon_obj,onside,5);
+			var bk_panel = $('<div class="balloon-BK"></div>').appendTo('body');
+			bk_panel.fadeIn('fast');
+			var Balloon = new balloonPosition(icon_obj, onside, 5);
+			icon_obj.addClass('active');
 			self.fadeIn('fast');
 			Balloon.calcPosition(self);
 			// リサイズは処理完了後に位置移動する
@@ -191,14 +192,15 @@ $.fn.PopupBaloonSetup = function () {
 			$(window).on('scroll.balloon', function () {
 				Balloon.calcPosition(self);
 			});
-			bk_panale.off().on('mousemove',function (e) {
+			bk_panel.off().on('mousemove',function (e) {
 				e.stopPropagation();
 				e.preventDefault();
 				if (!Balloon.inBalloon(e.clientX, e.clientY)) {
 					self.css('display','');	// fadeInで設定されたものを削除
+					icon_obj.removeClass('active');
 					self.removeClass(Balloon.balloon);
 					$(window).off('scroll.balloon resize.balloon');
-					bk_panale.remove();
+					bk_panel.remove();
 				};
 			});
 		});
@@ -236,14 +238,15 @@ $.fn.PopupBaloonSetup = function () {
 			if (ev == "click") icon_obj.css("cursor", "help");
 			icon_obj.off(ev).on(ev, function () {
 				// 他要素の mouseover防止とバルーンを消すための領域設定
-				var bk_panale = $('<div class="balloon-BK"></div>').appendTo('body');
-				bk_panale.fadeIn('fast');
+				var bk_panel = $('<div class="balloon-BK"></div>').appendTo('body');
+				bk_panel.fadeIn('fast');
 				var Balloon = new balloonPosition(icon_obj,onside,5);
 				var disp_class = ref_obj.attr('data-value');		// 表示するタグID
 				// 選択タグがあればそれをバルーンにする、なければ自身がバルーン
 				ballon_obj = (typeof disp_class === 'string') ? self.find('#' + disp_class) : self;
 				ballon_obj.addClass('popup-baloon');		// popup-baloon のスタイルを適用する
 				ballon_obj.fadeIn('fast');		// dusplay:block でないとサイズが取得できない
+				icon_obj.addClass('active');
 				Balloon.calcPosition(ballon_obj);
 				// リサイズは処理完了後に位置移動する
 				var resizeTimer = null;
@@ -258,15 +261,16 @@ $.fn.PopupBaloonSetup = function () {
 				$(window).on('scroll.mballoon', function () {
 					Balloon.calcPosition(ballon_obj);
 				});
-				bk_panale.off().on('mousemove',function (e) {
+				bk_panel.off().on('mousemove',function (e) {
 					e.stopPropagation();
 					e.preventDefault();
 					if (!Balloon.inBalloon(e.clientX, e.clientY)) {
 						// popup-balloon と吹き出し用のクラスを削除
 						ballon_obj.removeClass('popup-baloon ' + Balloon.balloon);
 						ballon_obj.css('display','');	// fadeInで設定されたものを削除
+						icon_obj.removeClass('active');
 						$(window).off('scroll.mballoon resize.mballoon');
-						bk_panale.remove();
+						bk_panel.remove();
 					};
 				});
 			});

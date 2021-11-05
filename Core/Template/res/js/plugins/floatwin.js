@@ -45,7 +45,7 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
     });
 	self.find('dl dt').text(title);
 	// 背景をクリックできなくする
-	var backwall = $('<div class="floatWin-BK"></div>');
+	var bk_panel = $('<div class="floatWin-BK"></div>');
     // イベントボタンリストを登録
 	self.off('click').on('click', elements, function (e) {
 //		alert(elements+"\nMe:"+$(this).prop('class'));
@@ -63,7 +63,7 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 		self.fadeOut("fast");
 		self.find('#init_contents').html('');      // clear contents
 		$(document).unbind("mousemove");
-		backwall.remove();
+		bk_panel.remove();
 	});
 	// ドロップ属性があればエレメントを初期化する
 	var cls = self.attr("class");
@@ -150,8 +150,8 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 			self.fitWindow();
         });
     });
-	$('body').append(backwall);
-	backwall.fadeIn('fast');
+	$('body').append(bk_panel);
+	bk_panel.fadeIn('fast');
 	self.fadeIn("fast");
 	return self;
 };

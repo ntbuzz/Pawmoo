@@ -61,14 +61,14 @@ $.fn.PopupBoxSetup = function () {
 				});
 			};
 			// バルーンを消すための領域を定義
-			var backwall = $('<div class="popup-BK"></div>');
+			var bk_panel = $('<div class="popup-BK"></div>');
 			// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
 			self.off('close-me').on('close-me', function (e) {
 				e.stopPropagation();
 				e.preventDefault();
 				self.fadeOut('fast');
-				backwall.fadeOut('fast', function () {
-					backwall.remove();
+				bk_panel.fadeOut('fast', function () {
+					bk_panel.remove();
 					var init_content = self.attr('data-init');	// クリアするコンテンツID
 					if (init_content !== undefined) {
 						alert(init_content + " CLEAR");
@@ -78,8 +78,8 @@ $.fn.PopupBoxSetup = function () {
 			});
 			// 起動ボタンのクリックで表示する
 			ref_obj.off('click').on('click', function () {
-				ref_obj.append(backwall);
-				backwall.fadeIn('fast');
+				ref_obj.append(bk_panel);
+				bk_panel.fadeIn('fast');
 				// バルーンコンテンツの表示位置をリンク先から取得して設定
 				var x = ref_obj.offset().left + ref_obj.width();
 				var y = ref_obj.offset().top + self.getPaddingBox().top;
