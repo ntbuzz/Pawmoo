@@ -194,11 +194,13 @@ $.fn.changeAttrNo = function (ix) {
 			var key = attrs[i].name;
 			var new_attr = bar[1] + ix;
 			this.attr(key, new_attr);
-		}
-	}
+		};
+	};
 	return this;
 };
-// クラスで呼び出すとき
+//==========================================================
+// ポップアップチェックリストボックスを表示する
+// セレクタがクラスの場合、複数要素に対応する
 $.fn.CheckRadioBox = function (checkbox_type, preload_func) {
 	this.each(function () {
 		$(this).SingleCheckBox(checkbox_type, preload_func);
@@ -212,40 +214,56 @@ $.fn.SingleCheckBox = function (checkbox_type, preload_func) {
 		CheckAll: (self.attr('data-type') === 'checkbox'),
 		TargetObj: self.find('input:first-child'),	//$('[name="' + self.attr('data-value') + '"'),  	// 書き込むINPUT name
 		Template: '<div class="check-itemset"></div>',
+		ClearTag: '<span class="clear"></span>',
+		DropDown: '<span class="arrow"></span>',
+		addClear: true,			// クリアボタンが必要
 	};
-	if (setting.TargetObj.prop('tagName') === undefined) return this;
-	switch (typeof checkbox_type) {
-		case 'boolean': setting.CheckAll = checkbox_type; break;
-		case 'string': setting.CheckAll = (checkbox_type === 'checkbox'); break;
-		case 'object': $.each(checkbox_type, function (key, value) { setting[key] = value; }); break;
-		case 'function': setting.CheckAll = checkbox_type.call(this); break;
+	if (setting.TargetObj.length === 0) return this;
+	if (checkbox_type !== null) {
+		switch (typeof checkbox_type) {
+			case 'boolean': setting.CheckAll = checkbox_type; break;
+			case 'string': setting.CheckAll = (checkbox_type === 'checkbox'); break;
+			case 'object': $.each(checkbox_type, function (key, value) { setting[key] = value; }); break;
+			case 'function': setting.CheckAll = checkbox_type.call(this); break;
+		};
 	};
-	// 中間タグのセレクトコールバック
-	self.Preload = function (callback) { setting.Preload = callback; };
-	self.find('s').click(function(e){
-		e.stopPropagation();
-		e.preventDefault();
-		setting.TargetObj.val('');
-	});
-	self.SetParams = function (callback) {
-		var setobj = callback.call(this);
-		$.each(setobj, function (key, value) { setting[key] = value; });
+	// [X]マークのタグが無ければ追加する
+	if (setting.addClear) {		// ターゲットがSELF内に無い時は false にする
+		var clearBtn = self.children('span.clear');
+		if (clearBtn.length === 0) {
+			clearBtn = $(setting.ClearTag).appendTo(self);
+		};
+		clearBtn.off().on('click',function(e){
+			e.stopPropagation();
+			e.preventDefault();
+			setting.TargetObj.val('');
+		});
+		// setting.TargetObj.on('input', function (e) {
+		// 	if (setting.TargetObj.val() === "") clearBtn.hide();
+		// 	else clearBtn.show();
+		// });
+	};
+	// ▼マークのタグが無ければ追加する
+	var dropBtn = self.children('span.arrow');
+	if (dropBtn.length === 0) {
+		dropBtn = $(setting.DropDown).appendTo(self);
 	};
 	self.css("cursor", "pointer").off('click').on('click', function () {
-//	alertDump({ Tag:setting.TargetObj.prop('tagName'), ID: setting.TargetObj.attr('id') });
 		// プリロード関数があれば
 		if (typeof preload_func === 'function') {
+			$.busy_cursor(true);
 			setting.Template = preload_func.call(this,setting.CheckAll);
-		}
-		var data = '<div class="navi-checklist">' + setting.Template;
-		if (setting.CheckAll) data = data + "<div class='check-all'>${#.core.CheckALL}<input type='checkbox' class='flip_all' /></div>";
-		var menu_box = $(data + '</div>').appendTo('body');
+			$.busy_cursor(false);
+		};
+		var data = '<div class="navi-checklist">'+setting.Template+'</div>';
+		var menu_box = $(data).appendTo('body');
+		if (setting.CheckAll) menu_box.append("<div class='check-all'>${#.core.CheckALL}<input type='checkbox' class='flip_all' /></div>");
 		menu_box.show();
 		// 移動している可能性があるため、クリック時に位置計算
-		var menuPos = new calcPosition(setting.TargetObj, menu_box);
+		var menuPos = new calcPosition(self, menu_box);
 		// メニューを消すための領域を定義
-		var backwall = $('<div class="popup-BK"></div>').appendTo('body');
-		backwall.fadeIn('fast');
+		var bk_panel = $('<div class="popup-BK"></div>').appendTo('body');
+		bk_panel.fadeIn('fast');
 		// メニューボックスを表示
 		var active_tab = menu_box.find('.check-itemset:first');
 		// チェック項目をリストアップしておく
@@ -256,14 +274,14 @@ $.fn.SingleCheckBox = function (checkbox_type, preload_func) {
 			$(this).prop('checked', (current.indexOf($(this).val()) !== -1));
 		});
 		// 背景をクリックした閉じる
-		backwall.click(function () { menu_box.trigger('close-me');});
+		bk_panel.click(function () { menu_box.trigger('close-me');});
 		// close ボタンが定義されているときの処理
 		menu_box.find('.close').on('click', function () { menu_box.trigger('close-me');	});
 		// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
 		menu_box.off('close-me').on('close-me', function (e) {
 			menu_box.fadeOut('fast');
 			$(window).off('scroll.drop-menu');
-			backwall.remove();
+			bk_panel.remove();
 			menu_box.remove();
 		});
 		// スクロールはリアルタイムで位置移動

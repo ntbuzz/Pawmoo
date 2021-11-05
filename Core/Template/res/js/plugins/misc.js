@@ -203,7 +203,7 @@ $.busy_cursor = function (disp) {
 };
 // Yes/No ダイアログボックスを開く
 $.dialogBox = function (title, msg, callback) {
-	var back_panel = $('<div class="popup-BK"></div>');
+	var bk_panel = $('<div class="popup-BK"></div>');
 	var dialog_box = '<div class="dialog-box"><dl class="title"><dt>'+title+'</dt><dd><span class="dialog-msg">'+msg+'</span></dd></dl><div class="buttonList">';
 	var controlls = ["okButton:${#.core.Yes}", "cancelButton:${#.core.No}"];
 	controlls.forEach(function (value) {
@@ -211,10 +211,10 @@ $.dialogBox = function (title, msg, callback) {
 		dialog_box = dialog_box + '<span class="'+cls[0]+'">'+cls[1]+'</span>';
 	});
 	dialog_box = dialog_box + "</div></div>";
-	back_panel.append(dialog_box);
-	$('body').append(back_panel);
+	bk_panel.append(dialog_box);
+	$('body').append(bk_panel);
 	// ボタン以外をクリックできないようにする
-	back_panel.fadeIn('fast');
+	bk_panel.fadeIn('fast');
 	var dialog = $('.dialog-box');
 	// バルーンコンテンツの表示位置をリンク先から取得して設定
 	var x = ($(window).innerWidth() - dialog.width())/2;  // 中央
@@ -232,99 +232,95 @@ $.dialogBox = function (title, msg, callback) {
 	// クローズイベントを登録
 	dialog.find(".okButton").off().click(function () {
 		dialog.fadeOut('fast');
-		back_panel.remove();
+		bk_panel.remove();
 		callback(true);
 	});
 	dialog.find(".cancelButton").off().click(function () {
 		dialog.fadeOut('fast');
-		back_panel.remove();
+		bk_panel.remove();
 		callback(false);
 	});
 };
-// ターゲット位置を元に自身のポジションを決定する
-function calcPosition(target, self) {
-	var target_left = target.offset().left;
-	var target_top = target.offset().top;
-	var target_width = target.innerWidth();
-	var target_height = target.innerHeight();
-	this.scrollPos = function () {
-		var x = this.left - $(window).scrollLeft();
-		var y = this.top - $(window).scrollTop();
-		self.css({'left': x + 'px','top': y + 'px'});
-	};
-	this.resizeBox = function () {
-		var self_width = self.outerWidth();
-		var self_height = self.outerHeight();
-		var window_right = $(window).innerWidth() + $(window).scrollLeft(); 
-		var window_bottom = $(window).innerHeight() + $(window).scrollTop(); 
-		this.left = target_left + Math.max(0,target_width - self_width);
-		if ((this.left + self_width) > window_right) {
-			this.left = target_left + target_width - self_width;
-		};
-		this.top = target_top + target_height + 3;
-		if ((this.top + self_height) > window_bottom) {
-			this.top = target_top - self_height;
-		};
-		this.scrollPos();
-	};
-	this.resizeBox();
-};
-// ポップアップメニューボックスを表示する
-$.fn.PopupMenuSetup = function () {
-	this.find('.navi-menubox').each(function () {
+//==========================================================
+// レイアウト内にメニューボックスが定義済の場合に備える
+// ポップアップチェックリストボックスを表示する
+$.fn.MenuSetup = function () {
+	this.find('.menu-container').each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
+		var kind = self.attr("data-value");
 		var ref_obj = $("#" + self.attr("data-element"));  // 紐付けるID
-		var tag_element = ref_obj.attr("data-element");
-		if (tag_element === undefined) return true;		// 未定義ならスキップ
-		var target = $('[name="' + tag_element + '"');  // 書き込むID
-		// 書き込み先が存在しなければスキップ
-		if (target.prop('tagName') === undefined) return true;
-		ref_obj.find('s').click(function(e){
-			e.stopPropagation();
-			e.preventDefault();
-			target.val('');
-		});		
-		ref_obj.css("cursor", "pointer");
-		ref_obj.off('click').on('click', function () {
-			// 移動している可能性があるため、クリック時に位置計算
-			var menuPos = new calcPosition(target, self);
-			// メニューを消すための領域を定義
-			var backwall = $('<div class="popup-BK"></div>').appendTo('body');
-			backwall.fadeIn('fast');
-			// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
-			self.off('close-me').on('close-me', function (e) {
-				self.fadeOut('fast');
-				$(window).off('scroll.drop-menu');
-				$('.popup-BK').remove();
-			});
-			backwall.click( function() {
-				self.trigger('close-me');
-			});
-			// スクロールはリアルタイムで位置移動
-			$(window).on('scroll.drop-menu', function () {
-				menuPos.scrollPos();
-			});
-			// メニューコンテンツの表示位置をリンク先から取得して設定
-			menuPos.scrollPos();
-			self.fadeIn('fast');
-			self.off('click').on('click','.item',function(e) {
-				e.stopPropagation();
-				e.preventDefault();
-				target.val($(this).text());
-				self.trigger('close-me');
-				target.trigger('selected');
-			});
-		});
+		if (ref_obj instanceof jQuery) {
+			switch (kind) {
+			case 'dropdown': ref_obj.DropDownMenuBox(function () { return self.html(); }); break;
+			case 'radio': ref_obj.SingleCheckBox(false, function () { return self.html(); }); break;
+			case 'checkbox': ref_obj.SingleCheckBox(true, function () { return self.html(); }); break;
+			};
+		};
 	});
 	return this;
 };
-// ポップアップメニューボックスを表示する
-$.fn.PopupCheckListSetup = function () {
-	this.find('.navi-checklist').each(function () {
-		var self = $(this); // jQueryオブジェクトを変数に代入しておく
-		var ref_obj = $("#" + self.attr("data-element"));  // 紐付けるID
-		ref_obj.SingleCheckBox(false,function() {
-			return self.html();
+// ポップアップドロップダウンメニューボックスを表示する
+$.fn.DropDownMenuBox = function (preload_func) {
+	var self = this; // jQueryオブジェクトを変数に代入しておく
+	var setting = {
+		TargetObj: self.find('input:first-child'),	// 書き込むINPUT name
+		Template: '<div></div>',
+		ClearTag: '<span class="clear"></span>',
+		DropDown: '<span class="arrow"></span>',
+	};
+	if (setting.TargetObj.length === 0) return this;
+	// [X]マークと▼マークのタグが無ければ追加する
+	var clearBtn = self.children('span.clear');
+	if (clearBtn.length === 0) {
+		clearBtn = $(setting.ClearTag).appendTo(self);
+	};
+	var dropBtn = self.children('span.arrow');
+	if (dropBtn.length === 0) {
+		dropBtn = $(setting.DropDown).appendTo(self);
+	};
+	clearBtn.off().on('click',function(e){
+		e.stopPropagation();
+		e.preventDefault();
+		setting.TargetObj.val('');
+	});
+	self.css("cursor", "pointer");
+	self.off('click').on('click', function () {
+		// プリロード関数が指定されていれば
+		if (typeof preload_func === 'function') {
+			$.busy_cursor(true);
+			setting.Template = preload_func.call(this);
+			$.busy_cursor(false);
+		};
+		var data = '<div class="navi-menubox">'+setting.Template+'</div>';
+		var menu_box = $(data).appendTo('body');
+		menu_box.show();
+		// 移動している可能性があるため、クリック時に位置計算
+		var menuPos = new calcPosition(self, menu_box);
+		// メニューを消すための領域を定義
+		var bk_panel = $('<div class="popup-BK"></div>').appendTo('body');
+		bk_panel.fadeIn('fast');
+		// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
+		menu_box.off('close-me').on('close-me', function (e) {
+			menu_box.fadeOut('fast');
+			$(window).off('scroll.drop-menu');
+			bk_panel.remove();
+			menu_box.remove();
+		});
+		bk_panel.click( function() {
+			menu_box.trigger('close-me');
+		});
+		// スクロールはリアルタイムで位置移動
+		$(window).on('scroll.drop-menu', function () {
+			menuPos.scrollPos();
+		});
+		// メニューコンテンツの表示位置をリンク先から取得して設定
+		menuPos.scrollPos();
+		menu_box.fadeIn('fast');
+		menu_box.off('click').on('click','.item',function(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			setting.TargetObj.val($(this).text());
+			menu_box.trigger('close-me');
 		});
 	});
 	return this;
@@ -353,7 +349,7 @@ $.fn.InitPopupSet = function () {
 		};
 		self.datepicker(date_form);
 	});
-	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().PopupMenuSetup().PopupCheckListSetup();
+	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().MenuSetup();
 };
 // FormSubmit用のオブジェクトを生成
 $.fn.submitObject = function (false_check,callback,is_parent) {
