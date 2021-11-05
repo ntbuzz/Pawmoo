@@ -296,7 +296,10 @@ opacity: 0.25; */
     width:18px;
     height:19px;
 	vertical-align: middle;
-    background: url(res/img/help-icon.png) no-repeat left bottom;
+    background: url(res/img/help-icon.png) no-repeat left top;
+}
+.help_icon.active {
+    background: url(res/img/help-icon.png) no-repeat left -19px;
 }
 /*==============================================================================
 インフォボックス
@@ -411,6 +414,7 @@ opacity: 0.25; */
     line-height: 30px;
     width:15em;
     margin-top:-1px;
+    margin-left:-1px;
 	white-space: nowrap;
 }
 /* サブメニューの幅 */
@@ -469,40 +473,6 @@ opacity: 0.25; */
     content: "";
     transform: translateY(-50%);
 }
-/* ドロップダウンメニューのコンテナ */
-.dropdown-arrow {
-	display:inline-block;
-	width:100%;
-	height:1.8em;
-	white-space: nowrap;
-}
-.dropdown-arrow>text-area,
-.dropdown-arrow>input {
-	width:98%;
-	height:100%;
-	background-color: ivory;
-}
-/* リストに「▼」を付ける */
-.dropdown-arrow:after {
-	position:relative;
-	content: "";
-	top:6px;
-	right:3px;
-	vertical-align: middle;
-	border: 6px solid transparent;
-	border-top: 14px solid gray;
-}
-/* リストに「X」を付ける */
-.dropdown-arrow>s {
-	position:absolute;
-    cursor: pointer;
-	top:0.5em;
-    right:12px;
-	width:11px;
-	height:11px;
-	background: url(res/img/clear_btn.png) no-repeat left top;
-}
-.dropdown-arrow>input::-ms-clear { visibility:hidden; }
 /*==============================================================================
     ポップアップナビメニュー
 */
@@ -515,6 +485,11 @@ opacity: 0.25; */
 	box-shadow: 1px 1px 2px gray;
 	border:2px solid black;
 	border-radius:5px;
+	background-color: #f5fbfe;
+}
+/* メッセージタグ */
+.navi-checklist>p {
+	margin:5px 10px;
 }
 .navi-checklist li {
 	list-style-type: none;
@@ -555,17 +530,6 @@ opacity: 0.25; */
 	border-top:1px dashed gray;
 	text-align:right;
 }
-/*
-.navi-checklist .col2 { column-count: 2; }
-.navi-checklist .col3 { column-count: 3; }
-.navi-checklist .col4 { column-count: 4; }
-.navi-checklist .col5 { column-count: 5; }
-.navi-checklist .col6 { column-count: 6; }
-.navi-checklist .col7 { column-count: 7; }
-.navi-checklist .col8 { column-count: 8; }
-.navi-checklist .col9 { column-count: 9; }
-.navi-checklist .check-itemset > div { bre0ak-inside: avoid; }
-*/
 /* 段組みは flex を使って独自に行う */
 .navi-checklist .check-itemset {
 	display: flex;
@@ -583,8 +547,55 @@ opacity: 0.25; */
 	height: calc(100% - 10);
 	margin: 5px 0;
 }
+/* (X)と▼付きのドロップダウンメニューのコンテナ */
+.dropdown-menu {
+	display:inline-flex;
+	color: silver;
+	background-color: #e9f4fb;
+	white-space: nowrap;
+	align-items: center;
+    vertical-align: middle;
+	border: 1px solid skyblue;
+	padding:0;
+font-size:10pt;
+}
+/* リストに「▼」を付ける */
+.dropdown-menu>span.arrow {
+	cursor: pointer;
+	display: inline-block;
+	border: 6px solid transparent;
+	border-top: 13px solid silver;
+	width: 0;
+	height: 0;
+	margin: 4px 2px 0px 2px;
+}
+.dropdown-menu>span.arrow:hover {
+	border-top-color: gray;
+}
+/* リストに「X」を付ける */
+.dropdown-menu>span.clear {
+	position:relative;
+	display: inline-block;
+	/* padding-right: 6px; */
+	border-right: 1px dotted gray;
+    cursor: pointer;
+	width:19px;
+	height:15px;
+	background: url(res/img/clear_btn.png) no-repeat left top;
+}
+.dropdown-menu>span.clear:hover {
+	background: url(res/img/clear_btn.png) no-repeat left -15px;
+}
+/* IEの [X] アイコンを消す */
+.dropdown-menu>input::-ms-clear { visibility:hidden; }
 /* テキストとチェックボックスの位置揃え */
-.navi-checklist input,
-.navi-checklist select{
+/* .navi-checklist>input,
+.navi-checklist>select, */
+.dropdown-menu>text-area,
+.dropdown-menu>input {
+	width:100%;
+	height:100%;
+	background-color: #e9f4fb;
+	border: none;
 	vertical-align:middle;
 }
