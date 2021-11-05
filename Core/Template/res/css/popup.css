@@ -17,7 +17,7 @@ opacity: 0.25; */
 }
 .balloon-BK:not(:target) {height:100%\9} /* IE9,10 */
 /*    ポップアップ吹き出し */
-.popup-baloon {
+.popup-balloon {
     z-index:101;
     position:fixed;
     top:0;
@@ -54,8 +54,8 @@ opacity: 0.25; */
     display:none;
 }
 /* 上中央フキダシ部分を作成 */
-.baloon-top-center { margin-top: 12px; }
-.baloon-top-center:before {
+.balloon-top-center { margin-top: 12px; }
+.balloon-top-center:before {
     content: "";
     position: absolute;
     top:-20px;
@@ -63,7 +63,7 @@ opacity: 0.25; */
     border: 8px solid transparent;
     border-bottom: 12px solid #999;
 }
-.baloon-top-center:after {
+.balloon-top-center:after {
     content: "";
     position: absolute;
     top:-17px;
@@ -72,8 +72,8 @@ opacity: 0.25; */
     border-bottom: 12px solid lightyellow;
 }
 /* 左上フキダシ部分を作成 */
-.baloon-top-left { margin-top: 13px; margin-left:-4px; }
-.baloon-top-left:before {
+.balloon-top-left { margin-top: 13px; margin-left:-4px; }
+.balloon-top-left:before {
     content: "";
     position: absolute;
     top:-13px;
@@ -81,7 +81,7 @@ opacity: 0.25; */
     border-top: 13px solid transparent;
     border-left: 18px solid #999;
 }
-.baloon-top-left:after {
+.balloon-top-left:after {
     content: "";
     position: absolute;
     top:-9px;
@@ -90,8 +90,8 @@ opacity: 0.25; */
     border-left: 18px solid lightyellow;
 }
 /* 右上フキダシ部分を作成 */
-.baloon-top-right { margin-top: 13px; margin-right:-4px; }
-.baloon-top-right:before {
+.balloon-top-right { margin-top: 13px; margin-right:-4px; }
+.balloon-top-right:before {
     content: "";
     position: absolute;
     top:-13px;
@@ -99,7 +99,7 @@ opacity: 0.25; */
     border-top: 13px solid transparent;
     border-right: 18px solid #999;
 }
-.baloon-top-right:after {
+.balloon-top-right:after {
     content: "";
     position: absolute;
     top:-9px;
@@ -108,8 +108,8 @@ opacity: 0.25; */
     border-right: 18px solid lightyellow;
 }
 /* 下中央フキダシ部分を作成 */
-.baloon-bottom-center { margin-bottom: 12px;}
-.baloon-bottom-center:before {
+.balloon-bottom-center { margin-bottom: 12px;}
+.balloon-bottom-center:before {
     content: "";
     position: absolute;
     bottom:-20px;
@@ -117,7 +117,7 @@ opacity: 0.25; */
     border: 8px solid transparent;
     border-top: 12px solid #999;
 }
-.baloon-bottom-center:after {
+.balloon-bottom-center:after {
     content: "";
     position: absolute;
     bottom:-17px;
@@ -126,8 +126,8 @@ opacity: 0.25; */
     border-top: 12px solid lightyellow;
 }
 /* 左下フキダシ部分を作成 */
-.baloon-bottom-left { margin-bottom: 13px; margin-left:-4px; }
-.baloon-bottom-left:before {
+.balloon-bottom-left { margin-bottom: 13px; margin-left:-4px; }
+.balloon-bottom-left:before {
     content: "";
     position: absolute;
     bottom:-13px;
@@ -135,7 +135,7 @@ opacity: 0.25; */
     border-bottom: 13px solid transparent;
     border-left: 18px solid #999;
 }
-.baloon-bottom-left:after {
+.balloon-bottom-left:after {
     content: "";
     position: absolute;
     bottom:-9px;
@@ -144,8 +144,8 @@ opacity: 0.25; */
     border-left: 18px solid lightyellow;
 }
 /* 右フキダシ部分を作成 */
-.baloon-bottom-right { margin-bottom: 13px; margin-right:-4px; }
-.baloon-bottom-right:before {
+.balloon-bottom-right { margin-bottom: 13px; margin-right:-4px; }
+.balloon-bottom-right:before {
     content: "";
     position: absolute;
     bottom:-13px;
@@ -153,7 +153,7 @@ opacity: 0.25; */
     border-bottom: 12px solid transparent;
     border-right: 18px solid #999;
 }
-.baloon-bottom-right:after {
+.balloon-bottom-right:after {
     content: "";
     position: absolute;
     bottom:-9px;
@@ -162,8 +162,8 @@ opacity: 0.25; */
     border-right: 18px solid lightyellow;
 }
 /* 左フキダシ部分を作成 */
-.baloon-left { margin-left: 12px;}
-.baloon-left:before {
+.balloon-left { margin-left: 12px;}
+.balloon-left:before {
     content: "";
     position: absolute;
     top:calc(50% - 8px);
@@ -171,7 +171,7 @@ opacity: 0.25; */
     border: 8px solid transparent;
     border-right: 12px solid #999;
 }
-.baloon-left:after {
+.balloon-left:after {
     content: "";
     position: absolute;
     top:calc(50% - 8px);
@@ -180,8 +180,8 @@ opacity: 0.25; */
     border-right: 12px solid lightyellow;
 }
 /* 右フキダシ部分を作成 */
-.baloon-right { margin-right: 12px;}
-.baloon-right:before {
+.balloon-right { margin-right: 12px;}
+.balloon-right:before {
     content: "";
     position: absolute;
     top:calc(50% - 8px);
@@ -189,7 +189,7 @@ opacity: 0.25; */
     border: 8px solid transparent;
     border-left: 12px solid #999;
 }
-.baloon-right:after {
+.balloon-right:after {
     content: "";
     position: absolute;
     top:calc(50% - 8px);

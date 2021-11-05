@@ -85,7 +85,7 @@ $("#dialog-demo").click(function () {
 @Slider
 
 // #popup-dialog のマウスオーバーバルーンヘルプ
-.popup-baloon{@popup} => [
+.popup-balloon{@popup} => [
 	ポップアプバルーンです。
 ]
 

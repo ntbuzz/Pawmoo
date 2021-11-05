@@ -132,7 +132,7 @@ function balloonPosition(target, onside, margin) {
 			right: bBox.right + margin,
 			bottom: bBox.bottom + margin
 		};
-		this.balloon = 'baloon-' + vt + hz;
+		this.balloon = 'balloon-' + vt + hz;
 		obj.addClass(this.balloon);
 		// マージン分移動する
 		bBox.left = bBox.left - parseInt(obj.css('margin-right'));
@@ -151,7 +151,7 @@ $.fn.PopupBaloonSetup = function () {
 // .popup-balloon.onside{@!item-id} => [
 //		Balloon Message
 // ]
-	this.find(".popup-baloon").each(function () {
+	this.find(".popup-balloon").each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var onside = self.attr('class').existsWord('onside');
 		var ref = self.attr("data-element");  // 紐付けるID
@@ -244,7 +244,7 @@ $.fn.PopupBaloonSetup = function () {
 				var disp_class = ref_obj.attr('data-value');		// 表示するタグID
 				// 選択タグがあればそれをバルーンにする、なければ自身がバルーン
 				ballon_obj = (typeof disp_class === 'string') ? self.find('#' + disp_class) : self;
-				ballon_obj.addClass('popup-baloon');		// popup-baloon のスタイルを適用する
+				ballon_obj.addClass('popup-balloon');		// popup-balloon のスタイルを適用する
 				ballon_obj.fadeIn('fast');		// dusplay:block でないとサイズが取得できない
 				icon_obj.addClass('active');
 				Balloon.calcPosition(ballon_obj);
@@ -266,7 +266,7 @@ $.fn.PopupBaloonSetup = function () {
 					e.preventDefault();
 					if (!Balloon.inBalloon(e.clientX, e.clientY)) {
 						// popup-balloon と吹き出し用のクラスを削除
-						ballon_obj.removeClass('popup-baloon ' + Balloon.balloon);
+						ballon_obj.removeClass('popup-balloon ' + Balloon.balloon);
 						ballon_obj.css('display','');	// fadeInで設定されたものを削除
 						icon_obj.removeClass('active');
 						$(window).off('scroll.mballoon resize.mballoon');

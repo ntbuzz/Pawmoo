@@ -53,7 +53,7 @@ Javascript => [
         +jquery => [
 			plugins => [
 				misc.js             	// miscellaneous plugin
-				baloon.js               // Balloon Help
+				balloon.js               // Balloon Help
 				floatwin.js             // inner window 
 				info-box.js             // info-box for cannot move/resize
 				popup-box.js            // popup-box 
@@ -81,7 +81,7 @@ Javascript => [
         +jquery => [
 			plugins => [
 				misc.js             	// miscellaneous plugin
-				baloon.js               // Balloon Help
+				balloon.js               // Balloon Help
 				floatwin.js             // inner window 
 				info-box.js             // info-box for cannot move/resize
 				popup-box.js            // popup-box 

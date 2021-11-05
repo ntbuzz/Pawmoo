@@ -1422,7 +1422,7 @@ static::$appRoot
   バルーン表示には、クリック式とマウスオーバー式が選べます。
 
   // バルーンヘルプ
-  .popup-baloon＜.onside＞{＜表示対象の要素ID＞} => [
+  .popup-balloon＜.onside＞{＜表示対象の要素ID＞} => [
     ＜テキスト＞
   ]
 
