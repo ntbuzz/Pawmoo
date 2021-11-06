@@ -211,7 +211,8 @@ $.fn.CheckRadioBox = function (checkbox_type, preload_func) {
 $.fn.SingleCheckBox = function (checkbox_type, preload_func) {
 	var self = this;
 	var setting = {
-		CheckAll: (self.attr('data-type') === 'checkbox'),
+		CheckType:(self.attr('data-type') === 'checkbox'),
+		CheckAll: false,
 		TargetObj: self.find('input:first-child'),	//$('[name="' + self.attr('data-value') + '"'),  	// 書き込むINPUT name
 		Template: '<div class="check-itemset"></div>',
 		ClearTag: '<span class="clear"></span>',
@@ -238,10 +239,6 @@ $.fn.SingleCheckBox = function (checkbox_type, preload_func) {
 			e.preventDefault();
 			setting.TargetObj.val('');
 		});
-		// setting.TargetObj.on('input', function (e) {
-		// 	if (setting.TargetObj.val() === "") clearBtn.hide();
-		// 	else clearBtn.show();
-		// });
 	};
 	// ▼マークのタグが無ければ追加する
 	var dropBtn = self.children('span.arrow');
@@ -252,12 +249,13 @@ $.fn.SingleCheckBox = function (checkbox_type, preload_func) {
 		// プリロード関数があれば
 		if (typeof preload_func === 'function') {
 			$.busy_cursor(true);
-			setting.Template = preload_func.call(this,setting.CheckAll);
+			setting.Template = preload_func.call(this,setting.CheckType);
 			$.busy_cursor(false);
 		};
 		var data = '<div class="navi-checklist">'+setting.Template+'</div>';
 		var menu_box = $(data).appendTo('body');
-		if (setting.CheckAll) menu_box.append("<div class='check-all'>${#.core.CheckALL}<input type='checkbox' class='flip_all' /></div>");
+		// checkbox の時だけ
+		if (setting.CheckType && setting.CheckAll) menu_box.append("<div class='check-all'>${#.core.CheckALL}<input type='checkbox' class='flip_all' /></div>");
 		menu_box.show();
 		// 移動している可能性があるため、クリック時に位置計算
 		var menuPos = new calcPosition(self, menu_box);
