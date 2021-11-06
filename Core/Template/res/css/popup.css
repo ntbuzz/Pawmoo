@@ -557,31 +557,45 @@ opacity: 0.25; */
     vertical-align: middle;
 	border: 1px solid skyblue;
 	padding:0;
-font-size:10pt;
+	font-size:10pt;
+}
+/* 他要素内にターゲットがあるときのメニュータイトル */
+.dropdown-menu.normal{
+	width: 100%;
+	color: inherit;
+	background-color: inherit;
+	border: none;
 }
 /* リストに「▼」を付ける */
 .dropdown-menu>span.arrow {
-	cursor: pointer;
+	position:relative;
 	display: inline-block;
-	border: 6px solid transparent;
-	border-top: 13px solid silver;
+	right:0;
 	width: 0;
 	height: 0;
-	margin: 4px 2px 0px 2px;
+	/* margin: 8px 2px 0px 2px; */
+	margin-top: 6px;
+	cursor: pointer;
+	border: 6px solid transparent;
+	border-top: 13px solid #aaa;
+}
+/* シルバー背景でも見えるようにする */
+.dropdown-menu.normal>span.arrow {
+	border-top-color: #888;
 }
 .dropdown-menu>span.arrow:hover {
-	border-top-color: gray;
+	border-top-color: #333;
 }
 /* リストに「X」を付ける */
 .dropdown-menu>span.clear {
 	position:relative;
 	display: inline-block;
-	/* padding-right: 6px; */
-	border-right: 1px dotted gray;
+	right:0;
     cursor: pointer;
 	width:19px;
 	height:15px;
 	background: url(res/img/clear_btn.png) no-repeat left top;
+	border-right: 1px dotted gray;
 }
 .dropdown-menu>span.clear:hover {
 	background: url(res/img/clear_btn.png) no-repeat left -15px;
@@ -589,13 +603,20 @@ font-size:10pt;
 /* IEの [X] アイコンを消す */
 .dropdown-menu>input::-ms-clear { visibility:hidden; }
 /* テキストとチェックボックスの位置揃え */
-/* .navi-checklist>input,
-.navi-checklist>select, */
-.dropdown-menu>text-area,
+.dropdown-menu>textarea,
 .dropdown-menu>input {
+	padding: 0 5px;
 	width:100%;
 	height:100%;
 	background-color: #e9f4fb;
+	border: none;
+	vertical-align:middle;
+}
+/* タイトル用 */
+.dropdown-menu>div{
+	padding: 0 5px;
+	width:100%;
+	height:100%;
 	border: none;
 	vertical-align:middle;
 }

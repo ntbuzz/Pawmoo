@@ -218,8 +218,10 @@ $.fn.SingleCheckBox = function (checkbox_type, preload_func) {
 		ClearTag: '<span class="clear"></span>',
 		DropDown: '<span class="arrow"></span>',
 		addClear: true,			// クリアボタンが必要
+		Separator: " ",
+		SetValue: function (value) { setting.TargetObj.val(value); },
+		GetValue: function () { return setting.TargetObj.val(); },
 	};
-	if (setting.TargetObj.length === 0) return this;
 	if (checkbox_type !== null) {
 		switch (typeof checkbox_type) {
 			case 'boolean': setting.CheckAll = checkbox_type; break;
@@ -228,6 +230,7 @@ $.fn.SingleCheckBox = function (checkbox_type, preload_func) {
 			case 'function': setting.CheckAll = checkbox_type.call(this); break;
 		};
 	};
+	if (setting.TargetObj.length === 0) return this;
 	// [X]マークのタグが無ければ追加する
 	if (setting.addClear) {		// ターゲットがSELF内に無い時は false にする
 		var clearBtn = self.children('span.clear');
@@ -237,7 +240,7 @@ $.fn.SingleCheckBox = function (checkbox_type, preload_func) {
 		clearBtn.off().on('click',function(e){
 			e.stopPropagation();
 			e.preventDefault();
-			setting.TargetObj.val('');
+			setting.SetValue('');
 		});
 	};
 	// ▼マークのタグが無ければ追加する
@@ -267,7 +270,8 @@ $.fn.SingleCheckBox = function (checkbox_type, preload_func) {
 		// チェック項目をリストアップしておく
 		var all_items = menu_box.find('.check-item').map(function () { return $(this).val(); }).get();
 		// 入力値をチェックリストに反映する
-		var current = setting.TargetObj.val();		// 現在の入力値
+//		var current = setting.TargetObj.val();		// 現在の入力値
+		var current = setting.GetValue();			// 現在の入力値を取得
 		menu_box.find('.check-item').map(function () {
 			$(this).prop('checked', (current.indexOf($(this).val()) !== -1));
 		});
@@ -304,14 +308,14 @@ $.fn.SingleCheckBox = function (checkbox_type, preload_func) {
 			if (check_obj.attr('type') === 'radio') {
 				uniq = check_obj.val();
 			} else {
-				var current = setting.TargetObj.val().split(" ");		// 区切り文字に置換予定
+				var current = setting.TargetObj.val().split(setting.Separator);		// 区切り文字に置換予定
 				var direct_data = current.filter(function (i) { return all_items.indexOf(i) === -1 });
 				var vals = check_obj.map(function () { return $(this).val(); }).get();
 				vals = direct_data.concat(vals);
 				// IEでも動くようにfilterで重複を削除して結合
-				uniq = vals.filter(function (x, i, menu_box) { return menu_box.indexOf(x) === i; }).join(" ");
+				uniq = vals.filter(function (x, i, menu_box) { return menu_box.indexOf(x) === i; }).join(setting.Separator).trim();
 			};
-			setting.TargetObj.val(uniq);
+			setting.SetValue(uniq);		// 値を書き込む
 		});
 		// タブ切り替えを処理
 		menu_box.find('.tabmenu>li').on('click').on('click', function () {
