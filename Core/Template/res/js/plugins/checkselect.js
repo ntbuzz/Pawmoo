@@ -201,17 +201,17 @@ $.fn.changeAttrNo = function (ix) {
 //==========================================================
 // ポップアップチェックリストボックスを表示する
 // セレクタがクラスの場合、複数要素に対応する
-$.fn.CheckRadioBox = function (checkbox_type, preload_func) {
+$.fn.CheckRadioBox = function (check_param, preload_func) {
 	this.each(function () {
-		$(this).SingleCheckBox(checkbox_type, preload_func);
+		$(this).SingleCheckBox(check_param, preload_func);
 	});
 	return this;
 };
 // チェックボックスorラジオボタンのポップアプを表示する
-$.fn.SingleCheckBox = function (checkbox_type, preload_func) {
+$.fn.SingleCheckBox = function (check_param, preload_func) {
 	var self = this;
 	var setting = {
-		CheckType:(self.attr('data-type') === 'checkbox'),
+		CheckType:(self.attr('data-type') !== 'radio'),
 		CheckAll: false,
 		TargetObj: self.find('input:first-child'),	//$('[name="' + self.attr('data-value') + '"'),  	// 書き込むINPUT name
 		Template: '<div class="check-itemset"></div>',
@@ -222,12 +222,12 @@ $.fn.SingleCheckBox = function (checkbox_type, preload_func) {
 		SetValue: function (value) { setting.TargetObj.val(value); },
 		GetValue: function () { return setting.TargetObj.val(); },
 	};
-	if (checkbox_type !== null) {
-		switch (typeof checkbox_type) {
-			case 'boolean': setting.CheckAll = checkbox_type; break;
-			case 'string': setting.CheckAll = (checkbox_type === 'checkbox'); break;
-			case 'object': $.each(checkbox_type, function (key, value) { setting[key] = value; }); break;
-			case 'function': setting.CheckAll = checkbox_type.call(this); break;
+	if (check_param !== null) {
+		switch (typeof check_param) {
+			case 'string': setting.CheckType = (check_param === 'checkbox'); break;
+			case 'object': $.each(check_param, function (key, value) { setting[key] = value; }); break;
+			case 'boolean': setting.CheckAll = check_param; break;
+			case 'function': setting.CheckAll = check_param.call(this); break;
 		};
 	};
 	if (setting.TargetObj.length === 0) return this;
@@ -270,7 +270,6 @@ $.fn.SingleCheckBox = function (checkbox_type, preload_func) {
 		// チェック項目をリストアップしておく
 		var all_items = menu_box.find('.check-item').map(function () { return $(this).val(); }).get();
 		// 入力値をチェックリストに反映する
-//		var current = setting.TargetObj.val();		// 現在の入力値
 		var current = setting.GetValue();			// 現在の入力値を取得
 		menu_box.find('.check-item').map(function () {
 			$(this).prop('checked', (current.indexOf($(this).val()) !== -1));
