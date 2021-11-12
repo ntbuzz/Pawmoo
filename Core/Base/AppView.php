@@ -41,10 +41,12 @@ class AppView extends AppObject {
             'recordset' => 'cmd_recordset',
             'tabset'    => 'cmd_tabset',
             'floatwin'  => 'cmd_floatwin',
-            'button'    => 'cmd_button',
-            'submit'    => 'cmd_submit',
-            'hidden'    => 'cmd_hidden',
-            'textbox'   => 'cmd_textbox',
+            'input'    	=> 'cmd_input',
+            'file'   	=> 'cmd_taginput',
+            'button'    => 'cmd_taginput',
+            'submit'    => 'cmd_taginput',
+            'hidden'    => 'cmd_taginput',
+            'textbox'   => 'cmd_taginput',
             'datebox'   => 'cmd_datebox',
             'textedit' 	=> 'cmd_textedit',
             'push'      => 'cmd_push',
@@ -205,7 +207,7 @@ public function ViewTemplate($name,$vars = []) {
                 return [];
             }
             $key = $this->expand_Strings($key,$vars);
-            $cmp_val = str_replace(["\n","\r"],'',$key);
+            $cmp_val = trim(trim(str_replace(["\n","\r"],'',$key),'"'),"'");
 			$default = NULL;
             foreach($sec as $check => $value) {
 				if(mb_substr($check,0,1)==='\\') $check = mb_substr($check,1);
@@ -531,8 +533,10 @@ public function ViewTemplate($name,$vars = []) {
     //--------------------------------------------------------------------------
     //  output IMAGE-TAG
     // +img => URL , +img => [ attribule => value URL ]
+	//	attr data-value replacement to 'alt'
     private function cmd_image($tag,$attrs,$sec,$vars) {
         list($attrs,$src,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
+		array_key_rename($attrs,'data-value','alt');
         $attr = $this->gen_Attrs($attrs,$vars);
         $src = make_hyperlink($src,$this->ModuleName);
         echo "<img src='{$src}'{$attr} />";
@@ -858,28 +862,23 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
 		$this->input_common('text',$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------
-    //  INPUT TEXT
-    // +textbox:size[name] => [  attribute => value value    ]
-    private function cmd_textbox($tag,$attrs,$sec,$vars) {
-		$this->input_common('text',$tag,$attrs,$sec,$vars);
+    //  INPUT TYPE = command
+    // 		+textbox:size[name] => [  attribute => value value    ]
+    // 		+file[name](value)
+    // 		+button[name](value)
+    // 		+hidden[name](value)
+    // 		+submit[name](value)
+    private function cmd_taginput($tag,$attrs,$sec,$vars) {
+		if($tag === 'textbox') $tag = 'text';
+		$this->input_common($tag,$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------
-    //  INPUT HIDDEN
-    // +hidden[name](value)
-    private function cmd_hidden($tag,$attrs,$sec,$vars) {
-		$this->input_common('hidden',$tag,$attrs,$sec,$vars);
-    }
-    //--------------------------------------------------------------------------
-    //  INPUT BUTTON
-    // +hidden[name](value)
-    private function cmd_button($tag,$attrs,$sec,$vars) {
-		$this->input_common('button',$tag,$attrs,$sec,$vars);
-    }
-    //--------------------------------------------------------------------------
-    //  INPUT SUBMIT
-    // +hidden[name](value)
-    private function cmd_submit($tag,$attrs,$sec,$vars) {
-		$this->input_common('submit',$tag,$attrs,$sec,$vars);
+    //  INPUT 
+    // 		+input<type>
+    private function cmd_input($tag,$attrs,$sec,$vars) {
+		$intype = (isset($attrs['data-value'])) ? $attrs['data-value'] : 'text';
+		unset($attrs['data-value']);
+		$this->input_common($intype,$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------
     //  TEXTAREA
@@ -901,7 +900,11 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
     // +radio[name] => [  select_option_value = > [
     //      option_text => option_value
 	//		 option_text.() => option_value
-    //      ...
+	//	OR
+    //      tag-wrapper => [
+    //      	option_text => option_value
+    //      	...
+	//		]
     //  ] ]
     private function cmd_radio($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
@@ -910,21 +913,35 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
         $sec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND ALL-CHILD
         list($opt_key, $opt_val) = array_first_item($sec);
         $sel_item = (is_numeric($opt_key)) ? '' : $opt_key;
+		if(mb_substr($sel_item,0,1) === '@') $sel_item = mb_substr($sel_item,1);
         if(is_array($opt_val)) {
+			list($wrap_key,$wrap_val) = array_first_item($opt_val);
+			if(is_numeric($wrap_key) || is_scalar($wrap_val)) {
+				$block_tag = ['<ul class="input-list">','</ul>'];
+				$wrap_tag = ['<li>','</li>'];
+			} else {
+				list($btag,$wrap_attrs) = $this->tag_Separate($wrap_key,$vars);
+				$wrap_attr = $this->gen_Attrs($wrap_attrs,$vars);
+				$opt_val = $wrap_val;
+				$block_tag = ['',''];
+				$wrap_tag = ["<{$btag}{$wrap_attr}>","</{$btag}>"];
+
+			}
             $opt_val = array_flat_reduce($opt_val);
-			echo '<ul class="input-list">';
+			echo "{$block_tag[0]}\n";
+			list($beg,$end) = $wrap_tag;
             foreach($opt_val as $opt => $val) {
 				if(is_numeric($opt) ) {
 					$val = separate_tag_value($val);
-					echo "<li>{$val}</li>\n";
+					echo "{$beg}{$val}{$end}\n";
 				} else {
 					$opt = tag_body_name($opt);
 					list($opt,$bc,$ec) = tag_label_value($opt);
 					$sel = ($val == $sel_item) ? ' checked':'';
-					echo "<li>{$bc}<label>{$tags} value='{$val}'{$sel}>{$opt}</label>{$ec}</li>\n";
+					echo "{$beg}{$bc}<label>{$tags} value='{$val}'{$sel}>{$opt}</label>{$ec}{$end}\n";
 				}
             }
-			echo "</ul>\n";
+			echo "{$block_tag[1]}\n";
         } else echo "<label>{$tags} value='{$opt_val}'>{$opt_val}</label>\n";
     }
     //--------------------------------------------------------------------------
