@@ -1,0 +1,96 @@
+//====================================================
+// common prototype define (Mostly fo IE-11)
+//====================================================
+// file-size convert for unit size
+Number.prototype.size_unit = function () {
+	var sz = this;
+	for (var i = 0; sz > 1000; i += 3, sz /= 1000) ;
+	szStr = sz.toFixed(2) + " B  KB MB GB TB PB".substr(i, 3);
+	return szStr;
+};
+//====================================================
+// Number overflow check by limit-string
+Number.prototype.valueOver = function (szstr) {
+	var unit_base = {
+		'B':	1,
+		'KB':	1000,
+		'MB':	1000*1000,
+		'GB':	1000*1000*1000,
+		'TB':	1000*1000*1000*1000,
+		'PB':	1000*1000*1000*1000*1000,
+	};
+	var splitStr = szstr.split(/(\d+(?:\.\d+)*)/).filter(function (i) { return i.length; }).map(function (v) { return v.trim(); });
+	var ret = splitStr[0];
+	var unit = unit_base[splitStr[1]];
+	var limit = parseFloat(ret)*unit; 
+	return this > limit;
+};
+//====================================================
+// triming space
+String.prototype.trim2 = function() {
+    return this.replace(/^[\s　]+|[\s　]+$/g, '');
+};
+//====================================================
+// check cannot use URI-charactor
+String.prototype.is_invalid_name = function () {
+    return (this.match(/^.*[\+%#].*?$/));
+};
+//====================================================
+// start of strings in array values
+String.prototype.startOfString = function (arr) {
+	var exists = false;
+	var base = this;
+	arr.forEach(function (val) {
+		if (base.substr(0,val.length) === val) {
+			exists = true;
+			return false;	// break forEach
+		};
+		return true;	// continue next
+	});
+	return exists;
+};
+//====================================================
+// start of strings in array values
+String.prototype.existsWord = function (str) {
+	var wd_arr = this.split(' ');	// separate space
+	return wd_arr.is_exists(str);
+};
+//====================================================
+// element search: IE-11 is not have includes() method.
+Array.prototype.is_exists = function (v) {
+	var exists = false;
+	this.forEach(function (val) {
+		if (val === v) {
+			exists = true;
+			return false;	// break forEach
+		};
+		return true;	// continue next
+	});
+	return exists;
+};
+//====================================================
+// delete element by value, don't duplicate
+Array.prototype.delete_exists = function (val) {
+	var index = this.indexOf(val);
+	if(index != -1) {
+		this.splice(index, 1);
+		return true;
+	};
+	return false;
+};
+//====================================================
+// pickup uniq element
+Array.prototype.uniq = function () {
+	return this.filter(function (x, i, self) { return (self.indexOf(x) === i); });
+};
+//====================================================
+// array merge: exclude duplicate element
+Array.prototype.mymerged = function (b) {
+	var new_array =  this.slice();	// 配列コピー
+	b.forEach(function (val) {
+		if (val !== "" & new_array.is_exists(val) == false) {
+			new_array.push(val);
+		};
+	});
+	return new_array;
+};
