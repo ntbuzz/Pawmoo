@@ -36,6 +36,7 @@ Stylesheet => [
             bodystyle.css        // Template Default Style
             libstyle.css
             context.css
+			dropfile.css
             floatwin.css
             markdown.css
             pagerstyle.css
@@ -66,6 +67,7 @@ Javascript => [
             @debugger:debugbar.js   // use DEBUGGER,if AppData['debugger'] in SESSION is not FLASE
         ]
         +import => [
+            prototypes.js           // prototype functions
             funcs.js                // common function/prototype
         ]
     ]
@@ -94,7 +96,9 @@ Javascript => [
             window.js               // JQuery-Plugins
         ]
         +import => [
+            prototypes.js           // prototype functions
             funcs.js                // common function/prototype
+			dropfile.js
         ]
 	]
 ]
