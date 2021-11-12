@@ -219,8 +219,7 @@ function passwd_random($n = 8) {
 //				ネストするときは3次元連想配列
 //				メニューキー名 => [	グループ名 => [ キー名 => 値, ... ]	]
 // label		TRUE: グループ名をタイトルとして表示
-// cls			最外部のdivクラス名
-function menu_box($menu,$label=true,$cls='') {
+function menu_box($menu,$label=true) {
 	// flexリストを出力
 	$select_list = function($title,$list,$label) use(&$select_list) {
 		echo "<ul>\n";
@@ -243,10 +242,7 @@ function menu_box($menu,$label=true,$cls='') {
 		}
 		echo "</ul>\n";
 	};
-	if(!empty($cls)) $cls = " class='{$cls}'";
-	echo "<div{$cls}>\n";
 	$select_list('',$menu,$label);
-	echo "</div>\n";
 };
 //==============================================================================
 // チェックリスト・ラジオボタンのメニュー作成
