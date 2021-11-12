@@ -28,8 +28,22 @@ function targetBox(obj) {
 function balloonPosition(target, onside, margin) {
 	if (target.prop('tagName') === undefined) return;
 	// ターゲットの中心位置
-	this.pointX = parseInt(target.offset().left) + parseInt(target.outerWidth(true)/2);
-	this.pointY = parseInt(target.offset().top) + parseInt(target.outerHeight(true) / 2);
+	var targetPos = {
+		left:parseInt(target.offset().left),
+		top:parseInt(target.offset().top),
+		width:parseInt(target.outerWidth(true)),
+		height: parseInt(target.outerHeight(true)),
+		Left: function () {return (this.left - $(window).scrollLeft());},
+		Top: function () {return (this.top - $(window).scrollTop());},
+		Center: function () {
+			return {
+				x: this.Left() + parseInt(this.width / 2),
+				y: this.Top() + parseInt(this.height / 2)
+			};
+		},
+		Bottom: function () {return this.Top() + this.height;},
+		Right: function () {return this.Left() + this.width;},
+	};
 	this.Box = { left: 0, top: 0, right: 0, bottom: 0 };
 	// this.Onside = onside;
 	// this.Margin = margin;
@@ -56,18 +70,13 @@ function balloonPosition(target, onside, margin) {
 			this.LeftPos(x);
 		},
 	};
-	// スクロール量を考慮
-	this.scrollPos = function () {
-		var x = this.pointX - $(window).scrollLeft();
-		var y = this.pointY - $(window).scrollTop();
-		return { x: x, y: y };
-	};
 	this.calcPosition = function (obj) {
 		var w = parseInt(obj.outerWidth());
 		var hw = parseInt(w / 2);
 		var h = parseInt(obj.outerHeight());
 		var hh = parseInt(h / 2);
-		var Pos = this.scrollPos();
+		var Pos = targetPos.Center();
+
 		var parentBox = {
 			left: 0,top: 0,
 			right: $(window).width(),
@@ -83,35 +92,36 @@ function balloonPosition(target, onside, margin) {
 			};
 			if (bBox.bottom > parentBox.bottom) {
 				vt = "bottom-"; hz = "center";
-				bBox.TopLeft(Pos.x - hw, Pos.y - h);
+				bBox.TopLeft(Pos.x - hw, targetPos.Top() - h);
 			};
 			if (bBox.right > parentBox.right || bBox.top < parentBox.top) {
 				vt = ""; hz = "right";
-				bBox.TopLeft(Pos.x - w, Pos.y - hh);
+				bBox.TopLeft(targetPos.Left() - w, Pos.y - hh);
 			};
 			if (bBox.left < parentBox.left) {
 				vt = "top-"; hz = "left";
-				bBox.TopLeft(Pos.x, Pos.y);
+				bBox.TopLeft(Pos.x, Pos.y + 8);
 				if (bBox.bottom > parentBox.bottom) {
 					vt = "bottom-";
-					bBox.TopPos(Pos.y - h);
+					bBox.TopPos(targetPos.Top() - h);
 				};
 			} else {
 				if (bBox.bottom > parentBox.bottom) {
 					vt = "bottom-";
-					bBox.TopPos(Pos.y - h);
+					bBox.TopPos(targetPos.Top() - h);
 				};
 				if (bBox.top < parentBox.top) {
 					vt = "top-";
 					bBox.TopPos(Pos.y);
 				};
+				if(vt !=="" && hz === "right") bBox.LeftPos(targetPos.Right() - w);
 			};
 		} else {
 			var vt = "top-"; var hz = "center";
 			bBox.setBound(Pos.x - hw, Pos.y, w, h);
 			if (bBox.bottom > parentBox.bottom) {
 				vt = "bottom-";
-				bBox.TopPos(Pos.y - h);
+				bBox.TopPos(targetPos.Top() - h);
 			};
 			if (bBox.right > parentBox.right) {
 				hz = "right";
@@ -134,9 +144,6 @@ function balloonPosition(target, onside, margin) {
 		};
 		this.balloon = 'balloon-' + vt + hz;
 		obj.addClass(this.balloon);
-		// マージン分移動する
-		bBox.left = bBox.left - parseInt(obj.css('margin-right'));
-		bBox.top = bBox.top - parseInt(obj.css('margin-bottom'));
 		obj.css({'left': bBox.left + 'px','top': bBox.top + 'px'});
 	};
 	this.inBalloon = function (x, y) {
@@ -175,7 +182,7 @@ $.fn.PopupBaloonSetup = function () {
 			// 他要素の mouseover防止とバルーンを消すための領域設定
 			var bk_panel = $('<div class="balloon-BK"></div>').appendTo('body');
 			bk_panel.fadeIn('fast');
-			var Balloon = new balloonPosition(icon_obj, onside, 5);
+			var Balloon = new balloonPosition(icon_obj, onside, 12);
 			icon_obj.addClass('active');
 			self.fadeIn('fast');
 			Balloon.calcPosition(self);
@@ -240,13 +247,19 @@ $.fn.PopupBaloonSetup = function () {
 				// 他要素の mouseover防止とバルーンを消すための領域設定
 				var bk_panel = $('<div class="balloon-BK"></div>').appendTo('body');
 				bk_panel.fadeIn('fast');
-				var Balloon = new balloonPosition(icon_obj,onside,5);
-				var disp_class = ref_obj.attr('data-value');		// 表示するタグID
+				var Balloon = new balloonPosition(icon_obj,onside,12);
+				var disp_id = ref_obj.attr('data-value');		// 表示するタグID
 				// 選択タグがあればそれをバルーンにする、なければ自身がバルーン
-				ballon_obj = (typeof disp_class === 'string') ? self.find('#' + disp_class) : self;
+				if (typeof disp_id === 'string') {
+					ballon_obj = self.find('#' + disp_id);
+					self.children('div').hide();					// 他の要素を非表示
+					self.show();						// 親を表示
+					self.css('display','block');
+				} else ballon_obj = self;
 				ballon_obj.addClass('popup-balloon');		// popup-balloon のスタイルを適用する
-				ballon_obj.fadeIn('fast');		// dusplay:block でないとサイズが取得できない
+				ballon_obj.fadeIn('fast');		// 表示されていないとサイズが取得できない
 				icon_obj.addClass('active');
+				ballon_obj.show();			// fadeIn ではタイムラグが出るので確実に表示する
 				Balloon.calcPosition(ballon_obj);
 				// リサイズは処理完了後に位置移動する
 				var resizeTimer = null;
@@ -267,7 +280,7 @@ $.fn.PopupBaloonSetup = function () {
 					if (!Balloon.inBalloon(e.clientX, e.clientY)) {
 						// popup-balloon と吹き出し用のクラスを削除
 						ballon_obj.removeClass('popup-balloon ' + Balloon.balloon);
-						ballon_obj.css('display','');	// fadeInで設定されたものを削除
+						self.css('display','');	// fadeInで設定されたものを削除
 						icon_obj.removeClass('active');
 						$(window).off('scroll.mballoon resize.mballoon');
 						bk_panel.remove();
