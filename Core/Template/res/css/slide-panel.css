@@ -1,6 +1,6 @@
 /* デバッグツール用のスタイル */
 .slide-panel {
-	z-index:10;
+	z-index:99999;
 	position:fixed;
 	background-color: whitesmoke;
 	white-space: nowrap;

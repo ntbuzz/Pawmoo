@@ -1,6 +1,6 @@
 
 .dialog-BK {
-    z-index:100;
+    z-index:90000;
     position:fixed;
     display:none;
     top:0;

@@ -1,6 +1,6 @@
 /* Loading.... ICON */
 .loader_icon {
-	z-index: 9999;
+	z-index: 99999;
 	position: fixed;
 	top:0;
 	left:0;
