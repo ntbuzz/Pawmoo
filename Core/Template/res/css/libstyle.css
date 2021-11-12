@@ -51,14 +51,14 @@
 	white-space: nowrap;
 	height:22px;
 }
-.delete-item-list>li>del {
+.delete-item-list>li>.del {
 	display: inline-block;
 	width:18px;
 	height:20px;
 	cursor: pointer;
 	background: url(res/img/del_button.png) no-repeat left top;
 }
-.delete-item-list>li>del:hover {
+.delete-item-list>li>.del:hover {
 	background: url(res/img/del_button.png) no-repeat left -20px;
 }
 
@@ -140,9 +140,29 @@ ul.input-list>li>label>input {
 	padding-left:18px;
 	cursor: pointer;
 color:white;
-	background: url(res/img/fplder-icon.png) no-repeat left top;
+	background: url(res/img/folder-icon.png) no-repeat left top;
 }
 .file-label>span:hover {
 	color:yellow;
-	background: url(res/img/fplder-icon.png) no-repeat left -22px;
+	background: url(res/img/folder-icon.png) no-repeat left -22px;
+}
+/* ドラッグドロップ用 */
+#fileList span {
+	display: inline-block;
+	vertical-align: middle;
+	width:25px;
+	height:26px;
+margin-right:5px;
+}
+#fileList span.doc {
+	display: inline-block;
+	background: url(res/img/icon/file-icon.png) no-repeat left top;
+}
+#fileList span.pdf {
+	display: inline-block;
+	background: url(res/img/icon/file-icon.png) no-repeat -48px top;
+}
+#fileList span.xls {
+	display: inline-block;
+	background: url(res/img/icon/file-icon.png) no-repeat -24px top;
 }
