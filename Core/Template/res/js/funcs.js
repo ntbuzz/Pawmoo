@@ -1,77 +1,4 @@
 //====================================================
-// normarl javascript functions
-
-// common prototype define (Mostly fo IE-11)
-//====================================================
-// triming space
-String.prototype.trim2 = function() {
-    return this.replace(/^[\s　]+|[\s　]+$/g, '');
-};
-//====================================================
-// check cannot use URI-charactor
-String.prototype.is_invalid_name = function () {
-    return (this.match(/^.*[\+%#].*?$/));
-};
-//====================================================
-// start of strings in array values
-String.prototype.startOfString = function (arr) {
-	var exists = false;
-	var base = this;
-	arr.forEach(function (val) {
-		if (base.substr(0,val.length) === val) {
-			exists = true;
-			return false;	// break forEach
-		};
-		return true;	// continue next
-	});
-	return exists;
-};
-//====================================================
-// start of strings in array values
-String.prototype.existsWord = function (str) {
-	var wd_arr = this.split(' ');	// separate space
-	return wd_arr.is_exists(str);
-};
-//====================================================
-// element search: IE-11 is not have includes() method.
-Array.prototype.is_exists = function (v) {
-	var exists = false;
-	this.forEach(function (val) {
-		if (val === v) {
-			exists = true;
-			return false;	// break forEach
-		};
-		return true;	// continue next
-	});
-	return exists;
-};
-//====================================================
-// delete element by value, don't duplicate
-Array.prototype.delete_exists = function (val) {
-	var index = this.indexOf(val);
-	if(index != -1) {
-		this.splice(index, 1);
-		return true;
-	};
-	return false;
-};
-//====================================================
-// pickup uniq element
-Array.prototype.uniq = function () {
-	return this.filter(function (x, i, self) { return (self.indexOf(x) === i); });
-};
-//====================================================
-// array merge: exclude duplicate element
-Array.prototype.mymerged = function (b) {
-	var new_array =  this.slice();	// 配列コピー
-	b.forEach(function (val) {
-		if (val !== "" & new_array.is_exists(val) == false) {
-			new_array.push(val);
-		};
-	});
-	return new_array;
-};
-//====================================================
 // customize location object class for this framework
 const LOC_FULL    = 3;     // :url     http://host/url
 const LOC_SYS     = 2;     // /url     http://host/sysRoot/url
@@ -230,11 +157,13 @@ function calcPosition(target, self) {
 		var window_bottom = $(window).innerHeight() + $(window).scrollTop(); 
 		this.left = target_left + Math.max(0,target_width - self_width);
 		if ((this.left + self_width) > window_right) {
-			this.left = target_left + target_width - self_width;
+			var vleft = target_left + target_width - self_width;
+			if(vleft > $(window).scrollLeft()) this.left = vleft;
 		};
 		this.top = target_top + target_height + 3;
 		if ((this.top + self_height) > window_bottom) {
-			this.top = target_top - self_height;
+			var vtop = target_top - self_height;
+			if (vtop > $(window).scrollTop()) this.top = vtop;
 		};
 		this.scrollPos();
 	};
@@ -293,8 +222,7 @@ function get_browserInfo() {
 };
 //====================================================
 // for DEBUG dump Object
-var alertDump = function() {
-	var Dump = function(obj, rIndent) {
+	var dumpStr = function(obj, rIndent) {
 		if (!obj) return '';
 		 var result = '', indent = '  ', br = '\n';
 		 if (rIndent) indent += rIndent;
@@ -307,7 +235,7 @@ var alertDump = function() {
 				} else if (typeof obj[key] === 'function') {
 					result += key +" is function()" + br;
 				} else if (typeof obj[key] === 'object') {
-					result += Dump(obj[key], indent);
+					result += dumpStr(obj[key], indent);
 				} else {
 					result += obj[key] + br;
 				};
@@ -319,13 +247,25 @@ var alertDump = function() {
 		 result = String(result);
 		 return result;
 	};
-	// 可変引数を解析
+//====================================================
+// dump alert()
+var alertDump = function() {
 	var str = "";
 	$.each(arguments,function (index,argv) {
-		if (typeof argv === 'object') str += Dump(argv)+"\n";
+		if (typeof argv === 'object') str += dumpStr(argv)+"\n";
 		else str += argv+"\n";
 	});
 	alert(str);
+};
+//====================================================
+// dump console()
+var consoleDump = function() {
+	var str = "";
+	$.each(arguments,function (index,argv) {
+		if (typeof argv === 'object') str += dumpStr(argv)+"\n";
+		else str += argv+"\n";
+	});
+	console.log(str);
 };
 //====================================================
 function DebugSlider() {
