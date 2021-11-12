@@ -250,25 +250,36 @@ $.fn.MenuSetup = function () {
 		var kind = self.attr("data-value");
 		var ref_obj = $("#" + self.attr("data-element"));  // 紐付けるID
 		if (ref_obj instanceof jQuery) {
-			switch (kind) {
-			case 'dropdown': ref_obj.DropDownMenuBox(function () { return self.html(); }); break;
-			case 'radio': ref_obj.SingleCheckBox(false, function () { return self.html(); }); break;
-			case 'checkbox': ref_obj.SingleCheckBox(true, function () { return self.html(); }); break;
+			var hint = self.attr('hint');
+			if (kind === 'dropdown') {
+				ref_obj.DropDownMenuBox(hint,function () { return self.html(); });
+			} else {
+				ref_obj.SingleCheckBox({ Hint: hint }, function () { return self.html(); });
 			};
 		};
 	});
 	return this;
 };
 // ポップアップドロップダウンメニューボックスを表示する
-$.fn.DropDownMenuBox = function (preload_func) {
+$.fn.DropDownMenuBox = function (param_obj,preload_func) {
 	var self = this; // jQueryオブジェクトを変数に代入しておく
 	var setting = {
 		TargetObj: self.find('input:first-child'),	// 書き込むINPUT name
-		Template: '<div></div>',
 		ClearTag: '<span class="clear"></span>',
 		DropDown: '<span class="arrow"></span>',
+		Hint: '',
+		Preload: function () { return '<div></div>';},
 	};
 	if (setting.TargetObj.length === 0) return this;
+	if (typeof preload_func === 'function') setting.Preload = preload_func;
+	switch (typeof param_obj) {
+		case 'string': setting.Hint = param_obj; break;
+		case 'object':
+			if (param_obj !== null && param_obj !== undefined) {
+				$.each(param_obj, function (key, value) { setting[key] = value; });
+			};
+			break;
+	};
 	// [X]マークと▼マークのタグが無ければ追加する
 	var clearBtn = self.children('span.clear');
 	if (clearBtn.length === 0) {
@@ -285,14 +296,13 @@ $.fn.DropDownMenuBox = function (preload_func) {
 	});
 	self.css("cursor", "pointer");
 	self.off('click').on('click', function () {
-		// プリロード関数が指定されていれば
-		if (typeof preload_func === 'function') {
-			$.busy_cursor(true);
-			setting.Template = preload_func.call(this);
-			$.busy_cursor(false);
-		};
-		var data = '<div class="navi-menubox">'+setting.Template+'</div>';
+		// テンプレート関数でメニューを取得
+		$.busy_cursor(true);
+		var Template = setting.Preload.call(this);
+		$.busy_cursor(false);
+		var data = '<div class="navi-menubox">'+Template+'</div>';
 		var menu_box = $(data).appendTo('body');
+		if (typeof setting.Hint === 'string') menu_box.attr('title', setting.Hint);
 		menu_box.show();
 		// 移動している可能性があるため、クリック時に位置計算
 		var menuPos = new calcPosition(self, menu_box);
