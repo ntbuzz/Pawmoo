@@ -23,6 +23,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	protected $LastCond;	// for DEBUG
 	protected $LastBuild;	// for DEBUG
 	protected $LIKE_opr = 'LIKE';		// Ignore Upper/Lower case LIKE
+	protected $NULL_ORDER = ' NULLS LAST';	// NULL seq
 //==============================================================================
 //	abstruct method
 	abstract protected function Connect($table);
@@ -178,7 +179,7 @@ public function getGroupCalcList($cond,$groups,$calc,$sortby,$max) {
 		$col = [];
 		foreach($sortby as $column => $seq) {
 			$order = ($seq === SORTBY_DESCEND) ? "desc" : "asc";
-			$col[]= "{$column} {$order}";
+			$col[]= "{$column} {$order}{$this->NULL_ORDER}";
 		}
 		$sort = " ORDER BY ".implode(',',$col);
 	}
@@ -206,7 +207,7 @@ public function findRecord($cond,$use_relations = FALSE,$sort = []) {
 		$orderby = "";
 		foreach($sort as $key => $val) {
 			$order = ($val === SORTBY_DESCEND) ? "desc" : "asc";
-			$orderby .=  "{$this->table}.\"{$key}\" {$order},";
+			$orderby .=  "{$this->table}.\"{$key}\" {$order}{$this->NULL_ORDER},";
 		}
 		$where .=  " ORDER BY ".trim($orderby,",");
 	}
@@ -232,7 +233,7 @@ public function firstRecord($cond,$use_relations = FALSE,$sort) {
 		$orderby = "";
 		foreach($sort as $key => $val) {
 			$order = ($val === SORTBY_DESCEND) ? "desc" : "asc";
-			$orderby .=  "{$this->table}.\"{$key}\" {$order},";
+			$orderby .=  "{$this->table}.\"{$key}\" {$order}{$this->NULL_ORDER},";
 		}
 		$where .=  " ORDER BY ".trim($orderby,",");
 	}
