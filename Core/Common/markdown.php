@@ -45,6 +45,33 @@ function pseudo_markdown($atext, $md_class = '') {
             }, array_filter(explode(':',$m[1]),function($v) {return strlen($v)>0;}));
             return "<dl class='dl_list'>".implode("\n",$dtdd)."</dl>";
         }],$atext);
+//------------------------------------------------------------------------------
+// プロック要素を先に処理する
+	$atext = preg_replace_callback_array([
+//------- ..class#id(value){TEXT} CLASS/ID/VALUE attributed SPAN/P replacement
+        '/(\s)\.\.([\w\-]+(?:\.[\w\-]+)*)?(?:#([\w\-]+))?(?:\(([^\)]+)\))?(:)?\{((?:\$\{[^\}\s]+\}|\\\}|.)*?)\}($|\s)/s' => function ($m) {
+			list($mm,$pre,$cls,$ids,$val,$tag,$txt,$post) = $m;
+            $cls = get_class_names($cls);
+            $ids = ($ids==='') ? '' : " id='{$ids}'";
+            $val = ($val==='') ? '' : " value='{$val}'";
+            $tag = ($tag==='') ? 'span' : 'p';
+			if($pre !== "\n") $pre = '';				// KEEP NL(\n), for previous line last DBL-SPC to <BR> tag
+			if($post !== "\n") $post = '';				// KEEP NL(\n), for next line markdown
+			if(strpos($txt ,'\\}')) $txt = str_replace('\\}','}',$txt);
+            return "{$pre}<{$tag}{$cls}{$ids}{$val}>{$txt}</{$tag}>{$post}";
+        },
+//------- ...!{ TEXT }... NL change <br> tag in div-indent class
+        '/\s\.\.\.([\w\-]+(?:\.[\w\-]+)*)?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
+			$txt = pseudo_markdown($m[3],false);
+            if($m[2]==='!') {
+                $txt = nl2br($txt);
+                // restore HTML-tag(</h1>) after <BR>
+                $txt = rtrim(preg_replace('/(<\/h\d>)(?:<br>|<br \/>)\n/i',"\\1\n","{$txt}\n"));
+            } else $txt = trim($txt);
+            $cls = ($m[1]==='')?'indent':get_class_names($m[1],false);
+            return "\n<div class='{$cls}'>{$txt}</div>";
+		},
+    ],$atext);
     // ul/ol/blockquote processing
     $p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)(?:\n((?:\.[\w\-]+)*)\n|$)/s';
     $atext = preg_replace_callback($p,function($matches) {
@@ -157,7 +184,6 @@ function pseudo_markdown($atext, $md_class = '') {
         },explode("\n", $txt));
         return "<table{$tbl_class}>".implode("\n",$arr)."</table>\n";
     }, $atext);
-
 //------------------------------------------------------------------------------
 // multi pattern replace
     $item_array = function($delimit,$str,$max=0,$b=[]) {
@@ -211,29 +237,6 @@ function pseudo_markdown($atext, $md_class = '') {
 			$attr = empty($arr) ? '': ' '.implode(' ',$arr);
 			return "<a href='{$url}'{$attr}>{$txt}</a>";
 		},
-//------- ..class#id(value){TEXT} CLASS/ID/VALUE attributed SPAN/P replacement
-        '/(\s)\.((?:\.[\w\-]+)+)(?:#([\w\-]+))?(?:\(([^\)]+)\))?(:)?\{((?:\$\{[^\}\s]+\}|\\\}|.)*?)\}($|\s)/s' => function ($m) {
-			list($mm,$pre,$cls,$ids,$val,$tag,$txt,$post) = $m;
-            $cls = get_class_names($cls);
-            $ids = ($ids==='') ? '' : " id='{$ids}'";
-            $val = ($val==='') ? '' : " value='{$val}'";
-            $tag = ($tag==='') ? 'span' : 'p';
-			if($pre !== "\n") $pre = '';				// KEEP NL(\n), for previous line last DBL-SPC to <BR> tag
-			if($post !== "\n") $post = '';				// KEEP NL(\n), for next line markdown
-			if(strpos($txt ,'\\}')) $txt = str_replace('\\}','}',$txt);
-            return "{$pre}<{$tag}{$cls}{$ids}{$val}>{$txt}</{$tag}>{$post}";
-        },
-//------- ...!{ TEXT }... NL change <br> tag in div-indent class
-        '/\s\.\.\.([\w\-]+(?:\.[\w\-]+)*)?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
-			$txt = pseudo_markdown($m[3],false);
-            if($m[2]==='!') {
-                $txt = nl2br($txt);
-                // restore HTML-tag(</h1>) after <BR>
-                $txt = rtrim(preg_replace('/(<\/h\d>)(?:<br>|<br \/>)\n/i',"\\1\n","{$txt}\n"));
-            } else $txt = trim($txt);
-            $cls = ($m[1]==='')?'indent':get_class_names($m[1],false);
-            return "\n<div class='{$cls}'>{$txt}</div>";
-        },
 //------- [check]{text} CHECKBOX MARK
         '/\[([^\]]*?)\]\{([^\}]*?[^\\\\])\}/' => function ($m) {
             $chk = (is_bool_false($m[1])) ? 'off':'on';
