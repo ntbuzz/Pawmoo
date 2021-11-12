@@ -180,7 +180,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 	});
 	return this;
 };
-// 全ての子要素に対して属性値を書換える
+// 全ての子要素に対してclass属性以外の属性値にある末尾の数字を書換える
 $.fn.changeAttrNo = function (ix) {
 	// 子要素を再帰的に呼び出す
 	this.children().each(function () {
@@ -188,12 +188,14 @@ $.fn.changeAttrNo = function (ix) {
 	});
 	var attrs = this.get(0).attributes;
 	for (var i = 0, len = attrs.length; i < len; i++) {
-		var val = attrs[i].value;
-		var bar = val.match(/([\w\-]+)\d+$/);
-		if (bar !== null) {
-			var key = attrs[i].name;
-			var new_attr = bar[1] + ix;
-			this.attr(key, new_attr);
+		var key = attrs[i].name;
+		if (key !== 'class') {
+			var val = attrs[i].value;
+			var bar = val.match(/(\D+)(\d+)$/);
+			if (bar !== null) {
+				var new_attr = bar[1] + ix;
+				this.attr(key, new_attr);
+			};
 		};
 	};
 	return this;
@@ -201,34 +203,37 @@ $.fn.changeAttrNo = function (ix) {
 //==========================================================
 // ポップアップチェックリストボックスを表示する
 // セレクタがクラスの場合、複数要素に対応する
-$.fn.CheckRadioBox = function (check_param, preload_func) {
+$.fn.CheckRadioBox = function (param_obj, preload_func) {
 	this.each(function () {
-		$(this).SingleCheckBox(check_param, preload_func);
+		$(this).SingleCheckBox(param_obj, preload_func);
 	});
 	return this;
 };
 // チェックボックスorラジオボタンのポップアプを表示する
-$.fn.SingleCheckBox = function (check_param, preload_func) {
+$.fn.SingleCheckBox = function (param_obj, preload_func) {
 	var self = this;
 	var setting = {
 		CheckType:(self.attr('data-type') !== 'radio'),
 		CheckAll: false,
 		TargetObj: self.find('input:first-child'),	//$('[name="' + self.attr('data-value') + '"'),  	// 書き込むINPUT name
-		Template: '<div class="check-itemset"></div>',
 		ClearTag: '<span class="clear"></span>',
 		DropDown: '<span class="arrow"></span>',
 		addClear: true,			// クリアボタンが必要
 		Separator: " ",
+		Hint:'',
+		Preload: function () { return '<div class="check-itemset"></div>'; },
 		SetValue: function (value) { setting.TargetObj.val(value); },
 		GetValue: function () { return setting.TargetObj.val(); },
 	};
-	if (check_param !== null) {
-		switch (typeof check_param) {
-			case 'string': setting.CheckType = (check_param === 'checkbox'); break;
-			case 'object': $.each(check_param, function (key, value) { setting[key] = value; }); break;
-			case 'boolean': setting.CheckAll = check_param; break;
-			case 'function': setting.CheckAll = check_param.call(this); break;
-		};
+	if (typeof preload_func === 'function') setting.Preload = preload_func;
+	switch (typeof param_obj) {
+		case 'string': setting.CheckType = (param_obj === 'checkbox'); break;
+		case 'boolean': setting.CheckAll = param_obj; break;
+		case 'object':
+			if (param_obj !== null && param_obj !== undefined) {
+				$.each(param_obj, function (key, value) { setting[key] = value; });
+			};
+			break;
 	};
 	if (setting.TargetObj.length === 0) return this;
 	// [X]マークのタグが無ければ追加する
@@ -249,14 +254,13 @@ $.fn.SingleCheckBox = function (check_param, preload_func) {
 		dropBtn = $(setting.DropDown).appendTo(self);
 	};
 	self.css("cursor", "pointer").off('click').on('click', function () {
-		// プリロード関数があれば
-		if (typeof preload_func === 'function') {
-			$.busy_cursor(true);
-			setting.Template = preload_func.call(this,setting.CheckType);
-			$.busy_cursor(false);
-		};
-		var data = '<div class="navi-checklist">'+setting.Template+'</div>';
+		// プリロード関数でメニューを取得
+		$.busy_cursor(true);
+		var Template = setting.Preload.call(self,setting.CheckType);
+		$.busy_cursor(false);
+		var data = '<div class="navi-checklist">'+Template+'</div>';
 		var menu_box = $(data).appendTo('body');
+		if (typeof setting.Hint === 'string') menu_box.attr('title', setting.Hint);
 		// checkbox の時だけ
 		if (setting.CheckType && setting.CheckAll) menu_box.append("<div class='check-all'>${#.core.CheckALL}<input type='checkbox' class='flip_all' /></div>");
 		menu_box.show();
