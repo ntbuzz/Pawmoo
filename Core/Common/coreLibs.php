@@ -331,6 +331,7 @@ function str_csvget($csv_str) {
 		$wrapstr = mb_substr($item,0,1) . mb_substr($item,-1);     // top-end char pair
 		if($wrapstr === '""' || $wrapstr === "''") $item = trim($item,$wrapstr);
 		if($item === '' || $item === 'NULL') $item = NULL;
+		else $item = str_replace('""','"',$item);		// "" のエスケープ解除
 		$csv[] = (is_numeric($item)) ? intval($item) : $item;
 	}
 	return $csv;
@@ -522,6 +523,12 @@ function attr_addrmclass($attrs,$add,$rm=NULL) {
 	$base = (isset($attrs['class'])) ? $attrs['class'] :'';
 	if(!empty($rm)) $base = str_replace($rm,'',$base);
     return ltrim("{$base} {$add}");
+}
+//==============================================================================
+//  classname exists check in attr[class] 
+function attr_class_exist($attrs,$name,$exist,$none='') {
+	$base = (isset($attrs['class'])) ? $attrs['class'] :'';
+	return (strpos($base,$name)!==false) ? $exist:$none;
 }
 //==============================================================================
 //  add classname into attr[class] 
