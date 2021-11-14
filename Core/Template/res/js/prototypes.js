@@ -36,6 +36,40 @@ String.prototype.is_invalid_name = function () {
     return (this.match(/^.*[\+%#].*?$/));
 };
 //====================================================
+// check EXECUTE file
+String.prototype.is_executable = function () {
+	var executable = ['exe', 'com', 'dll', 'ocx','vbs', 'vbe', 'bat', 'cmd','run', 'js', 'jse', 'wsf', 'wsh', 'msc', 'jar', 'hta', 'msi','scr','lnk','url','iqy','cpl'];
+	var ext = this.split('.').pop();
+	return executable.is_exists(ext);
+};
+//====================================================
+// convert extention type
+String.prototype.ext_type = function () {
+	var ext = {
+		psd: 'psd',
+		ai: 'ai',
+		indd:'indd',
+		xdw: 'xdw',
+		iso: ['iso','cdd'],
+		doc: ['docx', 'doc'],
+		xls: ['xls', 'xlsx', 'xlsm', 'xla'],
+		htm: ['htm', 'html','xml'],
+		txt: ['txt', 'rtf','csv'],
+		pdf: ['pdfx', 'pdf'],
+		ps:  ['ps', 'eps','pm','xps'],
+		ppt: ['pptx', 'ppt'],
+		img: ['gif', 'png', 'jpeg', 'jpg', 'bmp', 'dib','tif','tiff'],
+		mov: ['mpg', 'mpeg', 'mp4', 'avi', 'mov', 'rm', 'divx','flv'],
+		zip: ['zip', 'lzh', '7z', 'rar'],
+		exe: ['exe', 'com', 'dll', 'ocx','vbs', 'vbe', 'bat', 'cmd','run', 'js', 'jse', 'wsf', 'wsh', 'msc', 'jar', 'hta', 'msi','scr','lnk','url','iqy','cpl'],
+	};
+	for (var k in ext) {
+		var hit = (Array.isArray(ext[k])) ? (ext[k].is_exists(this)) : (ext[k] == this);
+		if  (hit) return k;
+	}
+	return 'file';
+};
+//====================================================
 // start of strings in array values
 String.prototype.startOfString = function (arr) {
 	var exists = false;
@@ -60,7 +94,7 @@ String.prototype.existsWord = function (str) {
 Array.prototype.is_exists = function (v) {
 	var exists = false;
 	this.forEach(function (val) {
-		if (val === v) {
+		if (val == v) {
 			exists = true;
 			return false;	// break forEach
 		};
