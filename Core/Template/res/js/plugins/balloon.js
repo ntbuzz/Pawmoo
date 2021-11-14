@@ -137,10 +137,10 @@ function balloonPosition(target, onside, margin) {
 			};
 		};
 		this.Box = {
-			left: bBox.left - margin,
-			top: bBox.top - margin,
-			right: bBox.right + margin,
-			bottom: bBox.bottom + margin
+			left: Math.min(targetPos.Left(),bBox.left) - margin,
+			top: Math.min(targetPos.Top(),bBox.top) - margin,
+			right: Math.max(targetPos.Top(),bBox.right) + margin,
+			bottom: Math.max(targetPos.Bottom(),bBox.bottom) + margin
 		};
 		this.balloon = 'balloon-' + vt + hz;
 		obj.addClass(this.balloon);
@@ -182,7 +182,7 @@ $.fn.PopupBaloonSetup = function () {
 			// 他要素の mouseover防止とバルーンを消すための領域設定
 			var bk_panel = $('<div class="balloon-BK"></div>').appendTo('body');
 			bk_panel.fadeIn('fast');
-			var Balloon = new balloonPosition(icon_obj, onside, 12);
+			var Balloon = new balloonPosition(icon_obj, onside, 3);
 			icon_obj.addClass('active');
 			self.fadeIn('fast');
 			Balloon.calcPosition(self);
@@ -247,7 +247,7 @@ $.fn.PopupBaloonSetup = function () {
 				// 他要素の mouseover防止とバルーンを消すための領域設定
 				var bk_panel = $('<div class="balloon-BK"></div>').appendTo('body');
 				bk_panel.fadeIn('fast');
-				var Balloon = new balloonPosition(icon_obj,onside,12);
+				var Balloon = new balloonPosition(icon_obj,onside,3);
 				var disp_id = ref_obj.attr('data-value');		// 表示するタグID
 				// 選択タグがあればそれをバルーンにする、なければ自身がバルーン
 				if (typeof disp_id === 'string') {
