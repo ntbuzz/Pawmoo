@@ -60,13 +60,13 @@ String.prototype.ext_type = function () {
 		ppt: ['pptx', 'ppt'],
 		img: ['gif', 'png', 'jpeg', 'jpg', 'bmp', 'dib','tif','tiff'],
 		mov: ['mpg', 'mpeg', 'mp4', 'avi', 'mov', 'rm', 'divx','flv'],
-		zip: ['zip', 'lzh', '7z', 'rar'],
+		zip: ['zip', 'lzh', '7z', 'rar','gz','tgz','tar'],
 		exe: ['exe', 'com', 'dll', 'ocx','vbs', 'vbe', 'bat', 'cmd','run', 'js', 'jse', 'wsf', 'wsh', 'msc', 'jar', 'hta', 'msi','scr','lnk','url','iqy','cpl'],
 	};
 	for (var k in ext) {
 		var hit = (Array.isArray(ext[k])) ? (ext[k].is_exists(this)) : (ext[k] == this);
 		if  (hit) return k;
-	}
+	};
 	return 'file';
 };
 //====================================================
