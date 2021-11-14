@@ -453,7 +453,7 @@ $.fn.DragDropFiles = function (send_obj,callback_func) {
 		$(input_obj).off('change').on('change',function() {
 			var file_tag = $(this).prop('files');
 			if(isFileCharsetOK(file_tag)) {
-				DropObject.AppendFiles(files);
+				DropObject.AppendFiles(file_tag);
 				$(this).val('');		// IE11以上
 			};
 		});
