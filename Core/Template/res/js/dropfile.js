@@ -409,6 +409,7 @@ $.fn.DragDropFiles = function (send_obj,callback_func) {
 	// DropFilesオブジェクト
 	var DropObject = {
 		Files: [],
+		AddedFunc:function() {}, 	// コールバック関数
 		ChangeFunc:function() {}, 	// コールバック関数
 		TotalSize: function() {
 			var total = 0;
@@ -448,15 +449,14 @@ $.fn.DragDropFiles = function (send_obj,callback_func) {
 	};
 	// ファイル追加時のコールバックを登録する
 	self.AddFiles =function(input_obj,callback_func) {
-		if (typeof callback_func === 'function') {
-			$(input_obj).off('change').on('change',function() {
-				var file_tag = $(this).prop('files');
-				if(isFileCharsetOK(file_tag)) {
-					callback_func.call($(this),file_tag);
-					$(this).val('');		// IE11以上
-				};
-			});
-		};
+		if (typeof callback_func === 'function') DropObject.AddedFunc = callback_func;
+		$(input_obj).off('change').on('change',function() {
+			var file_tag = $(this).prop('files');
+			if(isFileCharsetOK(file_tag)) {
+				DropObject.AppendFiles(files);
+				$(this).val('');		// IE11以上
+			};
+		});
 		return self;
 	};
 	// ファイルをクリアするオブジェクトを登録
