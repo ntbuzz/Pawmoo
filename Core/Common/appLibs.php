@@ -228,9 +228,13 @@ function menu_box($menu,$label=true) {
 			if(is_array($val)) {
 				echo "<li><a class='label'>{$key}</a>\n";
 				echo "<div class='navi-sub'>\n";
-				foreach($val as $kk => $vv) {
-					$ttl = ($label)  ? $kk : '';
-					$select_list($ttl,$vv,$label);
+				// 通常メニューを先に処理
+				$sub = array_filter($val, function($v) { return is_scalar($v);});
+				if(!empty($sub)) $select_list('',$sub,$label);
+				// グループメニューを処理
+				$sub = array_filter($val, function($v) { return is_array($v);});
+				if(!empty($sub)) {
+					foreach($sub as $kk => $vv) $select_list(($label)  ? $kk : '',$vv,$label);
 				}
 				echo "</div></li>\n";
 			} else if(is_numeric($key)) {
