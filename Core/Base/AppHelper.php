@@ -102,7 +102,7 @@ public function ALink_str($lnk,$txt,$attrs=false) {
 	else if(is_string($attrs)) $attrs = ['class' => $attrs];
 	else if(!is_array($attrs)) $attrs = [];
 	if(get_protocol($href) !== NULL) $attrs['target'] = '_blank';
-	$attr = array_key_value($attrs,' ',"'");
+	$attr = array_key_value($attrs,' ','"');
 	return "<a href='{$href}' {$attr}>{$txt}</a>";
 }
 //==============================================================================
