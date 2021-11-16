@@ -156,33 +156,33 @@ color:white;
 }
 #fileList span.del {
 	cursor: pointer;
-	background: url(/help/css/res/img/icon/icon-file.png) no-repeat left top;
+	background: url(res/img/icon/icon-file.png) no-repeat left top;
 }
-#fileList span.del:hover {	background: url(/help/css/res/img/icon/icon-file.png) no-repeat left -24px;}
+#fileList span.del:hover {	background: url(res/img/icon/icon-file.png) no-repeat left -24px;}
 
-#fileList span.icon-doc 	{	background: url(/help/css/res/img/icon/icon-doc.png) no-repeat left top;}
-#fileList span.icon-doc:hover {	background: url(/help/css/res/img/icon/icon-doc.png) no-repeat left -24px;}
+#fileList span.icon-doc 	{	background: url(res/img/icon/icon-doc.png) no-repeat left top;}
+#fileList span.icon-doc:hover {	background: url(res/img/icon/icon-doc.png) no-repeat left -24px;}
 
-#fileList span.icon-pdf		{	background: url(/help/css/res/img/icon/icon-pdf.png) no-repeat left top;}
-#fileList span.icon-pdf:hover {	background: url(/help/css/res/img/icon/icon-pdf.png) no-repeat left -24px;}
+#fileList span.icon-pdf		{	background: url(res/img/icon/icon-pdf.png) no-repeat left top;}
+#fileList span.icon-pdf:hover {	background: url(res/img/icon/icon-pdf.png) no-repeat left -24px;}
 
-#fileList span.icon-xls		{	background: url(/help/css/res/img/icon/icon-xls.png) no-repeat left top;}
-#fileList span.icon-xls:hover {	background: url(/help/css/res/img/icon/icon-xls.png) no-repeat left -24px;}
+#fileList span.icon-xls		{	background: url(res/img/icon/icon-xls.png) no-repeat left top;}
+#fileList span.icon-xls:hover {	background: url(res/img/icon/icon-xls.png) no-repeat left -24px;}
 
-#fileList span.icon-ppt		{	background: url(/help/css/res/img/icon/icon-ppt.png) no-repeat left top;}
-#fileList span.icon-ppt:hover {	background: url(/help/css/res/img/icon/icon-ppt.png) no-repeat left -24px;}
+#fileList span.icon-ppt		{	background: url(res/img/icon/icon-ppt.png) no-repeat left top;}
+#fileList span.icon-ppt:hover {	background: url(res/img/icon/icon-ppt.png) no-repeat left -24px;}
 
-#fileList span.icon-img		{	background: url(/help/css/res/img/icon/icon-img.png) no-repeat left top;}
-#fileList span.icon-img:hover {	background: url(/help/css/res/img/icon/icon-img.png) no-repeat left -24px;}
+#fileList span.icon-img		{	background: url(res/img/icon/icon-img.png) no-repeat left top;}
+#fileList span.icon-img:hover {	background: url(res/img/icon/icon-img.png) no-repeat left -24px;}
 
-#fileList span.icon-mov		{	background: url(/help/css/res/img/icon/icon-mov.png) no-repeat left top;}
-#fileList span.icon-mov:hover {	background: url(/help/css/res/img/icon/icon-mov.png) no-repeat left -24px;}
+#fileList span.icon-mov		{	background: url(res/img/icon/icon-mov.png) no-repeat left top;}
+#fileList span.icon-mov:hover {	background: url(res/img/icon/icon-mov.png) no-repeat left -24px;}
 
-#fileList span.icon-zip		{	background: url(/help/css/res/img/icon/icon-zip.png) no-repeat left top;}
-#fileList span.icon-zip:hover { background: url(/help/css/res/img/icon/icon-zip.png) no-repeat left -24px;}
+#fileList span.icon-zip		{	background: url(res/img/icon/icon-zip.png) no-repeat left top;}
+#fileList span.icon-zip:hover { background: url(res/img/icon/icon-zip.png) no-repeat left -24px;}
 
-#fileList span.icon-iso		{	background: url(/help/css/res/img/icon/icon-iso.png) no-repeat left top;}
-#fileList span.icon-iso:hover { background: url(/help/css/res/img/icon/icon-iso.png) no-repeat left -24px;}
+#fileList span.icon-iso		{	background: url(res/img/icon/icon-iso.png) no-repeat left top;}
+#fileList span.icon-iso:hover { background: url(res/img/icon/icon-iso.png) no-repeat left -24px;}
 
-#fileList span.icon-txt		{	background: url(/help/css/res/img/icon/icon-txt.png) no-repeat left top;}
-#fileList span.icon-txt:hover { background: url(/help/css/res/img/icon/icon-txt.png) no-repeat left -24px;}
+#fileList span.icon-txt		{	background: url(res/img/icon/icon-txt.png) no-repeat left top;}
+#fileList span.icon-txt:hover { background: url(res/img/icon/icon-txt.png) no-repeat left -24px;}
