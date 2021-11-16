@@ -127,7 +127,9 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
 }
 //==============================================================================
 function array_key_value($arr,$sep=',',$quote='') {
-    array_walk($arr,function(&$item,$key) use(&$quote) { $item = "{$key}={$quote}{$item}{$quote}"; });
+    array_walk($arr,function(&$item,$key) use(&$quote) {
+		if(!empty($quote) && strpos($item,$quote) !== false) $item = str_replace($quote,"\\{$quote}",$item);
+		$item = "{$key}={$quote}{$item}{$quote}"; });
     return implode($sep,$arr);
 }
 //==============================================================================
