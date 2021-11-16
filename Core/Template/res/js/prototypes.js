@@ -38,9 +38,11 @@ String.prototype.is_invalid_name = function () {
 //====================================================
 // check EXECUTE file
 String.prototype.is_executable = function () {
-	var executable = ['exe', 'com', 'dll', 'ocx','vbs', 'vbe', 'bat', 'cmd','run', 'js', 'jse', 'wsf', 'wsh', 'msc', 'jar', 'hta', 'msi','scr','lnk','url','iqy','cpl'];
-	var ext = this.split('.').pop();
-	return executable.is_exists(ext);
+	var ext = this.ext_type();
+	return (ext == 'exe');
+	// var executable = ['exe', 'com', 'dll', 'ocx','vbs', 'vbe', 'bat', 'cmd','run', 'js', 'jse', 'wsf', 'wsh', 'msc', 'jar', 'hta', 'msi','scr','lnk','url','iqy','cpl'];
+	// var ext = this.split('.').pop();
+	// return executable.is_exists(ext);
 };
 //====================================================
 // convert extention type
@@ -75,7 +77,7 @@ String.prototype.startOfString = function (arr) {
 	var exists = false;
 	var base = this;
 	arr.forEach(function (val) {
-		if (base.substr(0,val.length) === val) {
+		if (base.substr(0,val.length) == val) {
 			exists = true;
 			return false;	// break forEach
 		};
