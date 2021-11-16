@@ -773,6 +773,13 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
                                               %link_str => href
 											%link および link_str には中括弧で  target 属性を付加することができる
 											%link コマンドに付加した属性は全ての要素に適用され、link_str は個々の要素に適用される
+											リンク先(href)を配列定義すると javascriptの'window.open()'に変換される。
+											URLはhref属性で、ウィンドウ名はname属性で、その他のパラメータはスカラー値で定義する。
+												%link_str = [
+													href => URL
+													name => "New Window"
+													size=100 height=200 scrollbars=yes
+												]
     +inline.SecName => [ ... ]              インラインのレイアウトセクション定義。テンプレート呼出しで再利用ができる
     +markdown => Text                       Text を簡易マークダウンとして整形したものを出力する、セクション変数は整形後に展開する
                                             クラス属性を指定するとマークダウンのクラス名とする
