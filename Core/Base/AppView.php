@@ -459,17 +459,31 @@ public function ViewTemplate($name,$vars = []) {
     private function sec_link($tag,$attrs,$sec,$vars) {
         $sec = $this->expand_SectionVar($sec,$vars,TRUE);
 		array_key_rename($attrs,'data-element','target');
+		$wopen = function(&$attr,$sec) {
+			list($lnk,$nm) = array_filter_values($sec,['href','name'],['#','_new']);
+			unset($sec['href'],$sec['name']);
+			$href = make_hyperlink($lnk,$this->ModuleName);
+			$run = "window.open('{$href}','{$nm}','".implode($sec,',')."')";
+			$attr['onClick'] = "{$run};return false;";
+		};
         if($tag === 'link') {
             if(is_array($sec)) {
                 foreach($sec as $token => $href) {
             		list($token,$opt_attrs) = $this->tag_Separate($token,$vars);
 					array_key_rename($opt_attrs,'data-element','target');
 					$opt_attrs = array_override($attrs,$opt_attrs);
+					if(is_array($href)) {
+						$wopen($opt_attrs,$href);
+						$href = '#';
+					}
 					$this->Helper->ALink($href,$token,$opt_attrs);
 				}
             } else echo "{$tag} bad argument.\n";
         } else if(is_scalar($sec)) {
             $this->Helper->ALink($sec,$tag,$attrs);
+		} else if(is_array($sec)) {
+			$wopen($attrs,$sec);
+			$this->Helper->ALink('#',$tag,$attrs);
         } else echo "tag '{$tag}' not for feature.\n";
     }
     //==========================================================================
