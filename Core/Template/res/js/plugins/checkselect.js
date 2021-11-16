@@ -224,6 +224,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		Preload: function () { return '<div class="check-itemset"></div>'; },
 		SetValue: function (value) { setting.TargetObj.val(value); },
 		GetValue: function () { return setting.TargetObj.val(); },
+		Selected: null,
 	};
 	if (typeof preload_func === 'function') setting.Preload = preload_func;
 	switch (typeof param_obj) {
@@ -252,6 +253,10 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 	var dropBtn = self.children('span.arrow');
 	if (dropBtn.length === 0) {
 		dropBtn = $(setting.DropDown).appendTo(self);
+	};
+	self.Selected = function (callback) {
+		if (typeof callback === 'function') setting.Selected = callback;
+		return this;
 	};
 	self.css("cursor", "pointer").off('click').on('click', function () {
 		// プリロード関数でメニューを取得
@@ -310,6 +315,10 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 			var check_obj = menu_box.find('.check-item:checked');
 			if (check_obj.attr('type') === 'radio') {
 				uniq = check_obj.val();
+				if (typeof setting.Selected === 'function') {
+					setting.Selected.call(this, uniq, check_obj.parent().text());
+					return true;
+				};
 			} else {
 				var current = setting.TargetObj.val().split(setting.Separator);		// 区切り文字に置換予定
 				var direct_data = current.filter(function (i) { return all_items.indexOf(i) === -1 });

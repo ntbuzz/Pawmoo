@@ -268,7 +268,11 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 		ClearTag: '<span class="clear"></span>',
 		DropDown: '<span class="arrow"></span>',
 		Hint: '',
-		Preload: function () { return '<div></div>';},
+		Preload: function () { return '<div></div>'; },
+		SetValue: function (val) {
+			this.TargetObj.val(val);
+			this.TargetObj.trigger('change');
+		},
 	};
 	if (setting.TargetObj.length === 0) return this;
 	if (typeof preload_func === 'function') setting.Preload = preload_func;
@@ -292,7 +296,7 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 	clearBtn.off().on('click',function(e){
 		e.stopPropagation();
 		e.preventDefault();
-		setting.TargetObj.val('');
+		setting.SetValue('');
 	});
 	self.css("cursor", "pointer");
 	self.off('click').on('click', function () {
@@ -329,7 +333,7 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 		menu_box.off('click').on('click','.item',function(e) {
 			e.stopPropagation();
 			e.preventDefault();
-			setting.TargetObj.val($(this).text());
+			setting.SetValue($(this).text());
 			menu_box.trigger('close-me');
 		});
 	});
