@@ -222,7 +222,15 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		Separator: " ",
 		Hint:'',
 		Preload: function () { return '<div class="check-itemset"></div>'; },
-		SetValue: function (value) { setting.TargetObj.val(value); },
+		SetValue: function (value, label) {
+			if (typeof this.Selected === "function") {
+				return this.Selected.call(self, value, label);
+			} else {
+				this.TargetObj.val(value);
+				this.TargetObj.trigger('change');
+			};
+			return false;
+		},
 		GetValue: function () { return setting.TargetObj.val(); },
 		Selected: null,
 	};
@@ -236,7 +244,12 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 			};
 			break;
 	};
-	if (setting.TargetObj.length === 0) return this;
+	if (setting.TargetObj.length === 0) return self;
+	// 選択時のコールバック登録
+	self.SelectedItem = function (callback) {
+		if (typeof callback === 'function') setting.Selected = callback;
+		return this;
+	};
 	// [X]マークのタグが無ければ追加する
 	if (setting.addClear) {		// ターゲットがSELF内に無い時は false にする
 		var clearBtn = self.children('span.clear');
@@ -253,10 +266,6 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 	var dropBtn = self.children('span.arrow');
 	if (dropBtn.length === 0) {
 		dropBtn = $(setting.DropDown).appendTo(self);
-	};
-	self.Selected = function (callback) {
-		if (typeof callback === 'function') setting.Selected = callback;
-		return this;
 	};
 	self.css("cursor", "pointer").off('click').on('click', function () {
 		// プリロード関数でメニューを取得
@@ -315,10 +324,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 			var check_obj = menu_box.find('.check-item:checked');
 			if (check_obj.attr('type') === 'radio') {
 				uniq = check_obj.val();
-				if (typeof setting.Selected === 'function') {
-					setting.Selected.call(this, uniq, check_obj.parent().text());
-					return true;
-				};
+				label = check_obj.parent().text();
 			} else {
 				var current = setting.TargetObj.val().split(setting.Separator);		// 区切り文字に置換予定
 				var direct_data = current.filter(function (i) { return all_items.indexOf(i) === -1 });
@@ -326,8 +332,11 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 				vals = direct_data.concat(vals);
 				// IEでも動くようにfilterで重複を削除して結合
 				uniq = vals.filter(function (x, i, menu_box) { return menu_box.indexOf(x) === i; }).join(setting.Separator).trim();
+				label = uniq;
 			};
-			setting.SetValue(uniq);		// 値を書き込む
+			if (setting.SetValue(uniq, label) === true) {		// 値を書き込む
+				menu_box.trigger('close-me');			// メニューを閉じる
+			};
 		});
 		// タブ切り替えを処理
 		menu_box.find('.tabmenu>li').on('click').on('click', function () {
@@ -351,5 +360,5 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 			menu_box.trigger('values-set');
 		});
 	});
-	return this;
+	return self;
 };
