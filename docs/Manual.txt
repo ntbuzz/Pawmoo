@@ -692,6 +692,8 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     value=vvvv          (vvvv)
     data-value=zzzz     <zzzz>
     data-element=yyyy   {yyyy}
+    data-type=tttt   	^tttt
+    style=sssss		    |sssss|
   書式順は上記の上から順に記述してください。
   ex.
     span.right#menu[help](click)<ref-value>{popup} => BUTTON
