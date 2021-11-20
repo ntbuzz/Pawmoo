@@ -8,6 +8,17 @@ $.fn.Visible = function (flag) {
 	else this.hide();
 	return this;
 };
+// ドロップダウンメニューの上位 div を取得
+$.fn.DivSkipOf = function (cls) {
+	var pp = this;
+	do {
+		pp = pp.parent();
+		var clsStr = pp.attr('class');
+		if (clsStr === undefined || pp.prop('tagName') === 'BODY') break;
+	} while (clsStr.existsWord(cls) === true);
+	return pp;
+};
+// var dd = $('must-menu').ParentSkipOf('dropdown-menu');
 // 連動セレクトタグ object, integer|string, boolean, function,
 $.fn.ChainSelect = function () {
 	var self = this;	// Reminder jQuery Self Object
@@ -248,7 +259,9 @@ $.fn.MenuSetup = function () {
 	this.find('.menu-container').each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var kind = self.attr("data-value");
-		var ref_obj = $("#" + self.attr("data-element"));  // 紐付けるID
+		var ref_id = self.attr("data-element");
+		if (ref_id === undefined) return true;		// continue
+		var ref_obj = $("#" + ref_id);  // 紐付けるID
 		if (ref_obj instanceof jQuery) {
 			var hint = self.attr('hint');
 			if (kind === 'dropdown') {
