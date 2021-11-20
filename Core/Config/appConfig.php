@@ -3,7 +3,7 @@
  * Object Oriented PHP MVC Framework
  *  appConfig: Framework Configuration
  */
-define('CURRENT_VERSION','0.94 2021-10-08');
+define('CURRENT_VERSION','0.96 2021-11-06');
 define('COPYTIGHT','Copyright (c) 2017 - 2021 by nTak');
 define('PLATFORM_NAME','pawmoo');
 define('SESSION_PREFIX','_minimvc_pawmoo_maps');
@@ -44,3 +44,6 @@ define('SESSION_ENV_LIFE_LIMIT',	0b0010);
 define('SESSION_ENV_PICKUP_POST',	0b0100);
 define('SESSION_ENV_RESERVED_1',	0b1000);
 define('SESSION_ENV_EXEC_ALL',		0b1111);
+
+define('DEFAULT_HELPER_EXPAND',		'__x');
+ 

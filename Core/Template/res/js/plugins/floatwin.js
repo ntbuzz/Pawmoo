@@ -15,20 +15,9 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 	var id_name = function (obj) {
 		return obj.prop('tagName')+'.'+obj.prop('class')+'#'+obj.prop('id');
 	};
-//	操作ボタンパーツを追加
-    var controlls = ["close:${#core.Close}", "fw_resize:${#core.Resize}", "fw_resize_message:${#core.SizeDisplay}"];
-    controlls.forEach(function (value) {
-		var cls = value.split(':');
-		var clsname = "span." + cls[0];
-		var btn = self.find(clsname);
-        if (btn.length === 0) {
-            var alt = (cls[1] != '') ? '" alt="' + cls[1] : '';
-            $('<span class="'+cls[0]+alt+'"></span>').appendTo(self);
-		};
-    });
-//  標準ボタンパーツを追加
+//  ユーザー定義ボタンパーツを追加
 	if (buttons.length && self.find(".center").length===0) {
-        var buttontag = "<div class='center'><hr>";
+        var buttontag = "<div class='center'>";
         var buttonClass = [ "execButton", "closeButton"];
 		$.each(buttons, function (index, val) {
 			var label_array = val.split(":");
@@ -37,12 +26,26 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 			if(action === undefined || action === "") action = buttonClass[index];
 			buttontag = buttontag + '<span class="Button ' + action + '">' + btn_label + '</span>';
         });
-        buttontag = buttontag+"</div>";
-        self.find('dd').append(buttontag);
+		buttontag = buttontag + "</div>";
+		var button_bar = $(buttontag);
+		self.append(button_bar);
+		// 高さの調整
+		self.find('dd').css('height', 'calc(100% - ' + (button_bar.outerHeight()+36) +'px)');
 	};
+//	操作ボタンパーツを追加
+    var controlls = ["close:${#core.Close}", "fw_resize:${#core.Resize}", "fw_resize_message:${#core.SizeDisplay}"];
+    controlls.forEach(function (value) {
+		var cls = value.split(':');
+		var clsname = "span." + cls[0];
+		var btn = self.find(clsname);
+        if (btn.length === 0) {
+			var alt = (cls[1] != '') ? '" alt="' + cls[1] : '';
+            $('<span class="'+cls[0]+alt+'"></span>').appendTo(self);
+		};
+    });
 	self.find('dl dt').text(title);
 	// 背景をクリックできなくする
-	var backwall = $('<div class="floatWin-BK"></div>');
+	var bk_panel = $('<div class="floatWin-BK"></div>');
     // イベントボタンリストを登録
 	self.off('click').on('click', elements, function (e) {
 //		alert(elements+"\nMe:"+$(this).prop('class'));
@@ -60,7 +63,7 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 		self.fadeOut("fast");
 		self.find('#init_contents').html('');      // clear contents
 		$(document).unbind("mousemove");
-		backwall.remove();
+		bk_panel.remove();
 	});
 	// ドロップ属性があればエレメントを初期化する
 	var cls = self.attr("class");
@@ -108,7 +111,8 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 		if (e.key === 'Enter') {
 			e.stopPropagation();
 			e.preventDefault();
-			$('.execButton').click();
+//			$('.execButton').click();
+			$(callbackBtn).click();
 		};
 	});
     // タイトルバーのドラッグ
@@ -146,8 +150,8 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 			self.fitWindow();
         });
     });
-	$('body').append(backwall);
-	backwall.fadeIn('fast');
+	$('body').append(bk_panel);
+	bk_panel.fadeIn('fast');
 	self.fadeIn("fast");
 	return self;
 };

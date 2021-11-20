@@ -83,6 +83,9 @@ public function expand_locale($str) {
 	return str_replace($varList,$values,$str);
 }
 //==============================================================================
+// Transfer LOCALE varible by $id
+public function __x($id) { return $id; }
+//==============================================================================
 // Make HYPER-Link
 public function ALink($lnk,$txt,$attrs = NULL) {
 	echo $this->ALink_str($lnk,$txt,$attrs);
@@ -99,8 +102,8 @@ public function ALink_str($lnk,$txt,$attrs=false) {
 	else if(is_string($attrs)) $attrs = ['class' => $attrs];
 	else if(!is_array($attrs)) $attrs = [];
 	if(get_protocol($href) !== NULL) $attrs['target'] = '_blank';
-	$attr = array_key_value($attrs,' ',"'");
-	return "<a href='{$href}'{$attr}>{$txt}</a>";
+	$attr = array_key_value($attrs,' ','"');
+	return "<a href='{$href}' {$attr}>{$txt}</a>";
 }
 //==============================================================================
 // generate Page Button LABEL Tag

@@ -34,11 +34,11 @@ function ProgressBar(child, fmd, name,size,callback_func) {
     self.FileSize.html(szStr);
     self.FileName.html(name);	//fmd.get('name'));
     // 完了処理
-    self.Finished = function (aborted) {
+    self.Finished = function (aborted,data) {
         self.Cancel.Visible(false);
         var cls = (aborted) ? 'error' : 'complete';
         self.progressPanel.addClass(cls);
-        callback_func(aborted);
+        callback_func(aborted,data);
     };
     // 送信を中止
     self.Abort = function (propagate) {
@@ -50,7 +50,7 @@ function ProgressBar(child, fmd, name,size,callback_func) {
         self.progress_Bar.Visible('flex');
         if (self.child_link != null) self.child_link.AjaxStart(url);
         if (self.Aborted) {
-            self.Finished(true);    // ERROR または ABORT
+            self.Finished(true,'abort');    // ERROR または ABORT
             return;
         };
         self.jqxhr = $.ajax({
@@ -72,8 +72,8 @@ function ProgressBar(child, fmd, name,size,callback_func) {
                 return xhrobj;
             },
             success: function (data) {
-//                alert("Respons:"+url+"\n"+data);
-                self.Finished(false);
+//				alertDump({ Url: url, Response: data });
+                self.Finished(false,data);
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 if(!self.Aborted) {
@@ -83,7 +83,7 @@ function ProgressBar(child, fmd, name,size,callback_func) {
                         'errorThrown:' + errorThrown.message
                     );
                 };
-                self.Finished(true);    // ERROR または ABORT
+                self.Finished(true,'error');    // ERROR または ABORT
             },
         });
     };
@@ -129,9 +129,9 @@ function UploadFiles(files,url, callback_func) {
         form.append('name', files[i].name);
         form.append('file', files[i]);
         form.append('size', files[i].size);
-        var next = new ProgressBar(topBar,form,files[i].name,files[i].size,function (aborted) {
+        var next = new ProgressBar(topBar,form,files[i].name,files[i].size,function (aborted,data) {
             // 中止または完了時の処理
-            if(upload.result(aborted) <= 0) self.CloseWait();;
+            if(upload.result(aborted) <= 0) self.CloseWait(data);
             self.RestMessage(upload.rest);
         });
         obj.append(next.progress_Bar);
@@ -139,7 +139,7 @@ function UploadFiles(files,url, callback_func) {
     };
     $('body').append(bk_panel);
     if (topBar === null) {
-        self.CloseWait();
+        self.CloseWait('FILES EMPTY!!');
         alert("FILES EMPTY!!");
         return;
     };
@@ -152,9 +152,9 @@ function UploadFiles(files,url, callback_func) {
         bk_panel.fadeOut("fast");
         bk_panel.remove();
     };
-    self.CloseWait = function () {
+    self.CloseWait = function (data) {
         $.busy_cursor(false);
-        if (callback_func != undefined) callback_func(upload);
+        if (callback_func != undefined) callback_func(upload,data);
         if (!upload.abort) {
             self.CloseDialog();  // ABORTせずに完了したら即ダイアログを閉じる
         } else {
@@ -268,8 +268,8 @@ function PairUploadDialog(files,url,callback_func) {
             obj.append('first', files[num]);    // ドロップファイル
             obj.append('second',ff2);           // 2nd ファイル
             obj.append('size', files[num].size + ff2.size);
-            var next = new ProgressBar(topBar,obj,ttl,files[num].size + ff2.size,function (aborted) {
-                if(upload.result(aborted) <= 0) self.CloseWait();;
+            var next = new ProgressBar(topBar,obj,ttl,files[num].size + ff2.size,function (aborted,data) {
+                if(upload.result(aborted) <= 0) self.CloseWait(data);
                 self.RestMessage(upload.rest);
             });
             $(this).append(next.progress_Bar);
@@ -278,7 +278,7 @@ function PairUploadDialog(files,url,callback_func) {
             return true;
         });
         if (topBar === null) {
-            self.CloseWait();
+            self.CloseWait("FILES EMPTY!!");
             alert("FILES EMPTY!!");
             return false;
         };
@@ -301,9 +301,9 @@ function PairUploadDialog(files,url,callback_func) {
     self.RestMessage = function (n) {
         rest.text("${#.core.RestFiiles}" + n);
     };
-    self.CloseWait = function () {
+    self.CloseWait = function (data) {
         $.busy_cursor(false);
-        if (callback_func != undefined) callback_func(upload);
+        if (callback_func != undefined) callback_func(upload,data);
         if (!upload.abort) {
             cancel_close.click();
         } else {
@@ -319,13 +319,18 @@ function PairUploadDialog(files,url,callback_func) {
 //----------------------------------
 function isFileCharsetOK(files) {
     for (var i = 0; i < files.length; ++i) {
-        fname = files[i].name;
+		var fname = files[i].name;
         // URL禁則文字のチェック
         if (fname.is_invalid_name()) {
-            if (confirm("${#.core.BADFILE}")) {
+            if (confirm(fname+"\n${#.core.BADFILE}")) {
                 return false;
             };
-        };
+		};
+        // 実行可能ファイルのチェック
+		if (fname.is_executable()) {
+			alert(fname+"\n${#.core.FORBIDDEN}");
+            return false;
+		};
     };
     return true;
 };
@@ -392,4 +397,116 @@ $.fn.dropfiles2 = function (maxfiles,url, callback_func) {
         },
     });
 };
+// ドラッグドロップで登録し、ボタンイベントで送信
+// 	.DragDropFiles(送信タグ,送信関数(ファイルリスト)
+// 		.OnChangeFiles(ファイルリストが変更されたときの関数)
+// 		.AddFiles(INPUITタグ,ファイル追加関数(追加リスト)
+// 		.ClearOf(クリアタグ,コールバック関数)
+// 		.DeleteOf(削除タグ,削除番号を返す関数)
+// }); 
+$.fn.DragDropFiles = function (send_obj,callback_func) {
+    var self = this;
+	// DropFilesオブジェクト
+	var DropObject = {
+		Files: [],
+		AddedFunc:function() {}, 	// コールバック関数
+		ChangeFunc:function() {}, 	// コールバック関数
+		TotalSize: function() {
+			var total = 0;
+			for(var j=0;j<this.Files.length;j++){  
+				total += this.Files[j].size;
+			};
+			return total;
+		},
+		ClearFiles: function() {	// ファイルを消去
+			this.Files = [];
+			this.ChangeFunc(this.Files,0);
+		},
+		RemoveFile: function(index) {
+			this.Files.splice(index,1);
+			this.ChangeFunc(this.Files,this.TotalSize());
+		},
+		AppendFiles: function(files) {
+			var addfiles = [];
+			for(var i=0;i<files.length;i++){
+				var already_exist = false;
+				for(var j=0;j < this.Files.length;j++){  
+					if(files.item(i).name==this.Files[j].name){  
+						already_exist = true;  
+						break;  
+					};
+				};
+				if(already_exist === false) addfiles.push(files.item(i));
+			};
+			this.Files = this.Files.concat(addfiles);
+			this.AddedFunc(files);
+			this.ChangeFunc(this.Files,this.TotalSize());
+		},
+	};
+	self.OnChangeFiles = function(callback_func) {
+		if (typeof callback_func === 'function') DropObject.ChangeFunc = callback_func;
+		return self;
+	};
+	// ファイル追加時のコールバックを登録する
+	self.AddFiles =function(input_obj,callback_func) {
+		if (typeof callback_func === 'function') DropObject.AddedFunc = callback_func;
+		$(input_obj).off('change').on('change',function() {
+			var file_tag = $(this).prop('files');
+			if(isFileCharsetOK(file_tag)) {
+				DropObject.AppendFiles(file_tag);
+				$(this).val('');		// IE11以上
+			};
+		});
+		return self;
+	};
+	// ファイルをクリアするオブジェクトを登録
+	self.ClearOf = function(clear_obj,callback_func) {
+    	$(clear_obj).off('click').on('click',function() {
+			DropObject.ClearFiles();
+			if(typeof callback_func === 'function') callback_func.call($(this));
+		});
+		return self;
+	};
+	self.DeleteOf = function(del_obj,callback_func) {
+    	$(document).on('click',del_obj,function() {
+			var index = callback_func.call($(this));
+			DropObject.RemoveFile(index);
+		});
+		return self;
+	};
+    self.on({
+        'dragenter': function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            self.addClass('drag-over');
+        },
+        'dragleave': function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            self.removeClass('drag-over');
+        },
+        'dragover': function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+           self.addClass('drag-over');
+        },
+        'drop': function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            self.removeClass('drag-over');
+            var files = e.originalEvent.dataTransfer.files;
+            if(isFileCharsetOK(files)) {
+				DropObject.AppendFiles(files);
+			};
+        },
+    });
+	// 送信ボタンクリック
+   	$(send_obj).off('click').on('click',function() {
+		if(typeof callback_func === 'function') {
+			 callback_func.call($(this),DropObject.Files);
+		};
+	});
+	return self;
+};
+
 })(jQuery);

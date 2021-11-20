@@ -45,15 +45,6 @@ function get_routing_path($root) {
         array_intval_recursive($params),
     );
     $ret = [$appname,$app_uri,$module];
-    debug_xdump([
-		'Framework Information' => [
-            "SERVER" => $_SERVER['REQUEST_URI'],
-            "app_uri"=> $app_uri,
-            "appname"=> $appname,
-            "Module"=> $module,
-        ],
-        "RET" => $ret,
-    ]);
     return $ret;
 }
 //==============================================================================
@@ -251,8 +242,8 @@ function is_tag_identifier($str) {
 			'/^([&@\+<\?%\-])(?!\1|$)/' => 2,		// command-token (not repeat char)
 			'/^\$\w+$/' => 3,						// variable-token
 			'/^\\\d+$/' => 1,						// escape digit
-			// dirty pattern for TAG-token tag.class#id:size[name](value)<data-value>{data-element}
-			'/^(?:[a-zA-Z_]*)(?:[\.#][a-zA-Z_\-\s]*)+(?:\:\d+)?(?:[\{\(\[].+?[\}\)\]])*$/' => 1,
+			// dirty pattern for TAG-token tag.class#id:size[name](value)<data-value>{data-element}|style|
+			'/^[a-zA-Z_]*(?:[\.#][a-zA-Z_\-\s]*)+(?:\:\d+)?(?:[\[\(\<\{\|].+?[\|\}\>\)\]])*$/' => 1,
 		];
 		foreach($tokens as $pattern => $ret_val) {
 			if(preg_match($pattern,$str)) return $ret_val;
@@ -340,6 +331,7 @@ function str_csvget($csv_str) {
 		$wrapstr = mb_substr($item,0,1) . mb_substr($item,-1);     // top-end char pair
 		if($wrapstr === '""' || $wrapstr === "''") $item = trim($item,$wrapstr);
 		if($item === '' || $item === 'NULL') $item = NULL;
+		else $item = str_replace('""','"',$item);		// "" のエスケープ解除
 		$csv[] = (is_numeric($item)) ? intval($item) : $item;
 	}
 	return $csv;
@@ -460,15 +452,18 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
 			// cannot use in RESOURCE (AppStyle)
             case '&':       // Helper Method CALL
 				if(isset($class)) {
-                   	$p = '/&(\w+)(?:\(([^\)]+)\))?/';
-                    preg_match($p,$var,$m);
-                    $var = $m[1];
-                    $arg = (count($m)===3) ? $m[2]:NULL;
-                    if(method_exists($class->Helper,$var)) {
-						$arr = explode(',',$arg);
-						$arg = (count($arr)===1) ? $arg : $arr;
-                        $val = $class->Helper->$var($arg);
-                    } else $val = "NOT-FOUND({$var})";
+                   	$p = '/&(\w*)(?:\(([^\)]+)\))?/';
+                    if(preg_match($p,$var,$m)===1) {
+						list($mm,$method,$arg) = $m;
+						if(empty($method)) {
+							$method = (defined('HELPER_EXPAND')) ? HELPER_EXPAND : DEFAULT_HELPER_EXPAND;
+						}
+						if(method_exists($class->Helper,$method)) {
+							$arr = explode(',',$arg);
+							$arg = (count($arr)===1) ? $arg : $arr;
+							$val = $class->Helper->$method($arg);
+						} else $val = "NOT-FOUND({$method})";
+					}
 				}
 				break;
             default:
@@ -522,6 +517,29 @@ function make_combobox($sel_item,$opt_list,$size) {
 	return $tag;
 }
 //==============================================================================
+//  add classname into attr[class] 
+// and removed classname,if instructed.
+function attr_addrmclass($attrs,$add,$rm=NULL) {
+	$base = (isset($attrs['class'])) ? $attrs['class'] :'';
+	if(!empty($rm)) $base = str_replace($rm,'',$base);
+    return ltrim("{$base} {$add}");
+}
+//==============================================================================
+//  classname exists check in attr[class] 
+function attr_class_exist($attrs,$name,$exist,$none='') {
+	$base = (isset($attrs['class'])) ? $attrs['class'] :'';
+	return (strpos($base,$name)!==false) ? $exist:$none;
+}
+//==============================================================================
+//  add classname into attr[class] 
+// and removed classname,if instructed.
+function attr_extract_element(&$attrs,$name,$isempty='',$isexists='%s') {
+	$item_name = (isset($attrs[$name])) ? $attrs[$name]:'';
+	unset($attrs[$name]);
+	if(empty($item_name)) return $isempty;
+	return str_replace('%s',$item_name,$isexists);
+}
+//==============================================================================
 //  textbox, textedit size attribute convert
 // allow ??px, ??em, ??%
 function attr_sz_xchange($attrs) {
@@ -544,4 +562,25 @@ function attr_sz_xchange($attrs) {
 	if(!empty($style_str)) $attrs['style'] = "\"{$style_str};\"";
 	return $attrs;
 }
-
+//==============================================================================
+//  Check CLIENT BROWSER PHP version
+function client_Browser() {
+	$agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+	$browers = [
+		'Internet Explorer' => [ 'msie,trident',false],
+		'Edge'				=> [ 'edge,edg' , 	false],
+		'Google Chrome'		=> [ 'chrome', 		true],
+		'Safari'			=> [ 'safari',		true],
+		'FireFox'			=> [ 'firefox',		true],
+		'Opera'				=> [ 'opera',		true],
+	];
+	foreach($browers as $name => $element) {
+		$idset = explode(',',$element[0]);
+		foreach($idset as $key) {
+			if(strpos($agent,$key) !== false) {
+				return [$name, $element[1] ];
+			}
+		}
+	}
+	return [ 'Unknown',false];
+};

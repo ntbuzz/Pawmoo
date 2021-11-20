@@ -2,10 +2,23 @@
 // 諸々のJQueryプラグインを定義する
 // 表示切替
 $.fn.Visible = function (flag) {
-	var mode = (typeof flag === 'string') ? flag : 'none';
-	this.css('display', mode);
+	if (typeof flag === 'string') {
+		this.css('display', flag);
+	} else if (flag === true) this.show();
+	else this.hide();
 	return this;
 };
+// ドロップダウンメニューの上位 div を取得
+$.fn.DivSkipOf = function (cls) {
+	var pp = this;
+	do {
+		pp = pp.parent();
+		var clsStr = pp.attr('class');
+		if (clsStr === undefined || pp.prop('tagName') === 'BODY') break;
+	} while (clsStr.existsWord(cls) === true);
+	return pp;
+};
+// var dd = $('must-menu').ParentSkipOf('dropdown-menu');
 // 連動セレクトタグ object, integer|string, boolean, function,
 $.fn.ChainSelect = function () {
 	var self = this;	// Reminder jQuery Self Object
@@ -101,7 +114,7 @@ $.fn.fitWindow = function () {
 		var pbox = my_box.ParentRect(fit_obj);
 		var s_height = pbox.BottomRight.y - pbox.accSpace.y  - my_box.TopLeft.y;
 		var s_width  = pbox.BottomRight.x - pbox.accSpace.x  - my_box.TopLeft.x;
-//		alert("SELF:"+objDump(my_box)+"\nPARENT:"+objDump(pbox)+"\nSIZE(H: "+s_height+", W:"+s_width+")");
+//		alertDump({ SELF: my_box, PARENT: pbox, SIZE: [s_height, s_width] });
 		$(this).css({
 //			'width': s_width + "px",
 			'height': s_height + "px",
@@ -116,6 +129,7 @@ $.fn.LoadContents = function () {
 	var self = this;	// Reminder jQuery Self Object
 	var target = {
 		url: '',
+		async: false,		// asunc mode
 		postObj: null,
 		fitWin: null,
 		callback: null,
@@ -195,10 +209,12 @@ $.fn.onChangeFormItems = function(cls) {
 // カーソルを BUSY に変更
 $.busy_cursor = function (disp) {
 	$('body').css('cursor', (disp) ? 'wait' : 'default');
+	if (disp) $('body').append('<div class="loader_icon"></div>');
+	else $('.loader_icon').remove();
 };
 // Yes/No ダイアログボックスを開く
 $.dialogBox = function (title, msg, callback) {
-	var back_panel = $('<div class="popup-BK"></div>');
+	var bk_panel = $('<div class="popup-BK"></div>');
 	var dialog_box = '<div class="dialog-box"><dl class="title"><dt>'+title+'</dt><dd><span class="dialog-msg">'+msg+'</span></dd></dl><div class="buttonList">';
 	var controlls = ["okButton:${#.core.Yes}", "cancelButton:${#.core.No}"];
 	controlls.forEach(function (value) {
@@ -206,10 +222,10 @@ $.dialogBox = function (title, msg, callback) {
 		dialog_box = dialog_box + '<span class="'+cls[0]+'">'+cls[1]+'</span>';
 	});
 	dialog_box = dialog_box + "</div></div>";
-	back_panel.append(dialog_box);
-	$('body').append(back_panel);
+	bk_panel.append(dialog_box);
+	$('body').append(bk_panel);
 	// ボタン以外をクリックできないようにする
-	back_panel.fadeIn('fast');
+	bk_panel.fadeIn('fast');
 	var dialog = $('.dialog-box');
 	// バルーンコンテンツの表示位置をリンク先から取得して設定
 	var x = ($(window).innerWidth() - dialog.width())/2;  // 中央
@@ -227,14 +243,114 @@ $.dialogBox = function (title, msg, callback) {
 	// クローズイベントを登録
 	dialog.find(".okButton").off().click(function () {
 		dialog.fadeOut('fast');
-		back_panel.remove();
+		bk_panel.remove();
 		callback(true);
 	});
 	dialog.find(".cancelButton").off().click(function () {
 		dialog.fadeOut('fast');
-		back_panel.remove();
+		bk_panel.remove();
 		callback(false);
 	});
+};
+//==========================================================
+// レイアウト内にメニューボックスが定義済の場合に備える
+// ポップアップチェックリストボックスを表示する
+$.fn.MenuSetup = function () {
+	this.find('.menu-container').each(function () {
+		var self = $(this); // jQueryオブジェクトを変数に代入しておく
+		var kind = self.attr("data-value");
+		var ref_id = self.attr("data-element");
+		if (ref_id === undefined) return true;		// continue
+		var ref_obj = $("#" + ref_id);  // 紐付けるID
+		if (ref_obj instanceof jQuery) {
+			var hint = self.attr('hint');
+			if (kind === 'dropdown') {
+				ref_obj.DropDownMenuBox(hint,function () { return self.html(); });
+			} else {
+				ref_obj.SingleCheckBox({ Hint: hint }, function () { return self.html(); });
+			};
+		};
+	});
+	return this;
+};
+// ポップアップドロップダウンメニューボックスを表示する
+$.fn.DropDownMenuBox = function (param_obj,preload_func) {
+	var self = this; // jQueryオブジェクトを変数に代入しておく
+	var setting = {
+		TargetObj: self.find('input:first-child'),	// 書き込むINPUT name
+		ClearTag: '<span class="clear"></span>',
+		DropDown: '<span class="arrow"></span>',
+		Hint: '',
+		Preload: function () { return '<div></div>'; },
+		SetValue: function (val) {
+			this.TargetObj.val(val);
+			this.TargetObj.trigger('change');
+		},
+	};
+	if (setting.TargetObj.length === 0) return this;
+	if (typeof preload_func === 'function') setting.Preload = preload_func;
+	switch (typeof param_obj) {
+		case 'string': setting.Hint = param_obj; break;
+		case 'object':
+			if (param_obj !== null && param_obj !== undefined) {
+				$.each(param_obj, function (key, value) { setting[key] = value; });
+			};
+			break;
+	};
+	// [X]マークと▼マークのタグが無ければ追加する
+	var clearBtn = self.children('span.clear');
+	if (clearBtn.length === 0) {
+		clearBtn = $(setting.ClearTag).appendTo(self);
+	};
+	var dropBtn = self.children('span.arrow');
+	if (dropBtn.length === 0) {
+		dropBtn = $(setting.DropDown).appendTo(self);
+	};
+	clearBtn.off().on('click',function(e){
+		e.stopPropagation();
+		e.preventDefault();
+		setting.SetValue('');
+	});
+	self.css("cursor", "pointer");
+	self.off('click').on('click', function () {
+		// テンプレート関数でメニューを取得
+		$.busy_cursor(true);
+		var Template = setting.Preload.call(this);
+		$.busy_cursor(false);
+		var data = '<div class="navi-menubox">'+Template+'</div>';
+		var menu_box = $(data).appendTo('body');
+		if (typeof setting.Hint === 'string') menu_box.attr('title', setting.Hint);
+		menu_box.show();
+		// 移動している可能性があるため、クリック時に位置計算
+		var menuPos = new calcPosition(self, menu_box);
+		// メニューを消すための領域を定義
+		var bk_panel = $('<div class="popup-BK"></div>').appendTo('body');
+		bk_panel.fadeIn('fast');
+		// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
+		menu_box.off('close-me').on('close-me', function (e) {
+			menu_box.fadeOut('fast');
+			$(window).off('scroll.drop-menu');
+			bk_panel.remove();
+			menu_box.remove();
+		});
+		bk_panel.click( function() {
+			menu_box.trigger('close-me');
+		});
+		// スクロールはリアルタイムで位置移動
+		$(window).on('scroll.drop-menu', function () {
+			menuPos.scrollPos();
+		});
+		// メニューコンテンツの表示位置をリンク先から取得して設定
+		menuPos.scrollPos();
+		menu_box.fadeIn('fast');
+		menu_box.off('click').on('click','.item',function(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			setting.SetValue($(this).text());
+			menu_box.trigger('close-me');
+		});
+	});
+	return this;
 };
 // 動的コンテンツに対して、プラグイン要素を初期化する
 $.fn.InitPopupSet = function () {
@@ -260,7 +376,7 @@ $.fn.InitPopupSet = function () {
 		};
 		self.datepicker(date_form);
 	});
-	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup();
+	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().MenuSetup();
 };
 // FormSubmit用のオブジェクトを生成
 $.fn.submitObject = function (false_check,callback,is_parent) {

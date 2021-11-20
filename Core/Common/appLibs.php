@@ -151,19 +151,20 @@ function get_protocol($href) {
 //==============================================================================
 // Generate HYPER_LINK string
 //  http～  Direct URL
-// :xxx     /xxx		same as /xxx no-use!
-// /xxx     sysRoot/xxx
-// xxx      appRoot/xxx
-// ./xxx    appRoot/modname/xxx
+// /xxx     sysRoot/xxx			applistion(xxx) exchange
+// :xxx     appRoot/xxx			controller(xxx) exchange
+// ./xxx    appRoot/modname/xxx	method(xxx) exchange
+// xxx      xxx					current path
 // !!xxx    https://SERVER/xxx
 // !:xxx    http://SERVER/xxx
-function make_hyperlink($lnk,$modname) {
+function make_hyperlink($lnk,$modname=NULL) {
     if(get_protocol($lnk) === NULL) {
         // check on TOP-CHAR
         switch(mb_substr($lnk,0,1)) {
         case '#':
         case '?': break;        // label or query
-        case ':': $lnk[0] = '/'; break;
+//        case ':': $lnk[0] = '/'; break;
+        case ':': $lnk = App::Get_AppRoot(mb_substr($lnk,1)); break;
         case '/': $lnk = App::Get_SysRoot($lnk); break;
         case '!':
             $protocols = [ '!!' => 'https://', '!:' => ' http://' ];
@@ -176,10 +177,11 @@ function make_hyperlink($lnk,$modname) {
             break;
         default:
             if(mb_substr($lnk,0,2) === './') {
+				if($modname === NULL) $modname = App::$Controller;
                 $lnk = substr_replace($lnk, strtolower($modname), 0, 1);
                 $lnk = App::Get_AppRoot($lnk);
-            } else  {
-                $lnk = App::Get_AppRoot($lnk);
+            // } else  {
+            //     $lnk = App::Get_AppRoot($lnk);
             }
         }
     }
@@ -211,3 +213,86 @@ function passwd_encrypt($str) {
 function passwd_random($n = 8) {
     return substr(base_convert(bin2hex(openssl_random_pseudo_bytes($n)),16,36),0,$n);
 }
+//==============================================================================
+// ドロップダウンメニューを作成
+// menu:		キー名 => 値(未使用)
+//				ネストするときは3次元連想配列
+//				メニューキー名 => [	グループ名 => [ キー名 => 値, ... ]	]
+// label		TRUE: グループ名をタイトルとして表示
+function menu_box($menu,$label=true) {
+	// flexリストを出力
+	$select_list = function($title,$list,$label) use(&$select_list) {
+		echo "<ul>\n";
+		if(!empty($title)) echo "<li class='label'><span>{$title}</span></li>\n";
+		foreach($list as $key => $val) {
+			if(is_array($val)) {
+				echo "<li><a class='label'>{$key}</a>\n";
+				echo "<div class='navi-sub'>\n";
+				// 通常メニューを先に処理
+				$sub = array_filter($val, function($v) { return is_scalar($v);});
+				if(!empty($sub)) $select_list('',$sub,$label);
+				// グループメニューを処理
+				$sub = array_filter($val, function($v) { return is_array($v);});
+				if(!empty($sub)) {
+					foreach($sub as $kk => $vv) $select_list(($label)  ? $kk : '',$vv,$label);
+				}
+				echo "</div></li>\n";
+			} else if(is_numeric($key)) {
+				echo "<li><a class='item'>{$val}</a></li>\n";
+			} else {
+				if($val === -1) echo "<li class='label'><span>{$key}</span></li>\n";
+				else echo "<li><a class='item'>{$key}</a></li>\n";
+			}
+		}
+		echo "</ul>\n";
+	};
+	$select_list('',$menu,$label);
+};
+//==============================================================================
+// チェックリスト・ラジオボタンのメニュー作成
+// menu:		キー名 => 値(未使用)
+//				タブを使うときは２次元連想配列
+//				タブ名 => [	キー名 => 値, ...	]
+// item_name	ラジオボタンのときは必須
+// item_type	checkbox | radio
+function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=false) {
+	if(!empty($item_name)) $item_name = " name='{$item_name}'";
+	$tab_contents = function($subsec) use(&$item_name,&$item_type,&$label_val) {
+		echo "<div class='check-itemset'>";
+		echo "<div><ul>\n";
+		foreach($subsec as $label => $val) {
+			if($val === -2) echo "</ul></div><div><ul>\n";		//  break
+			else {
+				echo "<li>";
+				$item_val = ($label_val)?$val:$label;
+				if($val === -1) echo "<hr>";
+				else echo "<label><input type='{$item_type}' class='check-item' value='{$item_val}'{$item_name} /> {$label}</label>";;
+				echo "</li>\n";
+			}
+		}
+		echo "</ul></div>\n";
+		echo "</div>";
+	};
+	$tabset = array_filter($menu,function($v) {return is_array($v);});
+	if(empty($tabset)) {			// 単一タブ＝タブなし
+		$tab_contents($menu);
+	} else {	// 複数タブ
+		echo "<ul class='tabmenu'>\n";
+		foreach($tabset as $label => $subsec) {
+			list($label,$sel) = explode('.',$label);
+			$attr = ($sel === 'selected') ? ' class="selected"':'';
+			echo "<li{$attr}>{$label}</li>\n";
+		}
+		echo "</ul>\n";
+		// タブコンテンツを表示
+		echo "<ul class='tabcontents'>\n";
+		foreach($tabset as $label => $value) {
+			list($label,$sel) = explode('.',$label);
+			$attr = ($sel === 'selected') ? ' class="selected"':'';
+			echo "<li{$attr}>\n";
+			$tab_contents($value);
+			echo "</li>\n";
+		}
+		echo "</ul>\n";
+	}
+};

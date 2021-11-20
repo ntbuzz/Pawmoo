@@ -7,6 +7,8 @@
 //==============================================================================
 //	SQLite3用の抽象メソッドを実装する
 class SQLiteHandler extends SQLHandler {
+	protected $NULL_ORDER = '';	// NULL の順序
+
 //==============================================================================
 //	コンストラクタ：　データベースのテーブルに接続する
 	function __construct($table) {
@@ -49,7 +51,6 @@ protected function reset_seq($table,$primary) {
 //==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
-	debug_xdump(['SQL' => $sql]);
 	$this->rows = $this->dbb->query($sql);
 	return $this->rows;
 }

@@ -147,7 +147,6 @@ public static function Get_RelocateURL($force=FALSE,$query=NULL) {
 	// クエリを付加
 	if(!is_array($query)) $query = static::$Query;
     if(!empty($query)) $url = "{$url}?" . http_build_query($query);;
-    debug_xdump(["RE-LOCATE-JMP" => static::$execURI,'URI'=>$url]);
     return "/{$url}";
 }
 //==============================================================================
@@ -286,8 +285,9 @@ static function rollbackReqData($envKey,...$keys) {
         }
         //separate query string if exist
         list($file,$q_str) = (strpos($tagfile,'?') !== FALSE) ? explode('?',$tagfile):[$tagfile,'']; 
+		if(!empty($q_str)) $q_str = "?{$q_str}";
         $ext = substr($file,strrpos($file,'.') + 1);    // 拡張子を確認
-        $path = make_hyperlink($file,static::$Controller);
+        $path = make_hyperlink($file,static::$Controller).$q_str;
         switch($ext) {
     	case 'js':
             echo "<script src='{$path}' charset='UTF-8'></script>\n";
@@ -304,7 +304,7 @@ static function rollbackReqData($envKey,...$keys) {
 //==============================================================================
 //  webrootファイルの読込タグ出力（単独・配列）
     public static function WebInclude($files) {
-    debug_log(FALSE, ["WebINCLUDE" => $files]);
+    debug_xlog(3, ["WebINCLUDE" => $files]);
         if(is_array($files)) {
             foreach($files as $nm) self::includeTag($nm);
         } else self::includeTag($files);

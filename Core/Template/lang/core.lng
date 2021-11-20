@@ -16,7 +16,7 @@
     MoveFail    => "'%s' の移動に失敗しました"
 // チェックリストダイアログ
 	CheckList	=> チェックリスト
-	CheckALL	=> 全て:
+	CheckALL	=> 全てチェック:
 	CheckConfirm	=> 確定
 	CheckTITLE	=> チェックダイアログ
     SEND        => 送信
@@ -37,6 +37,7 @@
     AbortDone   => "送信完了しました."
     MAXFILE     => "送信ァイルは %d 個までです"
     BADFILE     => "'+','%','#' 文字を使用するとブラウザからダウンロードできなくなります！"
+	FORBIDDEN	=> "実行可能なファイルをアップロードすることはできません！"
 ]
 .en => [
     // for Dialog

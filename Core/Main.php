@@ -115,15 +115,11 @@ $defs = array_filter_import(true,['lang','region'],	//'REGION','LANG',
 			App::$Query,					// ?lang=&region=
 			App::$Post						// lang=&region=
 		);
-debug_xdump([
-	'CONFIG'=> [$lang,$region],
-	'SESSION'=> MySession::get_LoginValue(),
-	'QUERY' =>App::$Query,
-	'POST'	=> App::$Post
-]);
 list($lang,$region) = $defs;
+// get client BROWSER
+$browser = client_Browser();
 //if(empty($lang)) $lang = DEFAULT_LANG;
-MySession::set_LoginValue(['LANG'=>$lang, 'REGION'=>$region]);
+MySession::set_LoginValue(['LANG'=>$lang, 'REGION'=>$region, 'BROWSER'=>$browser[0]]);
 // Load if .share folder use, common library load
 if(SHARE_FOLDER_USE) {
 	$libs = get_php_files("app/.share/common/");

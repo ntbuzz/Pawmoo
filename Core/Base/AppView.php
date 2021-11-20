@@ -41,10 +41,12 @@ class AppView extends AppObject {
             'recordset' => 'cmd_recordset',
             'tabset'    => 'cmd_tabset',
             'floatwin'  => 'cmd_floatwin',
-            'button'    => 'cmd_button',
-            'submit'    => 'cmd_submit',
-            'hidden'    => 'cmd_hidden',
-            'textbox'   => 'cmd_textbox',
+            'input'    	=> 'cmd_input',
+            'file'   	=> 'cmd_taginput',
+            'button'    => 'cmd_taginput',
+            'submit'    => 'cmd_taginput',
+            'hidden'    => 'cmd_taginput',
+            'textbox'   => 'cmd_taginput',
             'datebox'   => 'cmd_datebox',
             'textedit' 	=> 'cmd_textedit',
             'push'      => 'cmd_push',
@@ -205,7 +207,7 @@ public function ViewTemplate($name,$vars = []) {
                 return [];
             }
             $key = $this->expand_Strings($key,$vars);
-            $cmp_val = str_replace(["\n","\r"],'',$key);
+            $cmp_val = trim(trim(str_replace(["\n","\r"],'',$key),'"'),"'");
 			$default = NULL;
             foreach($sec as $check => $value) {
 				if(mb_substr($check,0,1)==='\\') $check = mb_substr($check,1);
@@ -300,7 +302,7 @@ public function ViewTemplate($name,$vars = []) {
         $attrList = [];
         if($tag[0]==='<') return array($tag,$attrList); // html tag will be not separate
         // allow multi attribute, and separater not space
-        foreach(['data-element' => '{}', 'data-value' => '<>', 'value' => '()', 'name' => '[]', 'size' => '::', 'id' => '##', 'class' => '..'] as $key => $seps) {
+        foreach(['style'=>'||','data-type' => '^^','data-element' => '{}', 'data-value' => '<>', 'value' => '()', 'name' => '[]', 'size' => '::', 'id' => '##', 'class' => '..'] as $key => $seps) {
             list($sep,$tsep) = str_split($seps);
             $n = strrpos($tag,$sep);
             while( $n !== FALSE) {
@@ -378,6 +380,9 @@ public function ViewTemplate($name,$vars = []) {
 					$str = $this->expand_Strings($str,$vars);
 					$quote = mb_substr($str,0,1).mb_substr($str,-1);
 					$q = ($quote !== '""' && $quote !== "''") ? '"' : '';
+					if($name === 'style') {
+						if(strpos(';"',mb_substr($str,-1)) === false) $str .= ';';
+					}
 					$attr .= (is_numeric($name)) ? " {$str}" : " {$name}={$q}{$str}{$q}";
 				}
             }
@@ -454,17 +459,31 @@ public function ViewTemplate($name,$vars = []) {
     private function sec_link($tag,$attrs,$sec,$vars) {
         $sec = $this->expand_SectionVar($sec,$vars,TRUE);
 		array_key_rename($attrs,'data-element','target');
+		$wopen = function(&$attr,$sec) {
+			list($lnk,$nm) = array_filter_values($sec,['href','name'],['#','_new']);
+			unset($sec['href'],$sec['name']);
+			$href = make_hyperlink($lnk,$this->ModuleName);
+			$run = "window.open('{$href}','{$nm}','".implode($sec,',')."')";
+			$attr['onClick'] = "{$run};return false;";
+		};
         if($tag === 'link') {
             if(is_array($sec)) {
                 foreach($sec as $token => $href) {
             		list($token,$opt_attrs) = $this->tag_Separate($token,$vars);
 					array_key_rename($opt_attrs,'data-element','target');
 					$opt_attrs = array_override($attrs,$opt_attrs);
+					if(is_array($href)) {
+						$wopen($opt_attrs,$href);
+						$href = '#';
+					}
 					$this->Helper->ALink($href,$token,$opt_attrs);
 				}
             } else echo "{$tag} bad argument.\n";
         } else if(is_scalar($sec)) {
             $this->Helper->ALink($sec,$tag,$attrs);
+		} else if(is_array($sec)) {
+			$wopen($attrs,$sec);
+			$this->Helper->ALink('#',$tag,$attrs);
         } else echo "tag '{$tag}' not for feature.\n";
     }
     //==========================================================================
@@ -528,8 +547,10 @@ public function ViewTemplate($name,$vars = []) {
     //--------------------------------------------------------------------------
     //  output IMAGE-TAG
     // +img => URL , +img => [ attribule => value URL ]
+	//	attr data-value replacement to 'alt'
     private function cmd_image($tag,$attrs,$sec,$vars) {
         list($attrs,$src,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
+		array_key_rename($attrs,'data-value','alt');
         $attr = $this->gen_Attrs($attrs,$vars);
         $src = make_hyperlink($src,$this->ModuleName);
         echo "<img src='{$src}'{$attr} />";
@@ -577,6 +598,7 @@ public function ViewTemplate($name,$vars = []) {
     //  +markdown.classname => scalar-markdown-text-direct or [ sectionn-variables ... ]
     private function cmd_markdown($tag,$attrs,$sec,$vars) {
         $cls = (isset($attrs['class'])) ? $attrs['class'] : '';
+		if(strtolower($cls) === 'false') $cls = false;
 		if(is_array($sec)) {
 	        $atext = array_to_text($sec,"\n",FALSE);   // array to Text convert
 			// expand section variable before markdown
@@ -837,10 +859,13 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
     //  INPUT TAG OUTPUT
     private function input_common($type,$tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
-		array_set_element($attrs,'value',$innerText);
+		if(!isset($attrs['value'])) {
+			array_set_element($attrs,'value',$innerText);
+			$innerText = "";
+		}
 		$attrs = attr_sz_xchange($attrs);
         $attr = $this->gen_Attrs($attrs,$vars);
-        echo "<INPUT TYPE='{$type}'{$attr}>\n";
+        echo "<INPUT TYPE='{$type}'{$attr}>{$innerText}";
     }
     //--------------------------------------------------------------------------
     //  INPUT TEXT for CALENDAR
@@ -854,28 +879,29 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
 		$this->input_common('text',$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------
-    //  INPUT TEXT
-    // +textbox:size[name] => [  attribute => value value    ]
-    private function cmd_textbox($tag,$attrs,$sec,$vars) {
-		$this->input_common('text',$tag,$attrs,$sec,$vars);
+    //  INPUT TYPE = command
+    // 		+textbox:size[name] => [  attribute => value value    ]
+    // 		+file[name](value)
+    // 		+button[name](value)
+    // 		+hidden[name](value)
+    // 		+submit[name](value)
+    private function cmd_taginput($tag,$attrs,$sec,$vars) {
+		if($tag === 'textbox') $tag = 'text';
+		$this->input_common($tag,$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------
-    //  INPUT HIDDEN
-    // +hidden[name](value)
-    private function cmd_hidden($tag,$attrs,$sec,$vars) {
-		$this->input_common('hidden',$tag,$attrs,$sec,$vars);
-    }
-    //--------------------------------------------------------------------------
-    //  INPUT BUTTON
-    // +hidden[name](value)
-    private function cmd_button($tag,$attrs,$sec,$vars) {
-		$this->input_common('button',$tag,$attrs,$sec,$vars);
-    }
-    //--------------------------------------------------------------------------
-    //  INPUT SUBMIT
-    // +hidden[name](value)
-    private function cmd_submit($tag,$attrs,$sec,$vars) {
-		$this->input_common('submit',$tag,$attrs,$sec,$vars);
+    //  INPUT 
+    // 		+input<type>
+	// type=checkbox|radio		<label><input type='checkbox|radio'>innerText</label>
+    private function cmd_input($tag,$attrs,$sec,$vars) {
+		$intype = (isset($attrs['data-value'])) ? $attrs['data-value'] : 'text';
+		unset($attrs['data-value']);
+		if(in_array($intype,['checkbox','radio'])) {
+			list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
+			$attrs = attr_sz_xchange($attrs);
+			$attr = $this->gen_Attrs($attrs,$vars);
+			echo "<label><input type='{$intype}'{$attr}> {$innerText} </label>";
+		} else $this->input_common($intype,$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------
     //  TEXTAREA
@@ -897,7 +923,11 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
     // +radio[name] => [  select_option_value = > [
     //      option_text => option_value
 	//		 option_text.() => option_value
-    //      ...
+	//	OR
+    //      tag-wrapper => [
+    //      	option_text => option_value
+    //      	...
+	//		]
     //  ] ]
     private function cmd_radio($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
@@ -906,21 +936,35 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
         $sec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND ALL-CHILD
         list($opt_key, $opt_val) = array_first_item($sec);
         $sel_item = (is_numeric($opt_key)) ? '' : $opt_key;
+		if(mb_substr($sel_item,0,1) === '@') $sel_item = mb_substr($sel_item,1);
         if(is_array($opt_val)) {
+			list($wrap_key,$wrap_val) = array_first_item($opt_val);
+			if(is_numeric($wrap_key) || is_scalar($wrap_val)) {
+				$block_tag = ['<ul class="input-list">','</ul>'];
+				$wrap_tag = ['<li>','</li>'];
+			} else {
+				list($btag,$wrap_attrs) = $this->tag_Separate($wrap_key,$vars);
+				$wrap_attr = $this->gen_Attrs($wrap_attrs,$vars);
+				$opt_val = $wrap_val;
+				$block_tag = ['',''];
+				$wrap_tag = ["<{$btag}{$wrap_attr}>","</{$btag}>"];
+
+			}
             $opt_val = array_flat_reduce($opt_val);
-			echo '<ul class="input-list">';
+			echo "{$block_tag[0]}\n";
+			list($beg,$end) = $wrap_tag;
             foreach($opt_val as $opt => $val) {
 				if(is_numeric($opt) ) {
 					$val = separate_tag_value($val);
-					echo "<li>{$val}</li>\n";
+					echo "{$beg}{$val}{$end}\n";
 				} else {
 					$opt = tag_body_name($opt);
 					list($opt,$bc,$ec) = tag_label_value($opt);
 					$sel = ($val == $sel_item) ? ' checked':'';
-					echo "<li>{$bc}<label>{$tags} value='{$val}'{$sel}>{$opt}</label>{$ec}</li>\n";
+					echo "{$beg}{$bc}<label>{$tags} value='{$val}'{$sel}>{$opt}</label>{$ec}{$end}\n";
 				}
             }
-			echo "</ul>\n";
+			echo "{$block_tag[1]}\n";
         } else echo "<label>{$tags} value='{$opt_val}'>{$opt_val}</label>\n";
     }
     //--------------------------------------------------------------------------

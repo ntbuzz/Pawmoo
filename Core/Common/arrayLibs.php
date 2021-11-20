@@ -127,7 +127,9 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
 }
 //==============================================================================
 function array_key_value($arr,$sep=',',$quote='') {
-    array_walk($arr,function(&$item,$key) use(&$quote) { $item = "{$key}={$quote}{$item}{$quote}"; });
+    array_walk($arr,function(&$item,$key) use(&$quote) {
+		if(!empty($quote) && strpos($item,$quote) !== false) $item = str_replace($quote,"\\{$quote}",$item);
+		$item = "{$key}={$quote}{$item}{$quote}"; });
     return implode($sep,$arr);
 }
 //==============================================================================
@@ -293,4 +295,21 @@ function condition_array($keyset,$keystr) {
 		} else  $cond[] = [$keyset => $val];
     }
     return $cond;
+}
+//==============================================================================
+// get AND condition array by separate SPC word from find keyword
+function condition_array_multi($keyset,$keystr) {
+	$and_str = explode(' ',str_replace(['　','  '],' ',$keystr));
+	$and_cond = [];
+    foreach($and_str as $and_val) {
+		$cond = [];
+		foreach(explode('|',$and_val) as $val) {
+			if(mb_substr($val,0,1)==='-') {
+				$val = mb_substr($val,1);
+				$cond[] = ['NOT' => [$keyset => $val]];
+			} else  $cond[] = [$keyset => $val];
+		}
+		$and_cond[] = ['OR'=>$cond];
+	}
+    return $and_cond;
 }

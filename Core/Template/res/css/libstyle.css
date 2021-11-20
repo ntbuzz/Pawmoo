@@ -51,14 +51,14 @@
 	white-space: nowrap;
 	height:22px;
 }
-.delete-item-list>li>del {
+.delete-item-list>li>.del {
 	display: inline-block;
 	width:18px;
 	height:20px;
 	cursor: pointer;
 	background: url(res/img/del_button.png) no-repeat left top;
 }
-.delete-item-list>li>del:hover {
+.delete-item-list>li>.del:hover {
 	background: url(res/img/del_button.png) no-repeat left -20px;
 }
 
@@ -107,3 +107,82 @@ ul.input-list>li>label>input {
 .vertical>ul.input-list>li {
 	display: block;
 }
+/* メニューの雛形コンテナ */
+.menu-container {
+	display:none;
+}
+/* ファイル送信ラベル */
+.file-label {
+	display:flex;
+	white-space: nowrap;
+	align-items: center;
+    vertical-align: middle;
+	border: 1px solid skyblue;
+	padding:0;
+	font-size:10pt;
+}
+.file-label>input[type="file"] {
+	display: none;
+}
+.file-label>input[type="text"] {
+	display: inline-block;
+	width:100%;
+	height:22px;
+	background-color:#ffffe4;
+	border:none;
+}
+.file-label>span {
+	position:relative;
+	display: inline-block;
+	width:96px;
+	height:22px;
+	text-align:center;
+	padding-left:18px;
+	cursor: pointer;
+color:white;
+	background: url(res/img/folder-icon.png) no-repeat left top;
+}
+.file-label>span:hover {
+	color:yellow;
+	background: url(res/img/folder-icon.png) no-repeat left -22px;
+}
+/* ドラッグドロップ用 */
+#fileList span {
+	display: inline-block;
+	vertical-align: middle;
+	width:24px;
+	height:24px;
+	margin-right:5px;
+}
+#fileList span.del {
+	cursor: pointer;
+	background: url(res/img/icon/icon-file.png) no-repeat left top;
+}
+#fileList span.del:hover {	background: url(res/img/icon/icon-file.png) no-repeat left -24px;}
+
+#fileList span.icon-doc 	{	background: url(res/img/icon/icon-doc.png) no-repeat left top;}
+#fileList span.icon-doc:hover {	background: url(res/img/icon/icon-doc.png) no-repeat left -24px;}
+
+#fileList span.icon-pdf		{	background: url(res/img/icon/icon-pdf.png) no-repeat left top;}
+#fileList span.icon-pdf:hover {	background: url(res/img/icon/icon-pdf.png) no-repeat left -24px;}
+
+#fileList span.icon-xls		{	background: url(res/img/icon/icon-xls.png) no-repeat left top;}
+#fileList span.icon-xls:hover {	background: url(res/img/icon/icon-xls.png) no-repeat left -24px;}
+
+#fileList span.icon-ppt		{	background: url(res/img/icon/icon-ppt.png) no-repeat left top;}
+#fileList span.icon-ppt:hover {	background: url(res/img/icon/icon-ppt.png) no-repeat left -24px;}
+
+#fileList span.icon-img		{	background: url(res/img/icon/icon-img.png) no-repeat left top;}
+#fileList span.icon-img:hover {	background: url(res/img/icon/icon-img.png) no-repeat left -24px;}
+
+#fileList span.icon-mov		{	background: url(res/img/icon/icon-mov.png) no-repeat left top;}
+#fileList span.icon-mov:hover {	background: url(res/img/icon/icon-mov.png) no-repeat left -24px;}
+
+#fileList span.icon-zip		{	background: url(res/img/icon/icon-zip.png) no-repeat left top;}
+#fileList span.icon-zip:hover { background: url(res/img/icon/icon-zip.png) no-repeat left -24px;}
+
+#fileList span.icon-iso		{	background: url(res/img/icon/icon-iso.png) no-repeat left top;}
+#fileList span.icon-iso:hover { background: url(res/img/icon/icon-iso.png) no-repeat left -24px;}
+
+#fileList span.icon-txt		{	background: url(res/img/icon/icon-txt.png) no-repeat left top;}
+#fileList span.icon-txt:hover { background: url(res/img/icon/icon-txt.png) no-repeat left -24px;}

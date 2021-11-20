@@ -32,6 +32,8 @@ class AppModel extends AppObject {
     public $OnGetRecord = NULL;      // for feature FUNCTION
     public $HeaderSchema = [];       // Display Header List [ field_name => [disp_name, align, sort_flag ]
     public $DateFormat;              // Date format for Database
+    public $TimeFormat;              // Time format for Database
+    public $DateTimeFormat;          // TimeStamp format for Database
     public $SortDefault = SORTBY_ASCEND;    // findRecord Default Sort Sequence
     private $FieldSchema = [];       // Pickup Record fields columns [ref_name, org_name]
     private $Relations = [];         // Table Relation
@@ -275,6 +277,16 @@ public function getRecordBy($key,$value) {
 	$row = $this->dbDriver->doQueryBy($key,$value);
 	$this->fields = ($row === FALSE) ? [] : $row;
     return $this->fields;
+}
+//==============================================================================
+// Get Primary Value by Field Name
+// Result:   Primary Value or FALSE
+public function getPrimaryOf($key,$value,$default=false) {
+	if(empty($value)) return 0;		// not-allow NULL value
+	$row = $this->dbDriver->doQueryBy($key,$value);
+	if($row === false) return $default;
+    $ret = $row[$this->Primary];
+	return (is_numeric($ret)) ? intval($ret) : $ret;
 }
 //==============================================================================
 // Get Record Data by primary-key,and JOIN data by $join is TRUE.

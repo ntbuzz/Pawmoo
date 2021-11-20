@@ -650,10 +650,10 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 
   【ハイパーリンク省略形】
     http://～         URLの直接指定
-    :xxx              http://(ホスト名)/xxx
-    /xxx              /(フレームワークトップ)xxx～
+    /xxx              /(サーバートップ)/xxx～
+    :xxx              /(アプリトップ)/xxx
     ./xxx             /(アプリトップ)/(モジュール名)/xxx
-    xxx               /(アプリトップ)/xxx
+    xxx               xxx (カレントパスへの相対指定)
     !!xxx             http://SERVER/xxx
     !:xxx             https://SERVER/xxx
 
@@ -692,6 +692,8 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     value=vvvv          (vvvv)
     data-value=zzzz     <zzzz>
     data-element=yyyy   {yyyy}
+    data-type=tttt   	^tttt
+    style=sssss		    |sssss|
   書式順は上記の上から順に記述してください。
   ex.
     span.right#menu[help](click)<ref-value>{popup} => BUTTON
@@ -721,7 +723,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     +jquery => [ value, ... ]               value のリストをJQuery関数として出力する
     +img => [ attr => value, src ]          imageタグの簡易出力書式, class,id以外の属性を指定しない場合はスカラー値で定義できる
     +img => src
-    +ul/ol => [ attr => value , items ]     UL/OLタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
+    +ul/+ol => [ attr => value , items ]    UL/OLタグ専用のリスト出力、スカラー要素をリスト項目として出力できる
       items :=                                リスト項目は次の要素から構成する
         [ list-section ],           　          配列要素：　セクション項目
         .XXXX#DDDD => [ list-section ]          クラス名(XXXX)、ID名(DDDD)付のリストセクション項目
@@ -771,6 +773,15 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
     %link => [ link_str => href, ... ]      ハイパーリンク link_str に href のリンクを設定,Helper->ALinkを呼び出す
                                             単独タグの場合は省略形として以下の書式も使用できる
                                               %link_str => href
+											%link および link_str には中括弧で  target 属性を付加することができる
+											%link コマンドに付加した属性は全ての要素に適用され、link_str は個々の要素に適用される
+											リンク先(href)を配列定義すると javascriptの'window.open()'に変換される。
+											URLはhref属性で、ウィンドウ名はname属性で、その他のパラメータはスカラー値で定義する。
+												%link_str = [
+													href => URL
+													name => "New Window"
+													size=100 height=200 scrollbars=yes
+												]
     +inline.SecName => [ ... ]              インラインのレイアウトセクション定義。テンプレート呼出しで再利用ができる
     +markdown => Text                       Text を簡易マークダウンとして整形したものを出力する、セクション変数は整形後に展開する
                                             クラス属性を指定するとマークダウンのクラス名とする
@@ -851,6 +862,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 					!(URL)		=> target="_blank"
 					^(URL)		=> target="_top"
 					:(URL)		=> target="_self"
+				URLはセクション形式のハイパーリンク形式と同じ省略形が使用できる
     [テキスト]^(URL)            // ハイパーリンク(新規ウィンドウ)
     ![ALTテキスト](URL)         // URLへの画像リンク
                   以下は独自仕様
@@ -1419,7 +1431,7 @@ static::$appRoot
   バルーン表示には、クリック式とマウスオーバー式が選べます。
 
   // バルーンヘルプ
-  .popup-baloon＜.onside＞{＜表示対象の要素ID＞} => [
+  .popup-balloon＜.onside＞{＜表示対象の要素ID＞} => [
     ＜テキスト＞
   ]
 
@@ -1630,6 +1642,9 @@ static::$appRoot
   コールバック関数は最下層のSelectタグ変更時に呼び出します。
   最下層の前までのSELECTタグにコールバックを設定するときは InProgress()メソッドで処理します。
   ('#sel').ChainSelect(selObj,0, callback_func).InProgress(callback_func);
+	コールバック関数の引数は、中間コールバックと最終コールバックで異なります。
+	中間コールバック	callback_func(value値, id名)
+	最終コールバック	callback_func(value値, ラベルテキスト, id名)
 
 
 ・ドラッグドロップアップロード
@@ -1660,7 +1675,7 @@ static::$appRoot
     .core.NO_TITLE    => "'%s' のタイトルが未入力です"
     .core.MAXFILE     => "送信ァイルは %d 個までです"
 
-・ポップアップチェックセレクタ
+・ポップアップチェックセレクタ（廃止予定→後述の「ポップアップメニューボックス」に移行）
   (セレクタ).popupCheckSelect(setup_object, callback_func)
 
   セレクタの data-element 属性で指示される name 属性を持つタグに対し、
@@ -1708,3 +1723,69 @@ static::$appRoot
         "タブ2": [ リスト配列2 ],
       },
   タブ表示の場合、FlipCheck による全チェックはタブ毎の動作になります。
+
+・ポップアップメニューボックス
+	前記の「ポップアップチェックセレクタ」の代わりとなるプラグインです。
+	チェックボックスやラジオボタン、ドロップダウンメニューが扱えるようになり、
+	さらに表示リストもコールバック関数で動的に変更することが可能になっています。
+
+	■コンテナ形式 (レイアウト内の記述)
+		.menu-container<タイプ>{対象タグID} => [
+			(チェックリストのHTML)
+		]
+
+	クラス名は「menu-container」を指定します。
+	リストの値を反映させる先は「data-element」属性({...})で指定します。
+	「data-value」属性(<...>)はリストの形態を指定します。
+	data-value=checkbox		チェックボックスのポップアップボックスを表示
+	data-value=radio		ラジオボタンのポップアップボックスを表示
+	data-value=dropdown		ドロップダウン形式のポップアップメニューを表示
+
+	チェックリスト本体を出力するための関数が定義してあります。
+
+		function check_boxmenu(連想配列, タグ名, チェックタイプ)
+
+	リストは連想配列名で指示します。
+	２次元連想配列にすると、タブ形式で表示できます。
+		$menu = [
+			タブ１ => [
+				ラベル => 値
+				...
+			]
+			タブ2 => ...
+		]
+	タグ名は INPUTタグに付加する name 属性です。
+	チェックタイプは　INPUTタグのタイプ(checkbox/radio)を指定します。
+	配列値に「-1」を入れておくと「区切り線」を挿入できます。
+	「-2」を入れておくと、その次の値から段組みになります。
+
+	対象タグIDはINPUTタグを含むDIVまたはSPANタグに「doropdown-menu」クラス名を付加し
+	指定のID名を付けます
+	*入力タグ側
+		span.dropdown-menu#chec-menu => [
+				+textbox[select0] ~> [ placeholder="選択または直接入力" ]
+		]
+	*コンテナ側 (メニューリストの定義)
+		.menu-container<checkbox>{chec-menu} => ...
+
+	■プラグイン形式 (javascriptでの記述)
+	- ドロップダウンプラグイン
+
+		(セレクタ).DropDownMenuBox(パラメータ, コールバック関数)
+
+		コールバック関数はドロップダウンメニューのHTMLを返すようにします。
+		ドロップダウン用HTML生成用の関数が定義してあります。
+
+		function menu_box(連想配列, ラベル表示有無)
+
+		２次元以上の連想配列はネストしたドロップダウンメニューになります。
+		２段目以降の要素が連想配列の場合、キー名ごとに段組み表示となります。
+
+	- チェックボックス／ラジオボタンプラグイン
+
+		(セレクタ).CheckRadioBox(オブジェクト, コールバック関数)
+
+		コールバック関数はチェックリストメニューのHTMLを返すようにします。
+		前述の「check_boxmenu()」関数を利用することで連想配列から簡単にリスト生成できます。
+
+	セレクタはコンテナ形式で指示した対象タグIDと同じタグを指定します。

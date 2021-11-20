@@ -12,6 +12,7 @@ $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'ja;en;ja';		// 言語受け入れリスト
 $_SERVER['HTTP_REFERER'] = "localhost";
 $_SERVER['SERVER_PORT'] = '';
 $_SERVER['HTTP_HOST'] = 'localhost';
+$_SERVER['HTTP_USER_AGENT'] = 'Chrome/94.0.4606.104';
 
 $uri = $_SERVER['REQUEST_URI'];
 // command line parameter: app/module/method/param?QUERY??POST
