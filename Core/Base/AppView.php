@@ -302,7 +302,7 @@ public function ViewTemplate($name,$vars = []) {
         $attrList = [];
         if($tag[0]==='<') return array($tag,$attrList); // html tag will be not separate
         // allow multi attribute, and separater not space
-        foreach(['style'=>'||','data-element' => '{}', 'data-value' => '<>', 'value' => '()', 'name' => '[]', 'size' => '::', 'id' => '##', 'class' => '..'] as $key => $seps) {
+        foreach(['style'=>'||','data-type' => '^^','data-element' => '{}', 'data-value' => '<>', 'value' => '()', 'name' => '[]', 'size' => '::', 'id' => '##', 'class' => '..'] as $key => $seps) {
             list($sep,$tsep) = str_split($seps);
             $n = strrpos($tag,$sep);
             while( $n !== FALSE) {
@@ -859,10 +859,13 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
     //  INPUT TAG OUTPUT
     private function input_common($type,$tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
-		array_set_element($attrs,'value',$innerText);
+		if(!isset($attrs['value'])) {
+			array_set_element($attrs,'value',$innerText);
+			$innerText = "";
+		}
 		$attrs = attr_sz_xchange($attrs);
         $attr = $this->gen_Attrs($attrs,$vars);
-        echo "<INPUT TYPE='{$type}'{$attr}>\n";
+        echo "<INPUT TYPE='{$type}'{$attr}>{$innerText}";
     }
     //--------------------------------------------------------------------------
     //  INPUT TEXT for CALENDAR
@@ -889,10 +892,16 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
     //--------------------------------------------------------------------------
     //  INPUT 
     // 		+input<type>
+	// type=checkbox|radio		<label><input type='checkbox|radio'>innerText</label>
     private function cmd_input($tag,$attrs,$sec,$vars) {
 		$intype = (isset($attrs['data-value'])) ? $attrs['data-value'] : 'text';
 		unset($attrs['data-value']);
-		$this->input_common($intype,$tag,$attrs,$sec,$vars);
+		if(in_array($intype,['checkbox','radio'])) {
+			list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
+			$attrs = attr_sz_xchange($attrs);
+			$attr = $this->gen_Attrs($attrs,$vars);
+			echo "<label><input type='{$intype}'{$attr}> {$innerText} </label>";
+		} else $this->input_common($intype,$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------
     //  TEXTAREA
