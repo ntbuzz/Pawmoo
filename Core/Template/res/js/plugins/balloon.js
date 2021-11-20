@@ -139,7 +139,7 @@ function balloonPosition(target, onside, margin) {
 		this.Box = {
 			left: Math.min(targetPos.Left(),bBox.left) - margin,
 			top: Math.min(targetPos.Top(),bBox.top) - margin,
-			right: Math.max(targetPos.Top(),bBox.right) + margin,
+			right: Math.max(targetPos.Right(),bBox.right) + margin,
 			bottom: Math.max(targetPos.Bottom(),bBox.bottom) + margin
 		};
 		this.balloon = 'balloon-' + vt + hz;
