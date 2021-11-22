@@ -96,6 +96,17 @@ function byte_format($size){
 	return ($over) ? $num . $units[$max_digit] : $num . $units[$digits];
 }
 //==============================================================================
+// convert file size string
+function date_format($fmt,$tm){
+	list($yy,$mm,$dd,$hh,$ii,$ss,$ww) = explode(',',date('Y,m,d,H,i,s',$tm));
+	$mon_name = explode(',',str_replace("'",'',LangUI::get_value('core','.monthNames')));
+	$week_name= explode(',',str_replace("'",'',LangUI::get_value('core','.dayNames')));
+	return str_replace(
+	[ '%Y','%m','%M','%d','%H','%i','%s','%w','%W'],
+	[ $yy, $mm, $mon_name[$mm], $dd,$hh,$ii,$ss,$ww,$week_name[$ww]],
+	$fmt);
+}
+//==============================================================================
 // Convert text to HTML
 function text_to_html($atext) {
     return nl2br(htmlspecialchars($atext));
