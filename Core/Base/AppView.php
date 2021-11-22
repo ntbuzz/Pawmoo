@@ -892,16 +892,10 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
     //--------------------------------------------------------------------------
     //  INPUT 
     // 		+input<type>
-	// type=checkbox|radio		<label><input type='checkbox|radio'>innerText</label>
     private function cmd_input($tag,$attrs,$sec,$vars) {
 		$intype = (isset($attrs['data-value'])) ? $attrs['data-value'] : 'text';
 		unset($attrs['data-value']);
-		if(in_array($intype,['checkbox','radio'])) {
-			list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
-			$attrs = attr_sz_xchange($attrs);
-			$attr = $this->gen_Attrs($attrs,$vars);
-			echo "<label><input type='{$intype}'{$attr}> {$innerText} </label>";
-		} else $this->input_common($intype,$tag,$attrs,$sec,$vars);
+		$this->input_common($intype,$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------
     //  TEXTAREA
@@ -1013,22 +1007,25 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
         $tags = "<INPUT TYPE='checkbox'{$attr}";
 		list($key,$check) = array_first_item($sec);
 		if(is_scalar($check)) {		// FORMAT-I
-			$sec = [ $name => $sec];
-		}
-		echo '<ul class="input-list">';
-		foreach($sec as $key => $val) {
-			$key = is_numeric($key) ? $name : tag_body_name($key);
-			if(is_scalar($val)) {
-				$val = separate_tag_value($val);
-				echo "<li>{$val}</li>\n";
-			} else {
-				$key = tag_body_name($key);
-				list($key,$bc,$ec) = tag_label_value($key);
-				$item = $check_item($val);
-				echo "<li>{$bc}<label>{$tags} name='{$key}'{$item}</label>{$ec}</li>\n";
+			$item = $check_item($sec);
+			if(!empty($name)) $name = " name='${name}'";
+			echo "<label>{$tags}{$name}{$item}</label>";
+		} else {
+			echo '<ul class="input-list">';
+			foreach($sec as $key => $val) {
+				$key = is_numeric($key) ? $name : tag_body_name($key);
+				if(is_scalar($val)) {
+					$val = separate_tag_value($val);
+					echo "<li>{$val}</li>\n";
+				} else {
+					$key = tag_body_name($key);
+					list($key,$bc,$ec) = tag_label_value($key);
+					$item = $check_item($val);
+					echo "<li>{$bc}<label>{$tags} name='{$key}'{$item}</label>{$ec}</li>\n";
+				}
 			}
+			echo '</ul>';
 		}
-		echo '</ul>';
     }
 
 }
