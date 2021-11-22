@@ -224,14 +224,24 @@ function pseudo_markdown($atext, $md_class = '') {
 //			!(URL)	Target = NEW
 //			^(URL)	Target = TOP
 //			:(URL)	Target = SELF
-		'/\[([^\]]+)\]([!\^:])?\(([^\)]+)\)/' => function($m) {
+//			@(URL)	window.open = @(URL,width,height,scrollbars~
+		'/\[([^\]]+)\]([!\^:@])?\(([^\)]+)\)/' => function($m) {
 			$txt = $m[1];
-			$arr = explode(' ',$m[3]);		// allow user attribute
+			$arr = str_explode([' ',','],$m[3]);		// allow user attribute
 			$url = array_shift($arr);
             switch($m[2]) {
             case '!': $arr[] = 'target="_blank"'; break;
             case '^': $arr[] = 'target="_top"'; break;
             case ':': $arr[] = 'target="_self"'; break;
+			case '@':
+					$nm = array_shift($arr);
+					$param = array_key_value(
+								array_combine(['width','height','scrollbars'],
+									array_alternative($arr,3,[800,800,'yes'])));
+					$href = make_hyperlink($url);
+					$run = "window.open('{$href}','{$nm}','{$param}')";
+					$arr = [ "target=\"_new\" onClick=\"{$run};return false;\"" ];
+					$url = '#';
             }
 			$url = make_hyperlink($url);
 			$attr = empty($arr) ? '': ' '.implode(' ',$arr);
