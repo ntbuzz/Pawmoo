@@ -35,6 +35,21 @@ public function defaultUser() {
 	return $udata;
 }
 //==============================================================================
+//　ログインエラー時のメッセージ配列(app-login.phpで参照)
+//  メッセージをカスタマイズする時はこのメソッドをoverrideする
+public function retryMessages($userid) {
+	return [
+		'page_title'	=> $this->__('Login.LoginPage'),
+		'msg_title'		=> $this->__('Login.LoginTitle'),
+		'user_title'	=> $this->__('Login.UserName'),
+		'pass_title'	=> $this->__('Login.Password'),
+		'send_button'	=> $this->__('Login.Submit'),
+		'reset_button'	=> $this->__('Login.Reset'),
+		'msg_body'		=> $this->error_type,
+		'login_user'	=> $userid,
+	];
+}
+//==============================================================================
 //　Default User Info for CLI Debug
 public function reload_userdata($udata) {
 	list($uid,$lang,$region) = $udata;

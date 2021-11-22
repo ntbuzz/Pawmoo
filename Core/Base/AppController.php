@@ -97,19 +97,9 @@ public function is_authorised($method) {
 				$userid = MySession::get_LoginValue($login_key);	// already-logged-in check
 				if(empty($userid)) {		// not LOGGED-IN
 					$userid = (isset(App::$Post[$login_key])) ? App::$Post[$login_key] : '';
-					$msg = $this->__('.Login');
-					$err_msg = $Login->error_type;
 					$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
-					page_response($login_page,[
-						'page_title'	=> $this->__('Login.LoginPage'),
-						'msg_title'		=> $this->__('Login.LoginTitle'),
-						'user_title'	=> $this->__('Login.UserName'),
-						'pass_title'	=> $this->__('Login.Password'),
-						'send_button'	=> $this->__('Login.Submit'),
-						'reset_button'	=> $this->__('Login.Reset'),
-						'msg_body'		=> $Login->error_type,
-						'login_user'	=> $userid,
-					]);     // LOGIN PAGE Response, NO returned HERE!
+					page_response($login_page,$Login->retryMessages($userid));
+					// LOGIN PAGE Response, NO returned HERE!
 					return FALSE;
 				}
 			}
