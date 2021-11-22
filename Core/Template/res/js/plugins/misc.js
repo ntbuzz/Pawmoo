@@ -162,7 +162,8 @@ $.fn.LoadContents = function () {
 			DebugSlider();
 			if (target.callback !== null) target.callback.call(self);
 		})
-		.fail(function() {
+		.fail(function () {
+			console.log("FAIL POST:"+target.url+"\n");
 			$.busy_cursor(false);
 			DebugSlider();
 			result = false;
@@ -282,9 +283,12 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 		DropDown: '<span class="arrow"></span>',
 		Hint: '',
 		Preload: function () { return '<div></div>'; },
+		Selected: function () { return this;},
 		SetValue: function (val) {
-			this.TargetObj.val(val);
-			this.TargetObj.trigger('change');
+			this.TargetObj.val(val).trigger('change');
+			if (typeof this.Selected === "function") {
+				this.Selected.call(self,val);
+			};
 		},
 	};
 	if (setting.TargetObj.length === 0) return this;
@@ -311,6 +315,11 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 		e.preventDefault();
 		setting.SetValue('');
 	});
+	// 選択時のコールバック登録
+	self.SelectedItem = function (callback) {
+		if (typeof callback === 'function') setting.Selected = callback;
+		return this;
+	};
 	self.css("cursor", "pointer");
 	self.off('click').on('click', function () {
 		// テンプレート関数でメニューを取得
