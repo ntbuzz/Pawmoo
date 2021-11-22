@@ -86,10 +86,25 @@ String.prototype.startOfString = function (arr) {
 	return exists;
 };
 //====================================================
-// start of strings in array values
+// is exists WORD in string
 String.prototype.existsWord = function (str) {
 	var wd_arr = this.split(' ');	// separate space
 	return wd_arr.is_exists(str);
+};
+//====================================================
+// multi string comapre of indexOf
+String.prototype.includeOf = function (reg) {
+	var wd_arr = reg.split('|');	// separate stroke
+	var cmp_str = this;
+	var exists = false;
+	wd_arr.forEach(function (val) {
+		if(cmp_str.indexOf(val) !== -1) {
+			exists = true;
+			return false;	// break forEach
+		};
+		return true;	// continue next
+	});
+	return exists;
 };
 //====================================================
 // element search: IE-11 is not have includes() method.
