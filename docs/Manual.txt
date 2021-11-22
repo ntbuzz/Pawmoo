@@ -862,6 +862,10 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
 					!(URL)		=> target="_blank"
 					^(URL)		=> target="_top"
 					:(URL)		=> target="_self"
+					@(open)		=> onClick="window.open()"形式に変換
+								open = URL,名前,幅,高さ,スクロールバー有無
+								ex: @(help/topic,win,800,600,yes)
+									=> window.open('help/topic','win','width=800,height=600,scrollbars=yes')
 				URLはセクション形式のハイパーリンク形式と同じ省略形が使用できる
     [テキスト]^(URL)            // ハイパーリンク(新規ウィンドウ)
     ![ALTテキスト](URL)         // URLへの画像リンク
