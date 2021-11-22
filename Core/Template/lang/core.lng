@@ -103,10 +103,6 @@ monthNames =>[
 	.ja=> "1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月"
 	.en=> "Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec"
 ]
-monthOldNames =>[
-	.ja=> "睦月','如月','弥生','卯月','皐月','水無月','文月','葉月','長月','神無月','霜月','師走
-	.en=> "January','February','March','April','May','June','July','August','September','October','November','December"
-]
 dayNames =>[
 	.ja=> "日','月','火','水','木','金','土"
 	.en=> "Sun','Mon','Tue','Wed','Thu','Fri','Sat"
@@ -119,7 +115,24 @@ calendarTitle =>[
 	.ja=> "%y年%mのカレンダー"
 	.en=> "%y, %m Calendar"
 ]
-
+dateNames => [
+	shortMonth => [
+		.ja=> "1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月"
+		.en=> "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec"
+	]
+	oldMonth => [
+		.ja=> "睦月,如月,弥生,卯月,皐月,水無月,文月,葉月,長月,神無月,霜月,師走"
+		.en=> "January,February,March,April,May,June,July,August,September,October,November,December"
+	]
+	shortWeek => [
+		.ja=> "日,月,火,水,木,金,土"
+		.en=> "Sun,Mon,Tue,Wed,Thu,Fri,Sat"
+	]
+	weekNames =>[
+		.ja=> "日曜,月曜,火曜,水曜,木曜,金曜,土曜"
+		.en=> "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday"
+	]
+]
 #Login => [
 	LoginPage=>[
 		.ja=> ログイン
