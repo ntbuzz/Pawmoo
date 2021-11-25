@@ -97,15 +97,15 @@ function byte_format($size){
 }
 //==============================================================================
 // convert file size string
-function date_customformat($fmt,$tm){
-	list($yy,$mm,$dd,$hh,$ii,$ss,$ww) = explode(',',date('Y,m,d,H,i,s,w',$tm));
+function date_custom($fmt,$tm){
+	list($yy,$y,$mm,$dd,$hh,$ii,$ss,$ww) = explode(',',date('Y,y,m,d,H,i,s,w',$tm));
+	--$mm;		// array is ZERO origin
 	$dateNames = LangUI::get_value('core','.dateNames',true);
 	foreach($dateNames as $nm => $str) $$nm = explode(',',$str);
-	--$mm;		// array is ZERO origin
 	// dateNames => shortMonth, oldMonth, shortWeek, weekNames
 	return str_replace(
-	[ '%Y','%m','%M','%O','%d','%H','%i','%s','%w','%W'],
-	[ $yy, $mm, $shortMonth[$mm],$oldMonth[$mm], $dd,$hh,$ii,$ss,$shortWeek[$ww],$weekNames[$ww]],
+	[ '%Y','%y','%m','%M','%O','%d','%H','%i','%s','%w','%W'],
+	[ $yy, $y, $mm, $shortMonth[$mm],$oldMonth[$mm], $dd,$hh,$ii,$ss,$shortWeek[$ww],$weekNames[$ww]],
 	$fmt);
 }
 //==============================================================================
