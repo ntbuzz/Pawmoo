@@ -382,6 +382,8 @@ public function ViewTemplate($name,$vars = []) {
 					$q = ($quote !== '""' && $quote !== "''") ? '"' : '';
 					if($name === 'style') {
 						if(strpos(';"',mb_substr($str,-1)) === false) $str .= ';';
+					} else if(in_array($name,['href','src'])) {
+						$str = make_hyperlink($str,$this->ModuleName);
 					}
 					$attr .= (is_numeric($name)) ? " {$str}" : " {$name}={$q}{$str}{$q}";
 				}
@@ -914,7 +916,7 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
     }
     //--------------------------------------------------------------------------
     //  INPUT RADIO OUTPUT
-    // +radio[name] => [  select_option_value = > [
+    // +radio[name] => [  @select_option_value = > [
     //      option_text => option_value
 	//		 option_text.() => option_value
 	//	OR
@@ -947,6 +949,7 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
             $opt_val = array_flat_reduce($opt_val);
 			echo "{$block_tag[0]}\n";
 			list($beg,$end) = $wrap_tag;
+			$check_onece = true;
             foreach($opt_val as $opt => $val) {
 				if(is_numeric($opt) ) {
 					$val = separate_tag_value($val);
@@ -954,7 +957,12 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
 				} else {
 					$opt = tag_body_name($opt);
 					list($opt,$bc,$ec) = tag_label_value($opt);
-					$sel = ($val == $sel_item) ? ' checked':'';
+					list($val,$ss) = explode('.',$val);
+					if($check_onece) {
+						$cmp = (empty($sel_item)) ? ($ss==='checked'):($val===$sel_item);
+						if($cmp) $check_onece = false;
+					} else $cmp = false;
+					$sel = ($cmp) ? ' checked':'';
 					echo "{$beg}{$bc}<label>{$tags} value='{$val}'{$sel}>{$opt}</label>{$ec}{$end}\n";
 				}
             }
