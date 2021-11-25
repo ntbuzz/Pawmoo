@@ -195,7 +195,7 @@ public function ResetSchema() {
             }
             $new_Relations[$key] =  $sub_rel;
         }
-        $this->dbDriver->setupRelations($new_Relations);
+        $this->dbDriver->setupRelations($this->Primary,$new_Relations);
     }
 //==============================================================================
 // Selection Table Relation setup
@@ -313,10 +313,11 @@ public function ChangeSelectCondition($name,$cond) {
 //	d. key-name => [ Model. => number.title,	[ cond ] ]		for Select() in Model [title] = number|Primary
 //	e. key-name => [ id.title,					[ cond ] ]		for Select() by SELF [title] = number|Primary
 //	f. key-name => [ Model. => [ Method => argument],[ cond ] ]		Chain() ir Select() value,depend on Model Method returned.
-public function LoadSelection($key_names, $sort_val = false) {
+public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 	$selections = (is_array($key_names)) ? $key_names : [$key_names];
     foreach($selections as $key_name) {
 		list($target,$cond) = $this->SelectionDef[$key_name];
+		$cond = array_override($cond,$opt_cond);	// additional cond
 		list($model,$ref_list) = array_first_item($target);
 		if(is_int($model)) {        // self list
 			// case b., e.
