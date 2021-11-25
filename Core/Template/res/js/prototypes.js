@@ -92,7 +92,7 @@ String.prototype.existsWord = function (str) {
 	return wd_arr.is_exists(str);
 };
 //====================================================
-// multi string comapre of indexOf
+// multi string compare of indexOf()
 String.prototype.includeOf = function (reg) {
 	var wd_arr = reg.split('|');	// separate stroke
 	var cmp_str = this;
