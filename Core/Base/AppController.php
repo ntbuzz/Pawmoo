@@ -64,6 +64,7 @@ public function CreateAction() {
 //==============================================================================
 // check active METHOD
 public function is_enable_action($action) {
+	if(empty($action)) return false;
 	if(	array_key_exists($action,$this->aliasAction) ||		// exists Alias Action
 		in_array($action,$this->my_method,true)) return TRUE;	// exist ENABLED List
 	return FALSE;	// diable ActionMethod
@@ -196,20 +197,23 @@ public function AutoPaging($cond, $max_count = 100) {
 	$uri = App::Get_PagingPath();
 	// check SAVED Paging-Param
 	$Page = MySession::getPagingIDs('Setup');
-	list($sCond,$sSize,$sURI,$sQuery) = array_filter_values($Page,['Cond','Size','URI','QUERY']);
+	list($sCond,$sSize,$sURI,$sEnv) = array_filter_values($Page,['Cond','Size','URI','ENV']);
+	list($sQuery,$sPost) = $sEnv;
 	if($num === 0) $num = 1;
 	if($size === 0) {
 		$size = intval($sSize);
 		if($size === 0) $size = $max_count;
 	}
-	if($uri !== $sURI || empty($sCond) || (!empty($cond) && $sCond !== $cond))  {
-		$Page['Cond'] = $cond;
-		$Page['URI'] = $uri;
-		$Page['QUERY'] = App::$Query;
-	} else {
+	$comp = array_intersect($cond,$sCond);	// same condition pickup
+	if($uri === $sURI && $num > 1 && $cond === $comp && App::$emptyRequest)  {
 		$cond = $sCond;				// repeat by saved condition
 		if($size !== intval($sSize)) $num = 1;	// different size must be jump to Page-1
-		$this->SetHelperProps(['Query' => $sQuery]);	// Query is set to HELPER Props
+		App::$Query = $sQuery;
+		App::$Post = $sPost;
+	} else {
+		$Page['Cond'] = $cond;
+		$Page['URI'] = $uri;
+		$Page['ENV'] = [App::$Query,App::$Post];
 	}
 	$cnt = $this->Model->getCount($cond);
 	if($cnt < $size )  $Page = NULL;	// no-NEED Paging
