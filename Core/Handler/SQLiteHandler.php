@@ -49,6 +49,11 @@ protected function reset_seq($table,$primary) {
 	return FALSE;
 }
 //==============================================================================
+//	CONCAT FIELDS
+protected function concat_fields($arr) {
+	return implode('||',$arr);
+}
+//==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
 	$this->rows = $this->dbb->query($sql);

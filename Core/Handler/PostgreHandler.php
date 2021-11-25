@@ -52,6 +52,11 @@ protected function reset_seq($table,$primary) {
 	return $sql;
 }
 //==============================================================================
+//	CONCAT FIELDS
+protected function concat_fields($arr) {
+	return (count($arr)>1) ? 'concat(' . implode(',',$arr) . ')' : $arr[0];
+}
+//==============================================================================
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
 //	debug_log(DBMSG_HANDLER,['SQL' => $sql]);
