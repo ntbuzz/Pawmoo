@@ -436,17 +436,18 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                     } else $val = NULL;
 				}
                 break;
-            case '^':       // both ENV or REQ VAR
-            case '"':       // REQ-VAR
+            case '^':       // both ENV or POST VAR
+            case '"':       // POST-VAR
             case "'":       // ENV-VAR
                 if(substr($var,-1) === $var[0]) {     // check end-char
                     $tt = $var[0];
                     $var = trim($var,$tt);
-                    if($tt === '^') {
-                        $val = MySession::getEnvIDs($var,true);	// scalar-Get
-                        if($val !== '') break;
-                    }
-					$val = ($tt==="'") ? MySession::getEnvIDs($var,true) : App::PostElements($var);
+					switch($tt) {
+					case "'":$val = MySession::getEnvIDs($var);break;
+					case '^':$val = MySession::getEnvIDs($var);	// scalar-Get
+							 if($val !== '') break;	// empty will be try to POST
+					case '"':$val = App::PostElements($var);
+					}
                 }
                 break;
 			// cannot use in RESOURCE (AppStyle)
