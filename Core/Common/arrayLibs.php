@@ -45,14 +45,11 @@ function array_item_value(&$arr,$key,$default=NULL) {
 //==============================================================================
 //  To compensate array, fixed count
 function array_alternative($a,$max = 0, $b = []) {
-    $n = count($b);
-    if($max === 0) $max = $n;
-    else if($n < $max) $b += array_fill($n,$max - $n,NULL);
-    else $b = array_slice($b,0,$max);
-    foreach($b as $key => $val) {
-        if(empty($a[$key])) $a[$key] = $val;
-    }
-    return $a;
+	$c = ($max === 0)?$a:array_fill(0,$max,NULL);		// make counter array
+	$d = array_map(function($base,$val,$alt) {
+			return ($val === NULL) ? $alt: $val;
+		},$c,$a,$b);
+	return $d;
 }
 //==============================================================================
 // strpos for array version
@@ -136,9 +133,10 @@ function array_key_value($arr,$sep=',',$quote='') {
 function array_filter_values($arr,$filter,$alt=[]) {
 	$val = [];
 	if(is_array($arr)) {
-		$alt_filter = array_combine($filter,array_alternative($alt,count($filter)));
-		foreach($alt_filter as $key => $alt_val)
-			$val[] = (array_key_exists($key,$arr)) ? $arr[$key] : $alt_val;
+		for($n=count($alt);$n<count($filter);++$n) $alt[$n] = NULL;
+		$val = array_map(function($k,$v) use(&$arr) {
+					return array_key_exists($k,$arr) ? $arr[$k] : $v;
+					},$filter,$alt);
 	} else {
 		$val = array_fill(0,count($filter),NULL);
 	}
@@ -179,7 +177,7 @@ function array_key_exists_recursive($key,$arr) {
 //==============================================================================
 // array-key duplicate avoidance
 function array_key_unique($key,&$arr) {
-    $wkey = $key;
+    $wkey = tag_body_name($key);
     for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}::#{$n}";
     return $key;
 }
