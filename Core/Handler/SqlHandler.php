@@ -20,6 +20,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private $handler;		// Databas Handler Name
 	public $relations;		// relation tables
 	private $LastSQL;		// Last Query WHERE term
+	protected $Primary;		// for FUTURE
 	protected $LastCond;	// for DEBUG
 	protected $LastBuild;	// for DEBUG
 	protected $LIKE_opr = 'LIKE';		// Ignore Upper/Lower case LIKE
@@ -59,8 +60,9 @@ function __construct($table,$handler) {
 	}
 //==============================================================================
 // setupRelations: relation table reminder
-public function setupRelations($relations) {
+public function setupRelations($primary,$relations) {
 	$this->relations = $relations;
+	$this->Primary = $primary;
 //	debug_log(DBMSG_HANDLER,["RELATIONS" => $this->relations]);
 }
 //==============================================================================
@@ -123,12 +125,19 @@ public function SetPaging($pagesize, $pagenum) {
 	debug_log(FALSE,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
 }
 //==============================================================================
+//	QUERY Command: generate SELECT DISTINCT
+// private function QueryCommand($param) {
+// //	return "SELECT DISTINCT on({$this->Primary} {$param}";
+// 	return "SELECT DISTINCT {$param}";
+// }
+//==============================================================================
 //	getRecordCount($cond) 
 //		get $cond match record count
 //==============================================================================
 public function getRecordCount($cond) {
 	$where = $this->sql_makeWHERE($cond);	// 検索条件
-	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
+	$sql = "SELECT DISTINCT count(*) as \"total\" FROM {$this->table}";
+//	$sql = $this->QueryCommand("count(*) as \"total\" FROM {$this->table}";
 	$this->SQLdebug($sql,$where);
 	$this->execSQL("{$sql}{$where};");
 	$field = $this->fetch_array();
@@ -184,7 +193,7 @@ public function getGroupCalcList($cond,$groups,$calc,$sortby,$max) {
 		$sort = " ORDER BY ".implode(',',$col);
 	}
 	$limit = ($max > 0) ? (($this->is_offset) ? " offset 0 limit {$max}" : " limit 0,{$max}"):'';
-	$sql = "SELECT {$sel} FROM {$this->raw_table}{$where} GROUP BY {$grp}{$sort}{$limit};";
+	$sql = "SELECT DISTINCT  {$sel} FROM {$this->raw_table}{$where} GROUP BY {$grp}{$sort}{$limit};";
 	$this->execSQL($sql,false);
 debug_log(DBMSG_HANDLER,["LOG-Aggregate" => [ 'COND' => $cond,'SQL'=>$sql]]);
 	return $sql;
@@ -198,7 +207,7 @@ debug_log(DBMSG_HANDLER,["LOG-Aggregate" => [ 'COND' => $cond,'SQL'=>$sql]]);
 //==============================================================================
 public function findRecord($cond,$use_relations = FALSE,$sort = []) {
 	$where = $this->sql_makeWHERE($cond);
-	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
+	$sql = "SELECT DISTINCT  count(*) as \"total\" FROM {$this->table}";
 	$this->execSQL("{$sql}{$where};",FALSE);		// No Logging
 	$field = $this->fetch_array();
 	$this->recordMax = ($field) ? $field["total"] : 0;
@@ -270,7 +279,7 @@ public function deleteRecord($wh) {
 		$sql = implode(',',$fields);
 //		$groupby = (empty($grp)) ? '' : " GROUP BY \"{$grp}\"";
 		$this->SQLdebug($sql,$where);
-		$sql = "SELECT {$sql} FROM {$table}{$where} ORDER BY \"{$id}\";";
+		$sql = "SELECT DISTINCT  {$sql} FROM {$table}{$where} ORDER BY \"{$id}\";";
 		return $sql;
 	}
 //==============================================================================
@@ -281,7 +290,7 @@ public function deleteRecord($wh) {
 			foreach(array_combine($key,$val) as $k => $v) $expr[] = "(\"{$k}\"='{$v}')";
 			$sql = implode(' AND ',$expr);
 		} else $sql = "\"{$key}\"='{$val}'";
-		return "SELECT * FROM {$this->table} WHERE {$sql};";
+		return "SELECT DISTINCT  * FROM {$this->table} WHERE {$sql};";
 	}
 //==============================================================================
 // escape to single-quote(')
@@ -302,7 +311,7 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 //		....
 //	]
 	private function sql_JoinTable($use_relations) {
-		$sql = "SELECT {$this->table}.*";
+		$sql = "SELECT DISTINCT  {$this->table}.*";
 		$frm = " FROM {$this->table}";
 		$jstr = '';
 		if($use_relations && !empty($this->relations)) {
@@ -375,13 +384,15 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 				foreach(str_explode('+',$key) as $cmp) {
 					$cmp = $this->fieldAlias->get_lang_alias($cmp);
 					$fn = "{$table}.\"{$cmp}\"";
-					if(mb_strpos($val,'%') !== FALSE) {
-						$fn = "cast({$fn} as text)";
-					}
-					$expr[] = "({$fn} {$op} {$val})";
+					$expr[] = $fn;
 				}
-				$opp = implode('OR',$expr);
-				return (count($expr)===1) ? $opp : "({$opp})";
+				if(mb_strpos($val,'%') !== FALSE) {
+					$opc = $this->concat_fields($expr);
+					return "({$opc} {$op} {$val})";
+				} else {
+					$expr = array_map(function($k) use(&$op,&$val) { return "({$k} {$op} {$val})"; },$expr);
+					return '(' . implode('OR',$expr) . ')';
+				}
 			};
 			$opc = ''; $and_or_op = ['AND','OR','NOT'];
 			foreach($items as $key => $val) {
@@ -459,9 +470,9 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 					} else if(!is_numeric($val)) $val = "'{$val}'";
 					$opp = $multi_field($key,$op,$table,$val);
 				}
-				$opc = (empty($opc)) ? "{$opp}" : "({$opc}{$opr}{$opp})";
+				$opc = (empty($opc)) ? $opp : "{$opc}{$opr}{$opp}";
 			}
-			return (empty($opc)) ? '' : "{$opc}";	// ((count($items)===1) ? $opc : "({$opc})");
+			return (empty($opc)) ? '' : "({$opc})";
 		};
 		$sql = $dump_object('AND',$cond,$target_table);
 		return $sql;
