@@ -130,10 +130,9 @@ function array_key_value($arr,$sep=',',$quote='') {
     return implode($sep,$arr);
 }
 //==============================================================================
+// array filter by key,not exist key to alt[] value
 function array_filter_values($arr,$filter,$alt=[]) {
-	$val = [];
 	if(is_array($arr)) {
-		for($n=count($alt);$n<count($filter);++$n) $alt[$n] = NULL;
 		$val = array_map(function($k,$v) use(&$arr) {
 					return array_key_exists($k,$arr) ? $arr[$k] : $v;
 					},$filter,$alt);
@@ -143,23 +142,18 @@ function array_filter_values($arr,$filter,$alt=[]) {
 	return $val;
 }
 //==============================================================================
+// import $filter keys from $items..., overttide latest item.
 function array_filter_import($ignore,$filter,...$items) {
-	$new_filter = [];
-	foreach($filter as $key) {
-		if($ignore) $new_filter[strtolower($key)] = strtoupper($key);
-		else $new_filter[$key] = NULL;
-	}
-	$n = count($new_filter);
-	$vals = array_combine(array_keys($new_filter),array_fill(0,$n,NULL));
-	foreach($items as $arr)
-		if(is_array($arr) && !empty($arr)) {
-			foreach($new_filter as $key => $val) {
-				// uppercase check if ignore is TRUE
-				if($val !== NULL && array_key_exists($val,$arr)) $vals[$key] = $arr[$val];
-				// origin or lower case check
-				if(array_key_exists($key,$arr)) $vals[$key] = $arr[$key];
+	if($ignore) $filter = array_map(function($v) { return strtolower($v);},$filter);
+	$vals = array_combine($filter,array_fill(0,count($filter),NULL));
+	foreach($items as $arr) {
+		if(is_array($arr)) {
+			foreach($arr as $k => $v) {
+				if($ignore) $k = strtolower($k);
+				if(array_key_exists($k,$vals)) $vals[$k] = $v;
 			}
 		}
+	}
 	return array_values($vals);
 }
 //==============================================================================
@@ -297,7 +291,7 @@ function condition_array($keyset,$keystr) {
 //==============================================================================
 // get AND condition array by separate SPC word from find keyword
 function condition_array_multi($keyset,$keystr) {
-	$and_str = explode(' ',str_replace(['　','  '],' ',$keystr));
+    $and_str = str_explode(['　',' '],$keystr);
 	$and_cond = [];
     foreach($and_str as $and_val) {
 		$cond = [];
