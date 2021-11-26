@@ -203,13 +203,8 @@ function make_hyperlink($lnk,$modname=NULL) {
 //==============================================================================
 // MARKING WORD by SPAN CLASS
 function mark_active_words($atext,$word,$class) {
-	$ln = array_values(array_map('trim', explode("\n", $atext)));
-	$ret = array();
-	foreach($ln as $ll) {
-    	$ll = preg_replace("/(${word})/i","<span class='{$class}'>\\1</span>", $ll);
-		$ret[] = $ll;
-	}
-	return implode("\n",$ret);
+ 	$reg = implode('|',str_explode(['　',' '],$word));
+	return preg_replace("/({$reg})/i","<span class='{$class}'>\\1</span>", $atext);
 }
 //==============================================================================
 // password encryption
