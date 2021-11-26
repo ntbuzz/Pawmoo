@@ -375,8 +375,7 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 						},$val);
 					$expr[] = implode('OR',$cmp);
 				}
-				$opp = implode('OR',$expr);
-				return (count($expr)===1) ? $opp : "({$opp})";
+				return implode('OR',$expr);
 			};
 			// multi-columns f1+f2+f3...  OP val
 			$multi_field = function($key,$op,$table,$val) {
@@ -388,11 +387,12 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 				}
 				if(mb_strpos($val,'%') !== FALSE) {
 					$opc = $this->concat_fields($expr);
-					return "({$opc} {$op} {$val})";
-				} else {
+					return "{$opc} {$op} {$val}";
+				} else if(count($expr) > 1) {
 					$expr = array_map(function($k) use(&$op,&$val) { return "({$k} {$op} {$val})"; },$expr);
-					return '(' . implode('OR',$expr) . ')';
+					return implode(' OR ',$expr);
 				}
+				return "{$expr[0]} {$op} {$val}";
 			};
 			$opc = ''; $and_or_op = ['AND','OR','NOT'];
 			foreach($items as $key => $val) {
@@ -403,7 +403,7 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 						if(in_array($key,$and_or_op,true)) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
-							if($key === 'NOT') $opp = "(NOT {$opp})";
+							if($key === 'NOT') $opp = "NOT ({$opp})";
 						} else { // LIKE [ array ]
 							$opp = $like_object($key,$val,$table);
 						}
@@ -470,11 +470,12 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 					} else if(!is_numeric($val)) $val = "'{$val}'";
 					$opp = $multi_field($key,$op,$table,$val);
 				}
-				$opc = (empty($opc)) ? $opp : "{$opc}{$opr}{$opp}";
+				$opc = (empty($opc)) ? $opp : "({$opc}) {$opr} ({$opp})";
 			}
-			return (empty($opc)) ? '' : "({$opc})";
+			return $opc;
 		};
 		$sql = $dump_object('AND',$cond,$target_table);
+debug_xdump(['COND'=>$cond,'SQL'=>$sql]);
 		return $sql;
 	}
 
