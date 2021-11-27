@@ -441,15 +441,15 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 						if(is_scalar($rel)) {
 							list($tbl,$fn) = explode('.',$rel);
 							$ops = $dump_object('AND',$val,$tbl);
-							$opp = "({$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE {$ops}))";
+							$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE ({$ops}))";
 						} else {
 							list($tbl,$tbl_prim,$tbl_rel,$rel_tbl,$rel_fn,$fn) = $rel;
 							$fid = id_relation_name($tbl_rel)."_{$fn}";
 							list($kk,$vv) = array_first_item($val);		// because each element will be same table,id
 							$val = [str_replace($fid,$fn,$kk) => $vv]; // change rel-level field key
 							$ops = $dump_object('AND',$val,$rel_tbl);
-							$ops = "({$tbl}.\"{$tbl_rel}\" IN (SELECT Distinct({$rel_tbl}.\"{$rel_fn}\") FROM {$rel_tbl} WHERE {$ops}))";
-							$opp = "({$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$tbl_prim}\") FROM {$tbl} WHERE {$ops}))";
+							$ops = "{$tbl}.\"{$tbl_rel}\" IN (SELECT Distinct({$rel_tbl}.\"{$rel_fn}\") FROM {$rel_tbl} WHERE ({$ops}))";
+							$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$tbl_prim}\") FROM {$tbl} WHERE ({$ops}))";
 						}
 					} else continue;
 				} else if(is_array($val)) {
