@@ -11,7 +11,6 @@ class App {
     public static $Referer;         // HTTP_REFERER 変数
     public static $Query;           // urlのクエリー文字列の連想配列 = $_GET
     public static $Post;            // FORM POSTの連想配列 = $_POST
-	public static $emptyRequest;	// GET/POST のデータ無しフラグ
     public static $Filter;          // メソッドのフィルタ配列の先頭
     public static $Filters;         // メソッドのフィルタ配列
     public static $Params;          // メソッドの数値パラメータ配列
@@ -35,7 +34,6 @@ class App {
 
 		static::$Query	 = xchange_Boolean($_GET);				// same as query string
 		static::$Post	 = xchange_Boolean($_POST);				// same as form POST string
-		static::$emptyRequest = empty($_POST) && empty($_GET);
 		self::ChangeParams($params,false);
         // メソッドの書き換えによるアドレスバー操作用
         static::$execURI = [

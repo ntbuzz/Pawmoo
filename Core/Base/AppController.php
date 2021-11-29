@@ -200,21 +200,19 @@ public function AutoPaging($cond, $max_count = 100) {
 	list($sCond,$sSize,$sURI,$sEnv) = array_filter_values($Page,['Cond','Size','URI','ENV']);
 	list($sQuery,$sPost) = $sEnv;
 	if($num === 0) $num = 1;
-	if($size === 0) {
-		$size = intval($sSize);
-		if($size === 0) $size = $max_count;
-	}
 	$comp = array_intersect($cond,$sCond);	// same condition pickup
-	if($uri === $sURI && $num > 1 && $cond === $comp && App::$emptyRequest)  {
+	if($uri === $sURI && $num > 1 && $cond === $comp)  {
 		$cond = $sCond;				// repeat by saved condition
-		if($size !== intval($sSize)) $num = 1;	// different size must be jump to Page-1
 		App::$Query = $sQuery;
 		App::$Post = $sPost;
+		if($size === 0) $size = intval($sSize);
 	} else {
 		$Page['Cond'] = $cond;
 		$Page['URI'] = $uri;
 		$Page['ENV'] = [App::$Query,App::$Post];
 	}
+	if($size === 0) $size = $max_count;
+	if($size !== intval($sSize)) $num = 1;	// different size must be jump to Page-1
 	$cnt = $this->Model->getCount($cond);
 	if($cnt < $size )  $Page = NULL;	// no-NEED Paging
 	else {
@@ -224,6 +222,7 @@ public function AutoPaging($cond, $max_count = 100) {
 		App::ChangeParams([$num,0]);
 		$this->Model->SetPage($size,$num);
 	}
+	MySession::setPagingIDs('Size',$size);
 	MySession::setPagingIDs('Setup',$Page);
 	return $cond;
 }
