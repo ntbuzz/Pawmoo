@@ -354,41 +354,36 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 //		fieldkey => findvalue
 	private function makeExpr($cond,$target_table) {
 		$dump_object = function ($opr,$items,$table)  use (&$dump_object)  {
-			// LIKE operation build
-			$like_opstr = function($v) {
-				if($v[0] == '-' && strlen($v) > 1) {
-					$v = mb_substr($v,1);
-					$op = "NOT {$this->LIKE_opr}";
-				} else $op = $this->LIKE_opr;
-				if(mb_strpos($v,'%') === FALSE) $v = "%{$v}%";
-				return ["'{$v}'",$op];
-			};
-			// multi-column LIKE op
-			$like_object = function($key,$val,$table) use(&$like_opstr) {
-				$expr = [];
-				foreach(str_explode('+',$key) as $cmp) {
-					$cmp = $this->fieldAlias->get_lang_alias($cmp);
-					$opk = "{$table}.\"{$cmp}\"";
-					$cmp = array_map(function($v) use(&$opk,&$like_opstr) {
-							list($v,$opx) = $like_opstr($v);
-							return "(cast({$opk} as text) {$opx} {$v})";
-						},$val);
-					$expr[] = implode('OR',$cmp);
-				}
-				return implode('OR',$expr);
-			};
 			// multi-columns f1+f2+f3...  OP val
 			$multi_field = function($key,$op,$table,$val) {
-				$expr = [];
-				foreach(str_explode('+',$key) as $cmp) {
-					$cmp = $this->fieldAlias->get_lang_alias($cmp);
-					$fn = "{$table}.\"{$cmp}\"";
-					$expr[] = $fn;
-				}
-				if(mb_strpos($val,'%') !== FALSE) {
+				// field name arranged
+				$expr = array_map( function($v) use(&$table) {
+					$cmp = $this->fieldAlias->get_lang_alias($v);
+					return "{$table}.\"{$cmp}\"";
+				},str_explode('+',$key));
+				if($op === NULL) {		// need LIKE or NOT LIKE
+					// LIKE operation build
+					$like_opstr = function($v) {
+						if($v[0] == '-' && strlen($v) > 1) {
+							$v = mb_substr($v,1);
+							$op = "NOT {$this->LIKE_opr}";
+						} else $op = $this->LIKE_opr;
+						if(trim($v,'%') === $v) $v = "%{$v}%";
+						return [$v,$op];
+					};
 					$opc = $this->concat_fields($expr);
-					return "{$opc} {$op} {$val}";
-				} else if(count($expr) > 1) {
+					if(is_array($val)) {
+						$lexpr = array_map( function($v) use(&$opc,&$like_opstr) {
+							list($v,$x) = $like_opstr($v);
+							return "({$opc} {$x} '{$v}')";
+						},$val);
+						return implode(' OR ',$lexpr);
+					} else {
+						list($v,$opx) = $like_opstr($val);
+						return "{$opc} {$opx} '{$v}'";
+					}
+				}
+				if(count($expr) > 1) {
 					$expr = array_map(function($k) use(&$op,&$val) { return "({$k} {$op} {$val})"; },$expr);
 					return implode(' OR ',$expr);
 				}
@@ -405,7 +400,7 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 							$opp = $dump_object($opx,$val,$table);
 							if($key === 'NOT') $opp = "NOT ({$opp})";
 						} else { // LIKE [ array ]
-							$opp = $like_object($key,$val,$table);
+							$opp = $multi_field($key,NULL,$table,$val);
 						}
 					} else { // not have op code
 						if(mb_strpos($val,'...') !== FALSE) {
@@ -423,7 +418,7 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';
 						} else {
-							list($val,$op) = $like_opstr($val);
+							$op = NULL;
 						}
 						$opp = $multi_field($key,$op,$table,$val);
 					}
@@ -459,7 +454,7 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 						$opx = $in_op[$op];
 						$opp = $multi_field($key,$opx,$table,"({$cmp})");
 					} else {	// LIKE [ array ]
-						$opp = $like_object($key,$val,$table);
+						$opp = $multi_field($key,NULL,$table,$val);
 					}
 				} else {
 					if($val === NULL) {
