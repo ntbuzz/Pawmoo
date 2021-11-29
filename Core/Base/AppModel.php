@@ -73,6 +73,11 @@ public function is_exist_column($name) {
 	return array_key_exists($name,$this->dbDriver->columns);
 }
 //==============================================================================
+// get exist columns list
+public function get_exist_columns($names) {
+	return array_filter_values($names,function($v) { return array_key_exists($v,$this->dbDriver->columns);});
+}
+//==============================================================================
 // Switch Schema Language
 public function ResetSchema() {
     $this->SchemaAnalyzer();
