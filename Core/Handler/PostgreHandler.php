@@ -8,7 +8,7 @@
 class PostgreHandler extends SQLHandler {
 	protected $LIKE_opr = 'LIKE';		// 大文字小文字の無視比較
 //==============================================================================
-//	コンストラクタ：　データベースのテーブルに接続する
+//	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table) {
 		parent::__construct($table,'Postgre');
 	}

@@ -8,7 +8,7 @@
 //	SQLite3用の抽象メソッドを実装する
 class MySQLHandler extends SQLHandler {
 //==============================================================================
-//	コンストラクタ：　データベースのテーブルに接続する
+//	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table) {
 		parent::__construct($table,'MySQL');
 	}

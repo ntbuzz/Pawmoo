@@ -10,7 +10,7 @@ class SQLiteHandler extends SQLHandler {
 	protected $NULL_ORDER = '';	// NULL の順序
 
 //==============================================================================
-//	コンストラクタ：　データベースのテーブルに接続する
+//	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table) {
 		parent::__construct($table,'SQLite');
 	}

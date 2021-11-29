@@ -5,7 +5,7 @@ class NullHandler {
 	public  $DateStyle = 'Y-m-d';
 	public  $TimeStyle = 'H:i:s';
 //==============================================================================
-//	コンストラクタ：　データベースのテーブルに接続する
+//	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table) {
 		$this->fields = [];
 		$this->fieldAlias = new fieldAlias();

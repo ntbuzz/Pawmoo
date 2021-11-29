@@ -83,7 +83,7 @@ static function getEnvValues(...$keys) {
 	foreach($keys as $nm) $result[] = (array_key_exists($nm,static::$EnvData)) ? static::$EnvData[$nm] : '';
 	return $result;
 }
-// 廃止　→ getEnvValues() の引数ひとつで代用可
+// 廃止 → getEnvValues() の引数ひとつで代用可
 // static function getEnvData($keys) {
 // 	return (array_key_exists($key,static::$EnvData)) ? static::$EnvData[$key] : NULL;
 // }

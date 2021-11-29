@@ -21,7 +21,7 @@ abstract class LoginClass extends AppModel {
 		}
 	}
 //==============================================================================
-//　Default User Info for CLI Debug
+// Default User Info for CLI Debug
 public function defaultUser() {
 	static::$LoginUser = [
 		'userid'	=>	'guest',
@@ -35,7 +35,7 @@ public function defaultUser() {
 	return $udata;
 }
 //==============================================================================
-//　ログインエラー時のメッセージ配列(app-login.phpで参照)
+// ログインエラー時のメッセージ配列(app-login.phpで参照)
 //  メッセージをカスタマイズする時はこのメソッドをoverrideする
 public function retryMessages($userid) {
 	return [
@@ -50,7 +50,7 @@ public function retryMessages($userid) {
 	];
 }
 //==============================================================================
-//　Default User Info for CLI Debug
+// Default User Info for CLI Debug
 public function reload_userdata($udata) {
 	list($uid,$lang,$region) = $udata;
 	if($lang !== LangUI::$LocaleName) {
@@ -62,7 +62,7 @@ public function reload_userdata($udata) {
 	static::$LoginUser = $data;
 }
 //==============================================================================
-//　ユーザーIDの妥当性を検証する
+// ユーザーIDの妥当性を検証する
 //	失敗: FALSE
 //	成功: [ID,LANG,REGION]
 public function is_validUser($userid,$passwd = NULL) {
