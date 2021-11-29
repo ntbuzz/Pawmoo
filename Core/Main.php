@@ -190,7 +190,6 @@ if($controllerInstance->is_authorised($exemethod)) {
 		'FORM' => [
 			"GET"	=> App::$Query,
 			"POST"	=> App::$Post,
-	        "EMPTY"	=> App::$emptyRequest ,
 		],
         "SESSION-ALIVE"	=> date('Y/m/d H:i:s',$life_time)." ({$life_time})",
         "SESSION Variables" => [
