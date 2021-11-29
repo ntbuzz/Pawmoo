@@ -85,7 +85,7 @@ public function SetLayout($layoutfile) {
 //==============================================================================
 // Output layout
 //==============================================================================
-public function PutLayout($layout = NULL) {
+public function PutLayout($layout = NULL,$vars=[]) {
     if($layout === NULL) $layout = $this->Layout;
     debug_log(DBMSG_VIEW, "\$Layout = {$layout}");
 	$this->LayoutMode = TRUE;
@@ -94,6 +94,8 @@ public function PutLayout($layout = NULL) {
         $Helper = $this->Helper;
 		require_once ($tmplate);
 	}
+	// setvar from caller
+	foreach($vars as $key => $val) $this->env_vars[$key] = $val;
     $this->ViewTemplate($layout);
 }
 //==============================================================================
@@ -114,7 +116,7 @@ public function __TerminateView() {
     }
 }
 //==============================================================================
-//　Template file OUTPUT
+// Template file OUTPUT
 public function ViewTemplate($name,$vars = []) {
     $tmplate = $this->get_TemplateName($name);
     if(isset($tmplate)) {
