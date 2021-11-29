@@ -111,7 +111,7 @@ public function ViewHeader() {
     header("Content-Type: {$this->Template['head']};");
 }
 //==============================================================================
-//　Style Template Output
+// Style Template Output
 public function ViewStyle($file_name) {
     $temlatelist = $this->get_exists_files('template.mss');
     list($filename,$ext) = extract_base_name($file_name);
@@ -138,7 +138,7 @@ public function ViewStyle($file_name) {
     }
 }
 //==============================================================================
-//　Section Style Template Porcessing
+// Section Style Template Porcessing
 //  $templist   List of Template Folders
 //  $secname    Target SECTION name
     private function section_styles($tmplist, $secname) {
