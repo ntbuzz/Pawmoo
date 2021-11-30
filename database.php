@@ -18,7 +18,6 @@ if(!defined('CLI_DEBUG')) define('CLI_DEBUG',FALSE);
 
 require_once('Core/AppDebug.php');
 require_once('Core/Common/appLibs.php');
-//require_once('Core/Class/session.php');
 require_once('Core/Common/coreLibs.php');
 require_once('Core/Handler/DatabaseHandler.php');
 require_once('Core/Base/AppDatabase.php');
