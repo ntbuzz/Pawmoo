@@ -176,7 +176,6 @@ function make_hyperlink($lnk,$modname=NULL) {
         switch(mb_substr($lnk,0,1)) {
         case '#':
         case '?': break;        // label or query
-//        case ':': $lnk[0] = '/'; break;
         case ':': $lnk = App::Get_AppRoot(mb_substr($lnk,1)); break;
         case '/': $lnk = App::Get_SysRoot($lnk); break;
         case '!':
@@ -193,8 +192,6 @@ function make_hyperlink($lnk,$modname=NULL) {
 				if($modname === NULL) $modname = App::$Controller;
                 $lnk = substr_replace($lnk, strtolower($modname), 0, 1);
                 $lnk = App::Get_AppRoot($lnk);
-            // } else  {
-            //     $lnk = App::Get_AppRoot($lnk);
             }
         }
     }

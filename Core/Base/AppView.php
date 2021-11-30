@@ -509,7 +509,6 @@ public function ViewTemplate($name,$vars = []) {
     private function directOutput($beg_tag, $end_tag,$sec,$vars) {
         $txt = $this->expand_Strings(((is_array($sec)) ? array_to_text($sec) : $sec),$vars);
 		if(is_array($txt)) $txt = array_to_text($txt);
-//debug_log(DBMSG_DIE,['DIREC'=>$sec,$txt]);
         echo "{$beg_tag}\n{$txt}\n{$end_tag}\n";
     }
     //--------------------------------------------------------------------------

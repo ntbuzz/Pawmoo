@@ -358,14 +358,12 @@ public function GetValueList() {
     $this->Select= [];
 	$keyset = array_keys($this->SelectionDef);
 	$this->LoadSelection($keyset);
-    debug_log(DBMSG_MODEL, [ "SELECT_LIST" => $this->Select]);
 }
 //==============================================================================
 //   Get Field Value List
 // Result:  Select array
 public function getFieldValues($id,$field, $cond = NULL) {
     $select = $this->dbDriver->getValueLists(NULL,$field,$id,$cond);
-//    debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $select]);
 	return $select;
 }
 //==============================================================================
@@ -428,7 +426,7 @@ public function SelectFinder($chain, $filter, $cond) {
 		}
 	}
 	if(!$chain) ksort($data,SORT_FLAG_CASE|SORT_STRING);
-    debug_log(DBMSG_NONE, [
+    debug_xlog(DBMSG_NONE, [
         "Filter" => $filter,
         "COND" => $cond,
         "RECORDS" => $data,
@@ -466,7 +464,6 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
         }
     }
     $this->Records = $data;
-//    debug_log(DBMSG_CLI, ['DATA'=>$data]);
     debug_log(FALSE, [
         "record_max" => $this->record_max,
         "Filter" => $filter,
@@ -588,7 +585,7 @@ public function is_valid(&$row) {
             $alias = ($this->AliasMode) ? $this->dbDriver->fieldAlias->get_lang_alias($key) :$key;
             $this->fields[$alias] = $val;
         }
-        debug_log(DBMSG_MODEL,['ALIAS' => $this->fields]);
+        debug_xlog(DBMSG_MODEL,['ALIAS' => $this->fields]);
     }
 //==============================================================================
 // POST-name convert to Real field name by PostRenames[]

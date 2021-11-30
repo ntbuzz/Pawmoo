@@ -207,8 +207,6 @@ function array_flat_reduce($arr) {
                     $reduce_array($val);
                 } else if(isset($wx[$key])) {
                     $wx[] = $val;
-                // } else if(is_numeric($key)) {
-                //     $wx[] = $val;
                 } else {
                     $wx[$key] = $val;
                 }
@@ -294,14 +292,6 @@ function condition_array_multi($keyset,$keystr) {
     $and_str = str_explode(['　',' '],$keystr);
 	$and_cond = [];
     foreach($and_str as $and_val) {
-		// $cond = [];
-		// foreach(explode('|',$and_val) as $val) {
-		// 	if(mb_substr($val,0,1)==='-') {
-		// 		$val = mb_substr($val,1);
-		// 		$cond[] = ['NOT' => [$keyset => $val]];
-		// 	} else  $cond[] = [$keyset => $val];
-		// }
-		// $and_cond[] = ['OR'=>$cond];
 		if(mb_strpos($and_val,'|')!==false) $and_val = explode('|',$and_val);
 		$and_cond[] = [$keyset => $and_val];
 	}

@@ -24,13 +24,6 @@ class AppHelper  extends AppObject {
 		' align="right"',		// 3 right
 	];
 //==============================================================================
-// constructor( this_Owner_Object )
-/*
-	function __construct($owner) {
-		parent::__construct($owner);
-	}
-*/
-//==============================================================================
 // Call for Owner(AppView) Template Processing Method
 public function ViewTemplate($layout) {
 	$this->AOwner->ViewTemplate($layout);
@@ -181,10 +174,8 @@ public function MakePageLinks($args) {
 		echo "<tr class='item' id='{$columns->Primary}'>";
 		foreach($this->Model->HeaderSchema as $key => $val) {
 			list($alias,$align,$flag,$c_wd) = $val;
-//			$style = ($c_wd > 0) ? " style='width:{$c_wd}px;'":'';
-			$style = '';
 			$pos = self::AttrAlign[$align];
-			echo "<td{$pos}{$style}>{$columns->$key}</td>";
+			echo "<td{$pos}>{$columns->$key}</td>";
 		}
 		echo "</tr>\n";
 	}
