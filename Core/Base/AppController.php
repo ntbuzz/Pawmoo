@@ -196,8 +196,9 @@ public function AutoPaging($cond, $max_count = 100) {
 	$cond = re_build_array($cond);
 	$uri = App::Get_PagingPath();
 	// check SAVED Paging-Param
+	$sSize = MySession::getPagingIDs('Size');
 	$Page = MySession::getPagingIDs('Setup');
-	list($sCond,$sSize,$sURI,$sEnv) = array_filter_values($Page,['Cond','Size','URI','ENV']);
+	list($sCond,$sURI,$sEnv) = array_filter_values($Page,['Cond','URI','ENV']);
 	list($sQuery,$sPost) = $sEnv;
 	if($num === 0) $num = 1;
 	$comp = array_intersect($cond,$sCond);	// same condition pickup
@@ -218,7 +219,6 @@ public function AutoPaging($cond, $max_count = 100) {
 	else {
 		$last = ($num - 1) * $size;		// check LAST-Page#
 		if($last  > $cnt) $num = 1;
-		$Page['Size'] = $size;
 		App::ChangeParams([$num,0]);
 		$this->Model->SetPage($size,$num);
 	}
