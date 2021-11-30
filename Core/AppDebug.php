@@ -98,6 +98,9 @@ public static function debug($items) {
 public static function halt($items) {
     debug_log(DBMSG_DIE,$items);
 }
+public static function stderr($items) {
+    debug_log(DBMSG_STDERR,$items);
+}
 
 }
 //==========================================================================
@@ -138,6 +141,9 @@ function debug_dump($items) {
 }
 function debug_die($items) {
 	sysLog::halt($items);
+}
+function debug_stderr($items) {
+	sysLog::stderr($items);
 }
 function stderr($str) {
 	fputs(STDERR,"{$str}\n");
