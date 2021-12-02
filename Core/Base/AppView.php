@@ -240,13 +240,12 @@ public function ViewTemplate($name,$vars = []) {
         foreach($arr as $key => $val) {
             if($key[0]==='?') {
                 $ret = $if_selector($val,mb_substr($key,1));
-                if(is_scalar($ret)) $ret = [$key => $ret];
-                foreach($ret as $kk => $vv) {
-                    if(is_numeric($kk)) $wd[] = $this->expand_Strings($vv,$vars);
-                    else {
-                        set_array_key_unique($wd,$kk,$vv);
-                    }
-                }
+				$ret2 = (is_scalar($ret)) ? [ $ret ] : $this->array_if_selector($ret, $vars);
+debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
+				foreach($ret2 as $kk => $vv) {
+					if(is_numeric($kk)) $wd[] = $this->expand_Strings($vv,$vars);
+					else set_array_key_unique($wd,$kk,$vv);
+				}
             } else set_array_key_unique($wd,$key,$val);
         }
         return $wd;
