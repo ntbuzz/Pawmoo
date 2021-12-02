@@ -43,7 +43,7 @@ class App {
 			'filter' => NULL,
 			'params' => static::$Params,
 		];
-		list($uri,$q) = array_alternative(explode('?',$_SERVER['REQUEST_URI']),2);
+		list($uri,$q) = fix_explode('?',$_SERVER['REQUEST_URI'],2);
         static::$SysVAR = array(
             'SERVER'	=> $_SERVER['SERVER_NAME'],
             'SYSROOT'	=> static::$sysRoot,
@@ -91,7 +91,7 @@ public static function SetModuleExecution($module,$method,$change_filter=[],$rel
 	} else {
 		static::$MethodExtention = FALSE;
 	}
-    static::$execURI['controller'] = strtolower($module);
+    if(!empty($module)) static::$execURI['controller'] = strtolower($module);
     static::$execURI['method'] = strtolower($method);
     if(is_array($change_filter)) static::$execURI['filter'] = $change_filter;
     static::$ReLocate = $relocate;
@@ -122,7 +122,7 @@ private static function get_extensionURL() {
 //==============================================================================
 // パラメータ無しのパス
 public static function Get_PagingPath() { 
-	$path_arr = array_filter_values(static::$execURI,['root','controller','method','filter']);
+	$path_arr = array_keys_value(static::$execURI,['root','controller','method','filter']);
 	return array_to_URI($path_arr,NULL);
 }
 //==============================================================================
@@ -270,7 +270,7 @@ static function rollbackReqData($envKey,...$keys) {
             return;
         }
         //separate query string if exist
-        list($file,$q_str) = (strpos($tagfile,'?') !== FALSE) ? explode('?',$tagfile):[$tagfile,'']; 
+		list($file,$q_str) = fix_explode('?',$tagfile,2);
 		if(!empty($q_str)) $q_str = "?{$q_str}";
         $ext = substr($file,strrpos($file,'.') + 1);    // 拡張子を確認
         $path = make_hyperlink($file,static::$Controller).$q_str;

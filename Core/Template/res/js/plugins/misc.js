@@ -36,7 +36,7 @@ $.fn.ChainSelect = function () {
 		else if (typeof argv === 'object') target.selObj = argv;
 		else target.val = argv;
 	});
-	var id = this.attr('id');
+	var id = self.attr('id');
 	var sel_chain = new SelectLink(target.selObj, id, target.first_call, target.callback);
 	// 中間タグのセレクトコールバック
 	self.InProgress = function (callback) {
@@ -44,7 +44,7 @@ $.fn.ChainSelect = function () {
 	};
 	sel_chain.Select(target.val, function (v, id) {
 		if (typeof target.progress === 'function')
-			target.progress.call(this, v, id);
+			target.progress.call(self, v, id);
 	});
 	return self;
 };

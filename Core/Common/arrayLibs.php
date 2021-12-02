@@ -21,6 +21,13 @@ function str_explode($delm,$string,$trim_empty = true) {
     return $str_arr;
 }
 //==============================================================================
+// fix count explode
+function fix_explode($delm,$string,$max,$pad = '') {
+	$arr = explode($delm,$string);
+	for($n=count($arr); $n < $max ; ++$n ) $arr[] = $pad;
+    return $arr;
+}
+//==============================================================================
 // text line split by NL char, and reverse element with trim
 function explode_reverse($delm,$text) {
 	$array = array_reverse(array_filter(explode($delm,trim($text)),'strlen'));
@@ -131,10 +138,12 @@ function array_key_value($arr,$sep=',',$quote='') {
 }
 //==============================================================================
 // array filter by key,not exist key to alt[] value
-function array_filter_values($arr,$filter,$alt=[]) {
+function array_keys_value($arr,$filter,$alt=[]) {
 	if(is_array($arr)) {
 		$val = array_map(function($k,$v) use(&$arr) {
-					return array_key_exists($k,$arr) ? $arr[$k] : $v;
+					$v = array_key_exists($k,$arr) ? $arr[$k] : $v;
+					return is_numeric($v) ? intval($v) : $v;
+//					return array_key_exists($k,$arr) ? $arr[$k] : $v;
 					},$filter,$alt);
 	} else {
 		$val = array_fill(0,count($filter),NULL);

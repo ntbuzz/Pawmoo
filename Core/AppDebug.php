@@ -91,6 +91,11 @@ public static function dump($items) {
     debug_log((CLI_DEBUG)?DBMSG_STDERR:DBMSG_DUMP,$items);
 }
 //==========================================================================
+// デバッグレベルへのダンプ
+public static function debugLvl($items) {
+    debug_log(DBMSG_DEBUG,$items);
+}
+//==========================================================================
 // コマンドラインログの表示
 public static function debug($items) {
     debug_log(DBMSG_CLI,$items);
@@ -144,6 +149,9 @@ function debug_die($items) {
 }
 function debug_stderr($items) {
 	sysLog::stderr($items);
+}
+function debug($items) {
+	sysLog::debugLvl($items);
 }
 function stderr($str) {
 	fputs(STDERR,"{$str}\n");

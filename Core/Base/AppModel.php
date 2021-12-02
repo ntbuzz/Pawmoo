@@ -75,7 +75,7 @@ public function is_exist_column($name) {
 //==============================================================================
 // get exist columns list
 public function get_exist_columns($names) {
-	return array_filter_values($names,function($v) { return array_key_exists($v,$this->dbDriver->columns);});
+	return array_filter($names,function($v) { return array_key_exists($v,$this->dbDriver->columns);});
 }
 //==============================================================================
 // Switch Schema Language
@@ -83,7 +83,7 @@ public function ResetSchema() {
     $this->SchemaAnalyzer();
     $this->RelationSetup();
     $this->SelectionSetup();
-    debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
+    debug_xlog(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
 //            "Header"    => $this->HeaderSchema,
 //            "Field"     => $this->FieldSchema, 
@@ -131,7 +131,7 @@ public function ResetSchema() {
 //==============================================================================
 // extract DataTable or Alternate DataView
     private function model_view($db) {
-        list($model,$field,$refer) = explode('.', "{$db}...");
+		list($model,$field,$refer) = fix_explode('.',$db,3);
         if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
             $model = $m[1];
             $table = (is_array($this->$model->DataView))
@@ -172,7 +172,7 @@ public function ResetSchema() {
                 list($db,$ref_list) = array_first_item($rel);
                 if(is_numeric($db)) {       // maybe 'Model.id.Field'
                     if(!is_scalar($ref_list)) continue;
-                    list($d,$f,$r) = explode('.', "{$ref_list}...");
+					list($d,$f,$r) = fix_explode('.',$ref_list,3);
                     $db = "{$d}.{$f}";
                     $ref_list = $r;
                 }
@@ -187,7 +187,7 @@ public function ResetSchema() {
 				$rel_def = $rel;
             }
             $sub_rel = [];
-			list($rel_tbl,$primary) = explode('.',$rel_def);
+			list($rel_tbl,$primary) = fix_explode('.',$rel_def,2);
             foreach($ref_list as $refer) {
                 $sub_ref = $this->$model->JoinDefinition($table,$refer,$primary);
                 $alias_name = "{$base_name}_".id_relation_name($refer);
@@ -375,7 +375,7 @@ public function getRecordField($key,$value,$field) {
 	$keys = explode(',',$field);
 	$vals = array_map(function($fn) {
 			$dot = explode('.',$fn);
-			return implode(' ',array_filter_values($this->fields,$dot));
+			return implode(' ',array_keys_value($this->fields,$dot));
 		},$keys);
 	if(count($vals)===1) return $vals[0];
 	else return array_combine($keys,$vals);

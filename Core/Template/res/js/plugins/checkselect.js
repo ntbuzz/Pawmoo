@@ -248,7 +248,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 	// 選択時のコールバック登録
 	self.SelectedItem = function (callback) {
 		if (typeof callback === 'function') setting.Selected = callback;
-		return this;
+		return self;
 	};
 	// [X]マークのタグが無ければ追加する
 	if (setting.addClear) {		// ターゲットがSELF内に無い時は false にする

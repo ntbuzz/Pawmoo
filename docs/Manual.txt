@@ -1514,7 +1514,7 @@ static::$appRoot
   array_alternative($a,$max = 0, $b = []) 		配列 $a を $bにより $max要素数に拡張する
   array_concat_keys(&$arr,$keys)				$keys で指示されたキー名の要素を連結する
   array_depth($a, $c = 0) 						配列のネスト数を返す
-  array_filter_values($arr,$filter)				配列内から$filterで支持されたキー名の値を配列で返す
+  array_keys_value($arr,$filter)				配列内から$filterで支持されたキー名の値を配列で返す
   array_first_item($arr)						連想配列の最初の要素をキー名、値の配列で返す
   array_flat_reduce($arr) 						ネストされた配列をフラットな配列に変換
   array_intval($arr) 							配列要素にintval()を適用する

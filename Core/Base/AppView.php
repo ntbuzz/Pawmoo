@@ -51,6 +51,7 @@ class AppView extends AppObject {
             'textedit' 	=> 'cmd_textedit',
             'push'      => 'cmd_push',
             'php'       => 'cmd_php',
+            'for'       => 'cmd_for',
         ],
     );
     //==========================================================================
@@ -175,6 +176,7 @@ public function ViewTemplate($name,$vars = []) {
 //  variable format convert
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
     public function expand_Strings($str,$vars) {
+		if(!is_scalar($str)) return $str;
 		$variable = array_override_recursive($this->env_vars,$vars);
 		return expand_text($this,$str,$this->Model->RecData,$variable);
     }
@@ -212,13 +214,14 @@ public function ViewTemplate($name,$vars = []) {
             $cmp_val = trim(trim(str_replace(["\n","\r"],'',$key),'"'),"'");
 			$default = NULL;
             foreach($sec as $check => $value) {
+				$check = $this->expand_Strings($check,$vars);
 				if(mb_substr($check,0,1)==='\\') $check = mb_substr($check,1);
 				if(is_int($check)) $default = $value;
                 else if($check === '') $result = ($cmp_val==='');            // is_empty ?
                 else if($check === '*') $result = ($cmp_val !== '');     // is_notempty ?
                 else if(is_numeric($check)) $result = intval($check) === intval($cmp_val);
                 else if(mb_strpos($check,'...') !== false) {			// range comapre 1...9
-                    list($from,$to) = str_explode('...',$check);
+					list($from,$to) = fix_explode('...',$check,2);
 					$cmp_val = intval($cmp_val);
                     $result = intval($from) <= $cmp_val && $cmp_val <= intval($to);
 				} else {
@@ -239,7 +242,7 @@ public function ViewTemplate($name,$vars = []) {
                 $ret = $if_selector($val,mb_substr($key,1));
                 if(is_scalar($ret)) $ret = [$key => $ret];
                 foreach($ret as $kk => $vv) {
-                    if(is_numeric($kk)) $wd[] = $vv;
+                    if(is_numeric($kk)) $wd[] = $this->expand_Strings($vv,$vars);
                     else {
                         set_array_key_unique($wd,$kk,$vv);
                     }
@@ -292,7 +295,10 @@ public function ViewTemplate($name,$vars = []) {
                             } else echo "***NOT FOUND({$cmd}): {$cmd}({$tag},\$attrs,\$sec,\$vars) IN {$this->currentTemplate}\n";
                         } else if(method_exists($this, $func)) {
                             $this->$func($tag,$attrs,$sec,$vars);
-                        } else echo "CALL: {$func}({$tag},{$sec},vars)\n";
+                        } else {
+							debug_dump(['FAIL'=>[$func,$tag,$sec]]);
+//							echo "CALL: {$func}({$tag},{$sec},vars)\n";
+						}
                 }
             }
         }
@@ -384,7 +390,7 @@ public function ViewTemplate($name,$vars = []) {
 					$q = ($quote !== '""' && $quote !== "''") ? '"' : '';
 					if($name === 'style') {
 						if(strpos(';"',mb_substr($str,-1)) === false) $str .= ';';
-					} else if(in_array($name,['href','src'])) {
+					} else if(in_array($name,['href','src','action'])) {
 						$str = make_hyperlink($str,$this->ModuleName);
 					}
 					$attr .= (is_numeric($name)) ? " {$str}" : " {$name}={$q}{$str}{$q}";
@@ -464,7 +470,7 @@ public function ViewTemplate($name,$vars = []) {
         $sec = $this->expand_SectionVar($sec,$vars,TRUE);
 		array_key_rename($attrs,'data-element','target');
 		$wopen = function(&$attr,$sec) {
-			list($lnk,$nm) = array_filter_values($sec,['href','name'],['#','_new']);
+			list($lnk,$nm) = array_keys_value($sec,['href','name'],['#','_new']);
 			unset($sec['href'],$sec['name']);
 			$href = make_hyperlink($lnk,$this->ModuleName);
 			$run = "window.open('{$href}','{$nm}','".implode($sec,',')."')";
@@ -563,6 +569,21 @@ public function ViewTemplate($name,$vars = []) {
     //  +echo => value, echo => [ value-list ]
     private function cmd_echo($tag,$attrs,$sec,$vars) {
         $this->directOutput('', '',$sec,$vars);
+    }
+    //--------------------------------------------------------------------------
+    //  FOR loop
+    //  +for[repeat-list](var-name) => section
+	// 		repeat-list:	@list-name	=> $var[list-name]
+	//						v0:v1:v2:...	colon separate value
+    private function cmd_for($tag,$attrs,$sec,$vars) {
+		list($list,$name) = array_keys_value($attrs,['name','value']);
+		if($list[0] === '@') $list = $vars[mb_substr($list,1)];
+		else $list = explode("\n",$list);
+		foreach($list as $var) {
+			if(mb_substr($var,0,1) === '\\') $var = mb_substr($var,1);
+			$vars[$name] = $var;
+            $this->sectionAnalyze($sec,$vars);
+		}
     }
     //--------------------------------------------------------------------------
     //  PHP eval for DEBUG, Danger Section!
@@ -771,7 +792,7 @@ public function ViewTemplate($name,$vars = []) {
     private function cmd_tabset($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
         list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
-		list($mycls,$ulcls,$ulcont,$default_tab) = array_map(function($v) { return (empty($v))?'':" {$v}";},array_filter_values($attrs,['class','data-menu','data-content','value']));
+		list($mycls,$ulcls,$ulcont,$default_tab) = array_map(function($v) { return (empty($v))?'':" {$v}";},array_keys_value($attrs,['class','data-menu','data-content','value']));
 		$default_tab = trim($default_tab);
 		unset($attrs['data-menu'],$attrs['data-content'],$attrs['value']);
 		if(strpos($mycls,'slider-') !== false) {
@@ -906,7 +927,7 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
     private function cmd_textedit($tag,$attrs,$sec,$vars) {
         list($attrs,$innerText,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         if(isset($attrs['value'])) {
-			list($rows,$cols) = explode(':',"{$attrs['value']}:");
+			list($rows,$cols) = fix_explode(':',$attrs['value'],2);
 			unset($attrs['value']);
 			if(!empty($rows)) $attrs['rows'] = $rows;
 			if(!empty($cols)) $attrs['cols'] = $cols;
@@ -945,7 +966,6 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
 				$opt_val = $wrap_val;
 				$block_tag = ['',''];
 				$wrap_tag = ["<{$btag}{$wrap_attr}>","</{$btag}>"];
-
 			}
             $opt_val = array_flat_reduce($opt_val);
 			echo "{$block_tag[0]}\n";
@@ -956,9 +976,10 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
 					$val = separate_tag_value($val);
 					echo "{$beg}{$val}{$end}\n";
 				} else {
+					if($opt[0]==='\\') $opt = mb_substr($opt,1);
 					$opt = tag_body_name($opt);
 					list($opt,$bc,$ec) = tag_label_value($opt);
-					list($val,$ss) = explode('.',$val);
+					list($val,$ss) = fix_explode('.',$val,2);
 					if($check_onece) {
 						$cmp = (empty($sel_item)) ? ($ss==='checked'):($val===$sel_item);
 						if($cmp) $check_onece = false;

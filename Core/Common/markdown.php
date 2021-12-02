@@ -325,7 +325,7 @@ function pseudo_markdown($atext, $md_class = '') {
             case '!':   // text area
                     $vv = explode(':',$val);
                     if(count($vv)===2) {
-						list($rows,$cols) = explode(',',"{$vv[1]},");
+						list($rows,$cols) = fix_explode(',',$vv[1],2);
 						$wd = array_filter(['rows'=>$rows,'cols'=>$cols],'strlen');
 						$sz = array_key_value(attr_sz_xchange($wd),' ');
                     } else $sz = '';

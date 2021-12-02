@@ -404,7 +404,7 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 						}
 					} else { // not have op code
 						if(mb_strpos($val,'...') !== FALSE) {
-							list($from,$to) = str_explode('...',$val);
+							list($from,$to) = fix_explode('...',$val,2);
 							if(empty($from)) {
 								$op = '<=';
 								$val = $to;
@@ -434,7 +434,7 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 							if(is_array($rel)) $rel = implode('.',$rel);	// force scalar-value
 						}
 						if(is_scalar($rel)) {
-							list($tbl,$fn) = explode('.',$rel);
+							list($tbl,$fn) = fix_explode('.',$rel,2);
 							$ops = $dump_object('AND',$val,$tbl);
 							$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE ({$ops}))";
 						} else {

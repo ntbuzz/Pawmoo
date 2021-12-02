@@ -10,7 +10,7 @@ require_once('arrayLibs.php');
 // Extract the application,controller,method and parameters from REQUEST_URI
 function get_routing_path($root) {
     $vv = $_SERVER['REQUEST_URI'];
-    list($requrl,$q_str) = (mb_strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
+	list($requrl,$q_str) = fix_explode('?',$vv,2);
     $argv = explode('/', trim($requrl,'/'));
     if($root === $argv[0]) {
         array_shift($argv);         // retrieve application name

@@ -14,14 +14,16 @@ $_SERVER['SERVER_PORT'] = '';
 $_SERVER['HTTP_HOST'] = 'localhost';
 $_SERVER['HTTP_USER_AGENT'] = 'Chrome/94.0.4606.104';
 
+require_once("Core/Common/arrayLibs.php");
+
 $uri = $_SERVER['REQUEST_URI'];
 // command line parameter: app/module/method/param?QUERY??POST
 // POST check
-list($url,$p_str) = (strpos($uri,'??')!==FALSE)?explode('??',$uri):[$uri,''];
+list($url,$p_str) = fix_explode('??',$uri,2);
 parse_str($p_str, $post);
 $_POST = $post;
 // GET check
-list($url,$q_str) = (strpos($uri,'?')!==FALSE)?explode('?',$uri):[$uri,''];
+list($url,$q_str) = fix_explode('?',$uri,2);
 parse_str($q_str, $query);
 $_GET =  $query;
 

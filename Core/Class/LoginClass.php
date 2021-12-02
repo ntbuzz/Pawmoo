@@ -15,7 +15,7 @@ abstract class LoginClass extends AppModel {
 	public function class_startup() {
         parent::class_initialize();
 		if(isset($this->LoginID)) {
-			list($uid,$pwid) = explode(':',"{$this->LoginID}:");
+			list($uid,$pwid) = fix_explode(':',$this->LoginID,2);
 			$this->LoginID = $uid;
 			$this->PasswdID = empty($pid) ? 'password' : $pid;
 		}
@@ -31,7 +31,7 @@ public function defaultUser() {
 		'full_name'	=>	'Guest User',
 		'email'		=>	'no-mail@localhost',
 	];
-	$udata = array_filter_values(static::$LoginUser,['userid','language','region']);
+	$udata = array_keys_value(static::$LoginUser,['userid','language','region']);
 	return $udata;
 }
 //==============================================================================
@@ -77,8 +77,8 @@ public function is_validUser($userid,$passwd = NULL) {
             if($passwd !== $user_pass) return FALSE;
         }
         $this->error_type = '';
-		$user_lang = array_filter_values($data,['language','region'],[DEFAULT_LANG,DEFAULT_REGION]);
-		list($lang,$region) = array_filter_values(App::$Query,['lang','region'],$user_lang);
+		$user_lang = array_keys_value($data,['language','region'],[DEFAULT_LANG,DEFAULT_REGION]);
+		list($lang,$region) = array_keys_value(App::$Query,['lang','region'],$user_lang);
         static::$LoginUser = $data;
 		$udata = [$userid,$lang,$region];
 		if($lang !== LangUI::$LocaleName) {

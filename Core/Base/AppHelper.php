@@ -190,7 +190,7 @@ public function MakeListTable($deftab) {
 	]);
 	if(array_key_exists('pager',$deftab) && $deftab['pager'] == 'true') $this->MakePageLinks();
 	if(is_array($deftab)) {
-		list($tab,$tbl) = array_filter_values($deftab,['category','tableId']);
+		list($tab,$tbl) = array_keys_value($deftab,['category','tableId']);
 	} else {
 		$tab = $deftab;
 		$tbl = '_TableList';

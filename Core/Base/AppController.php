@@ -157,7 +157,7 @@ protected function SpoofingRestore($model) {
 private function exec_Logging($action) {
 	$no_log = (in_array($this->noLogging,['*',$action],true)) ||
 			(is_array($this->noLogging) && in_array($action,$this->noLogging,true));
-	list($model,$method) = explode('.',"{$this->LoggingMethod}.");
+	list($model,$method) = fix_explode('.',$this->LoggingMethod,2);
 	if(!empty($model) && !$no_log) {
 		if(empty($method)) $method = 'Logged';
 		$class_name = "{$model}Model";
@@ -198,7 +198,7 @@ public function AutoPaging($cond, $max_count = 100) {
 	// check SAVED Paging-Param
 	$sSize = MySession::getPagingIDs('Size');
 	$Page = MySession::getPagingIDs('Setup');
-	list($sCond,$sURI,$sEnv) = array_filter_values($Page,['Cond','URI','ENV']);
+	list($sCond,$sURI,$sEnv) = array_keys_value($Page,['Cond','URI','ENV']);
 	list($sQuery,$sPost) = $sEnv;
 	if($num === 0) $num = 1;
 	$comp = array_intersect($cond,$sCond);	// same condition pickup

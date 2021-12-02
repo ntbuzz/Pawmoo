@@ -284,7 +284,7 @@ function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=fals
 	} else {	// 複数タブ
 		echo "<ul class='tabmenu'>\n";
 		foreach($tabset as $label => $subsec) {
-			list($label,$sel) = explode('.',$label);
+			list($label,$sel) = fix_explode('.',$label,2);
 			$attr = ($sel === 'selected') ? ' class="selected"':'';
 			echo "<li{$attr}>{$label}</li>\n";
 		}
@@ -292,7 +292,7 @@ function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=fals
 		// タブコンテンツを表示
 		echo "<ul class='tabcontents'>\n";
 		foreach($tabset as $label => $value) {
-			list($label,$sel) = explode('.',$label);
+			list($label,$sel) = fix_explode('.',$label,2);
 			$attr = ($sel === 'selected') ? ' class="selected"':'';
 			echo "<li{$attr}>\n";
 			$tab_contents($value);
