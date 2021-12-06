@@ -130,7 +130,7 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
     return (is_array($array)) ? $dump_text(0,$array) : $array;
 }
 //==============================================================================
-function array_key_value($arr,$sep=',',$quote='') {
+function array_items_list($arr,$sep=',',$quote='') {
     array_walk($arr,function(&$item,$key) use(&$quote) {
 		if(!empty($quote) && strpos($item,$quote) !== false) $item = str_replace($quote,"\\{$quote}",$item);
 		$item = "{$key}={$quote}{$item}{$quote}"; });

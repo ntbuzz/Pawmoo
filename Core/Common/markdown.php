@@ -235,7 +235,7 @@ function pseudo_markdown($atext, $md_class = '') {
             case ':': $arr[] = 'target="_self"'; break;
 			case '@':
 					$nm = array_shift($arr);
-					$param = array_key_value(
+					$param = array_items_list(
 								array_combine(['width','height','scrollbars'],
 									array_alternative($arr,3,[800,800,'yes'])));
 					$href = make_hyperlink($url);
@@ -327,7 +327,7 @@ function pseudo_markdown($atext, $md_class = '') {
                     if(count($vv)===2) {
 						list($rows,$cols) = fix_explode(',',$vv[1],2);
 						$wd = array_filter(['rows'=>$rows,'cols'=>$cols],'strlen');
-						$sz = array_key_value(attr_sz_xchange($wd),' ');
+						$sz = array_items_list(attr_sz_xchange($wd),' ');
                     } else $sz = '';
 					if(!empty($sz)) $sz = " {$sz}";
                     // restore if ...{ TEXT }... mark converted.
@@ -337,7 +337,7 @@ function pseudo_markdown($atext, $md_class = '') {
                     break;
             case '=':   // text
                     $vv = explode(':',$val);
-                    $sz = (empty($vv[1])) ? '' : (' '.array_key_value(attr_sz_xchange(['size'=>$vv[1]]),' '));
+                    $sz = (empty($vv[1])) ? '' : (' '.array_items_list(attr_sz_xchange(['size'=>$vv[1]]),' '));
                     $tag = "{$spc}{$tag}{$sz} value='{$vv[0]}' />";
                     break;
             }
