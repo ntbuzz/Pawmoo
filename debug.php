@@ -12,6 +12,7 @@ $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'ja;en;ja';		// 言語受け入れリスト
 $_SERVER['HTTP_REFERER'] = "localhost";
 $_SERVER['SERVER_PORT'] = '';
 $_SERVER['HTTP_HOST'] = 'localhost';
+$_SERVER['REMOTE_ADDR'] = 'localhost';
 $_SERVER['HTTP_USER_AGENT'] = 'Chrome/94.0.4606.104';
 
 require_once("Core/Common/arrayLibs.php");
