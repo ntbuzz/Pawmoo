@@ -1522,7 +1522,7 @@ static::$appRoot
   array_item_value(&$arr,$key,$default=NULL)	連想配列の要素値、存在しないときは$defaultを返す
   array_key_exists_recursive($key,$arr)			array_key_exists() のネスト版
   array_key_unique($key,&$arr)					配列内のキー名重複を回避するキー名を返す
-  array_key_value($arr,$sep=',',$quote='')		配列を キー名＝値　のテキスト変換
+  array_items_list($arr,$sep=',',$quote='')		配列を キー名＝値　のテキスト変換
   array_member_value($nVal,$names)				ドットで区切られた要素名の値を取得する
   array_override($a, $b)                		array_merge() の代替え、無名要素も上書きする
   array_override_recursive($a, $b)      		array_merge_recursive() の代替え、同名要素を上書き
