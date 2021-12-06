@@ -215,6 +215,7 @@ public function ViewTemplate($name,$vars = []) {
 			$default = NULL;
             foreach($sec as $check => $value) {
 				$check = $this->expand_Strings($check,$vars);
+				$result = false;
 				if(mb_substr($check,0,1)==='\\') $check = mb_substr($check,1);
 				if(is_int($check)) $default = $value;
                 else if($check === '') $result = ($cmp_val==='');            // is_empty ?
@@ -313,14 +314,20 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
             list($sep,$tsep) = str_split($seps);
             $n = strrpos($tag,$sep);
             while( $n !== FALSE) {
+                $m = strrpos($tag,$tsep);
+				$sss = mb_strcut($tag,$n,2);
+				if($sss === $seps) {
+					if(($n+1) === $m) break;		// empty item, go next
+					$n2 = strrpos($tag,$sep,-(strlen($tag)-$n+1));	// skip first hit
+					if($n2 !== false) $n = $n2;
+				}
 				$pre_ch = mb_strcut($tag,$n-1,1);
 				if($pre_ch === '\\') {			// escape break
 	                $tag = mb_strcut($tag,0,$n-1) . mb_strcut($tag,$n);
 					break 2;			// break on foreach()
 				}
 				if($pre_ch === $sep) --$n;	// same-char of beg-end (size,id,class)
-				if(mb_strcut($tag,$n,2) === $seps) break;		// empty item, go next
-                $m = strrpos($tag,$tsep);
+//				if(mb_strcut($tag,$n,2) === $seps) break;		// empty item, go next
                 $str = ($m === FALSE || $m === $n) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
                 $tag = mb_strcut($tag,0,$n);
                 if($str !== '') {
@@ -635,7 +642,7 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
 					$var = preg_replace_callback('/(\$\{[^\}]+?\})/',
 						function($mm) use(&$vars) {
 							$vv = expand_text($this,$mm[1],$this->Model->RecData,$vars,true);
-							if(is_array($vv)) $vv = array_key_value($vv);
+							if(is_array($vv)) $vv = array_items_list($vv);
 							return $vv;
 						},$var);
 					return $var;
@@ -744,7 +751,7 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
     }
     //--------------------------------------------------------------------------
     //  select OUTPUT
-    // +select => [ selected_key. = > [
+    // +select => [ @selected_key. = > [
     //      option_text => value
     //      ...
     //  ] ]
@@ -753,7 +760,7 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
         list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         $attr = $this->gen_Attrs($attrs,$vars);
         list($opt_key, $opt_val) = array_first_item($sec);
-		if(mb_substr($opt_key,-1)==='.') $opt_key = rtrim($opt_key,'.');
+		if(mb_substr($opt_key,0,1)==='@') $opt_key = mb_substr($opt_key,1);
         $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
         $opt_val = array_flat_reduce($this->expand_SectionVar($opt_val,$vars));
         echo "<{$tag}{$attr}>\n";
@@ -1019,7 +1026,10 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
 						} else if(mb_substr($cmp2,0,1) === '%') {	// include value check
 							$cmp2 = mb_substr($cmp2,1);
 							$checked = $check_func(mb_strpos($cmp1,$cmp2) !== FALSE);
-						} else $checked = $check_func($cmp1 === $cmp2);
+						} else if(mb_substr($cmp1,0,1) === '@') {	// not empty
+							$cmp1 = mb_substr($cmp1,1);
+							$checked = $check_func(!empty($cmp1));
+						} else $checked = $check_func($cmp1 == $cmp2);
                     } else $checked = $check_func(!empty($val));
                 } else if($key[0]==='@') {
                     $value = mb_substr($key,1);
