@@ -389,10 +389,10 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                 $val = $var;
                 break;
             case '#': $var = mb_substr($var,1);     // Language refer
+                $allow = false;
                 if($var[0]==='@') {                 // AUTO Transfer
                     $var = mb_substr($var,1);
                     $var = 'Transfer.'.trim($recdata[$var]);
-                    $allow = FALSE;
                 } else if($var[0]==='$') {                 // INDIRECT Transfer from VAR
                     $val = '${'.mb_substr($var,1).'}';
 					$var = expand_text($class,$val,$recdata,$vars,true);
@@ -410,7 +410,9 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                         $n = strpos('abcdefghijklmnopqrstuvwxyz',$var);
                         $val = (isset(App::$Filters[$n])) ? App::$Filters[$n] : '';
                     }
-                }
+                } else if(isset($vars[$var])) {
+					$val = $vars[$var];
+				}
                 break;
             case '$': if(substr($var,-1) === '$') {
                     $var = trim($var,'$');
@@ -455,7 +457,7 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
 				if(isset($class)) {
                    	$p = '/&(\w*)(?:\(([^\)]+)\))?/';
                     if(preg_match($p,$var,$m)===1) {
-						list($mm,$method,$arg) = $m;
+						list($mm,$method,$arg) =array_alternative($m,3);
 						if(empty($method)) {
 							$method = (defined('HELPER_EXPAND')) ? HELPER_EXPAND : DEFAULT_HELPER_EXPAND;
 						}
