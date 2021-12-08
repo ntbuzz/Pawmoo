@@ -391,7 +391,7 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 			};
 			$opc = ''; $and_or_op = ['AND','OR','NOT'];
 			foreach($items as $key => $val) {
-				if(empty($key)) { echo "EMPTY!!!"; continue;}
+				if(empty($key)) { echo "EMPTY({$val})!!!"; continue;}
 				list($key,$op) = keystr_opr($key);
 				if(empty($op) || $op === '%') {			// non-exist op or LIKE-op(%)
 					if(is_array($val)) {
