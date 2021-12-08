@@ -98,9 +98,8 @@ public function ResetSchema() {
     private function SchemaAnalyzer() {
         $header = $relation = $locale = $bind = $field = [];
         foreach($this->Schema as $key => $defs) {
-            array_push($defs,0,NULL,NULL);
             $ref_key = $key;
-            list($disp_name,$disp_flag,$width,$relations,$binds) = $defs;
+            list($disp_name,$disp_flag,$width,$relations,$binds) = array_alternative($defs,5);
 			if($disp_flag < 0) continue;
             list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
             if(!empty($relations)) {
@@ -269,6 +268,12 @@ public function get_selectvalue_of_key($sel_name,$value) {
 		if($str_value === $val) return $key;
 	}
 	return "";
+}
+//==============================================================================
+// Make Empty Record
+public function makeEmptyRecord() {
+	$row = array_combine($this->dbDriver->columns,array_fill(0,count($this->dbDriver->columns),NULL));
+    return $row;
 }
 //==============================================================================
 // Get ROW-RECORD by Primarykey
