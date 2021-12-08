@@ -149,7 +149,7 @@ protected function SpoofingViewModel($model) {
 }
 //==============================================================================
 // Restore Original Model Class
-protected function SpoofingRestore($model) {
+protected function SpoofingRestore() {
 	$this->View->Model = $this->Helper->Model = $this->Model = $this->orgModel;
 }
 //==============================================================================
