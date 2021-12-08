@@ -97,7 +97,7 @@ public function PutLayout($layout = NULL,$vars=[]) {
 	}
 	// setvar from caller
 	foreach($vars as $key => $val) $this->env_vars[$key] = $val;
-    $this->ViewTemplate($layout);
+    $this->ViewTemplate($layout,$vars);
 }
 //==============================================================================
 // Terminate Response,
@@ -310,31 +310,21 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
         $attrList = [];
         if($tag[0]==='<') return array($tag,$attrList); // html tag will be not separate
         // allow multi attribute, and separater not space
-        foreach(['style'=>'||','data-type' => '^^','data-element' => '{}', 'data-value' => '<>', 'value' => '()', 'name' => '[]', 'size' => '::', 'id' => '##', 'class' => '..'] as $key => $seps) {
-            list($sep,$tsep) = str_split($seps);
-            $n = strrpos($tag,$sep);
-            while( $n !== FALSE) {
-                $m = strrpos($tag,$tsep);
-				$sss = mb_strcut($tag,$n,2);
-				if($sss === $seps) {
-					if(($n+1) === $m) break;		// empty item, go next
-					$n2 = strrpos($tag,$sep,-(strlen($tag)-$n+1));	// skip first hit
-					if($n2 !== false) $n = $n2;
-				}
-				$pre_ch = mb_strcut($tag,$n-1,1);
-				if($pre_ch === '\\') {			// escape break
-	                $tag = mb_strcut($tag,0,$n-1) . mb_strcut($tag,$n);
-					break 2;			// break on foreach()
-				}
-				if($pre_ch === $sep) --$n;	// same-char of beg-end (size,id,class)
-//				if(mb_strcut($tag,$n,2) === $seps) break;		// empty item, go next
-                $str = ($m === FALSE || $m === $n) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
-                $tag = mb_strcut($tag,0,$n);
-                if($str !== '') {
-                    $attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} ".$attrList[$key] : $str;
-                }
-                $n = strrpos($tag,$sep);
-            }
+		foreach(['style'=>'||','data-type' => ' ^','data-element' => '{}', 'data-value' => '<>', 'value' => '()', 'name' => '[]', 'size' => ' :', 'id' => ' #', 'class' => ' .'] as $key => $seps) {
+			list($sep,$tsep) = str_split($seps);
+			while(($m=strrpos($tag,$tsep)) !== false) {
+				if($sep === ' ') $n = $m;		// single-separator
+				else if(($n=strpos($tag,$sep)) === false) break;	// wrapper-char
+				$pre_ch = ($n>0) ? mb_strcut($tag,$n-1,1) : '';
+				if($pre_ch === '\\') {				// escape-char
+					$tag = substr_replace($tag,'',$n-1,1);
+					break;
+				} else if($n === $m && $pre_ch === $tsep) break;	// double-char
+				$str = ($n===$m) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
+				$tag = mb_strcut($tag,0,$n);
+				if(!empty($str)) $attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} ".$attrList[$key] : $str;
+				if($key !== 'class') break;		// repeat allow 'class' only
+			}
 		}
         if(empty($tag)) $tag = 'div';
         return array($tag,$attrList);
@@ -761,11 +751,11 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
         $attr = $this->gen_Attrs($attrs,$vars);
         list($opt_key, $opt_val) = array_first_item($sec);
 		if(mb_substr($opt_key,0,1)==='@') $opt_key = mb_substr($opt_key,1);
-        $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
+        $sel_item = (is_numeric($opt_key)) ? intval($opt_key) : $this->expand_Strings($opt_key,$vars);
         $opt_val = array_flat_reduce($this->expand_SectionVar($opt_val,$vars));
         echo "<{$tag}{$attr}>\n";
 		foreach($opt_val as $opt => $val) {
-			$sel = ($val == $sel_item) ? ' selected':'';	// allow digit-string compare
+			$sel = ($val === $sel_item) ? ' selected':'';	// allow digit-string compare
 			echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
 		}
         echo "</{$tag}>\n";
