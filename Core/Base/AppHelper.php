@@ -91,12 +91,13 @@ public function ALink_str($lnk,$txt,$attrs=false) {
 		$txt = $this->_($txt);
 	}
 	$href = make_hyperlink($lnk,$this->ModuleName);
+	if(!empty($href)) $href = " href='{$href}'";
 	if(empty($attrs)) $attrs = ['class' => 'nounder'];
 	else if(is_string($attrs)) $attrs = ['class' => $attrs];
 	else if(!is_array($attrs)) $attrs = [];
 	if(get_protocol($href) !== NULL) $attrs['target'] = '_blank';
 	$attr = array_items_list($attrs,' ','"');
-	return "<a href='{$href}' {$attr}>{$txt}</a>";
+	return "<a{$href} {$attr}>{$txt}</a>";
 }
 //==============================================================================
 // generate Page Button LABEL Tag
