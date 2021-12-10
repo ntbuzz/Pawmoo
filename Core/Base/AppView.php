@@ -24,6 +24,7 @@ class AppView extends AppObject {
             'setvar'    => 'cmd_setvar',
             'include'   => 'cmd_include',
             'style'     => 'cmd_style',
+            'alink'     => 'cmd_alink',
             'img'       => 'cmd_image',
             'echo'      => 'cmd_echo',
             'jquery'    => 'cmd_jquery',
@@ -459,27 +460,29 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
         }
     }
     //==========================================================================
+    // Window Open attribute setup
+	private function wopen(&$attr,$sec) {
+		list($lnk,$nm) = array_keys_value($sec,['href','name'],['#','_new']);
+		unset($sec['href'],$sec['name']);
+		$href = make_hyperlink($lnk,$this->ModuleName);
+		$run = "window.open('{$href}','{$nm}','".implode($sec,',')."')";
+		$attr['onClick'] = "{$run};return false;";
+	}
+    //==========================================================================
     // ALink Hyperlink
     //  %link.commonclass{target} => [ A-Text.opt-class{target} => URL ... ],
 	//  %A-Text.class{target} => URL
     private function sec_link($tag,$attrs,$sec,$vars) {
         $sec = $this->expand_SectionVar($sec,$vars,TRUE);
-		array_key_rename($attrs,'data-element','target');
-		$wopen = function(&$attr,$sec) {
-			list($lnk,$nm) = array_keys_value($sec,['href','name'],['#','_new']);
-			unset($sec['href'],$sec['name']);
-			$href = make_hyperlink($lnk,$this->ModuleName);
-			$run = "window.open('{$href}','{$nm}','".implode($sec,',')."')";
-			$attr['onClick'] = "{$run};return false;";
-		};
-        if($tag === 'link') {
+		array_key_rename($attrs,['data-element' => 'target']);
+		if($tag === 'link') {
             if(is_array($sec)) {
                 foreach($sec as $token => $href) {
             		list($token,$opt_attrs) = $this->tag_Separate($token,$vars);
-					array_key_rename($opt_attrs,'data-element','target');
+					array_key_rename($opt_attrs,['data-element'=>'target']);
 					$opt_attrs = array_override($attrs,$opt_attrs);
 					if(is_array($href)) {
-						$wopen($opt_attrs,$href);
+						$this->wopen($opt_attrs,$href);
 						$href = '#';
 					}
 					$this->Helper->ALink($href,$token,$opt_attrs);
@@ -488,7 +491,7 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
         } else if(is_scalar($sec)) {
             $this->Helper->ALink($sec,$tag,$attrs);
 		} else if(is_array($sec)) {
-			$wopen($attrs,$sec);
+			$this->wopen($attrs,$sec);
 			$this->Helper->ALink('#',$tag,$attrs);
         } else echo "tag '{$tag}' not for feature.\n";
     }
@@ -516,7 +519,7 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
     //--------------------------------------------------------------------------
     // cmd_xxxx method
     //--------------------------------------------------------------------------
-    //  iinclude external file, for CSS/JS/...
+    //  include external file, for CSS/JS/...
     //  +include => [ inlclude-filename ... ]
     private function cmd_include($tag,$attrs,$sec,$vars) {
         $wsec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
@@ -550,12 +553,36 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
         $this->directOutput('<style type="text/css">', "</style>",$sec,$vars);
     }
     //--------------------------------------------------------------------------
+    //  a Link
+    // +alink.class#id[name](href)<label>{target} => link-param
+	// +alink => [ attribule => value link-param ]
+	//   link-text:	scalar = link-text
+	//				array = window.open parameter [ href=>url name=>window-name widtj=xxxx height=yyyy scrollbars=yes ... ]
+    private function cmd_alink($tag,$attrs,$sec,$vars) {
+        list($attrs,$text,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
+        $subsec = array_flat_reduce($this->expand_SectionVar($subsec,$vars));
+		array_key_rename($attrs,['value'=>'href','data-element'=>'target']);
+		$label = array_extract_element($attrs,'data-value');
+		if(!empty($label)) {
+            list($s_tag,$s_attrs) = $this->tag_Separate($label,$vars);
+            $attr = $this->gen_Attrs($s_attrs,$vars);
+			echo "<label{$attr}>{$s_tag}";
+			$tag_end = "</label>";
+		} else $tag_end = '';
+		if(empty($subsec)) $this->Helper->ALink('',$text,$attrs);
+		else {
+			$this->wopen($attrs,$subsec);
+			$this->Helper->ALink('#',$text,$attrs);
+		}
+		echo $tag_end;
+	}
+    //--------------------------------------------------------------------------
     //  output IMAGE-TAG
     // +img => URL , +img => [ attribule => value URL ]
 	//	attr data-value replacement to 'alt'
     private function cmd_image($tag,$attrs,$sec,$vars) {
         list($attrs,$src,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
-		array_key_rename($attrs,'data-value','alt');
+		array_key_rename($attrs,['data-value'=>'alt']);
         $attr = $this->gen_Attrs($attrs,$vars);
         $src = make_hyperlink($src,$this->ModuleName);
         echo "<img src='{$src}'{$attr} />";
