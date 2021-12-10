@@ -60,9 +60,8 @@ function PawmooLocations() {
 };
 //===============================================
 // Nested SELECT revised edition
-function SelectLink(setupobj, id, first_call, callback) {
+function SelectLink(setupobj, id, callback) {
 	var self = this;
-	var callback_call = true;//first_call;
 	var self_obj = $('#' + id);
 	var my_prop = self_obj.attr('data-value');
 	if (my_prop === undefined) my_prop = id;
@@ -76,7 +75,7 @@ function SelectLink(setupobj, id, first_call, callback) {
 		Select: function (val) {return val;},
 		hideChildren: function () {return false;},
 	};
-	var child_obj = (child_id === null) ? child_term : new SelectLink(setupobj, child_id, first_call, callback);
+	var child_obj = (child_id === null) ? child_term : new SelectLink(setupobj, child_id, callback);
 	// 子要素を全て隠す
 	self.hideChildren = function () {
 		child_obj.hideChildren();	// 子要素以下を隠す
@@ -107,6 +106,18 @@ function SelectLink(setupobj, id, first_call, callback) {
 		};
 		return (opt > 0);		// SELECT 要素があるかどうかを返す
 	};
+	// 値の変更
+	self.onChange = function (my_val) {
+		// 自分が親になっている子要素を更新
+		if (child_obj.selfList(-1, my_val)) {	// 子要素のリストが存在するなら
+			if (typeof in_progress === "function") {	// 中間コールバック関数
+				in_progress.call(this, my_val, id);
+			};
+		} else if (typeof callback === "function") {	// 最終コールバック関数
+			var my_txt = self_obj.children(':selected').text();
+			callback.call(this, my_val, my_txt, id);
+		};
+	};
 	// 指定値を選択
 	self.Select = function (val, in_progress) {
 		// 子要素のリストを作成し、その親ID(=自分のselectID)を貰う
@@ -120,20 +131,10 @@ function SelectLink(setupobj, id, first_call, callback) {
 			};
 			return true;
 		});
-//	alertDump({val:val,pid:pid});
         self.selfList(val, pid);	// 自分と同じ親IDの仲間リストを作成
 		self_obj.off().change(function () {
 			var my_val = $(this).val();
-			// 自分が親になっている子要素を更新
-			if (child_obj.selfList(-1, my_val)) {	// 子要素のリストが存在するなら
-				if (typeof in_progress === "function") {	// 中間コールバック関数
-					in_progress.call(this, my_val, id);
-				};
-			} else if (typeof callback === "function") {	// 最終コールバック関数
-				var my_txt = self_obj.children(':selected').text();
-				if (callback_call) callback.call(this, my_val, my_txt, id);
-				callback_call = true;
-			};
+			self.onChange(my_val);
 		});
         return pid;
     };

@@ -37,15 +37,18 @@ $.fn.ChainSelect = function () {
 		else target.val = argv;
 	});
 	var id = self.attr('id');
-	var sel_chain = new SelectLink(target.selObj, id, target.first_call, target.callback);
-	// 中間タグのセレクトコールバック
+	var sel_chain = new SelectLink(target.selObj, id, target.callback);
+	// 中間タグのセレクトコールバックを登録
 	self.InProgress = function (callback) {
 		target.progress = callback;
 	};
+	// 初期値を設定
 	sel_chain.Select(target.val, function (v, id) {
 		if (typeof target.progress === 'function')
 			target.progress.call(self, v, id);
 	});
+	// 初期値でコールバックするなら onChange() を呼び出す
+	if (target.first_call) sel_chain.onChange(target.val);
 	return self;
 };
 // 指定要素 e のスクロールに追従する
