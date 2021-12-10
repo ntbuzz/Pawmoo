@@ -141,7 +141,7 @@ function array_items_list($arr,$sep=',',$quote='') {
 function array_keys_value($arr,$filter,$alt=[]) {
 	if(is_array($arr)) {
 		$val = array_map(function($k,$v) use(&$arr) {
-					$v = array_key_exists($k,$arr) ? $arr[$k] : $v;
+					$v = (array_key_exists($k,$arr) && ($arr[$k] !== NULL)) ? $arr[$k] : $v;
 					return is_numeric($v) ? intval($v) : $v;
 //					return array_key_exists($k,$arr) ? $arr[$k] : $v;
 					},$filter,$alt);
@@ -259,10 +259,25 @@ function array_set_element(&$arr,$name,$val) {
 }
 //==============================================================================
 // set array element
-function array_key_rename(&$arr,$from,$to) {
-	if(isset($arr[$from])) {
-		$arr[$to] = $arr[$from];
-		unset($arr[$from]);
+function array_extract_element(&$arr,$name) {
+	$ret = (isset($arr[$name])) ? $arr[$name] : NULL;
+	unset($arr[$name]);
+	return $ret;
+}
+//==============================================================================
+// set array element
+//function array_key_rename(&$arr,$from,$to) {
+// 	if(isset($arr[$from])) {
+// 		$arr[$to] = $arr[$from];
+// 		unset($arr[$from]);
+// 	}
+// }
+function array_key_rename(&$arr,$renames) {
+	foreach($renames as $from => $to) {
+		if(isset($arr[$from])) {
+			if(!empty($to)) $arr[$to] = $arr[$from];
+			unset($arr[$from]);
+		}
 	}
 }
 //==============================================================================
