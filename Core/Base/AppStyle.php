@@ -111,7 +111,7 @@ public function ViewHeader() {
     header("Content-Type: {$this->Template['head']};");
 }
 //==============================================================================
-//　Style Template Output
+// Style Template Output
 public function ViewStyle($file_name) {
     $temlatelist = $this->get_exists_files('template.mss');
     list($filename,$ext) = extract_base_name($file_name);
@@ -138,7 +138,7 @@ public function ViewStyle($file_name) {
     }
 }
 //==============================================================================
-//　Section Style Template Porcessing
+// Section Style Template Porcessing
 //  $templist   List of Template Folders
 //  $secname    Target SECTION name
     private function section_styles($tmplist, $secname) {
@@ -323,7 +323,7 @@ public function ViewStyle($file_name) {
 				}
             }
             if(get_protocol($vv) !== NULL) {    // IMPORT from INTERNET URL
-                list($filename,$v_str) = (strpos($vv,';')!==FALSE)?explode(';',$vv):[$vv,''];  // 置換文字列
+				list($filename,$v_str) = fix_explode(';',$vv,2);
                 parse_str($v_str, $vars);
                 if($this->do_msg) echo "/* {$scope}import from {$filename} */\n";
                 $content = file_get_contents($filename);
@@ -335,7 +335,7 @@ public function ViewStyle($file_name) {
                 array_push($this->importFiles,$vv); // for-DEBUG
                 continue;
             }
-            list($filename,$v_str) = (strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];  // クエリ文字列を変数セットとして扱う
+			list($filename,$v_str) = fix_explode('?',$vv,2);	// クエリ文字列を変数セットとして扱う
             parse_str($v_str, $vars);
             $vars = is_array($vars) ? array_merge($this->repVARS,$vars) : $this->repVARS;
             $imported = FALSE;

@@ -11,7 +11,6 @@ class App {
     public static $Referer;         // HTTP_REFERER 変数
     public static $Query;           // urlのクエリー文字列の連想配列 = $_GET
     public static $Post;            // FORM POSTの連想配列 = $_POST
-	public static $emptyRequest;	// GET/POST のデータ無しフラグ
     public static $Filter;          // メソッドのフィルタ配列の先頭
     public static $Filters;         // メソッドのフィルタ配列
     public static $Params;          // メソッドの数値パラメータ配列
@@ -29,25 +28,22 @@ class App {
         static::$AppName = $appname;
         list(static::$sysRoot,static::$appRoot) = $app_uri;
         list($controller,$method,$filters,$params) = $module;
-		$uri = array_to_URI([static::$appRoot,$module]);
 
         static::$DocRoot = (empty($_SERVER['DOCUMENT_ROOT'])) ? '' : $_SERVER['DOCUMENT_ROOT'];
         static::$Referer = (empty($_SERVER['HTTP_REFERER'])) ? '' : $_SERVER['HTTP_REFERER'];
 
 		static::$Query	 = xchange_Boolean($_GET);				// same as query string
 		static::$Post	 = xchange_Boolean($_POST);				// same as form POST string
-		static::$emptyRequest = empty($_POST) && empty($_GET);
-		// フィルタ先頭だけ取り出しておく
-        static::$Filter = empty($filters) ? '': $filters[0];
-        static::$Filters= $filters;
-        // メソッドの書き換えによるアドレスバー操作用
-        static::$execURI = [ 'root' => static::$appRoot ];
-		self::SetModuleExecution($controller,$method,$filters,false);
 		self::ChangeParams($params,false);
-
-		$method = static::$execURI['method'];
-		static::$Controller = $controller;
-		static::$Method		= ucfirst(str_replace('-','_',$method));
+        // メソッドの書き換えによるアドレスバー操作用
+        static::$execURI = [
+			'root' => static::$appRoot,
+    		'controller' => $controller,		// ResetModule()で書換える
+    		'method' => $method,			// ResetModule()で書換える
+			'filter' => NULL,
+			'params' => static::$Params,
+		];
+		list($uri,$q) = fix_explode('?',$_SERVER['REQUEST_URI'],2);
         static::$SysVAR = array(
             'SERVER'	=> $_SERVER['SERVER_NAME'],
             'SYSROOT'	=> static::$sysRoot,
@@ -56,23 +52,37 @@ class App {
             'REFERER'	=> static::$Referer,
             'REQURI'	=> $uri . array_to_query(static::$Query),
             'URI'		=> $uri,
-            'controller'=> strtolower($controller),  //ucfirst($uri_array[2]),
-            'method'	=> strtolower($method),  //ucfirst($uri_array[3]),
-            'extention' => static::$MethodExtention,
-            'filter'	=> static::$Filter,  // ucfirst(static::$Filter),
+            'controller'=> NULL,			// dummy , set by following ResetModule()
+            'method'	=> NULL,			// dummy , set by following ResetModule()
+            'extention' => NULL,			// dummy , set by following ResetModule()
+            'filter'	=> NULL,			// dummy , set by following ResetModule()
             'params'	=> static::$Params,
         );
-        // リクエスト情報を記憶
-        MySession::setEnvVariables([
-			// 'AppProperty' => [
-			// 	'QUERY' => static::$Query,
-			// 	'POST' => static::$Post,
-			// 	'CONTROLLER' => static::$Controller,
-			// 	'METHOD' => static::$Method,
-			// ],
-			'sysVAR'	=> static::$SysVAR,
-		]);
+        // モジュール情報を書込む
+		self::ResetModule($module);
     }
+//==============================================================================
+// モジュール情報を更新する
+public static function ResetModule($module) { 
+        list($controller,$method,$filters,$params) = $module;
+		// フィルタ先頭だけ取り出しておく
+        static::$Filter = empty($filters) ? '': $filters[0];
+        static::$Filters= $filters;
+        // メソッドの書き換えによるアドレスバー操作用
+		self::SetModuleExecution($controller,$method,$filters,false);
+		$method = static::$execURI['method'];
+		static::$Controller = $controller;
+		static::$Method		= ucfirst(str_replace('-','_',$method));
+        $sysVAR = array(
+            'controller'=> strtolower($controller),
+            'method'	=> strtolower($method),
+            'extention' => static::$MethodExtention,
+            'filter'	=> static::$Filter,
+        );
+		static::$SysVAR = array_override(static::$SysVAR,$sysVAR);
+        // リクエスト情報を更新
+        MySession::setEnvVariables(['sysVAR'=>static::$SysVAR]);
+}
 //==============================================================================
 // モジュール実行URIの書換え、数字パラメータは別に呼び出す
 public static function SetModuleExecution($module,$method,$change_filter=[],$relocate = TRUE) { 
@@ -81,24 +91,11 @@ public static function SetModuleExecution($module,$method,$change_filter=[],$rel
 	} else {
 		static::$MethodExtention = FALSE;
 	}
-    static::$execURI['controller'] = strtolower($module);
+    if(!empty($module)) static::$execURI['controller'] = strtolower($module);
     static::$execURI['method'] = strtolower($method);
     if(is_array($change_filter)) static::$execURI['filter'] = $change_filter;
     static::$ReLocate = $relocate;
 }
-// //==============================================================================
-// // メソッドの置換
-// public static function ChangeMethod($module,$method,$change_filter=[], $relocate = TRUE) { 
-// 	if(strpos($method,'.')!==FALSE) {
-// 		list($method,static::$MethodExtention) = extract_base_name($method);
-// 	} else {
-// 		static::$MethodExtention = FALSE;
-// 	}
-//     static::$execURI['controller'] = strtolower($module);
-//     static::$execURI['method'] = strtolower($method);
-//     if(is_array($change_filter)) static::$execURI['filter'] = $change_filter;
-//     static::$ReLocate = $relocate;        // URLの書き換え
-// }
 //==============================================================================
 // パラメータパスの置換
 public static function ChangeParams($params,$relocate = TRUE) { 
@@ -125,19 +122,8 @@ private static function get_extensionURL() {
 //==============================================================================
 // パラメータ無しのパス
 public static function Get_PagingPath() { 
-	$path_arr = [
-			static::$execURI['root'],
-			static::$execURI['controller'],
-			static::$execURI['method'],
-			static::$execURI['filter'],
-		];
-	// if(!empty(static::$MethodExtention)) {
-	// 	$method = $path_arr[2];
-	// 	$path_arr[2] = $path_arr[3];
-	// 	$path_arr[2] = "{$method}." . static::$MethodExtention;
-	// }
+	$path_arr = array_keys_value(static::$execURI,['root','controller','method','filter']);
 	return array_to_URI($path_arr,NULL);
-//		,array_key_value(static::$Query,'&');
 }
 //==============================================================================
 // メソッドとクエリ文字列の置換後のURLを返す
@@ -284,7 +270,7 @@ static function rollbackReqData($envKey,...$keys) {
             return;
         }
         //separate query string if exist
-        list($file,$q_str) = (strpos($tagfile,'?') !== FALSE) ? explode('?',$tagfile):[$tagfile,'']; 
+		list($file,$q_str) = fix_explode('?',$tagfile,2);
 		if(!empty($q_str)) $q_str = "?{$q_str}";
         $ext = substr($file,strrpos($file,'.') + 1);    // 拡張子を確認
         $path = make_hyperlink($file,static::$Controller).$q_str;

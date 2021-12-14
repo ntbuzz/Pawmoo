@@ -10,7 +10,7 @@ require_once('arrayLibs.php');
 // Extract the application,controller,method and parameters from REQUEST_URI
 function get_routing_path($root) {
     $vv = $_SERVER['REQUEST_URI'];
-    list($requrl,$q_str) = (mb_strpos($vv,'?')!==FALSE)?explode('?',$vv):[$vv,''];
+	list($requrl,$q_str) = fix_explode('?',$vv,2);
     $argv = explode('/', trim($requrl,'/'));
     if($root === $argv[0]) {
         array_shift($argv);         // retrieve application name
@@ -389,10 +389,10 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                 $val = $var;
                 break;
             case '#': $var = mb_substr($var,1);     // Language refer
+                $allow = false;
                 if($var[0]==='@') {                 // AUTO Transfer
                     $var = mb_substr($var,1);
                     $var = 'Transfer.'.trim($recdata[$var]);
-                    $allow = FALSE;
                 } else if($var[0]==='$') {                 // INDIRECT Transfer from VAR
                     $val = '${'.mb_substr($var,1).'}';
 					$var = expand_text($class,$val,$recdata,$vars,true);
@@ -410,7 +410,9 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                         $n = strpos('abcdefghijklmnopqrstuvwxyz',$var);
                         $val = (isset(App::$Filters[$n])) ? App::$Filters[$n] : '';
                     }
-                }
+                } else if(isset($vars[$var])) {
+					$val = $vars[$var];
+				}
                 break;
             case '$': if(substr($var,-1) === '$') {
                     $var = trim($var,'$');
@@ -436,17 +438,18 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                     } else $val = NULL;
 				}
                 break;
-            case '^':       // both ENV or REQ VAR
-            case '"':       // REQ-VAR
+            case '^':       // both ENV or POST VAR
+            case '"':       // POST-VAR
             case "'":       // ENV-VAR
                 if(substr($var,-1) === $var[0]) {     // check end-char
                     $tt = $var[0];
                     $var = trim($var,$tt);
-                    if($tt === '^') {
-                        $val = MySession::getEnvIDs($var,true);	// scalar-Get
-                        if($val !== '') break;
-                    }
-					$val = ($tt==="'") ? MySession::getEnvIDs($var,true) : App::PostElements($var);
+					switch($tt) {
+					case "'":$val = MySession::getEnvIDs($var);break;
+					case '^':$val = MySession::getEnvIDs($var);	// scalar-Get
+							 if($val !== '') break;	// empty will be try to POST
+					case '"':$val = App::PostElements($var);
+					}
                 }
                 break;
 			// cannot use in RESOURCE (AppStyle)
@@ -454,7 +457,7 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
 				if(isset($class)) {
                    	$p = '/&(\w*)(?:\(([^\)]+)\))?/';
                     if(preg_match($p,$var,$m)===1) {
-						list($mm,$method,$arg) = $m;
+						list($mm,$method,$arg) =array_alternative($m,3);
 						if(empty($method)) {
 							$method = (defined('HELPER_EXPAND')) ? HELPER_EXPAND : DEFAULT_HELPER_EXPAND;
 						}

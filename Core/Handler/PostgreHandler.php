@@ -8,7 +8,7 @@
 class PostgreHandler extends SQLHandler {
 	protected $LIKE_opr = 'LIKE';		// 大文字小文字の無視比較
 //==============================================================================
-//	コンストラクタ：　データベースのテーブルに接続する
+//	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table) {
 		parent::__construct($table,'Postgre');
 	}
@@ -50,6 +50,11 @@ public function truncate_sql($table) {
 protected function reset_seq($table,$primary) {
 	$sql = "select setval('{$table}_{$primary}_seq',(select max({$primary}) from {$table}));";
 	return $sql;
+}
+//==============================================================================
+//	CONCAT FIELDS
+protected function concat_fields($arr) {
+	return (count($arr)>1) ? 'concat(' . implode(',',$arr) . ')' : $arr[0];
 }
 //==============================================================================
 //	doQuery: 	SQLを発行する

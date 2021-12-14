@@ -32,20 +32,25 @@ $.fn.ChainSelect = function () {
 	// 可変引数を解析
 	$.each(arguments,function (key,argv) {
 		if (typeof argv === 'boolean') target.first_call = argv;
-		else if (typeof argv === 'function') target.callback = argv;
-		else if (typeof argv === 'object') target.selObj = argv;
+		else if (typeof argv === 'function') {
+			if (target.callback === null) target.callback = argv;
+			else target.progress = argv;
+		} else if (typeof argv === 'object') target.selObj = argv;
 		else target.val = argv;
 	});
-	var id = this.attr('id');
-	var sel_chain = new SelectLink(target.selObj, id, target.first_call, target.callback);
-	// 中間タグのセレクトコールバック
+	var id = self.attr('id');
+	var sel_chain = new SelectLink(target.selObj, id, target.callback);
+	// 中間タグのセレクトコールバックを登録
 	self.InProgress = function (callback) {
 		target.progress = callback;
 	};
-	sel_chain.Select(target.val, function (v, id) {
+	// 初期値を設定
+	sel_chain.Select(target.val, function (v, id, pid) {
 		if (typeof target.progress === 'function')
-			target.progress.call(this, v, id);
+			target.progress.call(self, v, id, pid);
 	});
+	// 初期値でコールバックするなら onChange() を呼び出す
+	if (target.first_call) sel_chain.onChange(target.val,target.progress);
 	return self;
 };
 // 指定要素 e のスクロールに追従する
@@ -162,7 +167,8 @@ $.fn.LoadContents = function () {
 			DebugSlider();
 			if (target.callback !== null) target.callback.call(self);
 		})
-		.fail(function() {
+		.fail(function () {
+			console.log("FAIL POST:"+target.url+"\n");
 			$.busy_cursor(false);
 			DebugSlider();
 			result = false;
@@ -282,9 +288,12 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 		DropDown: '<span class="arrow"></span>',
 		Hint: '',
 		Preload: function () { return '<div></div>'; },
+		Selected: function () { return this;},
 		SetValue: function (val) {
-			this.TargetObj.val(val);
-			this.TargetObj.trigger('change');
+			this.TargetObj.val(val).trigger('change');
+			if (typeof this.Selected === "function") {
+				this.Selected.call(self,val);
+			};
 		},
 	};
 	if (setting.TargetObj.length === 0) return this;
@@ -311,6 +320,11 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 		e.preventDefault();
 		setting.SetValue('');
 	});
+	// 選択時のコールバック登録
+	self.SelectedItem = function (callback) {
+		if (typeof callback === 'function') setting.Selected = callback;
+		return this;
+	};
 	self.css("cursor", "pointer");
 	self.off('click').on('click', function () {
 		// テンプレート関数でメニューを取得

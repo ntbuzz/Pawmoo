@@ -24,13 +24,6 @@ class AppHelper  extends AppObject {
 		' align="right"',		// 3 right
 	];
 //==============================================================================
-// constructor( this_Owner_Object )
-/*
-	function __construct($owner) {
-		parent::__construct($owner);
-	}
-*/
-//==============================================================================
 // Call for Owner(AppView) Template Processing Method
 public function ViewTemplate($layout) {
 	$this->AOwner->ViewTemplate($layout);
@@ -98,12 +91,13 @@ public function ALink_str($lnk,$txt,$attrs=false) {
 		$txt = $this->_($txt);
 	}
 	$href = make_hyperlink($lnk,$this->ModuleName);
+	if(!empty($href)) $href = " href='{$href}'";
 	if(empty($attrs)) $attrs = ['class' => 'nounder'];
 	else if(is_string($attrs)) $attrs = ['class' => $attrs];
 	else if(!is_array($attrs)) $attrs = [];
 	if(get_protocol($href) !== NULL) $attrs['target'] = '_blank';
-	$attr = array_key_value($attrs,' ','"');
-	return "<a href='{$href}' {$attr}>{$txt}</a>";
+	$attr = array_items_list($attrs,' ','"');
+	return "<a{$href} {$attr}>{$txt}</a>";
 }
 //==============================================================================
 // generate Page Button LABEL Tag
@@ -181,10 +175,8 @@ public function MakePageLinks($args) {
 		echo "<tr class='item' id='{$columns->Primary}'>";
 		foreach($this->Model->HeaderSchema as $key => $val) {
 			list($alias,$align,$flag,$c_wd) = $val;
-//			$style = ($c_wd > 0) ? " style='width:{$c_wd}px;'":'';
-			$style = '';
 			$pos = self::AttrAlign[$align];
-			echo "<td{$pos}{$style}>{$columns->$key}</td>";
+			echo "<td{$pos}>{$columns->$key}</td>";
 		}
 		echo "</tr>\n";
 	}
@@ -199,7 +191,7 @@ public function MakeListTable($deftab) {
 	]);
 	if(array_key_exists('pager',$deftab) && $deftab['pager'] == 'true') $this->MakePageLinks();
 	if(is_array($deftab)) {
-		list($tab,$tbl) = array_filter_values($deftab,['category','tableId']);
+		list($tab,$tbl) = array_keys_value($deftab,['category','tableId']);
 	} else {
 		$tab = $deftab;
 		$tbl = '_TableList';

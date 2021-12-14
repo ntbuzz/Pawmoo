@@ -96,6 +96,19 @@ function byte_format($size){
 	return ($over) ? $num . $units[$max_digit] : $num . $units[$digits];
 }
 //==============================================================================
+// convert file size string
+function date_custom($fmt,$tm){
+	list($yy,$y,$mm,$dd,$hh,$ii,$ss,$ww) = explode(',',date('Y,y,m,d,H,i,s,w',$tm));
+	--$mm;		// array is ZERO origin
+	$dateNames = LangUI::get_value('core','.dateNames',true);
+	foreach($dateNames as $nm => $str) $$nm = explode(',',$str);
+	// dateNames => shortMonth, oldMonth, shortWeek, weekNames
+	return str_replace(
+	[ '%Y','%y','%m','%M','%O','%d','%H','%i','%s','%w','%W'],
+	[ $yy, $y, $mm, $shortMonth[$mm],$oldMonth[$mm], $dd,$hh,$ii,$ss,$shortWeek[$ww],$weekNames[$ww]],
+	$fmt);
+}
+//==============================================================================
 // Convert text to HTML
 function text_to_html($atext) {
     return nl2br(htmlspecialchars($atext));
@@ -163,7 +176,6 @@ function make_hyperlink($lnk,$modname=NULL) {
         switch(mb_substr($lnk,0,1)) {
         case '#':
         case '?': break;        // label or query
-//        case ':': $lnk[0] = '/'; break;
         case ':': $lnk = App::Get_AppRoot(mb_substr($lnk,1)); break;
         case '/': $lnk = App::Get_SysRoot($lnk); break;
         case '!':
@@ -180,8 +192,6 @@ function make_hyperlink($lnk,$modname=NULL) {
 				if($modname === NULL) $modname = App::$Controller;
                 $lnk = substr_replace($lnk, strtolower($modname), 0, 1);
                 $lnk = App::Get_AppRoot($lnk);
-            // } else  {
-            //     $lnk = App::Get_AppRoot($lnk);
             }
         }
     }
@@ -190,13 +200,8 @@ function make_hyperlink($lnk,$modname=NULL) {
 //==============================================================================
 // MARKING WORD by SPAN CLASS
 function mark_active_words($atext,$word,$class) {
-	$ln = array_values(array_map('trim', explode("\n", $atext)));
-	$ret = array();
-	foreach($ln as $ll) {
-    	$ll = preg_replace("/(${word})/i","<span class='{$class}'>\\1</span>", $ll);
-		$ret[] = $ll;
-	}
-	return implode("\n",$ret);
+ 	$reg = implode('|',str_explode(['　',' '],$word));
+	return preg_replace("/({$reg})/i","<span class='{$class}'>\\1</span>", $atext);
 }
 //==============================================================================
 // password encryption
@@ -279,7 +284,7 @@ function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=fals
 	} else {	// 複数タブ
 		echo "<ul class='tabmenu'>\n";
 		foreach($tabset as $label => $subsec) {
-			list($label,$sel) = explode('.',$label);
+			list($label,$sel) = fix_explode('.',$label,2);
 			$attr = ($sel === 'selected') ? ' class="selected"':'';
 			echo "<li{$attr}>{$label}</li>\n";
 		}
@@ -287,7 +292,7 @@ function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=fals
 		// タブコンテンツを表示
 		echo "<ul class='tabcontents'>\n";
 		foreach($tabset as $label => $value) {
-			list($label,$sel) = explode('.',$label);
+			list($label,$sel) = fix_explode('.',$label,2);
 			$attr = ($sel === 'selected') ? ' class="selected"':'';
 			echo "<li{$attr}>\n";
 			$tab_contents($value);

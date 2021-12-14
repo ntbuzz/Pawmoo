@@ -77,7 +77,7 @@ public function __get($PropName) {
 //==============================================================================
 // extract DataTable or Alternate DataView
     private function model_view($db) {
-        list($model,$field) = explode('.', "{$db}...");
+		list($model,$field) = fix_explode('.',$db,2);
         if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
             $model = $m[1];
             $table = (is_array($this->$model->DataView))
@@ -264,7 +264,7 @@ public function createViewSet($exec,$depend=[]) {
 private function createView($table,$view) {
 	$alias_sep = function($key) {
 		if(substr($key, -1) === '.') $key .= ' ';
-		list($alias,$sep) = explode('.',"{$key}.");
+		list($alias,$sep) = fix_explode('.',$key,2);
 		return [$alias,$sep];
 	};
 	if(!isset($this->ViewSchema)) return '';

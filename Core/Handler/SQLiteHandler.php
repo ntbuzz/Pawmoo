@@ -10,7 +10,7 @@ class SQLiteHandler extends SQLHandler {
 	protected $NULL_ORDER = '';	// NULL の順序
 
 //==============================================================================
-//	コンストラクタ：　データベースのテーブルに接続する
+//	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table) {
 		parent::__construct($table,'SQLite');
 	}
@@ -47,6 +47,11 @@ public function truncate_sql($table) {
 //	RESET SEQ to PRIMARY
 protected function reset_seq($table,$primary) {
 	return FALSE;
+}
+//==============================================================================
+//	CONCAT FIELDS
+protected function concat_fields($arr) {
+	return '('.implode('||',$arr).')';
 }
 //==============================================================================
 //	doQuery: 	SQLを発行する

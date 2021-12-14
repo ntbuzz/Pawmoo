@@ -248,7 +248,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 	// 選択時のコールバック登録
 	self.SelectedItem = function (callback) {
 		if (typeof callback === 'function') setting.Selected = callback;
-		return this;
+		return self;
 	};
 	// [X]マークのタグが無ければ追加する
 	if (setting.addClear) {		// ターゲットがSELF内に無い時は false にする
@@ -288,9 +288,9 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		// チェック項目をリストアップしておく
 		var all_items = menu_box.find('.check-item').map(function () { return $(this).val(); }).get();
 		// 入力値をチェックリストに反映する
-		var current = setting.GetValue();			// 現在の入力値を取得
+		var current = setting.GetValue().split(setting.Separator);			// 現在の入力値を取得
 		menu_box.find('.check-item').map(function () {
-			$(this).prop('checked', (current.indexOf($(this).val()) !== -1));
+			$(this).prop('checked', current.is_exists($(this).val()));
 		});
 		// 背景をクリックした閉じる
 		bk_panel.click(function () { menu_box.trigger('close-me');});

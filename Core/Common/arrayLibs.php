@@ -21,6 +21,13 @@ function str_explode($delm,$string,$trim_empty = true) {
     return $str_arr;
 }
 //==============================================================================
+// fix count explode
+function fix_explode($delm,$string,$max,$pad = '') {
+	$arr = explode($delm,$string);
+	for($n=count($arr); $n < $max ; ++$n ) $arr[] = $pad;
+    return $arr;
+}
+//==============================================================================
 // text line split by NL char, and reverse element with trim
 function explode_reverse($delm,$text) {
 	$array = array_reverse(array_filter(explode($delm,trim($text)),'strlen'));
@@ -45,14 +52,11 @@ function array_item_value(&$arr,$key,$default=NULL) {
 //==============================================================================
 //  To compensate array, fixed count
 function array_alternative($a,$max = 0, $b = []) {
-    $n = count($b);
-    if($max === 0) $max = $n;
-    else if($n < $max) $b += array_fill($n,$max - $n,NULL);
-    else $b = array_slice($b,0,$max);
-    foreach($b as $key => $val) {
-        if(empty($a[$key])) $a[$key] = $val;
-    }
-    return $a;
+	$c = ($max === 0)?$a:array_fill(0,$max,NULL);		// make counter array
+	$d = array_map(function($base,$val,$alt) {
+			return ($val === NULL) ? $alt: $val;
+		},$c,$a,$b);
+	return $d;
 }
 //==============================================================================
 // strpos for array version
@@ -126,42 +130,39 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
     return (is_array($array)) ? $dump_text(0,$array) : $array;
 }
 //==============================================================================
-function array_key_value($arr,$sep=',',$quote='') {
+function array_items_list($arr,$sep=',',$quote='') {
     array_walk($arr,function(&$item,$key) use(&$quote) {
 		if(!empty($quote) && strpos($item,$quote) !== false) $item = str_replace($quote,"\\{$quote}",$item);
 		$item = "{$key}={$quote}{$item}{$quote}"; });
     return implode($sep,$arr);
 }
 //==============================================================================
-function array_filter_values($arr,$filter,$alt=[]) {
-	$val = [];
+// array filter by key,not exist key to alt[] value
+function array_keys_value($arr,$filter,$alt=[]) {
 	if(is_array($arr)) {
-		$alt_filter = array_combine($filter,array_alternative($alt,count($filter)));
-		foreach($alt_filter as $key => $alt_val)
-			$val[] = (array_key_exists($key,$arr)) ? $arr[$key] : $alt_val;
+		$val = array_map(function($k,$v) use(&$arr) {
+					$v = (array_key_exists($k,$arr) && ($arr[$k] !== NULL)) ? $arr[$k] : $v;
+					return is_numeric($v) ? intval($v) : $v;
+//					return array_key_exists($k,$arr) ? $arr[$k] : $v;
+					},$filter,$alt);
 	} else {
 		$val = array_fill(0,count($filter),NULL);
 	}
 	return $val;
 }
 //==============================================================================
+// import $filter keys from $items..., overttide latest item.
 function array_filter_import($ignore,$filter,...$items) {
-	$new_filter = [];
-	foreach($filter as $key) {
-		if($ignore) $new_filter[strtolower($key)] = strtoupper($key);
-		else $new_filter[$key] = NULL;
-	}
-	$n = count($new_filter);
-	$vals = array_combine(array_keys($new_filter),array_fill(0,$n,NULL));
-	foreach($items as $arr)
-		if(is_array($arr) && !empty($arr)) {
-			foreach($new_filter as $key => $val) {
-				// uppercase check if ignore is TRUE
-				if($val !== NULL && array_key_exists($val,$arr)) $vals[$key] = $arr[$val];
-				// origin or lower case check
-				if(array_key_exists($key,$arr)) $vals[$key] = $arr[$key];
+	if($ignore) $filter = array_map(function($v) { return strtolower($v);},$filter);
+	$vals = array_combine($filter,array_fill(0,count($filter),NULL));
+	foreach($items as $arr) {
+		if(is_array($arr)) {
+			foreach($arr as $k => $v) {
+				if($ignore) $k = strtolower($k);
+				if(array_key_exists($k,$vals)) $vals[$k] = $v;
 			}
 		}
+	}
 	return array_values($vals);
 }
 //==============================================================================
@@ -179,7 +180,7 @@ function array_key_exists_recursive($key,$arr) {
 //==============================================================================
 // array-key duplicate avoidance
 function array_key_unique($key,&$arr) {
-    $wkey = $key;
+    $wkey = tag_body_name($key);
     for($n=1;array_key_exists($key,$arr); $n++) $key = "{$wkey}::#{$n}";
     return $key;
 }
@@ -215,8 +216,6 @@ function array_flat_reduce($arr) {
                     $reduce_array($val);
                 } else if(isset($wx[$key])) {
                     $wx[] = $val;
-                // } else if(is_numeric($key)) {
-                //     $wx[] = $val;
                 } else {
                     $wx[$key] = $val;
                 }
@@ -260,10 +259,25 @@ function array_set_element(&$arr,$name,$val) {
 }
 //==============================================================================
 // set array element
-function array_key_rename(&$arr,$from,$to) {
-	if(isset($arr[$from])) {
-		$arr[$to] = $arr[$from];
-		unset($arr[$from]);
+function array_extract_element(&$arr,$name) {
+	$ret = (isset($arr[$name])) ? $arr[$name] : NULL;
+	unset($arr[$name]);
+	return $ret;
+}
+//==============================================================================
+// set array element
+//function array_key_rename(&$arr,$from,$to) {
+// 	if(isset($arr[$from])) {
+// 		$arr[$to] = $arr[$from];
+// 		unset($arr[$from]);
+// 	}
+// }
+function array_key_rename(&$arr,$renames) {
+	foreach($renames as $from => $to) {
+		if(isset($arr[$from])) {
+			if(!empty($to)) $arr[$to] = $arr[$from];
+			unset($arr[$from]);
+		}
 	}
 }
 //==============================================================================
@@ -299,17 +313,11 @@ function condition_array($keyset,$keystr) {
 //==============================================================================
 // get AND condition array by separate SPC word from find keyword
 function condition_array_multi($keyset,$keystr) {
-	$and_str = explode(' ',str_replace(['　','  '],' ',$keystr));
+    $and_str = str_explode(['　',' '],$keystr);
 	$and_cond = [];
     foreach($and_str as $and_val) {
-		$cond = [];
-		foreach(explode('|',$and_val) as $val) {
-			if(mb_substr($val,0,1)==='-') {
-				$val = mb_substr($val,1);
-				$cond[] = ['NOT' => [$keyset => $val]];
-			} else  $cond[] = [$keyset => $val];
-		}
-		$and_cond[] = ['OR'=>$cond];
+		if(mb_strpos($and_val,'|')!==false) $and_val = explode('|',$and_val);
+		$and_cond[] = [$keyset => $and_val];
 	}
     return $and_cond;
 }

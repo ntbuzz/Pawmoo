@@ -41,7 +41,7 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 	static::$MY_SESSION_ID = $session_id = SESSION_PREFIX . "_{$appname}";
 	static::$SYS_SESSION_ID= $session_sys="{$session_id}_sys";
 	$session_life = "{$session_id}_life";
-	list($s_limit,$env,$sys) = array_filter_values($_SESSION,[$session_life,$session_id,$session_sys],[0,[],[]]);
+	list($s_limit,$env,$sys) = array_keys_value($_SESSION,[$session_life,$session_id,$session_sys],[0,[],[]]);
 	static::$EnvData = array_intval_recursive($env);
 	static::$SysData = $sys;
 	// call from Main.php must be application session limit refresh
@@ -83,7 +83,7 @@ static function getEnvValues(...$keys) {
 	foreach($keys as $nm) $result[] = (array_key_exists($nm,static::$EnvData)) ? static::$EnvData[$nm] : '';
 	return $result;
 }
-// 廃止　→ getEnvValues() の引数ひとつで代用可
+// 廃止 → getEnvValues() の引数ひとつで代用可
 // static function getEnvData($keys) {
 // 	return (array_key_exists($key,static::$EnvData)) ? static::$EnvData[$key] : NULL;
 // }
@@ -226,7 +226,7 @@ static function get_LoginValue($id = NULL) {
 	if(array_key_exists('Login',static::$EnvData)) {
 		$LoginData = static::$EnvData['Login'];
 		if($id === NULL) return $LoginData;
-		if(is_array($id)) return array_filter_values($LoginData,$id);
+		if(is_array($id)) return array_keys_value($LoginData,$id);
 		else if(array_key_exists($id,$LoginData)) return $LoginData[$id];
 	}
 	return NULL;

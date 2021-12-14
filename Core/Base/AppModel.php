@@ -46,7 +46,7 @@ class AppModel extends AppObject {
         $this->setProperty(self::$DatabaseSchema);      // Set Default Database Schema Property
         $this->setProperty(static::$DatabaseSchema);    // Set Instance Property from Database Schema Array
 		if(empty($this->Schema)) {
-			debug_log(DBMSG_STDERR,["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
+			debug_stderr(["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
 		}
 		if(empty($this->Primary)) $this->Primary = 'id';	// default primary name
         if(isset($this->ModelTables)) {                 // Multi-Language Tabele exists
@@ -73,12 +73,17 @@ public function is_exist_column($name) {
 	return array_key_exists($name,$this->dbDriver->columns);
 }
 //==============================================================================
+// get exist columns list
+public function get_exist_columns($names) {
+	return array_filter($names,function($v) { return array_key_exists($v,$this->dbDriver->columns);});
+}
+//==============================================================================
 // Switch Schema Language
 public function ResetSchema() {
     $this->SchemaAnalyzer();
     $this->RelationSetup();
     $this->SelectionSetup();
-    debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
+    debug_xlog(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
 //            "Header"    => $this->HeaderSchema,
 //            "Field"     => $this->FieldSchema, 
@@ -93,9 +98,8 @@ public function ResetSchema() {
     private function SchemaAnalyzer() {
         $header = $relation = $locale = $bind = $field = [];
         foreach($this->Schema as $key => $defs) {
-            array_push($defs,0,NULL,NULL);
             $ref_key = $key;
-            list($disp_name,$disp_flag,$width,$relations,$binds) = $defs;
+            list($disp_name,$disp_flag,$width,$relations,$binds) = array_alternative($defs,5);
 			if($disp_flag < 0) continue;
             list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
             if(!empty($relations)) {
@@ -126,7 +130,7 @@ public function ResetSchema() {
 //==============================================================================
 // extract DataTable or Alternate DataView
     private function model_view($db) {
-        list($model,$field,$refer) = explode('.', "{$db}...");
+		list($model,$field,$refer) = fix_explode('.',$db,3);
         if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
             $model = $m[1];
             $table = (is_array($this->$model->DataView))
@@ -167,7 +171,7 @@ public function ResetSchema() {
                 list($db,$ref_list) = array_first_item($rel);
                 if(is_numeric($db)) {       // maybe 'Model.id.Field'
                     if(!is_scalar($ref_list)) continue;
-                    list($d,$f,$r) = explode('.', "{$ref_list}...");
+					list($d,$f,$r) = fix_explode('.',$ref_list,3);
                     $db = "{$d}.{$f}";
                     $ref_list = $r;
                 }
@@ -182,19 +186,20 @@ public function ResetSchema() {
 				$rel_def = $rel;
             }
             $sub_rel = [];
-			list($rel_tbl,$primary) = explode('.',$rel_def);
+			list($rel_tbl,$primary) = fix_explode('.',$rel_def,2);
             foreach($ref_list as $refer) {
                 $sub_ref = $this->$model->JoinDefinition($table,$refer,$primary);
                 $alias_name = "{$base_name}_".id_relation_name($refer);
                 $this->FieldSchema[$alias_name] = NULL;   // $key; import MUST!
                 // locale if exist in relation-db
-                $ref_name = "{$refer}_" . LangUI::$LocaleName;
-                if(!$this->$model->dbDriver->fieldAlias->exists_locale($ref_name)) $ref_name = $refer;
+                // $ref_name = "{$refer}_" . LangUI::$LocaleName;
+                // if(!$this->$model->dbDriver->fieldAlias->exists_locale($ref_name)) $ref_name = $refer;
+                $ref_name = $this->$model->dbDriver->fieldAlias->get_lang_alias($refer);
                 $sub_rel[$alias_name] = (is_array($sub_ref)) ? $sub_ref : "{$link}.{$ref_name}";
             }
             $new_Relations[$key] =  $sub_rel;
         }
-        $this->dbDriver->setupRelations($new_Relations);
+        $this->dbDriver->setupRelations($this->Primary,$new_Relations);
     }
 //==============================================================================
 // Selection Table Relation setup
@@ -265,6 +270,12 @@ public function get_selectvalue_of_key($sel_name,$value) {
 	return "";
 }
 //==============================================================================
+// Make Empty Record
+public function makeEmptyRecord() {
+	$row = array_combine($this->dbDriver->columns,array_fill(0,count($this->dbDriver->columns),NULL));
+    return $row;
+}
+//==============================================================================
 // Get ROW-RECORD by Primarykey
 // Result:   $this->fields in Column Data
 public function getRecordByKey($id) {
@@ -312,10 +323,11 @@ public function ChangeSelectCondition($name,$cond) {
 //	d. key-name => [ Model. => number.title,	[ cond ] ]		for Select() in Model [title] = number|Primary
 //	e. key-name => [ id.title,					[ cond ] ]		for Select() by SELF [title] = number|Primary
 //	f. key-name => [ Model. => [ Method => argument],[ cond ] ]		Chain() ir Select() value,depend on Model Method returned.
-public function LoadSelection($key_names, $sort_val = false) {
+public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 	$selections = (is_array($key_names)) ? $key_names : [$key_names];
     foreach($selections as $key_name) {
 		list($target,$cond) = $this->SelectionDef[$key_name];
+		$cond = array_override($cond,$opt_cond);	// additional cond
 		list($model,$ref_list) = array_first_item($target);
 		if(is_int($model)) {        // self list
 			// case b., e.
@@ -351,14 +363,12 @@ public function GetValueList() {
     $this->Select= [];
 	$keyset = array_keys($this->SelectionDef);
 	$this->LoadSelection($keyset);
-    debug_log(DBMSG_MODEL, [ "SELECT_LIST" => $this->Select]);
 }
 //==============================================================================
 //   Get Field Value List
 // Result:  Select array
 public function getFieldValues($id,$field, $cond = NULL) {
     $select = $this->dbDriver->getValueLists(NULL,$field,$id,$cond);
-//    debug_log(DBMSG_MODEL, [ "VALUE_LIST" => $select]);
 	return $select;
 }
 //==============================================================================
@@ -370,7 +380,7 @@ public function getRecordField($key,$value,$field) {
 	$keys = explode(',',$field);
 	$vals = array_map(function($fn) {
 			$dot = explode('.',$fn);
-			return implode(' ',array_filter_values($this->fields,$dot));
+			return implode(' ',array_keys_value($this->fields,$dot));
 		},$keys);
 	if(count($vals)===1) return $vals[0];
 	else return array_combine($keys,$vals);
@@ -421,7 +431,7 @@ public function SelectFinder($chain, $filter, $cond) {
 		}
 	}
 	if(!$chain) ksort($data,SORT_FLAG_CASE|SORT_STRING);
-    debug_log(DBMSG_NONE, [
+    debug_xlog(DBMSG_NONE, [
         "Filter" => $filter,
         "COND" => $cond,
         "RECORDS" => $data,
@@ -459,7 +469,6 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
         }
     }
     $this->Records = $data;
-//    debug_log(DBMSG_CLI, ['DATA'=>$data]);
     debug_log(FALSE, [
         "record_max" => $this->record_max,
         "Filter" => $filter,
@@ -581,7 +590,7 @@ public function is_valid(&$row) {
             $alias = ($this->AliasMode) ? $this->dbDriver->fieldAlias->get_lang_alias($key) :$key;
             $this->fields[$alias] = $val;
         }
-        debug_log(DBMSG_MODEL,['ALIAS' => $this->fields]);
+        debug_xlog(DBMSG_MODEL,['ALIAS' => $this->fields]);
     }
 //==============================================================================
 // POST-name convert to Real field name by PostRenames[]

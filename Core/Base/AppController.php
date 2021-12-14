@@ -64,6 +64,7 @@ public function CreateAction() {
 //==============================================================================
 // check active METHOD
 public function is_enable_action($action) {
+	if(empty($action)) return false;
 	if(	array_key_exists($action,$this->aliasAction) ||		// exists Alias Action
 		in_array($action,$this->my_method,true)) return TRUE;	// exist ENABLED List
 	return FALSE;	// diable ActionMethod
@@ -97,19 +98,9 @@ public function is_authorised($method) {
 				$userid = MySession::get_LoginValue($login_key);	// already-logged-in check
 				if(empty($userid)) {		// not LOGGED-IN
 					$userid = (isset(App::$Post[$login_key])) ? App::$Post[$login_key] : '';
-					$msg = $this->__('.Login');
-					$err_msg = $Login->error_type;
 					$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
-					page_response($login_page,[
-						'page_title'	=> $this->__('Login.LoginPage'),
-						'msg_title'		=> $this->__('Login.LoginTitle'),
-						'user_title'	=> $this->__('Login.UserName'),
-						'pass_title'	=> $this->__('Login.Password'),
-						'send_button'	=> $this->__('Login.Submit'),
-						'reset_button'	=> $this->__('Login.Reset'),
-						'msg_body'		=> $Login->error_type,
-						'login_user'	=> $userid,
-					]);     // LOGIN PAGE Response, NO returned HERE!
+					page_response($login_page,$Login->retryMessages($userid));
+					// LOGIN PAGE Response, NO returned HERE!
 					return FALSE;
 				}
 			}
@@ -158,7 +149,7 @@ protected function SpoofingViewModel($model) {
 }
 //==============================================================================
 // Restore Original Model Class
-protected function SpoofingRestore($model) {
+protected function SpoofingRestore() {
 	$this->View->Model = $this->Helper->Model = $this->Model = $this->orgModel;
 }
 //==============================================================================
@@ -166,7 +157,7 @@ protected function SpoofingRestore($model) {
 private function exec_Logging($action) {
 	$no_log = (in_array($this->noLogging,['*',$action],true)) ||
 			(is_array($this->noLogging) && in_array($action,$this->noLogging,true));
-	list($model,$method) = explode('.',"{$this->LoggingMethod}.");
+	list($model,$method) = fix_explode('.',$this->LoggingMethod,2);
 	if(!empty($model) && !$no_log) {
 		if(empty($method)) $method = 'Logged';
 		$class_name = "{$model}Model";
@@ -205,31 +196,33 @@ public function AutoPaging($cond, $max_count = 100) {
 	$cond = re_build_array($cond);
 	$uri = App::Get_PagingPath();
 	// check SAVED Paging-Param
+	$sSize = MySession::getPagingIDs('Size');
 	$Page = MySession::getPagingIDs('Setup');
-	list($sCond,$sSize,$sURI,$sQuery) = array_filter_values($Page,['Cond','Size','URI','QUERY']);
+	list($sCond,$sURI,$sEnv) = array_keys_value($Page,['Cond','URI','ENV']);
+	list($sQuery,$sPost) = $sEnv;
 	if($num === 0) $num = 1;
-	if($size === 0) {
-		$size = intval($sSize);
-		if($size === 0) $size = $max_count;
-	}
-	if($uri !== $sURI || empty($sCond) || (!empty($cond) && $sCond !== $cond))  {
+	$comp = ($sCond === NULL) ? NULL : array_intersect($cond,$sCond);	// same condition pickup
+	if($uri === $sURI && $num > 1 && $cond === $comp)  {
+		$cond = $sCond;				// repeat by saved condition
+		App::$Query = $sQuery;
+		App::$Post = $sPost;
+		if($size === 0) $size = intval($sSize);
+	} else {
 		$Page['Cond'] = $cond;
 		$Page['URI'] = $uri;
-		$Page['QUERY'] = App::$Query;
-	} else {
-		$cond = $sCond;				// repeat by saved condition
-		if($size !== intval($sSize)) $num = 1;	// different size must be jump to Page-1
-		$this->SetHelperProps(['Query' => $sQuery]);	// Query is set to HELPER Props
+		$Page['ENV'] = [App::$Query,App::$Post];
 	}
+	if($size === 0) $size = $max_count;
+	if($size !== intval($sSize)) $num = 1;	// different size must be jump to Page-1
 	$cnt = $this->Model->getCount($cond);
 	if($cnt < $size )  $Page = NULL;	// no-NEED Paging
 	else {
 		$last = ($num - 1) * $size;		// check LAST-Page#
 		if($last  > $cnt) $num = 1;
-		$Page['Size'] = $size;
 		App::ChangeParams([$num,0]);
 		$this->Model->SetPage($size,$num);
 	}
+	MySession::setPagingIDs('Size',$size);
 	MySession::setPagingIDs('Setup',$Page);
 	return $cond;
 }

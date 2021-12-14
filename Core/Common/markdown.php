@@ -224,14 +224,24 @@ function pseudo_markdown($atext, $md_class = '') {
 //			!(URL)	Target = NEW
 //			^(URL)	Target = TOP
 //			:(URL)	Target = SELF
-		'/\[([^\]]+)\]([!\^:])?\(([^\)]+)\)/' => function($m) {
+//			@(URL)	window.open = @(URL,width,height,scrollbars~
+		'/\[([^\]]+)\]([!\^:@])?\(([^\)]+)\)/' => function($m) {
 			$txt = $m[1];
-			$arr = explode(' ',$m[3]);		// allow user attribute
+			$arr = str_explode([' ',','],$m[3]);		// allow user attribute
 			$url = array_shift($arr);
             switch($m[2]) {
             case '!': $arr[] = 'target="_blank"'; break;
             case '^': $arr[] = 'target="_top"'; break;
             case ':': $arr[] = 'target="_self"'; break;
+			case '@':
+					$nm = array_shift($arr);
+					$param = array_items_list(
+								array_combine(['width','height','scrollbars'],
+									array_alternative($arr,3,[800,800,'yes'])));
+					$href = make_hyperlink($url);
+					$run = "window.open('{$href}','{$nm}','{$param}')";
+					$arr = [ "target=\"_new\" onClick=\"{$run};return false;\"" ];
+					$url = '#';
             }
 			$url = make_hyperlink($url);
 			$attr = empty($arr) ? '': ' '.implode(' ',$arr);
@@ -315,9 +325,9 @@ function pseudo_markdown($atext, $md_class = '') {
             case '!':   // text area
                     $vv = explode(':',$val);
                     if(count($vv)===2) {
-						list($rows,$cols) = explode(',',"{$vv[1]},");
+						list($rows,$cols) = fix_explode(',',$vv[1],2);
 						$wd = array_filter(['rows'=>$rows,'cols'=>$cols],'strlen');
-						$sz = array_key_value(attr_sz_xchange($wd),' ');
+						$sz = array_items_list(attr_sz_xchange($wd),' ');
                     } else $sz = '';
 					if(!empty($sz)) $sz = " {$sz}";
                     // restore if ...{ TEXT }... mark converted.
@@ -327,7 +337,7 @@ function pseudo_markdown($atext, $md_class = '') {
                     break;
             case '=':   // text
                     $vv = explode(':',$val);
-                    $sz = (empty($vv[1])) ? '' : (' '.array_key_value(attr_sz_xchange(['size'=>$vv[1]]),' '));
+                    $sz = (empty($vv[1])) ? '' : (' '.array_items_list(attr_sz_xchange(['size'=>$vv[1]]),' '));
                     $tag = "{$spc}{$tag}{$sz} value='{$vv[0]}' />";
                     break;
             }

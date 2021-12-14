@@ -15,13 +15,13 @@ abstract class LoginClass extends AppModel {
 	public function class_startup() {
         parent::class_initialize();
 		if(isset($this->LoginID)) {
-			list($uid,$pwid) = explode(':',"{$this->LoginID}:");
+			list($uid,$pwid) = fix_explode(':',$this->LoginID,2);
 			$this->LoginID = $uid;
 			$this->PasswdID = empty($pid) ? 'password' : $pid;
 		}
 	}
 //==============================================================================
-//　Default User Info for CLI Debug
+// Default User Info for CLI Debug
 public function defaultUser() {
 	static::$LoginUser = [
 		'userid'	=>	'guest',
@@ -31,11 +31,26 @@ public function defaultUser() {
 		'full_name'	=>	'Guest User',
 		'email'		=>	'no-mail@localhost',
 	];
-	$udata = array_filter_values(static::$LoginUser,['userid','language','region']);
+	$udata = array_keys_value(static::$LoginUser,['userid','language','region']);
 	return $udata;
 }
 //==============================================================================
-//　Default User Info for CLI Debug
+// ログインエラー時のメッセージ配列(app-login.phpで参照)
+//  メッセージをカスタマイズする時はこのメソッドをoverrideする
+public function retryMessages($userid) {
+	return [
+		'page_title'	=> $this->__('Login.LoginPage'),
+		'msg_title'		=> $this->__('Login.LoginTitle'),
+		'user_title'	=> $this->__('Login.UserName'),
+		'pass_title'	=> $this->__('Login.Password'),
+		'send_button'	=> $this->__('Login.Submit'),
+		'reset_button'	=> $this->__('Login.Reset'),
+		'msg_body'		=> $this->error_type,
+		'login_user'	=> $userid,
+	];
+}
+//==============================================================================
+// Default User Info for CLI Debug
 public function reload_userdata($udata) {
 	list($uid,$lang,$region) = $udata;
 	if($lang !== LangUI::$LocaleName) {
@@ -47,7 +62,7 @@ public function reload_userdata($udata) {
 	static::$LoginUser = $data;
 }
 //==============================================================================
-//　ユーザーIDの妥当性を検証する
+// ユーザーIDの妥当性を検証する
 //	失敗: FALSE
 //	成功: [ID,LANG,REGION]
 public function is_validUser($userid,$passwd = NULL) {
@@ -62,8 +77,8 @@ public function is_validUser($userid,$passwd = NULL) {
             if($passwd !== $user_pass) return FALSE;
         }
         $this->error_type = '';
-		$user_lang = array_filter_values($data,['language','region'],[DEFAULT_LANG,DEFAULT_REGION]);
-		list($lang,$region) = array_filter_values(App::$Query,['lang','region'],$user_lang);
+		$user_lang = array_keys_value($data,['language','region'],[DEFAULT_LANG,DEFAULT_REGION]);
+		list($lang,$region) = array_keys_value(App::$Query,['lang','region'],$user_lang);
         static::$LoginUser = $data;
 		$udata = [$userid,$lang,$region];
 		if($lang !== LangUI::$LocaleName) {

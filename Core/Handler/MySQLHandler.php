@@ -8,7 +8,7 @@
 //	SQLite3用の抽象メソッドを実装する
 class MySQLHandler extends SQLHandler {
 //==============================================================================
-//	コンストラクタ：　データベースのテーブルに接続する
+//	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table) {
 		parent::__construct($table,'MySQL');
 	}
@@ -43,6 +43,11 @@ public function truncate_sql($table) {
 //	RESET SEQ to PRIMARY
 protected function reset_seq($table,$primary) {
 	return FALSE;
+}
+//==============================================================================
+//	CONCAT FIELDS
+protected function concat_fields($arr) {
+	return (count($arr)>1) ? 'concat(' . implode(',',$arr) . ')' : $arr[0];
 }
 //==============================================================================
 //	doQuery: 	SQLを発行する

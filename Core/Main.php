@@ -146,9 +146,17 @@ if(!$controllerInstance->is_enable_action($exemethod)) {
     if(FORCE_REDIRECT || $method==='') {
         $exemethod = $method = $controllerInstance->defaultAction;   // get DEFAULT method
     } else {
-        $module[0] = $controller;       // may-be rewrited
-        $module[1] = $method;           // may-be rewrited virtual method
-        error_response('page-404.php',$appname,$app_uri,$module);
+		$exemethod = ucfirst(App::$Filter);
+		if($controllerInstance->is_enable_action($exemethod)) {
+			$tmp = array_shift($module[2]);
+			array_push($module[2],$method);
+			$module[1] = $method = $tmp;
+			App::ResetModule($module);
+		} else {
+			$module[0] = $controller;       // may-be rewrited
+			$module[1] = $method;           // may-be rewrited virtual method
+			error_response('page-404.php',$appname,$app_uri,$module);
+		}
     }
 }
 $hide_cont = (strcasecmp($appname,$controller) === 0) ? '' : $controller;
@@ -182,7 +190,6 @@ if($controllerInstance->is_authorised($exemethod)) {
 		'FORM' => [
 			"GET"	=> App::$Query,
 			"POST"	=> App::$Post,
-	        "EMPTY"	=> App::$emptyRequest ,
 		],
         "SESSION-ALIVE"	=> date('Y/m/d H:i:s',$life_time)." ({$life_time})",
         "SESSION Variables" => [

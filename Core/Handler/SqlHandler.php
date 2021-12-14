@@ -20,6 +20,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private $handler;		// Databas Handler Name
 	public $relations;		// relation tables
 	private $LastSQL;		// Last Query WHERE term
+	protected $Primary;		// for FUTURE
 	protected $LastCond;	// for DEBUG
 	protected $LastBuild;	// for DEBUG
 	protected $LIKE_opr = 'LIKE';		// Ignore Upper/Lower case LIKE
@@ -59,8 +60,9 @@ function __construct($table,$handler) {
 	}
 //==============================================================================
 // setupRelations: relation table reminder
-public function setupRelations($relations) {
+public function setupRelations($primary,$relations) {
 	$this->relations = $relations;
+	$this->Primary = $primary;
 //	debug_log(DBMSG_HANDLER,["RELATIONS" => $this->relations]);
 }
 //==============================================================================
@@ -123,12 +125,19 @@ public function SetPaging($pagesize, $pagenum) {
 	debug_log(FALSE,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
 }
 //==============================================================================
+//	QUERY Command: generate SELECT DISTINCT
+// private function QueryCommand($param) {
+// //	return "SELECT DISTINCT on({$this->Primary} {$param}";
+// 	return "SELECT DISTINCT {$param}";
+// }
+//==============================================================================
 //	getRecordCount($cond) 
 //		get $cond match record count
 //==============================================================================
 public function getRecordCount($cond) {
 	$where = $this->sql_makeWHERE($cond);	// 検索条件
-	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
+	$sql = "SELECT DISTINCT count(*) as \"total\" FROM {$this->table}";
+//	$sql = $this->QueryCommand("count(*) as \"total\" FROM {$this->table}";
 	$this->SQLdebug($sql,$where);
 	$this->execSQL("{$sql}{$where};");
 	$field = $this->fetch_array();
@@ -184,7 +193,7 @@ public function getGroupCalcList($cond,$groups,$calc,$sortby,$max) {
 		$sort = " ORDER BY ".implode(',',$col);
 	}
 	$limit = ($max > 0) ? (($this->is_offset) ? " offset 0 limit {$max}" : " limit 0,{$max}"):'';
-	$sql = "SELECT {$sel} FROM {$this->raw_table}{$where} GROUP BY {$grp}{$sort}{$limit};";
+	$sql = "SELECT DISTINCT  {$sel} FROM {$this->raw_table}{$where} GROUP BY {$grp}{$sort}{$limit};";
 	$this->execSQL($sql,false);
 debug_log(DBMSG_HANDLER,["LOG-Aggregate" => [ 'COND' => $cond,'SQL'=>$sql]]);
 	return $sql;
@@ -198,7 +207,7 @@ debug_log(DBMSG_HANDLER,["LOG-Aggregate" => [ 'COND' => $cond,'SQL'=>$sql]]);
 //==============================================================================
 public function findRecord($cond,$use_relations = FALSE,$sort = []) {
 	$where = $this->sql_makeWHERE($cond);
-	$sql = "SELECT count(*) as \"total\" FROM {$this->table}";
+	$sql = "SELECT DISTINCT  count(*) as \"total\" FROM {$this->table}";
 	$this->execSQL("{$sql}{$where};",FALSE);		// No Logging
 	$field = $this->fetch_array();
 	$this->recordMax = ($field) ? $field["total"] : 0;
@@ -270,7 +279,7 @@ public function deleteRecord($wh) {
 		$sql = implode(',',$fields);
 //		$groupby = (empty($grp)) ? '' : " GROUP BY \"{$grp}\"";
 		$this->SQLdebug($sql,$where);
-		$sql = "SELECT {$sql} FROM {$table}{$where} ORDER BY \"{$id}\";";
+		$sql = "SELECT DISTINCT  {$sql} FROM {$table}{$where} ORDER BY \"{$id}\";";
 		return $sql;
 	}
 //==============================================================================
@@ -281,7 +290,7 @@ public function deleteRecord($wh) {
 			foreach(array_combine($key,$val) as $k => $v) $expr[] = "(\"{$k}\"='{$v}')";
 			$sql = implode(' AND ',$expr);
 		} else $sql = "\"{$key}\"='{$val}'";
-		return "SELECT * FROM {$this->table} WHERE {$sql};";
+		return "SELECT DISTINCT  * FROM {$this->table} WHERE {$sql};";
 	}
 //==============================================================================
 // escape to single-quote(')
@@ -302,7 +311,7 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 //		....
 //	]
 	private function sql_JoinTable($use_relations) {
-		$sql = "SELECT {$this->table}.*";
+		$sql = "SELECT DISTINCT  {$this->table}.*";
 		$frm = " FROM {$this->table}";
 		$jstr = '';
 		if($use_relations && !empty($this->relations)) {
@@ -345,60 +354,57 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 //		fieldkey => findvalue
 	private function makeExpr($cond,$target_table) {
 		$dump_object = function ($opr,$items,$table)  use (&$dump_object)  {
-			// LIKE operation build
-			$like_opstr = function($v) {
-				if($v[0] == '-' && strlen($v) > 1) {
-					$v = mb_substr($v,1);
-					$op = "NOT {$this->LIKE_opr}";
-				} else $op = $this->LIKE_opr;
-				if(mb_strpos($v,'%') === FALSE) $v = "%{$v}%";
-				return ["'{$v}'",$op];
-			};
-			// multi-column LIKE op
-			$like_object = function($key,$val,$table) use(&$like_opstr) {
-				$expr = [];
-				foreach(str_explode('+',$key) as $cmp) {
-					$cmp = $this->fieldAlias->get_lang_alias($cmp);
-					$opk = "{$table}.\"{$cmp}\"";
-					$cmp = array_map(function($v) use(&$opk,&$like_opstr) {
-							list($v,$opx) = $like_opstr($v);
-							return "(cast({$opk} as text) {$opx} {$v})";
-						},$val);
-					$expr[] = implode('OR',$cmp);
-				}
-				$opp = implode('OR',$expr);
-				return (count($expr)===1) ? $opp : "({$opp})";
-			};
 			// multi-columns f1+f2+f3...  OP val
 			$multi_field = function($key,$op,$table,$val) {
-				$expr = [];
-				foreach(str_explode('+',$key) as $cmp) {
-					$cmp = $this->fieldAlias->get_lang_alias($cmp);
-					$fn = "{$table}.\"{$cmp}\"";
-					if(mb_strpos($val,'%') !== FALSE) {
-						$fn = "cast({$fn} as text)";
+				// field name arranged
+				$expr = array_map( function($v) use(&$table) {
+					$cmp = $this->fieldAlias->get_lang_alias($v);
+					return "{$table}.\"{$cmp}\"";
+				},str_explode('+',$key));
+				if($op === NULL) {		// need LIKE or NOT LIKE
+					// LIKE operation build
+					$like_opstr = function($v) {
+						if($v[0] == '-' && strlen($v) > 1) {
+							$v = mb_substr($v,1);
+							$op = "NOT {$this->LIKE_opr}";
+						} else $op = $this->LIKE_opr;
+						if(trim($v,'%') === $v) $v = "%{$v}%";
+						return [$v,$op];
+					};
+					$opc = $this->concat_fields($expr);
+					if(is_array($val)) {
+						$lexpr = array_map( function($v) use(&$opc,&$like_opstr) {
+							list($v,$x) = $like_opstr($v);
+							return "({$opc} {$x} '{$v}')";
+						},$val);
+						return implode(' OR ',$lexpr);
+					} else {
+						list($v,$opx) = $like_opstr($val);
+						return "{$opc} {$opx} '{$v}'";
 					}
-					$expr[] = "({$fn} {$op} {$val})";
 				}
-				$opp = implode('OR',$expr);
-				return (count($expr)===1) ? $opp : "({$opp})";
+				if(count($expr) > 1) {
+					$expr = array_map(function($k) use(&$op,&$val) { return "({$k} {$op} {$val})"; },$expr);
+					return implode(' OR ',$expr);
+				}
+				return "{$expr[0]} {$op} {$val}";
 			};
 			$opc = ''; $and_or_op = ['AND','OR','NOT'];
 			foreach($items as $key => $val) {
-				if(empty($key)) { echo "EMPTY!!!"; continue;}
+				if(empty($key)) { echo "EMPTY({$val})!!!"; continue;}
 				list($key,$op) = keystr_opr($key);
 				if(empty($op) || $op === '%') {			// non-exist op or LIKE-op(%)
 					if(is_array($val)) {
 						if(in_array($key,$and_or_op,true)) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
-							if($key === 'NOT') $opp = "(NOT {$opp})";
+							if($key === 'NOT') $opp = "NOT ({$opp})";
 						} else { // LIKE [ array ]
-							$opp = $like_object($key,$val,$table);
+							$opp = $multi_field($key,NULL,$table,$val);
 						}
 					} else { // not have op code
 						if(mb_strpos($val,'...') !== FALSE) {
-							list($from,$to) = str_explode('...',$val);
+							list($from,$to) = fix_explode('...',$val,2);
 							if(empty($from)) {
 								$op = '<=';
 								$val = $to;
@@ -412,7 +418,7 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';
 						} else {
-							list($val,$op) = $like_opstr($val);
+							$op = NULL;
 						}
 						$opp = $multi_field($key,$op,$table,$val);
 					}
@@ -428,17 +434,17 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 							if(is_array($rel)) $rel = implode('.',$rel);	// force scalar-value
 						}
 						if(is_scalar($rel)) {
-							list($tbl,$fn) = explode('.',$rel);
+							list($tbl,$fn) = fix_explode('.',$rel,2);
 							$ops = $dump_object('AND',$val,$tbl);
-							$opp = "({$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE {$ops}))";
+							$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE ({$ops}))";
 						} else {
 							list($tbl,$tbl_prim,$tbl_rel,$rel_tbl,$rel_fn,$fn) = $rel;
 							$fid = id_relation_name($tbl_rel)."_{$fn}";
 							list($kk,$vv) = array_first_item($val);		// because each element will be same table,id
 							$val = [str_replace($fid,$fn,$kk) => $vv]; // change rel-level field key
 							$ops = $dump_object('AND',$val,$rel_tbl);
-							$ops = "({$tbl}.\"{$tbl_rel}\" IN (SELECT Distinct({$rel_tbl}.\"{$rel_fn}\") FROM {$rel_tbl} WHERE {$ops}))";
-							$opp = "({$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$tbl_prim}\") FROM {$tbl} WHERE {$ops}))";
+							$ops = "{$tbl}.\"{$tbl_rel}\" IN (SELECT Distinct({$rel_tbl}.\"{$rel_fn}\") FROM {$rel_tbl} WHERE ({$ops}))";
+							$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$tbl_prim}\") FROM {$tbl} WHERE ({$ops}))";
 						}
 					} else continue;
 				} else if(is_array($val)) {
@@ -448,7 +454,7 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 						$opx = $in_op[$op];
 						$opp = $multi_field($key,$opx,$table,"({$cmp})");
 					} else {	// LIKE [ array ]
-						$opp = $like_object($key,$val,$table);
+						$opp = $multi_field($key,NULL,$table,$val);
 					}
 				} else {
 					if($val === NULL) {
@@ -459,11 +465,12 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 					} else if(!is_numeric($val)) $val = "'{$val}'";
 					$opp = $multi_field($key,$op,$table,$val);
 				}
-				$opc = (empty($opc)) ? "{$opp}" : "({$opc}{$opr}{$opp})";
+				$opc = (empty($opc)) ? $opp : "({$opc}) {$opr} ({$opp})";
 			}
-			return (empty($opc)) ? '' : "{$opc}";	// ((count($items)===1) ? $opc : "({$opc})");
+			return $opc;
 		};
 		$sql = $dump_object('AND',$cond,$target_table);
+debug_xdump(['COND'=>$cond,'SQL'=>$sql]);
 		return $sql;
 	}
 

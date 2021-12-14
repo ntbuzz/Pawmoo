@@ -39,8 +39,8 @@ public function Logged($instance,$action) {
 private function Logging($module,$method,$rec_id) {
 	$logtime = time();
 	$now	= date($this->TimeFormat ,$logtime);
-	$query	= array_key_value(App::$Query,'&');
-	$post	= array_key_value(App::$Post,'&');
+	$query	= array_items_list(App::$Query,'&');
+	$post	= array_items_list(App::$Post,'&');
 	if($rec_id === 0) $rec_id = '';
 	// 記録ログレコードを作成
 	$row = [
