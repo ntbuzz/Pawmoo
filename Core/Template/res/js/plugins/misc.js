@@ -32,8 +32,10 @@ $.fn.ChainSelect = function () {
 	// 可変引数を解析
 	$.each(arguments,function (key,argv) {
 		if (typeof argv === 'boolean') target.first_call = argv;
-		else if (typeof argv === 'function') target.callback = argv;
-		else if (typeof argv === 'object') target.selObj = argv;
+		else if (typeof argv === 'function') {
+			if (target.callback === null) target.callback = argv;
+			else target.progress = argv;
+		} else if (typeof argv === 'object') target.selObj = argv;
 		else target.val = argv;
 	});
 	var id = self.attr('id');
@@ -43,12 +45,12 @@ $.fn.ChainSelect = function () {
 		target.progress = callback;
 	};
 	// 初期値を設定
-	sel_chain.Select(target.val, function (v, id) {
+	sel_chain.Select(target.val, function (v, id, pid) {
 		if (typeof target.progress === 'function')
-			target.progress.call(self, v, id);
+			target.progress.call(self, v, id, pid);
 	});
 	// 初期値でコールバックするなら onChange() を呼び出す
-	if (target.first_call) sel_chain.onChange(target.val);
+	if (target.first_call) sel_chain.onChange(target.val,target.progress);
 	return self;
 };
 // 指定要素 e のスクロールに追従する
