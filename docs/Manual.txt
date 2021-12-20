@@ -1244,7 +1244,6 @@ static::$appRoot
     'language'              // ユーザー言語(ja;en)
 
 ・クラスメソッド
-  is_validUser($userid,$passwd) // ユーザデータを読み込んで検証する
   is_validLogin(POST変数)       // POSTされたログイン情報からユーザー情報を検証する
   reset_password($userid,$maxlen)	// ユーザーIDのパスワードを maxlen桁で乱数設定し値を返す
 

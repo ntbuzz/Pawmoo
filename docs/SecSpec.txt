@@ -137,6 +137,15 @@ Hyper-Link:
         ...
     ]
 
++alink                              // Single hyper-link tag, it cannot be expressed by '%'
+    +alink => [
+        attribules			        // When the attribute is not included in the tag.
+			value	=> href
+			data-element => target
+			data-value => label
+		link-text | [ window.open() params ]
+    ]
+
 +img                                // Image Tag output,allowed to add tag attributes to the command name.
     +img => URL                     // ex:  +img.class#id => URL
     +img => [
