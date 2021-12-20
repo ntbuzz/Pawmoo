@@ -274,7 +274,7 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
                         $tag = mb_substr($tag,1);   // delete '$' top-char
                         $vars[$tag] = $this->expand_SectionVar($sec,$vars,TRUE);
                         break;
-                case 0: if(empty($sec)) break;
+                case 0: if(empty($sec) && empty($attrs)) break;
                 case 1:         // tag-section
                         list($attrs,$innerText,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
                         $attr = $this->gen_Attrs($attrs,$vars);
@@ -498,13 +498,17 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
     //==========================================================================
     // CALL Helper-Method
     //  &Helper-Method, &Helper-Method => [ argument => value ... ] in Helper refer $arg['argument']
+	//  &Helper-Method(argument)
     private function sec_helper($tag,$attrs,$sec,$vars) {
-        // EXPAND CHILD for Helper-Method
         $sec = $this->expand_SectionVar($sec,$vars,TRUE);
+		if(array_key_exists('value',$attrs)) {
+			$arg = $attrs['value'];
+			if(!empty($sec)) $arg = array_flat_reduce([$arg,$sec]);
+		} else $arg = $sec;
         if(method_exists($this->Helper,$tag)) {
-            $this->Helper->$tag($sec);
+            $this->Helper->$tag($arg);
         } else if(method_exists('App',$tag)) {
-            App::$tag($sec);
+            App::$tag($arg);
         } else {
             echo "Helper Method:'{$tag}' not found. Please Create this method.\n";
         }
