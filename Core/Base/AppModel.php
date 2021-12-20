@@ -263,9 +263,8 @@ public function SetPage($pagesize,$pagenum) {
 //==============================================================================
 // find Select key by value
 public function get_selectvalue_of_key($sel_name,$value) {
-	$str_value = strval($value);
 	foreach($this->Select[$sel_name] as $key => $val) {
-		if($str_value === $val) return $key;
+		if($value == $val) return $key;
 	}
 	return "";
 }
@@ -576,6 +575,11 @@ public function DeleteRecord($num) {
 // DELETE Records by FIND-CONDITION
 public function MultiDeleteRecord($cond) {
     $this->dbDriver->deleteRecord($cond);
+}
+//==============================================================================
+// TRUNCATE TABLE
+public function doTruncate() {
+    $this->dbDriver->doTruncate();
 }
 //==============================================================================
 // VALIDATION of write data
