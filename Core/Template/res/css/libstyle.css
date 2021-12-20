@@ -85,7 +85,8 @@ option.disable {
 	width:calc(100% - 1.5em);
 }
 .ui-datepicker-trigger {
-   position: absolute;
+   /* position: absolute; */
+	vertical-align: middle;
 }
 /* チェックボックス・ラジオボタンリスト */
 ul.input-list {

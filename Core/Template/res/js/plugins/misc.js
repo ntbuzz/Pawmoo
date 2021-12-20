@@ -378,7 +378,7 @@ $.fn.InitPopupSet = function () {
 			yearSuffix: "${#.core.YearSuffix}",
 			buttonImage: "/res/images/calender_icon.png",   // カレンダーアイコン画像
 			buttonImageOnly: true,           // 画像として表示
-			showOn: "button",                   // カレンダー呼び出し元の定義
+			showOn: "both",                   // カレンダー呼び出し元の定義
 			buttonText: "${#.core.ToolTip}", // ツールチップ表示文言
 			showMonthAfterYear: true,
 		};
