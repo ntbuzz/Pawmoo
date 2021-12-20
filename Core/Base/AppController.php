@@ -201,8 +201,20 @@ public function AutoPaging($cond, $max_count = 100) {
 	list($sCond,$sURI,$sEnv) = array_keys_value($Page,['Cond','URI','ENV']);
 	list($sQuery,$sPost) = $sEnv;
 	if($num === 0) $num = 1;
-	$comp = ($sCond === NULL) ? NULL : array_intersect($cond,$sCond);	// same condition pickup
-	if($uri === $sURI && $num > 1 && $cond === $comp)  {
+	$array_same_check = function($pair_arrs) {
+		foreach($pair_arrs as $pair) {
+			list($base,$save) = $pair;
+			$pcomp = (array_intersect($save,$base) === $base);
+			if(!$pcomp) return false;
+		}
+		return true;
+	};
+	$same_check = $array_same_check([
+		[ $cond,		$sCond],
+		[ App::$Post,	$sPost],
+		[ App::$Query,	$sQuery],
+	]);
+	if($uri === $sURI  && $same_check) {
 		$cond = $sCond;				// repeat by saved condition
 		App::$Query = $sQuery;
 		App::$Post = $sPost;
