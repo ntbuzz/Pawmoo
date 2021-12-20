@@ -68,7 +68,7 @@ function SelectLink(setupobj, id, callback) {
 	var my_obj = setupobj[my_prop];
 	var child_id = self_obj.attr('data-element');
 	if($('#'+child_id).length === 0) child_id = null;
-	var select_me = '<option value="0">${#.core.SelectMe}</option>';
+	var select_me = '<option value="">${#.core.SelectMe}</option>';
 	// 末端の子要素オブジェクト
 	var child_term = {
 		selfList: function () {return false;},
@@ -83,6 +83,7 @@ function SelectLink(setupobj, id, callback) {
 	};
 	// 自分の親IDを探す
 	self.myParent = function (val) {
+		if (val === '') return 0;
 		var pid = val;
 		$.each(my_obj.sel_list, function (key, value) {
 			if (value[0] == val) {
