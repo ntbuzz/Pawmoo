@@ -50,6 +50,16 @@ public function retryMessages($userid) {
 	];
 }
 //==============================================================================
+// password alive period limitation
+public function is_passwd_limitation($login) {
+	return false;				// default permanent period
+}
+//==============================================================================
+// password alive period limitation
+public function set_passwd_limitation(&$login,$limit) {
+	return false;				// no limit
+}
+//==============================================================================
 // Default User Info for CLI Debug
 public function reload_userdata($udata) {
 	list($uid,$lang,$region) = $udata;
@@ -65,7 +75,7 @@ public function reload_userdata($udata) {
 // ユーザーIDの妥当性を検証する
 //	失敗: FALSE
 //	成功: [ID,LANG,REGION]
-public function is_validUser($userid,$passwd = NULL) {
+private function is_validUser($userid,$passwd = NULL) {
     $this->error_type = $this->__('Login.NeedLogin');
     if(empty($userid)) return FALSE;
     $data = $this->getRecordBy($this->LoginID,$userid);
@@ -75,6 +85,11 @@ public function is_validUser($userid,$passwd = NULL) {
 		    $this->error_type = $this->__('Login.PassError');
             $user_pass = $data['password'];
             if($passwd !== $user_pass) return FALSE;
+			// limitation check
+			if($this->is_passwd_limitation($data)) {
+			    $this->error_type = $this->__('Login.PassLimit');
+				return false;
+			}
         }
         $this->error_type = '';
 		$user_lang = array_keys_value($data,['language','region'],[DEFAULT_LANG,DEFAULT_REGION]);
@@ -101,7 +116,7 @@ public function is_validLogin($values) {
         // FORM POST name, renamed to Database column name
         $xkey = $this->get_post_field($key);
         if(array_key_exists($xkey,$this->Schema)) {     // pickup exists field name
-            list($disp,$flag) = $this->Schema[$xkey];   // need encrypt password
+            list($alt,$disp,$flag) = $this->Schema[$xkey];   // need encrypt password
             $dval = ($flag === -1) ? passwd_encrypt($val) : $val;
             $Login[$xkey] = $dval;    // accepta NULL value
         }
@@ -114,20 +129,32 @@ public function is_validLogin($values) {
 }
 //==============================================================================
 // Recieved LOGIN POST FORM, do accept USER LOGIN correct
-public function reset_password($userid,$maxlen = 8) {
-	$passwd = '';
+private function update_password($userid,$passwd,$limit = true) {
     if(array_key_exists($this->PasswdID,$this->Schema)) {     	// exist password field
     	$data = $this->getRecordBy($this->LoginID,$userid);		// check userid
 		if(!empty($data)) {
-			list($disp,$flag) = $this->Schema[$this->PasswdID];   // need encrypt password
-			$passwd = passwd_random($maxlen);
+			list($alt,$disp,$flag) = $this->Schema[$this->PasswdID];   // need encrypt password
 			$dval = ($flag === -1) ? passwd_encrypt($passwd) : $passwd;
 			$id = $data[$this->Primary];
 			$row[$this->PasswdID] = $dval;
+			$this->set_passwd_limitation($row,$limit);
 			$this->UpdateRecord($id,$row);
+			return !empty($this->RecData);		// update success check
 		}
     }
-	return $passwd;
+	return false;
+}
+//==============================================================================
+// RESET Password with limitation
+public function reset_password($userid,$maxlen = 8) {
+	$passwd = passwd_random($maxlen);
+	if($this->update_password($userid,$passwd)) return $passwd;
+	return '';
+}
+//==============================================================================
+// Permanent Password Setup
+public function password_update($userid,$passwd) {
+	return ($this->update_password($userid,$passwd,false));
 }
 
 }

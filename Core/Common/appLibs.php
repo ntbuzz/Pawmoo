@@ -209,7 +209,8 @@ function passwd_encrypt($str) {
     $method_name = 'AES-256-CBC';
     $key_string = SESSION_PREFIX;
 //    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method_name));
-	$iv = '';
+	$init = (defined('ENCRYPT_INIT')) ? ENCRYPT_INIT:DEFAULT_ENCRYPT_INIT;
+	$iv = substr($init,0,openssl_cipher_iv_length($method_name));
     return openssl_encrypt($str,$method_name,$key_string,0,$iv);
 }
 // $original_text = openssl_decrypt($str,$method_name,$key_string,0,$iv);
