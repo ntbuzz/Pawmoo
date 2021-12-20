@@ -28,7 +28,8 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 	var tag_name = this.attr('data-element');
 	var tag_obj = this.find('[name='+tag_name+']');
 	if (tag_obj.length == 0) {
-		alert("CheckList:NOT FOUND="+tag_name);
+		var self_name = this.attr('id');
+		alert("CheckList:NOT FOUND="+tag_name+' @ '+self_name);
 		return false;
 	};
 	tag_obj.css("padding", "0 5px");
@@ -338,6 +339,8 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 				menu_box.trigger('close-me');			// メニューを閉じる
 			};
 		});
+		menu_box.find('.tabmenu').children().first().addClass('selected');
+		menu_box.find('.tabcontents').children().first().addClass('selected');
 		// タブ切り替えを処理
 		menu_box.find('.tabmenu>li').on('click').on('click', function () {
 			var control = $(this).closest('div');

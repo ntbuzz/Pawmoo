@@ -46,7 +46,7 @@ function array_first_item($arr) {
 }
 //==============================================================================
 // exists item in array of KEY
-function array_item_value(&$arr,$key,$default=NULL) {
+function array_item_value($arr,$key,$default=NULL) {
     return (isset($arr[$key])) ? $arr[$key] : $default;
 }
 //==============================================================================

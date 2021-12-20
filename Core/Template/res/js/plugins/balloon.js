@@ -256,6 +256,7 @@ $.fn.PopupBaloonSetup = function () {
 					self.show();						// 親を表示
 					self.css('display','block');
 				} else ballon_obj = self;
+				if (ballon_obj.text() == "") ballon_obj.text("${core.EMPTY}");
 				ballon_obj.addClass('popup-balloon');		// popup-balloon のスタイルを適用する
 				ballon_obj.fadeIn('fast');		// 表示されていないとサイズが取得できない
 				icon_obj.addClass('active');

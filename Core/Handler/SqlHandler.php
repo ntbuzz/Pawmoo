@@ -56,7 +56,7 @@ function __construct($table,$handler) {
 	private function SQLdebug($sql,$where) {
     	$dbg = debug_backtrace();
     	$func = $dbg[1]['function'];
-		debug_log(DBMSG_HANDLER,["SQL-Execute ({$func})"=> [ 'COND'=>$this->LastBuild,'SQL' => $sql,'WHERE'=>$where]]);
+		debug_log(DBMSG_HANDLER,["SQL-Execute ({$func} @ {$this->table})"=> [ 'COND'=>$this->LastBuild,'SQL' => $sql,'WHERE'=>$where]]);
 	}
 //==============================================================================
 // setupRelations: relation table reminder
@@ -70,6 +70,12 @@ public function setupRelations($primary,$relations) {
 public function resetPrimary($primary) {
 	$sql = $this->reset_seq($this->raw_table,$primary);
 	if($sql) $this->doQuery($sql);
+}
+//==============================================================================
+// TRUNCATE TABLE
+public function doTruncate() {
+	$sql = $this->truncate_sql($this->raw_table);
+    $this->execSQL($sql);
 }
 //==============================================================================
 // fetchDB: get record data , and replace alias and bind column

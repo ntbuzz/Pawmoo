@@ -47,3 +47,4 @@ define('SESSION_ENV_EXEC_ALL',		0b1111);
 
 define('DEFAULT_HELPER_EXPAND',		'__x');
  
+define('DEFAULT_ENCRYPT_INIT','encrypt-pawmoo_iv');
