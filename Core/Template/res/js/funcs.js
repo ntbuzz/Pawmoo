@@ -244,7 +244,8 @@ function get_browserInfo() {
 				} else if (typeof obj[key] === 'function') {
 					result += key +" is function()" + br;
 				} else if (typeof obj[key] === 'object') {
-					result += dumpStr(obj[key], indent);
+					if (key !== "ownerDocument") result *= key;
+					else result += dumpStr(obj[key], indent);
 				} else {
 					result += obj[key] + br;
 				};
