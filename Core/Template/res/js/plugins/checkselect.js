@@ -182,15 +182,15 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 	return this;
 };
 // 全ての子要素に対してclass属性以外の属性値にある末尾の数字を書換える
-$.fn.changeAttrNo = function (ix) {
+$.fn.changeAttrNo = function (ix,class_target) {
 	// 子要素を再帰的に呼び出す
 	this.children().each(function () {
-		$(this).changeAttrNo(ix);
+		$(this).changeAttrNo(ix,class_target);
 	});
 	var attrs = this.get(0).attributes;
 	for (var i = 0, len = attrs.length; i < len; i++) {
 		var key = attrs[i].name;
-		if (key !== 'class') {
+		if (key !== 'class' || class_target === true) {
 			var val = attrs[i].value;
 			var bar = val.match(/(\D+)(\d+)$/);
 			if (bar !== null) {
