@@ -389,6 +389,7 @@ public function getRecordField($key,$value,$field) {
 // multi fields is separate by SPC(DOT), ARRAY (COMMA)
 // Result:   field-data
 public function getRecordByField($primary,$field) {
+	if(empty($primary)) $primary = 0;
 	return $this->getRecordField($this->Primary,$primary,$field);
 }
 //==============================================================================
