@@ -23,9 +23,19 @@ function targetBox(obj) {
 	};
 };
 */
+function balloonBox(top, left, right, bottom) {
+	this.top = top;
+	this.left = left;
+	this.right = right;
+	this.bottom = bottom;
+	this.inRange = function (x, y, margin) {
+		return (x >= (this.left - margin)) && (x <= (this.right + margin))
+			&& (y >= (this.top - margin)) && (y <= (this.bottom + margin));
+	};
+};
 // バルーンヘルプの表示
 // ターゲット位置を元に自身のポジションを決定する
-function balloonPosition(target, onside, margin) {
+function balloonPosition(target, onside, margin, no_icon) {
 	if (target.prop('tagName') === undefined) return;
 	// ターゲットの中心位置
 	var targetPos = {
@@ -33,49 +43,70 @@ function balloonPosition(target, onside, margin) {
 		top:parseInt(target.offset().top),
 		width:parseInt(target.outerWidth(true)),
 		height: parseInt(target.outerHeight(true)),
-		Left: function () {return (this.left - $(window).scrollLeft());},
-		Top: function () {return (this.top - $(window).scrollTop());},
-		Center: function () {
+		Left: function () {	return this.left - $(window).scrollLeft();},
+		Right: function () { return this.Left() + this.width;},
+		Top: function () { return this.top - $(window).scrollTop();},
+		Bottom: function () { return this.Top()+this.height;},
+		Box: function() {
+			var px = this.Left() + parseInt(this.width/2);
+			var py = this.Top() + parseInt(this.height/2);
 			return {
-				x: this.Left() + parseInt(this.width / 2),
-				y: this.Top() + parseInt(this.height / 2)
+				left: this.Left(),
+				right: this.Right(),
+				top: this.Top(),
+				bottom: this.Bottom(),
+				centerX: px,
+				centerY: py,
 			};
 		},
-		Bottom: function () {return this.Top() + this.height;},
-		Right: function () {return this.Left() + this.width;},
+		inRange: function (x, y, margin) {
+			var tBox = new balloonBox(this.Top(),this.Left(),this.Right(),this.Bottom());
+			return tBox.inRange(x, y, margin);
+		},
 	};
-	this.Box = { left: 0, top: 0, right: 0, bottom: 0 };
 	// this.Onside = onside;
 	// this.Margin = margin;
 	var bBox = {
 		width: 0, height: 0,
 		left: 0, top: 0, right: 0, bottom: 0 ,
-		LeftPos: function (x) {
-			this.left = x;
-			this.right = x + this.width;
+		pointX: '',pointY: '',
+		newX: 0, newY: 0,
+		PointSet: function(ypos,xpos) {
+			if(xpos !== false) this.pointX = xpos;
+			if(ypos !== false) this.pointY = ypos;
+			var box = targetPos.Box();
+			switch(this.pointY) {
+			case "top":   this.top = box.bottom - 8; break;
+			case "bottom":this.top = box.top - this.height; break;
+			default:  	  this.top = box.centerY - (this.height/2);
+			};
+			this.bottom = this.top + this.height;
+			switch(this.pointX) {
+			case "left": this.left = box.right - 6; break;
+			case "right":this.left = box.left - this.width + ((this.pointY==='')?-6:12); break;
+			default:	 this.left = box.centerX - (this.width/2);
+			};
+			this.right = this.left + this.width;
+			return this;
 		},
-		TopPos: function (y) {
-			this.top = y;
-			this.bottom = y + this.height;
+		PointClass: function() {
+			var cls = this.pointY + '-' + this.pointX;
+			return cls.replace(/^-+|-+$/g,'');
 		},
-		TopLeft: function (x, y) {
-			this.LeftPos(x);
-			this.TopPos(y);
-			return true;
-		},
-		setBound: function (x, y, w, h) {
+		setSize: function (w, h) {
 			this.width = w;
 			this.height = h;
-			this.TopPos(y);
-			this.LeftPos(x);
+			return this;
+		},
+		inRange: function (x, y, margin) {
+			var tBox = new balloonBox(this.top, this.left, this.right, this.bottom);
+			return tBox.inRange(x, y, margin);
 		},
 	};
 	this.calcPosition = function (obj) {
 		var w = parseInt(obj.outerWidth());
-		var hw = parseInt(w / 2);
 		var h = parseInt(obj.outerHeight());
-		var hh = parseInt(h / 2);
-		var Pos = targetPos.Center();
+		bBox.setSize(w, h);
 
 		var parentBox = {
 			left: 0,top: 0,
@@ -84,71 +115,56 @@ function balloonPosition(target, onside, margin) {
 		};
 		// default top-center default
 		if (onside) {
-			var hz = "left"; var vt = "";
-			bBox.setBound(Pos.x, Pos.y - hh, w, h);
+			bBox.PointSet('','left');		// left
 			if (bBox.right > parentBox.right || bBox.top < parentBox.top) {
-				vt = "top-"; hz = "center";
-				bBox.TopLeft(Pos.x - hw, Pos.y);
+				bBox.PointSet('top', 'center');
 			};
 			if (bBox.bottom > parentBox.bottom) {
-				vt = "bottom-"; hz = "center";
-				bBox.TopLeft(Pos.x - hw, targetPos.Top() - h);
+				bBox.PointSet('bottom','center');
 			};
 			if (bBox.right > parentBox.right || bBox.top < parentBox.top) {
-				vt = ""; hz = "right";
-				bBox.TopLeft(targetPos.Left() - w, Pos.y - hh);
+				bBox.PointSet('','right');
 			};
 			if (bBox.left < parentBox.left) {
-				vt = "top-"; hz = "left";
-				bBox.TopLeft(Pos.x, Pos.y + 8);
+				bBox.PointSet('top','left');
 				if (bBox.bottom > parentBox.bottom) {
-					vt = "bottom-";
-					bBox.TopPos(targetPos.Top() - h);
+					bBox.PointSet('bottom',false);
 				};
 			} else {
 				if (bBox.bottom > parentBox.bottom) {
-					vt = "bottom-";
-					bBox.TopPos(targetPos.Top() - h);
+					bBox.PointSet('bottom',false);
 				};
 				if (bBox.top < parentBox.top) {
-					vt = "top-";
-					bBox.TopPos(Pos.y);
+					bBox.PointSet('top',false);
 				};
-				if(vt !=="" && hz === "right") bBox.LeftPos(targetPos.Right() - w);
 			};
 		} else {
-			var vt = "top-"; var hz = "center";
-			bBox.setBound(Pos.x - hw, Pos.y, w, h);
+			bBox.PointSet('top',"center");
 			if (bBox.bottom > parentBox.bottom) {
-				vt = "bottom-";
-				bBox.TopPos(targetPos.Top() - h);
+				bBox.PointSet('bottom',false);
 			};
 			if (bBox.right > parentBox.right) {
-				hz = "right";
-				bBox.LeftPos(Pos.x - w);
+				bBox.PointSet(false,"right");
 			};
 			if (bBox.left < parentBox.left) {
-				hz = "left";
-				bBox.LeftPos(Pos.x);
+				bBox.PointSet(false,"left");
 			};
 			if (bBox.top < parentBox.top) {
-				vt = "";
-				bBox.TopPos(Pos.y);
+				bBox.PointSet('',false);
 			};
 		};
-		this.Box = {
-			left: Math.min(targetPos.Left(),bBox.left) - margin,
-			top: Math.min(targetPos.Top(),bBox.top) - margin,
-			right: Math.max(targetPos.Right(),bBox.right) + margin,
-			bottom: Math.max(targetPos.Bottom(),bBox.bottom) + margin
-		};
-		this.balloon = 'balloon-' + vt + hz;
-		obj.addClass(this.balloon);
+		this.balloon = 'balloon-' + bBox.PointClass();
+		// 'balloon-' で始まるclassをすべて削除してから
+		obj.removeClass(function(index, className) {
+			return (className.match(/\bballoon-\S+/g) || []).join(' ');
+		}).addClass(this.balloon);
 		obj.css({'left': bBox.left + 'px','top': bBox.top + 'px'});
 	};
 	this.inBalloon = function (x, y) {
-		return (x >= this.Box.left) && (x <= this.Box.right)
-				&& (y >= this.Box.top) && (y <= this.Box.bottom);
+		return bBox.inRange(x, y, margin) || targetPos.inRange(x, y, 2);
+	};
+	this.inTarget = function (x, y) {
+		return targetPos.inRange(x, y, 2);
 	};
 };
 //==============================================================================================
@@ -168,11 +184,12 @@ $.fn.PopupBaloonSetup = function () {
 			ref = ref.slice(1);
 			ev = 'mouseover';
 		};
-		if (ref.charAt(0) == '!') {		// ヘルプを付けない
+		var no_icon = (ref.charAt(0) == '!');
+		if (no_icon) {		// ヘルプを付けない
 			ref = ref.slice(1);
 			var icon = ref;
 		} else {
-			icon = ref + "-help";
+			var icon = ref + "-help";
 			$('#' + ref).after('<span class="help_icon" id="' + icon + '"></span>')
 							.css("margin-right", '2px');
 		};
@@ -182,7 +199,7 @@ $.fn.PopupBaloonSetup = function () {
 			// 他要素の mouseover防止とバルーンを消すための領域設定
 			var bk_panel = $('<div class="balloon-BK"></div>').appendTo('body');
 			bk_panel.fadeIn('fast');
-			var Balloon = new balloonPosition(icon_obj, onside, 3);
+			var Balloon = new balloonPosition(icon_obj, onside, 3, true);
 			icon_obj.addClass('active');
 			self.fadeIn('fast');
 			Balloon.calcPosition(self);
@@ -199,7 +216,14 @@ $.fn.PopupBaloonSetup = function () {
 			$(window).on('scroll.balloon', function () {
 				Balloon.calcPosition(self);
 			});
-			bk_panel.off().on('mousemove',function (e) {
+			if(no_icon) {
+				bk_panel.on('click',function (e) {
+					if (Balloon.inTarget(e.clientX, e.clientY)) {
+						icon_obj.trigger('click');
+					};
+				});
+			};
+			bk_panel.on('mousemove',function (e) {
 				e.stopPropagation();
 				e.preventDefault();
 				if (!Balloon.inBalloon(e.clientX, e.clientY)) {
@@ -232,11 +256,12 @@ $.fn.PopupBaloonSetup = function () {
 				ref = ref.slice(1);
 				ev = 'mouseover';
 			};
-			if (ref.charAt(0) == '!') {		// ヘルプを付けない
+			var no_icon = (ref.charAt(0) == '!');
+			if (no_icon) {		// ヘルプを付けない
 				ref = ref.slice(1);
 				var icon = ref;
 			} else {
-				icon = ref + "-help";
+				var icon = ref + "-help";
 				$('#' + ref).after('<span class="help_icon" id="' + icon + '"></span>')
 								.css("margin-right", '2px');
 			};
@@ -247,7 +272,7 @@ $.fn.PopupBaloonSetup = function () {
 				// 他要素の mouseover防止とバルーンを消すための領域設定
 				var bk_panel = $('<div class="balloon-BK"></div>').appendTo('body');
 				bk_panel.fadeIn('fast');
-				var Balloon = new balloonPosition(icon_obj,onside,3);
+				var Balloon = new balloonPosition(icon_obj,onside,3,true);
 				var disp_id = ref_obj.attr('data-value');		// 表示するタグID
 				// 選択タグがあればそれをバルーンにする、なければ自身がバルーン
 				if (typeof disp_id === 'string') {
@@ -256,7 +281,7 @@ $.fn.PopupBaloonSetup = function () {
 					self.show();						// 親を表示
 					self.css('display','block');
 				} else ballon_obj = self;
-				if (ballon_obj.text() == "") ballon_obj.text("${core.EMPTY}");
+				if (ballon_obj.text() == "") ballon_obj.text("${#core.EMPTY}");
 				ballon_obj.addClass('popup-balloon');		// popup-balloon のスタイルを適用する
 				ballon_obj.fadeIn('fast');		// 表示されていないとサイズが取得できない
 				icon_obj.addClass('active');
@@ -275,7 +300,14 @@ $.fn.PopupBaloonSetup = function () {
 				$(window).on('scroll.mballoon', function () {
 					Balloon.calcPosition(ballon_obj);
 				});
-				bk_panel.off().on('mousemove',function (e) {
+				if(no_icon) {
+					bk_panel.on('click',function (e) {
+						if (Balloon.inTarget(e.clientX, e.clientY)) {
+							icon_obj.trigger('click');
+						};
+					});
+				};
+				bk_panel.on('mousemove',function (e) {
 					e.stopPropagation();
 					e.preventDefault();
 					if (!Balloon.inBalloon(e.clientX, e.clientY)) {
