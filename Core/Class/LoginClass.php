@@ -45,6 +45,7 @@ public function retryMessages($userid) {
 		'pass_title'	=> $this->__('Login.Password'),
 		'send_button'	=> $this->__('Login.Submit'),
 		'reset_button'	=> $this->__('Login.Reset'),
+		'referer'		=> App::$SysVAR['REQURI'],
 		'msg_body'		=> $this->error_type,
 		'login_user'	=> $userid,
 	];
@@ -58,6 +59,11 @@ public function is_passwd_limitation($login) {
 // password alive period limitation
 public function set_passwd_limitation(&$login,$limit) {
 	return false;				// no limit
+}
+//==============================================================================
+// last login time-stamp
+public function set_last_login($userid) {
+	return false;				// no logging
 }
 //==============================================================================
 // Default User Info for CLI Debug
@@ -100,6 +106,7 @@ private function is_validUser($userid,$passwd = NULL) {
 			// Reload UserDataa when User Locale not match current Locale
 			$this->reload_userdata($udata);
 		}
+		$this->set_last_login($userid);
         return $udata;
     }
     $this->error_type = $this->__('Login.UnknownUser').": '{$userid}'";
