@@ -261,18 +261,21 @@ function menu_box($menu,$label=true) {
 //				タブ名 => [	キー名 => 値, ...	]
 // item_name	ラジオボタンのときは必須
 // item_type	checkbox | radio
-function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=false) {
+function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=false,$split=0) {
 	if(!empty($item_name)) $item_name = " name='{$item_name}'";
-	$tab_contents = function($subsec) use(&$item_name,&$item_type,&$label_val) {
+	$tab_contents = function($subsec,$split) use(&$item_name,&$item_type,&$label_val) {
 		echo "<div class='check-itemset'>";
 		echo "<div><ul>\n";
+		$cnt = 0;
 		foreach($subsec as $label => $val) {
-			if($val === -2) echo "</ul></div><div><ul>\n";		//  break
-			else {
+			if($val === -2 || ($split > 0 && ++$cnt > $split)) {
+				echo "</ul></div><div><ul>\n";		//  break
+				$cnt = 0;
+			} else {
 				echo "<li>";
 				$item_val = ($label_val)?$val:$label;
 				if($val === -1) echo "<hr>";
-				else echo "<label><input type='{$item_type}' class='check-item' value='{$item_val}'{$item_name} /> {$label}</label>";;
+				else echo "<label><input type='{$item_type}' class='check-item' value='{$item_val}'{$item_name} />{$label}</label>";;
 				echo "</li>\n";
 			}
 		}
@@ -281,7 +284,7 @@ function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=fals
 	};
 	$tabset = array_filter($menu,function($v) {return is_array($v);});
 	if(empty($tabset)) {			// 単一タブ＝タブなし
-		$tab_contents($menu);
+		$tab_contents($menu,$split);
 	} else {	// 複数タブ
 		echo "<ul class='tabmenu'>\n";
 		foreach($tabset as $label => $subsec) {
@@ -296,7 +299,7 @@ function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=fals
 			list($label,$sel) = fix_explode('.',$label,2);
 			$attr = ($sel === 'selected') ? ' class="selected"':'';
 			echo "<li{$attr}>\n";
-			$tab_contents($value);
+			$tab_contents($value,$split);
 			echo "</li>\n";
 		}
 		echo "</ul>\n";
