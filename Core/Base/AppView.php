@@ -243,7 +243,6 @@ public function ViewTemplate($name,$vars = []) {
             if($key[0]==='?') {
                 $ret = $if_selector($val,mb_substr($key,1));
 				$ret2 = (is_scalar($ret)) ? [ $ret ] : $this->array_if_selector($ret, $vars);
-debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
 				foreach($ret2 as $kk => $vv) {
 					if(is_numeric($kk)) $wd[] = $this->expand_Strings($vv,$vars);
 					else set_array_key_unique($wd,$kk,$vv);
@@ -560,7 +559,7 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
     //  a Link
     // +alink.class#id[name](href)<label>{target} => link-param
 	// +alink => [ attribule => value link-param ]
-	//   link-text:	scalar = link-text
+	//   link-param:scalar = link-text
 	//				array = window.open parameter [ href=>url name=>window-name widtj=xxxx height=yyyy scrollbars=yes ... ]
     private function cmd_alink($tag,$attrs,$sec,$vars) {
         list($attrs,$text,$subsec) = $this->subsec_separate($sec,$attrs,$vars);
@@ -573,6 +572,7 @@ debug_xdump(['KEY'=>$key,'VAL'=>$val,'VAR'=>$vars,'RET'=>$ret,'RET-IF'=>$ret2]);
 			echo "<label{$attr}>{$s_tag}";
 			$tag_end = "</label>";
 		} else $tag_end = '';
+		$attrs = $this->expand_SectionVar($attrs,$vars);	// expand for ALink attrs
 		if(empty($subsec)) $this->Helper->ALink('',$text,$attrs);
 		else {
 			$this->wopen($attrs,$subsec);
@@ -985,7 +985,9 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
         if(is_array($opt_val)) {
 			list($wrap_key,$wrap_val) = array_first_item($opt_val);
 			if(is_numeric($wrap_key) || is_scalar($wrap_val)) {
-				$block_tag = ['<ul class="input-list">','</ul>'];
+				list($sel_item,$ul_attr) = fix_explode('.',$sel_item,2);
+				if(!empty($ul_attr)) $ul_attr = " {$ul_attr}";
+				$block_tag = ["<ul class='input-list{$ul_attr}'>",'</ul>'];
 				$wrap_tag = ['<li>','</li>'];
 			} else {
 				list($btag,$wrap_attrs) = $this->tag_Separate($wrap_key,$vars);
