@@ -60,7 +60,7 @@ function PawmooLocations() {
 };
 //===============================================
 // Nested SELECT revised edition
-function SelectLink(setupobj, id, callback) {
+function SelectLink(setupobj, id, first_call, callback) {
 	var self = this;
 	var self_obj = $('#' + id);
 	var my_prop = self_obj.attr('data-value');
@@ -71,11 +71,17 @@ function SelectLink(setupobj, id, callback) {
 	var select_me = '<option value="">${#.core.SelectMe}</option>';
 	// 末端の子要素オブジェクト
 	var child_term = {
+		terminate:true,
 		selfList: function () {return false;},
 		Select: function (val) {return val;},
 		hideChildren: function () {return false;},
 	};
-	var child_obj = (child_id === null) ? child_term : new SelectLink(setupobj, child_id, callback);
+	var child_obj = (child_id === null) ? child_term : new SelectLink(setupobj, child_id, first_call, callback);
+	// ファーストコールフラグを子要素に伝播する
+	// self.setFirstCall = function (flag) {
+	// 	if (child_obj.terminate === true) first_call = flag;
+	// 	else child_obj.setFirstCall(flag);
+	// };
 	// 子要素を全て隠す
 	self.hideChildren = function () {
 		child_obj.hideChildren();	// 子要素以下を隠す
@@ -102,11 +108,12 @@ function SelectLink(setupobj, id, callback) {
 		$.each(my_obj.sel_list, function (key, value) {
 			if (value[2] === undefined || parseInt(value[2]) === parseInt(grp)) {
 				var sel = '';
-				if(value[0] === val) {
+				if(value[0] == val) {
 					selected = true;
 					sel = ' selected';
 				};
 				self_obj.append('<option value="' + value[0] + '"' + sel + '>' + value[1] + '</option>');
+				console.log('<option value="' + value[0] + '"' + sel + '>' + value[1] + '</option>');
 				++opt;
 			};
 		});
@@ -119,6 +126,12 @@ function SelectLink(setupobj, id, callback) {
 		};
 		return (opt > 0);		// SELECT 要素があるかどうかを返す
 	};
+	self.doCallback = function (val, pid) {
+		if (typeof callback === "function") {	// 最終コールバック関数
+			var my_txt = self_obj.children(':selected').text();
+			callback.call(self, val, my_txt, id, pid);
+		};
+	};
 	// 値の変更
 	self.onChange = function (my_val, in_progress) {
 		// 自分の親IDを探す
@@ -128,10 +141,7 @@ function SelectLink(setupobj, id, callback) {
 			if (typeof in_progress === "function") {	// 中間コールバック関数
 				in_progress.call(self, my_val, id, pid);
 			};
-		} else if (typeof callback === "function") {	// 最終コールバック関数
-			var my_txt = self_obj.children(':selected').text();
-			callback.call(self, my_val, my_txt, id, pid);
-		};
+		} else self.doCallback(my_val,pid);
 	};
 	// 指定値を選択
 	self.Select = function (val, in_progress) {
@@ -139,7 +149,11 @@ function SelectLink(setupobj, id, callback) {
 		val = child_obj.Select(val, in_progress);
 		// 自分の親IDを探す
 		var pid = self.myParent(val);
-        self.selfList(val, pid);	// 自分と同じ親IDの仲間リストを作成
+		self.selfList(val, pid);	// 自分と同じ親IDの仲間リストを作成
+		if(child_obj.terminate === true && first_call) {
+			self.doCallback(val, pid);
+			first_call = false;
+		};
 		self_obj.off().change(function () {
 			var my_val = $(this).val();
 			self.onChange(my_val, in_progress);
@@ -244,7 +258,7 @@ function get_browserInfo() {
 				} else if (typeof obj[key] === 'function') {
 					result += key +" is function()" + br;
 				} else if (typeof obj[key] === 'object') {
-					if (key !== "ownerDocument") result *= key;
+					if (key !== "ownerDocument") result += key;
 					else result += dumpStr(obj[key], indent);
 				} else {
 					result += obj[key] + br;
