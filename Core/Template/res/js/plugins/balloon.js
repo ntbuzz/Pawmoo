@@ -78,13 +78,13 @@ function balloonPosition(target, onside, margin, no_icon) {
 			switch(this.pointY) {
 			case "top":   this.top = box.bottom - 8; break;
 			case "bottom":this.top = box.top - this.height; break;
-			default:  	  this.top = box.centerY - (this.height/2);
+			default:  	  this.top = box.centerY - parseInt(this.height/2);
 			};
 			this.bottom = this.top + this.height;
 			switch(this.pointX) {
 			case "left": this.left = box.right - 6; break;
 			case "right":this.left = box.left - this.width + ((this.pointY==='')?-6:12); break;
-			default:	 this.left = box.centerX - (this.width/2);
+			default:	 this.left = box.centerX - parseInt(this.width/2);
 			};
 			this.right = this.left + this.width;
 			return this;
@@ -114,31 +114,7 @@ function balloonPosition(target, onside, margin, no_icon) {
 			bottom: $(window).height(),
 		};
 		// default top-center default
-		if (onside) {
-			bBox.PointSet('','left');		// left
-			if (bBox.right > parentBox.right || bBox.top < parentBox.top) {
-				bBox.PointSet('top', 'center');
-			};
-			if (bBox.bottom > parentBox.bottom) {
-				bBox.PointSet('bottom','center');
-			};
-			if (bBox.right > parentBox.right || bBox.top < parentBox.top) {
-				bBox.PointSet('','right');
-			};
-			if (bBox.left < parentBox.left) {
-				bBox.PointSet('top','left');
-				if (bBox.bottom > parentBox.bottom) {
-					bBox.PointSet('bottom',false);
-				};
-			} else {
-				if (bBox.bottom > parentBox.bottom) {
-					bBox.PointSet('bottom',false);
-				};
-				if (bBox.top < parentBox.top) {
-					bBox.PointSet('top',false);
-				};
-			};
-		} else {
+		if (onside === false) {
 			bBox.PointSet('top',"center");
 			if (bBox.bottom > parentBox.bottom) {
 				bBox.PointSet('bottom',false);
@@ -151,6 +127,41 @@ function balloonPosition(target, onside, margin, no_icon) {
 			};
 			if (bBox.top < parentBox.top) {
 				bBox.PointSet('',false);
+			};
+		} else {
+			var side_pos = (onside + "-right").split('-');
+			switch (side_pos[1]) {
+				case "left":
+					bBox.PointSet('', 'right');
+					if (bBox.left < parentBox.left) bBox.PointSet('','left');
+					if (bBox.bottom < parentBox.bottom && bBox.top > parentBox.top) break;
+				case "bottom":
+					bBox.PointSet('top', 'center');
+					if (bBox.bottom > parentBox.bottom) bBox.PointSet('bottom','center');
+					if (bBox.left > parentBox.left && bBox.right < parentBox.right) break;
+				case "right":
+					 bBox.PointSet('','left');
+					if (bBox.right > parentBox.right) bBox.PointSet('','right');
+					if (bBox.bottom < parentBox.bottom && bBox.top > parentBox.top) break;
+				case "top":
+					bBox.PointSet('bottom','center');
+					if (bBox.top < parentBox.top) bBox.PointSet('top','center');
+					if (bBox.left > parentBox.left && bBox.right < parentBox.right) break;
+				default:
+					bBox.PointSet('','left');
+					if (bBox.right > parentBox.right) {
+						bBox.PointSet('top','right');
+						if (bBox.bottom > parentBox.bottom) {
+							bBox.PointSet('bottom',false);
+						};
+					} else {
+						if (bBox.bottom > parentBox.bottom) {
+							bBox.PointSet('bottom',false);
+						};
+						if (bBox.top < parentBox.top) {
+							bBox.PointSet('top',false);
+						};
+					};
 			};
 		};
 		this.balloon = 'balloon-' + bBox.PointClass();
@@ -176,7 +187,8 @@ $.fn.PopupBaloonSetup = function () {
 // ]
 	this.find(".popup-balloon").each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
-		var onside = self.attr('class').existsWord('onside');
+		var cls = self.attr('class');
+		var onside = (cls === undefined) ? false : cls.pickWord('onside');
 		var ref = self.attr("data-element");  // 紐付けるID
 		if (ref === undefined) return true;	// continue
 		var ev = 'click';
@@ -248,7 +260,7 @@ $.fn.PopupBaloonSetup = function () {
 		$(this).children().each(function () {
 			var self = $(this); // jQueryオブジェクトを変数に代入しておく
 			var cls = self.attr('class');
-			var onside = (cls == undefined) ? false : cls.existsWord('onside');
+			var onside = (cls === undefined) ? false : cls.pickWord('onside');
 			var ref = self.attr("data-element");  // 紐付けるID
 			if (ref === undefined) return true;	// continue
 			var ev = 'click';
