@@ -534,8 +534,8 @@ function attr_class_exist($attrs,$name,$exist,$none='') {
 	return (strpos($base,$name)!==false) ? $exist:$none;
 }
 //==============================================================================
-//  add classname into attr[class] 
-// and removed classname,if instructed.
+//  extract and replace string in attr[name] 
+// and removed attr[name] in array.
 function attr_extract_element(&$attrs,$name,$isempty='',$isexists='%s') {
 	$item_name = (isset($attrs[$name])) ? $attrs[$name]:'';
 	unset($attrs[$name]);
