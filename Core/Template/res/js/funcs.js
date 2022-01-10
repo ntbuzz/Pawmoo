@@ -113,7 +113,7 @@ function SelectLink(setupobj, id, first_call, callback) {
 					sel = ' selected';
 				};
 				self_obj.append('<option value="' + value[0] + '"' + sel + '>' + value[1] + '</option>');
-				console.log('<option value="' + value[0] + '"' + sel + '>' + value[1] + '</option>');
+//				console.log('<option value="' + value[0] + '"' + sel + '>' + value[1] + '</option>');
 				++opt;
 			};
 		});
