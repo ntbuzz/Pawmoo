@@ -1,28 +1,4 @@
 //
-/* デバッグ用関数
-function dump_size(method,obj) {
-	alertDump({ method:method, w:obj.outerWidth(),h:obj.outerHeight() });
-};
-function ParentScroll(obj) {
-	if (obj.prop('tagName') === 'BODY') return { x: 0, y: 0 };
-	var pscroll = ParentScroll(obj.parent());
-	var scroll = {
-		x: obj.scrollLeft() + pscroll.x,
-		y: obj.scrollTop() + pscroll.y,
-	};
-	return scroll;
-};
-function targetBox(obj) {
-	var top = obj.offset().top;
-	var left = obj.offset().left;
-	return {
-		left: left,
-		top: top,
-		right: left + obj.width(),
-		bottom: top + obj.height(),
-	};
-};
-*/
 function balloonBox(top, left, right, bottom) {
 	this.top = top;
 	this.left = left;
@@ -41,22 +17,20 @@ function balloonPosition(target, onside, margin, no_icon) {
 	var targetPos = {
 		left:parseInt(target.offset().left),
 		top:parseInt(target.offset().top),
-		width:parseInt(target.outerWidth(true)),
+		width: parseInt(target.outerWidth(true)),
 		height: parseInt(target.outerHeight(true)),
 		Left: function () {	return this.left - $(window).scrollLeft();},
 		Right: function () { return this.Left() + this.width;},
 		Top: function () { return this.top - $(window).scrollTop();},
 		Bottom: function () { return this.Top()+this.height;},
 		Box: function() {
-			var px = this.Left() + parseInt(this.width/2);
-			var py = this.Top() + parseInt(this.height/2);
 			return {
 				left: this.Left(),
 				right: this.Right(),
 				top: this.Top(),
 				bottom: this.Bottom(),
-				centerX: px,
-				centerY: py,
+				centerX: this.Left() + parseInt(this.width/2),
+				centerY: this.Top() + parseInt(this.height/2),
 			};
 		},
 		inRange: function (x, y, margin) {
@@ -64,8 +38,6 @@ function balloonPosition(target, onside, margin, no_icon) {
 			return tBox.inRange(x, y, margin);
 		},
 	};
-	// this.Onside = onside;
-	// this.Margin = margin;
 	var bBox = {
 		width: 0, height: 0,
 		left: 0, top: 0, right: 0, bottom: 0 ,
@@ -76,9 +48,9 @@ function balloonPosition(target, onside, margin, no_icon) {
 			if(ypos !== false) this.pointY = ypos;
 			var box = targetPos.Box();
 			switch(this.pointY) {
-			case "top":   this.top = box.bottom - 8; break;
+			case "top": this.top =  box.bottom - 8; break;
 			case "bottom":this.top = box.top - this.height; break;
-			default:  	  this.top = box.centerY - parseInt(this.height/2);
+				default: this.top = box.centerY - parseInt(this.height/2);
 			};
 			this.bottom = this.top + this.height;
 			switch(this.pointX) {
@@ -87,6 +59,7 @@ function balloonPosition(target, onside, margin, no_icon) {
 			default:	 this.left = box.centerX - parseInt(this.width/2);
 			};
 			this.right = this.left + this.width;
+			consoleDump(ypos,xpos,box,this);
 			return this;
 		},
 		PointClass: function() {
@@ -94,8 +67,8 @@ function balloonPosition(target, onside, margin, no_icon) {
 			return cls.replace(/^-+|-+$/g,'');
 		},
 		setSize: function (w, h) {
-			this.width = w;
-			this.height = h;
+			this.width = parseInt(w);
+			this.height = parseInt(h);
 			return this;
 		},
 		inRange: function (x, y, margin) {
@@ -104,9 +77,7 @@ function balloonPosition(target, onside, margin, no_icon) {
 		},
 	};
 	this.calcPosition = function (obj) {
-		var w = parseInt(obj.outerWidth());
-		var h = parseInt(obj.outerHeight());
-		bBox.setSize(w, h);
+		bBox.setSize(obj.outerWidth(false), obj.outerHeight(false));
 
 		var parentBox = {
 			left: 0,top: 0,
