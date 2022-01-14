@@ -94,7 +94,7 @@ if($redirect) {
 require_once('Class/ClassLoader.php');
 ClassLoader::Setup($appname);   // AutoLoader for Application folder
 MySession::InitSession($appname,$controller,SESSION_ENV_EXEC_ALL);         // Session Variable SETUP
-MySession::set_paramIDs('debugger',DEBUGGER);  // SET DEBUGGER
+MySession::set_paramIDs('debugger',SetupEnv['DEBUGGER']);  // SET DEBUGGER
 MySession::set_paramIDs('sysinfo',[
     'platform'  => PLATFORM_NAME,
     'copyright' => COPYTIGHT,
