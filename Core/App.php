@@ -46,6 +46,7 @@ class App {
 		list($uri,$q) = fix_explode('?',$_SERVER['REQUEST_URI'],2);
         static::$SysVAR = array(
             'SERVER'	=> $_SERVER['SERVER_NAME'],
+            'PORT'		=> $_SERVER['SERVER_PORT'],
             'SYSROOT'	=> static::$sysRoot,
             'APPROOT'	=> static::$appRoot,
             'APPNAME'	=> static::$AppName,
