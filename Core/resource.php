@@ -42,6 +42,10 @@ date_default_timezone_set('Asia/Tokyo');
 $root = basename(dirname(__DIR__));        // Framework Folder
 list($appname,$app_uri,$module) = get_routing_path($root);
 $query	 = xchange_Boolean($_GET);		// query string into $_GET
+
+if(!defined('DEFAULT_LANG'))	 define('DEFAULT_LANG', 'ja');				// Language
+if(!defined('DEFAULT_REGION'))	 define('DEFAULT_REGION', 'jp');			// Region code
+
 list($fwroot,$appRoot) = $app_uri;
 list($controller,$files) = $module;		// 拡張子付きファイル名はメソッド位置に返る
 // ファイル名を拡張子と分離する

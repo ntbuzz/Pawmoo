@@ -18,6 +18,9 @@ $root = basename(dirname(__DIR__));        // Framework Folder
 list($appname,$app_uri,$module) = get_routing_path($root);
 $query	 = xchange_Boolean($_GET);		// query string into $_GET
 
+if(!defined('DEFAULT_LANG'))	 define('DEFAULT_LANG', 'ja');				// Language
+if(!defined('DEFAULT_REGION'))	 define('DEFAULT_REGION', 'jp');			// Region code
+
 // URI: /logs/appname/cont
 list($appname,$cont,$filter) = $module;
 MySession::InitSession($appname,$cont);
