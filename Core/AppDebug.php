@@ -3,8 +3,6 @@
  * PHPフレームワーク
  *  デバッグ用のメッセージ出力処理関数
  */
-if(!defined('DEBUG_LEVEL')) define('DEBUG_LEVEL', 10);
-
 define('DBMSG_LEVEL',   100);      // logging level
 define('DBMSG_ERROR',   100);      // for ERROR
 define('DBMSG_DEBUG',	108);      // for Temporary DEBUG Message
@@ -116,7 +114,7 @@ function sep_level($lvl) {
     $cli = ($lvl - $mod)/DBMSG_CLI;
     if($mod > DBMSG_DIE) return FALSE;          // Invalid LEVEL
     if($mod >= DBMSG_LEVEL) $mod = -$mod;       // SystemLog
-    else if($mod > DEBUG_LEVEL) return FALSE;   // out of LEVEL
+    else if($mod > SetupEnv['DEBUG_LEVEL']) return FALSE;   // out of LEVEL
     return [$cli,$mod];
 }
 //==========================================================================
@@ -136,7 +134,7 @@ function get_null_value($arg) {
 	else if(is_bool($arg)) $val = 'FALSE';
 	else if(is_int($arg)) $val = '0';
 	else if($arg !== '') $val = '"0"';
-	else $val = '""';
+	else $val = "''";
 	return "{$val}\n";
 }
 //==========================================================================
@@ -257,7 +255,7 @@ function debug_log($lvl,...$items) {
 							else $dmp_msg .= $dump_object($obj,1);
 						} else {
 							$dmp_msg .= "{$msg} : Object=".gettype($obj)."\n";
-							$dmp_msg .= print_r($obj,TRUE);
+							$dmp_msg .= print_r($obj,TRUE)."\n";
 						}
 					}
                 }

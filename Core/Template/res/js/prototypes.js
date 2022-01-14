@@ -92,6 +92,20 @@ String.prototype.existsWord = function (str) {
 	return wd_arr.is_exists(str);
 };
 //====================================================
+// Pick-word if exists
+String.prototype.pickWord = function (str) {
+	var wd_arr = this.split(' ');	// separate space
+	var wd_str = false;
+	wd_arr.forEach(function (val) {
+		if (val.substr(0,str.length) == str) {
+			wd_str = val;
+			return false;	// break forEach
+		};
+		return true;	// continue next
+	});
+	return wd_str;
+};
+//====================================================
 // multi string compare of indexOf()
 String.prototype.includeOf = function (reg) {
 	var wd_arr = reg.split('|');	// separate stroke

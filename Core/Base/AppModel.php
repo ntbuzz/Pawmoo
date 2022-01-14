@@ -353,7 +353,7 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 		case SORTBY_DESCEND:arsort($this->Select[$key_name]); break;
 		}
 	}
-	debug_log(DBMSG_MODEL,['KEYNAME'=>$key_names,'SELECTION'=>$this->Select]);
+	debug_log(DBMSG_MODEL,['DEFS'=>$this->SelectionDef,'KEYNAME'=>$key_names,'SELECTION'=>$this->Select]);
 }
 //==============================================================================
 //   Get Relation Table fields data list.
@@ -389,6 +389,7 @@ public function getRecordField($key,$value,$field) {
 // multi fields is separate by SPC(DOT), ARRAY (COMMA)
 // Result:   field-data
 public function getRecordByField($primary,$field) {
+	if(empty($primary)) $primary = 0;
 	return $this->getRecordField($this->Primary,$primary,$field);
 }
 //==============================================================================

@@ -38,6 +38,7 @@
     MAXFILE     => "送信ァイルは %d 個までです"
     BADFILE     => "'+','%','#' 文字を使用するとブラウザからダウンロードできなくなります！"
 	FORBIDDEN	=> "実行可能なファイルをアップロードすることはできません！"
+	EMPTY		=> (空)
 ]
 .en => [
     // for Dialog
@@ -71,6 +72,7 @@
     AbortDone   => "Send Complete."
     MAXFILE     => "Upload Max %d Files"
     BADFILE     => "'+','%','#' chars used,Bad Download by WebBrowser!"
+	EMPTY		=> (EMPTY)
 ]
 // ページャーボタン表示用  for Pager Buttons
 Page=>[

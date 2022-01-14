@@ -97,17 +97,18 @@ ul.input-list>li {
 	margin: 0 5px;
 	display: inline;
 }
-ul.input-list>li>label {
-	margin: 0 2px;
-}
-/* チェックボックスの位置揃え */
-ul.input-list>li>label>input {
-	vertical-align: middle;
-}
 /* 縦並び指定ブロック内 */
+ul.input-list.vertical>li ,
 .vertical>ul.input-list>li {
 	display: block;
 }
+/* チェックボックスの位置揃え */
+input[type="checkbox"],
+input[type="radio"] {
+	vertical-align: middle;
+	margin-right: 4px;
+}
+
 /* メニューの雛形コンテナ */
 .menu-container {
 	display:none;

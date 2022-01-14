@@ -89,22 +89,29 @@ public function getLastError() {
 // ON CONFLICT (id) DO UPDATE SET name = val_name；
 // pg_update($this->dbb,$this->raw_table,$row,$wh);
 //==============================================================================
-public function updateRecord($wh,$row) {
-	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ
+private function safe_convert($row,$func) {
 	$this->sql_safequote($row);
-
 	// PostgreSQLのデータ型に変換
 	$aa = pg_convert($this->dbb,$this->raw_table,$row,PGSQL_CONV_FORCE_NULL );
 	if($aa === FALSE) {
 		$res1 = pg_get_result($this->dbb);
-		debug_log(DBMSG_DIE,[
-			"ERROR:" => pg_result_error($res1),
-			"DBB" => $this->dbb,
+		debug_log(DBMSG_ERROR,[
+			"DBB"	=> $this->dbb,
 			"TABLE" => $this->raw_table,
+			"RESULT"=> $res1,
+			"MESSAGE" => pg_result_error_field($res1,PGSQL_DIAG_MESSAGE_DETAIL),	// pg_result_error($res1),
+			"{$func} CONVERT失敗" => pg_result_status($res1),	// pg_last_error(),
 			"ROW" => $row,
-			'Postgres CONVERT失敗' => pg_last_error(),
 		]);
+		$aa = array_map(function($v) { return "'{$v}'";},$row);// 暫定対策
 	}
+	return $aa;
+}
+//==============================================================================
+public function updateRecord($wh,$row) {
+	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ
+	$aa = $this->safe_convert($row,'Update');
+	if($aa === false) return [];
 	$primary = '"' . key($wh) . '"';		// プライマリキー名を取得
 	$kstr = implode(',', array_keys($aa));	// フィールド名リストを作成
 	$vstr = implode(',', $aa);				// VALUES リストを作成
@@ -125,19 +132,8 @@ public function updateRecord($wh,$row) {
 // pg_update($this->dbb,$this->raw_table,$row,$wh);
 //==============================================================================
 public function insertRecord($row) {
-	$this->sql_safequote($row);
-	// PostgreSQLのデータ型に変換
-	$aa = pg_convert($this->dbb,$this->raw_table,$row,PGSQL_CONV_FORCE_NULL);
-	if($aa === FALSE) {
-		$res1 = pg_get_result($this->dbb);
-		debug_log(DBMSG_DIE,[
-			"ERROR:" => pg_result_error($res1),
-			"DBB" => $this->dbb,
-			"TABLE" => $this->raw_table,
-			"ROW" => $row,
-			'Postgres CONVERT失敗' => pg_last_error(),
-		]);
-	}
+	$aa = $this->safe_convert($row,'Insert');
+	if($aa === false) return [];
 	$kstr = implode(',', array_keys($aa));	// フィールド名リストを作成
 	$vstr = implode(',', $aa);				// VALUES リストを作成
 	$set = " SET"; $sep = " ";				// UPDATE する時の代入文

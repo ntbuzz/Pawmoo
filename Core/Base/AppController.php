@@ -204,7 +204,8 @@ public function AutoPaging($cond, $max_count = 100) {
 	$array_same_check = function($pair_arrs) {
 		foreach($pair_arrs as $pair) {
 			list($base,$save) = $pair;
-			$pcomp = (array_intersect($save,$base) === $base);
+			$pcomp = (is_array($base) && is_array($save));
+			if($pcomp) $pcomp = (array_intersect($save,$base) === $base);
 			if(!$pcomp) return false;
 		}
 		return true;

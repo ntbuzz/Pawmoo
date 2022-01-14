@@ -476,7 +476,6 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 			return $opc;
 		};
 		$sql = $dump_object('AND',$cond,$target_table);
-debug_xdump(['COND'=>$cond,'SQL'=>$sql]);
 		return $sql;
 	}
 
