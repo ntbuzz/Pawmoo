@@ -3,9 +3,8 @@
  * Object Oriented PHP MVC Framework
  *  Module or Resource switcher.
  */
-define('DEBUGGER', TRUE);
-define('DEBUG_LEVEL', 10);
-ini_set('display_errors',0);
+// framework config
+require_once('site-config.php');
 
 // It seems that mod_rewrite of IIS decodes to SJIS without permission, so forcibly return to UTF-8.
  foreach(['REQUEST_URI', 'HTTP_REFERER'] as $id) {
