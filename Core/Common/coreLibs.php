@@ -396,6 +396,10 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                 } else if($var[0]==='$') {                 // INDIRECT Transfer from VAR
                     $val = '${'.mb_substr($var,1).'}';
 					$var = expand_text($class,$val,$recdata,$vars,true);
+                } else if($var[0]==='!') {              // resouce Transfer
+                    $var = mb_substr($var,1);
+					$rep = (isset($class)) ? $class->ModuleName : 'Res';
+					$var = str_replace('@@',$rep,$var);
                 } else {
                     $allow = ($var[0] === '#');         // allow array
                     if($allow) $var = mb_substr($var,1);
