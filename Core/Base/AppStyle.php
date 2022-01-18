@@ -43,7 +43,7 @@ class AppStyle {
         ],
         '*'  => 'do_comment',
     );
-    private $ModuleName;        // Module Name or Res
+    public $ModuleName;        // Module Name or Res
     private $Template;          // Content Template
     private $Folders;           // Search Folder List
     private $Filetype;          // File Type css/js

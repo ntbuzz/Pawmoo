@@ -16,6 +16,13 @@ public function monthNameText() {
 	return "'".implode("','",$month)."'";
 debug_die(['MONTH'=>$month]);
 }
+//==============================================================================
+//	Indirect Language Resource
+public function indirect($str) {
+	$mod = (empty($this->AOwner)) ? 'Res' : $this->AOwner->ModuleName;
+    $msg = LangUI::get_value('resource', "{$str}.{$mod}");
+	return $msg;
+}
 
 
 }
