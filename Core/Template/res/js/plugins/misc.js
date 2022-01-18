@@ -367,6 +367,21 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 	});
 	return this;
 };
+// スクロール連動
+$.fn.BindScrollSetup = function () {
+	$(".bind-scroll").each(function () {
+		var self = $(this); // jQueryオブジェクトを変数に代入しておく
+		var id = self.attr('id');	// 自分のID
+		var rel = self.attr("data-element");  // 紐付けるID
+		if (id !== rel) {					// 自分自身を指していなければ連動設定
+			$("#"+rel).on('scroll', function () {
+				self.scrollTop($(this).scrollTop());
+				self.scrollLeft($(this).scrollLeft());
+			});
+		};
+	});
+	return this;
+};
 // 動的コンテンツに対して、プラグイン要素を初期化する
 $.fn.InitPopupSet = function () {
 	// カレンダー設定
@@ -391,7 +406,7 @@ $.fn.InitPopupSet = function () {
 		};
 		self.datepicker(date_form);
 	});
-	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().MenuSetup();
+	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().MenuSetup().BindScrollSetup();
 };
 // FormSubmit用のオブジェクトを生成
 $.fn.submitObject = function (false_check,callback,is_parent) {
