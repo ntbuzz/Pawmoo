@@ -369,7 +369,7 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 };
 // スクロール連動
 $.fn.BindScrollSetup = function () {
-	$(".bind-scroll").each(function () {
+	this.find(".bind-scroll").each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var id = self.attr('id');	// 自分のID
 		var rel = self.attr("data-element");  // 紐付けるID
