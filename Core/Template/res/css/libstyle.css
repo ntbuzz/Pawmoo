@@ -83,6 +83,7 @@ option.disable {
 	bottom:3px;
 	border:none;
 	width:calc(100% - 1.5em);
+	height:calc(100% - 4px);
 }
 .ui-datepicker-trigger {
    /* position: absolute; */
@@ -91,6 +92,9 @@ option.disable {
 /* チェックボックス・ラジオボタンリスト */
 ul.input-list {
 	list-style: none;
+}
+ul.input-list:after {
+	clear: both;
 }
 /* デフォルトは横並び */
 ul.input-list>li {
