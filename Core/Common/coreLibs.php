@@ -512,9 +512,10 @@ function array_associate_convert($str) {
 //==============================================================================
 //  make combobox HTML
 function make_combobox($sel_item,$opt_list,$size) {
-	$sz = int_value($size,12);
+	$pat = '/^\d+(?:%|em|px)$/';
+	$sz = (preg_match($pat,$size)===1) ? $size : int_value($size,12).'em';
 	$input_val = $sel_item;
-	$tag= "<div class='combobox' style='width:{$sz}em;'>\n<select>\n";
+	$tag= "<div class='combobox' style='width:{$sz};'>\n<select>\n";
 	foreach($opt_list as $opt => $val) {
 		$sel = ($val == $sel_item) ? ' selected':'';
 		$tag= "{$tag}<OPTION{$sel}>{$opt}</OPTION>\n";
