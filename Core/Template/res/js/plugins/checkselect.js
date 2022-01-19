@@ -222,7 +222,9 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		addClear: true,			// クリアボタンが必要
 		Separator: " ",
 		Hint:'',
-		Preload: function () { return '<div class="check-itemset"></div>'; },
+		MenuContents:'',
+		Preload: null,
+//		Preload: function () { return '<div class="check-itemset"></div>'; },
 		SetValue: function (value, label) {
 			if (typeof this.Selected === "function") {
 				return this.Selected.call(self, value, label);
@@ -267,6 +269,13 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 	var dropBtn = self.children('span.arrow');
 	if (dropBtn.length === 0) {
 		dropBtn = $(setting.DropDown).appendTo(self);
+	};
+	if (setting.Preload === null) {
+		if (setting.MenuContents === '') {
+			setting.Preload = function () { return '<div class="check-itemset"></div>'; };
+		} else {
+			setting.Preload = function () { return $(setting.MenuContents).html(); };
+		};
 	};
 	self.css("cursor", "pointer").off('click').on('click', function () {
 		// プリロード関数でメニューを取得
