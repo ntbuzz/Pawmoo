@@ -634,9 +634,10 @@ public function ViewTemplate($name,$vars = []) {
 		$str = remove_space_comment_str($txt);
 		$txt = str_replace(["\r","\n"],['',"\\n\n"],$str);
         $name = str_replace(' ','.',$attrs['class']);
+		$append = (isset($attrs['data-type'])) ? ($attrs['data-type'] === 'append') : false;
 		if(empty($name)) $name = 'resource';
 		$push_name = implode('.',[App::$Controller,$name]);
-        MySession::syslog_SetData($push_name,trim($txt),FALSE,TRUE);
+        MySession::syslog_SetData($push_name,trim($txt),$append,TRUE);
     }
     //--------------------------------------------------------------------------
     //  Define INLINE Section, for use after import Template
