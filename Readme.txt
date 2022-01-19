@@ -1,9 +1,9 @@
  * -------------------------------------------------------------
  * Pawmoo - Object Oriented Web Application Platform with Section View Template
  * 
- * @copyright  Copyright (c) 2017 - 2021 by nTak
+ * @copyright  Copyright (c) 2017 - 2022 by nTak
  * @license    MIT
- * @version 0.101.0, 2021-12-14
+ * @version 0.103.0, 2022-01-19
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,12 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 変更履歴
+【0.103.0】2022/01/19
+	- checklistプラグインにオプションを追加
+	- comboboxのサイズ指定に単位の記述を許容
+	- pushコマンドにappendオプションを追加
+	- その他修正
+
 【0.101.0】2021/12/14
 	- +alink コマンドの実験的サポート
 	- hainSelectのコールバック巻数の引数変更
