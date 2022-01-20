@@ -795,7 +795,7 @@ public function ViewTemplate($name,$vars = []) {
     }
     //--------------------------------------------------------------------------
     //  select + input text
-    // +combobox => [ selected_key. = > [
+    // +combobox[name] => [ selected_key. = > [
     //      option_text => value
     //      ...
     //  ] ]
@@ -806,8 +806,8 @@ public function ViewTemplate($name,$vars = []) {
 		if(mb_substr($opt_key,-1)==='.') $opt_key = rtrim($opt_key,'.');
         $sel_item = (is_numeric($opt_key)) ? $opt_key : $this->expand_Strings($opt_key,$vars);
         $opt_val = array_flat_reduce($this->expand_SectionVar($opt_val,$vars));
-		$sz = (isset($attrs['size'])) ? $attrs['size'] : '';
-		$combo = make_combobox($sel_item,$opt_val,$sz);
+		list($name,$sz) = array_keys_value($attrs,['name','size']);
+		$combo = make_combobox($sel_item,$opt_val,$sz,$name);
 		echo $combo;
     }
     //--------------------------------------------------------------------------

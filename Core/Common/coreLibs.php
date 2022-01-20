@@ -511,7 +511,7 @@ function array_associate_convert($str) {
 }
 //==============================================================================
 //  make combobox HTML
-function make_combobox($sel_item,$opt_list,$size) {
+function make_combobox($sel_item,$opt_list,$size,$name='') {
 	$pat = '/^\d+(?:%|em|px)$/';
 	$sz = (preg_match($pat,$size)===1) ? $size : int_value($size,12).'em';
 	$input_val = $sel_item;
@@ -521,7 +521,8 @@ function make_combobox($sel_item,$opt_list,$size) {
 		$tag= "{$tag}<OPTION{$sel}>{$opt}</OPTION>\n";
 	}
 	$sz -= 2;
-	$tag = "{$tag}</select>\n<INPUT TYPE='text' value='{$input_val}' />\n</div>\n";
+	$nm = (empty($name)) ? '' : " name='{$name}'";
+	$tag = "{$tag}</select>\n<INPUT TYPE='text'${nm} value='{$input_val}' />\n</div>\n";
 	return $tag;
 }
 //==============================================================================
