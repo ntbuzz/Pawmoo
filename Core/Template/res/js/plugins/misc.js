@@ -416,6 +416,8 @@ $.fn.submitObject = function (false_check,callback,is_parent) {
 	// 兄弟要素を含めるため親要素に戻ってname属性を検索する
 	top_opj.find('[name]').each(function () {
 		var nm = $(this).attr('name');	// 検索済の要素なので必ず存在する
+		var is_arr = (nm.slice(-2) === "[]");	// 配列名か確認
+		if (is_arr) nm = nm.slice(0, -2);		// 括弧を除外
 		if ($(this).prop('tagName') === 'UL') {
 			value = $(this).text().trim();
 		} else {
@@ -425,6 +427,11 @@ $.fn.submitObject = function (false_check,callback,is_parent) {
 				else if (tt === 'checkbox' && false_check) value = false;   // チェックされていないときの値をセット
 				else return true;
 			} else value = $(this).val();
+		};
+		if (is_arr) {
+			var pre = (nm in setobj) ? setobj[nm] : [];
+			pre.push(value);
+			value = pre;
 		};
 		setobj[nm] = value;
 	});
