@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2022 by nTak
  * @license    MIT
- * @version 0.103.0, 2022-01-19
+ * @version 0.104.0, 2022-01-21
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,10 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 変更履歴
+【0.104.0】2022/01/21
+	- submitObjectに配列の名前処理を追加
+	- comboboxに名前属性を追加
+
 【0.103.0】2022/01/19
 	- checklistプラグインにオプションを追加
 	- comboboxのサイズ指定に単位の記述を許容
