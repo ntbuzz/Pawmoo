@@ -29,7 +29,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 	var tag_obj = this.find('[name='+tag_name+']');
 	if (tag_obj.length == 0) {
 		var self_name = this.attr('id');
-		alert("CheckList:NOT FOUND="+tag_name+' @ '+self_name);
+		alert("popupCheckSelect:NOT FOUND="+tag_name+' @ '+self_name);
 		return false;
 	};
 	tag_obj.css("padding", "0 5px");
