@@ -121,11 +121,12 @@ public static function get_database_handle($handler) {
         return static::$dbHandle[$handler];
     }
     if(array_key_exists($handler,static::DatabaseSpec)) {
-        debug_log(DBMSG_HANDLER,['HANDLER' => $handler, 'DATABASE' => DatabaseParameter[$handler]['database']]);
+		$db = DatabaseParameter[$handler];
+        debug_log(DBMSG_HANDLER,['HANDLER' => $handler, 'HOST' => $db['host'],'DATABASE' => $db['database']]);
         $defs = static::DatabaseSpec[$handler];
         $func = $defs['callback'];      // 呼び出し関数
         static::$have_offset = $defs['offset'];     // DBMS has OFFSET command?
-        static::$dbHandle[$handler] = static::$func(DatabaseParameter[$handler],'open');
+        static::$dbHandle[$handler] = static::$func($db,'open');
         return static::$dbHandle[$handler];
     }
     return NULL;
