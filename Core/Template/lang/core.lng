@@ -39,6 +39,7 @@
     BADFILE     => "'+','%','#' 文字を使用するとブラウザからダウンロードできなくなります！"
 	FORBIDDEN	=> "実行可能なファイルをアップロードすることはできません！"
 	EMPTY		=> (空)
+	Placeholder	=> 選択または直接入力
 ]
 .en => [
     // for Dialog
@@ -73,6 +74,7 @@
     MAXFILE     => "Upload Max %d Files"
     BADFILE     => "'+','%','#' chars used,Bad Download by WebBrowser!"
 	EMPTY		=> (EMPTY)
+	Placeholder	=> "Select or DirectInput"
 ]
 // ページャーボタン表示用  for Pager Buttons
 Page=>[
