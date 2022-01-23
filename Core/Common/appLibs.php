@@ -268,13 +268,19 @@ function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=fals
 		echo "<div><ul>\n";
 		$cnt = 0;
 		foreach($subsec as $label => $val) {
-			if($val === -2 || ($split > 0 && ++$cnt > $split)) {
+			$brk = 0;
+			if(is_int($label)) {
+				if($val === '---' || $val === -2) $brk = 2;
+				else if($val === '-' || $val === -1) $brk = 1;
+			}
+			$label = tag_body_name($label);
+			if($brk === 2 || ($split > 0 && ++$cnt > $split)) {
 				echo "</ul></div><div><ul>\n";		//  break
 				$cnt = 0;
 			} else {
 				echo "<li>";
 				$item_val = ($label_val)?$val:$label;
-				if($val === -1) echo "<hr>";
+				if($brk === 1) echo "<hr>";
 				else echo "<label><input type='{$item_type}' class='check-item' value='{$item_val}'{$item_name} />{$label}</label>";;
 				echo "</li>\n";
 			}
@@ -288,6 +294,7 @@ function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=fals
 	} else {	// 複数タブ
 		echo "<ul class='tabmenu'>\n";
 		foreach($tabset as $label => $subsec) {
+			$label = tag_body_name($label);
 			list($label,$sel) = fix_explode('.',$label,2);
 			$attr = ($sel === 'selected') ? ' class="selected"':'';
 			echo "<li{$attr}>{$label}</li>\n";
@@ -296,6 +303,7 @@ function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=fals
 		// タブコンテンツを表示
 		echo "<ul class='tabcontents'>\n";
 		foreach($tabset as $label => $value) {
+			$label = tag_body_name($label);
 			list($label,$sel) = fix_explode('.',$label,2);
 			$attr = ($sel === 'selected') ? ' class="selected"':'';
 			echo "<li{$attr}>\n";
