@@ -254,7 +254,7 @@ public function ViewTemplate($name,$vars = []) {
     }
 //==============================================================================
 // Analyzed Token-Section NEW VERSION
-    private function sectionAnalyze($divSection,$vars) {
+    protected function sectionAnalyze($divSection,$vars) {
         if(is_scalar($divSection)) {
             echo "SECTION: {$divSection}\n";
             echo "DIE!!!!!!!!!!!!\n";
@@ -290,10 +290,16 @@ public function ViewTemplate($name,$vars = []) {
                         $tag = mb_substr($tag,1);
                         $func = self::FunctionList[$top_char];
                         if(is_array($func)) {
-                            $cmd = $func[$tag];
-                            if(array_key_exists($tag,$func) && (method_exists($this, $cmd))) {
-                                $this->$cmd($tag,$attrs,$sec,$vars);
-                            } else echo "***NOT FOUND({$cmd}): {$cmd}({$tag},\$attrs,\$sec,\$vars) IN {$this->currentTemplate}\n";
+							if(isset($func[$tag])) {
+								$cmd = $func[$tag];
+								if(array_key_exists($tag,$func) && (method_exists($this, $cmd))) {
+									$this->$cmd($tag,$attrs,$sec,$vars);
+								} else echo "***NOT FOUND({$cmd}): {$cmd}({$tag},\$attrs,\$sec,\$vars) IN {$this->currentTemplate}\n";
+							} else {	// prototype debug
+								$cmd = "cmd_{$tag}";
+								if(method_exists($this,$cmd)) $this->$cmd($tag,$attrs,$sec,$vars);
+								else echo "+++ ProtoType Not Found: {$cmd}\n";
+							}
                         } else if(method_exists($this, $func)) {
                             $this->$func($tag,$attrs,$sec,$vars);
                         } else {
@@ -306,7 +312,7 @@ public function ViewTemplate($name,$vars = []) {
     }
     //==========================================================================
     // TAG string SEPARATE
-    private function tag_Separate($tag,$vars) {
+    protected function tag_Separate($tag,$vars) {
         $tag = $this->expand_Strings(tag_body_name($tag),$vars);
         $attrList = [];
         if($tag[0]==='<') return array($tag,$attrList); // html tag will be not separate
@@ -332,7 +338,7 @@ public function ViewTemplate($name,$vars = []) {
     }
 //==============================================================================
 // Analyzed Section, and Dispatch Command method
-    private function subsec_separate($section,$attrList,$vars,$all_item=TRUE) {
+    protected function subsec_separate($section,$attrList,$vars,$all_item=TRUE) {
         $subsec = [];
         if(is_scalar($section)) {
             $innerText = array_to_text($this->expand_Strings($section,$vars));
@@ -374,7 +380,7 @@ public function ViewTemplate($name,$vars = []) {
     // SECTION-TAG PROCESSIOG
     //==========================================================================
     // Convert ATTRIBUTE-LIST ARRAY to tag attribute strings
-    private function gen_Attrs($attrs,$vars) {
+    protected function gen_Attrs($attrs,$vars) {
         $attr = "";
         if(!empty($attrs)) {
             ksort($attrs);

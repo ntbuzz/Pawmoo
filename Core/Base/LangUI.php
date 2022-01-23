@@ -37,7 +37,9 @@ public static function SwitchLangs($newlang) {
         debug_log(DBMSG_LOCALE,["言語リスト" => static::$Locale]);
     }
     // フレームワークの言語リソースを読込む
-    self::LangFiles('Core/Template/lang/','core');
+	$core_dir = __DIR__ . '/../Template/lang/';
+    self::LangFiles($core_dir,'core');
+//    self::LangFiles('Core/Template/lang/','core');
     // アプリケーションの言語リソースパス
 	if(!empty($default)) self::LangFiles($default,static::$controllers);
     self::LangDebug();
