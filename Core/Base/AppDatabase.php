@@ -214,10 +214,7 @@ public function createTableSet($exec,$csv_only,$depend=[]) {
 // CSV file Load (must be UTF-8)
 private function loadCSV($filename) {
 	$path = "{$this->data_folder}{$filename}";
-	if (($handle = fopen($path, "r")) !== FALSE) {
-		$bom = pack('C*',0xEF,0xBB,0xBF);
-		$top3 = fread($handle,3);
-		if($bom != $top3) rewind($handle);		// No BOM
+	if (($handle = fcsvopen($path, "r")) !== FALSE) {
 		$row_columns = array_keys($this->Schema);
 		while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
 			if(count($data) !== count($row_columns)) {

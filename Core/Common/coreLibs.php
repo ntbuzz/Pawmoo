@@ -60,6 +60,12 @@ function xchange_Boolean($arr) {
 	return $data;
 }
 //==============================================================================
+function string_boolean($str) {
+	$str = strtolower($str);
+	$bool_array = ['true'=>true,'false'=>false,'on'=>true,'off'=>false,'t'=>true,'f'=>false];
+	return (array_key_exists($str,$bool_array)) ? $bool_array[$str] : false;
+}
+//==============================================================================
 // Generate URI from array, even when there is an array in the element
 function array_to_query($query) {
 	if(empty($query)) return '';
@@ -349,6 +355,17 @@ function fcsvget($handle) {
 		return str_csvget(trim($csv));
 	}
 	return false;
+}
+//==============================================================================
+// UTF-8 CSV open with BOM
+// fgets version
+function fcsopen($path,$rw) {
+	if (($handle = fopen($path, $rw)) !== FALSE) {
+		$bom = pack('C*',0xEF,0xBB,0xBF);		// BOM check
+		$top3 = fread($handle,3);
+		if($bom != $top3) rewind($handle);		// No BOM
+	}
+	return $handle;
 }
 //==============================================================================
 //  variable format convert
