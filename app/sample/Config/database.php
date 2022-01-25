@@ -40,19 +40,18 @@ const GlobalConfig = [
 	'SESSION_LIMIT' => 'now +15 minute',	// for DEBUG
 	'Postgre' =>  [
 		// PostgreSQLの共通設定
+		'host' => 'localhost',
 		'database' => 'pg_sample',
 		'login' => 'postgres',
 		'password' => 'postgres',
 		'encoding' => 'utf8',
 		'Linux' => [		// OS別(PHP_OS)の設定
-			'host' => 'localhost',
-			'port' => 5432,
+			'port' => 5532,
 		],
 		'WINNT' => [		// OS別(PHP_OS)の設定
-			'host' => 'localhost',
 			'port' => 5432,
 		],
-		'spider' => [		// ホスト別の設定
+		'hostname' => [		// ホスト別の設定
 			'login' => 'admin',		// 共通設定の上書き
 			'password' => 'admin',
 		],

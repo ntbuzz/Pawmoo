@@ -85,7 +85,7 @@ public function Setup($spec,$enviroment) {
 			$this->$val = $db_common;
 		}
 	}
-print_r($this);
+//print_r($this);
 }
 
 }
