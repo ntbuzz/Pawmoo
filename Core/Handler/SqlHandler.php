@@ -52,6 +52,16 @@ function __construct($table,$handler) {
 		$this->fieldAlias = new fieldAlias();
 	}
 //==============================================================================
+// Check Same of columns and bind key
+public function bind_columns($data) {
+	if(count($data) !== count($this->row_columns)) {
+		return false;		// column count miss-match
+	}
+	$diff_arr = array_diff($data,$this->row_columns);
+	if(empty($diff_arr)) return true;	// maybe CSV Header line
+	return array_combine($this->row_columns,$data);
+}
+//==============================================================================
 // DEBUGGING for SQL Execute
 	private function SQLdebug($sql,$where) {
     	$dbg = debug_backtrace();
