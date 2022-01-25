@@ -367,6 +367,21 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 	});
 	return this;
 };
+// スクロール連動
+$.fn.BindScrollSetup = function () {
+	this.find(".bind-scroll").each(function () {
+		var self = $(this); // jQueryオブジェクトを変数に代入しておく
+		var id = self.attr('id');	// 自分のID
+		var rel = self.attr("data-element");  // 紐付けるID
+		if (id !== rel) {					// 自分自身を指していなければ連動設定
+			$("#"+rel).on('scroll', function () {
+				self.scrollTop($(this).scrollTop());
+				self.scrollLeft($(this).scrollLeft());
+			});
+		};
+	});
+	return this;
+};
 // 動的コンテンツに対して、プラグイン要素を初期化する
 $.fn.InitPopupSet = function () {
 	// カレンダー設定
@@ -391,7 +406,7 @@ $.fn.InitPopupSet = function () {
 		};
 		self.datepicker(date_form);
 	});
-	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().MenuSetup();
+	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().MenuSetup().BindScrollSetup();
 };
 // FormSubmit用のオブジェクトを生成
 $.fn.submitObject = function (false_check,callback,is_parent) {
@@ -401,6 +416,8 @@ $.fn.submitObject = function (false_check,callback,is_parent) {
 	// 兄弟要素を含めるため親要素に戻ってname属性を検索する
 	top_opj.find('[name]').each(function () {
 		var nm = $(this).attr('name');	// 検索済の要素なので必ず存在する
+		var is_arr = (nm.slice(-2) === "[]");	// 配列名か確認
+		if (is_arr) nm = nm.slice(0, -2);		// 括弧を除外
 		if ($(this).prop('tagName') === 'UL') {
 			value = $(this).text().trim();
 		} else {
@@ -410,6 +427,11 @@ $.fn.submitObject = function (false_check,callback,is_parent) {
 				else if (tt === 'checkbox' && false_check) value = false;   // チェックされていないときの値をセット
 				else return true;
 			} else value = $(this).val();
+		};
+		if (is_arr) {
+			var pre = (nm in setobj) ? setobj[nm] : [];
+			pre.push(value);
+			value = pre;
 		};
 		setobj[nm] = value;
 	});

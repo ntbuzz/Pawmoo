@@ -218,6 +218,7 @@ function pseudo_markdown($atext, $md_class = '') {
             case ':': $src = "/images/{$m[4]}";break;
             default: $src = $m[4];
             }
+			if(empty($src)) return '';
             return "<img src='{$src}' alt='{$alt}'{$sz} />";
         },
 //------- [text](URL) HYPER LINK
@@ -243,6 +244,7 @@ function pseudo_markdown($atext, $md_class = '') {
 					$arr = [ "target=\"_new\" onClick=\"{$run};return false;\"" ];
 					$url = '#';
             }
+			if(empty($url)) return '';
 			$url = make_hyperlink($url);
 			$attr = empty($arr) ? '': ' '.implode(' ',$arr);
 			return "<a href='{$url}'{$attr}>{$txt}</a>";

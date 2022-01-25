@@ -341,5 +341,22 @@ public static function define_var_array($arr,$name) {
 	$row = "var {$name} = [\n{$list}\n];";
 	return $row;
 }
+//==============================================================================
+// ドロップダウンメニュー
+//	&DropdownMenu(true|false) => [ menu-array ]
+function DropdownMenu($arg,$menu) {
+	menu_box($menu,string_boolean($arg));
+}
+//==============================================================================
+// チェック・ラジオボタンメニュー
+//	&CheckRadioMenu(name,kind,label,count) => [ menu-array ]
+function CheckRadioMenu($param,$menu) {
+	list($name,$kind,$label,$cnt) = fix_explode([',',':'],$param,4);
+	$kind_arr = ['checkbox'=>true,'radio'=>true];
+	if(!array_key_exists($kind,$kind_arr)) $kind = 'checkbox';
+	$label = string_boolean($label);
+	check_boxmenu($menu,$name,$kind,$label,$cnt);
+}
+
 
 }

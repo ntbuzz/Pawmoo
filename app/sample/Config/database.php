@@ -7,35 +7,69 @@ define('T_BOOL',  't');
 // SQLite3データベース
 define('SQLITE_DB',__DIR__ . '/sample.db');
 //--------------------------------------------
-// PostgreSQLのサーバー定義
-define('PG_HOST','localhost');
-define('PG_PORT','5432');
-define('PG_DB',  'pg_sample');
-//--------------------------------------------
-// MySQLのサーバー定義
-define('MYSQL_DB',  'my_sample');
 
-const DatabaseParameter  = [
-	'Postgre' =>  array(
-		'host' => PG_HOST,
-		'port' => PG_PORT,
-		'database' => PG_DB,
+const GlobalConfig = [
+'production' => [
+	'USE_DEBUGGER'	=> false,
+	'SESSION_LIMIT' => 'tomorrow 03:00:00',
+	'Postgre' =>  [
+		'host' => 'localhost',
+		'port' => 5432,
+		'database' => 'pg_sample',
 		'login' => 'postgres',
 		'password' => 'postgres',
-		'encoding' => 'utf8'
-	),
-	'SQLite' => array(
+		'encoding' => 'utf8',
+	],
+	'SQLite' => [
 		'host' => 'localhost',
 		'database' => SQLITE_DB,
 		'login' => '',
 		'password' => '',
-		'encoding' => 'utf8'
-	),
-	'MySQL' => array(
+		'encoding' => 'utf8',
+	],
+	'MySQL' => [
 		'host' => 'localhost',
-		'database' => MYSQL_DB,
+		'database' => 'my_sample',
 		'login' => 'admin',
 		'password' => 'admin',
-		'encoding' => 'utf8'
-	),
+		'encoding' => 'utf8',
+	],
+],
+'development' => [
+	'USE_DEBUGGER'	=> true,
+	'SESSION_LIMIT' => 'now +15 minute',	// for DEBUG
+	'Postgre' =>  [
+		// PostgreSQLの共通設定
+		'database' => 'pg_sample',
+		'login' => 'postgres',
+		'password' => 'postgres',
+		'encoding' => 'utf8',
+		'Linux' => [		// OS別(PHP_OS)の設定
+			'host' => 'localhost',
+			'port' => 5432,
+		],
+		'WINNT' => [		// OS別(PHP_OS)の設定
+			'host' => 'localhost',
+			'port' => 5432,
+		],
+		'spider' => [		// ホスト別の設定
+			'login' => 'admin',		// 共通設定の上書き
+			'password' => 'admin',
+		],
+	],
+	'SQLite' => [
+		'host' => 'localhost',
+		'database' => SQLITE_DB,
+		'login' => '',
+		'password' => '',
+		'encoding' => 'utf8',
+	],
+	'MySQL' => [
+		'host' => 'localhost',
+		'database' => 'my_sample',
+		'login' => 'admin',
+		'password' => 'admin',
+		'encoding' => 'utf8',
+	],
+],
 ];

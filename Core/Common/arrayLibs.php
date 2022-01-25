@@ -23,7 +23,7 @@ function str_explode($delm,$string,$trim_empty = true) {
 //==============================================================================
 // fix count explode
 function fix_explode($delm,$string,$max,$pad = '') {
-	$arr = explode($delm,$string);
+	$arr = str_explode($delm,$string);
 	for($n=count($arr); $n < $max ; ++$n ) $arr[] = $pad;
     return $arr;
 }

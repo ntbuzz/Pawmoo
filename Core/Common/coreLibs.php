@@ -60,6 +60,12 @@ function xchange_Boolean($arr) {
 	return $data;
 }
 //==============================================================================
+function string_boolean($str) {
+	$str = strtolower($str);
+	$bool_array = ['true'=>true,'false'=>false,'on'=>true,'off'=>false,'t'=>true,'f'=>false];
+	return (array_key_exists($str,$bool_array)) ? $bool_array[$str] : false;
+}
+//==============================================================================
 // Generate URI from array, even when there is an array in the element
 function array_to_query($query) {
 	if(empty($query)) return '';
@@ -351,6 +357,17 @@ function fcsvget($handle) {
 	return false;
 }
 //==============================================================================
+// UTF-8 CSV open with BOM
+// fgets version
+function fcsopen($path,$rw) {
+	if (($handle = fopen($path, $rw)) !== FALSE) {
+		$bom = pack('C*',0xEF,0xBB,0xBF);		// BOM check
+		$top3 = fread($handle,3);
+		if($bom != $top3) rewind($handle);		// No BOM
+	}
+	return $handle;
+}
+//==============================================================================
 //  variable format convert
 // $[@#]varname | ${[@#]varname} | {$SysVar$} | {%Params%}
 function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
@@ -396,6 +413,10 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                 } else if($var[0]==='$') {                 // INDIRECT Transfer from VAR
                     $val = '${'.mb_substr($var,1).'}';
 					$var = expand_text($class,$val,$recdata,$vars,true);
+                } else if($var[0]==='!') {              // resouce Transfer
+                    $var = mb_substr($var,1);
+					$rep = (isset($class)) ? $class->ModuleName : 'Res';
+					$var = str_replace('@@',$rep,$var);
                 } else {
                     $allow = ($var[0] === '#');         // allow array
                     if($allow) $var = mb_substr($var,1);
@@ -507,16 +528,18 @@ function array_associate_convert($str) {
 }
 //==============================================================================
 //  make combobox HTML
-function make_combobox($sel_item,$opt_list,$size) {
-	$sz = int_value($size,12);
+function make_combobox($sel_item,$opt_list,$size,$name='') {
+	$pat = '/^\d+(?:%|em|px)$/';
+	$sz = (preg_match($pat,$size)===1) ? $size : int_value($size,12).'em';
 	$input_val = $sel_item;
-	$tag= "<div class='combobox' style='width:{$sz}em;'>\n<select>\n";
+	$tag= "<div class='combobox' style='width:{$sz};'>\n<select>\n";
 	foreach($opt_list as $opt => $val) {
 		$sel = ($val == $sel_item) ? ' selected':'';
 		$tag= "{$tag}<OPTION{$sel}>{$opt}</OPTION>\n";
 	}
 	$sz -= 2;
-	$tag = "{$tag}</select>\n<INPUT TYPE='text' value='{$input_val}' />\n</div>\n";
+	$nm = (empty($name)) ? '' : " name='{$name}'";
+	$tag = "{$tag}</select>\n<INPUT TYPE='text'${nm} value='{$input_val}' />\n</div>\n";
 	return $tag;
 }
 //==============================================================================
