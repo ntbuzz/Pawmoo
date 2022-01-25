@@ -56,6 +56,8 @@ require_once('Base/AppModel.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
 
+$config->Setup(GlobalConfig,SITE_PRODUCTION);
+
 // Check Default defined CONST
 if(!defined('FORCE_REDIRECT'))	 define('FORCE_REDIRECT', FALSE);
 if(!defined('DEFAULT_LANG'))	 define('DEFAULT_LANG', 'ja');				// Language
@@ -94,7 +96,7 @@ if($redirect) {
 require_once('Class/ClassLoader.php');
 ClassLoader::Setup($appname);   // AutoLoader for Application folder
 MySession::InitSession($appname,$controller,SESSION_ENV_EXEC_ALL);         // Session Variable SETUP
-MySession::set_paramIDs('debugger',SetupEnv['DEBUGGER']);  // SET DEBUGGER
+MySession::set_paramIDs('debugger',$config->USE_DEBUGGER);  // SET DEBUGGER
 MySession::set_paramIDs('sysinfo',[
     'platform'  => PLATFORM_NAME,
     'copyright' => COPYTIGHT,

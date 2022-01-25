@@ -35,6 +35,7 @@ class MySession {
 static function InitSession($appname = 'default',$controller='',$flags = 0) {
 	$env_unset_param = ($flags & SESSION_ENV_UNSET_PARAMS) !== 0;
 	$env_life_limit  = ($flags & SESSION_ENV_LIFE_LIMIT) !== 0;
+	$config = $GLOBALS['config'];
 
 	$appname = strtolower($appname);
 	static::$Controller = (empty($controller)) ? 'Res' : $controller;
@@ -46,7 +47,8 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 	static::$SysData = $sys;
 	// call from Main.php must be application session limit refresh
 	if($env_life_limit) {
-		$limit_time = (defined('SESSION_LIMIT')) ? SESSION_LIMIT : SESSION_DEFAULT_LIMIT;
+		$limit_time = (isset($config->SESSION_LIMIT)) ?$config->SESSION_LIMIT : SESSION_DEFAULT_LIMIT;
+//		$limit_time = defined('SESSION_LIMIT')) ? SESSION_LIMIT : SESSION_DEFAULT_LIMIT;
 		$session_limit_time = strtotime($limit_time);
 		$now_time = time();
 		if($s_limit <= $now_time) self::ClearSession();

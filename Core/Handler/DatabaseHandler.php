@@ -117,11 +117,13 @@ class DatabaseHandler {
 //==============================================================================
 // データベースへ接続してハンドルを返す
 public static function get_database_handle($handler) {
+	$config = $GLOBALS['config'];
     if(array_key_exists($handler,static::$dbHandle)) {
         return static::$dbHandle[$handler];
     }
     if(array_key_exists($handler,static::DatabaseSpec)) {
-		$db = DatabaseParameter[$handler];
+//		$db = DatabaseParameter[$handler];
+		$db = $config->$handler;
         debug_log(DBMSG_HANDLER,['HANDLER' => $handler, 'HOST' => $db['host'],'DATABASE' => $db['database']]);
         $defs = static::DatabaseSpec[$handler];
         $func = $defs['callback'];      // 呼び出し関数
