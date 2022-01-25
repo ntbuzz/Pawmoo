@@ -103,7 +103,7 @@ private function safe_convert($row,$func) {
 			"{$func} CONVERT失敗" => pg_result_status($res1),	// pg_last_error(),
 			"ROW" => $row,
 		]);
-		$aa = array_map(function($v) { return "'{$v}'";},$row);// 暫定対策
+		$aa = array_map(function($v) { return (is_int($v))?$v:"'{$v}'";},$row);// 暫定対策
 	}
 	return $aa;
 }
