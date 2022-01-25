@@ -20,6 +20,8 @@ define('DBMSG_DIE',     119);      // die message
 define('DBMSG_NONE',    false);    // none
 define('DBMSG_CLI',     256);      // CLI BIT Mask for CLI_DEBUG
 
+if(!defined('DEBUG_LEVEL'))  define('DEBUG_LEVEL', 10);
+
 const EMPTY_MSG = " EMPTY\n";
 const EXCLUSION = [
 //    'Syslog' => 1,
@@ -114,7 +116,7 @@ function sep_level($lvl) {
     $cli = ($lvl - $mod)/DBMSG_CLI;
     if($mod > DBMSG_DIE) return FALSE;          // Invalid LEVEL
     if($mod >= DBMSG_LEVEL) $mod = -$mod;       // SystemLog
-    else if($mod > SetupEnv['DEBUG_LEVEL']) return FALSE;   // out of LEVEL
+    else if($mod > DEBUG_LEVEL) return FALSE;   // out of LEVEL
     return [$cli,$mod];
 }
 //==========================================================================
