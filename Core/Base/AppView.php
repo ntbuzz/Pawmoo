@@ -21,40 +21,27 @@ class AppView extends AppObject {
         '%'    => 'sec_link',
         '-'    => 'sec_singletag',
         '+'    => [
-            'setvar'    => 'cmd_setvar',
-            'include'   => 'cmd_include',
-            'style'     => 'cmd_style',
-            'alink'     => 'cmd_alink',
             'img'       => 'cmd_image',
-            'echo'      => 'cmd_echo',
-            'jquery'    => 'cmd_jquery',
-            'script'    => 'cmd_script',
             'ul'        => 'cmd_list',
             'ol'        => 'cmd_list',
-            'dl'        => 'cmd_dl',
-            'select'    => 'cmd_select',
-            'combobox'  => 'cmd_combobox',
-            'radio'     => 'cmd_radio',
-            'checkbox'  => 'cmd_checkbox',
-            'table'     => 'cmd_table',
-            'inline'    => 'cmd_inline',
-            'markdown'  => 'cmd_markdown',
-            'recordset' => 'cmd_recordset',
-            'tabset'    => 'cmd_tabset',
-            'floatwin'  => 'cmd_floatwin',
-            'input'    	=> 'cmd_input',
             'file'   	=> 'cmd_taginput',
             'button'    => 'cmd_taginput',
             'submit'    => 'cmd_taginput',
             'hidden'    => 'cmd_taginput',
             'textbox'   => 'cmd_taginput',
-            'datebox'   => 'cmd_datebox',
-            'textedit' 	=> 'cmd_textedit',
-            'push'      => 'cmd_push',
-            'php'       => 'cmd_php',
-            'for'       => 'cmd_for',
         ],
     );
+	const AttributeList = [
+		'style'			=> '||',
+		'data-type'		=> ' ^',
+		'data-element'	=> '{}',
+		'data-value'	=> '<>',
+		'value'			=> '()',
+		'name'			=> '[]',
+		'size'			=> ' :',
+		'id'			=> ' #',
+		'class'			=> ' .'
+	];
     //==========================================================================
     // Constructor: Import Model Class by Owner Class, Create Helper
     //==========================================================================
@@ -290,21 +277,17 @@ public function ViewTemplate($name,$vars = []) {
                         $tag = mb_substr($tag,1);
                         $func = self::FunctionList[$top_char];
                         if(is_array($func)) {
-							if(isset($func[$tag])) {
-								$cmd = $func[$tag];
-								if(array_key_exists($tag,$func) && (method_exists($this, $cmd))) {
-									$this->$cmd($tag,$attrs,$sec,$vars);
-								} else echo "***NOT FOUND({$cmd}): {$cmd}({$tag},\$attrs,\$sec,\$vars) IN {$this->currentTemplate}\n";
-							} else {	// prototype debug
-								$cmd = "cmd_{$tag}";
-								if(method_exists($this,$cmd)) $this->$cmd($tag,$attrs,$sec,$vars);
-								else echo "+++ ProtoType Not Found: {$cmd}\n";
+							// alias func name or real func name
+							$cmd = (isset($func[$tag])) ? $func[$tag] : "cmd_{$tag}";
+							if(method_exists($this, $cmd)) {
+								$this->$cmd($tag,$attrs,$sec,$vars);
+							} else {
+								debug_dump(["*** NOT FOUND IN {$this->currentTemplate}" => $token,$cmd => [ $tag,'ATTR'=>$attrs,'SEC'=>$sec,'VARS'=>$vars]]);
 							}
                         } else if(method_exists($this, $func)) {
                             $this->$func($tag,$attrs,$sec,$vars);
                         } else {
 							debug_dump(['FAIL'=>[$func,$tag,$sec]]);
-//							echo "CALL: {$func}({$tag},{$sec},vars)\n";
 						}
                 }
             }
@@ -317,7 +300,7 @@ public function ViewTemplate($name,$vars = []) {
         $attrList = [];
         if($tag[0]==='<') return array($tag,$attrList); // html tag will be not separate
         // allow multi attribute, and separater not space
-		foreach(['style'=>'||','data-type' => ' ^','data-element' => '{}', 'data-value' => '<>', 'value' => '()', 'name' => '[]', 'size' => ' :', 'id' => ' #', 'class' => ' .'] as $key => $seps) {
+		foreach(self::AttributeList as $key => $seps) {
 			list($sep,$tsep) = str_split($seps);
 			while(($m=strrpos($tag,$tsep)) !== false) {
 				if($sep === ' ') $n = $m;		// single-separator
@@ -329,7 +312,8 @@ public function ViewTemplate($name,$vars = []) {
 				} else if($n === $m && $pre_ch === $tsep) break;	// double-char
 				$str = ($n===$m) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
 				$tag = mb_strcut($tag,0,$n);
-				if(!empty($str)) $attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} ".$attrList[$key] : $str;
+				// if(!empty($str)) // allow empty attribute
+					$attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} ".$attrList[$key] : $str;
 				if($key !== 'class') break;		// repeat allow 'class' only
 			}
 		}
@@ -348,22 +332,15 @@ public function ViewTemplate($name,$vars = []) {
                 foreach($section as $token => $sec) {
                     if(is_numeric($token)) {
                         if(is_scalar($sec)) {
-/*
-                            if(is_tag_identifier($sec)===2) {   // command-token @Template, etc...
-                                set_array_key_unique($subsec,$sec,[]);
-                            } else {
-*/
-                                // separate attribute
-                                $p = '/^([a-zA-Z][a-zA-Z\-]+[^\\\]):(.*)$/';
-                                if(preg_match($p,$sec,$m) === 1) {
-                                    $attrList[$m[1]] = ($m[2]==='') ? NULL : trim($m[2],"\"'");   // quote-char trim
-                                } else $innerText .= $sec;
-//                            }
+							// separate attribute
+							$p = '/^([a-zA-Z][a-zA-Z\-]+[^\\\]):(.*)$/';
+							if(preg_match($p,$sec,$m) === 1) {
+								$attrList[$m[1]] = ($m[2]==='') ? NULL : trim($m[2],"\"'");   // quote-char trim
+							} else $innerText .= $sec;
                         } else $subsec[] = $sec;
                     } else {
                         $token = $this->expand_Strings(tag_body_name($token),$vars);
 						if($all_item && preg_match('/^[a-zA-Z][a-zA-Z\-]+$/',$token)) {	// attr-name
-//                            if(!empty($sec)) 
 							$attrList[$token] = $sec;		// empty sec is single attr
                         } else {
                             set_array_key_unique($subsec,$token,$sec);
@@ -504,17 +481,16 @@ public function ViewTemplate($name,$vars = []) {
     //==========================================================================
     // CALL Helper-Method
     //  &Helper-Method, &Helper-Method => [ argument => value ... ] in Helper refer $arg['argument']
-	//  &Helper-Method(argument)
+	//  &Helper-Method(argument) => [ params... ]  call to Helper-Method(argument, params)
     private function sec_helper($tag,$attrs,$sec,$vars) {
         $sec = $this->expand_SectionVar($sec,$vars,TRUE);
-		if(array_key_exists('value',$attrs)) {
-			$arg = $attrs['value'];
-			if(!empty($sec)) $arg = array_flat_reduce([$arg,$sec]);
-		} else $arg = $sec;
+		$arg = (array_key_exists('value',$attrs)) ? $attrs['value'] : NULL;
         if(method_exists($this->Helper,$tag)) {
-            $this->Helper->$tag($arg);
+			if($arg === NULL) $this->Helper->$tag($sec);
+			else $this->Helper->$tag($arg,$sec);
         } else if(method_exists('App',$tag)) {
-            App::$tag($arg);
+			if($arg === NULL) App::$tag($sec);
+			else App::$tag($arg,$sec);
         } else {
             echo "Helper Method:'{$tag}' not found. Please Create this method.\n";
         }
