@@ -202,14 +202,12 @@ $.fn.onChangeFormItems = function(cls) {
 	var self = this;
 	self.on('change', 'input,select,textarea', function () {
 		var ptag = $(this).parent();
-		if (ptag.hasClass('combobox')) {
-			// コンボボックス用のSELECTはmodifiedをつけない
-		} else {
-			$(this).addClass(cls);
-			// チェックボックスとラジオボタンは label タグの色を変える
-			if (['checkbox', 'radio'].is_exists($(this).prop('type'))) {
-				ptag.addClass('changed');
-			};
+		// コンボボックス用のSELECTはmodifiedをつけない
+		if (ptag.hasClass('combobox') && $(this).prop('tagName') === 'SELECT') return true;
+		$(this).addClass(cls);
+		// チェックボックスとラジオボタンは label タグの色を変える
+		if (['checkbox', 'radio'].is_exists($(this).prop('type'))) {
+			ptag.addClass('changed');
 		};
 	});
 };
