@@ -357,9 +357,9 @@ function fcsvget($handle) {
 	return false;
 }
 //==============================================================================
-// UTF-8 CSV open with BOM
+// UTF-8 CSV file open with BOM
 // fgets version
-function fcsopen($path,$rw) {
+function fcsvopen($path,$rw) {
 	if (($handle = fopen($path, $rw)) !== FALSE) {
 		$bom = pack('C*',0xEF,0xBB,0xBF);		// BOM check
 		$top3 = fread($handle,3);

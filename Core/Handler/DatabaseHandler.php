@@ -122,7 +122,6 @@ public static function get_database_handle($handler) {
         return static::$dbHandle[$handler];
     }
     if(array_key_exists($handler,static::DatabaseSpec)) {
-//		$db = DatabaseParameter[$handler];
 		$db = $config->$handler;
         debug_log(DBMSG_HANDLER,['HANDLER' => $handler, 'HOST' => $db['host'],'DATABASE' => $db['database']]);
         $defs = static::DatabaseSpec[$handler];
