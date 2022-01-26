@@ -268,19 +268,19 @@ function pseudo_markdown($atext, $md_class = '') {
 			list($tmp,$spc,$cls,$id,$nm,$kind,$val) = $m;
 			if(strpos($val,'\\}')) $val = str_replace('\\}','}',$val);
             $vv = $type[$kind];
-			$nm = (empty($nm)) ? '' : " name='{$nm}'";
+			$attr_nm = (empty($nm)) ? '' : " name='{$nm}'";
 			if(!empty($cls)) {
 				$cls = trim(str_replace('.',' ',$cls));
-				$nm = "{$nm} class='{$cls}'";
+				$attr_nm = "{$attr_nm} class='{$cls}'";
 			}
-			if(!empty($id)) $nm = "{$nm} id='{$id}'";
-            $attr = " type='{$vv}'{$nm}";
+			if(!empty($id)) $attr_nm = "{$attr_nm} id='{$id}'";
+            $attr = " type='{$vv}'{$attr_nm}";
             $tag = "<input{$attr}";
             switch($kind) {
             case '+':   // combobox = select + textbox
                     list($sel_val,$opt_items,$sz) = $item_array(':',$val,3);
 					$opt_list = array_associate_convert($opt_items);
-					$tag = make_combobox($sel_val,$opt_list,$sz);
+					$tag = make_combobox($sel_val,$opt_list,$sz,$nm);
                     break;
             case '%':   // select
                     list($sel_val,$opt_items) = $item_array(':',$val,2);
@@ -293,7 +293,7 @@ function pseudo_markdown($atext, $md_class = '') {
                             $opt_list .= "<option value='{$opt_val}'{$sel}>{$opt_text}</option>\n";
                         }
                     }
-                    $tag = "{$spc}<select{$nm}>{$opt_list}</select>\n";
+                    $tag = "{$spc}<select{$attr_nm}>{$opt_list}</select>\n";
                     break;
             case '@':   // radio
                     list($check_val,$radio_items) = $item_array(':',$val,2);
