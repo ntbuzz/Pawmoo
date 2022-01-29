@@ -41,6 +41,8 @@ $defsfile = "{$config_path}/Setup/Config.php";
 
 require_once($defsfile);
 
+$config->Setup(GlobalConfig,SITE_PRODUCTION);
+
 SetupLoader::Setup($appname,AliasMap);
 
 $ln = str_repeat("=", 50);
