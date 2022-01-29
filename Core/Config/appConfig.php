@@ -68,6 +68,7 @@ array(
 */
 class appConfig {
 	// default config parameter
+	public $Enviroment		= "";
 	public $USE_DEBUGGER	= false;
 	public $SESSION_LIMIT	= 'tomorrow 03:00:00';
 	const DB_Key = [ 'Postgre', 'SQLite', 'MySQL'];
