@@ -197,20 +197,6 @@ $.fn.getPaddingBox = function() {
 	};
 	return widths;
 };
-// フォーム部品(INPUT,SELECT,TEXTAREA)の変更時にクラス属性をセットする
-$.fn.onChangeFormItems = function(cls) {
-	var self = this;
-	self.on('change', 'input,select,textarea', function () {
-		var ptag = $(this).parent();
-		// コンボボックス用のSELECTはmodifiedをつけない
-		if (ptag.hasClass('combobox') && $(this).prop('tagName') === 'SELECT') return true;
-		$(this).addClass(cls);
-		// チェックボックスとラジオボタンは label タグの色を変える
-		if (['checkbox', 'radio'].is_exists($(this).prop('type'))) {
-			ptag.addClass('changed');
-		};
-	});
-};
 // カーソルを BUSY に変更
 $.busy_cursor = function (disp) {
 	$('body').css('cursor', (disp) ? 'wait' : 'default');
@@ -406,36 +392,50 @@ $.fn.InitPopupSet = function () {
 	});
 	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().MenuSetup().BindScrollSetup();
 };
-// FormSubmit用のオブジェクトを生成
-$.fn.submitObject = function (false_check,callback,is_parent) {
-	var self = this;	// Reminder jQuery Self Object
-	var setobj = {};
-	var top_opj = (is_parent === false) ? self : self.parent();
-	// 兄弟要素を含めるため親要素に戻ってname属性を検索する
-	top_opj.find('[name]').each(function () {
-		var nm = $(this).attr('name');	// 検索済の要素なので必ず存在する
-		var is_arr = (nm.slice(-2) === "[]");	// 配列名か確認
-		if (is_arr) nm = nm.slice(0, -2);		// 括弧を除外
-		if ($(this).prop('tagName') === 'UL') {
-			value = $(this).text().trim();
-		} else {
-			var tt = $(this).attr('type');
-			if (tt === 'checkbox' || tt === 'radio') {
-				if ($(this).is(':checked')) value = $(this).val();
-				else if (tt === 'checkbox' && false_check) value = false;   // チェックされていないときの値をセット
-				else return true;
-			} else value = $(this).val();
-		};
-		if (is_arr) {
-			var pre = (nm in setobj) ? setobj[nm] : [];
-			pre.push(value);
-			value = pre;
-		};
-		setobj[nm] = value;
-	});
-	if (callback !== undefined) callback.call(self, setobj);
-	return self;
-};
+// // フォーム部品(INPUT,SELECT,TEXTAREA)の変更時にクラス属性をセットする
+// $.fn.onChangeFormItems = function(cls) {
+// 	var self = this;
+// 	self.on('change', 'input,select,textarea', function () {
+// 		var ptag = $(this).parent();
+// 		// コンボボックス用のSELECTはmodifiedをつけない
+// 		if (ptag.hasClass('combobox') && $(this).prop('tagName') === 'SELECT') return true;
+// 		$(this).addClass(cls);
+// 		// チェックボックスとラジオボタンは label タグの色を変える
+// 		if (['checkbox', 'radio'].is_exists($(this).prop('type'))) {
+// 			ptag.addClass('changed');
+// 		};
+// 	});
+// };
+// // FormSubmit用のオブジェクトを生成
+// $.fn.submitObject = function (false_check,callback,is_parent) {
+// 	var self = this;	// Reminder jQuery Self Object
+// 	var setobj = {};
+// 	var top_opj = (is_parent === false) ? self : self.parent();
+// 	// 兄弟要素を含めるため親要素に戻ってname属性を検索する
+// 	top_opj.find('[name]').each(function () {
+// 		var nm = $(this).attr('name');	// 検索済の要素なので必ず存在する
+// 		var is_arr = (nm.slice(-2) === "[]");	// 配列名か確認
+// 		if (is_arr) nm = nm.slice(0, -2);		// 括弧を除外
+// 		if ($(this).prop('tagName') === 'UL') {
+// 			value = $(this).text().trim();
+// 		} else {
+// 			var tt = $(this).attr('type');
+// 			if (tt === 'checkbox' || tt === 'radio') {
+// 				if ($(this).is(':checked')) value = $(this).val();
+// 				else if (tt === 'checkbox' && false_check) value = false;   // チェックされていないときの値をセット
+// 				else return true;
+// 			} else value = $(this).val();
+// 		};
+// 		if (is_arr) {
+// 			var pre = (nm in setobj) ? setobj[nm] : [];
+// 			pre.push(value);
+// 			value = pre;
+// 		};
+// 		setobj[nm] = value;
+// 	});
+// 	if (callback !== undefined) callback.call(self, setobj);
+// 	return self;
+// };
 //----------------------------------------------------------------------------------------------
 // 新プラグイン
 // フォーム部品(INPUT,SELECT,TEXTAREA)の変更時にクラス属性をセットする
@@ -457,9 +457,8 @@ $.fn.onChangeClass = function (cls) {
 // FormSubmit用のオブジェクトを生成
 $.fn.formObject = function (false_check,callback) {
 	var setobj = { referer: location.href };
-	this.each(function () {
-		var nm = $(this).attr('name');	// 検索済の要素なので必ず存在する
-		if (nm === undefined) return true;	// 名前未定義なら次の要素へ
+	this.find('[name]').each(function () {		// name属性を持つ子孫全てをスキャン
+		var nm = $(this).attr('name');
 		var is_arr = (nm.slice(-2) === "[]");	// 配列名か確認
 		if (is_arr) nm = nm.slice(0, -2);		// 括弧を除外
 		if ($(this).prop('tagName') === 'UL') {

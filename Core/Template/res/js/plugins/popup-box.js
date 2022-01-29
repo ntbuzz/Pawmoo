@@ -53,7 +53,7 @@ $.fn.PopupBoxSetup = function () {
 					var btn = $('<span class="button ' + label_class[1] + '">' + label_class[0] + '</span>').appendTo(panel);
 					if (!["close", "cancel"].is_exists(label_class[1])) {
 						btn.off().click(function () {
-							self.submitObject(false, function (e) {
+							self.formObject(false, function (e) {
 								btn.trigger("execute",e);
 							},false);	// 自身から下の要素
 						});
