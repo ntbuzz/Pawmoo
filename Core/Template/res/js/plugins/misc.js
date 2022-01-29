@@ -436,3 +436,49 @@ $.fn.submitObject = function (false_check,callback,is_parent) {
 	if (callback !== undefined) callback.call(self, setobj);
 	return self;
 };
+//----------------------------------------------------------------------------------------------
+// 新プラグイン
+// フォーム部品(INPUT,SELECT,TEXTAREA)の変更時にクラス属性をセットする
+$.fn.onChangeClass = function (cls) {
+	this.each(function () {
+		var self = $(this);
+		self.on('change', 'input,select,textarea', function () {
+			var ptag = $(this).parent();
+			// コンボボックス用のSELECTはmodifiedをつけない
+			if (ptag.hasClass('combobox') && $(this).prop('tagName') === 'SELECT') return true;
+			$(this).addClass(cls);
+			// チェックボックスとラジオボタンは label タグの色を変える
+			if (['checkbox', 'radio'].is_exists($(this).prop('type'))) {
+				ptag.addClass('changed');
+			};
+		});
+	});
+};
+// FormSubmit用のオブジェクトを生成
+$.fn.formObject = function (false_check,callback) {
+	var setobj = { referer: location.href };
+	this.each(function () {
+		var nm = $(this).attr('name');	// 検索済の要素なので必ず存在する
+		if (nm === undefined) return true;	// 名前未定義なら次の要素へ
+		var is_arr = (nm.slice(-2) === "[]");	// 配列名か確認
+		if (is_arr) nm = nm.slice(0, -2);		// 括弧を除外
+		if ($(this).prop('tagName') === 'UL') {
+			value = $(this).text().trim();
+		} else {
+			var tt = $(this).attr('type');
+			if (tt === 'checkbox' || tt === 'radio') {
+				if ($(this).is(':checked')) value = $(this).val();
+				else if (tt === 'checkbox' && false_check) value = false;   // チェックされていないときの値をセット
+				else return true;		// 次の要素へ
+			} else value = $(this).val();
+		};
+		if (is_arr) {
+			var pre = (nm in setobj) ? setobj[nm] : [];
+			pre.push(value);
+			value = pre;
+		};
+		setobj[nm] = value;
+	});
+	if (callback !== undefined) callback.call(self, setobj);
+	return self;
+};
