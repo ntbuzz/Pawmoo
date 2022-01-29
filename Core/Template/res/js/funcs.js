@@ -258,8 +258,9 @@ function get_browserInfo() {
 				} else if (typeof obj[key] === 'function') {
 					result += key +" is function()" + br;
 				} else if (typeof obj[key] === 'object') {
-					if (key !== "ownerDocument") result += key;
-					else result += dumpStr(obj[key], indent);
+					if (key === "ownerDocument") result += "own:"+dumpStr(obj[key], indent);
+					else if(Array.isArray(obj[key])) result += "["+obj[key].join(",")+"]"+br;
+					else result += "Object:" + key + br;
 				} else {
 					result += obj[key] + br;
 				};
