@@ -455,9 +455,11 @@ $.fn.onChangeClass = function (cls) {
 	});
 };
 // FormSubmit用のオブジェクトを生成
-$.fn.formObject = function (false_check,callback) {
+$.fn.formObject = function (false_check,filter,callback) {
+	var items = ([null,undefined,'','*','.*'].is_exists(filter)) ? this : this.find(filter);
 	var setobj = { referer: location.href };
-	this.find('[name]').each(function () {		// name属性を持つ子孫全てをスキャン
+	var self = $('<object></object>').append(items);
+	self.find('[name]').each(function () {		// name属性を持つ子孫全てをスキャン
 		var nm = $(this).attr('name');
 		var is_arr = (nm.slice(-2) === "[]");	// 配列名か確認
 		if (is_arr) nm = nm.slice(0, -2);		// 括弧を除外
@@ -467,7 +469,7 @@ $.fn.formObject = function (false_check,callback) {
 			var tt = $(this).attr('type');
 			if (tt === 'checkbox' || tt === 'radio') {
 				if ($(this).is(':checked')) value = $(this).val();
-				else if (tt === 'checkbox' && false_check) value = false;   // チェックされていないときの値をセット
+				else if (tt === 'checkbox' && false_check) value = 'f';   // チェックされていないときの値をセット
 				else return true;		// 次の要素へ
 			} else value = $(this).val();
 		};
