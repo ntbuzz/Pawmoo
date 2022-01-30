@@ -160,6 +160,9 @@ function stderr($str) {
 function debug_xdump($items) {}
 function debug_xdie($items) {}
 function debug_xlog($items) {}
+function xdebug_dump($items) {}
+function xdebug_die($items) {}
+function xdebug_log($items) {}
 function reuire_debugbar() {
 	$debug = __DIR__ . '/Template/View/debugbar.php';
 	require_once($debug);
