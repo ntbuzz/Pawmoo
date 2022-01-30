@@ -47,7 +47,6 @@ function __construct($table,$handler) {
 		$this->raw_columns = ($this->raw_table === $this->table) ?
 							$this->columns :
 							$this->Connect($this->raw_table);	// write-table  column for Insert/Update
-		debug_log(FALSE,["Columns List" => $this->columns]);
 		$this->handler = $handler;
 		$this->fieldAlias = new fieldAlias();
 	}
@@ -57,9 +56,10 @@ public function bind_columns($data) {
 	if(count($data) !== count($this->raw_columns)) {
 		return false;		// column count miss-match
 	}
-	$diff_arr = array_diff($data,$this->raw_columns);
+	$keys = array_keys($this->raw_columns);
+	$diff_arr = array_diff($data,$keys);
 	if(empty($diff_arr)) return true;	// maybe CSV Header line
-	return array_combine($this->raw_columns,$data);
+	return array_combine($keys,$data);
 }
 //==============================================================================
 // DEBUGGING for SQL Execute
@@ -87,6 +87,7 @@ public function doTruncate() {
 	$sql = $this->truncate_sql($this->raw_table);
     $this->execSQL($sql);
 }
+
 //==============================================================================
 // fetchDB: get record data , and replace alias and bind column
 public function fetchDB() {
@@ -184,8 +185,8 @@ public function getMaxValueRecord($field_name) {
 	return ($row) ? $row['max_val'] : 0;
 }
 //==============================================================================
-//	getMaxValueRecord($field_name) 
-//		get MAX value into field_name by this-table
+//	getGroupCalcList($cond,$groups,$calc,$sortby,$max)
+//		GROUP
 //==============================================================================
 public function getGroupCalcList($cond,$groups,$calc,$sortby,$max) {
 	$where = $this->sql_makeWHERE($cond);
@@ -309,14 +310,38 @@ public function deleteRecord($wh) {
 		return "SELECT DISTINCT  * FROM {$this->table} WHERE {$sql};";
 	}
 //==============================================================================
-// escape to single-quote(')
-protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
-	foreach($value as $key => $val) {
-		if(gettype($val) === 'string') {
-			$value[$key] = str_replace($find,$rep,$val);
-//			$value[$key] = str_replace("'","''",$val);
+// escape to single-quote(') in TEXT,and CONVERT FIELD TYPE(integer,boolean)
+protected function sql_safe_convert($data,$find=["'",'\\'],$rep=["''",'\\\\']) {
+	$row = [];
+	$columns = $this->raw_columns;
+	foreach($data as $key => $val) {
+		if(array_key_exists($key,$columns)) {
+			switch($columns[$key]) {
+			case 'integer': $val = intval($val); break;
+			case 'boolean': $val = is_bool_false($val) ? "'f'" : "'t'"; break;
+			case 'text':	$val = str_replace($find,$rep,$val);
+			default: $val = "'{$val}'";		// others,date,timestamp,.etc...
+			}
 		}
+		$row[$key] = $val;
 	}
+	return $row;
+}
+//==============================================================================
+// CONVERT FIELD TYPE
+protected function fetch_convert($data) {
+	$row = [];
+	$columns = ($write) ? $this->raw_columns : $this->columns;
+	foreach($data as $key => $val) {
+		if(array_key_exists($key,$columns)) {
+			switch($columns[$key]) {
+			case 'integer': $val = intval($val); break;
+			case 'boolean': $val = is_bool_false($val) ? 'f' : 't'; break;
+			}
+		}
+		$row[$key] = $val;
+	}
+	return $row;
 }
 //==============================================================================
 // generate JOIN token

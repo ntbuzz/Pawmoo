@@ -26,7 +26,7 @@ protected function Connect($table) {
 		if(!$row) {
 			die('Postgres QUERY失敗' . pg_last_error());
 		}
-		$columns[$row['column_name']] = $row['column_name'];
+		$columns[$row['column_name']] = $row['data_type'];
 	}
 	return $columns;
 }
@@ -76,7 +76,8 @@ public function doQuery($sql) {
 //==============================================================================
 //	fetch_array: 	レコードを取得してカラム配列を返す
 public function fetch_array() {
-	return pg_fetch_array($this->rows,NULL,PGSQL_ASSOC);
+	$row = pg_fetch_array($this->rows,NULL,PGSQL_ASSOC);
+	return $this->fetch_convert($row,false);	// 型変換
 }
 //==============================================================================
 //	getLastError: 	レコードを取得してカラム配列を返す
@@ -90,7 +91,7 @@ public function getLastError() {
 // pg_update($this->dbb,$this->raw_table,$row,$wh);
 //==============================================================================
 private function safe_convert($row,$func) {
-	$this->sql_safequote($row);
+	$row = $this->sql_safe_convert($row);
 	// PostgreSQLのデータ型に変換
 	$aa = pg_convert($this->dbb,$this->raw_table,$row,PGSQL_CONV_FORCE_NULL );
 	if($aa === FALSE) {
@@ -103,7 +104,7 @@ private function safe_convert($row,$func) {
 			"{$func} CONVERT失敗" => pg_result_status($res1),	// pg_last_error(),
 			"ROW" => $row,
 		]);
-		$aa = array_map(function($v) { return (is_int($v))?$v:"'{$v}'";},$row);// 暫定対策
+		return $row;	// 自力で書き込み型変換
 	}
 	return $aa;
 }

@@ -16,11 +16,11 @@ class MySQLHandler extends SQLHandler {
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
 protected function Connect($table) {
 	// テーブル属性を取得
-	$sql = "PRAGMA table_info({$table});";
+	$sql = "show columns from {$table};";
 	$rows = $this->dbb->query($sql);
 	$columns = array();
 	while ($row = $rows->fetch_assoc()) {
-		$columns[$row['name']] = $row['name'];
+		$columns[$row['Field']] = strtolower($row['Type']);
 	}
 	return $columns;
 }
@@ -58,7 +58,8 @@ public function doQuery($sql) {
 //==============================================================================
 //	fetchDB: 	レコードを取得してカラム配列を返す
 public function fetch_array() {
-	return $this->rows->fetch_assoc(); //またはSQLITE3_NUM
+	$row = $this->rows->fetch_assoc(); //またはSQLITE3_NUM
+	return $this->fetch_convert($row,false);	// 型変換
 }
 //==============================================================================
 //	getLastError: 	レコードを取得してカラム配列を返す
@@ -69,7 +70,7 @@ public function getLastError() {
 //	レコードの追加 
 //==============================================================================
 public function insertRecord($row) {
-	$this->sql_safequote($row);
+	$row = $this->sql_safe_convert($row);
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
 	$vstr = "'" . implode("','", $row) . "'";
@@ -86,7 +87,7 @@ public function insertRecord($row) {
 //	レコードの更新 $row[key] value
 //==============================================================================
 public function updateRecord($wh,$row) {
-	$this->sql_safequote($row);
+	$row = $this->sql_safe_convert($row);
 	list($pkey,$pval) = array_first_item($wh);
 	unset($row[$pkey]);			// プライマリキーは削除しておく
 	$where = " WHERE \"{$pkey}\"={$pval}";		// プライマリキー名を取得
