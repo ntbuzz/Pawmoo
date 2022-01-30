@@ -267,7 +267,7 @@ public function SelectObject($args) {
 	$object = "{$selname}: {\n\tselect_one: {$select_one},\n\tsel_list: [\n";
    	foreach($this->Model->Select[$selname] as $valset) {
 		$new_map = array_map(function($v) {
-			return (is_numeric($v)) ? $v :"'{$v}'";
+			return (is_int($v)) ? $v :"'{$v}'";
 		},$valset);
 		if(count($new_map)===2) $new_map[] = 0;
 		$object .= "\t[".implode(',',$new_map) ."],\n";
