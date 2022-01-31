@@ -325,5 +325,16 @@ public function MakepdfAction() {
 	$this->Model->GetRecord($num,TRUE);
 	$this->View->ViewTemplate('MakePDF');
 }
+//==============================================================================
+// Language Switch Action
+public function LanguageAction() {
+	list($lang,$region,$refer) = array_keys_value(App::$Post,['lang','region','referer'],[DEFAULT_LANG,DEFAULT_REGION,App::$Referer]);
+	$login_data = [
+		'LANG' => $lang,
+//		'REGION' => $region,
+	];
+	MySession::set_LoginValue($login_data);
+	header('Location:' . $refer);
+}
 
 }
