@@ -207,9 +207,10 @@ var ajaxLoadSync = function (url, obj, default_data) {
 };
 //====================================================
 // create FORM and SUBMIT
-var formSubmit = function (obj, url) {
+var formSubmit = function (obj, url, new_win) {
 	$.busy_cursor(true);
-	var form = $('<form method="POST">');
+	var tag = (new_win === 'new')?'<form method="POST" target="_blank">':'<form method="POST">';
+	var form = $(tag);
 	$.each(obj, function (key, value) {
 		$('<input>').attr({
 			'type': 'hidden',
@@ -218,6 +219,7 @@ var formSubmit = function (obj, url) {
 		}).appendTo(form);
 	});
 	form.attr('action', url).appendTo('body').submit();
+	$.busy_cursor(false);
 };
 //====================================================
 //  Check CLIENT BROWSER Javascript version
