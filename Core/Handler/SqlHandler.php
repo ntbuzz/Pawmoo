@@ -49,6 +49,7 @@ function __construct($table,$handler) {
 							$this->Connect($this->raw_table);	// write-table  column for Insert/Update
 		$this->handler = $handler;
 		$this->fieldAlias = new fieldAlias();
+		debug_log(DBMSG_HANDLER,["COLUMN"=> [ $this->columns,$this->raw_columns]]);
 	}
 //==============================================================================
 // Check Same of columns and bind key
@@ -310,38 +311,43 @@ public function deleteRecord($wh) {
 		return "SELECT DISTINCT  * FROM {$this->table} WHERE {$sql};";
 	}
 //==============================================================================
-// escape to single-quote(') in TEXT,and CONVERT FIELD TYPE(integer,boolean)
-protected function sql_safe_convert($data,$find=["'",'\\'],$rep=["''",'\\\\']) {
-	$row = [];
-	$columns = $this->raw_columns;
+// escape to single-quote(') in string value
+protected function sql_str_quote($data,$find=["'",'\\'],$rep=["''",'\\\\']) {
+	$row = array_map(function($v) use(&$find,&$rep) {
+				return (gettype($v) === 'string') ? str_replace($find,$rep,$v):$v;
+			},$data);
+	return $row;
+}
+//==============================================================================
+// Convert to columns type
+protected function sql_safe_convert($data) {
 	foreach($data as $key => $val) {
-		if(array_key_exists($key,$columns)) {
-			switch($columns[$key]) {
-			case 'integer': $val = intval($val); break;
-			case 'boolean': $val = is_bool_false($val) ? "'f'" : "'t'"; break;
-			case 'text':	$val = str_replace($find,$rep,$val);
-			default: $val = "'{$val}'";		// others,date,timestamp,.etc...
+		if(array_key_exists($key,$this->raw_columns)) {
+			switch($this->raw_columns[$key]) {
+			case 'serial':
+			case 'integer': $data[$key] = intval($val); break;
+			case 'boolean': $data[$key] = is_bool_false($val) ? "'f'" : "'t'"; break;
+			// others, text, date, timestamp, etc...
+			default: $data[$key] = (empty($val))?'NULL':"'{$val}'";
 			}
 		}
-		$row[$key] = $val;
 	}
-	return $row;
+	return $data;
 }
 //==============================================================================
 // CONVERT FIELD TYPE
 protected function fetch_convert($data) {
-	$row = [];
-	$columns = ($write) ? $this->raw_columns : $this->columns;
+	if($data === false) return false;
 	foreach($data as $key => $val) {
-		if(array_key_exists($key,$columns)) {
-			switch($columns[$key]) {
-			case 'integer': $val = intval($val); break;
-			case 'boolean': $val = is_bool_false($val) ? 'f' : 't'; break;
+		if(array_key_exists($key,$this->raw_columns)) {
+			switch($this->raw_columns[$key]) {
+			case 'serial':
+			case 'integer': $data[$key] = intval($val); break;
+			case 'boolean': $data[$key] = is_bool_false($val) ? 'f' : 't'; break;
 			}
 		}
-		$row[$key] = $val;
 	}
-	return $row;
+	return $data;
 }
 //==============================================================================
 // generate JOIN token
@@ -410,18 +416,18 @@ protected function fetch_convert($data) {
 							$op = "NOT {$this->LIKE_opr}";
 						} else $op = $this->LIKE_opr;
 						if(trim($v,'%') === $v) $v = "%{$v}%";
-						return [$v,$op];
+						return (empty($v)) ? 'IS NULL' : "{$op} '{$v}'";
 					};
 					$opc = $this->concat_fields($expr);
 					if(is_array($val)) {
 						$lexpr = array_map( function($v) use(&$opc,&$like_opstr) {
-							list($v,$x) = $like_opstr($v);
-							return "({$opc} {$x} '{$v}')";
+							$x = $like_opstr($v);
+							return "({$opc} {$x})";
 						},$val);
 						return implode(' OR ',$lexpr);
 					} else {
-						list($v,$opx) = $like_opstr($val);
-						return "{$opc} {$opx} '{$v}'";
+						$opx = $like_opstr($val);
+						return "{$opc} {$opx}";
 					}
 				}
 				if(count($expr) > 1) {
@@ -503,7 +509,8 @@ protected function fetch_convert($data) {
 						if(!array_key_exists($op,$in_op)) $op = '==';
 						$op = $in_op[$op];
 						$val = 'NULL';
-					} else if(!is_numeric($val)) $val = "'{$val}'";
+					} else if(is_bool($val)) $val = ($val) ? "'t'" : "'f'";
+					else if(!is_numeric($val)) $val = "'{$val}'";
 					$opp = $multi_field($key,$op,$table,$val);
 				}
 				$opc = (empty($opc)) ? $opp : "({$opc}) {$opr} ({$opp})";

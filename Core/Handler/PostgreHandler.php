@@ -91,7 +91,7 @@ public function getLastError() {
 // pg_update($this->dbb,$this->raw_table,$row,$wh);
 //==============================================================================
 private function safe_convert($row,$func) {
-	$row = $this->sql_safe_convert($row);
+	$row = $this->sql_str_quote($row);
 	// PostgreSQLのデータ型に変換
 	$aa = pg_convert($this->dbb,$this->raw_table,$row,PGSQL_CONV_FORCE_NULL );
 	if($aa === FALSE) {
@@ -104,7 +104,7 @@ private function safe_convert($row,$func) {
 			"{$func} CONVERT失敗" => pg_result_status($res1),	// pg_last_error(),
 			"ROW" => $row,
 		]);
-		return $row;	// 自力で書き込み型変換
+		$aa = $this->sql_safe_convert($row);	// 自力で書き込み型変換
 	}
 	return $aa;
 }

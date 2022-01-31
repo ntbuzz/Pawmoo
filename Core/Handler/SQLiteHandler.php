@@ -75,7 +75,7 @@ public function getLastError() {
 //	レコードの追加 
 //==============================================================================
 public function insertRecord($row) {
-	$row = $this->sql_safe_convert($row);	// 書き込み型変換
+	$row = $this->sql_safe_convert($this->sql_str_quote($row));	// 書き込み型変換
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
 	$vstr = implode(",", $row);
@@ -95,7 +95,7 @@ public function insertRecord($row) {
 //	レコードの更新 $row[key] value
 //==============================================================================
 public function updateRecord($wh,$row) {
-	$row = $this->sql_safe_convert($row);	// 書き込み型変換
+	$row = $this->sql_safe_convert($this->sql_str_quote($row));	// 書き込み型変換
 	list($pkey,$pval) = array_first_item($wh);
 	unset($row[$pkey]);			// プライマリキーは削除しておく
 	$where = " WHERE \"{$pkey}\"={$pval}";		// プライマリキー名を取得
@@ -106,6 +106,7 @@ public function updateRecord($wh,$row) {
 	}
 	// UPSERT 文を生成
 	$sql = "UPDATE \"{$this->raw_table}\"{$set}{$where};";
+debug_xdie(['UPDATE'=>$row,'SQL'=>$sql]);
 	error_reporting(E_ALL);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
