@@ -43,14 +43,19 @@ function __construct($table,$handler) {
 		list($this->raw_table,$this->table) = (is_array($table))?$table:[$table,$table];
 		$this->dbb = DatabaseHandler::get_database_handle($handler);
 		$this->is_offset = DatabaseHandler::$have_offset;
-		$this->columns = $this->Connect($this->table);		// view-table column for Get-Record
-		$this->raw_columns = ($this->raw_table === $this->table) ?
-							$this->columns :
-							$this->Connect($this->raw_table);	// write-table  column for Insert/Update
+		$this->load_columns();
 		$this->handler = $handler;
 		$this->fieldAlias = new fieldAlias();
-		debug_log(DBMSG_HANDLER,["COLUMN"=> [ $this->columns,$this->raw_columns]]);
+		xdebug_log(DBMSG_HANDLER,["COLUMN"=> [ $this->columns,$this->raw_columns]]);
 	}
+//==============================================================================
+// load columns info
+public function load_columns() {
+	$this->columns = $this->Connect($this->table);		// view-table column for Get-Record
+	$this->raw_columns = ($this->raw_table === $this->table) ?
+						$this->columns :
+						$this->Connect($this->raw_table);	// write-table  column for Insert/Update
+}
 //==============================================================================
 // Check Same of columns and bind key
 public function bind_columns($data) {
