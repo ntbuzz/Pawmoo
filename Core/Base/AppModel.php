@@ -510,7 +510,6 @@ public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     $fields = $this->dbDriver->firstRecord($cond,FALSE,$sort);
     return ($fields === FALSE) ? FALSE : array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
-//    $this->RecData = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
 }
 //==============================================================================
 // Get Record with Prev/Next Record List by FIND-CONDITION without JOIN!.
@@ -528,12 +527,10 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
     $r_prev = $r_next = NULL;
     $prev = true;
     $row_num = 0;
-//    $primary = intval($primary);
     while (($fields = $this->dbDriver->fetchDB())) {
         $data = [];
         foreach($fields_list as $key => $val) $data[$key] = $fields[$key];
         $row_id = $fields[$this->Primary];
-//        if( intval($row_id) === $primary) {
         if( $row_id === $primary) {
             $prev = false;
             $this->RecData = $fields;   // all-fields in 
@@ -636,6 +633,7 @@ public function CopyRecord($id,$replaces=[]) {
 	    $row = $this->dbDriver->insertRecord($data);
 		$this->RecData = ($row) ? $row : [];
 	}
+	return empty($this->RecData) ? false : $this->RecData[$this->Primary];
 }
 //==============================================================================
 // Add NEW record
@@ -645,6 +643,7 @@ public function AddRecord($row) {
 	    $row = $this->dbDriver->insertRecord($this->fields);
 		$this->RecData = ($row) ? $row : [];
     }
+	return empty($this->RecData) ? false : $this->RecData[$this->Primary];
 }
 //==============================================================================
 // UPDATE Record
@@ -654,6 +653,7 @@ public function UpdateRecord($num,$row) {
         $row = $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
 		$this->RecData = ($row) ? $row : [];
     }
+	return empty($this->RecData) ? false : $this->RecData[$this->Primary];
 }
 
 }
