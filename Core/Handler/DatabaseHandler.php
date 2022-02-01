@@ -10,6 +10,7 @@ require_once('Core/Handler/SqlHandler.php');
 // 各種データベースへのアクセスハンドラ
 require_once('Core/Handler/SQLiteHandler.php');
 require_once('Core/Handler/PostgreHandler.php');
+require_once('Core/Handler/MySQLHandler.php');
 require_once('Core/Handler/NullHandler.php');
 
 //==============================================================================
