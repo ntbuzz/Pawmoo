@@ -284,13 +284,6 @@ public function ItemAction() {
 	$this->View->ViewTemplate('ItemView');
 }
 //==============================================================================
-// Delete Record
-public function DeleteAction() {
-	$num = App::$Params[0];
-	$this->Model->DeleteRecord($num);
-	header('Location:' . App::$Referer);
-}
-//==============================================================================
 // Contents Template Action in AJAX access for like a SPA
 // app/(cont)/contents/(templatename)/(rec-number)
 public function ContentsAction() {
@@ -300,23 +293,41 @@ public function ContentsAction() {
 	$this->View->ViewTemplate("{$template}Parts");
 }
 //==============================================================================
+// Delete Record
+public function DeleteAction() {
+	$num = App::$Params[0];
+	$this->Model->DeleteRecord($num);
+	$this->set_location(App::$Referer);
+}
+//==============================================================================
+// location echoback
+protected function set_location($url) {
+	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
+	header('Location:' . $url);
+}
+//==============================================================================
 // Default Add Record Action
 public function AddAction() {
 	$url = App::$Referer;
-	$this->Model->AddRecord(App::$Post);
-	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
-	header('Location:' . $url);
-//	echo App::$Referer;
+	$num = $this->Model->AddRecord(App::$Post);
+	MySession::setEnvVariables(['RecordNo' => $num]);
+	$this->set_location(App::$Referer);
 }
 //==============================================================================
 // Default Update Action
 public function UpdateAction() {
 	$num = App::$Params[0];
-	$url = App::$Referer;
 	MySession::setEnvVariables(['RecordNo' => $num]);
 	$this->Model->UpdateRecord($num,App::$Post);
-	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
-	header('Location:' . $url);
+	$this->set_location(App::$Referer);
+}
+//==============================================================================
+// Default Copy Record Action
+public function CopyAction() {
+	$num = App::$Params[0];
+	$num = $this->Model->CopyRecord($num,App::$Post);
+	MySession::setEnvVariables(['RecordNo' => $num]);
+	$this->set_location(App::$Referer);
 }
 //==============================================================================
 // Default PDF Convert Action
@@ -334,7 +345,7 @@ public function LanguageAction() {
 //		'REGION' => $region,
 	];
 	MySession::set_LoginValue($login_data);
-	header('Location:' . $refer);
+	$this->set_location($refer);
 }
 
 }
