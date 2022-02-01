@@ -185,6 +185,7 @@ public function createTableSet($exec,$csv_only,$depend=[]) {
 		$sql = "CREATE TABLE {$this->MyTable} (\n";
 		$sql .= implode(",\n",$fset) . "\n);";
 		$this->doSQL($exec,$sql);
+		$this->dbDriver->load_columns();
 	}
 	// IMPORT initial Table DATA, CSV load or TEST mode
 	if(isset($this->InitCSV)) {
@@ -222,12 +223,14 @@ private function loadCSV($filename) {
 			} else {
 				$diff_arr = array_diff($data,$row_columns);
 				if(empty($diff_arr)) continue;	// maybe CSV Header line
-				if(count($diff_arr) !== count($row_columns)) {
-					debug_die(['CHECK-HEADER'=>['FILE'=>$path,'HEAD'=>$diff_arr,'COL'=>$row_columns]]);
-				}
+				// if(count($diff_arr) !== count($row_columns)) {
+				// 	debug_die(['CHECK-HEADER'=>['FILE'=>$path,'COL'=>$row_columns,'DAT'=>$data,'DIFF'=>$diff_arr]]);
+				// }
 			}
 			$row = array_combine($row_columns,$data);
-			$this->dbDriver->insertRecord($row);
+			list($primary,$id) = array_first_item($row);
+			$this->dbDriver->updateRecord([$primary=>$id],$row);
+//			$this->dbDriver->insertRecord($row);
 		}
 		fclose($handle);
 	}

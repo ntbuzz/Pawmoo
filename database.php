@@ -27,13 +27,16 @@ date_default_timezone_set('Asia/Tokyo');
 
 $in = explode('/',"{$cmd_arg}//");
 // lower-case convert,except '$defs' parameter.
-// command-line: php database.php appname/model/[renew |view | test]
+// command-line: php database.php appname/[renew |view | test]/model1/model2/...
 // renew = re-create table & view
 // view  = re-create view (default)
 // test  = echo SQL, not-execute
-list($appname,$defs,$cmd) = array_map(
-		function($in,$low) { return ($low) ? strtolower($in) : $in;},
-		$in, [true, false, true]);
+$appname = strtolower(array_shift($in));
+$cmd = strtolower(array_shift($in));
+$list = array_filter($in,'strlen');
+// list($appname,$defs,$cmd) = array_map(
+// 		function($in,$low) { return ($low) ? strtolower($in) : $in;},
+// 		$in, [true, false, true]);
 
 $config_path = "app/{$appname}/Config";
 $data_path = "{$config_path}/db_data/";
@@ -41,19 +44,35 @@ $defsfile = "{$config_path}/Setup/Config.php";
 
 require_once($defsfile);
 
+$config->Setup(GlobalConfig,SITE_PRODUCTION);
+
 SetupLoader::Setup($appname,AliasMap);
 
 $ln = str_repeat("=", 50);
 print_r($argv);
 echo "{$ln} START HERE ${ln}\n";
 
-$setup_class = "{$defs}Setup";
-
-foreach(AliasMap as $fname => $classes) {
-	if(in_array($setup_class,$classes)) {
-		$db = new $setup_class($data_path);
-		$db->execute($cmd);
-		exit;
+xdebug_die(['SETUP'=>$list]);
+foreach($list as $defs) {
+	$setup_class = "{$defs}Setup";
+	$not_found = true;
+	foreach(AliasMap as $fname => $classes) {
+		if(in_array($setup_class,$classes)) {
+			$db = new $setup_class($data_path);
+			$db->execute($cmd);
+			$not_found = false;
+			break;
+		}
 	}
+	if($not_found) echo "'{$setup_class}' NOT FOUND!\n";
 }
-echo "'{$setup_class}' NOT FOUND!\n";
+// $setup_class = "{$defs}Setup";
+
+// foreach(AliasMap as $fname => $classes) {
+// 	if(in_array($setup_class,$classes)) {
+// 		$db = new $setup_class($data_path);
+// 		$db->execute($cmd);
+// 		exit;
+// 	}
+// }
+// echo "'{$setup_class}' NOT FOUND!\n";

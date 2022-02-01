@@ -197,22 +197,6 @@ $.fn.getPaddingBox = function() {
 	};
 	return widths;
 };
-// フォーム部品(INPUT,SELECT,TEXTAREA)の変更時にクラス属性をセットする
-$.fn.onChangeFormItems = function(cls) {
-	var self = this;
-	self.on('change', 'input,select,textarea', function () {
-		var ptag = $(this).parent();
-		if (ptag.hasClass('combobox')) {
-			// コンボボックス用のSELECTはmodifiedをつけない
-		} else {
-			$(this).addClass(cls);
-			// チェックボックスとラジオボタンは label タグの色を変える
-			if (['checkbox', 'radio'].is_exists($(this).prop('type'))) {
-				ptag.addClass('changed');
-			};
-		};
-	});
-};
 // カーソルを BUSY に変更
 $.busy_cursor = function (disp) {
 	$('body').css('cursor', (disp) ? 'wait' : 'default');
@@ -408,14 +392,75 @@ $.fn.InitPopupSet = function () {
 	});
 	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().MenuSetup().BindScrollSetup();
 };
+// // フォーム部品(INPUT,SELECT,TEXTAREA)の変更時にクラス属性をセットする
+// $.fn.onChangeFormItems = function(cls) {
+// 	var self = this;
+// 	self.on('change', 'input,select,textarea', function () {
+// 		var ptag = $(this).parent();
+// 		// コンボボックス用のSELECTはmodifiedをつけない
+// 		if (ptag.hasClass('combobox') && $(this).prop('tagName') === 'SELECT') return true;
+// 		$(this).addClass(cls);
+// 		// チェックボックスとラジオボタンは label タグの色を変える
+// 		if (['checkbox', 'radio'].is_exists($(this).prop('type'))) {
+// 			ptag.addClass('changed');
+// 		};
+// 	});
+// };
+// // FormSubmit用のオブジェクトを生成
+// $.fn.submitObject = function (false_check,callback,is_parent) {
+// 	var self = this;	// Reminder jQuery Self Object
+// 	var setobj = {};
+// 	var top_opj = (is_parent === false) ? self : self.parent();
+// 	// 兄弟要素を含めるため親要素に戻ってname属性を検索する
+// 	top_opj.find('[name]').each(function () {
+// 		var nm = $(this).attr('name');	// 検索済の要素なので必ず存在する
+// 		var is_arr = (nm.slice(-2) === "[]");	// 配列名か確認
+// 		if (is_arr) nm = nm.slice(0, -2);		// 括弧を除外
+// 		if ($(this).prop('tagName') === 'UL') {
+// 			value = $(this).text().trim();
+// 		} else {
+// 			var tt = $(this).attr('type');
+// 			if (tt === 'checkbox' || tt === 'radio') {
+// 				if ($(this).is(':checked')) value = $(this).val();
+// 				else if (tt === 'checkbox' && false_check) value = false;   // チェックされていないときの値をセット
+// 				else return true;
+// 			} else value = $(this).val();
+// 		};
+// 		if (is_arr) {
+// 			var pre = (nm in setobj) ? setobj[nm] : [];
+// 			pre.push(value);
+// 			value = pre;
+// 		};
+// 		setobj[nm] = value;
+// 	});
+// 	if (callback !== undefined) callback.call(self, setobj);
+// 	return self;
+// };
+//----------------------------------------------------------------------------------------------
+// 新プラグイン
+// フォーム部品(INPUT,SELECT,TEXTAREA)の変更時にクラス属性をセットする
+$.fn.onChangeClass = function (cls) {
+	this.each(function () {
+		var self = $(this);
+		self.on('change', 'input,select,textarea', function () {
+			var ptag = $(this).parent();
+			// コンボボックス用のSELECTはmodifiedをつけない
+			if (ptag.hasClass('combobox') && $(this).prop('tagName') === 'SELECT') return true;
+			$(this).addClass(cls);
+			// チェックボックスとラジオボタンは label タグの色を変える
+			if (['checkbox', 'radio'].is_exists($(this).prop('type'))) {
+				ptag.addClass('changed');
+			};
+		});
+	});
+};
 // FormSubmit用のオブジェクトを生成
-$.fn.submitObject = function (false_check,callback,is_parent) {
-	var self = this;	// Reminder jQuery Self Object
-	var setobj = {};
-	var top_opj = (is_parent === false) ? self : self.parent();
-	// 兄弟要素を含めるため親要素に戻ってname属性を検索する
-	top_opj.find('[name]').each(function () {
-		var nm = $(this).attr('name');	// 検索済の要素なので必ず存在する
+$.fn.formObject = function (false_check,filter,callback) {
+	var items = ([null,undefined,'','*','.*'].is_exists(filter)) ? this : this.find(filter);
+	var setobj = { referer: location.href };
+	var self = $('<object></object>').append(items);
+	self.find('[name]').each(function () {		// name属性を持つ子孫全てをスキャン
+		var nm = $(this).attr('name');
 		var is_arr = (nm.slice(-2) === "[]");	// 配列名か確認
 		if (is_arr) nm = nm.slice(0, -2);		// 括弧を除外
 		if ($(this).prop('tagName') === 'UL') {
@@ -424,8 +469,8 @@ $.fn.submitObject = function (false_check,callback,is_parent) {
 			var tt = $(this).attr('type');
 			if (tt === 'checkbox' || tt === 'radio') {
 				if ($(this).is(':checked')) value = $(this).val();
-				else if (tt === 'checkbox' && false_check) value = false;   // チェックされていないときの値をセット
-				else return true;
+				else if (tt === 'checkbox' && false_check) value = 'f';   // チェックされていないときの値をセット
+				else return true;		// 次の要素へ
 			} else value = $(this).val();
 		};
 		if (is_arr) {

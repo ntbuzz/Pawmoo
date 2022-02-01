@@ -43,23 +43,29 @@ function __construct($table,$handler) {
 		list($this->raw_table,$this->table) = (is_array($table))?$table:[$table,$table];
 		$this->dbb = DatabaseHandler::get_database_handle($handler);
 		$this->is_offset = DatabaseHandler::$have_offset;
-		$this->columns = $this->Connect($this->table);		// view-table column for Get-Record
-		$this->raw_columns = ($this->raw_table === $this->table) ?
-							$this->columns :
-							$this->Connect($this->raw_table);	// write-table  column for Insert/Update
-		debug_log(FALSE,["Columns List" => $this->columns]);
+		$this->load_columns();
 		$this->handler = $handler;
 		$this->fieldAlias = new fieldAlias();
+		xdebug_log(DBMSG_HANDLER,["COLUMN"=> [ $this->columns,$this->raw_columns]]);
 	}
+//==============================================================================
+// load columns info
+public function load_columns() {
+	$this->columns = $this->Connect($this->table);		// view-table column for Get-Record
+	$this->raw_columns = ($this->raw_table === $this->table) ?
+						$this->columns :
+						$this->Connect($this->raw_table);	// write-table  column for Insert/Update
+}
 //==============================================================================
 // Check Same of columns and bind key
 public function bind_columns($data) {
-	if(count($data) !== count($this->row_columns)) {
+	if(count($data) !== count($this->raw_columns)) {
 		return false;		// column count miss-match
 	}
-	$diff_arr = array_diff($data,$this->row_columns);
+	$keys = array_keys($this->raw_columns);
+	$diff_arr = array_diff($data,$keys);
 	if(empty($diff_arr)) return true;	// maybe CSV Header line
-	return array_combine($this->row_columns,$data);
+	return array_combine($keys,$data);
 }
 //==============================================================================
 // DEBUGGING for SQL Execute
@@ -87,6 +93,7 @@ public function doTruncate() {
 	$sql = $this->truncate_sql($this->raw_table);
     $this->execSQL($sql);
 }
+
 //==============================================================================
 // fetchDB: get record data , and replace alias and bind column
 public function fetchDB() {
@@ -184,8 +191,8 @@ public function getMaxValueRecord($field_name) {
 	return ($row) ? $row['max_val'] : 0;
 }
 //==============================================================================
-//	getMaxValueRecord($field_name) 
-//		get MAX value into field_name by this-table
+//	getGroupCalcList($cond,$groups,$calc,$sortby,$max)
+//		GROUP
 //==============================================================================
 public function getGroupCalcList($cond,$groups,$calc,$sortby,$max) {
 	$where = $this->sql_makeWHERE($cond);
@@ -309,14 +316,43 @@ public function deleteRecord($wh) {
 		return "SELECT DISTINCT  * FROM {$this->table} WHERE {$sql};";
 	}
 //==============================================================================
-// escape to single-quote(')
-protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
-	foreach($value as $key => $val) {
-		if(gettype($val) === 'string') {
-			$value[$key] = str_replace($find,$rep,$val);
-//			$value[$key] = str_replace("'","''",$val);
+// escape to single-quote(') in string value
+protected function sql_str_quote($data,$find=["'",'\\'],$rep=["''",'\\\\']) {
+	$row = array_map(function($v) use(&$find,&$rep) {
+				return (gettype($v) === 'string') ? str_replace($find,$rep,$v):$v;
+			},$data);
+	return $row;
+}
+//==============================================================================
+// Convert to columns type
+protected function sql_safe_convert($data) {
+	foreach($data as $key => $val) {
+		if(array_key_exists($key,$this->raw_columns)) {
+			switch($this->raw_columns[$key]) {
+			case 'serial':
+			case 'integer': $data[$key] = intval($val); break;
+			case 'boolean': $data[$key] = is_bool_false($val) ? "'f'" : "'t'"; break;
+			// others, text, date, timestamp, etc...
+			default: $data[$key] = (empty($val))?'NULL':"'{$val}'";
+			}
 		}
 	}
+	return $data;
+}
+//==============================================================================
+// CONVERT FIELD TYPE
+protected function fetch_convert($data) {
+	if($data === false) return false;
+	foreach($data as $key => $val) {
+		if(array_key_exists($key,$this->raw_columns)) {
+			switch($this->raw_columns[$key]) {
+			case 'serial':
+			case 'integer': $data[$key] = intval($val); break;
+			case 'boolean': $data[$key] = is_bool_false($val) ? 'f' : 't'; break;
+			}
+		}
+	}
+	return $data;
 }
 //==============================================================================
 // generate JOIN token
@@ -385,18 +421,18 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 							$op = "NOT {$this->LIKE_opr}";
 						} else $op = $this->LIKE_opr;
 						if(trim($v,'%') === $v) $v = "%{$v}%";
-						return [$v,$op];
+						return (empty($v)) ? 'IS NULL' : "{$op} '{$v}'";
 					};
 					$opc = $this->concat_fields($expr);
 					if(is_array($val)) {
 						$lexpr = array_map( function($v) use(&$opc,&$like_opstr) {
-							list($v,$x) = $like_opstr($v);
-							return "({$opc} {$x} '{$v}')";
+							$x = $like_opstr($v);
+							return "({$opc} {$x})";
 						},$val);
 						return implode(' OR ',$lexpr);
 					} else {
-						list($v,$opx) = $like_opstr($val);
-						return "{$opc} {$opx} '{$v}'";
+						$opx = $like_opstr($val);
+						return "{$opc} {$opx}";
 					}
 				}
 				if(count($expr) > 1) {
@@ -478,7 +514,8 @@ protected function sql_safequote(&$value,$find=["'",'\\'],$rep=["''",'\\\\']) {
 						if(!array_key_exists($op,$in_op)) $op = '==';
 						$op = $in_op[$op];
 						$val = 'NULL';
-					} else if(!is_numeric($val)) $val = "'{$val}'";
+					} else if(is_bool($val)) $val = ($val) ? "'t'" : "'f'";
+					else if(!is_numeric($val)) $val = "'{$val}'";
 					$opp = $multi_field($key,$op,$table,$val);
 				}
 				$opc = (empty($opc)) ? $opp : "({$opc}) {$opr} ({$opp})";

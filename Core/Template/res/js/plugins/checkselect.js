@@ -341,7 +341,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 				var vals = check_obj.map(function () { return $(this).val(); }).get();
 				vals = direct_data.concat(vals);
 				// IEでも動くようにfilterで重複を削除して結合
-				uniq = vals.filter(function (x, i, menu_box) { return menu_box.indexOf(x) === i; }).join(setting.Separator).trim();
+				uniq = vals.filter(function (x, i, menu_box) { return (menu_box.indexOf(x) === i)&&(![null,undefined,""].is_exists(x)); }).join(setting.Separator).trim();
 				label = uniq;
 			};
 			if (setting.SetValue(uniq, label) === true) {		// 値を書き込む

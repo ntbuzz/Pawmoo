@@ -10,6 +10,7 @@ require_once('Core/Handler/SqlHandler.php');
 // 各種データベースへのアクセスハンドラ
 require_once('Core/Handler/SQLiteHandler.php');
 require_once('Core/Handler/PostgreHandler.php');
+require_once('Core/Handler/MySQLHandler.php');
 require_once('Core/Handler/NullHandler.php');
 
 //==============================================================================
@@ -122,7 +123,6 @@ public static function get_database_handle($handler) {
         return static::$dbHandle[$handler];
     }
     if(array_key_exists($handler,static::DatabaseSpec)) {
-//		$db = DatabaseParameter[$handler];
 		$db = $config->$handler;
         debug_log(DBMSG_HANDLER,['HANDLER' => $handler, 'HOST' => $db['host'],'DATABASE' => $db['database']]);
         $defs = static::DatabaseSpec[$handler];

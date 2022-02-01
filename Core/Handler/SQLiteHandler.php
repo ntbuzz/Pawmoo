@@ -22,7 +22,7 @@ protected function Connect($table) {
 	$rows = $this->dbb->query($sql);
 	$columns = array();
 	while ($row = $rows->fetchArray(SQLITE3_ASSOC)) {
-		$columns[$row['name']] = $row['name'];
+		$columns[$row['name']] = strtolower($row['type']);
 	}
 	return $columns;
 }
@@ -62,7 +62,8 @@ public function doQuery($sql) {
 //==============================================================================
 //	fetch_array: 	レコードを取得してカラム配列を返す
 public function fetch_array() {
-	return $this->rows->fetchArray(SQLITE3_ASSOC); //またはSQLITE3_NUM
+	$row = $this->rows->fetchArray(SQLITE3_ASSOC); //またはSQLITE3_NUM
+	return $this->fetch_convert($row,false);	// 型変換
 }
 //==============================================================================
 //	getLastError: 	レコードを取得してカラム配列を返す
@@ -74,10 +75,10 @@ public function getLastError() {
 //	レコードの追加 
 //==============================================================================
 public function insertRecord($row) {
-	$this->sql_safequote($row,"'","''");
+	$row = $this->sql_safe_convert($this->sql_str_quote($row));	// 書き込み型変換
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
-	$vstr = "'" . implode("','", $row) . "'";
+	$vstr = implode(",", $row);
 
 	$sql = "INSERT INTO {$this->raw_table} ({$kstr}) VALUES ({$vstr});";
 	error_reporting(E_ERROR);
@@ -94,13 +95,13 @@ public function insertRecord($row) {
 //	レコードの更新 $row[key] value
 //==============================================================================
 public function updateRecord($wh,$row) {
-	$this->sql_safequote($row,"'","''");
+	$row = $this->sql_safe_convert($this->sql_str_quote($row));	// 書き込み型変換
 	list($pkey,$pval) = array_first_item($wh);
 	unset($row[$pkey]);			// プライマリキーは削除しておく
 	$where = " WHERE \"{$pkey}\"={$pval}";		// プライマリキー名を取得
 	$set = " SET"; $sep = " ";				// UPDATE する時の代入文
 	foreach($row as $key => $val) {
-		$set .= "{$sep}\"{$key}\"='{$val}'";
+		$set .= "{$sep}\"{$key}\"={$val}";
 		$sep = ", ";
 	}
 	// UPSERT 文を生成

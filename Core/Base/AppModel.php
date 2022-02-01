@@ -271,7 +271,8 @@ public function get_selectvalue_of_key($sel_name,$value) {
 //==============================================================================
 // Make Empty Record
 public function makeEmptyRecord() {
-	$row = array_combine($this->dbDriver->columns,array_fill(0,count($this->dbDriver->columns),NULL));
+	$col_keys = array_keys($this->dbDriver->columns);
+	$row = array_combine($col_keys,array_fill(0,count($col_keys),NULL));
     return $row;
 }
 //==============================================================================
@@ -295,8 +296,7 @@ public function getPrimaryOf($key,$value,$default=false) {
 	if(empty($value)) return 0;		// not-allow NULL value
 	$row = $this->dbDriver->doQueryBy($key,$value);
 	if($row === false) return $default;
-    $ret = $row[$this->Primary];
-	return (is_numeric($ret)) ? intval($ret) : $ret;
+    return $row[$this->Primary];
 }
 //==============================================================================
 // Get Record Data by primary-key,and JOIN data by $join is TRUE.
@@ -400,7 +400,7 @@ public function getCount($cond) {
 //==============================================================================
 // Normalized Field-Filter
 	private function normalize_filter($filter) {
-		if(empty($filter)) $filter = $this->dbDriver->columns;
+		if(empty($filter)) $filter = array_keys($this->dbDriver->columns);
 		else if(is_scalar($filter)) {
 			$filter = (strpos($filter,'.')!==FALSE) ? explode('.',$filter): [$filter];
 		}
@@ -421,17 +421,15 @@ public function SelectFinder($chain, $filter, $cond) {
 				$id = $this->Primary;
 			}
 			$pval = (empty($pid)) ? 0 : $fields[$pid];
-			if(is_numeric($pval)) $pval = intval($pval);
 			$data[] = [ $fields[$id], $fields[$fn], $pval];
 		} else {
 			$key = (empty($fn)) ? $fields[$id] : $fields[$fn];
 			$pval = $fields[$id];
-			if(is_numeric($pval)) $pval = intval($pval);
 			$data[$key] = $pval;
 		}
 	}
 	if(!$chain) ksort($data,SORT_FLAG_CASE|SORT_STRING);
-    debug_xlog(DBMSG_NONE, [
+    xdebug_log(DBMSG_NONE, [
         "Filter" => $filter,
         "COND" => $cond,
         "RECORDS" => $data,
@@ -469,7 +467,7 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
         }
     }
     $this->Records = $data;
-    debug_log(FALSE, [
+    xdebug_dump([
         "record_max" => $this->record_max,
         "Filter" => $filter,
 //        "FieldSchema" => $this->FieldSchema,
@@ -512,7 +510,6 @@ public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     $fields = $this->dbDriver->firstRecord($cond,FALSE,$sort);
     return ($fields === FALSE) ? FALSE : array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
-//    $this->RecData = array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
 }
 //==============================================================================
 // Get Record with Prev/Next Record List by FIND-CONDITION without JOIN!.
@@ -530,12 +527,11 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
     $r_prev = $r_next = NULL;
     $prev = true;
     $row_num = 0;
-    $primary = intval($primary);
     while (($fields = $this->dbDriver->fetchDB())) {
         $data = [];
         foreach($fields_list as $key => $val) $data[$key] = $fields[$key];
         $row_id = $fields[$this->Primary];
-        if( intval($row_id) === $primary) {
+        if( $row_id === $primary) {
             $prev = false;
             $this->RecData = $fields;   // all-fields in 
             ++$row_num;
@@ -637,6 +633,7 @@ public function CopyRecord($id,$replaces=[]) {
 	    $row = $this->dbDriver->insertRecord($data);
 		$this->RecData = ($row) ? $row : [];
 	}
+	return empty($this->RecData) ? false : $this->RecData[$this->Primary];
 }
 //==============================================================================
 // Add NEW record
@@ -646,6 +643,7 @@ public function AddRecord($row) {
 	    $row = $this->dbDriver->insertRecord($this->fields);
 		$this->RecData = ($row) ? $row : [];
     }
+	return empty($this->RecData) ? false : $this->RecData[$this->Primary];
 }
 //==============================================================================
 // UPDATE Record
@@ -655,6 +653,7 @@ public function UpdateRecord($num,$row) {
         $row = $this->dbDriver->updateRecord([$this->Primary => $num],$this->fields);
 		$this->RecData = ($row) ? $row : [];
     }
+	return empty($this->RecData) ? false : $this->RecData[$this->Primary];
 }
 
 }

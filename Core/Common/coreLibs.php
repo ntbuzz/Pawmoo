@@ -327,6 +327,12 @@ function re_build_array($cond) {
 	return $array_map_shurink('AND',$cond);
 }
 //==============================================================================
+// UTF-8 CSV item remove of 'false',''
+function csv_false_remove($val,$sep) {
+	$csv = array_filter(explode(',',$val),function($v) { return (($v !== "false") && strlen($v));});
+	return implode($sep,$csv);
+}
+//==============================================================================
 // UTF-8 CSV miss processing in Windows
 // str_csv version
 function str_csvget($csv_str) {
@@ -357,9 +363,8 @@ function fcsvget($handle) {
 	return false;
 }
 //==============================================================================
-// UTF-8 CSV open with BOM
-// fgets version
-function fcsopen($path,$rw) {
+// UTF-8 CSV file open with BOM
+function fcsvopen($path,$rw) {
 	if (($handle = fopen($path, $rw)) !== FALSE) {
 		$bom = pack('C*',0xEF,0xBB,0xBF);		// BOM check
 		$top3 = fread($handle,3);

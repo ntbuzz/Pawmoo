@@ -16,12 +16,27 @@ class MySQLHandler extends SQLHandler {
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
 protected function Connect($table) {
 	// テーブル属性を取得
-	$sql = "PRAGMA table_info({$table});";
+	$sql = "show columns from {$table};";
 	$rows = $this->dbb->query($sql);
+	if($rows === false) return [];
 	$columns = array();
+	$type_int = [
+		'bigint'	=> 'integer',
+		'tinyint'	=> 'integer',
+		'int'		=> 'integer',
+	];
 	while ($row = $rows->fetch_assoc()) {
-		$columns[$row['name']] = $row['name'];
+		list($name,$type) = array_keys_value($row,['Field','Type']);
+		$decl = strtolower($type);
+		foreach($type_int as $key => $tt) {
+			if(strpos($decl,$key)===0) {
+				$decl = $tt;
+				break;
+			}
+		}
+		$columns[$name] = $decl;
 	}
+xdebug_die(['SQL'=>$sql,'ROW'=>$columns]);
 	return $columns;
 }
 //==============================================================================
@@ -53,12 +68,17 @@ protected function concat_fields($arr) {
 //	doQuery: 	SQLを発行する
 public function doQuery($sql) {
 	$this->rows = $this->dbb->query($sql);
+	if($this->rows === false) {
+		echo($this->dbb->error);
+		debug_die(['MySQLi'=>$this->dbb,'RESULT'=>$this->rows,'SQL'=>$sql]);
+	}
 	return $this->rows;
 }
 //==============================================================================
 //	fetchDB: 	レコードを取得してカラム配列を返す
 public function fetch_array() {
-	return $this->rows->fetch_assoc(); //またはSQLITE3_NUM
+	$row = mysqli_fetch_assoc($this->rows);
+	return $this->fetch_convert($row,false);	// 型変換
 }
 //==============================================================================
 //	getLastError: 	レコードを取得してカラム配列を返す
@@ -69,40 +89,49 @@ public function getLastError() {
 //	レコードの追加 
 //==============================================================================
 public function insertRecord($row) {
-	$this->sql_safequote($row);
+	$row = $this->sql_safe_convert($this->sql_str_quote($row));	// 書き込み型変換
 	// UPDATE OR INSERT => REPLACE SQL生成
-	$kstr = '"' . implode('","', array_keys($row)) . '"';
-	$vstr = "'" . implode("','", $row) . "'";
-
-	$sql = "INSERT INTO {$this->raw_table} ({$kstr}) VALUES ({$vstr}) RETURNING *;";
+	$kstr = implode(',', array_keys($row));
+	$vstr = implode(',', $row);
+	$sql = "INSERT INTO {$this->raw_table} ({$kstr}) VALUES ({$vstr});";
 	error_reporting(E_ERROR);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
-		echo 'ERROR:'.$this->getLastError()."\n".$sql;
-		return [];
-	} else	return $this->fetchDB();
+		echo 'ERROR:'.$this->getLastError()."{$sql}\n";
+	}
+	return [];
 }
 //==============================================================================
 //	レコードの更新 $row[key] value
 //==============================================================================
 public function updateRecord($wh,$row) {
-	$this->sql_safequote($row);
 	list($pkey,$pval) = array_first_item($wh);
-	unset($row[$pkey]);			// プライマリキーは削除しておく
-	$where = " WHERE \"{$pkey}\"={$pval}";		// プライマリキー名を取得
-	$set = " SET"; $sep = " ";				// UPDATE する時の代入文
-	foreach($row as $key => $val) {
-		$set .= "{$sep}\"{$key}\"='{$val}'";
-		$sep = ", ";
-	}
-	// UPSERT 文を生成
-	$sql = "UPDATE \"{$this->raw_table}\"{$set}{$where} RETURNING *;";
+	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ
+	$aa = $this->sql_safe_convert($this->sql_str_quote($row));	// 書き込み型変換
+	unset($aa[$pkey]);					// プライマリキーは削除しておく
+	if($aa === false) return [];
+	$keys = array_keys($aa);
+	$kstr = implode(',', $keys);	// フィールド名リストを作成
+	$vstr = implode(',', $aa);				// VALUES リストを作成
+	// INSERT/UPSERT 文を生成
+	$set = array_map(function($k,$v) {return "{$k}={$v}";},$keys,$aa);
+	$set_str = implode(',', $set);
+	$sql = "INSERT INTO {$this->raw_table} ({$kstr}) VALUES ({$vstr}) ON DUPLICATE KEY UPDATE {$set_str};";
 	error_reporting(E_ERROR);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
 		echo 'ERROR:'.$this->getLastError()."\n".$sql;
-		return [];
-	} else	return $this->fetchDB();
+		return false;
+	}
+// MySQL old version cannot support 'RETURNING'.
+	$where = " WHERE \"{$pkey}\"={$pval}";		// プライマリキー名を取得
+	$sql = "SELECT * FROM {$this->raw_table}{$where};";
+	$rows = $this->doQuery($sql);
+	if(!$rows) {
+		echo 'ERROR:'.$this->getLastError()."\n{$sql}\n";
+		return FALSE;
+	}
+	return $this->fetchDB();
 }
 
 }

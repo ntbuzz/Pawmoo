@@ -99,6 +99,7 @@ private static function MailAddress($addres) {
 //==============================================================================
 // メール送信
 static function Send() {
+	$config = $GLOBALS['config'];
 	$header = self::ConvHeader('','From',static::$From);
 	$header = self::ConvHeader($header,'Cc',static::$CC);
 	$header = self::ConvHeader($header,'Bcc',static::$BCC);
@@ -106,7 +107,7 @@ static function Send() {
 	$body = mb_convert_kana(static::$Message, "KV");		// 半角カナを全角に濁点付き文字は1文字に変換
 	$subject = mb_convert_kana(static::$Subject, "KV");
 	mb_language('uni');
-	if(defined('SENDMAIL_DEBUG')) {		// デバッグメールの宛先が定義されている
+	if(!empty($config->SENDMAIL_DEBUG)) {		// デバッグメールの宛先が定義されている
 		$body = array_to_text([
 			'HEADER'=> $header,
 			'MAIL-BODY' => [
@@ -117,7 +118,7 @@ static function Send() {
 				'SUBJECT'=>static::$Subject,
 				'BODY'	=> $body,
 			]]);
-		$to = SENDMAIL_DEBUG;
+		$to = $config->SENDMAIL_DEBUG;
 		$subject = "DEBUG: {$subject}";
 	}
 	$header = self::ConvHeader('','From',static::$From);

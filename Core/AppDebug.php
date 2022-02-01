@@ -160,6 +160,9 @@ function stderr($str) {
 function debug_xdump($items) {}
 function debug_xdie($items) {}
 function debug_xlog($items) {}
+function xdebug_dump($items) {}
+function xdebug_die($items) {}
+function xdebug_log($items) {}
 function reuire_debugbar() {
 	$debug = __DIR__ . '/Template/View/debugbar.php';
 	require_once($debug);
@@ -268,11 +271,12 @@ function debug_log($lvl,...$items) {
 //    global $debug_log_str;
     $dmp_info = $dump_log_info($items);
     if(!empty($dmp_info)) {
+		$pre_dump = (CLI_DEBUG) ? "\n{$dmp_info}\n" : "<pre>\n{$dmp_info}\n</pre>\n";
         switch($lvl) {
         case -DBMSG_STDERR:  stderr($dmp_info); break;
-        case -DBMSG_DIE:    //ySession::CloseSession(); // Session Close before die();
-							die("<pre>\n{$dmp_info}\n</pre>\n");
-        case -DBMSG_DUMP:    echo "<pre>\n{$dmp_info}\n</pre>\n"; break;
+        case -DBMSG_DIE:    //Session::CloseSession(); // Session Close before die();
+							die($pre_dump);
+        case -DBMSG_DUMP:    echo $pre_dump; break;
         case -DBMSG_NOLOG:   $lvl  = -99;
         default:
             if((-DBMSG_LEVEL < $lvl && $lvl < 0) || (CLI_DEBUG && $cli !== 0)) {

@@ -63,6 +63,7 @@ if(!defined('FORCE_REDIRECT'))	 define('FORCE_REDIRECT', FALSE);
 if(!defined('DEFAULT_LANG'))	 define('DEFAULT_LANG', 'ja');				// Language
 if(!defined('DEFAULT_REGION'))	 define('DEFAULT_REGION', 'jp');			// Region code
 if(!defined('SHARE_FOLDER_USE')) define('SHARE_FOLDER_USE',false);			// autoload on .share
+if(!defined('USE_QUERY_LANG'))	 define('USE_QUERY_LANG',false);			// use query lang= region=
 
 if(!is_extst_module($appname,$controller,'Controller')) {
     // if BAD controller name, try DEFAULT CONTROLLER and shift follows
@@ -114,10 +115,11 @@ list($lang,$region) = explode('.',$locale_set);
 $defs = array_filter_import(true,['lang','region'],	//'REGION','LANG',
 			['lang'=>$lang, 'region'=>$region],	// BROWSER config
 			MySession::get_LoginValue(),	// LANG,REGION LOGIN
-			App::$Query,					// ?lang=&region=
+			(USE_QUERY_LANG)?App::$Query:[],// ?lang=&region=
 			App::$Post						// lang=&region=
 		);
 list($lang,$region) = $defs;
+if(empty($lang)) $lang = DEFAULT_LANG;
 // get client BROWSER
 $browser = client_Browser();
 //if(empty($lang)) $lang = DEFAULT_LANG;

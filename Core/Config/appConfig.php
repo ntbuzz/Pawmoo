@@ -48,29 +48,36 @@ define('SESSION_ENV_EXEC_ALL',		0b1111);
 define('DEFAULT_HELPER_EXPAND',		'__x');
  
 define('DEFAULT_ENCRYPT_INIT','encrypt-pawmoo_iv');
-
+/*
+GlobalConfig structure
+array(
+	// common config parameter
+	define-name	=> value,
+	...
+	// common database parameter, DB_NAME is (Postgre,SQLite,MySQL)
+	DB_NAME => [
+		DB_PARAMS...
+		// OS or HOSTNAME Dependent parameter
+		PHP_OS	=> [ DB_PARAMS... ]		// PHP_OS is (Linux or WINNT)
+		HOST	=> [ DB_PARAMS... ]		// HOST is gethostname()
+	],
+	// enviroment parameter
+	production => [ // same as common config structure // ]
+	development=> [ // same as common config structure // ]
+)
+*/
 class appConfig {
 	// default config parameter
+	public $Enviroment		= "";
 	public $USE_DEBUGGER	= false;
 	public $SESSION_LIMIT	= 'tomorrow 03:00:00';
-	public $Postgre = [];		// PostgreSQL Config
-	public $SQLite = [];		// SQLite2 Config
-	public $MySQL = [];			// MariaDB Config
+	const DB_Key = [ 'Postgre', 'SQLite', 'MySQL'];
 //===============================================================
-public function Setup($spec,$enviroment) {
-	// config-enviroment
-	$config = $spec[$enviroment];
-	list($host) = explode('.',gethostname());
-	// common config property
-	$common_config = array_filter($config,function($v) { return !is_array($v);});
-	foreach($common_config as $key => $val) $this->$key = $val;
-	// select property
-	$select_config = array_filter($config,function($v) { return is_array($v);});
-	// extract Database Define
-	foreach(['Postgre', 'SQLite', 'MySQL'] as $val) {
+private function database_Setup($host,$config) {
+	foreach(self::DB_Key as $val) {
 		// OS, Hostname, Common config Setuo
-		if(array_key_exists($val,$select_config)) {
-			$db_setup = $select_config[$val];
+		if(array_key_exists($val,$config)) {
+			$db_setup = $config[$val];
 			// Common config Parameter
 			$db_common = array_filter($db_setup,function($v) { return is_scalar($v);});
 			$db_config = array_filter($db_setup,function($v) { return is_array($v);});
@@ -78,14 +85,32 @@ public function Setup($spec,$enviroment) {
 				// extract [ OS, Hostname] config Parameter
 				foreach([PHP_OS, $host] as $db_key) {
 					if(array_key_exists($db_key,$db_config)) {
-						$db_common = array_merge($db_common,$db_config[$db_key]);
+						$db_common = array_override($db_common,$db_config[$db_key]);
 					}
 				}
 			}
-			$this->$val = $db_common;
+			$this->$val = array_override($this->$val, $db_common);
 		}
 	}
-//print_r($this);
+}
+//===============================================================
+public function Setup($spec,$enviroment) {
+	list($host) = explode('.',gethostname());		// exclude domain-name
+	// Create DB_KEY parameter by empty value
+	foreach(self::DB_Key as $val) $this->$val = [];
+	// setup Global-Config for Database
+	$this->database_Setup($host,$spec);
+	// check enviroment config
+	if(array_key_exists($enviroment,$spec)) {
+		$config = $spec[$enviroment];
+		// common config property
+		$common_config = array_filter($config,function($v) { return !is_array($v);});
+		foreach($common_config as $key => $val) $this->$key = $val;
+		// database select property
+		$select_config = array_filter($config,function($v) { return is_array($v);});
+		$this->database_Setup($host,$select_config);
+		$this->Enviroment = $enviroment;
+	}
 }
 
 }
