@@ -106,7 +106,6 @@ public function updateRecord($wh,$row) {
 	}
 	// UPSERT 文を生成
 	$sql = "UPDATE \"{$this->raw_table}\"{$set}{$where};";
-debug_xdie(['UPDATE'=>$row,'SQL'=>$sql]);
 	error_reporting(E_ALL);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
