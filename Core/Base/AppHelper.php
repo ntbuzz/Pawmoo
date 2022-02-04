@@ -346,7 +346,7 @@ public static function define_var_array($arr,$name) {
 //==============================================================================
 // JS array define with KEY OBJECT
 public static function define_array_object($arr,$name) {
-	$txt = "var {$name} = [\n";
+	$txt = "var {$name} = {\n";
 	foreach($arr as $key => $val_arr) {
 		$txt = "{$txt}\"{$key}\": ['" . implode("',\n'",$val_arr)."'],\n";
 	}
