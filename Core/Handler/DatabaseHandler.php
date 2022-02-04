@@ -10,7 +10,6 @@ require_once('Core/Handler/SqlHandler.php');
 // 各種データベースへのアクセスハンドラ
 require_once('Core/Handler/SQLiteHandler.php');
 require_once('Core/Handler/PostgreHandler.php');
-require_once('Core/Handler/MySQLHandler.php');
 require_once('Core/Handler/NullHandler.php');
 
 //==============================================================================
@@ -106,12 +105,12 @@ class DatabaseHandler {
             'callback' => 'PgDatabase',
             'offset' => TRUE,
         ],
-        // MariaDB(MySQL)データベースへの接続情報
-        'MySQL' => [
-            'datasource' => 'Database/MariaDB',
-            'callback' => 'MySQLDatabase',
-            'offset' => false,
-        ],
+        // // MariaDB(MySQL)データベースへの接続情報
+        // 'MySQL' => [
+        //     'datasource' => 'Database/MariaDB',
+        //     'callback' => 'MySQLDatabase',
+        //     'offset' => false,
+        // ],
     ];
     private static $dbHandle = [];
     public static $have_offset = TRUE;
@@ -190,7 +189,7 @@ private static function SQLiteDatabase($dbdef,$action) {
     }
 }
 //==============================================================================
-// MariaDB(MySQL) データベース
+// MariaDB(MySQL) データベース(試験的)
 private static function MySQLDatabase($dbdef,$action) {
     switch($action) {       //   [ .ptl, .tpl, .inc, .twg ]
     case 'open':

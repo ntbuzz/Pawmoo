@@ -116,7 +116,7 @@
 
 1.3 対応データベース
 
-  本ライブラリは初期状態で、SQLite3, PostgreSQL, MariaDB(MySQL)のデータベースドライバが
+  本ライブラリは初期状態で、SQLite3, PostgreSQL のデータベースドライバが
   組み込んであります。
   データベースドライバを追加することで新しいデータベース利用が可能になります。
   ドライバは Core/Handler フォルダに格納しますが、データベース接続パラメータは
@@ -358,13 +358,12 @@
     AppModel ---+---- Handler
                 +-----> SQLite3
                 +-----> PostgreSQL
-                +-----> MySQL
 
 2.2.1 テーブルスキーマ書式
   モデルクラスではデータベース接続のパラメータ定義とフィールドスキーマ定義で
   モデルクラスの動作を指定します。
   データベース接続のパラメータにはRDBMS名、テーブル名、プライマリーキーを定義します。
-    'Handler'   => Null | Postgre | SQLite | MySQL
+    'Handler'   => Null | Postgre | SQLite
     'DataTable' => テーブル名 | [ 実テーブル名, ビュー名 ]
     'Primary'   => テーブルのプライマリーキー名
     'DataView'  => [
