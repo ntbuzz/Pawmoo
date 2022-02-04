@@ -34,9 +34,6 @@ $in = explode('/',"{$cmd_arg}//");
 $appname = strtolower(array_shift($in));
 $cmd = strtolower(array_shift($in));
 $list = array_filter($in,'strlen');
-// list($appname,$defs,$cmd) = array_map(
-// 		function($in,$low) { return ($low) ? strtolower($in) : $in;},
-// 		$in, [true, false, true]);
 
 $config_path = "app/{$appname}/Config";
 $data_path = "{$config_path}/db_data/";
@@ -52,6 +49,10 @@ $ln = str_repeat("=", 50);
 print_r($argv);
 echo "{$ln} START HERE ${ln}\n";
 
+if($cmd === 'remake') {
+	$list = RemakeView;
+	$cmd = 'self';
+}
 xdebug_die(['SETUP'=>$list]);
 foreach($list as $defs) {
 	$setup_class = "{$defs}Setup";
@@ -66,13 +67,3 @@ foreach($list as $defs) {
 	}
 	if($not_found) echo "'{$setup_class}' NOT FOUND!\n";
 }
-// $setup_class = "{$defs}Setup";
-
-// foreach(AliasMap as $fname => $classes) {
-// 	if(in_array($setup_class,$classes)) {
-// 		$db = new $setup_class($data_path);
-// 		$db->execute($cmd);
-// 		exit;
-// 	}
-// }
-// echo "'{$setup_class}' NOT FOUND!\n";
