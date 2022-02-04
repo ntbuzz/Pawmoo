@@ -770,7 +770,7 @@ public function ViewTemplate($name,$vars = []) {
         $opt_val = array_flat_reduce($this->expand_SectionVar($opt_val,$vars));
         echo "<{$tag}{$attr}>\n";
 		foreach($opt_val as $opt => $val) {
-			$sel = ($val === $sel_item) ? ' selected':'';	// allow digit-string compare
+			$sel = ($val == $sel_item) ? ' selected':'';	// allow dirty compare
 			echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
 		}
         echo "</{$tag}>\n";
