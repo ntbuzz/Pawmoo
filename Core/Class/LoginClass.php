@@ -23,15 +23,12 @@ abstract class LoginClass extends AppModel {
 //==============================================================================
 // Default User Info for CLI Debug
 public function defaultUser() {
-	static::$LoginUser = [
+	$udata = [
 		'userid'	=>	'guest',
-		'role'		=>	'Guest',
 		'language'	=>	'ja',
 		'region'	=>	'jp',
-		'full_name'	=>	'Guest User',
-		'email'		=>	'no-mail@localhost',
 	];
-	$udata = array_keys_value(static::$LoginUser,['userid','language','region']);
+	static::$LoginUser = $udata;
 	return $udata;
 }
 //==============================================================================
@@ -66,73 +63,52 @@ public function set_last_login($userid) {
 	return false;				// no logging
 }
 //==============================================================================
-// Default User Info for CLI Debug
-public function reload_userdata($udata) {
-	list($uid,$lang,$region) = $udata;
-	if($lang !== LangUI::$LocaleName) {
-		// Reload UserData when User Locale not match current Locale
-		LangUI::SwitchLangs($lang);
-		$this->ResetSchema();
-	}
-	$data = $this->getRecordBy($this->LoginID,$uid);
-	static::$LoginUser = $data;
-}
-//==============================================================================
-// ユーザーIDの妥当性を検証する
-//	失敗: FALSE
-//	成功: [ID,LANG,REGION]
-private function is_validUser($userid,$passwd = NULL) {
-    $this->error_type = $this->__('Login.NeedLogin');
-    if(empty($userid)) return FALSE;
-    $data = $this->getRecordBy($this->LoginID,$userid);
-    if($userid === $data[$this->LoginID]) {
-        // $passwd != NULL ならここでパスワードチェックをする
-        if($passwd !== NULL) {
-		    $this->error_type = $this->__('Login.PassError');
-            $user_pass = $data['password'];
-            if($passwd !== $user_pass) return FALSE;
-			// limitation check
-			if($this->is_passwd_limitation($data)) {
-			    $this->error_type = $this->__('Login.PassLimit');
-				return false;
-			}
-        }
-        $this->error_type = '';
-		$user_lang = array_keys_value($data,['language','region'],[DEFAULT_LANG,DEFAULT_REGION]);
-		list($lang,$region) = array_keys_value(App::$Query,['lang','region'],$user_lang);
-        static::$LoginUser = $data;
-		$udata = [$userid,$lang,$region];
-		if($lang !== LangUI::$LocaleName) {
-			// Reload UserDataa when User Locale not match current Locale
-			$this->reload_userdata($udata);
-		}
-		$this->set_last_login($userid);
-        return $udata;
-    }
-    $this->error_type = $this->__('Login.UnknownUser').": '{$userid}'";
-    return FALSE;
-}
-//==============================================================================
 // Recieved LOGIN POST FORM, do accept USER LOGIN correct
 //	Success: [ID,LANG,REGION]
 //	NO-POST: NULL
 //	VALID FAIL: FALSE
-public function is_validLogin($values) {
+public function is_validLoginUser($values,$pass_check) {
     $Login = [];
+	// FORM POST name, renamed to Database column name
     foreach($values as $key => $val) {
-        // FORM POST name, renamed to Database column name
         $xkey = $this->get_post_field($key);
         if(array_key_exists($xkey,$this->Schema)) {     // pickup exists field name
             list($alt,$disp,$flag) = $this->Schema[$xkey];   // need encrypt password
             $dval = ($flag === -1) ? passwd_encrypt($val) : $val;
-            $Login[$xkey] = $dval;    // accepta NULL value
+            if(!empty($dval)) $Login[$xkey] = $dval;    // accepta NULL value
         }
     }
-    $this->error_type = NULL;
-    if(!array_key_exists($this->LoginID,$Login)) return FALSE;
-	$passwd = $Login[$this->PasswdID];
-	if(empty($passwd)) $passwd = '*';
-    return $this->is_validUser($Login[$this->LoginID],$passwd);
+    $this->error_type = $this->__('Login.NeedLogin');
+	list($userid,$passwd) = array_keys_value($Login,[$this->LoginID,'password']);
+	// exist Login-ID
+    if(empty($userid)) return false;
+    $this->error_type = $this->__('Login.UnknownUser').": '{$userid}'";
+    $login_data = $this->getRecordBy($this->LoginID,$userid);
+    if($login_data === false) return false;	// not-exist user
+	if($pass_check) {
+	    $this->error_type = $this->__('Login.PassError');
+		if($passwd !== $login_data['password']) return false;
+		// limitation check
+		if($this->is_passwd_limitation($login_data)) {
+			$this->error_type = $this->__('Login.PassLimit');
+			return false;
+		}
+	}
+	// user-data value override from request value
+	$data = array_override($login_data,$Login);
+	list($lang,$region) = array_keys_value($data,['language','region'],[DEFAULT_LANG,DEFAULT_REGION]);
+	// RELOAD user-data when user-locale not match current language
+	if($lang !== LangUI::$LocaleName) {
+		// Reload UserDataa when User Locale not match current Locale
+		LangUI::SwitchLangs($lang);
+		$data = $this->getRecordBy($this->LoginID,$userid);
+		$data = array_override($data,$Login);
+	}
+	$udata = [$userid,$lang,$region];
+	unset($login_data['password']);	// security keep
+	static::$LoginUser = $login_data;
+	$this->set_last_login($userid);
+	return $udata;
 }
 //==============================================================================
 // Recieved LOGIN POST FORM, do accept USER LOGIN correct
