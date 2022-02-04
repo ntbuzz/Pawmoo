@@ -55,7 +55,7 @@ class AppModel extends AppObject {
         }
         $this->fields = [];
         $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
+        $this->dbDriver = new $driver($this->DataTable,$this->Primary); // connect Database Driver
         $this->DateFormat = $this->dbDriver->DateStyle;         // Date format from DB-Driver
         $this->TimeFormat = $this->dbDriver->TimeStyle;         // Time format from DB-Driver
         $this->DateTimeFormat = "{$this->DateFormat} {$this->TimeFormat}"; // DateTime
@@ -83,7 +83,7 @@ public function ResetSchema() {
     $this->SchemaAnalyzer();
     $this->RelationSetup();
     $this->SelectionSetup();
-    debug_xlog(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
+    xdebug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
 //            "Header"    => $this->HeaderSchema,
 //            "Field"     => $this->FieldSchema, 
@@ -353,7 +353,7 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 		case SORTBY_DESCEND:arsort($this->Select[$key_name]); break;
 		}
 	}
-	debug_log(DBMSG_MODEL,['DEFS'=>$this->SelectionDef,'KEYNAME'=>$key_names,'SELECTION'=>$this->Select]);
+	debug_xlog(DBMSG_MODEL,['DEFS'=>$this->SelectionDef,'KEYNAME'=>$key_names,'SELECTION'=>$this->Select]);
 }
 //==============================================================================
 //   Get Relation Table fields data list.
@@ -461,12 +461,13 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
         if($callback !== NULL) $record = $callback($record,$filter);
         if(! empty($record) ) {
             $data[] = $record;
-            $this->record_max = $this->dbDriver->recordMax;
+//            $this->record_max = $this->dbDriver->recordMax;
         } else {
             debug_log(FALSE, ["fields" => $fields]);
         }
     }
     $this->Records = $data;
+	$this->record_max = count($data);
     xdebug_dump([
         "record_max" => $this->record_max,
         "Filter" => $filter,
@@ -591,7 +592,6 @@ public function is_valid(&$row) {
             $alias = ($this->AliasMode) ? $this->dbDriver->fieldAlias->get_lang_alias($key) :$key;
             $this->fields[$alias] = $val;
         }
-        debug_xlog(DBMSG_MODEL,['ALIAS' => $this->fields]);
     }
 //==============================================================================
 // POST-name convert to Real field name by PostRenames[]

@@ -11,8 +11,8 @@ class SQLiteHandler extends SQLHandler {
 
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
-	function __construct($table) {
-		parent::__construct($table,'SQLite');
+	function __construct($table,$primary) {
+		parent::__construct($table,'SQLite',$primary);
 	}
 //==============================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
@@ -119,7 +119,12 @@ public function updateRecord($wh,$row) {
 		echo 'ERROR:'.$this->getLastError()."\n{$sql}\n";
 		return FALSE;
 	}
-	return $this->fetchDB();
+	$a = $this->fetch_array();		// 書込みはraw-tableなのでAlias無し
+	//view が定義されていれば取り直す
+	if($this->raw_table !== $this->table) {
+		$a = $this->doQueryBy($pkey,$pval);
+	}
+	return $a;
 }
 
 }
