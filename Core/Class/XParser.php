@@ -178,7 +178,7 @@ next_wd:    if($wd == ']') return $arr;            // セクション終了な�
 				goto next_wd;
             }
         }
-		$this->clear();
-		return $arr;
+		$this->clear():
+       return $arr;
     }
 }
