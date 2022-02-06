@@ -39,6 +39,12 @@ class SectionParser {
 		$this->reset_line();
 	}
 //==============================================================================
+	private function clear() {
+		$this->lno = 0;
+        $this->lines = '';
+		$this->line_count = 0;
+	}
+//==============================================================================
 	private function reset_line() {
 		$this->lno = 0;
 		$this->next_line();
@@ -172,6 +178,7 @@ next_wd:    if($wd == ']') return $arr;            // セクション終了な�
 				goto next_wd;
             }
         }
-       return $arr;
+		$this->clear():
+		return $arr;
     }
 }

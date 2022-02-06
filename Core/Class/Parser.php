@@ -66,8 +66,12 @@ EOS;
         }
         $this->wpos = 0;                        // インデクスを先頭にする
         $this->wend = count($this->wordlist);   // 要素数を数える
-debug_xlog(DBMSG_DEBUG,['PARSE' => $this->wordlist]);
     }
+//==============================================================================
+	private function clear() {
+        $this->wpos = $this->wend = 0;   // 要素数を数える
+		$this->wordlist = [];
+	}
 //==============================================================================
 //  トークン取り出し、インデクスを進める
     private function nextToken($pp = -1) {
@@ -127,7 +131,8 @@ debug_xlog(DBMSG_DEBUG,['PARSE' => $this->wordlist]);
                 }
             }
         }
-       return $arr;
+		$this->clear():
+		return $arr;
     }
 //==============================================================================
 
