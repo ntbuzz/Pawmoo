@@ -17,7 +17,7 @@ class SectionParser {
 	private $lno = 0;
 	private $current_line;
 	const token_separator = [
-		'=>' => 2,'/*' => 2,'*/' => 2,'//' => 2,
+		'=>' => 2,'/*' => 2,'*/' => 2,	// '//' => 2,
 		' ' => 1,"\t" => 1,"\n" => 1,
 	];
 	const skip_separator = [
@@ -64,7 +64,7 @@ class SectionParser {
 	}
 //==============================================================================
 	private function is_token($token) {
-		return isset(self::token_separator[$token]);
+		return $token === '//' || isset(self::token_separator[$token]);
 	}
 //==============================================================================
 	private function is_separator() {
