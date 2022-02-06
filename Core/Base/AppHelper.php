@@ -30,12 +30,12 @@ public function ViewTemplate($layout) {
 }
 //==============================================================================
 // Runtime output
-public function Runtime() {
-	if(!is_bool_false(MySession::get_paramIDs('debugger'))) {
-		echo "<hr>\n";
-		sysLog::run_time(-1);
-	}
-}
+// public function Runtime() {
+// 	if(!is_bool_false(MySession::get_paramIDs('debugger'))) {
+// 		echo "<hr>\n";
+// 		sysLog::run_time(-1);
+// 	}
+// }
 //==============================================================================
 // Resource(.css/.js) Output (Not USE!)
 public function Resource($res) {
