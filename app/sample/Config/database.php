@@ -24,13 +24,6 @@ const GlobalConfig = [
 	'password' => '',
 	'encoding' => 'utf8',
 ],
-'MySQL' => [
-	'host' => 'localhost',
-	'database' => 'my_sample',
-	'login' => 'admin',
-	'password' => 'admin',
-	'encoding' => 'utf8',
-],
 'production' => [
 	'USE_DEBUGGER'	=> false,
 	'SESSION_LIMIT' => 'tomorrow 03:00:00',
@@ -41,6 +34,7 @@ const GlobalConfig = [
 'development' => [
 	'USE_DEBUGGER'	=> true,
 	'SESSION_LIMIT' => 'now +15 minute',	// for DEBUG
+	'SENDMAIL_DEBUG'=> 'root@localhost',
 	'Postgre' =>  [
 		'Linux' => [		// OS別(PHP_OS)の設定
 			'port' => 5532,
