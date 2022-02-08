@@ -206,7 +206,6 @@ function pseudo_markdown_sub($atext) {
         }
         return $a;
     };
-debug_log(7,['MARKDOWN'=>$atext]);
 	$atext = preg_replace_callback_array([
 //------- HEAD(#) TAG
         '/^(#{1,6})((?:\.[\w\-]+)*) (.+?)$/m' => function($m) {
