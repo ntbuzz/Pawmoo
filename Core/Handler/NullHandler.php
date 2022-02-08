@@ -6,7 +6,7 @@ class NullHandler {
 	public  $TimeStyle = 'H:i:s';
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
-	function __construct($table) {
+	function __construct($table,$primary) {
 		$this->fields = [];
 		$this->fieldAlias = new fieldAlias();
 	}
@@ -21,7 +21,7 @@ class NullHandler {
 public function fieldConcat($sep,$arr) { return "";}
 public function drop_sql($kind,$table) { return "";}
 public function truncate_sql($table) { return "";}		// TRUNCATE SQL
-public function setupRelations($primary,$relations) { $this->relations = $relations; $this->Primary = $primary; }
+public function setupRelations($relations) { $this->relations = $relations; }
 public function SetPaging($pagesize, $pagenum) { }
 public function getValueLists($table,$ref,$id,$cond) { return []; }
 public function getRecordValue($row,$relations) { return []; }

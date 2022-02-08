@@ -39,18 +39,19 @@ abstract class SQLHandler {	// extends SqlCreator {
 //==============================================================================v
 //	Constructor( table name, DB Handler)
 //==============================================================================
-function __construct($table,$handler) {
+function __construct($table,$handler,$primary) {
 		list($this->raw_table,$this->table) = (is_array($table))?$table:[$table,$table];
 		$this->dbb = DatabaseHandler::get_database_handle($handler);
 		$this->is_offset = DatabaseHandler::$have_offset;
 		$this->load_columns();
 		$this->handler = $handler;
+		$this->Primary = $primary;
 		$this->fieldAlias = new fieldAlias();
-		xdebug_log(DBMSG_HANDLER,["COLUMN"=> [ $this->columns,$this->raw_columns]]);
+		xdebug_log(DBMSG_HANDLER,["COLUMN({$this->table})"=> [ $this->columns,$this->raw_columns]]);
 	}
 //==============================================================================
 // load columns info
-public function load_columns() {
+private function load_columns() {
 	$this->columns = $this->Connect($this->table);		// view-table column for Get-Record
 	$this->raw_columns = ($this->raw_table === $this->table) ?
 						$this->columns :
@@ -76,15 +77,13 @@ public function bind_columns($data) {
 	}
 //==============================================================================
 // setupRelations: relation table reminder
-public function setupRelations($primary,$relations) {
+public function setupRelations($relations) {
 	$this->relations = $relations;
-	$this->Primary = $primary;
-//	debug_log(DBMSG_HANDLER,["RELATIONS" => $this->relations]);
 }
 //==============================================================================
 // reset primary seq value
-public function resetPrimary($primary) {
-	$sql = $this->reset_seq($this->raw_table,$primary);
+public function resetPrimary() {
+	$sql = $this->reset_seq($this->raw_table,$this->Primary);
 	if($sql) $this->doQuery($sql);
 }
 //==============================================================================
@@ -93,7 +92,6 @@ public function doTruncate() {
 	$sql = $this->truncate_sql($this->raw_table);
     $this->execSQL($sql);
 }
-
 //==============================================================================
 // fetchDB: get record data , and replace alias and bind column
 public function fetchDB() {
@@ -332,7 +330,11 @@ protected function sql_safe_convert($data) {
 			case 'serial':
 			case 'integer': $data[$key] = intval($val); break;
 			case 'boolean': $data[$key] = is_bool_false($val) ? "'f'" : "'t'"; break;
-			// others, text, date, timestamp, etc...
+			// case 'text':
+			// 		$val = str_replace(["'",'\\'],["''",'\\\\'],$val);
+			// 		$data[$key] = "'{$val}'";
+			// 		break;
+			// others, date, timestamp, etc...
 			default: $data[$key] = (empty($val))?'NULL':"'{$val}'";
 			}
 		}
@@ -349,6 +351,10 @@ protected function fetch_convert($data) {
 			case 'serial':
 			case 'integer': $data[$key] = intval($val); break;
 			case 'boolean': $data[$key] = is_bool_false($val) ? 'f' : 't'; break;
+			// case 'text':
+			// 		 $val = str_replace(["''",'\\\\'],["'",'\\'],$val);
+			// 		 $data[$key] = $val;
+			// 		break;
 			}
 		}
 	}

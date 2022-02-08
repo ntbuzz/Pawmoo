@@ -7,7 +7,6 @@ const LOC_APPSELF = 0;     // url .url http://host/appRoot/url
 //=====================================================
 // URIの操作
 function PawmooLocations() {
-//    var cont = "${$controller$}";
     this.protocol = window.location.protocol;
     this.host = window.location.host;
     this.qstr = window.location.search.replace('?','');
@@ -113,7 +112,6 @@ function SelectLink(setupobj, id, first_call, callback) {
 					sel = ' selected';
 				};
 				self_obj.append('<option value="' + value[0] + '"' + sel + '>' + value[1] + '</option>');
-//				console.log('<option value="' + value[0] + '"' + sel + '>' + value[1] + '</option>');
 				++opt;
 			};
 		});

@@ -11,8 +11,8 @@ class SQLiteHandler extends SQLHandler {
 
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
-	function __construct($table) {
-		parent::__construct($table,'SQLite');
+	function __construct($table,$primary) {
+		parent::__construct($table,'SQLite',$primary);
 	}
 //==============================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
@@ -75,7 +75,7 @@ public function getLastError() {
 //	レコードの追加 
 //==============================================================================
 public function insertRecord($row) {
-	$row = $this->sql_safe_convert($this->sql_str_quote($row));	// 書き込み型変換
+	$row = $this->sql_safe_convert($this->sql_str_quote($row,["'"],["''"]));	// 書き込み型変換
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
 	$vstr = implode(",", $row);
@@ -95,7 +95,7 @@ public function insertRecord($row) {
 //	レコードの更新 $row[key] value
 //==============================================================================
 public function updateRecord($wh,$row) {
-	$row = $this->sql_safe_convert($this->sql_str_quote($row));	// 書き込み型変換
+	$row = $this->sql_safe_convert($this->sql_str_quote($row,["'"],["''"]));	// 書き込み型変換
 	list($pkey,$pval) = array_first_item($wh);
 	unset($row[$pkey]);			// プライマリキーは削除しておく
 	$where = " WHERE \"{$pkey}\"={$pval}";		// プライマリキー名を取得
@@ -119,7 +119,12 @@ public function updateRecord($wh,$row) {
 		echo 'ERROR:'.$this->getLastError()."\n{$sql}\n";
 		return FALSE;
 	}
-	return $this->fetchDB();
+	$a = $this->fetch_array();		// 書込みはraw-tableなのでAlias無し
+	//view が定義されていれば取り直す
+	if($this->raw_table !== $this->table) {
+		$a = $this->doQueryBy($pkey,$pval);
+	}
+	return $a;
 }
 
 }

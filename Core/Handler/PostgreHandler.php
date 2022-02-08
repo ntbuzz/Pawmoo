@@ -9,8 +9,8 @@ class PostgreHandler extends SQLHandler {
 	protected $LIKE_opr = 'LIKE';		// 大文字小文字の無視比較
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
-	function __construct($table) {
-		parent::__construct($table,'Postgre');
+	function __construct($table,$primary) {
+		parent::__construct($table,'Postgre',$primary);
 	}
 //==============================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
@@ -91,9 +91,9 @@ public function getLastError() {
 // pg_update($this->dbb,$this->raw_table,$row,$wh);
 //==============================================================================
 private function safe_convert($row,$func) {
-	$row = $this->sql_str_quote($row);
+	$aa = $this->sql_str_quote($row);
 	// PostgreSQLのデータ型に変換
-	$aa = pg_convert($this->dbb,$this->raw_table,$row,PGSQL_CONV_FORCE_NULL );
+	$aa = pg_convert($this->dbb,$this->raw_table,$aa,PGSQL_CONV_FORCE_NULL );
 	if($aa === FALSE) {
 		$res1 = pg_get_result($this->dbb);
 		debug_log(DBMSG_ERROR,[
@@ -123,8 +123,13 @@ public function updateRecord($wh,$row) {
 	}
 	// UPSERT 文を生成
 	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) ON CONFLICT ({$primary}) DO UPDATE {$set} RETURNING *;";
-	$res = $this->doQuery($sql);
-	return $this->fetchDB();
+	$this->doQuery($sql);
+	$a = $this->fetch_array();		// 書込みはraw-tableなのでAlias無し
+	//view が定義されていれば取り直す
+	if($this->raw_table !== $this->table) {
+		$a = $this->doQueryBy($this->Primary,$a[$this->Primary]);
+	}
+	return $a;
 }
 //==============================================================================
 //	INSERT
@@ -144,8 +149,13 @@ public function insertRecord($row) {
 	}
 	// UPSERT 文を生成
 	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) RETURNING *;";
-	$res = $this->doQuery($sql);
-	return $this->fetchDB();
+	$this->doQuery($sql);
+	$a = $this->fetch_array();		// 書込みはraw-tableなのでAlias無し
+	//view が定義されていれば取り直す
+	if($this->raw_table !== $this->table) {
+		$a = $this->doQueryBy($this->Primary,$a[$this->Primary]);
+	}
+	return $a;
 }
 
 }

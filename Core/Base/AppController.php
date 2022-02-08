@@ -13,6 +13,7 @@ class AppController extends AppObject {
     protected $noLogging = NULL;		// execute log save exception method list ex. [ 'List',... ]
 	protected $LoggingMethod = NULL;	// execute log save Model "class.method". ex. 'Access.Logging'
 	protected $BypassMethod = '';		// Login bypass method,if NEDD LOGIN(ex.Logout)
+	protected $AutoLogin = '';		    // DefaultUser AutoLogin method,if NEDD LOGIN(ex. MailsendAction)
 	private $orgModel;					// save original Model Class for Spoofing
 //==============================================================================
 // constructor: create MODEL, VIEW(with HELPER)
@@ -70,50 +71,68 @@ public function is_enable_action($action) {
 	return FALSE;	// diable ActionMethod
 }
 //==============================================================================
-// setup login user language and region
-	private function setup_user_lang_region($data,$userdata,$loginkey = NULL) {
-		list($userid,$lang,$region) = $data;
-		$login_data = [
-			'LANG' => $lang,
-			'REGION' => $region,
-		];
-		if($loginkey !== NULL) $login_data[$loginkey] = $userdata[$loginkey];
-		MySession::set_LoginValue($login_data);
-		$this->Model->ResetSchema();
-	}
-//==============================================================================
 // authorised login mode, if need view LOGIN form, return FALSE
 public function is_authorised($method) {
 	if(defined('LOGIN_CLASS')) {			// enable Login Class
-		$model = LOGIN_CLASS . 'Model';
-		$Login = $this->$model;
-		$login_key = isset($Login->LoginID) ? $Login->LoginID:'login-user';
-		$bypass_method = (is_array($this->BypassMethod)) ? $this->BypassMethod : [$this->BypassMethod];
-		$bypass_method[] = 'Logout';	// must be append LogoutAction
-		if($this->needLogin && !in_array($method,$bypass_method)) {
-			$data = (CLI_DEBUG) ? $Login->defaultUser() : $Login->is_validLogin(App::$Post);
-			if(is_array($data)) {		// Login Success
- 				$this->setup_user_lang_region($data,$model::$LoginUser,$login_key);
-			} else {	// LOGIN-FAIL or Already Logged-In
-				$userid = MySession::get_LoginValue($login_key);	// already-logged-in check
-				if(empty($userid)) {		// not LOGGED-IN
-					$userid = (isset(App::$Post[$login_key])) ? App::$Post[$login_key] : '';
+		if($this->needLogin) {
+			$model = LOGIN_CLASS . 'Model';
+			$Login = $this->$model;
+			$login_key = isset($Login->LoginID) ? $Login->LoginID:'login-user';
+			$autologin = (is_array($this->AutoLogin)) ? $this->AutoLogin : [$this->AutoLogin];
+			$bypass_method = (is_array($this->BypassMethod)) ? $this->BypassMethod : [$this->BypassMethod];
+			$bypass_method[] = 'Logout';	// must be append LogoutAction
+			$pass_check = false;	// NO password check.
+			if(in_array($method,$autologin) || CLI_DEBUG) {
+				$data = $Login->defaultUser();		// auto-login user
+				if(isset(App::$Post['login'])) $data = array_override($data,App::$Post);
+			} else if(isset(App::$Post['login'])) {	// Distinction Normal Login POST
+				$data = App::$Post;
+				$pass_check = true;
+			} else {	// check already LOGIN
+				$login = MySession::get_LoginValue([$login_key,'LANG','REGION']);
+				$data = array_combine([$login_key,'language','region'],$login);
+			}
+			$udata = $Login->is_validLoginUser($data,$pass_check);
+			if($udata === false) {	// fail valid user => not login, or unknown user
+				if(in_array($method,$bypass_method)) {
+					// not login, and this method is BYPASS
+					$udata = [NULL,DEFAULT_LANG,DEFAULT_REGION];
+				} else {
+					$userid = (isset($data[$login_key])) ? $data[$login_key] : '';
 					$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
 					page_response($login_page,$Login->retryMessages($userid));
-					// LOGIN PAGE Response, NO returned HERE!
+					// NEVER RETURN HERE!
 					return FALSE;
 				}
 			}
 		}
-		// Login-Success or NoNEED or BYPASS-METHOD reached HERE
-		$data = MySession::get_LoginValue([$login_key,'LANG','REGION']);
-		$userid = $data[0];
-		// Check Already Logined
-		if(!empty($userid) && !isset($model::$LoginUser)) {
-			// Reload UserData, bu LANG & REGION is remind in SESSION
-			$Login->reload_userdata($data);
-			$this->setup_user_lang_region($data,$model::$LoginUser);
-		}
+		// if(CLI_DEBUG || in_array($method,$autologin)) {
+		// 	$data = $Login->defaultUser();		// auto-login user
+		// 	if(isset(App::$Post['login'])) $data = array_override($data,App::$Post);
+		// } else if(isset(App::$Post['login'])) {	// Distinction Normal POST
+		// 	$data = App::$Post;
+		// 	$pass_check = true;
+		// }
+		// if($udata === false) {	// fail valid user => not login, or unknown user
+		// 	// NEED-LOGIN and not BYPASS method
+		// 	if($this->needLogin && !in_array($method,$bypass_method)) {
+		// 		$userid = (isset($data[$login_key])) ? $data[$login_key] : '';
+		// 		$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
+		// 		page_response($login_page,$Login->retryMessages($userid));
+		// 		// LOGIN PAGE Response, NO returned HERE!
+		// 		return FALSE;
+		// 	}
+		// 	// no need login and not login
+		// 	$udata = [NULL,DEFAULT_LANG,DEFAULT_REGION];
+		// }
+		// setup login user language and region
+		list($userid,$lang,$region) = $udata;
+		$login_data = [
+			'LANG' => $lang,
+			'REGION' => $region,
+		];
+		if(!empty($userid)) $login_data[$login_key] = $userid;
+		MySession::set_LoginValue($login_data);
 		LockDB::SetOwner($userid);
 	}
 	return TRUE;

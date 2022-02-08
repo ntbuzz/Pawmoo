@@ -13,3 +13,5 @@ define('LOCALE_REGION', [
 	'de'	=> 'en.de',			// German
 	'zh'	=> 'en.cn',			// Chinese
 ]);
+
+define('USE_QUERY_LANG',true);			// use query lang= region=

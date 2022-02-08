@@ -14,6 +14,15 @@ if (!function_exists('preg_replace_callback_array')) {
 // Markdown syntax is the original syntax other than the general one.
 function pseudo_markdown($atext, $md_class = '') {
 	if($md_class !== false) $md_class = get_class_names("easy_markdown.{$md_class}");
+	$atext = pseudo_markdown_sub($atext);
+    // Returns the escaped character to the character before escaping.
+    $p = '/\\\([~\-_<>\^\[\]`*#|\(\.{}])/s';
+    $atext = preg_replace_callback($p,function($matches) {return $matches[1];}, $atext);
+    return ($md_class === false) ? $atext : "<div{$md_class}>{$atext}</div>\n";
+}
+//==============================================================================
+// MarkDown Sub-Description for recusive-call
+function pseudo_markdown_sub($atext) {
     $replace_defs = [
         "/\s\*\*(.+?)\*\*\s/" => '<strong>\\1</strong>',  // BOLD
         "/\s__(.+?)__\s/"     => '<em>\\1</em>',   // BOLD
@@ -62,7 +71,7 @@ function pseudo_markdown($atext, $md_class = '') {
         },
 //------- ...!{ TEXT }... NL change <br> tag in div-indent class
         '/\s\.\.\.([\w\-]+(?:\.[\w\-]+)*)?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
-			$txt = pseudo_markdown($m[3],false);
+			$txt = pseudo_markdown_sub($m[3]);
             if($m[2]==='!') {
                 $txt = nl2br($txt);
                 // restore HTML-tag(</h1>) after <BR>
@@ -119,7 +128,7 @@ function pseudo_markdown($atext, $md_class = '') {
                         $res .= "{$spc}<{$ptag}>{$low}{$spc}{$ptag_close}";
                         if($n > 0 && $islist)	$res .= "</li>";
                     } else {
-						$val = pseudo_markdown($val,false);
+						$val = pseudo_markdown_sub($val);
 						if($islist) {
                         	$res .= (is_array(next($array)))?"{$spc}<li>{$val}":"{$spc}<li>{$val}</li>";
                     	} else {
@@ -177,7 +186,7 @@ function pseudo_markdown($atext, $md_class = '') {
                         break;
                 }
                 if(!empty($style)) $style =" style='{$style}'";
-				$col = pseudo_markdown($col,false);
+				$col = pseudo_markdown_sub($col);
                 $ln .= "<{$tag}{$attrs}{$style}>{$col}</{$tag}>";
             }
             return "<tr>{$ln}</tr>";
@@ -349,9 +358,5 @@ function pseudo_markdown($atext, $md_class = '') {
     // replace other PATTERN values
     $replace_keys   = array_keys($replace_defs);
     $replace_values = array_values($replace_defs);
-    $atext = preg_replace($replace_keys,$replace_values, $atext);
-    // Returns the escaped character to the character before escaping.
-    $p = '/\\\([~\-_<>\^\[\]`*#|\(\.{}])/s';
-    $atext = preg_replace_callback($p,function($matches) {return $matches[1];}, $atext);
-    return ($md_class === false) ? $atext : "<div{$md_class}>{$atext}</div>\n";
+    return preg_replace($replace_keys,$replace_values, $atext);
 }

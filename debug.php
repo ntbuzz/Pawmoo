@@ -22,7 +22,8 @@ $uri = $_SERVER['REQUEST_URI'];
 // POST check
 list($url,$p_str) = fix_explode('??',$uri,2);
 parse_str($p_str, $post);
-$_POST = $post;
+$locale = ['login'=>1,'language'=>'ja','region'=>'jp'];
+$_POST = array_override($locale,$post);
 // GET check
 list($url,$q_str) = fix_explode('?',$uri,2);
 parse_str($q_str, $query);

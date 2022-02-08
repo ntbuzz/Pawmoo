@@ -48,7 +48,6 @@ class AppDatabase {
 		'SQLite' => [
 			'serial' => 'integer',
 		],
-		'MySQL' => [],
 	];
 //==============================================================================
 // setup table-name and view-table list
@@ -64,7 +63,7 @@ class AppDatabase {
 		$this->MyTable = $table;
 		$this->ViewSet = $viewset;
         $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
+        $this->dbDriver = new $driver($this->DataTable,$this->Primary);        // connect Database Driver
     }
 //==============================================================================
 // dynamic construct OBJECT Class for 'modules'
@@ -92,6 +91,17 @@ public function __get($PropName) {
 		if(empty($sql)) return;
 		echo "SQL: {$sql}\n";
 		if($exec) $this->dbDriver->execSQL($sql);
+    }
+//==============================================================================
+// reset columns,raw_columns type
+	private function set_driver_columns() {
+		$columns = [];
+		foreach($this->Schema as $key => $field) {
+			list($ftype,$not_null) = $field;
+			$columns[$key] = strtolower($ftype);
+		}
+		$this->dbDriver->columns = $columns;
+		$this->dbDriver->raw_columns = $columns;
     }
 //==============================================================================
 // Execute Create TABLE,VIEW, and INTIAL DATA
@@ -185,13 +195,12 @@ public function createTableSet($exec,$csv_only,$depend=[]) {
 		$sql = "CREATE TABLE {$this->MyTable} (\n";
 		$sql .= implode(",\n",$fset) . "\n);";
 		$this->doSQL($exec,$sql);
-		$this->dbDriver->load_columns();
+		$this->set_driver_columns();
 	}
 	// IMPORT initial Table DATA, CSV load or TEST mode
 	if(isset($this->InitCSV)) {
 		$sql = $this->dbDriver->truncate_sql($this->MyTable);
 		$this->doSQL($exec,$sql);
-		debug_dump(["INITIAL DATA" => $this->InitCSV]);
 		if(is_array($this->InitCSV)) {
 			if($exec) {
 				$row_columns = array_keys($this->Schema);
@@ -207,7 +216,7 @@ public function createTableSet($exec,$csv_only,$depend=[]) {
 		}
 		list($ftype,$not_null) = $this->Schema[$this->Primary];
 		if(strtolower($ftype) === 'serial') {
-			$this->dbDriver->resetPrimary($this->Primary);
+			$this->dbDriver->resetPrimary();
 		}
 	}
 }

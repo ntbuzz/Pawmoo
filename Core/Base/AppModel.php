@@ -55,7 +55,7 @@ class AppModel extends AppObject {
         }
         $this->fields = [];
         $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->DataTable);        // connect Database Driver
+        $this->dbDriver = new $driver($this->DataTable,$this->Primary); // connect Database Driver
         $this->DateFormat = $this->dbDriver->DateStyle;         // Date format from DB-Driver
         $this->TimeFormat = $this->dbDriver->TimeStyle;         // Time format from DB-Driver
         $this->DateTimeFormat = "{$this->DateFormat} {$this->TimeFormat}"; // DateTime
@@ -83,7 +83,7 @@ public function ResetSchema() {
     $this->SchemaAnalyzer();
     $this->RelationSetup();
     $this->SelectionSetup();
-    debug_xlog(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
+    xdebug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
 //            "Header"    => $this->HeaderSchema,
 //            "Field"     => $this->FieldSchema, 
@@ -199,7 +199,7 @@ public function ResetSchema() {
             }
             $new_Relations[$key] =  $sub_rel;
         }
-        $this->dbDriver->setupRelations($this->Primary,$new_Relations);
+        $this->dbDriver->setupRelations($new_Relations);
     }
 //==============================================================================
 // Selection Table Relation setup
@@ -353,7 +353,7 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 		case SORTBY_DESCEND:arsort($this->Select[$key_name]); break;
 		}
 	}
-	debug_log(DBMSG_MODEL,['DEFS'=>$this->SelectionDef,'KEYNAME'=>$key_names,'SELECTION'=>$this->Select]);
+	debug_xlog(DBMSG_MODEL,['DEFS'=>$this->SelectionDef,'KEYNAME'=>$key_names,'SELECTION'=>$this->Select]);
 }
 //==============================================================================
 //   Get Relation Table fields data list.
@@ -439,46 +439,33 @@ public function SelectFinder($chain, $filter, $cond) {
 //==============================================================================
 // Get Record List by FIND-CONDITION with JOIN Table.
 // Result:   $this->Records  Find-Result List
-public function RecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
+public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
 	$filter = $this->normalize_filter($filter);
     $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
         return in_array($vv,$filter,true) || ($vv === NULL);
     });
+    $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => $this->SortDefault ];
     else if(is_scalar($sort)) {
         $sort = [ $sort => $this->SortDefault ];
     }
     $this->dbDriver->findRecord($cond,TRUE,$sort);
+	$this->record_max = $this->dbDriver->recordMax;
     while (($fields = $this->dbDriver->fetchDB())) {
         unset($record);
         foreach($fields_list as $key => $val) {
             $record[$key] = $fields[$key];
             if($val !== NULL && $key !== $val) $record[$val] = $fields[$val];
         }
-        // Must be PRIMARY-KEY
-        $record[$this->Primary] = $fields[$this->Primary];
-        if($callback !== NULL) $record = $callback($record,$filter);
-        if(! empty($record) ) {
-            $data[] = $record;
-            $this->record_max = $this->dbDriver->recordMax;
-        } else {
-            debug_log(FALSE, ["fields" => $fields]);
-        }
+        $data[] = $record;
     }
     $this->Records = $data;
-    xdebug_dump([
-        "record_max" => $this->record_max,
-        "Filter" => $filter,
-//        "FieldSchema" => $this->FieldSchema,
-        "COND" => $cond,
-        "RECORDS" => $this->Records,
-    ]);
 }
 //==============================================================================
 // Get Raw Record List by FIND-CONDITION without JOIN!.
 // Result:   $this->Records  Find-Result List
-public function RawRecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
+public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
 	$filter = $this->normalize_filter($filter);
     $fields_list = array_combine($filter,$filter);
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
@@ -488,16 +475,13 @@ public function RawRecordFinder($cond,$filter=NULL,$sort=NULL,$callback=NULL) {
         $sort = [ $sort => $this->SortDefault ];
     }
     $this->dbDriver->findRecord($cond,FALSE,$sort);
+	$this->record_max = $this->dbDriver->recordMax;
     while (($fields = $this->dbDriver->fetch_locale())) {
         unset($record);
         foreach($fields_list as $key => $val) {
             $record[$key] = $fields[$key];
         }
-        if(! empty($record) ) {
-            if($callback !== NULL) $record = $callback($record,$filter);
-            $data[] = $record;
-            $this->record_max = $this->dbDriver->recordMax;
-        }
+        $data[] = $record;
     }
     $this->Records = $data;
 }
@@ -519,11 +503,12 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
 	$filter = $this->normalize_filter($filter);
     $fields_list = [$this->Primary => $this->Primary];  // must be include Primary-Key
     foreach($filter as $key) {
-        if(array_key_exists($key,$this->FieldSchema)) $fields_list[$key] = $this->FieldSchema[$key];
+        if(isset($this->FieldSchema[$key])) $fields_list[$key] = $this->FieldSchema[$key];
     }
     if(empty($sort)) $sort = [ $this->Primary => $this->SortDefault ];
     else if(is_scalar($sort)) $sort = [ $sort => $this->SortDefault ];
     $this->dbDriver->findRecord($cond,TRUE,$sort);
+    $this->record_max = $this->dbDriver->recordMax;
     $r_prev = $r_next = NULL;
     $prev = true;
     $row_num = 0;
@@ -544,7 +529,6 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
         }
     }
     $this->row_number = $row_num;
-    $this->record_max = $this->dbDriver->recordMax;
     $this->NearData = [$r_prev, $r_next ];
 }
 //==============================================================================
@@ -591,7 +575,6 @@ public function is_valid(&$row) {
             $alias = ($this->AliasMode) ? $this->dbDriver->fieldAlias->get_lang_alias($key) :$key;
             $this->fields[$alias] = $val;
         }
-        debug_xlog(DBMSG_MODEL,['ALIAS' => $this->fields]);
     }
 //==============================================================================
 // POST-name convert to Real field name by PostRenames[]

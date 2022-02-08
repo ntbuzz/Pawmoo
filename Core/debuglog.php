@@ -12,6 +12,7 @@ require_once('Common/coreLibs.php');
 require_once('Class/session.php');
 require_once('Class/Parser.php');
 require_once('Base/LangUI.php');           // static class
+require_once('Class/ClassManager.php');
 
 date_default_timezone_set('Asia/Tokyo');
 $root = basename(dirname(__DIR__));        // Framework Folder

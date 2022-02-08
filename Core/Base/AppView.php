@@ -115,10 +115,13 @@ public function ViewTemplate($name,$vars = []) {
         $ix = array_search($ext, self::Extensions);
         switch($ix) {   //   [ .tpl, .php, .inc, .twg ]
         case 0:         // '.tpl'   div Section
+$run_time = microtime(TRUE);
             $parser = new SectionParser($tmplate);
             $divSection = $parser->getSectionDef(true);
+$tm = round((microtime(TRUE) - $run_time), 5);     // 少数2位まで
+debug_log(DBMSG_DEBUG,["ExecTime({$tmplate})"=>"{$tm} sec"]);
              $this->inlineSection = [];         // Clear Inline-Section in this TEMPLATE
-             debug_log(DBMSG_VIEW,["SECTION @ {$name}" => $divSection,"SEC-VARS" => $vars]);
+             debug_log(DBMSG_VIEW,["SEC-VARS" => $vars,"SECTION @ {$name}" => $divSection]);
              $this->sectionAnalyze($divSection,$vars);
             break;
         case 1:         // 'php'     // PHP Template
@@ -484,7 +487,10 @@ public function ViewTemplate($name,$vars = []) {
 	//  &Helper-Method(argument) => [ params... ]  call to Helper-Method(argument, params)
     private function sec_helper($tag,$attrs,$sec,$vars) {
         $sec = $this->expand_SectionVar($sec,$vars,TRUE);
-		$arg = (array_key_exists('value',$attrs)) ? $attrs['value'] : NULL;
+		if(array_key_exists('value',$attrs)) {
+			$arg = explode(',',$attrs['value']);
+			if(count($arg)===1) $arg = $arg[0];
+		} else $arg = NULL;
         if(method_exists($this->Helper,$tag)) {
 			if($arg === NULL) $this->Helper->$tag($sec);
 			else $this->Helper->$tag($arg,$sec);
@@ -770,7 +776,7 @@ public function ViewTemplate($name,$vars = []) {
         $opt_val = array_flat_reduce($this->expand_SectionVar($opt_val,$vars));
         echo "<{$tag}{$attr}>\n";
 		foreach($opt_val as $opt => $val) {
-			$sel = ($val === $sel_item) ? ' selected':'';	// allow digit-string compare
+			$sel = ($val == $sel_item) ? ' selected':'';	// allow dirty compare
 			echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
 		}
         echo "</{$tag}>\n";

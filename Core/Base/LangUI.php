@@ -43,6 +43,7 @@ public static function SwitchLangs($newlang) {
     // アプリケーションの言語リソースパス
 	if(!empty($default)) self::LangFiles($default,static::$controllers);
     self::LangDebug();
+	ClassManager::ChangeModelSchema();	// 生成済みモデルを全てスイッチ
 }
 //==============================================================================
 //  言語ファイルの読み込み

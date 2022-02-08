@@ -99,13 +99,13 @@ function byte_format($size){
 // convert file size string
 function date_custom($fmt,$tm){
 	list($yy,$y,$mm,$dd,$hh,$ii,$ss,$ww) = explode(',',date('Y,y,m,d,H,i,s,w',$tm));
-	--$mm;		// array is ZERO origin
+	$mi = $mm - 1;		// array is ZERO origin
 	$dateNames = LangUI::get_value('core','.dateNames',true);
 	foreach($dateNames as $nm => $str) $$nm = explode(',',$str);
 	// dateNames => shortMonth, oldMonth, shortWeek, weekNames
 	return str_replace(
 	[ '%Y','%y','%m','%M','%O','%d','%H','%i','%s','%w','%W'],
-	[ $yy, $y, $mm, $shortMonth[$mm],$oldMonth[$mm], $dd,$hh,$ii,$ss,$shortWeek[$ww],$weekNames[$ww]],
+	[ $yy, $y, $mm, $shortMonth[$mi],$oldMonth[$mi], $dd,$hh,$ii,$ss,$shortWeek[$ww],$weekNames[$ww]],
 	$fmt);
 }
 //==============================================================================

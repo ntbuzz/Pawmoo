@@ -3,7 +3,7 @@
  * Object Oriented PHP MVC Framework
  *  appConfig: Framework Configuration
  */
-define('CURRENT_VERSION','1.0.0pv 2022-01-25');
+define('CURRENT_VERSION','1.0.1 2022-02-04');
 define('COPYTIGHT','Copyright (c) 2017 - 2022 by nTak');
 define('PLATFORM_NAME','pawmoo');
 define('SESSION_PREFIX','_minimvc_pawmoo_maps');
@@ -54,7 +54,7 @@ array(
 	// common config parameter
 	define-name	=> value,
 	...
-	// common database parameter, DB_NAME is (Postgre,SQLite,MySQL)
+	// common database parameter, DB_NAME is (Postgre,SQLite)
 	DB_NAME => [
 		DB_PARAMS...
 		// OS or HOSTNAME Dependent parameter
@@ -71,7 +71,7 @@ class appConfig {
 	public $Enviroment		= "";
 	public $USE_DEBUGGER	= false;
 	public $SESSION_LIMIT	= 'tomorrow 03:00:00';
-	const DB_Key = [ 'Postgre', 'SQLite', 'MySQL'];
+	const DB_Key = [ 'Postgre', 'SQLite'];
 //===============================================================
 private function database_Setup($host,$config) {
 	foreach(self::DB_Key as $val) {

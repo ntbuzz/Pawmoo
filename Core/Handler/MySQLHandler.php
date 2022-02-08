@@ -1,16 +1,16 @@
 <?php
 /* -------------------------------------------------------------
  * PHPフレームワーク
- * 	SQLiteHandler: SQLite3 データベースへのアクセスハンドラ
+ * 	MySQLHandler: MariaDB データベースへのアクセスハンドラ
  *
  */
 //==============================================================================
-//	SQLite3用の抽象メソッドを実装する
+//	MariaDB用の抽象メソッドを実装する
 class MySQLHandler extends SQLHandler {
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
-	function __construct($table) {
-		parent::__construct($table,'MySQL');
+	function __construct($table,$primary) {
+		parent::__construct($table,'MariaDB',$primary);
 	}
 //==============================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
@@ -89,7 +89,7 @@ public function getLastError() {
 //	レコードの追加 
 //==============================================================================
 public function insertRecord($row) {
-	$row = $this->sql_safe_convert($this->sql_str_quote($row));	// 書き込み型変換
+	$row = $this->sql_safe_convert($this->sql_str_quote($row,["'"],["''"]));	// 書き込み型変換
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = implode(',', array_keys($row));
 	$vstr = implode(',', $row);
@@ -107,7 +107,7 @@ public function insertRecord($row) {
 public function updateRecord($wh,$row) {
 	list($pkey,$pval) = array_first_item($wh);
 	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ
-	$aa = $this->sql_safe_convert($this->sql_str_quote($row));	// 書き込み型変換
+	$row = $this->sql_safe_convert($this->sql_str_quote($row,["'"],["''"]));	// 書き込み型変換
 	unset($aa[$pkey]);					// プライマリキーは削除しておく
 	if($aa === false) return [];
 	$keys = array_keys($aa);

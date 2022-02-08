@@ -23,7 +23,7 @@ class SectionParser {
         $lines = file_get_contents($template);          // ファイルから全て読み込む (正規表現でトークン分離するため)
         $this->wordlist = array();
         $p = <<<'EOS'
-/(?:^|[,\s]+)
+/(?:^|\s+)
 ((?:
 "(?:[^"]|(?:\\\\)*\\")+"|
 '(?:[^']|(?:\\\\)*\\')+'|
@@ -31,7 +31,7 @@ class SectionParser {
 <(?:[^>]|(?:\\\\)*\\>)+>|
 \{(?:[^\}]|(?:\\\\)*\\\})+\}|
 (?:\/\/.*)|
-[^,\s]+
+[^\s]+
 )*)/x
 EOS;
         preg_match_all($p,$lines,$m);               // 全ての要素をトークン分離する
@@ -61,12 +61,16 @@ EOS;
                     }
                 }
                 // 改行文字\nを置換する
-                $this->wordlist[] = ($wrapstr == '""') ? str_replace('\n', "\n", $token) : $token;
+                $this->wordlist[] = ($wrapstr == '""') ? str_replace('\n', "\n",$token) : $token;
             }
         }
         $this->wpos = 0;                        // インデクスを先頭にする
         $this->wend = count($this->wordlist);   // 要素数を数える
-debug_xlog(DBMSG_DEBUG,['PARSE' => $this->wordlist]);
+    }
+//==============================================================================
+	private function clear() {
+        $this->wpos = $this->wend = 0;   // 要素数を数える
+		$this->wordlist = [];
     }
 //==============================================================================
 //  トークン取り出し、インデクスを進める
@@ -127,6 +131,7 @@ debug_xlog(DBMSG_DEBUG,['PARSE' => $this->wordlist]);
                 }
             }
         }
+		$this->clear();
        return $arr;
     }
 //==============================================================================

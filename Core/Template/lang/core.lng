@@ -233,7 +233,6 @@ SiteMenu=>[
 		GitHib	=> GitHib
 		SQLite	=> SQLite
 		PostgreSQL => PostgreSQL
-		MySQL	=> MySQL
 		TestLink => TestLink
 	]
 ]
