@@ -29,7 +29,7 @@ public static function Create($module_name,$class_name,$owner) {
 // Reset Model Schema
 public static function ChangeModelSchema() {
     foreach(static::$ObjectList as $key => $val) {
-        list($state,$ini,$cnt,$ow_list) = $val;
+        list($state,$ini,$cnt,$owlist,$obj) = $val;
 		if(method_exists($obj,'ResetSchema')) {
 			$obj->ResetSchema();
 		}
