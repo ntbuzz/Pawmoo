@@ -92,7 +92,7 @@ public function is_authorised($method) {
 				$login = MySession::get_LoginValue([$login_key,'LANG','REGION']);
 				$data = array_combine([$login_key,'language','region'],$login);
 			}
-			$udata = $Login->is_validLoginUser($data,$pass_check);
+			$udata = $Login->is_validLoginUser($data,$pass_check);	// is valid user check
 			if($udata === false) {	// fail valid user => not login, or unknown user
 				if(in_array($method,$bypass_method)) {
 					// not login, and this method is BYPASS
@@ -105,7 +105,7 @@ public function is_authorised($method) {
 					return FALSE;
 				}
 			}
-		}
+		} else $udata = [NULL,DEFAULT_LANG,DEFAULT_REGION];
 		// if(CLI_DEBUG || in_array($method,$autologin)) {
 		// 	$data = $Login->defaultUser();		// auto-login user
 		// 	if(isset(App::$Post['login'])) $data = array_override($data,App::$Post);
