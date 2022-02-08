@@ -23,7 +23,7 @@ class SectionParser {
         $lines = file_get_contents($template);          // ファイルから全て読み込む (正規表現でトークン分離するため)
         $this->wordlist = array();
         $p = <<<'EOS'
-/(?:^|[,\s]+)
+/(?:^|\s+)
 ((?:
 "(?:[^"]|(?:\\\\)*\\")+"|
 '(?:[^']|(?:\\\\)*\\')+'|
@@ -31,7 +31,7 @@ class SectionParser {
 <(?:[^>]|(?:\\\\)*\\>)+>|
 \{(?:[^\}]|(?:\\\\)*\\\})+\}|
 (?:\/\/.*)|
-[^,\s]+
+[^\s]+
 )*)/x
 EOS;
         preg_match_all($p,$lines,$m);               // 全ての要素をトークン分離する
@@ -61,7 +61,7 @@ EOS;
                     }
                 }
                 // 改行文字\nを置換する
-                $this->wordlist[] = ($wrapstr == '""') ? str_replace('\n', "\n", $token) : $token;
+                $this->wordlist[] = ($wrapstr == '""') ? str_replace('\n', "\n",$token) : $token;
             }
         }
         $this->wpos = 0;                        // インデクスを先頭にする
