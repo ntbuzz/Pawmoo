@@ -33,8 +33,9 @@ class SectionParser {
 	];
 //==============================================================================
     function __construct($template) {
-        $contents = file_get_contents($template);          // ファイルから全て読み込む (正規表現でトークン分離するため)
-        $this->lines = array_values(array_filter(explode("\n",$contents),'strlen'));
+        $contents = file_get_contents($template);          // ファイルから全て読み込む
+		// 改行文字を \n に統一、文字列定数のため空行フィルタはしない
+        $this->lines = explode("\n",str_replace(["\r\n","\r"],"\n",$contents));
 		$this->line_count = count($this->lines);
 		$this->reset_line();
 	}
@@ -84,26 +85,40 @@ class SectionParser {
 	}
 //==============================================================================
 	private function quote($q) {
-		$token = '';
 		$qend = self::token_quote[$q];
 		$ch = $this->current_ch();
+		if($ch === $qend) return '';
 		$trim = ($ch === '^');
-		while($ch !== $qend) {
-			// エスケープ
-			if($ch === '\\') $ch = $this->current_ch();
-			$token = "{$token}{$ch}";
-			$ch = $this->current_ch();
+		if($trim) $ch = $this->current_ch();
+		if($ch === "\n") $ch = $this->current_ch();
+		if($ch === false) return '';
+		$token = $ch;
+retry:	while(($n=mb_strpos($this->current_line,$qend))===false) {
+			$token = "{$token}{$this->current_line}\n";
+			if($this->next_line()===false) break;
 		}
-        // 戦闘の空白を削除
-        if($trim) $token = implode("\n", text_line_array("\n",mb_substr($token,1),FALSE));
-        // 改行文字\nを置換する
-        if($q === '"') $token = str_replace('\n', "\n", $token);
+		if($n !== false) {
+			$ln = mb_substr($this->current_line,0,$n);
+			$token = "{$token}{$ln}";
+			$this->current_line = mb_substr($this->current_line,$n+1);
+			if(substr($token,-1) === '\\') {		// escape-char
+				$token[strlen($token)-1] = $qend;
+				goto retry;
+			}
+		}
+        // 前後の空白を削除
+        if($trim) $token = implode("\n", text_line_array("\n",$token,FALSE));
+        // エスケープ文字[\n,\t]を文字コード置換する
+        if($q === '"') $token = str_replace(['\n','\t'],["\n","\t"], $token);
         else if($q === '<') $token = "<{$token}>";	// タグクオート
 		return $token;
 	}
 //==============================================================================
 	public function get_token() {
-retry:	while(isset(self::skip_separator[$ch = $this->current_ch()])) ;
+retry:	do {
+			$ch = $this->current_ch();
+			if($ch === false) return false;
+		} while(isset(self::skip_separator[$ch])) ;
 		if($ch === false) return false;
 		$token = false;
 		do {
