@@ -195,7 +195,7 @@ public function createTableSet($exec,$csv_only,$depend=[]) {
 		$sql = "CREATE TABLE {$this->MyTable} (\n";
 		$sql .= implode(",\n",$fset) . "\n);";
 		$this->doSQL($exec,$sql);
-		$this->set_diver_columns();
+		$this->set_driver_columns();
 	}
 	// IMPORT initial Table DATA, CSV load or TEST mode
 	if(isset($this->InitCSV)) {
