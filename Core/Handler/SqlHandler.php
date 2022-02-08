@@ -330,11 +330,11 @@ protected function sql_safe_convert($data) {
 			case 'serial':
 			case 'integer': $data[$key] = intval($val); break;
 			case 'boolean': $data[$key] = is_bool_false($val) ? "'f'" : "'t'"; break;
-			case 'text':
-					$val = str_replace(["'",'\\'],["''",'\\\\'],$val);
-					$data[$key] = "'{$val}'";
-					break;
-			// others, text, date, timestamp, etc...
+			// case 'text':
+			// 		$val = str_replace(["'",'\\'],["''",'\\\\'],$val);
+			// 		$data[$key] = "'{$val}'";
+			// 		break;
+			// others, date, timestamp, etc...
 			default: $data[$key] = (empty($val))?'NULL':"'{$val}'";
 			}
 		}
@@ -351,6 +351,10 @@ protected function fetch_convert($data) {
 			case 'serial':
 			case 'integer': $data[$key] = intval($val); break;
 			case 'boolean': $data[$key] = is_bool_false($val) ? 'f' : 't'; break;
+			// case 'text':
+			// 		 $val = str_replace(["''",'\\\\'],["'",'\\'],$val);
+			// 		 $data[$key] = $val;
+			// 		break;
 			}
 		}
 	}
