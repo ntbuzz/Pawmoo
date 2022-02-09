@@ -217,6 +217,7 @@ var formSubmit = function (obj, url, new_win) {
 		}).appendTo(form);
 	});
 	form.attr('action', url).appendTo('body').submit();
+	form.remove();
 	$.busy_cursor(false);
 };
 //====================================================
