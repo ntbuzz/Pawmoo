@@ -87,10 +87,9 @@ class SectionParser {
 	private function quote($q) {
 		$qend = self::token_quote[$q];
 		$ch = $this->current_ch();
-		if($ch === $qend) return '';
 		$trim = ($ch === '^');
 		if($trim) $ch = $this->current_ch();
-		if($ch === false) return '';
+		if($ch === false || $ch === $qend) return '';
 		if($this->current_line === true) {
 			if($this->next_line()===false) return "\n";
 		}
