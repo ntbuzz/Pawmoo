@@ -120,8 +120,9 @@ static function Send() {
 			]]);
 		$to = $config->SENDMAIL_DEBUG;
 		$subject = "DEBUG: {$subject}";
+		$header = '';
 	}
-	$header = self::ConvHeader('','From',static::$From);
+	$header = self::ConvHeader($header,'From',static::$From);
 	if(mb_send_mail($to,$subject,$body,$header) === false) {
 		sysLog::die(['MAIL-CHECK' => [
 			'HEAD'=> [ 'FROM' => static::$From, 'CC' => static::$CC, 'BCC' => static::$BCC],
