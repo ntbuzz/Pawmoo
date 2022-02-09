@@ -74,57 +74,37 @@ public function is_enable_action($action) {
 // authorised login mode, if need view LOGIN form, return FALSE
 public function is_authorised($method) {
 	if(defined('LOGIN_CLASS')) {			// enable Login Class
-		if($this->needLogin) {
-			$model = LOGIN_CLASS . 'Model';
-			$Login = $this->$model;
-			$login_key = isset($Login->LoginID) ? $Login->LoginID:'login-user';
-			$autologin = (is_array($this->AutoLogin)) ? $this->AutoLogin : [$this->AutoLogin];
-			$bypass_method = (is_array($this->BypassMethod)) ? $this->BypassMethod : [$this->BypassMethod];
-			$bypass_method[] = 'Logout';	// must be append LogoutAction
-			$pass_check = false;	// NO password check.
-			if(in_array($method,$autologin) || CLI_DEBUG) {
-				$data = $Login->defaultUser();		// auto-login user
-				if(isset(App::$Post['login'])) $data = array_override($data,App::$Post);
-			} else if(isset(App::$Post['login'])) {	// Distinction Normal Login POST
-				$data = App::$Post;
-				$pass_check = true;
-			} else {	// check already LOGIN
-				$login = MySession::get_LoginValue([$login_key,'LANG','REGION']);
-				$data = array_combine([$login_key,'language','region'],$login);
+		$model = LOGIN_CLASS . 'Model';
+		$Login = $this->$model;
+		$login_key = isset($Login->LoginID) ? $Login->LoginID:'login-user';
+		$autologin = (is_array($this->AutoLogin)) ? $this->AutoLogin : [$this->AutoLogin];
+		$bypass_method = (is_array($this->BypassMethod)) ? $this->BypassMethod : [$this->BypassMethod];
+		$bypass_method[] = 'Logout';	// must be append LogoutAction
+		$pass_check = false;	// NO password check.
+		if(in_array($method,$autologin) || CLI_DEBUG) {
+			$data = $Login->defaultUser();		// auto-login user
+			if(isset(App::$Post['login'])) $data = array_override($data,App::$Post);
+		} else if(isset(App::$Post['login'])) {	// Distinction Normal Login POST
+			$data = App::$Post;
+			$pass_check = true;
+		} else {	// check already LOGIN
+			$login = MySession::get_LoginValue([$login_key,'LANG','REGION']);
+			$data = array_combine([$login_key,'language','region'],$login);
+		}
+		$udata = $Login->is_validLoginUser($data,$pass_check);	// is valid user check
+		if($udata === false) {	// fail valid user => not login, or unknown user
+			if($this->needLogin && (in_array($method,$bypass_method)) {
+				$userid = (isset($data[$login_key])) ? $data[$login_key] : '';
+				$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
+				page_response($login_page,$Login->retryMessages($userid));
+				// NEVER RETURN HERE!
+				return FALSE;
 			}
-			$udata = $Login->is_validLoginUser($data,$pass_check);	// is valid user check
-			if($udata === false) {	// fail valid user => not login, or unknown user
-				if(in_array($method,$bypass_method)) {
-					// not login, and this method is BYPASS
-					$udata = [NULL,DEFAULT_LANG,DEFAULT_REGION];
-				} else {
-					$userid = (isset($data[$login_key])) ? $data[$login_key] : '';
-					$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
-					page_response($login_page,$Login->retryMessages($userid));
-					// NEVER RETURN HERE!
-					return FALSE;
-				}
-			}
-		} else $udata = [NULL,DEFAULT_LANG,DEFAULT_REGION];
-		// if(CLI_DEBUG || in_array($method,$autologin)) {
-		// 	$data = $Login->defaultUser();		// auto-login user
-		// 	if(isset(App::$Post['login'])) $data = array_override($data,App::$Post);
-		// } else if(isset(App::$Post['login'])) {	// Distinction Normal POST
-		// 	$data = App::$Post;
-		// 	$pass_check = true;
-		// }
-		// if($udata === false) {	// fail valid user => not login, or unknown user
-		// 	// NEED-LOGIN and not BYPASS method
-		// 	if($this->needLogin && !in_array($method,$bypass_method)) {
-		// 		$userid = (isset($data[$login_key])) ? $data[$login_key] : '';
-		// 		$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
-		// 		page_response($login_page,$Login->retryMessages($userid));
-		// 		// LOGIN PAGE Response, NO returned HERE!
-		// 		return FALSE;
-		// 	}
-		// 	// no need login and not login
-		// 	$udata = [NULL,DEFAULT_LANG,DEFAULT_REGION];
-		// }
+			// not login, and this method is BYPASS
+			$udata = MySession::get_LoginValue([$login_key,'LANG','REGION']);
+			$udata[0] = NULL;	// no login user
+
+		}
 		// setup login user language and region
 		list($userid,$lang,$region) = $udata;
 		$login_data = [
