@@ -53,8 +53,10 @@ function xchange_Boolean($arr) {
 	$data = [];
 	$bool_value = [ 'on' => TRUE,'off' => FALSE,'t' => TRUE,'f' => FALSE];
 	foreach($arr as $key => $val) {		// GET parameter will be check query
-		if(array_key_exists($val,$bool_value)) $val = $bool_value[$val];
-		else if(is_numeric($val)) $val = intval($val);
+		if(is_scalar($val)) {
+			if(array_key_exists($val,$bool_value)) $val = $bool_value[$val];
+			else if(is_numeric($val)) $val = intval($val);
+		}
 		if(ctype_alnum(str_replace(['-','_'],'', $key))) $data[$key] = $val;
 	}
 	return $data;
