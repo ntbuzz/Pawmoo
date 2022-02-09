@@ -103,7 +103,6 @@ public function is_authorised($method) {
 			// not login, and this method is BYPASS
 			$udata = MySession::get_LoginValue([$login_key,'LANG','REGION']);
 			$udata[0] = NULL;	// no login user
-
 		}
 		// setup login user language and region
 		list($userid,$lang,$region) = $udata;

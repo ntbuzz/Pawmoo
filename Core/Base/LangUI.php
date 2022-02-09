@@ -7,11 +7,12 @@
 // 言語ファイルの操作クラス
 class LangUI {
     public  static $STRINGS;        // 翻訳言語配列
-    public  static $LocaleName;       // ロケール名
+    public  static $LocaleName;     // ロケール名
+	public	static $ReginName;		// リージョン名
     private static $LangDir;        // 言語ファイルのパス
     private static $Locale;         // 言語識別子
     private static $LocaleFiles;    // for debug
-    private static $controllers;     // コントローラー
+    private static $controllers;    // コントローラー
 
 //==============================================================================
 // HTTP_ACCEPT_LANGUAGE を元にデフォルトの言語を決定する
@@ -19,13 +20,14 @@ class LangUI {
         // アプリケーションの言語リソースパス
         static::$LangDir = $default;      // App::Get_AppPath("View/lang/");
         static::$controllers = $initfiles;  // 初期ロードする言語
-        self::SwitchLangs($lang);
+        self::SwitchLangs($lang,DEFAULT_REGION);
     }
 //==============================================================================
 //  言語ファイルの切替え
-public static function SwitchLangs($newlang) {
+public static function SwitchLangs($newlang,$newregion) {
 	$langs = get_locale_lang($newlang);
 	if(empty($langs)) $langs = DEFAULT_LANG;
+    static::$ReginName = $newregion;
 	if(static::$Locale === ".{$langs}") return;	// 同じ言語ならリロードしない
     $default = static::$LangDir;      // ロード先を保存
     static::$Locale = ".{$langs}";    // 言語識別文字を付加
@@ -34,7 +36,7 @@ public static function SwitchLangs($newlang) {
     // ディレクトリが NULL ならログ処理の最中
     if($default !== NULL) {
         log_reset(DBMSG_LOCALE);
-        debug_log(DBMSG_LOCALE,["言語リスト" => static::$Locale]);
+        debug_log(DBMSG_LOCALE,["言語リスト" => static::$Locale,'地域'=>static::$ReginName]);
     }
     // フレームワークの言語リソースを読込む
 	$core_dir = __DIR__ . '/../Template/lang/';

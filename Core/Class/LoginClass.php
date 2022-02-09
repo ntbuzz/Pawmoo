@@ -100,7 +100,7 @@ public function is_validLoginUser($values,$pass_check) {
 	// RELOAD user-data when user-locale not match current language
 	if($lang !== LangUI::$LocaleName) {
 		// Reload UserDataa when User Locale not match current Locale
-		LangUI::SwitchLangs($lang);
+		LangUI::SwitchLangs($lang,$region);
 		$data = $this->getRecordBy($this->LoginID,$userid);
 		$data = array_override($data,$Login);
 	}
