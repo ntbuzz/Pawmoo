@@ -90,8 +90,10 @@ class SectionParser {
 		if($ch === $qend) return '';
 		$trim = ($ch === '^');
 		if($trim) $ch = $this->current_ch();
-		if($ch === "\n") $ch = $this->current_ch();
 		if($ch === false) return '';
+		if($this->current_line === true) {
+			if($this->next_line()===false) return "\n";
+		}
 		$token = $ch;
 retry:	while(($n=mb_strpos($this->current_line,$qend))===false) {
 			$token = "{$token}{$this->current_line}\n";
