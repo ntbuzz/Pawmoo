@@ -137,7 +137,7 @@ foreach($libs as $files) {
     require_once $files;
 }
 // Load Common Locale tranlate parameter
-LangUI::construct($lang,App::Get_AppPath("View/lang/"),['#common',$controller]);
+LangUI::construct($lang,$region,App::Get_AppPath("View/lang/"),['#common',$controller]);
 // Load Application MODULE files. (Controller,Model,View,Helpe)
 App::LoadModuleFiles($controller);
 $ContClass = "{$controller}Controller";

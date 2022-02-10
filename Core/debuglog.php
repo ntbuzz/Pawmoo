@@ -33,7 +33,7 @@ if(array_key_exists('lang', $query)) {
     $lang = MySession::get_LoginValue('LANG');
     if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 }
-LangUI::construct($lang,NULL,NULL);    // Load CORE lang ONLY
+LangUI::construct($lang,DEFAULT_REGION,NULL,NULL);    // Load CORE lang ONLY
 ?>
 <div class='debugtab'>
 <span class="closeButton"></span>

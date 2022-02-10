@@ -65,7 +65,7 @@ if(array_key_exists('lang', $query)) {
     $lang = MySession::get_LoginValue('LANG');
     if($lang === NULL) $lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 }
-LangUI::construct($lang,$default_dir,$contfiles);    // Load CORE lang and SET app-Folder
+LangUI::construct($lang,DEFAULT_REGION,$default_dir,$contfiles);    // Load CORE lang and SET app-Folder
 // モジュール名と拡張子を使いテンプレートを決定する
 $AppStyle = new AppStyle($appname,$app_uri, $controller, $filename, $ext);
 // ヘッダの出力

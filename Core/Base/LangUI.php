@@ -16,11 +16,11 @@ class LangUI {
 
 //==============================================================================
 // HTTP_ACCEPT_LANGUAGE を元にデフォルトの言語を決定する
-    public static function construct($lang,$default,$initfiles) {
+    public static function construct($lang,$region,$default,$initfiles) {
         // アプリケーションの言語リソースパス
         static::$LangDir = $default;      // App::Get_AppPath("View/lang/");
         static::$controllers = $initfiles;  // 初期ロードする言語
-        self::SwitchLangs($lang,DEFAULT_REGION);
+        self::SwitchLangs($lang,$region,);
     }
 //==============================================================================
 //  言語ファイルの切替え
@@ -46,6 +46,11 @@ public static function SwitchLangs($newlang,$newregion) {
 	if(!empty($default)) self::LangFiles($default,static::$controllers);
     self::LangDebug();
 	ClassManager::ChangeModelSchema();	// 生成済みモデルを全てスイッチ
+}
+//==============================================================================
+//  言語ファイルの読み込み
+public static function LocaleSet() {
+	return [static::$LocaleName,static::$ReginName];
 }
 //==============================================================================
 //  言語ファイルの読み込み

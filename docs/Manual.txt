@@ -1168,7 +1168,7 @@ f)     セレクション名 => [ Model名.  => [ メソッド名 => メソッ�
   LangUI::$LocaleName;                  // ロケール名
 
 ・静的メソッド
-  LangUI::construct($lang)              // 言語リストを元にクラスを初期化する (Main.phpのみで使用)
+  LangUI::construct($lang,$region)      // 言語リストを元にクラスを初期化する (Main.phpのみで使用)
   LangUI::SwitchLangs($newlang,$newregion) // 言語と地域を切り替える
   LangUI::get_value($mod, $id, $allow)  // モジュール内の言語識別名から文字列を取り出す、allow = TRUE なら配列を返す
   LangUI::get_array($arr, $mod, $var)   // 言語識別名から翻訳要素名を取り出し、連想配列の値を返す
