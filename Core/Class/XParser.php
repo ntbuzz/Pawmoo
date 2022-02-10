@@ -17,7 +17,7 @@ class SectionParser {
 	private $lno = 0;
 	private $current_line;
 	const token_separator = [
-		'=>' => 2,'/*' => 2,'*/' => 2,	// '//' => 2,
+		'=>' => 2,'/*' => 2,'*/' => 2,	// '//' => 2,	http:// の回避のため
 		' ' => 1,"\t" => 1,"\n" => 1,
 	];
 	const skip_separator = [
