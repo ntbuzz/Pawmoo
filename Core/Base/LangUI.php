@@ -7,12 +7,12 @@
 // 言語ファイルの操作クラス
 class LangUI {
     public  static $STRINGS;        // 翻訳言語配列
-    public  static $LocaleName;     // ロケール名
+    public  static $LocaleName;       // ロケール名
 	public	static $ReginName;		// リージョン名
     private static $LangDir;        // 言語ファイルのパス
     private static $Locale;         // 言語識別子
     private static $LocaleFiles;    // for debug
-    private static $controllers;    // コントローラー
+    private static $controllers;     // コントローラー
 
 //==============================================================================
 // HTTP_ACCEPT_LANGUAGE を元にデフォルトの言語を決定する

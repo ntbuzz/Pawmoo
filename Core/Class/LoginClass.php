@@ -76,39 +76,39 @@ public function is_validLoginUser($values,$pass_check) {
             list($alt,$disp,$flag) = $this->Schema[$xkey];   // need encrypt password
             $dval = ($flag === -1) ? passwd_encrypt($val) : $val;
             if(!empty($dval)) $Login[$xkey] = $dval;    // accepta NULL value
-        }
-    }
+	}
+}
     $this->error_type = $this->__('Login.NeedLogin');
 	list($userid,$passwd) = array_keys_value($Login,[$this->LoginID,'password']);
 	// exist Login-ID
-    if(empty($userid)) return false;
+    if(empty($userid)) return FALSE;
     $this->error_type = $this->__('Login.UnknownUser').": '{$userid}'";
     $login_data = $this->getRecordBy($this->LoginID,$userid);
     if($login_data === false) return false;	// not-exist user
 	if($pass_check) {
-	    $this->error_type = $this->__('Login.PassError');
+		    $this->error_type = $this->__('Login.PassError');
 		if($passwd !== $login_data['password']) return false;
-		// limitation check
+			// limitation check
 		if($this->is_passwd_limitation($login_data)) {
-			$this->error_type = $this->__('Login.PassLimit');
-			return false;
-		}
-	}
+			    $this->error_type = $this->__('Login.PassLimit');
+				return false;
+			}
+        }
 	// user-data value override from request value
 	$data = array_override($login_data,$Login);
 	list($lang,$region) = array_keys_value($data,['language','region'],[DEFAULT_LANG,DEFAULT_REGION]);
 	// RELOAD user-data when user-locale not match current language
-	if($lang !== LangUI::$LocaleName) {
-		// Reload UserDataa when User Locale not match current Locale
+		if($lang !== LangUI::$LocaleName) {
+			// Reload UserDataa when User Locale not match current Locale
 		LangUI::SwitchLangs($lang,$region);
 		$data = $this->getRecordBy($this->LoginID,$userid);
 		$data = array_override($data,$Login);
-	}
+		}
 	$udata = [$userid,$lang,$region];
 	unset($login_data['password']);	// security keep
 	static::$LoginUser = $login_data;
-	$this->set_last_login($userid);
-	return $udata;
+		$this->set_last_login($userid);
+        return $udata;
 }
 //==============================================================================
 // Recieved LOGIN POST FORM, do accept USER LOGIN correct
