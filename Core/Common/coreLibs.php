@@ -331,7 +331,7 @@ function re_build_array($cond) {
 //==============================================================================
 // UTF-8 CSV item remove of 'false',''
 function csv_false_remove($val,$sep) {
-	$csv = array_filter(explode(',',$val),function($v) { return (($v !== "false") && strlen($v));});
+	$csv = array_filter(explode(',',$val),function($v) { return !is_bool_false($v);});
 	return implode($sep,$csv);
 }
 //==============================================================================
