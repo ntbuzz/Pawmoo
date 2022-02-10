@@ -93,7 +93,7 @@ public function is_authorised($method) {
 		}
 		$udata = $Login->is_validLoginUser($data,$pass_check);	// is valid user check
 		if($udata === false) {	// fail valid user => not login, or unknown user
-			if($this->needLogin && (in_array($method,$bypass_method))) {
+			if($this->needLogin && !in_array($method,$bypass_method)) {
 				$userid = (isset($data[$login_key])) ? $data[$login_key] : '';
 				$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
 				page_response($login_page,$Login->retryMessages($userid));
