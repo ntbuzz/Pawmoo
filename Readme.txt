@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2022 by nTak
  * @license    MIT
- * @version 1.0.2, 2022-02-08
+ * @version 1.0.3, 2022-02-10
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,11 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 変更履歴
+【1.0.3】2022/02/10
+	- LangUIにリーション引数を追加
+	- CSV false判定バグを修正
+	- その他細かい修正
+
 【1.0.2】2022/02/08
 	- safe_convertの不具合修正
 	- markdownエスケープ不具合の対策
