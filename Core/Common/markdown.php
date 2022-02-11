@@ -64,11 +64,11 @@ function pseudo_markdown_sub($atext) {
             $ids = ($ids==='') ? '' : " id='{$ids}'";
             $val = ($val==='') ? '' : " value='{$val}'";
             $tag = ($tag==='') ? 'span' : 'p';
-			if($pre !== "\n") $pre = '';				// KEEP NL(\n), for previous line last DBL-SPC to <BR> tag
+			if($pre !== "\n") $pre = ' ';				// KEEP NL(\n), for previous line last DBL-SPC to <BR> tag
 			if($post !== "\n") $post = '';				// KEEP NL(\n), for next line markdown
 			if(strpos($txt ,'\\}')) $txt = str_replace('\\}','}',$txt);
             return "{$pre}<{$tag}{$cls}{$ids}{$val}>{$txt}</{$tag}>{$post}";
-        },
+		},
 //------- ...!{ TEXT }... NL change <br> tag in div-indent class
         '/\s\.\.\.([\w\-]+(?:\.[\w\-]+)*)?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
 			$txt = pseudo_markdown_sub($m[3]);
