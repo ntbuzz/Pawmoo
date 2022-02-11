@@ -58,7 +58,7 @@ function pseudo_markdown_sub($atext) {
 // プロック要素を先に処理する
 	$atext = preg_replace_callback_array([
 //------- ..class#id(value){TEXT} CLASS/ID/VALUE attributed SPAN/P replacement
-        '/(\s)\.\.([\w\-]+(?:\.[\w\-]+)*)?(?:#([\w\-]+))?(?:\(([^\)]+)\))?(:)?\{((?:\$\{[^\}\s]+\}|\\\}|.)*?)\}($|\s)/s' => function ($m) {
+        '/(^|\s)\.\.([\w\-]+(?:\.[\w\-]+)*)?(?:#([\w\-]+))?(?:\(([^\)]+)\))?(:)?\{((?:\$\{[^\}\s]+\}|\\\}|.)*?)\}($|\s)/s' => function ($m) {
 			list($mm,$pre,$cls,$ids,$val,$tag,$txt,$post) = $m;
             $cls = get_class_names($cls);
             $ids = ($ids==='') ? '' : " id='{$ids}'";
@@ -70,7 +70,7 @@ function pseudo_markdown_sub($atext) {
             return "{$pre}<{$tag}{$cls}{$ids}{$val}>{$txt}</{$tag}>{$post}";
 		},
 //------- ...!{ TEXT }... NL change <br> tag in div-indent class
-        '/\s\.\.\.([\w\-]+(?:\.[\w\-]+)*)?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
+        '/(?:^|\s)\.\.\.([\w\-]+(?:\.[\w\-]+)*)?(!)?\{\n(.+?)\n\}\.\.\.(?:\n|$)/s' => function ($m) {
 			$txt = pseudo_markdown_sub($m[3]);
             if($m[2]==='!') {
                 $txt = nl2br($txt);
@@ -82,7 +82,7 @@ function pseudo_markdown_sub($atext) {
 		},
     ],$atext);
     // ul/ol/blockquote processing
-    $p = '/\n(([\-\d][\s\.]|>\s)[\s\S]+?)(?:\n((?:\.[\w\-]+)*)\n|$)/s';
+    $p = '/(?:^|\n)(([\-\d][\s\.]|>\s)[\s\S]+?)(?:\n((?:\.[\w\-]+)*)\n|$)/s';
     $atext = preg_replace_callback($p,function($matches) {
         $txt = $matches[1];
 		$usr_cls = (count($matches)===4) ? $matches[3] : '';
