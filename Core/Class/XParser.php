@@ -1,14 +1,14 @@
 <?php
 /* -------------------------------------------------------------
- * PHP�t���[�����[�N
- *  SectionParser:  �Z�N�V�������C�A�E�g�t�@�C���̐V�P��p�[�T�[
- *		�������x�͒x���Ȃ邪�A�g�[�N�����󔒂ŋ�؂�K�v���Ȃ��Ȃ�
- *      �󔒂��܂߂�Ƃ��̓N�I�[�g�ň͂�
- *      �g�[�N��:
- *          "�C�ӂ̕�����" �܂��� '�C�ӂ̕�����'
- *           <�C�ӂ̕�����>
- *          (�C�ӂ̕�����)
- *          //�R�����g������\r
+ * PHPフレームワーク
+ *  SectionParser:  セクションレイアウトファイルの新単語パーサー
+ *		処理速度は遅くなるが、トークンを空白で区切る必要がなくなる
+ *      空白を含めるときはクオートで囲む
+ *      トークン:
+ *          "任意の文字列" または '任意の文字列'
+ *           <任意の文字列>
+ *          (任意の文字列)
+ *          //コメント文字列\r
  */
 //==============================================================================
 class SectionParser {
@@ -17,7 +17,7 @@ class SectionParser {
 	private $lno = 0;
 	private $current_line;
 	const token_separator = [
-		'=>' => 2,'/*' => 2,'*/' => 2,	// '//' => 2,	http:// �̉���̂���
+		'=>' => 2,'/*' => 2,'*/' => 2,	// '//' => 2,	http:// の回避のため
 		' ' => 1,"\t" => 1,"\n" => 1,
 	];
 	const skip_separator = [
@@ -33,8 +33,8 @@ class SectionParser {
 	];
 //==============================================================================
     function __construct($template) {
-        $contents = file_get_contents($template);          // �t�@�C������S�ēǂݍ���
-		// ���s������ \n �ɓ���A������萔�̂��ߋ�s�t�B���^�͂��Ȃ�
+        $contents = file_get_contents($template);          // ファイルから全て読み込む
+		// 改行文字を \n に統一、文字列定数のため空行フィルタはしない
         $this->lines = explode("\n",str_replace(["\r\n","\r"],"\n",$contents));
 		$this->line_count = count($this->lines);
 		$this->reset_line();
@@ -70,10 +70,6 @@ class SectionParser {
 		return $ch;
 	}
 //==============================================================================
-	private function is_token($token) {
-		return $token === '//' || isset(self::token_separator[$token]);
-	}
-//==============================================================================
 	private function is_separator() {
 		if($this->current_line === '') return true;//$this->next_line();
 		foreach(self::token_separator as $wd => $len) {
@@ -107,11 +103,11 @@ retry:	while(($n=mb_strpos($this->current_line,$qend))===false) {
 				goto retry;
 			}
 		}
-        // �O��̋󔒂��폜
+        // 前後の空白を削除
         if($trim) $token = implode("\n", text_line_array("\n",$token,FALSE));
-        // �G�X�P�[�v����[\n,\t]�𕶎��R�[�h�u������
+        // エスケープ文字[\n,\t]を文字コード置換する
         if($q === '"') $token = str_replace(['\n','\t'],["\n","\t"], $token);
-        else if($q === '<') $token = "<{$token}>";	// �^�O�N�I�[�g
+        else if($q === '<') $token = "<{$token}>";	// タグクオート
 		return $token;
 	}
 //==============================================================================
@@ -127,52 +123,56 @@ retry:	do {
 			} else {
 				$token = $ch;
 				if($token === '[' || $token === ']') break;
+				if($token === '/') {
+					$ch = mb_substr($this->current_line,0,1);	// 先読み
+					if($ch === '/') {		// 行コメント
+						$this->next_line();
+						goto retry;
+					}
+					if($ch === '*') {	// ブロックコメント
+						$this->current_line = mb_substr($this->current_line,1);
+						do {
+							$token = $this->get_token();
+						} while($token !== false && $token !== '*/');
+						goto retry;
+					}
+				}
 				$nest = 0;
-				while(!$this->is_token($token)) {
+				while(!isset(self::token_separator[$token])) {
 					if($this->is_separator()) break;
-					// ] �̐�ǂ�
+					// ] の先読み
 					if(mb_substr($this->current_line,0,1) === ']') {
-						if($nest-- === 0) break;	// name�����̊O
+						if($nest-- === 0) break;	// name属性の外
 					}
 					if(($ch = $this->current_ch())===false) break;
 					if($ch === '[') ++$nest;
 					$token = "{$token}{$ch}";
-				}
-				if($token === '//') {
-					$this->next_line();
-					goto retry;
-				}
-				if($token === '/*') {
-					do {
-						$token = $this->get_token();
-					} while($token !== false && $token !== '*/');
-					goto retry;
 				}
 			}
 		} while($token === false);
 		return $token;
 	}
 //==============================================================================
-//  �P�ꃊ�X�g����Z�N�V�����z����쐬���A�z��v�f��Ԃ�
+//  単語リストからセクション配列を作成し、配列要素を返す
     function getSectionDef($is_TAG) {
         $arr = [];
 		while(($wd=$this->get_token())!==false) {
-next_wd:    if($wd == ']') return $arr;            // �Z�N�V�����I���Ȃ琶�������z���Ԃ�
-            if($wd == '[') {                       // �Z�N�V�����J�n
+next_wd:    if($wd == ']') return $arr;            // セクション終了なら生成した配列を返す
+            if($wd == '[') {                       // セクション開始
                 do {
-                    $arr[] = $this->getSectionDef($is_TAG);    // �Z�N�V�����z����Ƃ肾���A�Z�N�V�����z��ɒǉ�����
-                    $wd=$this->get_token();          // ���̃g�[�N��
-                } while( $wd == '[');                  // ����ɃZ�N�V�����v�f�������ԌJ��Ԃ�
-                if($wd == ']') return $arr;            // �Z�N�V�����I���Ȃ�z���Ԃ�
+                    $arr[] = $this->getSectionDef($is_TAG);    // セクション配列をとりだし、セクション配列に追加する
+                    $wd=$this->get_token();         // 次のトークン
+                } while( $wd == '[');               // さらにセクション要素が続く間繰り返す
+                if($wd == ']') return $arr;         // セクション終了なら配列を返す
             }
-            $nwd = $this->get_token();          // ���̃g�[�N��
-            if($nwd === '=>') {                          // �A�z�z��v�f�Ȃ�
+            $nwd = $this->get_token();          	// 次のトークン
+            if($nwd === '=>') {                     // 連想配列要素なら
                 $wkey = array_key_unique($wd,$arr);
-	            $wd = $this->get_token();          // ���̃g�[�N��
-                if($wd == '[') {                // �Z�N�V�����J�n�Ȃ�
-                    $arr[$wkey] = $this->getSectionDef($is_TAG);   // �ċA�Ăяo���ŃZ�N�V�����v�f��A�z�z��ɑ��
+	            $wd = $this->get_token();          	// 次のトークン
+                if($wd == '[') {                	// セクション開始なら
+                    $arr[$wkey] = $this->getSectionDef($is_TAG);   // 再帰呼び出しでセクション要素を連想配列に代入
                 } else {
-                    $arr[$wkey] = $wd;                  // �g�[�N����A�z�z��ɑ��
+                    $arr[$wkey] = $wd;              // トークンを連想配列に代入
                 }
             } else {
                 switch(is_tag_identifier($wd)) {
