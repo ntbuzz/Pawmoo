@@ -823,7 +823,6 @@ debug_log(DBMSG_DEBUG,["ExecTime({$tmplate})"=>"{$tm} sec"]);
 			$tabend = '</ul></div>';
 			$contents="<ul class='tabcontents{$ulcont}'>";
 		}
-debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$contents]]);
         $attrs['class'] = $mycls;
         $tabs = array_keys($sec);
 		if(is_numeric($default_tab)) {

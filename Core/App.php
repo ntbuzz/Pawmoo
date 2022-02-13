@@ -291,7 +291,6 @@ static function rollbackReqData($envKey,...$keys) {
 //==============================================================================
 //  webrootファイルの読込タグ出力（単独・配列）
     public static function WebInclude($files) {
-    debug_xlog(3, ["WebINCLUDE" => $files]);
         if(is_array($files)) {
             foreach($files as $nm) self::includeTag($nm);
         } else self::includeTag($files);

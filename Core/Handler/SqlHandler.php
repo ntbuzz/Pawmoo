@@ -47,7 +47,6 @@ function __construct($table,$handler,$primary) {
 		$this->handler = $handler;
 		$this->Primary = $primary;
 		$this->fieldAlias = new fieldAlias();
-		xdebug_log(DBMSG_HANDLER,["COLUMN({$this->table})"=> [ $this->columns,$this->raw_columns]]);
 	}
 //==============================================================================
 // load columns info

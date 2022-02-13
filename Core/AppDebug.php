@@ -157,9 +157,6 @@ function stderr($str) {
 	fputs(STDERR,"{$str}\n");
 }
 // dummy function
-function debug_xdump($items) {}
-function debug_xdie($items) {}
-function debug_xlog($items) {}
 function xdebug_dump($items) {}
 function xdebug_die($items) {}
 function xdebug_log($items) {}
