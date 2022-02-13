@@ -24,8 +24,8 @@ if(!defined('DEBUG_LEVEL'))  define('DEBUG_LEVEL', 10);
 
 const EMPTY_MSG = " EMPTY\n";
 const EXCLUSION = [
-//    'Syslog' => 1,
-//    'password' => 1,
+    'Syslog' => 1,
+    'password' => 1,
     'passwd' => 1,
 ];
 /*
@@ -257,7 +257,7 @@ function debug_log($lvl,...$items) {
 						} else if(is_array($obj)) {
 							$dmp_msg .= "===== {$msg} =====\n";
 							if(empty($obj)) $dmp_msg .= EMPTY_MSG;
-							else $dmp_msg .= $dump_object($obj,1);
+							else $dmp_msg .= $dump_object($obj,0);
 						} else {
 							$dmp_msg .= "{$msg} : Object=".gettype($obj)."\n";
 							$dmp_msg .= print_r($obj,TRUE)."\n";
