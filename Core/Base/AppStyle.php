@@ -3,7 +3,7 @@
  * Object Oriented PHP MVC Framework
  *  AppStyle:   css, js joined by template
  */
-require_once('Core/Class/Parser.php');
+require_once('Core/Class/XParser.php');
 require_once('Core/Base/AppStyleHelper.php');
 
 class AppStyle {
