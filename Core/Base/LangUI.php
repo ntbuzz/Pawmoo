@@ -68,7 +68,6 @@ private static function LangFiles($folder,$files) {
 public static function LangDebug() {
     debug_log(DBMSG_LOCALE, [
 		"#LocalInfo" => [
-			'Locale' => static::$Locale,
 			'File'   => static::$LocaleFiles,
 			'Folder' => static::$LangDir,
 			'STRING' => static::$STRINGS,
