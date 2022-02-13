@@ -120,7 +120,6 @@ retry:	do {
 			$ch = $this->current_ch();
 			if($ch === false) return false;
 		} while(isset(self::skip_separator[$ch])) ;
-		if($ch === false) return false;
 		$token = false;
 		do {
 			if(isset(self::token_quote[$ch])) {

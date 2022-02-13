@@ -95,7 +95,8 @@ function array_override_recursive($a,$b) {
 function text_line_array($del,$txt,$trim = FALSE) {
     $array = array_values(
             array_filter(
-                array_map(function($a) {return ltrim(preg_replace('/\s+/', ' ', str_replace('　',' ',$a)));},
+//                array_map(function($a) {return ltrim(preg_replace('/\s+/', ' ', str_replace('　',' ',$a)));},
+                array_map(function($a) {return ltrim($a);},
                     explode($del, $txt)
             ), ($trim) ? 'strlen' : function($a) { return TRUE;}
         ));
