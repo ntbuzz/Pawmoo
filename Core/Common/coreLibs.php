@@ -23,6 +23,7 @@ function get_routing_path($root) {
     $pp = array_slice($argv,$n);
     list($appname,$controller,$method) = $args;
     $filters = array_splice($args,3);
+    $aegv = array_splice($argv,3);		// raw parameter from URI path
     $filename = '';
     $params = array_filter($pp,
         function($v) use(&$filename) {
@@ -43,6 +44,7 @@ function get_routing_path($root) {
         $method,
         $filters,
         array_intval_recursive($params),
+        array_intval_recursive($argv),			// raw path item array
     );
     $ret = [$appname,$app_uri,$module];
     return $ret;

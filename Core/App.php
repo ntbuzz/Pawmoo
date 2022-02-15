@@ -14,6 +14,7 @@ class App {
     public static $Filter;          // メソッドのフィルタ配列の先頭
     public static $Filters;         // メソッドのフィルタ配列
     public static $Params;          // メソッドの数値パラメータ配列
+    public static $RawItems;        // フィルタ以降の生パラメータ
     public static $ParamCount;      // 引数の数
     public static $Controller;      // 実行コントローラ名
     public static $Method;    // 呼出しメソッド名
@@ -27,8 +28,9 @@ class App {
 	public static function __Init($appname,$app_uri,$module) {
         static::$AppName = $appname;
         list(static::$sysRoot,static::$appRoot) = $app_uri;
-        list($controller,$method,$filters,$params) = $module;
+        list($controller,$method,$filters,$params, $rawpath) = $module;
 
+        static::$RawItems = $rawpath;
         static::$DocRoot = (empty($_SERVER['DOCUMENT_ROOT'])) ? '' : $_SERVER['DOCUMENT_ROOT'];
         static::$Referer = (empty($_SERVER['HTTP_REFERER'])) ? '' : $_SERVER['HTTP_REFERER'];
 
