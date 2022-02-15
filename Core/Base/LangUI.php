@@ -20,7 +20,7 @@ class LangUI {
         // アプリケーションの言語リソースパス
         static::$LangDir = $default;      // App::Get_AppPath("View/lang/");
         static::$controllers = $initfiles;  // 初期ロードする言語
-        self::SwitchLangs($lang,$region,);
+        self::SwitchLangs($lang,$region);
     }
 //==============================================================================
 //  言語ファイルの切替え
@@ -48,7 +48,7 @@ public static function SwitchLangs($newlang,$newregion) {
 	ClassManager::ChangeModelSchema();	// 生成済みモデルを全てスイッチ
 }
 //==============================================================================
-//  言語ファイルの読み込み
+//  言語・地域のセット
 public static function LocaleSet() {
 	return [static::$LocaleName,static::$ReginName];
 }
