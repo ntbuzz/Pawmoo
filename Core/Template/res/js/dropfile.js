@@ -154,7 +154,7 @@ function UploadFiles(files,url, callback_func) {
     };
     self.CloseWait = function (data) {
         $.busy_cursor(false);
-        if (callback_func != undefined) callback_func(upload,data);
+        if (typeof callback_func === "function") callback_func(upload,data);
         if (!upload.abort) {
             self.CloseDialog();  // ABORTせずに完了したら即ダイアログを閉じる
         } else {
@@ -303,7 +303,7 @@ function PairUploadDialog(files,url,callback_func) {
     };
     self.CloseWait = function (data) {
         $.busy_cursor(false);
-        if (callback_func != undefined) callback_func(upload,data);
+        if (typeof callback_func === "function") callback_func(upload,data);
         if (!upload.abort) {
             cancel_close.click();
         } else {
