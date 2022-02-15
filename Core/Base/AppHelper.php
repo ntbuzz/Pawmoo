@@ -31,7 +31,7 @@ public function ViewTemplate($layout) {
 //==============================================================================
 // Runtime output
 // public function Runtime() {
-// 	if(!is_bool_false(MySession::get_paramIDs('debugger'))) {
+// 	if(!is_bool_false(MySession::getSysData('debugger'))) {
 // 		echo "<hr>\n";
 // 		sysLog::run_time(-1);
 // 	}
