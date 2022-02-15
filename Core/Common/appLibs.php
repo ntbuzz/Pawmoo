@@ -119,6 +119,17 @@ function echo_safe($atext,$is_safe = TRUE) {
     echo ($is_safe) ? htmlspecialchars($atext) : $atext;
 }
 //==============================================================================
+// make JSON value
+function json_value($arr) {
+	$str ="{";
+	foreach($arr as $key => $val) {
+		$vv = json_escape($val);
+		$str .= "\"{$key}\": \"{$vv}\",";
+	}
+	$str = trim($str,',');
+	return "{$str}}\n";
+}
+//==============================================================================
 // escape char for JSON value
 function json_escape($a) {
 	// controll-code change
