@@ -246,12 +246,14 @@ public function PagingFinder($cond, $max_count=100,$filter=[],$sort=[]) {
 //==============================================================================
 // Default List Action
 public function ListAction() {
+	MySession::unsetAppData('RecordNo');
 	$this->Model->RecordFinder([]);
 	$this->View->PutLayout();
 }
 //==============================================================================
 // Default Page Action
 public function PageAction() {
+	MySession::unsetAppData('RecordNo');
 	$cond = $this->AutoPaging([], 50);
 	$this->Model->RecordFinder($cond,NULL);
 	$this->View->PutLayout();
@@ -264,6 +266,7 @@ public function FindAction() {
 	} else {
 		$row = array();
 	}
+	MySession::unsetAppData('RecordNo');
 	$this->Model->RecordFinder($row);
 	$this->View->PutLayout();
 }
@@ -271,6 +274,7 @@ public function FindAction() {
 // Default View Action (Full Page)
 public function ViewAction() {
 	$num = App::$Params[0];
+	MySession::setAppData('RecordNo',$num);
 	$this->Model->GetRecord($num,TRUE,TRUE);
 	$this->View->PutLayout('ContentView');
 }
@@ -278,6 +282,7 @@ public function ViewAction() {
 // Default Item View Action (Parts of Page)
 public function ItemAction() {
 	$num = App::$Params[0];
+	MySession::setAppData('RecordNo',$num);
 	$this->Model->GetRecord($num,TRUE,TRUE);
 	$this->View->ViewTemplate('ItemView');
 }
@@ -303,29 +308,30 @@ protected function set_location($url) {
 	if(empty($url)) $url = App::Get_AppRoot($this->ModuleName,TRUE) . '/list/'.App::$Filter;
 	header('Location:' . $url);
 }
+private function RecNoSet($num) {
+	MySession::setAppData('RecordNo',$num);
+	$this->set_location(App::$Referer);
+}
 //==============================================================================
 // Default Add Record Action
 public function AddAction() {
 	$url = App::$Referer;
 	$num = $this->Model->AddRecord(App::$Post);
-	MySession::setEnvVariables(['RecordNo' => $num]);
-	$this->set_location(App::$Referer);
+	$this->RecNoSet($num);
 }
 //==============================================================================
 // Default Update Action
 public function UpdateAction() {
 	$num = App::$Params[0];
-	MySession::setEnvVariables(['RecordNo' => $num]);
 	$this->Model->UpdateRecord($num,App::$Post);
-	$this->set_location(App::$Referer);
+	$this->RecNoSet($num);
 }
 //==============================================================================
 // Default Copy Record Action
 public function CopyAction() {
 	$num = App::$Params[0];
 	$num = $this->Model->CopyRecord($num,App::$Post);
-	MySession::setEnvVariables(['RecordNo' => $num]);
-	$this->set_location(App::$Referer);
+	$this->RecNoSet($num);
 }
 //==============================================================================
 // Default PDF Convert Action
