@@ -25,6 +25,7 @@ if(!defined('DEBUG_LEVEL'))  define('DEBUG_LEVEL', 10);
 const EMPTY_MSG = " EMPTY\n";
 const EXCLUSION = [
     'Syslog' => 1,
+    'Paging' => 1,  // ページングデバッグ時はコメントアウト
     'password' => 1,
     'passwd' => 1,
 ];
