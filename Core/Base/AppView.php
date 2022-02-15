@@ -29,6 +29,7 @@ class AppView extends AppObject {
             'submit'    => 'cmd_taginput',
             'hidden'    => 'cmd_taginput',
             'textbox'   => 'cmd_taginput',
+            'passbox'   => 'cmd_taginput',
         ],
     );
 	const AttributeList = [
@@ -926,7 +927,11 @@ debug_log(DBMSG_DEBUG,["ExecTime({$tmplate})"=>"{$tm} sec"]);
     // 		+hidden[name](value)
     // 		+submit[name](value)
     private function cmd_taginput($tag,$attrs,$sec,$vars) {
-		if($tag === 'textbox') $tag = 'text';
+		$trans = [
+			'textbox'	=> 'text',
+			'passbox'	=> 'password',
+		];
+		if(isset($trans[$tag])) $tag = $trans[$tag];
 		$this->input_common($tag,$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------

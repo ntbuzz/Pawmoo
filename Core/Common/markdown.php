@@ -269,11 +269,12 @@ function pseudo_markdown_sub($atext) {
 //  checkbox    => ^[name]:{item1=val1:checked,item2=val2:checked,...}
 //  textarea    => ^[name]!{text-value:row,col}
 //  textbox     => ^[name]={text-value:size}
+//  passbox     => ^[name]*{text-value:size}
 //  select      => ^[name]%{select-val:option1=val1,option2=val2,...}
 //  combobox    => ^[name]+{select-val:option1=val1,option2=val2,...:size}
 //		Grant class & id name,description between '^' and '[', like ^class#id[name]...
-        '/(\s)\^([\w\-\.]+)?(?:#([\w\-]+))?\[([\w\-]+)?\]([@:!=%+])\{((?:\$\{[^\}\s]+\}|\\\}|.)*?)\}/s' => function ($m) use(&$item_array) {
-            $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','!' => 'textarea','%' => 'select','+' => 'combo'];
+        '/(\s)\^([\w\-\.]+)?(?:#([\w\-]+))?\[([\w\-]+)?\]([@:!=#%+])\{((?:\$\{[^\}\s]+\}|\\\}|.)*?)\}/s' => function ($m) use(&$item_array) {
+            $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','#' => 'password','!' => 'textarea','%' => 'select','+' => 'combo'];
 			list($tmp,$spc,$cls,$id,$nm,$kind,$val) = $m;
 			if(strpos($val,'\\}')) $val = str_replace('\\}','}',$val);
             $vv = $type[$kind];
@@ -347,6 +348,11 @@ function pseudo_markdown_sub($atext) {
                     $tag = "{$spc}<textarea{$attr}{$sz}>{$txt}</textarea>";
                     break;
             case '=':   // text
+                    $vv = explode(':',$val);
+                    $sz = (empty($vv[1])) ? '' : (' '.array_items_list(attr_sz_xchange(['size'=>$vv[1]]),' '));
+                    $tag = "{$spc}{$tag}{$sz} value='{$vv[0]}' />";
+                    break;
+            case '#':   // password
                     $vv = explode(':',$val);
                     $sz = (empty($vv[1])) ? '' : (' '.array_items_list(attr_sz_xchange(['size'=>$vv[1]]),' '));
                     $tag = "{$spc}{$tag}{$sz} value='{$vv[0]}' />";
