@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2022 by nTak
  * @license    MIT
- * @version 1.0.3, 2022-02-10
+ * @version 1.0.4, 2022-02-15
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,12 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 変更履歴
+【1.0.4】2022/02/15
+	- セッション変数AppDataをSysDataに変更、AppDataはアプリ専用に変更
+	- AppData/SysData専用のメソッドとテンプレート変数を拡張
+	- セクションパーサーを再構築
+	- その他JQueryプラグイン不具合の修正等
+
 【1.0.3】2022/02/10
 	- LangUIにリーション引数を追加
 	- CSV false判定バグを修正
