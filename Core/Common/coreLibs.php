@@ -468,8 +468,10 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                     } else $val = NULL;
 				}
                 break;
-            case '^':       // both ENV or POST VAR
-            case '"':       // POST-VAR
+			case '~':       // AppData
+			case '`':       // SysData
+			case '^':       // both ENV or POST VAR
+			case '"':       // POST-VAR
             case "'":       // ENV-VAR
                 if(substr($var,-1) === $var[0]) {     // check end-char
                     $tt = $var[0];
@@ -478,7 +480,9 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
 					case "'":$val = MySession::getEnvIDs($var);break;
 					case '^':$val = MySession::getEnvIDs($var);	// scalar-Get
 							 if($val !== '') break;	// empty will be try to POST
-					case '"':$val = App::PostElements($var);
+					case '"':$val = App::PostElements($var);break;
+					case '~':$val = MySession::getAppData($var);break;
+					case '`':$val = MySession::getEnvIDs(PARAMS_NAME.".{$var}");break;
 					}
                 }
                 break;

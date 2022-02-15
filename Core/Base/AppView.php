@@ -97,7 +97,7 @@ public function __TerminateView() {
             debug_log(DBMSG_VIEW,"RedirectURL: {$url}");
             echo "<script type='text/javascript'>\nhistory.replaceState(null, null, \"{$url}\");\n</script>\n";
         }
-        if(!is_bool_false(MySession::get_paramIDs('debugger'))) {
+        if(!is_bool_false(MySession::getSysData('debugger'))) {
 	        $this->ViewTemplate('debugbar');
 		}
         $tmplate = $this->get_TemplateName('Trailer');

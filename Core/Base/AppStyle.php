@@ -317,7 +317,7 @@ public function ViewStyle($file_name) {
 						continue;
 					} else {
 		                list($tmp,$id_name,$flag,$vv) = $m;
-						$test_value = MySession::get_paramIDs($flag);
+						$test_value = MySession::getSysData($flag);
 						if(is_bool_false($test_value)) continue;
 					}
 				}

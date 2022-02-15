@@ -246,23 +246,22 @@ public static function set_if_empty($arr) {
 }
 //==============================================================================
 // POST変数から環境変数に移動する
-static function preservReqData($envKey,...$keys) {
+static function preservReqData(...$keys) {
 	foreach($keys as $nm) {
 		if(array_key_exists($nm,static::$Post)) {
-			MySession::$EnvData[$envKey][$nm] = static::$Post[$nm];
+            MySession::setAppData("POST.{$nm}", static::$Post[$nm]);
 			unset(static::$Post[$nm]);
 		}
 	}
 }
 //==============================================================================
 // SESSION変数からPOSTに移動する
-static function rollbackReqData($envKey,...$keys) {
+static function rollbackReqData(...$keys) {
 	foreach($keys as $nm) {
 		if(array_key_exists($nm,MySession::$EnvData[$envKey])) {
-			static::$Post[$nm] = MySession::$EnvData[$envKey][$nm];
-			unset(MySession::$EnvData[$envKey][$nm]);
+			static::$Post[$nm] = MySession::getAppData("POST.{$nm}");
 		}
-//		unset(MySession::$EnvData[$envKey]);
+		MySession::unsetAppData('POST');
 	}
 }
 //==============================================================================
