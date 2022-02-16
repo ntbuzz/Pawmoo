@@ -159,7 +159,7 @@ function control_escape($a) {
 // judgement boolean FALSE
 function is_bool_false($bool) {
     $bool = strtolower(trim($bool,"'"));
-    foreach(['','0','f','false',0,NULL] as $val) {
+    foreach(['','f','false',NULL] as $val) {
         if($bool === $val) return TRUE;
     }
     return FALSE;
