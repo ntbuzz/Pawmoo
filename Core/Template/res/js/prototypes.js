@@ -121,6 +121,23 @@ String.prototype.includeOf = function (reg) {
 	return exists;
 };
 //====================================================
+// charset include check for password
+String.prototype.passwdCheck = function (kind,mxlen) {
+	var len = this.length;
+	if(len < mxlen) return false;
+	for(var i=0;i<=kind.length;++i) {
+		switch(kind.charAt(i)) {
+		case 'a': str = this.replace(/[a-z]/g,'');break;
+		case 'A': str = this.replace(/[A-Z]/g,'');break;
+		case '0': str = this.replace(/[0-9]/g,'');break;
+		case '!': str = this.replace(/[!#$%&=^@;:,_~\"\'\(\)\[\]\.\?\+\-\/\*]/g,'');
+		default: str = this.replace(/[a-zA-Z0-9_]/g,'');
+		};
+		if(str.length == len) return false;
+	};
+	return true;
+};
+//====================================================
 // element search: IE-11 is not have includes() method.
 Array.prototype.is_exists = function (v) {
 	var exists = false;
