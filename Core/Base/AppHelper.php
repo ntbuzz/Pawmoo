@@ -225,7 +225,7 @@ public function TableListView($header,$primary,$Records=NULL,$max=0) {
 	foreach($header as $key => $val) {
 		list($alias,$align,$flag,$wd) = $val;
 		$tsort = ($flag==2) ? '' : ' class="sorter-false"';
-		$style = ($wd==0) ? '' : " style='width:{$wd}px;'";
+		$style = ($wd==0) ? '' : " style='width:{$wd}px;max-width:{$wd}px;'";
 		echo "<th${tsort}{$style}>{$alias}</th>";
 	}
 	echo "</tr>\n";
@@ -236,7 +236,7 @@ public function TableListView($header,$primary,$Records=NULL,$max=0) {
 		foreach($header as $key => $val) {
 			list($alias,$align,$flag,$c_wd) = $val;
 			$data = $columns[$key];
-			$style = ($c_wd > 0) ? " style='width:{$c_wd}px;'":'';
+			$style = ($c_wd > 0) ? " style='width:{$c_wd}px;max-width:{$c_wd}px;overflow:hidden;'":'';
 			$pos = self::AttrAlign[$align];
 			echo "<td{$pos}{$style}>{$data}</td>";
 		}
