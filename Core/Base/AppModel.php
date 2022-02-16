@@ -45,7 +45,7 @@ class AppModel extends AppObject {
 	    parent::__construct($owner);                    // call parent constructor
         $this->setProperty(self::$DatabaseSchema);      // Set Default Database Schema Property
         $this->setProperty(static::$DatabaseSchema);    // Set Instance Property from Database Schema Array
-		if(empty($this->Schema)) {
+		if(empty($this->Schema) && $this->Handler !== 'Null') {
 			debug_stderr(["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
 		}
 		if(empty($this->Primary)) $this->Primary = 'id';	// default primary name
