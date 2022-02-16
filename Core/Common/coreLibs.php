@@ -23,7 +23,7 @@ function get_routing_path($root) {
     $pp = array_slice($argv,$n);
     list($appname,$controller,$method) = $args;
     $filters = array_splice($args,3);
-    $aegv = array_splice($argv,3);		// raw parameter from URI path
+    $argv = array_splice($argv,3);		// raw parameter from URI path
     $filename = '';
     $params = array_filter($pp,
         function($v) use(&$filename) {
@@ -333,7 +333,8 @@ function re_build_array($cond) {
 //==============================================================================
 // UTF-8 CSV item remove of 'false',''
 function csv_false_remove($val,$sep) {
-	$csv = array_filter(explode(',',$val),function($v) { return !is_bool_false($v);});
+	if(!is_array($val)) $val = explode(',',$val);
+	$csv = array_filter($val,function($v) { return !is_bool_false($v);});
 	return implode($sep,$csv);
 }
 //==============================================================================
