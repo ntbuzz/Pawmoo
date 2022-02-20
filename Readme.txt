@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2022 by nTak
  * @license    MIT
- * @version 1.0.4, 2022-02-15
+ * @version 1.0.5, 2022-02-20
  * System Require: PHP 5.6 or Higher
  *
 
@@ -47,6 +47,11 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 変更履歴
+【1.0.2】2022/02/20
+	- CSVダウンロード用標準メソッドの追加
+	- 文字種チェックメソッド名を変更
+	- その他デバッグ文等の修正
+
 【1.0.4】2022/02/15
 	- セッション変数AppDataをSysDataに変更、AppDataはアプリ専用に変更
 	- AppData/SysData専用のメソッドとテンプレート変数を拡張
