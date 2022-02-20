@@ -282,8 +282,8 @@ opacity: 0.25; */
     margin-bottom:5px;
 }
 .popup-box .custom-button {
-	position:absolute;
-	bottom:11px;
+	/* position:absolute;
+	bottom:11px; */
 	display:flex;
 	width:95%;
 	padding-top:2px;
