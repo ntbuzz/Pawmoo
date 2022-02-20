@@ -368,6 +368,15 @@ function CheckRadioMenu($param,$menu) {
 	$label = string_boolean($label);
 	check_boxmenu($menu,$name,$kind,$label,$cnt);
 }
-
+//==============================================================================
+// CSV Output for Model->Records
+function CsvResponse($file_name) {
+	$csv = $this->Model->RecordsCSV();
+    header('Content-Type: application/octet-stream');
+    header("Content-Disposition: attachment; filename={$file_name}.csv");
+    header('Content-Transfer-Encoding: binary');
+	header("Content-Length: ".strlen($csv));
+	echo $csv;
+}
 
 }

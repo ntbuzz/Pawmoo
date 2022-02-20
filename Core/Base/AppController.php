@@ -351,5 +351,19 @@ public function LanguageAction() {
 	MySession::set_LoginValue($login_data);
 	$this->set_location($refer);
 }
+//==============================================================================
+//	List Condition, must be override Controller
+protected function ListFilter() {
+	return NULL;
+}
+//==============================================================================
+// CSV Output
+public function CsvAction() {
+	$cond = $this->ListFilter();
+	$name = strtolower(App::$Controller);
+	$this->Model->RecordFinder($cond);
+	$this->Helper->CsvResponse($name);
+}
+
 
 }
