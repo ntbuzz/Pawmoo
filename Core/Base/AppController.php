@@ -360,9 +360,13 @@ protected function ListFilter() {
 // CSV Output
 public function CsvAction() {
 	$cond = $this->ListFilter();
-	$name = strtolower(App::$Controller);
 	$this->Model->RecordFinder($cond);
-	$this->Helper->CsvResponse($name);
+	$csv = $this->Model->RecordsCSV();
+	if($csv === false) {
+		die('CSV FAIL');
+	};
+	$name = strtolower(App::$Controller);
+	$this->Helper->CsvResponse($name,$csv);
 }
 
 

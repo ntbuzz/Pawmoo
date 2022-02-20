@@ -370,13 +370,14 @@ function CheckRadioMenu($param,$menu) {
 }
 //==============================================================================
 // CSV Output for Model->Records
-function CsvResponse($file_name) {
-	$csv = $this->Model->RecordsCSV();
+function CsvResponse($file_name,$csv) {
+xdebug_die(['FILE'=>$file_name,'CSV'=>$csv]);
+	$data = implode("\n",$csv);
     header('Content-Type: application/octet-stream');
     header("Content-Disposition: attachment; filename={$file_name}.csv");
     header('Content-Transfer-Encoding: binary');
-	header("Content-Length: ".strlen($csv));
-	echo $csv;
+	header("Content-Length: ".strlen($data));
+	echo $data;
 }
 
 }
