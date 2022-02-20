@@ -36,7 +36,6 @@ protected function Connect($table) {
 		}
 		$columns[$name] = $decl;
 	}
-xdebug_die(['SQL'=>$sql,'ROW'=>$columns]);
 	return $columns;
 }
 //==============================================================================

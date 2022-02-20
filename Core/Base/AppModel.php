@@ -45,7 +45,7 @@ class AppModel extends AppObject {
 	    parent::__construct($owner);                    // call parent constructor
         $this->setProperty(self::$DatabaseSchema);      // Set Default Database Schema Property
         $this->setProperty(static::$DatabaseSchema);    // Set Instance Property from Database Schema Array
-		if(empty($this->Schema)) {
+		if(empty($this->Schema) && $this->Handler !== 'Null') {
 			debug_stderr(["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
 		}
 		if(empty($this->Primary)) $this->Primary = 'id';	// default primary name
@@ -83,7 +83,7 @@ public function ResetSchema() {
     $this->SchemaAnalyzer();
     $this->RelationSetup();
     $this->SelectionSetup();
-    xdebug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
+    debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
 //            "Header"    => $this->HeaderSchema,
 //            "Field"     => $this->FieldSchema, 
@@ -353,7 +353,6 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 		case SORTBY_DESCEND:arsort($this->Select[$key_name]); break;
 		}
 	}
-	debug_xlog(DBMSG_MODEL,['DEFS'=>$this->SelectionDef,'KEYNAME'=>$key_names,'SELECTION'=>$this->Select]);
 }
 //==============================================================================
 //   Get Relation Table fields data list.
@@ -463,7 +462,7 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
     $this->Records = $data;
 }
 //==============================================================================
-// Get Raw Record List by FIND-CONDITION without JOIN!.
+// Get Raw Record List by FIND-CONDITION from RAW-TABLE.
 // Result:   $this->Records  Find-Result List
 public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
 	$filter = $this->normalize_filter($filter);
@@ -474,7 +473,7 @@ public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
     else if(is_scalar($sort)) {
         $sort = [ $sort => $this->SortDefault ];
     }
-    $this->dbDriver->findRecord($cond,FALSE,$sort);
+    $this->dbDriver->findRecord($cond,FALSE,$sort,true);
 	$this->record_max = $this->dbDriver->recordMax;
     while (($fields = $this->dbDriver->fetch_locale())) {
         unset($record);
@@ -637,6 +636,56 @@ public function UpdateRecord($num,$row) {
 		$this->RecData = ($row) ? $row : [];
     }
 	return empty($this->RecData) ? false : $this->RecData[$this->Primary];
+}
+//==============================================================================
+// CSV file Load (must be UTF-8)
+public function UploadCSV($path) {
+    if(file_exists($path)) {
+		if (($handle = fcsvopen($path, "r")) !== FALSE) {
+			$row_columns = $this->dbDriver->raw_columns;
+			while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
+				if(count($data) !== count($row_columns)) {
+					fclose($handle);
+					return false;
+				} else {
+					$diff_arr = array_diff($data,$row_columns);
+					if(empty($diff_arr)) continue;	// maybe CSV Header line
+				}
+				$row = array_combine($row_columns,$data);
+				list($primary,$id) = array_first_item($row);
+				$this->dbDriver->updateRecord([$primary=>$id],$row);
+			}
+			fclose($handle);
+			return true;
+		}
+    }
+	return false;
+}
+//==============================================================================
+// CSV file download data
+public function RecordsCSV() {
+	$records = $this->Records;
+	if(empty($records)) return false;
+	$col = reset($records);
+	// create header by Model Schema
+	$keys = array_map(function($v) {
+			if(isset($this->Model->Schema[$v])) {
+				list($disp_name,$disp_flag) = $this->Model->Schema[$v];
+                if(empty($disp_name)) return $v;
+                else if($disp_name[0] === '.') return $this->_(".Schema{$disp_name}");
+				return $disp_name;
+			} else return $v;
+		},array_keys($col));
+	$csv = [ implode(',',$keys) ];	// column header
+	foreach($records as $columns) {
+		$row = array_map(function($v) {
+			if(mb_strpos($v,'"') !== false) $v = str_replace('"','\\"',$v);
+			if(preg_match('/[\s,]/s',$v)) $v = "\"{$v}\"";
+			return $v;
+		},$columns);
+		$csv[] = implode(',',$row);
+	}
+	return $csv;
 }
 
 }

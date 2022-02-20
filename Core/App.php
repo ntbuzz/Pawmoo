@@ -14,6 +14,7 @@ class App {
     public static $Filter;          // メソッドのフィルタ配列の先頭
     public static $Filters;         // メソッドのフィルタ配列
     public static $Params;          // メソッドの数値パラメータ配列
+    public static $RawItems;        // フィルタ以降の生パラメータ
     public static $ParamCount;      // 引数の数
     public static $Controller;      // 実行コントローラ名
     public static $Method;    // 呼出しメソッド名
@@ -27,8 +28,9 @@ class App {
 	public static function __Init($appname,$app_uri,$module) {
         static::$AppName = $appname;
         list(static::$sysRoot,static::$appRoot) = $app_uri;
-        list($controller,$method,$filters,$params) = $module;
+        list($controller,$method,$filters,$params, $rawpath) = $module;
 
+        static::$RawItems = $rawpath;
         static::$DocRoot = (empty($_SERVER['DOCUMENT_ROOT'])) ? '' : $_SERVER['DOCUMENT_ROOT'];
         static::$Referer = (empty($_SERVER['HTTP_REFERER'])) ? '' : $_SERVER['HTTP_REFERER'];
 
@@ -244,23 +246,22 @@ public static function set_if_empty($arr) {
 }
 //==============================================================================
 // POST変数から環境変数に移動する
-static function preservReqData($envKey,...$keys) {
+static function preservReqData(...$keys) {
 	foreach($keys as $nm) {
 		if(array_key_exists($nm,static::$Post)) {
-			MySession::$EnvData[$envKey][$nm] = static::$Post[$nm];
+            MySession::setAppData("POST.{$nm}", static::$Post[$nm]);
 			unset(static::$Post[$nm]);
 		}
 	}
 }
 //==============================================================================
 // SESSION変数からPOSTに移動する
-static function rollbackReqData($envKey,...$keys) {
+static function rollbackReqData(...$keys) {
 	foreach($keys as $nm) {
 		if(array_key_exists($nm,MySession::$EnvData[$envKey])) {
-			static::$Post[$nm] = MySession::$EnvData[$envKey][$nm];
-			unset(MySession::$EnvData[$envKey][$nm]);
+			static::$Post[$nm] = MySession::getAppData("POST.{$nm}");
 		}
-//		unset(MySession::$EnvData[$envKey]);
+		MySession::unsetAppData('POST');
 	}
 }
 //==============================================================================
@@ -291,7 +292,6 @@ static function rollbackReqData($envKey,...$keys) {
 //==============================================================================
 //  webrootファイルの読込タグ出力（単独・配列）
     public static function WebInclude($files) {
-    debug_xlog(3, ["WebINCLUDE" => $files]);
         if(is_array($files)) {
             foreach($files as $nm) self::includeTag($nm);
         } else self::includeTag($files);

@@ -53,7 +53,6 @@ if($cmd === 'remake') {
 	$list = RemakeView;
 	$cmd = 'self';
 }
-xdebug_die(['SETUP'=>$list]);
 foreach($list as $defs) {
 	$setup_class = "{$defs}Setup";
 	$not_found = true;

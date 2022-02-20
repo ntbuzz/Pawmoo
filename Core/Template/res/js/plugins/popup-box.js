@@ -55,7 +55,7 @@ $.fn.PopupBoxSetup = function () {
 						btn.off().click(function () {
 							self.formObject(false,null,function (e) {
 								btn.trigger("execute",e);
-							},false);	// 自身から下の要素
+							});
 						});
 					};
 				});

@@ -25,6 +25,7 @@ if(!defined('DEBUG_LEVEL'))  define('DEBUG_LEVEL', 10);
 const EMPTY_MSG = " EMPTY\n";
 const EXCLUSION = [
     'Syslog' => 1,
+    'Paging' => 1,  // ページングデバッグ時はコメントアウト
     'password' => 1,
     'passwd' => 1,
 ];
@@ -157,9 +158,6 @@ function stderr($str) {
 	fputs(STDERR,"{$str}\n");
 }
 // dummy function
-function debug_xdump($items) {}
-function debug_xdie($items) {}
-function debug_xlog($items) {}
 function xdebug_dump($items) {}
 function xdebug_die($items) {}
 function xdebug_log($items) {}

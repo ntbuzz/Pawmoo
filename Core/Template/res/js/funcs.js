@@ -46,7 +46,8 @@ function PawmooLocations() {
     this.cont_path = function (e, isnum) { return this.trunc_path(1, e, isnum); };
     this.act_path = function (e, isnum) { return this.trunc_path(2, e, isnum); };
     this.filter_path = function (e, isnum) { return this.trunc_path(3, e, isnum); };
-    this.getfilter = function () { return this.items[2]; };
+    this.get_action = function () { return this.items[2]; };
+    this.get_filter = function () { return this.items[3]; };
     this.param_path = function (e) {
         var path = this.items;
         for (var n=0; (n < path.length) && (isNaN(path[n])); ++n);

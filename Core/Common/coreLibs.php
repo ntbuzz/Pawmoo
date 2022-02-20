@@ -23,6 +23,7 @@ function get_routing_path($root) {
     $pp = array_slice($argv,$n);
     list($appname,$controller,$method) = $args;
     $filters = array_splice($args,3);
+    $argv = array_splice($argv,3);		// raw parameter from URI path
     $filename = '';
     $params = array_filter($pp,
         function($v) use(&$filename) {
@@ -43,6 +44,7 @@ function get_routing_path($root) {
         $method,
         $filters,
         array_intval_recursive($params),
+        array_intval_recursive($argv),			// raw path item array
     );
     $ret = [$appname,$app_uri,$module];
     return $ret;
@@ -331,7 +333,8 @@ function re_build_array($cond) {
 //==============================================================================
 // UTF-8 CSV item remove of 'false',''
 function csv_false_remove($val,$sep) {
-	$csv = array_filter(explode(',',$val),function($v) { return !is_bool_false($v);});
+	if(!is_array($val)) $val = explode(',',$val);
+	$csv = array_filter($val,function($v) { return !is_bool_false($v);});
 	return implode($sep,$csv);
 }
 //==============================================================================
@@ -466,8 +469,10 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                     } else $val = NULL;
 				}
                 break;
-            case '^':       // both ENV or POST VAR
-            case '"':       // POST-VAR
+			case '~':       // AppData
+			case '`':       // SysData
+			case '^':       // both ENV or POST VAR
+			case '"':       // POST-VAR
             case "'":       // ENV-VAR
                 if(substr($var,-1) === $var[0]) {     // check end-char
                     $tt = $var[0];
@@ -476,7 +481,9 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
 					case "'":$val = MySession::getEnvIDs($var);break;
 					case '^':$val = MySession::getEnvIDs($var);	// scalar-Get
 							 if($val !== '') break;	// empty will be try to POST
-					case '"':$val = App::PostElements($var);
+					case '"':$val = App::PostElements($var);break;
+					case '~':$val = MySession::getAppData($var);break;
+					case '`':$val = MySession::getEnvIDs(PARAMS_NAME.".{$var}");break;
 					}
                 }
                 break;

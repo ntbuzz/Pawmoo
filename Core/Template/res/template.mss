@@ -2,7 +2,7 @@
 //
 @message => yes
 @comment => off
-@compact => on
+//@compact => on
 // =====================================================
 // stylesheet SECTION
 Stylesheet => [

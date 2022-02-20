@@ -171,7 +171,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 				uniq = $('input[name="'+tag_name+'"]:checked').val();
 			};
 			bk_panel.click();
-			if (callback !== undefined) callback.call(tag_obj, uniq);
+			if (typeof callback === "function") callback.call(tag_obj, uniq);
 			return false;
 		});
 		bk_panel.click(function (e) {

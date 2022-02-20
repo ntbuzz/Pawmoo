@@ -77,6 +77,7 @@ public function __get($PropName) {
     $class_names = [
         'Model'         =>  -5,
         'Controller'    => -10,
+        'Class'    		=>  -5,
     ];
     if(array_key_exists($PropName,$class_names)) {
         $mod_name = $this->ModuleName;

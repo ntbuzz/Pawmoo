@@ -19,7 +19,8 @@ else {
 //	session_save_path('c:/Windows/temp/pawmoo');		// for windows
 	session_start();
 }
-define('PARAMS_NAME','AppData');
+define('APPDATA_NAME','AppData');
+define('SYSDATA_NAME','SysData');
 define('SYSLOG_ID','Syslog');
 define('RESOURCE_ID','Resource');
 
@@ -58,7 +59,7 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 	if(!isset(static::$EnvData['Login'])) static::$EnvData['Login'] = [];
 	// POST variables moved App CLASS
 	if($env_unset_param) {
-		unset(static::$EnvData[PARAMS_NAME]);           	// Delete Style Parameter for AppStyle
+		unset(static::$EnvData[SYSDATA_NAME]);           	// Delete Style Parameter for AppStyle
 		unset(static::$SysData[SYSLOG_ID][$controller]);	// delete contoller LOG
 	}
 }
@@ -166,14 +167,38 @@ static function assignPagingIDs($id,$val) {
 	return $val;
 }
 //==============================================================================
-// ENV変数にアプリケーションパラメータを識別子指定で設定する
-static function set_paramIDs($names,$val) {
-	self::setEnvIDs(PARAMS_NAME.".{$names}",$val);
+// アプリケーション用保存データ(AppData)
+static function getAppData($names,$unset=false) {
+	$nVal = array_member_value(static::$EnvData, APPDATA_NAME.".{$names}");
+	if($unset) self::unsetAppData($names);
+	return $nVal;
+}
+static function setAppData($names,$val) {
+	self::setEnvIDs(APPDATA_NAME.".{$names}",$val);
+}
+static function unsetAppData($names='') {
+    $key_arr = array_filter(explode('.',$names),'strlen');
+	$tag = array_pop($key_arr);
+	if(empty($tag)) {
+		unset(static::$EnvData[APPDATA_NAME]);
+	} else {
+		$nVal = &static::$EnvData[APPDATA_NAME];
+		foreach($key_arr as $nm) {
+			if(!array_key_exists($nm,$nVal)) return;
+			$nVal = &$nVal[$nm];
+		}
+		unset($nVal[$tag]);           	// Delete Style Parameter for AppStyle
+	}
 }
 //==============================================================================
-// ENV変数からアプリケーションパラメータを識別子指定で値を取得
-static function get_paramIDs($names) {
-	$nVal = array_member_value(static::$EnvData, PARAMS_NAME.".{$names}");
+// 自動消去のシステム保存データ(SysData)へ格納
+static function setSysData($names,$val) {
+	self::setEnvIDs(SYSDATA_NAME.".{$names}",$val);
+}
+//==============================================================================
+// システム保存データ(SysData)から取得
+static function getSysData($names) {
+	$nVal = array_member_value(static::$EnvData, SYSDATA_NAME.".{$names}");
 	return $nVal;
 }
 //==============================================================================
@@ -258,8 +283,8 @@ POST変数値の操作は App クラスへ移動
 												getPostData($keys)
 		App::setPostElements($arr)				setPostVariables($arr)
 		App::set_if_empty($arr)					setPost_if_empty($arr)
-		App::preservReqData($envKey,...$keys)	preservReqData($envKey,...$keys)
-		App::rollbackReqData($envKey,...$keys)	rollbackReqData($envKey,...$keys)
+		App::preservReqData($envKey,...$keys)	preservReqData(,...$keys)
+		App::rollbackReqData($envKey,...$keys)	rollbackReqData(...$keys)
 -------------------------
 	旧メソッド読み替えコメントは終了
 ==============================================================================

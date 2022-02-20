@@ -24,8 +24,10 @@ list($url,$p_str) = fix_explode('??',$uri,2);
 parse_str($p_str, $post);
 $locale = ['login'=>1,'language'=>'ja','region'=>'jp'];
 $_POST = array_override($locale,$post);
+// exclude POST string
+$_SERVER['REQUEST_URI'] = $url;
 // GET check
-list($url,$q_str) = fix_explode('?',$uri,2);
+list($url,$q_str) = fix_explode('?',$url,2);
 parse_str($q_str, $query);
 $_GET =  $query;
 

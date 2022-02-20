@@ -59,7 +59,7 @@ function balloonPosition(target, onside, margin, no_icon) {
 			default:	 this.left = box.centerX - parseInt(this.width/2);
 			};
 			this.right = this.left + this.width;
-			consoleDump(ypos,xpos,box,this);
+//			consoleDump(ypos,xpos,box,this);
 			return this;
 		},
 		PointClass: function() {

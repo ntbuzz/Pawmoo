@@ -47,7 +47,6 @@ function __construct($table,$handler,$primary) {
 		$this->handler = $handler;
 		$this->Primary = $primary;
 		$this->fieldAlias = new fieldAlias();
-		xdebug_log(DBMSG_HANDLER,["COLUMN({$this->table})"=> [ $this->columns,$this->raw_columns]]);
 	}
 //==============================================================================
 // load columns info
@@ -70,10 +69,10 @@ public function bind_columns($data) {
 }
 //==============================================================================
 // DEBUGGING for SQL Execute
-	private function SQLdebug($sql,$where) {
+	private function SQLdebug($sql,$where,$sort=[]) {
     	$dbg = debug_backtrace();
     	$func = $dbg[1]['function'];
-		debug_log(DBMSG_HANDLER,["SQL-Execute ({$func} @ {$this->table})"=> [ 'COND'=>$this->LastBuild,'SQL' => $sql,'WHERE'=>$where]]);
+		debug_log(DBMSG_HANDLER,["SQL-Execute ({$func} @ {$this->table})"=> [ 'COND'=>$this->LastBuild,'SORT'=>$sort,'SQL' => $sql,'WHERE'=>$where]]);
 	}
 //==============================================================================
 // setupRelations: relation table reminder
@@ -226,18 +225,19 @@ debug_log(DBMSG_HANDLER,["LOG-Aggregate" => [ 'COND' => $cond,'SQL'=>$sql]]);
 // pgSQL: SELECT *, count('No') over() as full_count FROM public.mydb offset 10 limit 50;
 // SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
 //==============================================================================
-public function findRecord($cond,$use_relations = FALSE,$sort = []) {
-	$where = $this->sql_makeWHERE($cond);
-	$sql = "SELECT DISTINCT  count(*) as \"total\" FROM {$this->table}";
+public function findRecord($cond,$use_relations = FALSE,$sort = [],$raw=false) {
+	$table = ($raw) ? $this->raw_table : $this->table;
+	$where = $this->sql_makeWHERE($cond,$table);
+	$sql = "SELECT DISTINCT  count(*) as \"total\" FROM {$table}";
 	$this->execSQL("{$sql}{$where};",FALSE);		// No Logging
 	$field = $this->fetch_array();
 	$this->recordMax = ($field) ? $field["total"] : 0;
-	$sql = $this->sql_JoinTable($use_relations);
+	$sql = $this->sql_JoinTable($use_relations,$table);
 	if(!empty($sort)) {
 		$orderby = "";
 		foreach($sort as $key => $val) {
 			$order = ($val === SORTBY_DESCEND) ? "desc" : "asc";
-			$orderby .=  "{$this->table}.\"{$key}\" {$order}{$this->NULL_ORDER},";
+			$orderby .=  "{$table}.\"{$key}\" {$order}{$this->NULL_ORDER},";
 		}
 		$where .=  " ORDER BY ".trim($orderby,",");
 	}
@@ -248,7 +248,7 @@ public function findRecord($cond,$use_relations = FALSE,$sort = []) {
 			$where .= " limit {$this->startrec},{$this->limitrec}";
 		}
 	}
-	$this->SQLdebug($sql,$where);
+	$this->SQLdebug($sql,$where,$sort);
 	$sql .= "{$where};";
 	$this->execSQL($sql);
 }
@@ -368,9 +368,10 @@ protected function fetch_convert($data) {
 //		[alias] = [ ref_table, ref_name, rel_id, ref_id  ]	sub-relations
 //		....
 //	]
-	private function sql_JoinTable($use_relations) {
-		$sql = "SELECT DISTINCT  {$this->table}.*";
-		$frm = " FROM {$this->table}";
+	private function sql_JoinTable($use_relations,$target_table=NULL) {
+		if($target_table === NULL) $target_table = $this->table;
+		$sql = "SELECT DISTINCT  {$target_table}.*";
+		$frm = " FROM {$target_table}";
 		$jstr = '';
 		if($use_relations && !empty($this->relations)) {
 			$join = [];//['L0'=>[],'L1'=>[]];
@@ -382,7 +383,7 @@ protected function fetch_convert($data) {
 						if(!isset($join[$table])) $join[$table] = $rel;			// duplicate-refer
 					} else {
 						list($table,$fn,$ref) = explode('.', $lnk);
-						$rel = "{$this->table}.\"{$key}\"={$table}.\"{$fn}\"";
+						$rel = "{$target_table}.\"{$key}\"={$table}.\"{$fn}\"";
 						if(!isset($join[$table])) $join = [$table => $rel] + $join;	// duplicate-refer
 					}
 					$sql .= ",{$table}.\"{$ref}\" AS \"{$alias}\"";
@@ -426,7 +427,7 @@ protected function fetch_convert($data) {
 							$v = mb_substr($v,1);
 							$op = "NOT {$this->LIKE_opr}";
 						} else $op = $this->LIKE_opr;
-						if(trim($v,'%') === $v) $v = "%{$v}%";
+						if(is_int($v) || trim($v,'%') === $v) $v = "%{$v}%";
 						return (empty($v)) ? 'IS NULL' : "{$op} '{$v}'";
 					};
 					$opc = $this->concat_fields($expr);

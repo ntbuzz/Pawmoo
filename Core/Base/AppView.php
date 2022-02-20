@@ -29,6 +29,7 @@ class AppView extends AppObject {
             'submit'    => 'cmd_taginput',
             'hidden'    => 'cmd_taginput',
             'textbox'   => 'cmd_taginput',
+            'passbox'   => 'cmd_taginput',
         ],
     );
 	const AttributeList = [
@@ -97,7 +98,7 @@ public function __TerminateView() {
             debug_log(DBMSG_VIEW,"RedirectURL: {$url}");
             echo "<script type='text/javascript'>\nhistory.replaceState(null, null, \"{$url}\");\n</script>\n";
         }
-        if(!is_bool_false(MySession::get_paramIDs('debugger'))) {
+        if(!is_bool_false(MySession::getSysData('debugger'))) {
 	        $this->ViewTemplate('debugbar');
 		}
         $tmplate = $this->get_TemplateName('Trailer');
@@ -823,7 +824,6 @@ debug_log(DBMSG_DEBUG,["ExecTime({$tmplate})"=>"{$tm} sec"]);
 			$tabend = '</ul></div>';
 			$contents="<ul class='tabcontents{$ulcont}'>";
 		}
-debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$contents]]);
         $attrs['class'] = $mycls;
         $tabs = array_keys($sec);
 		if(is_numeric($default_tab)) {
@@ -927,7 +927,11 @@ debug_xdie(['ATTR'=>$attrs,'CLASS'=>[$mycls,$ulcls,$ulcont],'TAG'=>[$tabset,$con
     // 		+hidden[name](value)
     // 		+submit[name](value)
     private function cmd_taginput($tag,$attrs,$sec,$vars) {
-		if($tag === 'textbox') $tag = 'text';
+		$trans = [
+			'textbox'	=> 'text',
+			'passbox'	=> 'password',
+		];
+		if(isset($trans[$tag])) $tag = $trans[$tag];
 		$this->input_common($tag,$tag,$attrs,$sec,$vars);
     }
     //--------------------------------------------------------------------------
