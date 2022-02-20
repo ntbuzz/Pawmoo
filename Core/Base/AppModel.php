@@ -642,17 +642,18 @@ public function UpdateRecord($num,$row) {
 public function UploadCSV($path) {
     if(file_exists($path)) {
 		if (($handle = fcsvopen($path, "r")) !== FALSE) {
-			$row_columns = $this->dbDriver->raw_columns;
+			$raw_columns = array_keys($this->dbDriver->raw_columns);
 			while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
-				if(count($data) !== count($row_columns)) {
+				if(count($data) !== count($raw_columns)) {
 					fclose($handle);
 					return false;
 				} else {
-					$diff_arr = array_diff($data,$row_columns);
+					$diff_arr = array_diff($data,$raw_columns);
 					if(empty($diff_arr)) continue;	// maybe CSV Header line
 				}
-				$row = array_combine($row_columns,$data);
+				$row = array_combine($raw_columns,$data);
 				list($primary,$id) = array_first_item($row);
+debug_dump(['TABLE'=>$this->dbDriver->raw_table,'PRIMARY'=>[$primary,$id],'ROW'=>$row]);
 				$this->dbDriver->updateRecord([$primary=>$id],$row);
 			}
 			fclose($handle);
@@ -663,19 +664,22 @@ public function UploadCSV($path) {
 }
 //==============================================================================
 // CSV file download data
-public function RecordsCSV() {
+public function RecordsCSV($map=true) {
 	$records = $this->Records;
 	if(empty($records)) return false;
 	$col = reset($records);
 	// create header by Model Schema
-	$keys = array_map(function($v) {
+	$keys = array_keys($col);
+	if($map) {
+		$keys = array_map(function($v) {
 			if(isset($this->Model->Schema[$v])) {
 				list($disp_name,$disp_flag) = $this->Model->Schema[$v];
                 if(empty($disp_name)) return $v;
                 else if($disp_name[0] === '.') return $this->_(".Schema{$disp_name}");
 				return $disp_name;
 			} else return $v;
-		},array_keys($col));
+		},$keys);
+	}
 	$csv = [ implode(',',$keys) ];	// column header
 	foreach($records as $columns) {
 		$row = array_map(function($v) {
