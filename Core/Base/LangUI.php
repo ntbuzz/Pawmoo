@@ -99,7 +99,7 @@ public static function LangDebug() {
 			$new_sec = [];
 			$lang_only = true;
 			foreach($sec as $key => $val) {
-				if($key[0] === '.') {
+				if(mb_substr($key,0,1) === '.') {
 					if($key === static::$Locale) {			// 言語定義
 						$vv = $lang_recursive($val);
 						if(is_scalar($vv)) $new_sec[] = $vv;
