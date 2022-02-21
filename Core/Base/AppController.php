@@ -361,7 +361,7 @@ protected function ListFilter() {
 public function CsvAction() {
 	$cond = $this->ListFilter();
 	$this->Model->RecordFinder($cond);
-	$csv = $this->Model->RecordsCSV();
+	$csv = $this->Model->RecordsCSV(true,255);
 	if($csv === false) {
 		die('CSV FAIL');
 	};

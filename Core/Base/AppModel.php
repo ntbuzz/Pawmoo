@@ -465,9 +465,11 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
 // Get Raw Record List by FIND-CONDITION from RAW-TABLE.
 // Result:   $this->Records  Find-Result List
 public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
-	$filter = $this->normalize_filter($filter);
-    $fields_list = array_combine($filter,$filter);
-    $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
+    if(empty($filter)) $fields_list = $this->dbDriver->raw_columns;
+    else {
+        $fields_list = array_filter($this->dbDriver->raw_columns,function($v) { return in_array($v,$filter);},ARRAY_FILTER_USE_KEY);
+        $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
+    }
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => $this->SortDefault ];
     else if(is_scalar($sort)) {
@@ -475,7 +477,7 @@ public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
     }
     $this->dbDriver->findRecord($cond,FALSE,$sort,true);
 	$this->record_max = $this->dbDriver->recordMax;
-    while (($fields = $this->dbDriver->fetch_locale())) {
+    while(($fields = $this->dbDriver->fetch_array())) {
         unset($record);
         foreach($fields_list as $key => $val) {
             $record[$key] = $fields[$key];
@@ -653,7 +655,6 @@ public function UploadCSV($path) {
 				}
 				$row = array_combine($raw_columns,$data);
 				list($primary,$id) = array_first_item($row);
-debug_dump(['TABLE'=>$this->dbDriver->raw_table,'PRIMARY'=>[$primary,$id],'ROW'=>$row]);
 				$this->dbDriver->updateRecord([$primary=>$id],$row);
 			}
 			fclose($handle);
@@ -664,7 +665,7 @@ debug_dump(['TABLE'=>$this->dbDriver->raw_table,'PRIMARY'=>[$primary,$id],'ROW'=
 }
 //==============================================================================
 // CSV file download data
-public function RecordsCSV($map=true) {
+public function RecordsCSV($map=true,$limit=0) {
 	$records = $this->Records;
 	if(empty($records)) return false;
 	$col = reset($records);
@@ -682,8 +683,9 @@ public function RecordsCSV($map=true) {
 	}
 	$csv = [ implode(',',$keys) ];	// column header
 	foreach($records as $columns) {
-		$row = array_map(function($v) {
+		$row = array_map(function($v) use(&$limit) {
 			if(mb_strpos($v,'"') !== false) $v = str_replace('"','\\"',$v);
+			if($limit !== 0 && mb_strlen($v) > $limit) $v = mb_substr($v,0,$limit)."...";
 			if(preg_match('/[\s,]/s',$v)) $v = "\"{$v}\"";
 			return $v;
 		},$columns);
