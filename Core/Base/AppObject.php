@@ -74,47 +74,51 @@ class AppObject {
 public function __get($PropName) {
     if($this->autoload === FALSE) return NULL;
     if(isset($this->$PropName)) return $this->$PropName;
-    $class_names = [
-        'Model'         =>  -5,
-        'Controller'    => -10,
-        'Class'    		=>  -5,
-    ];
-    if(array_key_exists($PropName,$class_names)) {
-        $mod_name = $this->ModuleName;
-        $cls_name = $PropName;
-    } else  {
-        $mod_name = $PropName;
-        $cls_name = 'Model';
-        foreach($class_names as $c_name => $len) {
-            if($c_name === substr($PropName,$len)) {
-                $mod_name = substr($PropName,0,$len);
-                $cls_name = $c_name;
-                break;
-            }
-        }
-    }
-    // already class file loaded?
+	list($mod_name,$cls_name) = get_mod_class_name($PropName);
+	if(empty($mod_name)) $mod_name = $this->ModuleName;
     $prop_name = "{$mod_name}{$cls_name}";
+	// Delegate the required() action to the ClassLoader()
     if(class_exists($prop_name)) {
         $this->$PropName = ClassManager::Create($prop_name,$prop_name,$this);
         return $this->$PropName;
     }
-    // app/modules/* path search
-    $modfile = App::Get_AppPath("modules/{$mod_name}/{$prop_name}.php");
-    if(file_exists($modfile)) {
-        if($cls_name === 'Controller') {
-            App::LoadModuleFiles($mod_name);    // Load on Controller,Model,Helper
-            if(class_exists($prop_name)) {      // is SUCCESS?
-                // Controller create with Model,View.Helper
-                $this->$PropName = ClassManager::Create($prop_name,$prop_name,$this);
-                return $this->$PropName;
-            }
-        } else {
-            require_once($modfile);
-            $this->$PropName = ClassManager::Create($prop_name,$prop_name,$this);
-            return $this->$PropName;
-        }
-    }
+    // $class_names = [
+    //     'Model'         =>  -5,
+    //     'Controller'    => -10,
+    //     'Class'    		=>  -5,
+    // ];
+    // if(array_key_exists($PropName,$class_names)) {
+    //     $mod_name = $this->ModuleName;
+    //     $cls_name = $PropName;
+    // } else  {
+    //     $mod_name = $PropName;
+    //     $cls_name = 'Model';
+    //     foreach($class_names as $c_name => $len) {
+    //         if($c_name === substr($PropName,$len)) {
+    //             $mod_name = substr($PropName,0,$len);
+    //             $cls_name = $c_name;
+    //             break;
+    //         }
+    //     }
+    // }
+    // already class file loaded?
+    // $prop_name = "{$mod_name}{$cls_name}";
+    // // app/modules/* path search
+    // $modfile = App::Get_AppPath("modules/{$mod_name}/{$prop_name}.php");
+    // if(file_exists($modfile)) {
+    //     if($cls_name === 'Controller') {
+    //         App::LoadModuleFiles($mod_name);    // Load on Controller,Model,Helper
+    //         if(class_exists($prop_name)) {      // is SUCCESS?
+    //             // Controller create with Model,View.Helper
+    //             $this->$PropName = ClassManager::Create($prop_name,$prop_name,$this);
+    //             return $this->$PropName;
+    //         }
+    //     } else {
+    //         require_once($modfile);
+    //         $this->$PropName = ClassManager::Create($prop_name,$prop_name,$this);
+    //         return $this->$PropName;
+    //     }
+    // }
     throw new Exception("SubClass Create Error for '{$prop_name}'");
 }
 //==============================================================================
