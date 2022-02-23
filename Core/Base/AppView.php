@@ -116,11 +116,11 @@ public function ViewTemplate($name,$vars = []) {
         $ix = array_search($ext, self::Extensions);
         switch($ix) {   //   [ .tpl, .php, .inc, .twg ]
         case 0:         // '.tpl'   div Section
-$run_time = microtime(TRUE);
+//$run_time = microtime(TRUE);		// パーサーの実行時間を測る
             $parser = new SectionParser($tmplate);
             $divSection = $parser->getSectionDef(true);
-$tm = round((microtime(TRUE) - $run_time), 5);     // 少数2位まで
-debug_log(DBMSG_DEBUG,["ExecTime({$tmplate})"=>"{$tm} sec"]);
+//$tm = round((microtime(TRUE) - $run_time), 5);     // 少数2位まで
+//debug_log(DBMSG_DEBUG,["ExecTime({$tmplate})"=>"{$tm} sec"]);
              $this->inlineSection = [];         // Clear Inline-Section in this TEMPLATE
              debug_log(DBMSG_VIEW,["SEC-VARS" => $vars,"SECTION @ {$name}" => $divSection]);
              $this->sectionAnalyze($divSection,$vars);
