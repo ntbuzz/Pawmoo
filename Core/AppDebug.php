@@ -176,30 +176,35 @@ function debug_log($lvl,...$items) {
     list($cli,$lvl) = $logging;
     if($lvl < -DBMSG_DIE) return;
     // バックトレースから呼び出し元の情報を取得
-    $dump_log_info = function($items) {
-        $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
-        $trace = "";
-        foreach($dbinfo as $stack) {
-            if(isset($stack['file'])) {
-                $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
-                list($pp,$fn,$ext) = extract_path_file_ext($path);
-                if($fn !== 'AppDebug') {                            // 自クラスの情報は不要
-                    $func = "{$fn}({$stack['line']})";
-                    $trace = (empty($trace)) ? $func : "{$func}>{$trace}";
-                }
-            }
-        }
-        $sep = 	str_repeat("-", 30);
-        $dmp_msg = "TRACE:: {$trace}\n";
+    $dump_log_info = function($items,$level) {
+		if($level === -115 || $level === -114) {	// システムと言語リソースはトレース情報省略
+			$dmp_msg =  '';
+		} else {
+			$dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
+			$trace = "";
+			foreach($dbinfo as $stack) {
+				if(isset($stack['file'])) {
+					$path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
+					list($pp,$fn,$ext) = extract_path_file_ext($path);
+					if($fn !== 'AppDebug') {                            // 自クラスの情報は不要
+						$func = "{$fn}({$stack['line']})";
+						$trace = (empty($trace)) ? $func : "{$func}>{$trace}";
+					}
+				}
+			}
+			$sep = 	str_repeat("-", 30);
+			$dmp_msg = "TRACE:: {$trace}\n";
+		}
         // 子要素のオブジェクトをダンプする関数
         $dump_object = function ($obj,$indent) use (&$dump_object) {
 			$is_scalar_array = function($arr) {
-				foreach($arr as $element) if(!is_scalar($element)) return FALSE;
+				foreach($arr as $element) if($element!==NULL && !is_scalar($element)) return FALSE;
 				return TRUE;
 			};
-			if(array_values($obj) === $obj && $is_scalar_array($obj) && $indent>1) {
+			if(array_values($obj) === $obj && $is_scalar_array($obj) && $indent>=0) {
 				$vals = implode(", ",array_map(function($v) {
-					return (is_string($v)) ? str_replace(["\r\n","\r","\n","\t"],['\r\n', '\r', '\n', '\t'], $v) :$v;
+					if($v === NULL) return 'NULL';
+					else return (is_string($v)) ? str_replace(["\r\n","\r","\n","\t"],['\r\n', '\r', '\n', '\t'], $v):$v;
 				}, $obj));
 				$dmp = str_repeat(' ',$indent*2) . "[ {$vals} ]\n";
 			} else {
@@ -267,7 +272,7 @@ function debug_log($lvl,...$items) {
         return "{$dmp_msg}\n";
     };
 //    global $debug_log_str;
-    $dmp_info = $dump_log_info($items);
+    $dmp_info = $dump_log_info($items,$lvl);
     if(!empty($dmp_info)) {
 		$pre_dump = (CLI_DEBUG) ? "\n{$dmp_info}\n" : "<pre>\n{$dmp_info}\n</pre>\n";
         switch($lvl) {
