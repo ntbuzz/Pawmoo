@@ -35,9 +35,9 @@ class AppModel extends AppObject {
     public $TimeFormat;              // Time format for Database
     public $DateTimeFormat;          // TimeStamp format for Database
     public $SortDefault = SORTBY_ASCEND;    // findRecord Default Sort Sequence
-    private $FieldSchema = [];       // Pickup Record fields columns [ref_name, org_name]
-    private $Relations = [];         // Table Relation
-    private $SelectionDef = [];      // Selection JOIN list
+    protected $FieldSchema = [];       // Pickup Record fields columns [ref_name, org_name]
+    protected $Relations = [];         // Table Relation
+    protected $SelectionDef = [];      // Selection JOIN list
 //==============================================================================
 //	Constructor: Owner
 //==============================================================================
@@ -87,15 +87,15 @@ public function ResetSchema() {
         $this->ModuleName => [
 //            "Header"    => $this->HeaderSchema,
 //            "Field"     => $this->FieldSchema, 
-            "Join-Defs"     => $this->dbDriver->relations,
+            "Relations"     => $this->dbDriver->relations,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
-            "Select-Defs"   => $this->SelectionDef,
+//            "Select-Defs"   => $this->SelectionDef,
         ]
     ]);
 }
 //==============================================================================
 // Schema Define Analyzer
-    private function SchemaAnalyzer() {
+    protected function SchemaAnalyzer() {
         $header = $relation = $locale = $bind = $field = [];
         foreach($this->Schema as $key => $defs) {
             $ref_key = $key;
@@ -162,7 +162,7 @@ public function ResetSchema() {
     }
 //==============================================================================
 // Table Relation setup DBMSG_MODEL
-    private function RelationSetup() {
+protected function RelationSetup() {
         $new_Relations = [];
         foreach($this->Relations as $key => $rel) {
             $base_name = id_relation_name($key);
@@ -203,7 +203,7 @@ public function ResetSchema() {
     }
 //==============================================================================
 // Selection Table Relation setup
-    private function SelectionSetup() {
+protected function SelectionSetup() {
         $new_Selection = [];
         $separate_rel_cond = function($defs) {
             $rel = $cond = [];
