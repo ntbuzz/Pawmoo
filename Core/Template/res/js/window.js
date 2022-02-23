@@ -30,5 +30,15 @@ $(document).on('change','.combobox>select',function () {
 	inbox.val(txt);
 	inbox.addClass('modified');
 });
+// INPUT 数字
+$(document).on('change','input.numeric[type="text"]',function () {
+	var num = $(this).val().hankaku();
+	if(num.charsetCheck('#')) {
+		$(this).val(num);
+		return false;
+	};
+	alert("数値で入力");
+	$(this).focus();
+});
 // ウィンドウサイズ調整
 $(window).resize();

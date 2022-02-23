@@ -31,6 +31,12 @@ String.prototype.trim2 = function() {
     return this.replace(/^[\s　]+|[\s　]+$/g, '');
 };
 //====================================================
+// hankaku
+String.prototype.hankaku = function() {
+	return this.replace(/[Ａ-Ｚａ-ｚ０-９．]/g,function(s){
+			return String.fromCharCode(s.charCodeAt(0)-0xFEE0);});
+};
+//====================================================
 // check cannot use URI-charactor
 String.prototype.is_invalid_name = function () {
     return (this.match(/^.*[\+%#].*?$/));
