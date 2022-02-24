@@ -139,6 +139,8 @@ String.prototype.charsetCheck = function (kind,mxlen) {
 		case '0': str = this.replace(/[0-9]/g,'');break;
 		case '!': str = this.replace(/[!#$%&=^@;:,_~\"\'\(\)\[\]\.\?\+\-\/\*]/g, ''); break;
 		case '#': str = this.replace(/^([1-9]\d*|0)(\.\d+)?$/, ''); break;
+		case '@': str = this.replace(/^\d{4}[\/\-]\d{2}[\/\-]\d{2}$/, ''); break;
+		case ':': str = this.replace(/^\d{4}[\/\-]\d{2}[\/\-]\d{2} \d{2}:\d{2}:\d{2}$/, ''); break;
 		default: str = this.replace(/[a-zA-Z0-9_]/g,'');
 		};
 		if(str.length == len) return false;

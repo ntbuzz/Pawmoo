@@ -30,15 +30,28 @@ $(document).on('change','.combobox>select',function () {
 	inbox.val(txt);
 	inbox.addClass('modified');
 });
-// INPUT 数字
-$(document).on('change','input.numeric[type="text"]',function () {
-	var num = $(this).val().hankaku();
-	if(num.charsetCheck('#')) {
-		$(this).val(num);
+
+// 文字種チェック
+function InputCharsetCheck(target, kind, msg) {
+	var str = target.val().hankaku();
+	if(str.charsetCheck(kind)) {
+		target.val(str);
 		return false;
 	};
-	alert("数値で入力");
-	$(this).focus();
+	alert(msg);
+	target.focus();
+}
+// INPUT 数字
+$(document).on('change', 'input.numeric[type="text"]', function () {
+	InputCharsetCheck($(this), '#', '${#core.NUMERIC}');
+});
+// INPUT 日付
+$(document).on('change', 'input.date[type="text"]', function () {
+	InputCharsetCheck($(this), '@', '${#core.DATEFMT}');
+});
+// INPUT 日時
+$(document).on('change', 'input.datetime[type="text"]', function () {
+	InputCharsetCheck($(this), ':', '${#core.TIMESTAMP}');
 });
 // ウィンドウサイズ調整
 $(window).resize();
