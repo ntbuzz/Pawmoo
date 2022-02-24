@@ -339,7 +339,7 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 				$this->Select[$key_name] = $this->$model->SelectFinder(true,$ref_list,$cond);
 			} else if(method_exists($this->$model,$method)) {	// case f.
 				$method_val = $this->$model->$method($args,$cond);
-				ksort($method_val,SORT_FLAG_CASE | SORT_STRING );
+//				ksort($method_val,SORT_FLAG_CASE | SORT_STRING );
 				$this->Select[$key_name] = $method_val;
 			}
 		} else {
@@ -347,10 +347,12 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 			$ref_list = array_filter(explode('.', $ref_list), "strlen" );
 			$this->Select[$key_name] = $this->$model->SelectFinder(false,$ref_list,$cond);
 		}
-		switch($sort_val) {
-		case true:
-		case SORTBY_ASCEND:	asort($this->Select[$key_name]); break;
-		case SORTBY_DESCEND:arsort($this->Select[$key_name]); break;
+		if($sort_val !== false) {
+			switch($sort_val) {
+			case true:
+			case SORTBY_ASCEND:	asort($this->Select[$key_name]); break;
+			case SORTBY_DESCEND:arsort($this->Select[$key_name]); break;
+			}
 		}
 	}
 }
@@ -684,9 +686,11 @@ public function RecordsCSV($map=true,$limit=0) {
 	$csv = [ implode(',',$keys) ];	// column header
 	foreach($records as $columns) {
 		$row = array_map(function($v) use(&$limit) {
-			if(mb_strpos($v,'"') !== false) $v = str_replace('"','\\"',$v);
 			if($limit !== 0 && mb_strlen($v) > $limit) $v = mb_substr($v,0,$limit)."...";
-			if(preg_match('/[\s,]/s',$v)) $v = "\"{$v}\"";
+			if(mb_strpos($v,'"') !== false) $v = str_replace('"','""',$v);
+			foreach([' ',',',"\f","\t","\r","\n"] as $esc) {
+				if(strpos($v,$esc)!==false) return "\"{$v}\"";
+			}
 			return $v;
 		},$columns);
 		$csv[] = implode(',',$row);

@@ -3,8 +3,8 @@
  * Object Oriented PHP MVC Framework
  *  DatabaseHandler: Database Connection Handling
  */
-define('SORTBY_ASCEND', 0);
-define('SORTBY_DESCEND', 1);
+define('SORTBY_ASCEND', 1);
+define('SORTBY_DESCEND', 2);
 
 require_once('Core/Handler/SqlHandler.php');
 // 各種データベースへのアクセスハンドラ
