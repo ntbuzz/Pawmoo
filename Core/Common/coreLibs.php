@@ -55,6 +55,7 @@ function get_mod_class_name($PropName) {
     $class_names = [
         'Model'         =>  -5,
         'Controller'    => -10,
+        'Helper'    	=>  -6,
         'Class'    		=>  -5,
     ];
     if(array_key_exists($PropName,$class_names)) {
@@ -566,7 +567,12 @@ function make_combobox($sel_item,$opt_list,$size,$name='') {
 	$input_val = $sel_item;
 	$tag= "<div class='combobox' style='width:{$sz};'>\n<select>\n";
 	foreach($opt_list as $opt => $val) {
-		$sel = ($val == $sel_item) ? ' selected':'';
+		if($val === '-') {
+			$sel = ' disabled="disabled"';
+			$opt = str_repeat('-',20);
+		} else {
+			$sel = ($val == $sel_item) ? ' selected':'';
+		}
 		$tag= "{$tag}<OPTION{$sel}>{$opt}</OPTION>\n";
 	}
 	$sz -= 2;
