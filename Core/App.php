@@ -205,6 +205,12 @@ public static function Get_ActionRoot($path = '',$lower = FALSE) {
 	return implode('/',$URI);
 }
 //==============================================================================
+// カレントのURIを指定キーに保存する、既に保存されていれば何もしない
+public static function Save_MyURL($save_key) {  
+	$save_url = MySession::getAppData($save_key,false);
+	if(empty($save_url)) MySession::setAppData($save_key,static::$SysVAR['URI']);
+}
+//==============================================================================
 // POST/GET変数の要素名による取得
 private static function query_element($arr,$filter,$default_value) {
 	if(is_array($filter)) {
