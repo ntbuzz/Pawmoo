@@ -1,3 +1,3 @@
 @echo off
 
-php.exe console/database.php %1/%2
+php.exe utl/database.php %1/%2

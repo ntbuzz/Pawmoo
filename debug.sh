@@ -1,4 +1,4 @@
 !/bin/bash
 
-php console/debug.php $1/$2
+php utl/debug.php $1/$2
 
