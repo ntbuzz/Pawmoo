@@ -647,7 +647,7 @@ public function ViewTemplate($name,$vars = []) {
 			$atext = $this->expand_Strings("\n{$atext}\n\n",$vars);
 			$mtext = pseudo_markdown($atext,$cls);
 		} else {
-			// pre-expand for checkbox and radio/select markdown
+			// pre-expand for checkbox and radio/select/combobox/checkbox/textbox markdown
 			$atext = preg_replace_callback('/(\[[^\]]*?\]\{(?:\$\{[^\}]+?\}|[^\}])+?\}|\^\[[^\]]*?\][%@:=+]\{(?:\$\{[^\}]+?\}|[^\}])+?\})/',
 				function($m) use(&$vars) {
 					list($pat,$var) = $m;

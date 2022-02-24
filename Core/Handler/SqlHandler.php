@@ -120,7 +120,7 @@ public function getValueLists($table,$ref,$id,$cond=NULL) {
 	$sql = $this->sql_QueryValues($table,$ref,$id,$cond);
 	$this->execSQL($sql);
 	$values = array();
-	debug_log(9,["VALUE-LIST" => [$table,$ref,$id,$sql,'REL'=>$this->relations,'ALIAS'=>$this->fieldAlias->GetAlias()]]);
+//	debug_log(9,["VALUE-LIST" => [$table,$ref,$id,$sql,'REL'=>$this->relations,'ALIAS'=>$this->fieldAlias->GetAlias()]]);
 	while ($row = $this->fetch_array()) {	// other table refer is not bind!
 		$key = $row[$ref];
 		if(!empty($key)) $values[$key] = $row[$id];
