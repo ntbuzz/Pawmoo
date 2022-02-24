@@ -186,6 +186,7 @@ static function unsetAppData($names='') {
 		foreach($key_arr as $nm) {
 			if(!array_key_exists($nm,$nVal)) return;
 			$nVal = &$nVal[$nm];
+			if(!is_array($nVal)) return;
 		}
 		unset($nVal[$tag]);           	// Delete Style Parameter for AppStyle
 	}
