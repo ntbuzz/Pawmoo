@@ -1,5 +1,25 @@
 <?php
 //==============================================================================
+function array_extract($arr,$n) {
+	if(is_array($arr)) {
+		$slice = [];
+		foreach($arr as $key => $val) {
+			if(is_int($key)) $slice[] = $val;//(is_array($val))?[$val]:$val;
+			else $slice[] = [$key => $val];
+			--$n;
+		}
+	} else $slice = [$arr];
+	while($n-- > 0)$slice[]=NULL;
+	return $slice;
+}
+//==============================================================================
+function oct_extract($val,$n) {
+	$oct = [];
+	while($n--) { $oct[] = ($val & 07); $val >>= 3; }
+	return $oct;
+}
+
+//==============================================================================
 // Databas Table Create Class
 class AppSchema extends AppBase {
    static $DatabaseSchema = [
@@ -69,7 +89,12 @@ class AppSchema extends AppBase {
 	public $TableName;
 	public $ViewName;
 	public $ViewSet;
-
+	const typeXchanger  = [
+		'Postgre' =>  [],
+		'SQLite' => [
+			'serial' => 'integer',
+		],
+	];
 //==============================================================================
 // setup table-name and view-table list
 	function __construct() {
@@ -90,62 +115,53 @@ class AppSchema extends AppBase {
 // Switch Schema Language
 public function SchemaSetup() {
     $this->SchemaAnalyzer();
-	$this->ResetLocation();
-	debug_log(DBMSG_MODEL,[             // DEBUG LOG information
-        $this->ModuleName => [
-			'FIELD' => $this->FieldSchema,
-			'COLUMN' => $this->columns,
-			'RAW-COLUMN' => $this->raw_columns,
-			// 'LOCALE' => $this->locale_columns,
-			// 'BIND' => $this->bind_columns,
-			'VIEW' => $this->ViewSchema,
-			"Relations"     => $this->dbDriver->relations,
-//            "Select-Defs"   => $this->SelectionDef,
-			"Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
-		],
+	debug_dump([             // DEBUG LOG information
+		'SCHEMA' => $this->Schema,
+		'FIELD' => $this->FieldSchema,
+		'VIEW' => $this->ViewSchema,
 	]);
 }
+//==============================================================================
+// extract DataTable or Alternate DataView
+    private function model_view($db) {
+		list($model,$field) = fix_explode('.',$db,2);
+        if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
+            $model = $m[1];
+            $table = (is_array($this->$model->DataView))
+                        ? $this->$model->DataView[$m[2]]    // View Element Index
+                        : $this->$model->dbDriver->table;	// illegal define
+        } else $table = $this->$model->dbDriver->table;
+        return [$table,$field];
+    }
 //==============================================================================
 //	Constructor: Owner
 public function SchemaAnalyzer() {
 	$this->FieldSchema=$this->ViewSchema = [];
-	$this->columns=$this->raw_columns=[];
-	$this->bind_columns=[];
-	$setup_field = function($key,$defs) {
-		if(is_scalar($defs)) $defs = [$defs];
-		list($dtype,$flag,$width,$rel) = array_extract($defs,4);
-		list($disphead,$align,$csv,$lang) = oct_extract($flag,4);
-		if(is_int($width))
-		$this->FieldSchema[$key] = [$disphead,$width,$align,$csv,$lang];
-		return [$dtype,$rel];
-	};
 	foreach($this->Schema as $key => $defs) {
-		list($dtype,$rel) = $setup_field($key,$defs);
 		list($dtype,$flag,$width,$rel) = array_extract($defs,4);
 		$dtype = strtolower($dtype);
-		$this->columns[$key] = [$dtype,$flag,$width];
+		list($link,$def) = array_first_item($rel);
+		if(!is_scalar($defs) && (!is_int($link) || $width !== NULL)) $this->FieldSchema[$key] = [$dtype,$flag,$width];
+		$val = [$dtype,$flag,$width];
 		if(is_array($rel)) {
-			list($link,$def) = array_first_item($rel);
-			list($dtype,$flag,$width,$rel) = array_extract($defs,4);
-			if(is_int($link)) {
-				$this->columns[$key] = ['bind',$flag,$width];
-				if(is_array($def)) $this->ViewSchema[] = [ $key => $def];
-				else $this->bind_columns[$key] = $rel;
-				//unset($this->raw_columns[$key]);
+			if(is_int($link)) {		// bind or multi-bind
+				if(is_array($def)) {
+					$this->ViewSchema[] = [ $key => $def];
+					if($width !== NULL) $this->FieldSchema[$key] = ['bind',$flag,$width];
+				} else if($width !== NULL) {
+					$this->FieldSchema[$key] = ['bind',$flag,$width,$rel];
+				}
 			} else{
 				$view = [];
-				$this->raw_columns[$key] = $dtype;
 				foreach($def as $kk => $vv) {
-					list($alias,$rr) = $setup_field($kk,$vv);
-					list($dtype,$flag,$width,$rel) = array_extract($vv,4);
-//					$this->columns[$kk] = (is_array($alias))?'alias-bind':'alias';
+					list($alias,$flag,$width,$rel) = array_extract($vv,4);
 					$atype = (is_array($alias))?'alias-bind':'alias';
-					$this->columns[$kk] = ($width===NULL)?$atype:[$atype,$flag,$width];
+					if($width!==NULL) $this->FieldSchema[$kk] = ($width===NULL)?$atype:[$atype,$flag,$width];
 					$view[$kk] = $alias;
 				}
 				$this->ViewSchema[$link] = $view;
 			}
-		} else $this->raw_columns[$key] = $dtype;
+		}
 	}
 }
 //==============================================================================

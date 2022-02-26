@@ -203,7 +203,7 @@ private function createSchema($fields) {
 						$bstr = array_map(function($v) use(&$lng) {
 							return "{$v}_{$lng}";
 						},$bind);
-						$col["{$name}_{$lng}"] = [ $type, $flag, NULL, $bstr ];
+						$col["{$name}_{$lng}"] = [ $type, $flag, NULL, $bstr];
 					}
 				}
 				break;
@@ -212,7 +212,7 @@ private function createSchema($fields) {
 				if(is_array($langs)) {
 					$flag &= 00700;			// CSVのみ残す
 					foreach($langs as $lng) {
-						$col["{$field}_{$lng}"] = [ $type, $flag];
+						$col["{$field}_{$lng}"] = $type;//[ $type, $flag];
 					}
 				}
 				if(!empty($rel)) {
@@ -220,6 +220,7 @@ private function createSchema($fields) {
 				}
 		}
 	}
+debug_dump(['FIELD'=>$col]);
 	return [$resource,$col];
 }
 //==============================================================================
@@ -236,17 +237,20 @@ private function makeSchema($Schema) {
 		}
 		return '[ '.implode(',',$bind).' ]';		// self-bind
 	};
+xdebug_dump(['Make'=>$Schema]);
 	$line = ["'Schema' => ["];
 	foreach($Schema as $key=>$defs) {
-		list($type,$flag,$wd) = array_alternative($defs,3);
-		list($link,$rels) =	array_first_item(array_slice($defs, 3, 1, true));
+		list($type,$flag,$wd,$rel) = array_extract($defs,4);
+		list($link,$rels) = array_first_item($rel);
 		$flag = $oct_fix($flag);
 		if(empty($rels)) {
 			$wd = ($wd === NULL) ?'':",\t{$wd}";
-			$line[] ="\t'{$key}'\t=> [ '{$type}',\t{$flag}{$wd} ],";
+			if(is_scalar($defs)) $line[] ="\t'{$key}'\t=> '{$type}',";
+			else $line[] ="\t'{$key}'\t=> [ '{$type}',\t{$flag}{$wd} ],";
 		} else if(is_int($link)) {
 			if($wd === NULL) $wd = 'NULL';
-			$bstr = $rel_bind($rels);		// self-bind
+			if(!is_array($rels)) $rels = $rel;	// self-bind
+			$bstr = $rel_bind($rels);		
 			$val = implode('',array_values($rels));
 			if(strpos($val,'.') !== false) $bstr = "\n\t\t\t[ {$bstr} ]\n\t\t"; // view-bind
 			$line[] ="\t'{$key}'\t=> [ 'bind',\t{$flag},\t{$wd},{$bstr} ],";
@@ -328,8 +332,9 @@ EOT;
 //==============================================================================
 // フォルダ内のスキーマ定義ファイルをスキャンする
 private function GenModel($path,$target,$model) {
-echo "Model($model)\n";
 	$this->$model->SchemaSetup();
+	$schema_txt = $this->makeSchema($this->$model->FieldSchema);
+	echo "{$schema_txt}\n";
 }
 //==============================================================================
 // Execute Create TABLE,VIEW, and INTIAL DATA
