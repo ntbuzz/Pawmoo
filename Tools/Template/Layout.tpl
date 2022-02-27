@@ -7,7 +7,7 @@
 ]
 
 .appWindow=>[
-	h1. => "This is INITIAL MODULE"
+	h1. => "This is TEMPLATE LAYOUT."
 
 ]
 

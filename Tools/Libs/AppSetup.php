@@ -38,14 +38,16 @@ class AppSetup  extends AppBase {
 	];
 	// 初期ファイル
 	const Template = [
-		'config.php'		=> 'config.php',
+		'config.php'		=> true,
 		'*Controller.php'	=> 'Controller.php',
 		'*Helper.php'		=> 'Helper.php',
 		'*Model.php'		=> 'Model.php',
-		'Layout.tpl'		=> 'Layout.tpl',
-		'mystyle.css'		=> 'mystyle.css',
-		'myscript.js'		=> 'myscript.js',
-		'template.mss'		=> 'template.mss',
+		'Layout.tpl'		=> true,
+		'Header.tpl'		=> true,
+		'Footer.tpl'		=> true,
+		'mystyle.css'		=> true,
+		'myscript.js'		=> true,
+		'template.mss'		=> true,
 	];
 
 //==============================================================================
@@ -56,8 +58,8 @@ private function CreateFile($path,$module,$file) {
 		$target = "{$path}/{$modfile}";
 		if(!is_file($target)) {
 			if(array_key_exists($file,self::Template)) {
-				$tmp_file = self::Template[$file];
-				$tmp_file = "Tools/Template/".self::Template[$file];
+				$tmp_file = (self::Template[$file]===true)? $file : self::Template[$file];
+				$tmp_file = "Tools/Template/{$tmp_file}";
 		        $contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 				$template = str_replace('%module%',$module,$contents);
 				file_put_contents($target,$template);
