@@ -1,37 +1,7 @@
 <?php
-/*
-	プロトタイプ・テストクラス
-*/
-define('ROOT_DIR', __DIR__ . '/../../');
-define('IND_DIR', __DIR__ . '/../../Core/');
-// デバッグ用のクラス
-require_once(IND_DIR . 'AppDebug.php');
-require_once(IND_DIR . 'Config/appConfig.php');
-require_once(IND_DIR . 'Common/coreLibs.php');
-require_once(IND_DIR . 'Common/appLibs.php');
-require_once(IND_DIR . 'Common/arrayLibs.php');
-// require_once(IND_DIR . 'Common/markdown.php');
-// require_once(IND_DIR . 'Class/XParser.php');
-// require_once(IND_DIR . 'App.php');
-// require_once(IND_DIR . 'Base/AppObject.php');
-require_once(IND_DIR . 'Base/LangUI.php');
-// require_once(IND_DIR . 'Base/AppView.php');
-// require_once(IND_DIR . 'Base/AppHelper.php');
-// require_once(IND_DIR . 'Class/session.php');
-// require_once(IND_DIR . 'Class/ClassManager.php');
-require_once('Core/Handler/DatabaseHandler.php');
-require_once('AppBase.php');
-require_once('AppSchema.php');
-require_once('database.php');
-
-date_default_timezone_set('Asia/Tokyo');
-
-if(!defined('DEFAULT_LANG'))	 define('DEFAULT_LANG', 'ja');				// Language
-if(!defined('DEFAULT_REGION'))	 define('DEFAULT_REGION', 'jp');			// Region code
-
 //==============================================================================
 // Databas Table Create Class
-class MakeDatabase  extends AppBase {
+class AppSetup  extends AppBase {
 	// アプリケーションツリー構造
 	const PathList = [
 		'common' 	=> [],
@@ -44,15 +14,7 @@ class MakeDatabase  extends AppBase {
 		],
         "extends"	=> [],
         "Models"	=> [],
-        "modules"	=> [
-			'Index' => [
-				'res' => ['css' => [],'js' => [],'template.mss'],
-				'View' => [ 'Layout.tpl' ],
-        		"IndexController.php",
-		        "IndexHelper.php",
-		        "IndexModel.php",
-			],
-		],
+        "modules"	=> [],
 		'View'	=> [
 			'lang' => [ 'common.lng', 'resource.lng' ],
 			'res' => ['css' => [],'js' => [],'template.mss'],
@@ -67,22 +29,38 @@ class MakeDatabase  extends AppBase {
 			'images'=> [],
 		],
 	];
+    const Module = [
+		'res' => ['css' => [ 'mystyle.css' ],'js' => ['myscript.js' ],'template.mss'],
+		'View' => [ 'Layout.tpl' ],
+		"*Controller.php",
+		"*Helper.php",
+		"*Model.php",
+	];
 	// 初期ファイル
 	const Template = [
-		"config.php"			=> "<?php\n\n",
-		"IndexController.php"	=> "<?php\n\nclass IndexController extends AppController {\n\n\n}\n",
-		"IndexHelper.php"		=> "<?php\n\nclass IndexHelper extends AppHelper {\n\n\n}\n",
-		"IndexModel.php"		=> "<?php\n\nclass IndexModel extends AppModel {\n\n\n}\n",
-		'Layout.tpl'			=> "@Header\n.appWindow=>[\n\n]\n@Footer\n",
+		'config.php'		=> 'config.php',
+		'*Controller.php'	=> 'Controller.php',
+		'*Helper.php'		=> 'Helper.php',
+		'*Model.php'		=> 'Model.php',
+		'Layout.tpl'		=> 'Layout.tpl',
+		'mystyle.css'		=> 'mystyle.css',
+		'myscript.js'		=> 'myscript.js',
+		'template.mss'		=> 'template.mss',
 	];
+
 //==============================================================================
 // アプリケーションツリーを作成
-private function CreateFile($path,$file) {
+private function CreateFile($path,$module,$file) {
 	if(is_scalar($file)) {
-		$target = "{$path}/{$file}";
+		$modfile = (substr($file,0,1)==='*') ? $module.substr($file,1) : $file;
+		$target = "{$path}/{$modfile}";
 		if(!is_file($target)) {
 			if(array_key_exists($file,self::Template)) {
-				file_put_contents($target,self::Template[$file]);
+				$tmp_file = self::Template[$file];
+				$tmp_file = "Tools/Template/".self::Template[$file];
+		        $contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
+				$template = str_replace('%module%',$module,$contents);
+				file_put_contents($target,$template);
 			} else {
 				touch($target);
 			}
@@ -95,7 +73,7 @@ private function CreateFile($path,$file) {
 		}
 		foreach($file as $key => $val) {
 			$dir = (is_int($key)) ? $path : "{$path}/{$key}";
-			$this->CreateFile($dir,$val);
+			$this->CreateFile($dir,$module,$val);
 		}
 	}
 }
@@ -157,7 +135,8 @@ private function createSchema($fields) {
 	foreach($fields as $key => $column) {
 		list($name,$field,$lang,$type,$disp,$csv,$rel,$note) = array_values($column);
 		$type = strtolower($type);
-		$resource[$field] = $name;
+		list($fname,$sep) = fix_explode('.',$field,2,NULL);
+		$resource[$fname] = $name;
 		$flag = 0;
         if(preg_match('/([LCR])?(S?)(\d+)/',$disp,$m)===1) {
 			list($tmp,$align,$sort,$wd) = $m;
@@ -173,29 +152,27 @@ private function createSchema($fields) {
 				if(empty($rel)) break;
 				list($id,$rel_name,$rel_bind) = fix_explode('.',$rel,3,NULL);
 				if(!empty($rel_bind)) {
-					list($field,$sep) = fix_explode('.',$field,2,NULL);
 					if($sep === NULL) $rel_name = [$rel_name,$rel_bind];
 					else $rel_name = [$rel_name, $sep => $rel_bind ];
 				}
 				list($link,$rels) =	array_first_item(array_slice($col[$id], 3, 1, true));
-				$rels[$field] = [$rel_name, $flag, $wd ];
+				$rels[$fname] = [$rel_name, $flag, $wd ];
 				if(is_array($langs)) {
 					foreach($langs as $lng) {
 						if(is_array($rel_name)) $bstr = [ array_map(function($v) use(&$lng) {
 							return "{$v}_{$lng}";
 						},$rel_name),NULL,NULL ];
 						else $bstr = "{$rel_name}_{$lng}";
-						$rels["{$field}_{$lng}"] = $bstr;
+						$rels["{$fname}_{$lng}"] = $bstr;
 					}
 				}
 				$col[$id][$link] = $rels;
 				break;
 		case 'bind':
 				list($b1,$b2) = explode("\r\n",$rel);
-				list($name,$sep) = fix_explode('.',$field,2,NULL);
 				if($sep === NULL) $bind = [$b1,$b2];
 				else $bind = [$b1, $sep => $b2 ];
-				$col[$name] = [ $type, $flag, $wd, $bind ];
+				$col[$fname] = [ $type, $flag, $wd, $bind ];
 				// self-bind は言語置換されたものをbindするので置換は不要
 				if(strpos($rel,'.') != false && is_array($langs)) {
 					$flag &= 00700;			// CSVのみ残す
@@ -203,29 +180,28 @@ private function createSchema($fields) {
 						$bstr = array_map(function($v) use(&$lng) {
 							return "{$v}_{$lng}";
 						},$bind);
-						$col["{$name}_{$lng}"] = [ $type, $flag, NULL, $bstr];
+						$col["{$fname}_{$lng}"] = [ $type, $flag, NULL, $bstr];
 					}
 				}
 				break;
 		default:
-				$col[$field] = [ $type, $flag, $wd];
+				$col[$fname] = [ $type, $flag, $wd];
 				if(is_array($langs)) {
 					$flag &= 00700;			// CSVのみ残す
 					foreach($langs as $lng) {
-						$col["{$field}_{$lng}"] = $type;//[ $type, $flag];
+						$col["{$fname}_{$lng}"] = $type;//[ $type, $flag];
 					}
 				}
 				if(!empty($rel)) {
-					$col[$field][$rel] = [];
+					$col[$fname][$rel] = [];
 				}
 		}
 	}
-debug_dump(['FIELD'=>$col]);
 	return [$resource,$col];
 }
 //==============================================================================
 // CSV file Load (must be UTF-8)
-private function makeSchema($Schema) {
+private function makeSchema($Schema,$lang=NULL,$lang_def=false) {
 	$oct_fix = function($dec) {
 		if($dec) $dec = substr("0000".decoct($dec),-5);
 		return $dec;
@@ -242,40 +218,53 @@ xdebug_dump(['Make'=>$Schema]);
 	foreach($Schema as $key=>$defs) {
 		list($type,$flag,$wd,$rel) = array_extract($defs,4);
 		list($link,$rels) = array_first_item($rel);
+		if(is_array($lang) && array_key_exists($key,$lang)) {
+			$comm = "\t// {$lang[$key]}";
+		} else $comm = '';
 		$flag = $oct_fix($flag);
 		if(empty($rels)) {
 			$wd = ($wd === NULL) ?'':",\t{$wd}";
-			if(is_scalar($defs)) $line[] ="\t'{$key}'\t=> '{$type}',";
-			else $line[] ="\t'{$key}'\t=> [ '{$type}',\t{$flag}{$wd} ],";
+			if(is_scalar($defs)) $line[] ="\t'{$key}'\t=> '{$type}',{$comm}";
+			else $line[] ="\t'{$key}'\t=> [ '{$type}',\t{$flag}{$wd} ],{$comm}";
 		} else if(is_int($link)) {
 			if($wd === NULL) $wd = 'NULL';
 			if(!is_array($rels)) $rels = $rel;	// self-bind
 			$bstr = $rel_bind($rels);		
 			$val = implode('',array_values($rels));
 			if(strpos($val,'.') !== false) $bstr = "\n\t\t\t[ {$bstr} ]\n\t\t"; // view-bind
-			$line[] ="\t'{$key}'\t=> [ 'bind',\t{$flag},\t{$wd},{$bstr} ],";
+			$line[] ="\t'{$key}'\t=> [ 'bind',\t{$flag},\t{$wd},{$bstr} ],{$comm}";
 		} else {
 			if($wd === NULL) $wd = 'NULL';
-			$line[] ="\t'{$key}'\t=> [ '{$type}',\t{$flag},\t{$wd},";
+			$line[] ="\t'{$key}'\t=> [ '{$type}',\t{$flag},\t{$wd},{$comm}";
 			$line[] ="\t\t'{$link}'\t=> [\t\t// View-Relation";
 			foreach($rels as $kk => $vv) {
+				if(is_array($lang) && array_key_exists($kk,$lang)) {
+					$comm = "\t// {$lang[$kk]}";
+				} else $comm = '';
 				if(is_array($vv)) {
 					list($name,$flag,$wd) = $vv;
 					$wd = ($wd === NULL) ?'':",\t{$wd}";
 					$name = (is_array($name)) ? $rel_bind($name):"'{$name}'";	// alias-bind
 					if($flag === NULL) {
-						$line[] ="\t\t\t'{$kk}'\t=> [ {$name} ],";
+						$line[] ="\t\t\t'{$kk}'\t=> [ {$name} ],{$comm}";
 					}else{
 						$flag = $oct_fix($flag);
-						$line[] ="\t\t\t'{$kk}'\t=> [ {$name},\t{$flag}{$wd} ],";
+						$line[] ="\t\t\t'{$kk}'\t=> [ {$name},\t{$flag}{$wd} ],{$comm}";
 					}
-				} else $line[] ="\t\t\t'{$kk}'\t=> '{$vv}',";
+				} else $line[] ="\t\t\t'{$kk}'\t=> '{$vv}',{$comm}";
 			}
 			$line[] ="\t\t],";
 			$line[] ="\t],";
 		}
 	}
 	$line[] ="],";
+	if($lang !== NULL && $lang_def) {
+		$line[] = "'Lang' => [";
+		foreach($lang as $key=>$defs) {
+			$line[] ="\t'{$key}'\t=> '{$defs}',";
+		}
+		$line[] ="],";
+	}
 	return implode("\n\t",$line);
 }
 //==============================================================================
@@ -300,41 +289,55 @@ private function GenSchema($path,$targetdir,$langdir) {
 		$database = $this->loadCSV($target);
 		$this->SetProperty($database);
 		list($lng,$col) = $this->createSchema($this->Schema);
-		$lng_txt = $this->makeResource($lng);
-		file_put_contents("{$langdir}{$this->Model}.lng",$lng_txt);
-		$schema_txt = $this->makeSchema($col);
+		$schema_txt = $this->makeSchema($col,$lng,true);
 		if(is_array($this->DataTable)) $table = "['".implode("','",$this->DataTable)."']";
 		else $table = "'{$this->DataTable}'";
 		if(!empty($this->DataView)) {
 			if(is_scalar($this->DataView)) $this->DataView = [$this->DataView];
 			$view = "'DataView' => ['".implode("','",$this->DataView)."'],";
 		} else $view = '';
-		$header = <<<EOT
-<?php
-//==============================================================================
-// Databas Table Create Class
-class {$this->Model}Schema extends AppSchema {
-  static \$DatabaseSchema = [
-	'Handler' => '{$this->Handler}',
-	'DataTable' => {$table},
-	{$view}
-	'Primary' => '{$this->Primary}',
-	'Lang_Alternate' => TRUE,
-	{$schema_txt}
-  ];
-}
-
-EOT;
-		file_put_contents("{$targetdir}{$this->Model}Schema.php",$header);
-		echo $header;
+		$rep_array =[
+			'%model%' => $this->Model,
+			'%handler%' => $this->Handler,
+			'%table%' => $table,
+			'%view%' => $view,
+			'%primary%' => $this->Primary,
+			'%schema%' => $schema_txt,
+		];
+		$tmp_file = "Tools/Template/AppSchema.php";
+		$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
+		$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
+		file_put_contents("{$targetdir}{$this->Model}Schema.php",$template);
+		echo $template;
 	}
 }
 //==============================================================================
 // フォルダ内のスキーマ定義ファイルをスキャンする
 private function GenModel($path,$target,$model) {
-	$this->$model->SchemaSetup();
-	$schema_txt = $this->makeSchema($this->$model->FieldSchema);
-	echo "{$schema_txt}\n";
+	if(empty($model)) return;
+	$schema = $this->$model;
+	$schema->SchemaSetup();
+	$lng_txt = $this->makeResource($schema->Lang);
+	file_put_contents("{$target}Lang/{$model}.lng",$lng_txt);
+	$schema_txt = $this->makeSchema($schema->FieldSchema,$schema->Lang);
+	if(is_array($schema->DataTable)) $table = "['".implode("','",$schema->DataTable)."']";
+	else $table = "'{$schema->DataTable}'";
+	if(!empty($schema->DataView)) {
+		$view = "'DataView' => ['".implode("','",$schema->DataView)."'],";
+	} else $view = '';
+	$rep_array =[
+		'%model%' => $model,
+		'%handler%' => $schema->Handler,
+		'%table%' => $table,
+		'%view%' => $view,
+		'%primary%' => $schema->Primary,
+		'%schema%' => $schema_txt,
+	];
+	$tmp_file = "Tools/Template/AppModel.php";
+	$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
+	$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
+	file_put_contents("{$target}Models/{$model}Model.php",$template);
+	echo $template;
 }
 //==============================================================================
 // Execute Create TABLE,VIEW, and INTIAL DATA
@@ -342,19 +345,22 @@ private function GenModel($path,$target,$model) {
 public function execute($cmd,$appname,$model) {
 	$path = realpath(ROOT_DIR . "app/{$appname}");
 	$config = "{$path}/Config";
+	if(!empty($model)) $model = ucfirst(strtolower($model));
 	switch($cmd) {
 	case 'create':
-		$this->CreateFile($path,self::PathList);
+		$this->CreateFile($path,NULL,self::PathList);
+	case 'module':
+		if(empty($model)) break;
+		$this->CreateFile("{$path}/modules/{$model}",$model,self::Module);
 		break;
 	case 'setup':
 		echo "GENERATE: {$path}\n";
-		$this->loadCSV($config);
 		break;
 	case 'schema':
 		$this->GenSchema("{$config}/Setup","{$config}/Schema/","{$config}/Proto/Lang/");
 		break;
 	case 'model':
-		$this->GenModel("{$config}/Schema","{$config}/Proto/Models/",$model);
+		$this->GenModel("{$config}/Schema","{$config}/Proto/",$model);
 		break;
 	default:
 		echo "BAD COMMAND($cmd)\n";
@@ -362,19 +368,3 @@ public function execute($cmd,$appname,$model) {
 }
 
 }
-//==============================================================================
-// Execute Create TABLE,VIEW, and INTIAL DATA
-
-$ln = str_repeat("=", 50);
-print_r($argv);
-echo "{$ln} START HERE ${ln}\n";
-
-list($self,$cmd,$appname,$model) = array_alternative($argv,4);
-
-SetupLoader::Setup($appname);
-
-$config->Setup(GlobalConfig,'development');
-
-$pawmoo = new MakeDatabase();
-$pawmoo->execute($cmd,$appname,$model);
-

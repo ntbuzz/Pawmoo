@@ -22,72 +22,12 @@ function oct_extract($val,$n) {
 //==============================================================================
 // Databas Table Create Class
 class AppSchema extends AppBase {
-   static $DatabaseSchema = [
-        'Handler' => HANDLER,
-        'DataTable' => 'host_lists',
-        'Primary' => 'id',
-		'Lang_Alternate' => TRUE,
-		'Schema' => [
-            'id'				=> ['serial',	00100,	32],
-            'active'			=> ['boolean',  00122,	22],
-            'status_id'			=> ['integer',  00122,	22],
-			'name_list_id'		=> ['integer',	00100,	NULL,
-				// 連想配列で定義されたものはVIEWで定義、WHERE句の使用可
-				'Names.id' => [
-					'host_name'		=> ['name', 	01002,  50],
-					'host_name_en'	=> 'name_en',
-					'host_name_desc'=> ['description',  	01002,  50],
-					'host_name_desc_en'=> 'description_en',
-					'bind_name'		=> [ ['source','name'],  01002,  50],
-					'bind_name_en'	=> [ ['name','source'] ],
-				],
-			],
-            'product_name'			=> ['text',		01102,	0],
-            'product_name_en'		=> ['text',		00100],
-			'provider_id'	=> ['integer',  00102,  NULL,
-				'Providers.id' => [
-					'provider_name' => [ 'name',  01102,  50],
-					'provider_name_en' => 'name_en',
-				],
-			],
-            'operating_system_id'=> ['integer',	00102,	 NULL,
-				'Os.id' => [
-					'os_name'		=> ['name',				00002,	 0],
-					'os_name_en'	=> 'name_en',
-					'os_family_id'	=> ['os_family_id',		00002,	 0],
-					'os_family_name'=> ['os_family_name',	00002,	 0],
-				],
-			],
-            'location'			=> ['text', 	00101],
-            'entity'			=> ['text',   	00101],
-            'locationentity'	=> ['text',		00001,	 0,	
-				['location','／' => 'entity']
-			],
-			'license_id' => ['integer',	00100,			NULL,
-				'Licenses.id' => [
-					'os_license'	=> ['license',	00002,	 0],
-					'os_license_en'	=> 'license_en',
-				],
-			],
-			'desktop_id' => ['integer',	00100,	NULL,
-				'Desktops.id' => [
-					'desktop' => [	'desktop', 00002,	0],
-					'desktop_en' => 'desktop',
-				],
-			],
-			'multibind_name' => [ 'text',		00000,	 0,	
-				[ ['Licenses.license','Os.name'] ]
-			],
-		],
-    ];
-	public $FieldSchema;
-	public $columns;
-	public $raw_columns;
+	public $FieldSchema;		// read-only column => view column
+	public $TableSchema;		// read/write column => table column
+	public $ro_columns;		// read-only column => view column
 	public $locale_columns;
 	public $bind_columns;
 	public $ViewSchema;
-	public $TableName;
-	public $ViewName;
 	public $ViewSet;
 	const typeXchanger  = [
 		'Postgre' =>  [],
@@ -117,8 +57,9 @@ public function SchemaSetup() {
     $this->SchemaAnalyzer();
 	debug_dump([             // DEBUG LOG information
 		'SCHEMA' => $this->Schema,
+		'VIEW-SCHEMA' => $this->ViewSchema,
+		'TABLE' => $this->TableSchema,
 		'FIELD' => $this->FieldSchema,
-		'VIEW' => $this->ViewSchema,
 	]);
 }
 //==============================================================================
@@ -137,12 +78,17 @@ public function SchemaSetup() {
 //	Constructor: Owner
 public function SchemaAnalyzer() {
 	$this->FieldSchema=$this->ViewSchema = [];
+	$this->TableSchema = [];
 	foreach($this->Schema as $key => $defs) {
 		list($dtype,$flag,$width,$rel) = array_extract($defs,4);
 		$dtype = strtolower($dtype);
 		list($link,$def) = array_first_item($rel);
-		if(!is_scalar($defs) && (!is_int($link) || $width !== NULL)) $this->FieldSchema[$key] = [$dtype,$flag,$width];
-		$val = [$dtype,$flag,$width];
+		if(!is_scalar($defs)) {
+			if(!is_int($link)) $this->TableSchema[$key] =  [$dtype,$flag,$width];
+			if((!is_int($link) || $width !== NULL)) {
+				$this->FieldSchema[$key] = [$dtype,$flag,$width];
+			}
+		}
 		if(is_array($rel)) {
 			if(is_int($link)) {		// bind or multi-bind
 				if(is_array($def)) {
@@ -156,7 +102,7 @@ public function SchemaAnalyzer() {
 				foreach($def as $kk => $vv) {
 					list($alias,$flag,$width,$rel) = array_extract($vv,4);
 					$atype = (is_array($alias))?'alias-bind':'alias';
-					if($width!==NULL) $this->FieldSchema[$kk] = ($width===NULL)?$atype:[$atype,$flag,$width];
+					if($width!==NULL) $this->FieldSchema[$kk] = [$atype,$flag,$width];
 					$view[$kk] = $alias;
 				}
 				$this->ViewSchema[$link] = $view;

@@ -1,13 +1,13 @@
 <?php
-//define('SQLITE_DB',__DIR__ . '/pcenv.db');
 define('SQLITE_DB',__DIR__ . '/testdb.db');
 define('LOCK_DB',__DIR__ . '/lock.db');
 
-define('MYSQL_DB',  'pcmanager');
+define('MYSQL_DB',  'testdb');
+define('PGSQL_DB',  'testdb');
+
 //define('HANDLER',  'MySQL');
 //define('HANDLER',  'Postgre');
 define('HANDLER',  'SQLite');
-define('T_BOOL',  't');
 
 const GlobalConfig = [
 	'Postgre' =>  [
@@ -15,14 +15,8 @@ const GlobalConfig = [
 		'login' => 'postgres',
 		'password' => 'postgres',
 		'encoding' => 'utf8',
-		'Linux' => [
-			'port' => 5532,
-			'database' => 'testdb',
-		],
-		'WINNT' => [
-			'port' => 5432,
-			'database' => 'pcmanager',
-		],
+		'port' => 5532,
+		'database' => PGSQL_DB,
 	],
 	'SQLite' => [
 		'host' => 'localhost',
@@ -33,7 +27,7 @@ const GlobalConfig = [
 	],
 	'MySQL' => [
 		'host' => 'localhost',
-		'database' => 'pcmanager',
+		'database' => MYSQL_DB,
 		'login' => 'root',
 		'password' => 'superman',
 		'encoding' => 'utf8',
