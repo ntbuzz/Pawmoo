@@ -6,6 +6,7 @@
 #			gen			Model/Lang ファイルを作成
 #			table		テーブルとビューを作成
 #			view		ビューのみ作成
+cd ..
 
-php Core/Tools/Setup.php $@
+php Tools/Libs/Setup.php $@
 
