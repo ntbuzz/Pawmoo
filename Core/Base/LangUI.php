@@ -218,3 +218,23 @@ public static function get_array($arr, $mod, $var) {
 }
 
 }
+
+//==============================================================================
+// read LOCALE resource alias func
+// if allow_array will be TRUE, read the Array allowed.
+function lang_get_module($mod, $defs, $allow_array = FALSE) {
+    return LangUI::get_value($mod, $defs, $allow_array);
+}
+//==============================================================================
+function lang_get_core($defs, $allow_array = FALSE) {
+    return LangUI::get_value('core', $defs, $allow_array);
+}
+//==============================================================================
+// read LOCALE resource by array item alias
+function lang_get_module_in($mod, $arr,$defs) {
+    return LangUI::get_array($arr, $mod, $defs);
+}
+//==============================================================================
+function lang_get_core_in($arr,$defs) {
+    return LangUI::get_array($arr, 'core', $defs);
+}
