@@ -1,6 +1,6 @@
 <?php
 
-class {module}Helper extends AppHelper {
+class %module%Helper extends AppHelper {
 
 
 }

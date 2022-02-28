@@ -1,6 +1,6 @@
 <?php
 
-class {module}Controller extends AppController {
+class %module%Controller extends AppController {
 
 
 }
