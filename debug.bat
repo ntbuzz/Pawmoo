@@ -1,3 +1,3 @@
 @echo off
 
-php.exe utl/debug.php %1/%2
+php.exe Tools/cmd/debug.php %1/%2

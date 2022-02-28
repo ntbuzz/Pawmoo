@@ -1,4 +1,4 @@
-!/usr/bin/sh
+#!/usr/bin/sh
 
-php utl/database.php $1/$2
+php Tools/cmd/database.php $1/$2
 
