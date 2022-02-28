@@ -13,7 +13,7 @@ class SetupLoader {
                 return true;
             }
         }
-		echo "NOT FOUND:{$className}\n";
+//		echo "NOT FOUND:{$className}\n";
     }
 //==============================================================================
 // Setup専用のローダー
@@ -60,7 +60,24 @@ public function __get($PropName) {
 		$this->$PropName = new $prop_name();
         return $this->$PropName;
     }
+	debug_trace_info();
+	die("ERROR: NOT-FOUND CLASS @ '{$prop_name}'\n\n");
     throw new Exception("SubClass Create Error for '{$prop_name}'");
 }
 
+}
+function debug_trace_info() {
+	$dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
+	$trace = "";
+	foreach($dbinfo as $stack) {
+		if(isset($stack['file'])) {
+			$path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
+			list($pp,$fn,$ext) = extract_path_file_ext($path);
+			if($fn !== 'AppDebug') {                            // 自クラスの情報は不要
+				$func = "{$fn}({$stack['line']})";
+				$trace = (empty($trace)) ? $func : "{$func}>{$trace}";
+			}
+		}
+	}
+	echo "TRACE:: {$trace}\n";
 }

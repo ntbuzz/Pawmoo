@@ -10,6 +10,7 @@ class AppSetup  extends AppBase {
 				'Setup' => [],
 				'Schema' => [],
 				'Proto' => [ 'Models' => [],'Lang' => [] ],
+				'InitCSV' => [],
 				'config.php',
 		],
         "extends"	=> [],
@@ -49,10 +50,61 @@ class AppSetup  extends AppBase {
 		'myscript.js'		=> true,
 		'template.mss'		=> true,
 	];
-
+	private $AppName;
+	private $AppRoot;
+	private $AppConfig;
+//==============================================================================
+//	constructor( object owner )
+function __construct($appname) {
+	$approot = ROOT_DIR . "/app/";
+	$this->AppName = $appname;
+	$this->AppRoot = "{$approot}{$appname}";
+	$this->AppConfig = "{$this->AppRoot}/Config";
+}
+//==============================================================================
+// Execute Create TABLE,VIEW, and INTIAL DATA
+//	before check Dependent Table
+public function execute($cmd,$model) {
+	if(!empty($model)) $model = ucfirst(strtolower($model));
+	switch($cmd) {
+	case 'create':	// アプリケーションフォルダツリー作成
+		if($this->CreateFile($this->AppRoot,NULL,self::PathList) === false)
+			echo "Create '{$this->AppName}'\n";
+		else echo "Application '{$this->AppName}' allready exist.\n";
+	case 'module':	// アプリケーションモジュールフォルダ作成
+		if(empty($model)) break;
+		if($this->CreateFile("{$this->AppRoot}/modules/{$model}",$model,self::Module) === false)
+			echo "Create Module '{$model}'\n";
+		else echo "Module '{$model}' allready exist.\n";
+		break;
+	case 'schema':	// CSVからスキーマファイルを生成
+		$model = $this->GenSchema($model);
+		if($model === false) echo "Cannot Generated Schema.\n";
+		else echo "Module '{$model}' Schema Generated.\n";
+		break;
+	case 'model':	// スキーマからモデルクラスと言語リソース生成
+		if(empty($model)) break;
+		$this->MakeModel($model);
+		break;
+	case 'setup':	// CSVからスキーマ生成〜モデルクラス〜モジュールフォルダの生成
+		$model = $this->makeModule($model);
+		if($model === false) echo "Cannot Module Setup.\n";
+		else echo "Setup '{$model}' module.\n";
+		break;
+	case 'database':	//スキーマファイルからテーブルとビューを作成
+		$this->MakeDatabase($model);
+		break;
+	case 'view':	//スキーマファイルからテーブルとビューを作成
+		$this->MakeTableView($model);
+		break;
+	default:
+		echo "BAD COMMAND($cmd)\n";
+    }
+}
 //==============================================================================
 // アプリケーションツリーを作成
 private function CreateFile($path,$module,$file) {
+	$exist = true;
 	if(is_scalar($file)) {
 		$modfile = (substr($file,0,1)==='*') ? $module.substr($file,1) : $file;
 		$target = "{$path}/{$modfile}";
@@ -66,32 +118,34 @@ private function CreateFile($path,$module,$file) {
 			} else {
 				touch($target);
 			}
-			echo "Create({$target})\n";
+			$exist = false;
 		}
 	} else if(is_array($file)) {
 		if(!is_dir($path)) {
-			echo "MKDIR({$path})\n";
 			mkdir($path,0777,true);
+			$exist = false;
 		}
 		foreach($file as $key => $val) {
 			$dir = (is_int($key)) ? $path : "{$path}/{$key}";
-			$this->CreateFile($dir,$module,$val);
+			if($this->CreateFile($dir,$module,$val)==false) $exist = false;
+
 		}
 	}
+	return 	$exist;
 }
 //==============================================================================
 // フォルダ内のファイルを取得する
-private function get_files($path,$ext) {
+private function get_files($path,$ext,$full=true) {
     if(!file_exists ($path)) return false;
     setlocale(LC_ALL,"ja_JP.UTF-8");
     $drc=dir($path);
 	$files = [];
     while(false !== ($fl=$drc->read())) {
 		if(! in_array($fl,IgnoreFiles,true)) {
-			$fullpath = "{$path}/{$fl}";
+			$fullpath = "{$path}{$fl}";
 			$ex = substr($fl,strrpos($fl,'.'));
 			if(is_file($fullpath) && ($ex === $ext)) {
-				$files[] = $fullpath;
+				$files[] = ($full) ? $fullpath : $fl;
 			}
 		}
      }
@@ -215,7 +269,6 @@ private function makeSchema($Schema,$lang=NULL,$lang_def=false) {
 		}
 		return '[ '.implode(',',$bind).' ]';		// self-bind
 	};
-xdebug_dump(['Make'=>$Schema]);
 	$line = ["'Schema' => ["];
 	foreach($Schema as $key=>$defs) {
 		list($type,$flag,$wd,$rel) = array_extract($defs,4);
@@ -270,28 +323,20 @@ xdebug_dump(['Make'=>$Schema]);
 	return implode("\n\t",$line);
 }
 //==============================================================================
-// 言語リソース変換
-private function makeResource($lang) {
-	$lng = "Schema => [\n\t.ja => [\n";
-	foreach($lang as $key => $val) {
-		if(strpos($val,' ')!==false) $val = "'{$val}'";
-		else if(strpos($val,'"')!==false) $val = "'{$val}'";
-		else if(strpos($val,"'")!==false) $val = "\"{$val}\"";
-		$lng = "${lng}\t\t{$key}\t=> {$val}\n";
-	}
-	$lng = "${lng}\t]\n]\n";
-	return $lng;
-}
-//==============================================================================
-// フォルダ内のスキーマ定義ファイルをスキャンする
-private function GenSchema($path,$targetdir,$langdir) {
-	$files = $this->get_files($path,'.csv');
-	if($files === false) return;
-	foreach($files as $target) {
-		$database = $this->loadCSV($target);
+// モデルスキーマ定義ファイルをスキャンする
+private function MakeModelSchema($csv_file) {
+	if(is_file($csv_file)) {
+		$database = $this->loadCSV($csv_file);
+		unset($this->Model,$this->Handler,$this->DataView);
 		$this->SetProperty($database);
-		list($lng,$col) = $this->createSchema($this->Schema);
-		$schema_txt = $this->makeSchema($col,$lng,true);
+		if(empty($this->Model)) {
+			list($path,$fname,$ext) = extract_path_file_ext($csv_file);
+			list($fname,$opt) = explode('_',$fname);
+			$this->Model = ucfirst($fname);
+		}
+		if(empty($this->Handler)) $this->Handler = HANDLER;
+		list($lng,$schema) = $this->createSchema($this->Schema);
+		$schema_txt = $this->makeSchema($schema,$lng,true);
 		if(is_array($this->DataTable)) $table = "['".implode("','",$this->DataTable)."']";
 		else $table = "'{$this->DataTable}'";
 		if(!empty($this->DataView)) {
@@ -309,18 +354,33 @@ private function GenSchema($path,$targetdir,$langdir) {
 		$tmp_file = "Tools/Template/AppSchema.php";
 		$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 		$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
-		file_put_contents("{$targetdir}{$this->Model}Schema.php",$template);
-		echo $template;
-	}
+		$target = "{$this->AppConfig}/Schema/{$this->Model}Schema.php";
+		file_put_contents($target,$template);
+		return $this->Model;
+	} else echo "Bad CSV file({$csv_file})\n";
+	return false;
 }
 //==============================================================================
-// フォルダ内のスキーマ定義ファイルをスキャンする
-private function GenModel($path,$target,$model) {
-	if(empty($model)) return;
+// 言語リソース変換
+private function makeResource($lang) {
+	$lng = "Schema => [\n\t.ja => [\n";
+	foreach($lang as $key => $val) {
+		if(strpos($val,' ')!==false) $val = "'{$val}'";
+		else if(strpos($val,'"')!==false) $val = "'{$val}'";
+		else if(strpos($val,"'")!==false) $val = "\"{$val}\"";
+		$lng = "${lng}\t\t{$key}\t=> {$val}\n";
+	}
+	$lng = "${lng}\t]\n]\n";
+	return $lng;
+}
+//==============================================================================
+// モデルスキーマ定義ファイルからクラスファイルと言語リソースを生成する
+private function MakeModel($model) {
+	if(empty($model)) return false;
 	$schema = $this->$model;
-	$schema->SchemaSetup();
 	$lng_txt = $this->makeResource($schema->Lang);
-	file_put_contents("{$target}Lang/{$model}.lng",$lng_txt);
+	$target = "{$this->AppConfig}/Proto/Lang/{$model}.lng";
+	file_put_contents($target,$lng_txt);
 	$schema_txt = $this->makeSchema($schema->FieldSchema,$schema->Lang);
 	if(is_array($schema->DataTable)) $table = "['".implode("','",$schema->DataTable)."']";
 	else $table = "'{$schema->DataTable}'";
@@ -338,35 +398,87 @@ private function GenModel($path,$target,$model) {
 	$tmp_file = "Tools/Template/AppModel.php";
 	$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 	$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
-	file_put_contents("{$target}Models/{$model}Model.php",$template);
-	echo $template;
+	$target = "{$this->AppConfig}/Proto/Models/{$model}Model.php";
+	file_put_contents($target,$template);
+	return $model;
 }
 //==============================================================================
-// Execute Create TABLE,VIEW, and INTIAL DATA
-//	before check Dependent Table
-public function execute($cmd,$appname,$model) {
-	$path = realpath(ROOT_DIR . "app/{$appname}");
-	$config = "{$path}/Config";
-	if(!empty($model)) $model = ucfirst(strtolower($model));
-	switch($cmd) {
-	case 'create':
-		$this->CreateFile($path,NULL,self::PathList);
-	case 'module':
-		if(empty($model)) break;
-		$this->CreateFile("{$path}/modules/{$model}",$model,self::Module);
-		break;
-	case 'setup':
-		echo "GENERATE: {$path}\n";
-		break;
-	case 'schema':
-		$this->GenSchema("{$config}/Setup","{$config}/Schema/","{$config}/Proto/Lang/");
-		break;
-	case 'model':
-		$this->GenModel("{$config}/Schema","{$config}/Proto/",$model);
-		break;
-	default:
-		echo "BAD COMMAND($cmd)\n";
-    }
+// モデルスキーマ定義ファイル(CSV)からスキーマ、モデルクラス、言語リソースを生成
+private function makeModule($model) {
+	if($model) {
+		$model = strtolower($model);
+		$csv_file = "{$this->AppConfig}/Setup/{$model}_def.csv";
+	    if(!file_exists($csv_file)) return false;
+		$files = [$csv_file];
+	} else {
+		$csv_dir = "{$this->AppConfig}/Setup/";
+		$files = $this->get_files($csv_dir,'.csv');
+		if($files === false) return false;
+	}
+	$models = [];
+	foreach($files as $target) {
+echo str_repeat("-", 20)." {$target} ".str_repeat("-", 20)."\n";
+		$module = $this->MakeModelSchema($target);
+		if($module) {
+			$models[] = $module;
+			$this->MakeModel($module);
+			$mod_folder = "{$this->AppRoot}/modules/{$module}";
+			if(!is_dir($mod_folder)) {
+				$this->CreateFile("{$this->AppRoot}/modules/{$module}",$module,self::Module);
+			}
+		}
+	}
+	return implode(', ',$models);
+}
+//==============================================================================
+// フォルダ内のスキーマ定義ファイル(CSV)をスキャンする
+private function GenSchema($model) {
+	if($model) {
+		$model = strtolower($model);
+		$csv_file = "{$this->AppConfig}/Setup/{$model}_def.csv";
+	    if(!file_exists($csv_file)) return false;
+		$files = [$csv_file];
+	} else {
+		$csv_dir = "{$this->AppConfig}/Setup/";
+		$files = $this->get_files($csv_dir,'.csv');
+		if($files === false) return false;
+	}
+	$models = [];
+	foreach($files as $target) {
+		$models[] = $this->MakeModelSchema($target);
+	}
+	return implode(', ',$models);
+}
+//==============================================================================
+// スキーマ定義ファイルからデータベースを作成
+private function MakeDatabase($model) {
+	if(empty($model)) {
+		$schema_dir = "{$this->AppConfig}/Schema/";
+		$files = $this->get_files($schema_dir,'.php',false);
+		if($files === false) return;
+		$files = array_map(function($v) { return str_replace('Schema.php','',$v);},$files);
+	} else $files = [$model];
+	// 指定された、見つかったクラスファイルを全て処理する
+	foreach($files as $model) {
+		$schema = $this->$model;
+		$schema->CreateDatabase(true);
+		$schema->CreateTableView(true);
+	}
+}
+//==============================================================================
+// スキーマ定義ファイルからビューを作成
+private function MakeTableView($model) {
+	if(empty($model)) {
+		$schema_dir = "{$this->AppConfig}/Schema/";
+		$files = $this->get_files($schema_dir,'.php',false);
+		if($files === false) return;
+		$files = array_map(function($v) { return str_replace('Schema.php','',$v);},$files);
+	} else $files = [$model];
+	// 指定された、見つかったクラスファイルを全て処理する
+	foreach($files as $model) {
+		$schema = $this->$model;
+		$schema->CreateTableView();
+	}
 }
 
 }

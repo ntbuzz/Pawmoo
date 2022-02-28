@@ -24,10 +24,8 @@ function oct_extract($val,$n) {
 class AppSchema extends AppBase {
 	public $FieldSchema;		// read-only column => view column
 	public $TableSchema;		// read/write column => table column
-	public $ro_columns;		// read-only column => view column
 	public $locale_columns;
 	public $bind_columns;
-	public $ViewSchema;
 	public $ViewSet;
 	const typeXchanger  = [
 		'Postgre' =>  [],
@@ -49,50 +47,37 @@ class AppSchema extends AppBase {
 		$this->MyTable = $table;
 		$this->ViewSet = $viewset;
         $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->DataTable,$this->Primary);        // connect Database Driver
+        $this->dbDriver = new $driver($this->MyTable,$this->Primary);        // connect Database Driver
+		$this->SchemaSetup();
     }
 //==============================================================================
 // Switch Schema Language
-public function SchemaSetup() {
+private function SchemaSetup() {
     $this->SchemaAnalyzer();
 	debug_dump([             // DEBUG LOG information
 		'SCHEMA' => $this->Schema,
-		'VIEW-SCHEMA' => $this->ViewSchema,
+		'VIEW' => $this->ViewSet,
 		'TABLE' => $this->TableSchema,
 		'FIELD' => $this->FieldSchema,
 	]);
 }
 //==============================================================================
-// extract DataTable or Alternate DataView
-    private function model_view($db) {
-		list($model,$field) = fix_explode('.',$db,2);
-        if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
-            $model = $m[1];
-            $table = (is_array($this->$model->DataView))
-                        ? $this->$model->DataView[$m[2]]    // View Element Index
-                        : $this->$model->dbDriver->table;	// illegal define
-        } else $table = $this->$model->dbDriver->table;
-        return [$table,$field];
-    }
-//==============================================================================
-//	Constructor: Owner
+//	スキーマ解析
 public function SchemaAnalyzer() {
-	$this->FieldSchema=$this->ViewSchema = [];
-	$this->TableSchema = [];
+	$this->FieldSchema = $this->TableSchema = [];
 	foreach($this->Schema as $key => $defs) {
 		list($dtype,$flag,$width,$rel) = array_extract($defs,4);
 		$dtype = strtolower($dtype);
 		list($link,$def) = array_first_item($rel);
-		if(!is_scalar($defs)) {
+		if(is_array($defs)) {
 			if(!is_int($link)) $this->TableSchema[$key] =  [$dtype,$flag,$width];
 			if((!is_int($link) || $width !== NULL)) {
 				$this->FieldSchema[$key] = [$dtype,$flag,$width];
 			}
-		}
+		} else $this->TableSchema[$key] = [$dtype,$flag,$width];
 		if(is_array($rel)) {
 			if(is_int($link)) {		// bind or multi-bind
 				if(is_array($def)) {
-					$this->ViewSchema[] = [ $key => $def];
 					if($width !== NULL) $this->FieldSchema[$key] = ['bind',$flag,$width];
 				} else if($width !== NULL) {
 					$this->FieldSchema[$key] = ['bind',$flag,$width,$rel];
@@ -105,13 +90,12 @@ public function SchemaAnalyzer() {
 					if($width!==NULL) $this->FieldSchema[$kk] = [$atype,$flag,$width];
 					$view[$kk] = $alias;
 				}
-				$this->ViewSchema[$link] = $view;
 			}
 		}
 	}
 }
 //==============================================================================
-//	Constructor: Owner
+//	言語リソースの再設定
 protected function ResetLocation() {
 	$this->locale_columns=[];
 	foreach($this->FieldSchema as $key => $defs) {
@@ -123,6 +107,143 @@ protected function ResetLocation() {
 		}
 	}
 	$this->dbDriver->fieldAlias->SetupAlias($this->locale_columns,$this->bind_columns);
+}
+//==============================================================================
+// execute SQL
+	private function doSQL($exec,$sql) {
+		if(empty($sql)) return;
+		echo "SQL: {$sql}\n";
+		if($exec) $this->dbDriver->execSQL($sql);
+    }
+//==============================================================================
+//	データベーステーブルを作成
+public function CreateDatabase($exec=false) {
+	$sql = $this->dbDriver->drop_sql("TABLE",$this->MyTable);
+	$this->doSQL($exec,$sql);
+	// Create Table
+	$fset = [];
+	foreach($this->TableSchema as $key => $field) {
+		list($ftype,$flag,$width) = (is_array($field)) ? $field : [$field,NULL,NULL];
+		$lftype = strtolower($ftype);
+		if(array_key_exists($lftype,static::typeXchanger[HANDLER])) $ftype = static::typeXchanger[HANDLER][$lftype];
+		$str = "{$key} {$ftype}";
+		if($lftype === 'serial') $str .= " NOT NULL";
+		$fset[] = $str;
+	}
+	$fset[] = "PRIMARY KEY ({$this->Primary})";
+	$sql = "CREATE TABLE {$this->MyTable} (\n";
+	$sql .= implode(",\n",$fset) . "\n);";
+	$this->doSQL($exec,$sql);
+}
+//==============================================================================
+//	テーブルとビューを作成
+public function CreateTableView($exec=false) {
+	foreach($this->ViewSet as $view) {
+		$sql = $this->dbDriver->drop_sql("VIEW",$view);
+		$this->doSQL($exec,$sql);
+	}
+	foreach($this->ViewSet as $view) {
+		debug_dump(["VIEW-DEFS" => $view]);
+		$sql = $this->createView($this->MyTable,$view);
+		$this->doSQL($exec,$sql);
+	}
+}
+//==============================================================================
+// extract DataTable or Alternate DataView
+    private function model_view($db) {
+		list($model,$field) = fix_explode('.',$db,2);
+        if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
+            list($tmp,$model,$n) = $m;
+        } else $n = NULL;
+		$table = $this->$model->get_view_name($n);
+        return [$table,$field];
+    }
+//==============================================================================
+// extract DataTable or Alternate DataView
+public function get_view_name($n) {
+		if($n === NULL) {
+			$table = (is_array($this->DataTable))? $this->DataTable[1]:$this->DataTable;
+		} else if(isset($this->DataView)) {
+			$table = $this->DataView[$n];
+		} else $table = $this->MyTable;
+        return $table;
+    }
+//==============================================================================
+// createView: Create View Table
+// Schema => [
+// 	'hostname'		=> ['text',	false],						// NORMAL Field(TEXT)
+// 	'license_id'	=> ['integer',	false ,'licenses.id'],	// Relation Link LicesesSetup Class
+// ]
+// ViewSchema => [
+//		...
+//		'license_id'	=> [ 'os_license' => 'license' ],		// license_id = Licenses.id => Licenses.license as 'os_license' 
+//		[ 'bind_name.sep' => [ 'entity' , 'location'] ],		// BIND-FIELD on My-Table field
+//		[ 'bind_name.sep' => [ 'table1.refer' , 'ltable2.refer'] ],		// OTHER-TABLE BIND-FIELD
+// ]
+private function createView($table,$view) {
+	$alias_sep = function($key) {
+		if(substr($key, -1) === '.') $key .= ' ';
+		list($alias,$sep) = fix_explode('.',$key,2);
+		return [$alias,$sep];
+	};
+	if(empty($this->ViewSet)) return '';
+	$sql = "CREATE VIEW {$view} AS SELECT\n";
+	$join = $left = [];
+	foreach($this->Schema as $column => $defs) {
+		list($dtype,$flag,$wd,$rel) = array_extract($defs,4);
+	 	if($rel===NULL) $join[] = "{$table}.\"{$column}\"";
+		if(is_array($rel)) {
+			list($key,$rels) = array_first_item($rel);
+			if(is_int($key)) {		// bind
+				list($mbind,$vv) = array_first_item($rels);
+				if(is_array($mbind)) {		// multi-bind
+				} else {	// self-bind
+xdebug_die([$this->Schema,'COL'=>$column,'REL'=>$rel,'RELS'=>$rels]);
+					list($alias,$sep) = $alias_sep($column);
+					$bind = [];
+					foreach($rel as $fn) $bind[] = "{$table}.\"{$fn}\"";
+					$join[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
+				}
+			} else {
+				list($tbl,$id) = $this->model_view($key);
+				foreach($rels as $alias => $val) {
+					if(is_array($val)) {
+						list($name,$flag,$wd) = $val;
+						if(is_array($name)) {	// combine
+							list($alias,$sep) = $alias_sep($alias);
+							$bind = [];
+							foreach($name as $fn) $bind[] = "{$tbl}.\"{$fn}\"";
+							$join[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
+						} else {
+							$join[] = "{$tbl}.\"{$name}\" as {$alias}";
+						}
+					} else {
+						$join[] = "{$tbl}.\"{$val}\" as {$alias}";
+					}
+					if(!isset($left[$tbl])) $left[$tbl] = "LEFT JOIN {$tbl} on {$table}.\"{$column}\" = {$tbl}.{$id}";
+				}
+			}
+		}
+	}
+xdebug_dump(['TABLE'=>$table,'VIEW'=>$view,'JOIN'=>$join,'LEFT'=>$left]);
+	// // relation field Others BIND
+	// $bind = array_filter($view_schema,function($k) { return is_numeric($k);},ARRAY_FILTER_USE_KEY );
+	// foreach($bind as $bind_names) {
+	// 	foreach($bind_names as $key => $bind_fn) {
+	// 		if(is_array($bind_fn)) {	// combine
+	// 			list($alias,$sep) = $alias_sep($key);
+	// 			$bind = array_map(function($fn) use (&$table) {
+	// 				list($tbl,$nm) = (strpos($fn,'.')===false) ? [$table, $fn] : $this->model_view($fn);
+	// 				 return "{$tbl}.\"{$nm}\"";
+	// 			},$bind_fn);
+	// 			$join[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
+	// 		}
+	// 	}
+	// }
+	$sql .= implode(",\n",$join)."\n";
+	$sql .= "FROM {$table}\n";
+	$sql .= implode("\n",$left).";";
+	return $sql;
 }
 
 }
