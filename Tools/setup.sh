@@ -8,5 +8,5 @@
 #			view		ビューのみ作成
 cd ..
 
-php Tools/Libs/Setup.php $@
+php Tools/cmd/Setup.php $@
 
