@@ -352,9 +352,11 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 			case true:
 			case SORTBY_ASCEND:	asort($this->Select[$key_name]); break;
 			case SORTBY_DESCEND:arsort($this->Select[$key_name]); break;
+			default: debug_log(8,['SORT-NONE'=>$this->Select[$key_name]]);
 			}
 		}
 	}
+	default: debug_log(8,['Select'=>$this->Select]);
 }
 //==============================================================================
 //   Get Relation Table fields data list.
