@@ -477,7 +477,7 @@ private function MakeTableView($model) {
 	// 指定された、見つかったクラスファイルを全て処理する
 	foreach($files as $model) {
 		$schema = $this->$model;
-		$schema->CreateTableView(false);
+		$schema->CreateTableView(true);
 	}
 }
 
