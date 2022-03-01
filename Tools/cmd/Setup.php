@@ -3,7 +3,7 @@
 	プロトタイプ・テストクラス
 */
 define('ROOT_DIR', realpath(__DIR__ . '/../..'));
-define('IND_DIR', realpath(__DIR__ . '/../../Core'));
+
 // デバッグ用のクラス
 require_once(ROOT_DIR . '/Core/AppDebug.php');
 require_once(ROOT_DIR . '/Core/Config/appConfig.php');
@@ -11,10 +11,9 @@ require_once(ROOT_DIR . '/Core/Common/coreLibs.php');
 require_once(ROOT_DIR . '/Core/Common/appLibs.php');
 require_once(ROOT_DIR . '/Core/Common/arrayLibs.php');
 require_once(ROOT_DIR . '/Core/Handler/DatabaseHandler.php');
-require_once('AppBase.php');
-require_once('AppSchema.php');
-require_once('AppSetup.php');
-//require_once('database.php');
+require_once(ROOT_DIR . '/Tools/Libs/AppBase.php');
+require_once(ROOT_DIR . '/Tools/Libs/AppSchema.php');
+require_once(ROOT_DIR . '/Tools/Libs/AppSetup.php');
 
 date_default_timezone_set('Asia/Tokyo');
 
