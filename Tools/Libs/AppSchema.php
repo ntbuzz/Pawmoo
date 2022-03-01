@@ -170,16 +170,6 @@ public function get_view_name($n) {
     }
 //==============================================================================
 // createView: Create View Table
-// Schema => [
-// 	'hostname'		=> ['text',	false],						// NORMAL Field(TEXT)
-// 	'license_id'	=> ['integer',	false ,'licenses.id'],	// Relation Link LicesesSetup Class
-// ]
-// ViewSchema => [
-//		...
-//		'license_id'	=> [ 'os_license' => 'license' ],		// license_id = Licenses.id => Licenses.license as 'os_license' 
-//		[ 'bind_name.sep' => [ 'entity' , 'location'] ],		// BIND-FIELD on My-Table field
-//		[ 'bind_name.sep' => [ 'table1.refer' , 'ltable2.refer'] ],		// OTHER-TABLE BIND-FIELD
-// ]
 private function createView($table,$view) {
 	$alias_sep = function($key) {
 		if(substr($key, -1) === '.') $key .= ' ';
@@ -189,17 +179,26 @@ private function createView($table,$view) {
 	if(empty($this->ViewSet)) return '';
 	$sql = "CREATE VIEW {$view} AS SELECT\n";
 	$join = $left = [];
+	$tables = [ $table ];
 	foreach($this->Schema as $column => $defs) {
 		list($dtype,$flag,$wd,$rel) = array_extract($defs,4);
 	 	if($rel===NULL) $join[] = "{$table}.\"{$column}\"";
 		if(is_array($rel)) {
 			list($key,$rels) = array_first_item($rel);
 			if(is_int($key)) {		// bind
-				list($mbind,$vv) = array_first_item($rels);
-				if(is_array($mbind)) {		// multi-bind
+				list($alias,$sep) = $alias_sep($column);
+				if(is_array($rels)) {		// multi-bind
+					$bind = array_map(function($fn) {
+						list($tbl,$nm) = $this->model_view($fn);
+						return "{$tbl}.\"{$nm}\"";
+					},$rels);
+					$btbl = array_map(function($fn) {
+						list($tbl,$nm) = $this->model_view($fn);
+						return $tbl;
+					},$rels);
+					$tables[] = implode(",",$btbl);
+		 			$join[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
 				} else {	// self-bind
-xdebug_die([$this->Schema,'COL'=>$column,'REL'=>$rel,'RELS'=>$rels]);
-					list($alias,$sep) = $alias_sep($column);
 					$bind = [];
 					foreach($rel as $fn) $bind[] = "{$table}.\"{$fn}\"";
 					$join[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
@@ -226,22 +225,8 @@ xdebug_die([$this->Schema,'COL'=>$column,'REL'=>$rel,'RELS'=>$rels]);
 		}
 	}
 xdebug_dump(['TABLE'=>$table,'VIEW'=>$view,'JOIN'=>$join,'LEFT'=>$left]);
-	// // relation field Others BIND
-	// $bind = array_filter($view_schema,function($k) { return is_numeric($k);},ARRAY_FILTER_USE_KEY );
-	// foreach($bind as $bind_names) {
-	// 	foreach($bind_names as $key => $bind_fn) {
-	// 		if(is_array($bind_fn)) {	// combine
-	// 			list($alias,$sep) = $alias_sep($key);
-	// 			$bind = array_map(function($fn) use (&$table) {
-	// 				list($tbl,$nm) = (strpos($fn,'.')===false) ? [$table, $fn] : $this->model_view($fn);
-	// 				 return "{$tbl}.\"{$nm}\"";
-	// 			},$bind_fn);
-	// 			$join[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
-	// 		}
-	// 	}
-	// }
 	$sql .= implode(",\n",$join)."\n";
-	$sql .= "FROM {$table}\n";
+	$sql .= "FROM ".implode(",",$tables)."\n";
 	$sql .= implode("\n",$left).";";
 	return $sql;
 }
