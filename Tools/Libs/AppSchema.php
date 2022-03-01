@@ -63,6 +63,25 @@ private function SchemaSetup() {
 }
 //==============================================================================
 //	スキーマ解析
+	// 'Schema' => [
+	// 	'id'	=> [ 'serial',	00100,	0 ],	通常フィールド
+	// 	'name'	=> [ 'bind',	01110,	50,[ 'firstname','lastname' ] ],	// 結合フィールド
+	// 	'os_id' => [ 'alias',	01110,	50,		リレーションビューフィールド
+	// 		'Os.id' => [							リレーションモデル・キー
+	// 			'os_name' => [ 'name',00100,20],	ビューフィールド
+	// 			'cat_id' => [						
+	// 				'Oscat.id' => [					ネストリレーションモデル・キー
+	// 					'os_providor' => [ 'provider',0100,40],		リレーション名
+	// 					'os_category' => [ 'bind',0100,50, ['name', 'providor', 'cont' ],	// 結合
+	// 					'group_id' => [				ネスト
+	// 						'Osgrp.id' => [
+	// 							'os_group' => [ 'group',0010,50],
+	// 						]
+	// 					]
+	// 				]
+	// 			]
+	// 		]
+	// 	]
 public function SchemaAnalyzer() {
 	$this->FieldSchema = $this->TableSchema = [];
 	foreach($this->Schema as $key => $defs) {
@@ -118,17 +137,20 @@ protected function ResetLocation() {
 //==============================================================================
 //	データベーステーブルを作成
 public function CreateDatabase($exec=false) {
+	// DEOP TABLE
 	$sql = $this->dbDriver->drop_sql("TABLE",$this->MyTable);
 	$this->doSQL($exec,$sql);
 	// Create Table
 	$fset = [];
-	foreach($this->TableSchema as $key => $field) {
-		list($ftype,$flag,$width) = (is_array($field)) ? $field : [$field,NULL,NULL];
-		$lftype = strtolower($ftype);
-		if(array_key_exists($lftype,static::typeXchanger[HANDLER])) $ftype = static::typeXchanger[HANDLER][$lftype];
-		$str = "{$key} {$ftype}";
-		if($lftype === 'serial') $str .= " NOT NULL";
-		$fset[] = $str;
+	foreach($this->Schema as $column => $defs) {
+		list($ftype,$flag,$wd,$bind) = array_extract($defs,4);
+		if(is_scalar($ftype) && ($bind === NULL)) {
+			$lftype = strtolower($ftype);
+			if(array_key_exists($lftype,static::typeXchanger[HANDLER])) $ftype = static::typeXchanger[HANDLER][$lftype];
+			$str = "{$column} {$ftype}";
+			if($lftype === 'serial') $str .= " NOT NULL";
+			$fset[] = $str;
+		}
 	}
 	$fset[] = "PRIMARY KEY ({$this->Primary})";
 	$sql = "CREATE TABLE {$this->MyTable} (\n";
@@ -138,13 +160,14 @@ public function CreateDatabase($exec=false) {
 //==============================================================================
 //	テーブルとビューを作成
 public function CreateTableView($exec=false) {
+	if(empty($this->ViewSet)) return '';
 	foreach($this->ViewSet as $view) {
 		$sql = $this->dbDriver->drop_sql("VIEW",$view);
 		$this->doSQL($exec,$sql);
 	}
 	foreach($this->ViewSet as $view) {
 		debug_dump(["VIEW-DEFS" => $view]);
-		$sql = $this->createView($this->MyTable,$view);
+		$sql = $this->createView($view);
 		$this->doSQL($exec,$sql);
 	}
 }
@@ -170,64 +193,76 @@ public function get_view_name($n) {
     }
 //==============================================================================
 // createView: Create View Table
-private function createView($table,$view) {
+// 'Schema' => [
+// 	'id'	=> [ 'serial',	00100,	0 ],	通常フィールド
+// 	'name'	=> [ 'bind',	01110,	50,[ 'firstname','lastname' ] ],	// 結合フィールド
+// 	'os_id' => [ 'alias',	01110,	50,		リレーションビューフィールド
+// 		'Os.id' => [							リレーションモデル・キー
+// 			'os_name' => [ 'name',00100,20],	ビューフィールド
+// 			'cat_id' => [						
+// 				'Oscat.id' => [					ネストリレーションモデル・キー
+// 					'os_providor' => [ 'provider',0100,40],		リレーション名
+// 					'os_category' => [ 'bind',0100,50, ['name', 'providor', 'cont' ],	// 結合
+// 					'group_id' => [				ネスト
+// 						'Osgrp.id' => [
+// 							'os_group' => [ 'group',0010,50],
+// 						]
+// 					]
+// 				]
+// 			]
+// 		]
+// 	]
+//==============================================================================
+// extract VIEW
+function createView($view) {
 	$alias_sep = function($key) {
 		if(substr($key, -1) === '.') $key .= ' ';
 		list($alias,$sep) = fix_explode('.',$key,2);
 		return [$alias,$sep];
 	};
-	if(empty($this->ViewSet)) return '';
-	$sql = "CREATE VIEW {$view} AS SELECT\n";
-	$join = $left = [];
-	$tables = [ $table ];
-	foreach($this->Schema as $column => $defs) {
-		list($dtype,$flag,$wd,$rel) = array_extract($defs,4);
-	 	if($rel===NULL) $join[] = "{$table}.\"{$column}\"";
-		if(is_array($rel)) {
-			list($key,$rels) = array_first_item($rel);
-			if(is_int($key)) {		// bind
-				list($alias,$sep) = $alias_sep($column);
-				if(is_array($rels)) {		// multi-bind
-					$bind = array_map(function($fn) {
-						list($tbl,$nm) = $this->model_view($fn);
-						return "{$tbl}.\"{$nm}\"";
-					},$rels);
-					$btbl = array_map(function($fn) {
-						list($tbl,$nm) = $this->model_view($fn);
-						return $tbl;
-					},$rels);
-					$tables[] = implode(",",$btbl);
-		 			$join[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
-				} else {	// self-bind
-					$bind = [];
-					foreach($rel as $fn) $bind[] = "{$table}.\"{$fn}\"";
-					$join[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
-				}
-			} else {
-				list($tbl,$id) = $this->model_view($key);
-				foreach($rels as $alias => $val) {
-					if(is_array($val)) {
-						list($name,$flag,$wd) = $val;
-						if(is_array($name)) {	// combine
-							list($alias,$sep) = $alias_sep($alias);
-							$bind = [];
-							foreach($name as $fn) $bind[] = "{$tbl}.\"{$fn}\"";
-							$join[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
-						} else {
-							$join[] = "{$tbl}.\"{$name}\" as {$alias}";
-						}
-					} else {
-						$join[] = "{$tbl}.\"{$val}\" as {$alias}";
-					}
-					if(!isset($left[$tbl])) $left[$tbl] = "LEFT JOIN {$tbl} on {$table}.\"{$column}\" = {$tbl}.{$id}";
-				}
+	$join = [];
+	$fields = [];
+// 	'cat_id' => [ 'Oscat.id' => [ ... ]  ]
+//   key         rels
+	$relations = function($table,$key,$rels) use(&$relations,&$join,&$fields) {
+		list($kk,$arr) = array_first_item($rels);
+		// kk = Oscat.id arr = []
+		list($tbl,$nm) = $this->model_view($kk);
+		$join[] = "LEFT JOIN {$tbl} ON {$table}.{$key}={$tbl}.{$nm}";
+		foreach($arr as $fn => $defs) {
+			list($type,$flag,$wd,$bind) = array_extract($defs,4);
+			//  fn = cat_name, type  = 'name', flag= 00100, $wd=20
+			//  fn = cat_id type  = [ OScat.id => [...], NULL ,NULL ],
+			if(is_array($type)) {	// リレーション
+				$relations($tbl,$fn,$type);
+			} else if($bind===NULL) {
+				$fields[] = "{$tbl}.\"{$type}\" as {$fn}";
+			} else {	// リレーション先のBIND
+				list($alias,$sep) = $alias_sep($fn);
+				$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
 			}
 		}
+	};
+	foreach($this->Schema as $column => $defs) {
+		list($dtype,$flag,$wd,$bind) = array_extract($defs,4);
+		if(is_scalar($dtype)) {
+			if($bind === NULL) {
+				$fields[] = "{$this->MyTable}.\"$column\"";
+			} else if(is_array($bind)) {
+				list($kk,$rel) = array_first_item($bind);
+				if(is_int($kk)) {		// Self Bind
+					list($alias,$sep) = $alias_sep($column);
+		 			$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
+				} else {	// リレーション
+					$relations($this->MyTable,$column,$bind);
+				}
+			}
+		} else {	// リレーション
+			$relations($this->MyTable,$column,$dtype);
+		}
 	}
-xdebug_dump(['TABLE'=>$table,'VIEW'=>$view,'JOIN'=>$join,'LEFT'=>$left]);
-	$sql .= implode(",\n",$join)."\n";
-	$sql .= "FROM ".implode(",",$tables)."\n";
-	$sql .= implode("\n",$left).";";
+	$join_sql = (empty($join)) ? '':implode("\n",$join).";\n";
+	$sql = "CREATE VIEW {$view} AS SELECT\n".implode(",\n",$fields) ."\nFROM {$this->MyTable}\n{$join_sql};\n";
 	return $sql;
 }
 
