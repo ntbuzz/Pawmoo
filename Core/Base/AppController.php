@@ -359,8 +359,9 @@ protected function ListFilter() {
 //==============================================================================
 // CSV Output
 public function CsvAction() {
-	$cond = $this->ListFilter();
-	$this->Model->RecordFinder(NULL);
+//	$cond = $this->ListFilter();
+	$cond = MySession::getAppData("Filter.{$this->ModuleName}",false);
+	$this->Model->RecordFinder($cond);
 	$csv = $this->Model->RecordsCSV(true,255);
 	if($csv === false) {
 		die('CSV FAIL');
