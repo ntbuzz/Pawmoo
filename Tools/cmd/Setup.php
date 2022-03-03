@@ -11,6 +11,7 @@ require_once(ROOT_DIR . '/Core/Common/coreLibs.php');
 require_once(ROOT_DIR . '/Core/Common/appLibs.php');
 require_once(ROOT_DIR . '/Core/Common/arrayLibs.php');
 require_once(ROOT_DIR . '/Core/Handler/DatabaseHandler.php');
+require_once(ROOT_DIR . '/Tools/Libs/funcs.php');
 require_once(ROOT_DIR . '/Tools/Libs/AppBase.php');
 require_once(ROOT_DIR . '/Tools/Libs/AppSchema.php');
 require_once(ROOT_DIR . '/Tools/Libs/AppSetup.php');
@@ -28,7 +29,7 @@ list($self,$cmd,$appname,$model) = array_alternative($argv,4);
 
 SetupLoader::Setup($appname);
 
-$usrconfig = ROOT_DIR ."/app/{$appname}/Config/config.php";
+$usrconfig = ROOT_DIR ."/appSpec/{$appname}/Config/config.php";
 if(is_file($usrconfig)) {
 	require_once($usrconfig);
 	$config->Setup(GlobalConfig,'development');
