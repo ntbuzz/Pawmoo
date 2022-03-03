@@ -55,6 +55,7 @@ class App {
             'REFERER'	=> static::$Referer,
             'REQURI'	=> $uri . array_to_query(static::$Query),
             'URI'		=> $uri,
+            'TODAY'		=> date('Y/m/d'),
             'controller'=> NULL,			// dummy , set by following ResetModule()
             'method'	=> NULL,			// dummy , set by following ResetModule()
             'extention' => NULL,			// dummy , set by following ResetModule()
