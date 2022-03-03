@@ -52,6 +52,7 @@ function array_item_value($arr,$key,$default=NULL) {
 //==============================================================================
 //  To compensate array, fixed count
 function array_alternative($a,$max = 0, $b = []) {
+	if(is_scalar($b)) $b = [];
 	$c = ($max === 0)?$a:array_fill(0,$max,NULL);		// make counter array
 	$d = array_map(function($base,$val,$alt) {
 			return ($val === NULL) ? $alt: $val;
