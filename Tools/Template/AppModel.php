@@ -7,6 +7,7 @@ class %model%Model extends AppModel {
 	'DataTable' => %table%,
 	%view%
 	'Primary' => '%primary%',
+	%csv%
 	%schema%
   ];
 //==============================================================================
