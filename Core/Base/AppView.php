@@ -33,15 +33,15 @@ class AppView extends AppObject {
         ],
     );
 	const AttributeList = [
-		'style'			=> '||',
-		'data-type'		=> ' ^',
-		'data-element'	=> '{}',
-		'data-value'	=> '<>',
-		'value'			=> '()',
-		'name'			=> '[]',
-		'size'			=> ' :',
-		'id'			=> ' #',
-		'class'			=> ' .'
+		'style'			=> '||*',
+		'data-type'		=> ' ^*',
+		'data-element'	=> '{}*',
+		'data-value'	=> '<> ',
+		'value'			=> '() ',
+		'name'			=> '[]*',
+		'size'			=> ' :*',
+		'id'			=> ' #*',
+		'class'			=> ' .*'
 	];
     //==========================================================================
     // Constructor: Import Model Class by Owner Class, Create Helper
@@ -305,7 +305,7 @@ public function ViewTemplate($name,$vars = []) {
         if($tag[0]==='<') return array($tag,$attrList); // html tag will be not separate
         // allow multi attribute, and separater not space
 		foreach(self::AttributeList as $key => $seps) {
-			list($sep,$tsep) = str_split($seps);
+			list($sep,$tsep,$emp) = str_split($seps);
 			while(($m=strrpos($tag,$tsep)) !== false) {
 				if($sep === ' ') $n = $m;		// single-separator
 				else if(($n=strpos($tag,$sep)) === false) break;	// wrapper-char
@@ -316,8 +316,8 @@ public function ViewTemplate($name,$vars = []) {
 				} else if($n === $m && $pre_ch === $tsep) break;	// double-char
 				$str = ($n===$m) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
 				$tag = mb_strcut($tag,0,$n);
-				// if(!empty($str)) // allow empty attribute
-					$attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} ".$attrList[$key] : $str;
+				if(empty($str) && $emp ==='*') break;	// not-allow empty attribute
+				$attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} ".$attrList[$key] : $str;
 				if($key !== 'class') break;		// repeat allow 'class' only
 			}
 		}
