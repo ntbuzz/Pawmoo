@@ -48,6 +48,7 @@ define('SESSION_ENV_EXEC_ALL',		0b1111);
 define('DEFAULT_HELPER_EXPAND',		'__x');
  
 define('DEFAULT_ENCRYPT_INIT','encrypt-pawmoo_iv');
+
 /*
 GlobalConfig structure
 array(
@@ -71,10 +72,10 @@ class appConfig {
 	public $Enviroment		= "";
 	public $USE_DEBUGGER	= false;
 	public $SESSION_LIMIT	= 'tomorrow 03:00:00';
-	const DB_Key = [ 'Postgre', 'SQLite'];
+	private $HandlerList = [ 'Postgre', 'SQLite'];
 //===============================================================
 private function database_Setup($host,$config) {
-	foreach(self::DB_Key as $val) {
+	foreach($this->HandlerList as $val) {
 		// OS, Hostname, Common config Setuo
 		if(array_key_exists($val,$config)) {
 			$db_setup = $config[$val];
@@ -96,8 +97,9 @@ private function database_Setup($host,$config) {
 //===============================================================
 public function Setup($spec,$enviroment) {
 	list($host) = explode('.',gethostname());		// exclude domain-name
-	// Create DB_KEY parameter by empty value
-	foreach(self::DB_Key as $val) $this->$val = [];
+	// Create HandlerList parameter by empty value
+	if(defined('HANDLER_LIST')) $this->HandlerList = HANDLER_LIST;
+	foreach($this->HandlerList as $val) $this->$val = [];
 	// setup Global-Config for Database
 	$this->database_Setup($host,$spec);
 	// check enviroment config
