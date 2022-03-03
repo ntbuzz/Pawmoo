@@ -20,7 +20,7 @@ class SetupLoader {
 public static function Setup($appname) {
     static::$LoadDirs = [
         'Core/Class',
-        "app/{$appname}/Config/Schema",
+        "appSpec/{$appname}/Schema",
     ];
     spl_autoload_register(array('SetupLoader','loadClass'));
 }
