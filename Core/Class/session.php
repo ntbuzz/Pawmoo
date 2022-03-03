@@ -4,6 +4,7 @@
  * 	MySession:	Management SESSION variable, POST/GET variables
  */
 define('SESSION_DEFAULT_LIMIT','tomorrow 05:00:00');
+define('SESSION_SAVE_PATH','c:/Windows/temp/pawmoo');
 
 if(CLI_DEBUG) $_SESSION = [];
 else {
@@ -15,8 +16,8 @@ else {
 		ini_set('session.gc_probability','1');
 		ini_set('session.gc_divisor','1');
 	}
-//	session_cache_limiter('none');				// 
-//	session_save_path('c:/Windows/temp/pawmoo');		// for windows
+	session_cache_limiter('nochace');			// no-chace
+	session_save_path(SESSION_SAVE_PATH);		// session data save path in this system
 	session_start();
 }
 define('APPDATA_NAME','AppData');
@@ -183,6 +184,7 @@ static function unsetAppData($names='') {
 		unset(static::$EnvData[APPDATA_NAME]);
 	} else {
 		$nVal = &static::$EnvData[APPDATA_NAME];
+		if(empty($nVal)) return;
 		foreach($key_arr as $nm) {
 			if(!array_key_exists($nm,$nVal)) return;
 			$nVal = &$nVal[$nm];
