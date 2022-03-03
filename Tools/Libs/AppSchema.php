@@ -1,25 +1,5 @@
 <?php
 //==============================================================================
-function array_extract($arr,$n) {
-	if(is_array($arr)) {
-		$slice = [];
-		foreach($arr as $key => $val) {
-			if(is_int($key)) $slice[] = $val;//(is_array($val))?[$val]:$val;
-			else $slice[] = [$key => $val];
-			--$n;
-		}
-	} else $slice = [$arr];
-	while($n-- > 0)$slice[]=NULL;
-	return $slice;
-}
-//==============================================================================
-function oct_extract($val,$n) {
-	$oct = [];
-	while($n--) { $oct[] = ($val & 07); $val >>= 3; }
-	return $oct;
-}
-
-//==============================================================================
 // Databas Table Create Class
 class AppSchema extends AppBase {
 	public $FieldSchema;		// read-only column => view column
@@ -156,6 +136,7 @@ public function CreateDatabase($exec=false) {
 	$sql = "CREATE TABLE {$this->MyTable} (\n";
 	$sql .= implode(",\n",$fset) . "\n);";
 	$this->doSQL($exec,$sql);
+	// initCSVがあるときはデータロード
 }
 //==============================================================================
 //	テーブルとビューを作成
@@ -250,7 +231,7 @@ function createView($view) {
 				$fields[] = "{$this->MyTable}.\"$column\"";
 			} else if(is_array($bind)) {
 				list($kk,$rel) = array_first_item($bind);
-				if(is_int($kk)) {		// Self Bind
+				if(is_int($kk) || is_scalar($rel)) {		// Self Bind
 					list($alias,$sep) = $alias_sep($column);
 		 			$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
 				} else {	// リレーション
@@ -261,9 +242,40 @@ function createView($view) {
 			$relations($this->MyTable,$column,$dtype);
 		}
 	}
-	$join_sql = (empty($join)) ? '':implode("\n",$join).";\n";
-	$sql = "CREATE VIEW {$view} AS SELECT\n".implode(",\n",$fields) ."\nFROM {$this->MyTable}\n{$join_sql};\n";
+	$join_sql = (empty($join)) ? '':"\n".implode("\n",$join).";\n";
+	$sql = "CREATE VIEW {$view} AS SELECT\n".implode(",\n",$fields) ."\nFROM {$this->MyTable}{$join_sql};\n";
 	return $sql;
+}
+//==============================================================================
+// CSVデータが定義されていればデータを読み込む
+private function ImportCSV($data_path) {
+	if(isset($this->InitCSV)) {
+		$path = "{$data_path}/{$this->InitCSV}";
+		if(is_file($path)) {
+			$sql = $this->dbDriver->truncate_sql($this->MyTable);
+			$this->doSQL($exec,$sql);
+			echo "Load CSV from '{$this->InitCSV}'\n";
+			if (($handle = fcsvopen($path, "r")) !== FALSE) {
+				$row_columns = array_keys($this->Schema);
+				while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
+					if(count($data) !== count($row_columns)) {
+						debug_die(['CHECK-CSV'=>['FILE'=>$path,'COL'=>$row_columns,'CSV'=>$data]]);
+					} else {
+						$diff_arr = array_diff($data,$row_columns);
+						if(empty($diff_arr)) continue;	// maybe CSV Header line
+					}
+					$row = array_combine($row_columns,$data);
+					list($primary,$id) = array_first_item($row);
+					$this->dbDriver->updateRecord([$primary=>$id],$row);
+				}
+				fclose($handle);
+			}
+		}
+		list($ftype,$not_null) = $this->Schema[$this->Primary];
+		if(strtolower($ftype) === 'serial') {
+			$this->dbDriver->resetPrimary();
+		}
+	}
 }
 
 }
