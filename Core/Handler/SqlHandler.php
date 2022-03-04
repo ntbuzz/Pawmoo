@@ -25,6 +25,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	protected $LastBuild;	// for DEBUG
 	protected $LIKE_opr = 'LIKE';		// Ignore Upper/Lower case LIKE
 	protected $NULL_ORDER = ' NULLS LAST';	// NULL seq
+	private $register_callback = [ NULL,NULL];	// fetchDB Callback
 //==============================================================================
 //	abstruct method
 	abstract protected function Connect($table);
@@ -68,6 +69,16 @@ public function bind_columns($data) {
 	return array_combine($keys,$data);
 }
 //==============================================================================
+// fetchDB Callback method register
+public function register_method($class,$method) {
+	if (is_subclass_of($class, 'AppModel',false)) {
+		$this->register_callback = [$class,$method];
+	} else {
+		$cls = get_class($class);
+		echo "'{$cls}' is not sub-class AppModel\n";
+	}
+}
+//==============================================================================
 // DEBUGGING for SQL Execute
 	private function SQLdebug($sql,$where,$sort=[]) {
     	$dbg = debug_backtrace();
@@ -96,6 +107,10 @@ public function doTruncate() {
 public function fetchDB() {
 	if($row = $this->fetch_array()) {
 		$this->fieldAlias->to_alias_bind($row);
+		list($obj,$method) = $this->register_callback;
+		if (is_subclass_of($obj, 'AppModel',false)) {
+			if(method_exists($obj,$method)) $obj->$method($row);
+		}
 	}
 	return $row;
 }

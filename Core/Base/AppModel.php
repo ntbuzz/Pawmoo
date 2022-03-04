@@ -38,6 +38,7 @@ class AppModel extends AppObject {
     protected $FieldSchema = [];       // Pickup Record fields columns [ref_name, org_name]
     protected $Relations = [];         // Table Relation
     protected $SelectionDef = [];      // Selection JOIN list
+	private $virtual_columns = [];
 //==============================================================================
 //	Constructor: Owner
 //==============================================================================
@@ -60,6 +61,7 @@ class AppModel extends AppObject {
         $this->TimeFormat = $this->dbDriver->TimeStyle;         // Time format from DB-Driver
         $this->DateTimeFormat = "{$this->DateFormat} {$this->TimeFormat}"; // DateTime
 		$this->dbDriver->fieldAlias->lang_alternate = $this->Lang_Alternate;
+		$this->dbDriver->register_method($this,'virtual_field');
 	}
 //==============================================================================
 // Initializ Class Property
@@ -83,10 +85,12 @@ public function ResetSchema() {
     $this->SchemaAnalyzer();
     $this->RelationSetup();
     $this->SelectionSetup();
+	$this->virtual_columns = array_values(array_unique(array_merge(array_keys($this->FieldSchema),array_keys($this->HeaderSchema))));
     debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
-//            "Header"    => $this->HeaderSchema,
-//            "Field"     => $this->FieldSchema, 
+            "Header"    => $this->HeaderSchema,
+			'Virtual'	=> $this->virtual_columns,
+            "Field"     => $this->FieldSchema, 
             "Relations"     => $this->dbDriver->relations,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
 //            "Select-Defs"   => $this->SelectionDef,
@@ -403,7 +407,8 @@ public function getCount($cond) {
 //==============================================================================
 // Normalized Field-Filter
 	private function normalize_filter($filter) {
-		if(empty($filter)) $filter = array_keys($this->dbDriver->columns);
+		if(empty($filter)) $filter = $this->virtual_columns;
+//		if(empty($filter)) $filter = array_keys($this->dbDriver->columns);
 		else if(is_scalar($filter)) {
 			$filter = (strpos($filter,'.')!==FALSE) ? explode('.',$filter): [$filter];
 		}
