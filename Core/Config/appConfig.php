@@ -13,9 +13,12 @@ define('TIME_ZONE','Asia/Tokyo');
 if (PHP_OS == "Linux") {
 	define("OSDEP","UNIX");
 	define("ZIPTEMP","/tmp/");
+	define('SESSION_SAVE_PATH','/var/lib/php/session');	// same as PHP default
+//	define('SESSION_SAVE_PATH','/var/tmp/pawmoo/session');	// not-writable
 } else {
 	define("OSDEP","WIN");
 	define("ZIPTEMP","C:/tmp/");
+	define('SESSION_SAVE_PATH','c:/Windows/temp/pawmoo');
 }
 define('OS_CODEPAGE','UTF8');
 //	define('OS_CODEPAGE','SJIS');
@@ -29,14 +32,14 @@ if(php_sapi_name() === 'cli') {
 } else {
 	define('CLI_DEBUG',FALSE);
 }
-// argument of MySession
-define('S_ENV',TRUE);		// App::$EnvData
-define('S_REQ',FALSE);		// App::$ReqData
+// // argument of MySession
+// define('S_ENV',TRUE);		// App::$EnvData
+// define('S_REQ',FALSE);		// App::$ReqData
 
-define('SECTION_TOKEN','<@&+*%-${[');
+// define('SECTION_TOKEN','<@&+*%-${[');
 
-define('SESSION_PARAMS_CLEAR',	01);
-define('SESSION_LIFE_LIMIT',	02);
+// define('SESSION_PARAMS_CLEAR',	01);
+// define('SESSION_LIFE_LIMIT',	02);
 
 define('SESSION_ENV_NOP',			0b0000);
 define('SESSION_ENV_UNSET_PARAMS',	0b0001);
