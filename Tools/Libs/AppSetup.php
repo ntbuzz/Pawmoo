@@ -374,6 +374,9 @@ private function createSchema($fields) {
 					}
 				}
 				break;
+		case 'virtual':	// 仮想フィールドは言語依存しない
+				$col[$fname] = [ $type, $flag, $wd ];
+				break;
 		default:
 				$col[$fname] = [ $type, $flag, $wd];
 				if(is_array($langs)) {
