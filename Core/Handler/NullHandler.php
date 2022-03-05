@@ -20,6 +20,7 @@ class NullHandler {
 	protected function reset_seq($table,$primary) { return FALSE;}
 	protected function concat_fields($arr) {return implode(',',$arr); }
 //==============================================================================
+public function register_method($class,$method) { }
 public function fetchDB() { return [];}
 public function fieldConcat($sep,$arr) { return "";}
 public function drop_sql($kind,$table) { return "";}
