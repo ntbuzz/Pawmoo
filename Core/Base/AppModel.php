@@ -90,6 +90,7 @@ public function ResetSchema() {
         $this->ModuleName => [
             "Header"    => $this->HeaderSchema,
 			'Virtual'	=> $this->virtual_columns,
+			'Handler'	=> $this->dbDriver->columns,
             "Field"     => $this->FieldSchema, 
             "Relations"     => $this->dbDriver->relations,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
