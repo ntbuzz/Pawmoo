@@ -228,11 +228,11 @@ private function SetupModel($model,$exec) {
 	$models = [];
 	foreach($files as $target) {
 		list($pp,$ff) = extract_path_filename($target);
-		echo str_repeat("-", 20)." {$ff} ".str_repeat("-", 20)."\n";
+		echo str_repeat("=", 10)."<< {$ff} >>".str_repeat("=", 10)."\n";
 		$module = $this->makeModelSchema($target);
 		if($module) {
 			$models[] = $module;
-			$this->GenModel($module);
+			$this->GenModel($module,$exec);
 			// $mod_folder = "{$this->AppRoot}/modules/{$module}";
 			// if(!is_dir($mod_folder)) {
 			// 	$this->createFolder("{$this->AppRoot}/modules/{$module}",$module,self::Module);
@@ -381,7 +381,7 @@ private function createSchema($fields) {
 			$disp = 0;
 			if(isset($DispFlags[$align])) $flag |= $DispFlags[$align];
 			if(isset($DispFlags[$sort])) $flag |= $DispFlags[$sort];
-		} else list($align,$sort,$wd) = [NULL,NULL,NULL,NULL];
+		} else list($align,$sort,$wd) = [NULL,NULL,NULL];
 		if(!empty($csv)) $flag |= 00100;
 		if($lang) $flag |= 01000;
 		switch($type) {
@@ -455,8 +455,8 @@ private function makeSchema($Schema,$lang=NULL) {
 				list($type,$flag,$wd,$rel) = array_extract($defs,4);
 				$flag = oct_fix($flag);
 				$ln = str_repeat(' ',$indent*4) . "'{$key}'\t=> [ '{$type}',\t{$flag}";
+				if($wd===NULL) $wd = 'NULL';
 				if(is_array($rel)) {
-					if($wd===NULL) $wd = 'NULL';
 					$ln = "{$ln},\t{$wd},";
 					list($link,$rels) = array_first_item($rel);
 					if(is_int($link)) {
@@ -469,7 +469,7 @@ private function makeSchema($Schema,$lang=NULL) {
 						$ln = "{$ln}\n{$spc}'{$link}' => [\n". $dump_schema($rels,$indent+2)."\n{$spc}],\n".str_repeat(' ',$indent*4)."],";
 					}
 				} else {
-					$ln = "{$ln} ],";
+					$ln = "{$ln}, {$wd} ],";
 					if(array_key_exists($key,$lang)) $ln = "{$ln}\t// {$lang[$key]}";
 				}
 			}
@@ -530,7 +530,7 @@ private function makeModelSchema($csv_file) {
 //==============================================================================
 // 言語リソース変換
 private function makeResource($lang,$list) {
-	array_push($list,'ja');
+	array_unshift($list,'ja');
 	$lng = "Schema => [\n";
 	foreach($list as $defs) {
 		$lng = "{$lng}\t.{$defs} => [\n";
@@ -546,7 +546,7 @@ private function makeResource($lang,$list) {
 	return $lng;
 }
 //==============================================================================
-// CSV file Load (must be UTF-8)
+// モデルクラスのスキーマ変換
 private function makeModelField($Schema,$lang=NULL) {
 	$dump_schema = function($schema,$indent) use(&$lang,&$dump_schema) {
 		$line = [];
@@ -554,26 +554,15 @@ private function makeModelField($Schema,$lang=NULL) {
 			if($defs === NULL) continue;
 			if(is_array($defs)) {
 				list($type,$flag,$wd,$rel) = array_extract($defs,4);
+				if(in_array($type,['alias','bind'])) $type = '____';
 				$flag = oct_fix($flag);
-				$ln = str_repeat(' ',$indent*4) . "'{$key}'\t=> [ '{$type}',\t{$flag}";
-				if(is_array($rel)) {
-					if($wd===NULL) $wd = 'NULL';
-					$ln = "{$ln},\t{$wd},";
-					list($link,$rels) = array_first_item($rel);
-					if(is_int($link)) {
-						$val = "'".implode("', '",$rel)."'";
-						$ln = "{$ln}\t[ {$val} ] ],";
-						if(array_key_exists($key,$lang)) $ln = "{$ln}\t// {$lang[$key]}";
-					} else {
-						$spc = str_repeat(' ',($indent+1)*4);
-						if(array_key_exists($key,$lang)) $ln = "{$ln}\t// {$lang[$key]}";
-						$ln = "{$ln}\n". $dump_schema($rels,$indent);
-					}
-				} else {
-					$ln = "{$ln} ],";
-					if(array_key_exists($key,$lang)) $ln = "{$ln}\t// {$lang[$key]}";
-				}
-			$line[] = $ln;
+				if($wd===NULL) $wd = 0;
+				$spc_len = 18 - strlen($key);
+				if($spc_len <= 0) $spc_len = 2;
+				$spc = str_repeat(' ',$spc_len);
+				$ln = str_repeat(' ',$indent*4) . "'{$key}'{$spc}=> [ '{$type}',\t{$flag},\t{$wd} ],";
+				if(array_key_exists($key,$lang)) $ln = "{$ln}\t// {$lang[$key]}";
+				$line[] = $ln;
 			}
 		}
 		return implode("\n",$line);
