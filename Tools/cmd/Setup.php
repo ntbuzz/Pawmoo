@@ -25,7 +25,7 @@ $ln = str_repeat("=", 50);
 print_r($argv);
 echo "{$ln} START HERE ${ln}\n";
 
-list($self,$cmd,$appname,$model) = array_alternative($argv,4);
+list($self,$cmd,$appname,$model,$exec) = array_alternative($argv,4);
 
 SetupLoader::Setup($appname);
 
@@ -36,5 +36,5 @@ if(is_file($usrconfig)) {
 }
 
 $pawmoo = new AppSetup($appname);
-$pawmoo->execute($cmd,$model);
+$pawmoo->execute($cmd,$model,$exec);
 
