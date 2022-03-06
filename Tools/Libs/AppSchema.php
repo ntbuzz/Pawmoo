@@ -28,6 +28,7 @@ class AppSchema extends AppBase {
         $driver = $this->Handler . 'Handler';
         $this->dbDriver = new $driver($this->MyTable,$this->Primary);        // connect Database Driver
 		$this->SchemaSetup();
+		echo "Handler({$driver})\n";
     }
 //==============================================================================
 // Switch Schema Language
@@ -77,7 +78,6 @@ private function SchemaAnalyzer() {
 		$this->FieldSchema[$key] = [$dtype,$flag,$width];
 		list($link,$def) = array_first_item($rel);
 		if(is_int($link)) $def = $rel;
-xdebug_dump(['EXTRACT'=>$rel,'LINK'=>$link,'DEF'=>$def]);
 		if($dtype !== 'virtual' && ($rel === NULL || !is_int($link))) {	// relation-field
 			$this->TableSchema[$key] = [$dtype,$flag,$width];
 		}
@@ -177,7 +177,6 @@ public function CreateTableView($exec=false) {
         if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
             list($tmp,$model,$n) = $m;
         } else $n = NULL;
-xdebug_dump(['model_view'=>$model,$field]);
 		$table = $this->$model->get_view_name($n);
         return [$table,$field];
     }
@@ -244,12 +243,13 @@ private function createView($view) {
 	}
 	$join_sql = (empty($join)) ? '':"\n".implode("\n",$join)."";
 	$sql = "CREATE VIEW {$view} AS SELECT\n".implode(",\n",$fields) ."\nFROM {$this->MyTable}{$join_sql};";
-debug_dump(['SQL'=>$sql]);
+debug_dump(["SQL({$this->Handler})"=>$sql]);
 	return $sql;
 }
 //==============================================================================
 // CSVデータが定義されていればデータを読み込む
 public function ImportCSV($data_path) {
+	echo "ImportCSV({$this->ModuleName}): ";
 	if(isset($this->InitCSV)) {
 		$path = "{$data_path}{$this->InitCSV}";
 		if(is_file($path)) {
@@ -267,8 +267,7 @@ public function ImportCSV($data_path) {
 					}
 					$row = array_combine($row_columns,$data);
 					list($primary,$id) = array_first_item($row);
-//					$this->dbDriver->updateRecord([$primary=>$id],$row);
-					$this->dbDriver->insertRecord($row);
+					$this->dbDriver->upsertRecord([$primary=>$id],$row);
 				}
 				fclose($handle);
 			}
