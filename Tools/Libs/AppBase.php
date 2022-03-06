@@ -51,6 +51,13 @@ class AppBase {
         }
     }
 //==============================================================================
+//	setup objerct property
+    protected function unsetProperty($props) {
+        foreach($props as $key => $val) {
+            unset($this->$key);
+        }
+    }
+//==============================================================================
 // dynamic construct OBJECT Class for 'modules'
 public function __get($PropName) {
 //debug_dump(['PROP'=>$PropName]);
