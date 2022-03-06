@@ -17,7 +17,6 @@ class AppSchema extends AppBase {
 // setup table-name and view-table list
 	function __construct() {
 	    parent::__construct();                    // call parent
-		$this->ClassName = get_class($this);
         foreach(static::$DatabaseSchema as $key => $val) $this->$key = $val;
 		$viewset = (isset($this->DataView)) ? ((is_array($this->DataView)) ? $this->DataView : [$this->DataView]) : [];
 		if(is_array($this->DataTable)) {
@@ -34,59 +33,63 @@ class AppSchema extends AppBase {
 // Switch Schema Language
 private function SchemaSetup() {
     $this->SchemaAnalyzer();
-	debug_dump([             // DEBUG LOG information
-		'SCHEMA' => $this->Schema,
-		'VIEW' => $this->ViewSet,
-		'TABLE' => $this->TableSchema,
-		'FIELD' => $this->FieldSchema,
+	xdebug_dump([             // DEBUG LOG information
+		$this->ModuleName => [
+			'SCHEMA' => $this->Schema,
+			'VIEW' => $this->ViewSet,
+			'TABLE' => [ $this->TableSchema ],	// row table field
+			'FIELD' => [ $this->FieldSchema ],	// model field
+		]
 	]);
 }
 //==============================================================================
 //	スキーマ解析
-	// 'Schema' => [
-	// 	'id'	=> [ 'serial',	00100,	0 ],	通常フィールド
-	// 	'name'	=> [ 'bind',	01110,	50,[ 'firstname','lastname' ] ],	// 結合フィールド
-	// 	'os_id' => [ 'alias',	01110,	50,		リレーションビューフィールド
-	// 		'Os.id' => [							リレーションモデル・キー
-	// 			'os_name' => [ 'name',00100,20],	ビューフィールド
-	// 			'cat_id' => [						
-	// 				'Oscat.id' => [					ネストリレーションモデル・キー
-	// 					'os_providor' => [ 'provider',0100,40],		リレーション名
-	// 					'os_category' => [ 'bind',0100,50, ['name', 'providor', 'cont' ],	// 結合
-	// 					'group_id' => [				ネスト
-	// 						'Osgrp.id' => [
-	// 							'os_group' => [ 'group',0010,50],
-	// 						]
-	// 					]
-	// 				]
-	// 			]
-	// 		]
-	// 	]
-public function SchemaAnalyzer() {
+// 'Schema' => [
+// 	'id'	=> [ 'serial',	00100,	0 ],	通常フィールド
+//	'bind'	=> [ 'bind',	01110,	50,[ 'firstname','lastname' ] ],	// 結合フィールド
+//	'name_list_id'	=> [ 'integer',	0,	NULL,	// 名前ID
+//     'Names.id' => [
+//         'host_name'	=> [ 'name',	01000 ],	// ホスト名
+//         'host_name_en'	=> 'name_en',
+//     ],
+// ],
+// 	'os_id' => [ 'alias',	01110,	50,		リレーションビューフィールド
+// 		'Os.id' => [							リレーションモデル・キー
+// 			'os_name' => [ 'name',00100,20],	ビューフィールド
+// 			'os_name_en'=> 'name_en',			言語フィールド
+// 			'cat_id' => [						
+// 				'Oscat.id' => [					ネストリレーションモデル・キー
+// 					'os_providor' => [ 'provider',0100,40],		リレーション名
+// 					'group_id' => [				ネスト
+// 						'Osgrp.id' => [
+// 							'os_group' => [ 'group',0010,50],
+// 						]
+// 					]
+// 				]
+// 			]
+// 		]
+// 	]
+private function SchemaAnalyzer() {
 	$this->FieldSchema = $this->TableSchema = [];
 	foreach($this->Schema as $key => $defs) {
 		list($dtype,$flag,$width,$rel) = array_extract($defs,4);
 		$dtype = strtolower($dtype);
+		$this->FieldSchema[$key] = [$dtype,$flag,$width];
 		list($link,$def) = array_first_item($rel);
-		if(is_array($defs)) {
-			if(!is_int($link)) $this->TableSchema[$key] =  [$dtype,$flag,$width];
-			if((!is_int($link) || $width !== NULL)) {
-				$this->FieldSchema[$key] = [$dtype,$flag,$width];
-			}
-		} else $this->TableSchema[$key] = [$dtype,$flag,$width];
-		if(is_array($rel)) {
-			if(is_int($link)) {		// bind or multi-bind
-				if(is_array($def)) {
-					if($width !== NULL) $this->FieldSchema[$key] = ['bind',$flag,$width];
-				} else if($width !== NULL) {
-					$this->FieldSchema[$key] = ['bind',$flag,$width,$rel];
-				}
+		if(is_int($link)) $def = $rel;
+xdebug_dump(['EXTRACT'=>$rel,'LINK'=>$link,'DEF'=>$def]);
+		if($dtype !== 'virtual' && ($rel === NULL || !is_int($link))) {	// relation-field
+			$this->TableSchema[$key] = [$dtype,$flag,$width];
+		}
+		if(is_array($def)) {
+			if(is_int($link)) {		// bind
+				if($width !== NULL) $this->FieldSchema[$key] = ['bind',$flag,$width];
 			} else{
 				$view = [];
 				foreach($def as $kk => $vv) {
 					list($alias,$flag,$width,$rel) = array_extract($vv,4);
 					$atype = (is_array($alias))?'alias-bind':'alias';
-					if($width!==NULL) $this->FieldSchema[$kk] = [$atype,$flag,$width];
+					$this->FieldSchema[$kk] = [$atype,$flag,$width];
 					$view[$kk] = $alias;
 				}
 			}
@@ -111,7 +114,7 @@ protected function ResetLocation() {
 // execute SQL
 	private function doSQL($exec,$sql) {
 		if(empty($sql)) return;
-		echo "SQL: {$sql}\n";
+//		echo "SQL: {$sql}\n";
 		if($exec) $this->dbDriver->execSQL($sql);
     }
 //==============================================================================
@@ -122,9 +125,9 @@ public function CreateDatabase($exec=false) {
 	$this->doSQL($exec,$sql);
 	// Create Table
 	$fset = [];
-	foreach($this->Schema as $column => $defs) {
+	foreach($this->TableSchema as $column => $defs) {
 		list($ftype,$flag,$wd,$bind) = array_extract($defs,4);
-		if(is_scalar($ftype) && ($bind === NULL)) {
+		if(is_scalar($ftype) && $ftype !== 'virtual') {
 			$lftype = strtolower($ftype);
 			if(array_key_exists($lftype,static::typeXchanger[HANDLER])) $ftype = static::typeXchanger[HANDLER][$lftype];
 			$str = "{$column} {$ftype}";
@@ -140,12 +143,27 @@ public function CreateDatabase($exec=false) {
 }
 //==============================================================================
 //	テーブルとビューを作成
+public function DependList($list) {
+	if(empty($this->Dependent)) return $list;
+	$new = array_unique(array_merge($this->Dependent,$list));
+	foreach($this->Dependent as $sub) {
+		if(!in_array($sub,$list)) $new = $this->$sub->DependList($new);
+	}
+	return $new;
+}
+//==============================================================================
+//	テーブルとビューを作成
 public function CreateTableView($exec=false) {
-	if(empty($this->ViewSet)) return '';
+	if(empty($this->ViewSet)) {
+		debug_dump([$this->ModuleName=>"Not have VIEW"]);
+		return false;
+	}
+	// DROP-VIEW
 	foreach($this->ViewSet as $view) {
 		$sql = $this->dbDriver->drop_sql("VIEW",$view);
 		$this->doSQL($exec,$sql);
 	}
+	// CREATE-VIEW
 	foreach($this->ViewSet as $view) {
 		debug_dump(["VIEW-DEFS" => $view]);
 		$sql = $this->createView($view);
@@ -159,12 +177,13 @@ public function CreateTableView($exec=false) {
         if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
             list($tmp,$model,$n) = $m;
         } else $n = NULL;
+xdebug_dump(['model_view'=>$model,$field]);
 		$table = $this->$model->get_view_name($n);
         return [$table,$field];
     }
 //==============================================================================
 // extract DataTable or Alternate DataView
-public function get_view_name($n) {
+private function get_view_name($n) {
 		if($n === NULL) {
 			$table = (is_array($this->DataTable))? $this->DataTable[1]:$this->DataTable;
 		} else if(isset($this->DataView)) {
@@ -174,28 +193,7 @@ public function get_view_name($n) {
     }
 //==============================================================================
 // createView: Create View Table
-// 'Schema' => [
-// 	'id'	=> [ 'serial',	00100,	0 ],	通常フィールド
-// 	'name'	=> [ 'bind',	01110,	50,[ 'firstname','lastname' ] ],	// 結合フィールド
-// 	'os_id' => [ 'alias',	01110,	50,		リレーションビューフィールド
-// 		'Os.id' => [							リレーションモデル・キー
-// 			'os_name' => [ 'name',00100,20],	ビューフィールド
-// 			'cat_id' => [						
-// 				'Oscat.id' => [					ネストリレーションモデル・キー
-// 					'os_providor' => [ 'provider',0100,40],		リレーション名
-// 					'os_category' => [ 'bind',0100,50, ['name', 'providor', 'cont' ],	// 結合
-// 					'group_id' => [				ネスト
-// 						'Osgrp.id' => [
-// 							'os_group' => [ 'group',0010,50],
-// 						]
-// 					]
-// 				]
-// 			]
-// 		]
-// 	]
-//==============================================================================
-// extract VIEW
-function createView($view) {
+private function createView($view) {
 	$alias_sep = function($key) {
 		if(substr($key, -1) === '.') $key .= ' ';
 		list($alias,$sep) = fix_explode('.',$key,2);
@@ -227,6 +225,7 @@ function createView($view) {
 	foreach($this->Schema as $column => $defs) {
 		list($dtype,$flag,$wd,$bind) = array_extract($defs,4);
 		if(is_scalar($dtype)) {
+			if($dtype === 'virtual') continue;
 			if($bind === NULL) {
 				$fields[] = "{$this->MyTable}.\"$column\"";
 			} else if(is_array($bind)) {
@@ -235,6 +234,7 @@ function createView($view) {
 					list($alias,$sep) = $alias_sep($column);
 		 			$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
 				} else {	// リレーション
+					$fields[] = "{$this->MyTable}.\"$column\"";
 					$relations($this->MyTable,$column,$bind);
 				}
 			}
@@ -242,21 +242,22 @@ function createView($view) {
 			$relations($this->MyTable,$column,$dtype);
 		}
 	}
-	$join_sql = (empty($join)) ? '':"\n".implode("\n",$join).";\n";
-	$sql = "CREATE VIEW {$view} AS SELECT\n".implode(",\n",$fields) ."\nFROM {$this->MyTable}{$join_sql};\n";
+	$join_sql = (empty($join)) ? '':"\n".implode("\n",$join)."";
+	$sql = "CREATE VIEW {$view} AS SELECT\n".implode(",\n",$fields) ."\nFROM {$this->MyTable}{$join_sql};";
+debug_dump(['SQL'=>$sql]);
 	return $sql;
 }
 //==============================================================================
 // CSVデータが定義されていればデータを読み込む
-private function ImportCSV($data_path) {
+public function ImportCSV($data_path) {
 	if(isset($this->InitCSV)) {
-		$path = "{$data_path}/{$this->InitCSV}";
+		$path = "{$data_path}{$this->InitCSV}";
 		if(is_file($path)) {
 			$sql = $this->dbDriver->truncate_sql($this->MyTable);
-			$this->doSQL($exec,$sql);
+			$this->doSQL(true,$sql);
 			echo "Load CSV from '{$this->InitCSV}'\n";
 			if (($handle = fcsvopen($path, "r")) !== FALSE) {
-				$row_columns = array_keys($this->Schema);
+				$row_columns = array_keys($this->TableSchema);
 				while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
 					if(count($data) !== count($row_columns)) {
 						debug_die(['CHECK-CSV'=>['FILE'=>$path,'COL'=>$row_columns,'CSV'=>$data]]);
@@ -266,16 +267,17 @@ private function ImportCSV($data_path) {
 					}
 					$row = array_combine($row_columns,$data);
 					list($primary,$id) = array_first_item($row);
-					$this->dbDriver->updateRecord([$primary=>$id],$row);
+//					$this->dbDriver->updateRecord([$primary=>$id],$row);
+					$this->dbDriver->insertRecord($row);
 				}
 				fclose($handle);
 			}
-		}
+		} else echo "NOT-FOUND:{$this->InitCSV}\n";
 		list($ftype,$not_null) = $this->Schema[$this->Primary];
 		if(strtolower($ftype) === 'serial') {
 			$this->dbDriver->resetPrimary();
 		}
-	}
+	} else echo "NO-InitCSV\n";
 }
 
 }
