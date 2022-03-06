@@ -126,7 +126,7 @@ public function CreateDatabase($exec=false) {
 	$fset = [];
 	foreach($this->TableSchema as $column => $defs) {
 		list($ftype,$flag,$wd,$bind) = array_extract($defs,4);
-		if(is_scalar($ftype) && $ftype !== 'virtual') {
+		if(is_scalar($ftype) && !in_array($ftype,['bind','virtual'])) {
 			$lftype = strtolower($ftype);
 			if(array_key_exists($lftype,static::typeXchanger[HANDLER])) $ftype = static::typeXchanger[HANDLER][$lftype];
 			$str = "{$column} {$ftype}";
@@ -192,11 +192,6 @@ private function get_view_name($n) {
 //==============================================================================
 // createView: Create View Table
 private function createView($view) {
-	$alias_sep = function($key) {
-		if(substr($key, -1) === '.') $key .= ' ';
-		list($alias,$sep) = fix_explode('.',$key,2);
-		return [$alias,$sep];
-	};
 	$join = [];
 	$fields = [];
 // 	'cat_id' => [ 'Oscat.id' => [ ... ]  ]
@@ -215,8 +210,9 @@ private function createView($view) {
 			} else if($bind===NULL) {
 				$fields[] = "{$tbl}.\"{$type}\" as {$fn}";
 			} else {	// リレーション先のBIND
-				list($alias,$sep) = $alias_sep($fn);
-				$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
+				list($kk,$rel) = array_first_item($bind);
+				list($sep,$bind) = array_first_item($rel);
+				$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$fn}";
 			}
 		}
 	};
@@ -228,9 +224,9 @@ private function createView($view) {
 				$fields[] = "{$this->MyTable}.\"$column\"";
 			} else if(is_array($bind)) {
 				list($kk,$rel) = array_first_item($bind);
-				if(is_int($kk) || is_scalar($rel)) {		// Self Bind
-					list($alias,$sep) = $alias_sep($column);
-		 			$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$alias}";
+				if(is_int($kk)) {		// Self Bind
+					list($sep,$bind) = array_first_item($rel);
+		 			$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$column}";
 				} else {	// リレーション
 					$fields[] = "{$this->MyTable}.\"$column\"";
 					$relations($this->MyTable,$column,$bind);

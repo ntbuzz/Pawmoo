@@ -175,8 +175,9 @@ private function ModTree($model,$exec) {
 				list($k,$v) = array_first_item($defs);
 				if(is_int($k)) {
 					$val = implode(', ',array_map(function($k,$v) {
-						if(is_int($k)) return "'{$v}'";
-						return "'{$k}' => '{$v}'";
+						$v = (is_array($v))?"[ '".implode("','",$v)."' ]":"'{$v}'";
+						if(is_int($k)) return $v;
+						return "'{$k}' => {$v}";
 					},array_keys($defs),array_values($defs)));
 					$line[] = "{$spc}'{$key}'\t=> [ {$val} ],";
 				} else {
@@ -374,7 +375,7 @@ private function createSchema($fields) {
 	foreach($fields as $key => $column) {
 		list($name,$field,$lang,$type,$rel,$disp,$csv,$note) = array_values($column);
 		$type = strtolower($type);
-		list($fname,$sep) = fix_explode('.',$field,2,NULL);
+		list($fname,$sep) = bind_explode('.',$field,2,0);
 		$fname = strtolower($fname);
 		$resource[$fname] = $name;
 		$flag = 0;
@@ -412,13 +413,15 @@ private function createSchema($fields) {
 				$bind = bind_array($rel,$sep);
 				$col[$fname] = [ $type, $flag, $wd ,$bind ];
 				// self-bindは言語依存しない
-				if(strpos($rel,'.') !== false && $lang) {
+//				if(strpos($rel,'.') !== false && $lang) {
+				if($lang) {
+					list($sep,$bind) =	array_first_item($bind);
 					$flag &= 00700;			// CSVのみ残す
 					foreach($this->Language as $lng) {
 						$bstr = array_map(function($v) use(&$lng) {
 							return "{$v}_{$lng}";
 						},$bind);
-						$col["{$fname}_{$lng}"] = [ $type, $flag, NULL, $bstr];
+						$col["{$fname}_{$lng}"] = [ $type, $flag, NULL, [$sep => $bstr]];
 					}
 				}
 				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_view"];
@@ -450,7 +453,7 @@ private function makeSchema($Schema,$lang=NULL) {
 	$dump_schema = function($schema,$indent) use(&$lang,&$dump_schema) {
 		$line = [];
 		foreach($schema as $key=>$defs) {
-			if($defs === NULL) continue;
+			if($defs === NULL) continue;	// SKIP empty
 			if(is_scalar($defs)) {
 				$ln = str_repeat(' ',$indent*4) . "'{$key}'\t=> '{$defs}',";
 			} else {
@@ -458,14 +461,17 @@ private function makeSchema($Schema,$lang=NULL) {
 				$flag = oct_fix($flag);
 				$ln = str_repeat(' ',$indent*4) . "'{$key}'\t=> [ '{$type}',\t{$flag}";
 				if($wd===NULL) $wd = 'NULL';
-				if(is_array($rel)) {
+				if(is_array($rel)) {	// bind or relation
 					$ln = "{$ln},\t{$wd},";
 					list($link,$rels) = array_first_item($rel);
-					if(is_int($link)) {
-						$val = "'".implode("', '",$rel)."'";
+					if(is_int($link)) {				// bind
+						list($sep,$bind) = array_first_item($rels);
+						$val = implode("', '",$bind);
+						if(is_int($sep)) $val = " [ '{$val}' ]";
+						else $val = " '{$sep}' => [ '{$val}' ]";
 						$ln = "{$ln}\t[ {$val} ] ],";
 						if(array_key_exists($key,$lang)) $ln = "{$ln}\t// {$lang[$key]}";
-					} else {
+					} else {	// relation
 						$spc = str_repeat(' ',($indent+1)*4);
 						if(array_key_exists($key,$lang)) $ln = "{$ln}\t// {$lang[$key]}";
 						$ln = "{$ln}\n{$spc}'{$link}' => [\n". $dump_schema($rels,$indent+2)."\n{$spc}],\n".str_repeat(' ',$indent*4)."],";
@@ -581,13 +587,10 @@ private function makeModelClass($model) {
 	$gen_virtual = function($virt) {
 		$ln = [];
 		foreach($virt as $key => $col) {
-			if(is_scalar($col)) $ln[] = "\$row['{$key}'] = \$row['{$col}'];";
+			list($sep,$bind) =	array_first_item($col);
+			if(is_scalar($bind)) $ln[] = "\$row['{$key}'] = \$row['{$bind}'];";
 			else {
-				$ss = "";
-				foreach($col as $k => $fn) {
-					if(!is_int($k)) $ss = $ss.tag_body_name($k);
-					$ss ="{$ss}{\$row['{$fn}']}";
-				}
+				$ss = implode($sep,array_map(function($v) { return "{\$row['{$v}']}";},$bind));
 				$ln[] = "\$row['{$key}'] = \"{$ss}\";";
 			}
 		}

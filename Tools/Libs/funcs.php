@@ -4,7 +4,7 @@ function array_extract($arr,$n) {
 	if(is_array($arr)) {
 		$slice = [];
 		foreach($arr as $key => $val) {
-			if(is_int($key)) $slice[] = $val;//(is_array($val))?[$val]:$val;
+			if(is_int($key)) $slice[] = (is_array($val))?[$val]:$val;
 			else $slice[] = [$key => $val];
 			--$n;
 		}
@@ -44,18 +44,26 @@ function oct_fix($dec) {
 	return $dec;
 };
 //==============================================================================
+// fix count explode
+function bind_explode($delm,$string,$max,$pad = '') {
+	$arr = explode($delm,$string);
+	for($n=count($arr); $n < $max ; ++$n ) $arr[] = $pad;
+    return $arr;
+}
+//==============================================================================
 // バインド配列変換
-function bind_array($rel,$sep=NULL) {
+function bind_array($rel,$sep=0) {
 	$bind = str_explode(["\r\n","\n"],$rel);
-	if(count($bind)===1)	$bind = $rel;
-	else {
-		if($sep !== NULL) {
-			$item = [array_pop($bind)];
-			foreach($bind as $nm) {
-				set_array_key_unique($item,$sep,$nm);
-			}
-			$bind = $item;
-		}
-	}
+	if(count($bind)===1)	$bind = [$sep => $rel ];
+	else $bind = [ $sep => $bind];
+	// else {
+	// 	if($sep !== NULL) {
+	// 		$item = [array_pop($bind)];
+	// 		foreach($bind as $nm) {
+	// 			set_array_key_unique($item,$sep,$nm);
+	// 		}
+	// 		$bind = $item;
+	// 	}
+	// }
 	return $bind;
 }
