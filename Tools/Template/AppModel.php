@@ -2,18 +2,15 @@
 //==============================================================================
 // 
 class %model%Model extends AppModel {
-  static $DatabaseSchema = [
-	'Handler' => '%handler%',
-	'DataTable' => %table%,
-	%view%
-	'Primary' => '%primary%',
-	%csv%
-	%schema%
-  ];
+static $DatabaseSchema = [
+%databasedefs%
+	];
+}
 //==============================================================================
 //	クラス初期化処理
 protected function ClassInit() {
 
 }
+%virtual_class%
 
 }
