@@ -109,29 +109,6 @@ private function safe_convert($row,$func) {
 	return $aa;
 }
 //==============================================================================
-public function updateRecord($wh,$row) {
-	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ
-	$aa = $this->safe_convert($row,'Update');
-	if($aa === false) return [];
-	$primary = '"' . key($wh) . '"';		// プライマリキー名を取得
-	$kstr = implode(',', array_keys($aa));	// フィールド名リストを作成
-	$vstr = implode(',', $aa);				// VALUES リストを作成
-	$set = " SET"; $sep = " ";				// UPDATE する時の代入文
-	foreach($aa as $key => $val) {
-		$set .= "{$sep}{$key}={$val}";
-		$sep = ",";
-	}
-	// UPSERT 文を生成
-	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) ON CONFLICT ({$primary}) DO UPDATE {$set} RETURNING *;";
-	$this->doQuery($sql);
-	$a = $this->fetch_array();		// 書込みはraw-tableなのでAlias無し
-	//view が定義されていれば取り直す
-	if($this->raw_table !== $this->table) {
-		$a = $this->doQueryBy($this->Primary,$a[$this->Primary]);
-	}
-	return $a;
-}
-//==============================================================================
 //	INSERT
 // INSERT INTO test_table (id, name) VALUES (val_id, val_name)
 // ON CONFLICT (id) DO UPDATE SET name = val_name；
@@ -149,6 +126,35 @@ public function insertRecord($row) {
 	}
 	// UPSERT 文を生成
 	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) RETURNING *;";
+	$this->doQuery($sql);
+	$a = $this->fetch_array();		// 書込みはraw-tableなのでAlias無し
+	//view が定義されていれば取り直す
+	if($this->raw_table !== $this->table) {
+		$a = $this->doQueryBy($this->Primary,$a[$this->Primary]);
+	}
+	return $a;
+}
+//==============================================================================
+// UPDATE 暫定的に UPSERT動作
+public function updateRecord($wh,$row) {
+	return $this->upsertRecord($wh,$row);
+}
+//==============================================================================
+// UPSERT 
+public function upsertRecord($wh,$row) {
+	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ
+	$aa = $this->safe_convert($row,'Update');
+	if($aa === false) return [];
+	$primary = '"' . key($wh) . '"';		// プライマリキー名を取得
+	$kstr = implode(',', array_keys($aa));	// フィールド名リストを作成
+	$vstr = implode(',', $aa);				// VALUES リストを作成
+	$set = " SET"; $sep = " ";				// UPDATE する時の代入文
+	foreach($aa as $key => $val) {
+		$set .= "{$sep}{$key}={$val}";
+		$sep = ",";
+	}
+	// UPSERT 文を生成
+	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) ON CONFLICT ({$primary}) DO UPDATE {$set} RETURNING *;";
 	$this->doQuery($sql);
 	$a = $this->fetch_array();		// 書込みはraw-tableなのでAlias無し
 	//view が定義されていれば取り直す

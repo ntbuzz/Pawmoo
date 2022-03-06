@@ -113,17 +113,28 @@ public function updateRecord($wh,$row) {
 		return FALSE;
 	}
 // SQLite3 old version cannot support 'RETURNING'.
-	$sql = "SELECT * FROM {$this->raw_table}{$where};";
+	$a = $this->doQueryBy($pkey,$pval);
+	return $a;
+}
+//==============================================================================
+//	レコードの更新または追加 (REPLACE)
+//	on confilict は SQLite 3.24.0 以降
+public function upsertRecord($wh,$row) {
+	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ
+	$row = $this->sql_safe_convert($this->sql_str_quote($row,["'"],["''"]));	// 書き込み型変換
+	list($pkey,$pval) = array_first_item($wh);
+	// UPDATE OR INSERT => REPLACE SQL生成
+	$kstr = '"' . implode('","', array_keys($row)) . '"';
+	$vstr = implode(',', $row);
+	$sql = "REPLACE INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr});";
+	error_reporting(E_ALL);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
 		echo 'ERROR:'.$this->getLastError()."\n{$sql}\n";
 		return FALSE;
 	}
-	$a = $this->fetch_array();		// 書込みはraw-tableなのでAlias無し
-	//view が定義されていれば取り直す
-	if($this->raw_table !== $this->table) {
-		$a = $this->doQueryBy($pkey,$pval);
-	}
+	// 指定条件でレコードを取り出す
+	$a = $this->doQueryBy($pkey,$pval);
 	return $a;
 }
 
