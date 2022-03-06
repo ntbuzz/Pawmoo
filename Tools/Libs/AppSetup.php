@@ -165,6 +165,8 @@ private function ModTree($model,$exec) {
 					$defs = "[\n{$defs}\n{$spc}]";
 				} else if(is_bool($defs)) {
 					$defs = ($defs) ? 'TRUE':'FALSE';
+				} else if($defs === HANDLER) {
+					$defs = 'HANDLER';
 				} else if(!is_int($defs)) {
 					$defs = "'{$defs}'";
 				}
