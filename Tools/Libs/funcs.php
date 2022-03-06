@@ -37,3 +37,25 @@ function get_files($path,$ext,$full=true) {
      $drc->close();
 	return $files;
 }
+//==============================================================================
+// 8進数に変換
+function oct_fix($dec) {
+	if($dec) $dec = substr("0000".decoct($dec),-5);
+	return $dec;
+};
+//==============================================================================
+// バインド配列変換
+function bind_array($rel,$sep=NULL) {
+	$bind = str_explode(["\r\n","\n"],$rel);
+	if(count($bind)===1)	$bind = $rel;
+	else {
+		if($sep !== NULL) {
+			$item = [array_pop($bind)];
+			foreach($bind as $nm) {
+				set_array_key_unique($item,$sep,$nm);
+			}
+			$bind = $item;
+		}
+	}
+	return $bind;
+}
