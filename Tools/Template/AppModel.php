@@ -9,7 +9,6 @@ static $DatabaseSchema = [
 //==============================================================================
 //	クラス初期化処理
 protected function ClassInit() {
-
 }
 %virtual_class%
 
