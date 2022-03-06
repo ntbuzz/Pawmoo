@@ -71,10 +71,12 @@ public function bind_columns($data) {
 //==============================================================================
 // fetchDB Callback method register
 public function register_method($class,$method) {
+	$cls = get_class($class);
 	if (is_subclass_of($class, 'AppModel',false)) {
-		$this->register_callback = [$class,$method];
+		if(method_exists($class,$method)) {
+			$this->register_callback = [$class,$method];
+		}
 	} else {
-		$cls = get_class($class);
 		echo "'{$cls}' is not sub-class AppModel\n";
 	}
 }
@@ -108,9 +110,7 @@ public function fetchDB() {
 	if($row = $this->fetch_array()) {
 		$this->fieldAlias->to_alias_bind($row);
 		list($obj,$method) = $this->register_callback;
-		if (is_subclass_of($obj, 'AppModel',false)) {
-			if(method_exists($obj,$method)) $obj->$method($row);
-		}
+		if ($obj !== NULL) $obj->$method($row);	// already checked by refistered
 	}
 	return $row;
 }

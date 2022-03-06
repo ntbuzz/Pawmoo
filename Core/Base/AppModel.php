@@ -61,7 +61,9 @@ class AppModel extends AppObject {
         $this->TimeFormat = $this->dbDriver->TimeStyle;         // Time format from DB-Driver
         $this->DateTimeFormat = "{$this->DateFormat} {$this->TimeFormat}"; // DateTime
 		$this->dbDriver->fieldAlias->lang_alternate = $this->Lang_Alternate;
-		$this->dbDriver->register_method($this,'virtual_field');
+		if(method_exists($this,'virtual_field')) {
+			$this->dbDriver->register_method($this,'virtual_field');
+		}
 	}
 //==============================================================================
 // Initializ Class Property
@@ -90,7 +92,7 @@ public function ResetSchema() {
         $this->ModuleName => [
             "Header"    => $this->HeaderSchema,
 			'Virtual'	=> $this->virtual_columns,
-			'Handler'	=> $this->dbDriver->columns,
+			'Handler'	=> $this->Handler,
             "Field"     => $this->FieldSchema, 
             "Relations"     => $this->dbDriver->relations,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
