@@ -17,15 +17,16 @@ require_once('Core/Handler/NullHandler.php');
 class fieldAlias {
 	public $lang_alternate = FALSE;			// use origin field, when lang field empty
 	private	$lang_alias = [];
-    private	$bind_columns = [];
+    // private	$bind_columns = [];
 //==============================================================================
 // Setup ALIAS parameter,and BIND-column parameter
-public function SetupAlias($alias,$binds) {
+public function SetupAlias($alias) {
 	$this->lang_alias = $alias;
-	$this->bind_columns = $binds;
+	// $this->bind_columns = $binds;
 }
 public function GetAlias() {
-	return [ 'Locale' => $this->lang_alias,'Bind' => $this->bind_columns];
+	return [ 'Locale' => $this->lang_alias];
+	// return [ 'Locale' => $this->lang_alias,'Bind' => $this->bind_columns];
 }
 //==============================================================================
 // check exists Locale ALIAS field
@@ -35,26 +36,26 @@ public function exists_locale($field_name) {
 }
 //==============================================================================
 // check exists Locale BIND field
-public function get_bind_ifexists($fields) {
-    foreach($this->bind_columns as $key => $columns) {
-        if(count($columns) === count($fields)) {
-            $match = TRUE;
-            foreach($columns as $fn ) {
-                if(!in_array($fn,$fields)) {
-                    $match = FALSE;
-                    break;
-                }
-            }
-            if($match) return $key;
-        }
-    }
-    return FALSE;
-}
+// public function get_bind_ifexists($fields) {
+//     foreach($this->bind_columns as $key => $columns) {
+//         if(count($columns) === count($fields)) {
+//             $match = TRUE;
+//             foreach($columns as $fn ) {
+//                 if(!in_array($fn,$fields)) {
+//                     $match = FALSE;
+//                     break;
+//                 }
+//             }
+//             if($match) return $key;
+//         }
+//     }
+//     return FALSE;
+// }
 //==============================================================================
 // Concatenate BIND-column in record field
-public function get_bind_key($row,$key) {
-    return array_concat_keys($row,$this->bind_columns[$key]);
-}
+// public function get_bind_key($row,$key) {
+//     return array_concat_keys($row,$this->bind_columns[$key]);
+// }
 //==============================================================================
 //	if exists LOCALE alias, get LOCALE fields name
 public function get_lang_alias($field_name) {
@@ -70,11 +71,11 @@ public function to_lang_alias(&$row) {
 }
 //==============================================================================
 // ALIAS fields replace to standard field, and BIND-column to record field
-public function to_bind_field(&$row) {
-    foreach($this->bind_columns as $key => $columns) {
-        $row[$key] = array_concat_keys($row,$columns);
-    }
-}
+// public function to_bind_field(&$row) {
+//     foreach($this->bind_columns as $key => $columns) {
+//         $row[$key] = array_concat_keys($row,$columns);
+//     }
+// }
 //==============================================================================
 // ALIAS fields replace to standard field, and BIND-column to record field
 public function to_alias_bind(&$row) {
@@ -82,9 +83,9 @@ public function to_alias_bind(&$row) {
         if(!empty($row[$lang]) || $this->lang_alternate === FALSE) $row[$key] = $row[$lang];
         unset($row[$lang]);
     }
-    foreach($this->bind_columns as $key => $columns) {
-        $row[$key] = array_concat_keys($row,$columns);
-    }
+    // foreach($this->bind_columns as $key => $columns) {
+    //     $row[$key] = array_concat_keys($row,$columns);
+    // }
 }
 // End-OF-CLASS
 }

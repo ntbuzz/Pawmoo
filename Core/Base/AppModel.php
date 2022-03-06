@@ -103,18 +103,14 @@ public function ResetSchema() {
 //==============================================================================
 // Schema Define Analyzer
     protected function SchemaAnalyzer() {
-        $header = $relation = $locale = $bind = $field = [];
+        $header = $relation = $locale = $field = [];
         foreach($this->Schema as $key => $defs) {
             $ref_key = $key;
-            list($disp_name,$disp_flag,$width,$relations,$binds) = array_alternative($defs,5);
+            list($disp_name,$disp_flag,$width,$relations) = array_alternative($defs,5);
 			if($disp_flag < 0) continue;
             list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
             if(!empty($relations)) {
                 $relation[$key] = $relations;
-            }
-            if(!empty($binds)) {
-                $bind[$ref_key] = $binds;
-                $key = NULL;
             }
             $field[$ref_key] = $key;
             if($disp_head !== 0) {
@@ -132,7 +128,7 @@ public function ResetSchema() {
         $this->HeaderSchema = $header;
         $this->FieldSchema = $field;
         $this->Relations = $relation;
-        $this->dbDriver->fieldAlias->SetupAlias($locale,$bind);
+        $this->dbDriver->fieldAlias->SetupAlias($locale);
     }
 //==============================================================================
 // extract DataTable or Alternate DataView

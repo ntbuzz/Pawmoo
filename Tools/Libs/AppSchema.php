@@ -5,7 +5,6 @@ class AppSchema extends AppBase {
 	public $FieldSchema;		// read-only column => view column
 	public $TableSchema;		// read/write column => table column
 	public $locale_columns;
-	public $bind_columns;
 	public $ViewSet;
 	const typeXchanger  = [
 		'Postgre' =>  [],
@@ -75,7 +74,8 @@ private function SchemaAnalyzer() {
 	foreach($this->Schema as $key => $defs) {
 		list($dtype,$flag,$width,$rel) = array_extract($defs,4);
 		$dtype = strtolower($dtype);
-		$this->FieldSchema[$key] = [$dtype,$flag,$width];
+		// 言語フィールドは省略
+		if(is_array($defs)) $this->FieldSchema[$key] = [$dtype,$flag,$width];
 		list($link,$def) = array_first_item($rel);
 		if(is_int($link)) $def = $rel;
 		if($dtype !== 'virtual' && ($rel === NULL || !is_int($link))) {	// relation-field
@@ -85,12 +85,11 @@ private function SchemaAnalyzer() {
 			if(is_int($link)) {		// bind
 				if($width !== NULL) $this->FieldSchema[$key] = ['bind',$flag,$width];
 			} else{
-				$view = [];
 				foreach($def as $kk => $vv) {
 					list($alias,$flag,$width,$rel) = array_extract($vv,4);
 					$atype = (is_array($alias))?'alias-bind':'alias';
-					$this->FieldSchema[$kk] = [$atype,$flag,$width];
-					$view[$kk] = $alias;
+					// 言語フィールドは省略
+					if(is_array($vv)) $this->FieldSchema[$kk] = [$atype,$flag,$width];
 				}
 			}
 		}
@@ -108,7 +107,7 @@ protected function ResetLocation() {
 			}
 		}
 	}
-	$this->dbDriver->fieldAlias->SetupAlias($this->locale_columns,$this->bind_columns);
+	$this->dbDriver->fieldAlias->SetupAlias($this->locale_columns);
 }
 //==============================================================================
 // execute SQL
