@@ -109,7 +109,7 @@ public function updateRecord($wh,$row) {
 	error_reporting(E_ALL);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
-		echo 'ERROR:'.$this->getLastError()."\n{$sql}\n";
+		echo 'UPDATE ERROR:'.$this->getLastError()."\n{$sql}\n";
 		return FALSE;
 	}
 // SQLite3 old version cannot support 'RETURNING'.
@@ -125,12 +125,12 @@ public function upsertRecord($wh,$row) {
 	list($pkey,$pval) = array_first_item($wh);
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
-	$vstr = implode(',', $row);
+	$vstr = implode(",", $row);
 	$sql = "REPLACE INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr});";
 	error_reporting(E_ALL);
 	$rows = $this->doQuery($sql);
 	if(!$rows) {
-		echo 'ERROR:'.$this->getLastError()."\n{$sql}\n";
+		echo 'REPLACE ERROR:'.$this->getLastError()."\n{$sql}\n";
 		return FALSE;
 	}
 	// 指定条件でレコードを取り出す
