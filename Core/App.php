@@ -101,6 +101,12 @@ public static function SetModuleExecution($module,$method,$change_filter=[],$rel
     static::$ReLocate = $relocate;
 }
 //==============================================================================
+// フィルタパスの書き換え
+public static function ChangeFilters($change_filter=[],$relocate = TRUE) { 
+    if(is_array($change_filter)) static::$execURI['filter'] = $change_filter;
+    static::$ReLocate = $relocate;
+}
+//==============================================================================
 // パラメータパスの置換
 public static function ChangeParams($params,$relocate = TRUE) { 
 	static::$ParamCount = count($params);	// ZERO 充填前のパラメータ数
