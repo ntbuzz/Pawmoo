@@ -97,6 +97,7 @@ public function execute($cmd,$model,$exec) {
 	if(empty($model) && $mod) {
 		$this->Help("'{$cmd}' Need module parameter");
 	}
+	echo "EXEC: {$func}\n";
 	$this->$func($model,$exec);
 }
 //==============================================================================
@@ -138,6 +139,10 @@ private function ModTree($model,$exec) {
 			$csv_dir = "{$this->AppConfig}/Setup/";
 			$files = get_files($csv_dir,'.csv');
 		}
+		if(empty($files)) {
+			echo "SPEC define CSV file not found.\n";
+			return false;
+		}
 		return $files;
 	}
 //==============================================================================
@@ -149,6 +154,10 @@ private function ModTree($model,$exec) {
 		} else {
 			$files = get_files($schema_dir,'.php',false);
 			if($files !== false) $files = array_map(function($v) { return str_replace('Schema.php','',$v);},$files);
+		}
+		if(empty($files)) {
+			echo "SCHEMA file not found.\n";
+			return false;
 		}
 		return $files;
 	}
@@ -194,10 +203,7 @@ private function ModTree($model,$exec) {
 private function GenSchema($model,$exec) {
 	// 指定された、見つかったクラスファイルを全て処理する
 	$files = $this->get_csv_files($model);
-	if($files === false) {
-		echo "Cannot Generated Schema.\n";
-		return false;
-	}
+	if($files === false) return false;
 	$models = [];
 	foreach($files as $target) $models[] = $this->makeModelSchema($target);
 	$model = implode(', ',$models);
@@ -208,10 +214,7 @@ private function GenSchema($model,$exec) {
 private function GenModel($model,$exec) {
 	// 指定された、見つかったクラスファイルを全て処理する
 	$files = $this->get_schema_files($model);
-	if($files === false) {
-		echo "Cannot Generated Model.\n";
-		return false;
-	}
+	if($files === false) return false;
 	$models = [];
 	foreach($files as $target) {
 		$models[] = $this->makeModelClass($target);
@@ -224,10 +227,7 @@ private function GenModel($model,$exec) {
 private function SetupModel($model,$exec) {
 	// 指定された、見つかったクラスファイルを全て処理する
 	$files = $this->get_csv_files($model);
-	if($files === false) {
-		echo "Cannot Setup '{$model}'.\n";
-		return false;
-	}
+	if($files === false) return false;
 	$models = [];
 	foreach($files as $target) {
 		list($pp,$ff) = extract_path_filename($target);
@@ -252,10 +252,7 @@ private function SetupModel($model,$exec) {
 private function MakeTable($model,$exec) {
 	// 指定された、見つかったクラスファイルを全て処理する
 	$files = $this->get_schema_files($model);
-	if($files === false) {
-		echo "Cannot TABLE '{$model}'.\n";
-		return false;
-	}
+	if($files === false) return false;
 	$csv_path = "{$this->AppConfig}/InitCSV/";
 	foreach($files as $mm) {
 		$schema = $this->$mm;
@@ -269,10 +266,7 @@ private function MakeTable($model,$exec) {
 private function ImportCSV($model) {
 	// 指定された、見つかったクラスファイルを全て処理する
 	$files = $this->get_schema_files($model);
-	if($files === false) {
-		echo "Cannot CSV '{$model}'.\n";
-		return false;
-	}
+	if($files === false) return false;
 	$csv_path = "{$this->AppConfig}/InitCSV/";
 	foreach($files as $model) {
 		$schema = $this->$model;
@@ -284,6 +278,7 @@ private function ImportCSV($model) {
 private function MakeView($model,$exec) {
 	// 指定された、見つかったクラスファイルを全て処理する
 	$files = $this->get_schema_files($model);
+	if($files === false) return false;
 	foreach($files as $model) {
 		$schema = $this->$model;
 		$depend = $schema->DependList([]);
@@ -439,7 +434,7 @@ private function createSchema($fields) {
 					}
 				}
 				if(!empty($rel)) {
-					list($m,$ix) = explode('.',$rel);
+					list($m,$ix) = fix_explode('.',$rel,2);
 					$depend[] = $m;
 					$col[$fname][$rel] = [];
 				}
