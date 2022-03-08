@@ -27,7 +27,7 @@ class AppSchema extends AppBase {
         $driver = $this->Handler . 'Handler';
         $this->dbDriver = new $driver($this->MyTable,$this->Primary);        // connect Database Driver
 		$this->SchemaSetup();
-		echo "Handler({$driver})\n";
+		echo sprintf("  * %-14s schema use %s Handler.\n",$this->ModuleName,$this->Handler);
     }
 //==============================================================================
 // Switch Schema Language
@@ -122,6 +122,11 @@ public function CreateDatabase($exec=false) {
 	// DEOP TABLE
 	$sql = $this->dbDriver->drop_sql("TABLE",$this->MyTable);
 	$this->doSQL($exec,$sql);
+	$sql = "SELECT COUNT(*) as \"total\" FROM sqlite_master WHERE TYPE='table' AND name='{$this->MyTable}';";
+	$this->doSQL($exec,$sql);
+	$field = $this->dbDriver->fetch_array();
+	$exist =  ($field) ? intval($field["total"]) : 0;
+xdebug_dump(["DROP-TABLE"=>$this->MyTable,'EXIST'=>$exist]);
 	// Create Table
 	$fset = [];
 	foreach($this->TableSchema as $column => $defs) {
@@ -154,7 +159,7 @@ public function DependList($list) {
 //	テーブルとビューを作成
 public function CreateTableView($exec=false) {
 	if(empty($this->ViewSet)) {
-		debug_dump([$this->ModuleName=>"Not have VIEW"]);
+		debug_dump([$this->ModuleName=>'has no VIEW'],false);
 		return false;
 	}
 	// DROP-VIEW
@@ -164,7 +169,7 @@ public function CreateTableView($exec=false) {
 	}
 	// CREATE-VIEW
 	foreach($this->ViewSet as $view) {
-		debug_dump(["VIEW-DEFS" => $view]);
+		debug_dump(["Create View" => $view],false);
 		$sql = $this->createView($view);
 		$this->doSQL($exec,$sql);
 	}
@@ -238,7 +243,7 @@ private function createView($view) {
 	}
 	$join_sql = (empty($join)) ? '':"\n".implode("\n",$join)."";
 	$sql = "CREATE VIEW {$view} AS SELECT\n".implode(",\n",$fields) ."\nFROM {$this->MyTable}{$join_sql};";
-debug_dump(["SQL({$this->Handler})"=>$sql]);
+xdebug_dump(["SQL({$this->Handler})"=>$sql]);
 	return $sql;
 }
 //==============================================================================

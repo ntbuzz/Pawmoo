@@ -97,7 +97,7 @@ public function execute($cmd,$model,$exec) {
 	if(empty($model) && $mod) {
 		$this->Help("'{$cmd}' Need module parameter");
 	}
-	echo "EXEC: {$func}\n";
+	echo "EXEC: << {$func} >>\n\n";
 	$this->$func($model,$exec);
 }
 //==============================================================================
@@ -206,8 +206,7 @@ private function GenSchema($model,$exec) {
 	if($files === false) return false;
 	$models = [];
 	foreach($files as $target) $models[] = $this->makeModelSchema($target);
-	$model = implode(', ',$models);
-	echo "Module '{$model}' Schema Generated.\n";
+	debug_dump(["'Schema' class Generated"=>$models],false);
 }
 //==============================================================================
 // スキーマからモデルクラス作成、省略可
@@ -219,8 +218,7 @@ private function GenModel($model,$exec) {
 	foreach($files as $target) {
 		$models[] = $this->makeModelClass($target);
 	}
-	$model = implode(', ',$models);
-	echo "Module '{$model}' ModelClass Generated.\n";
+	debug_dump(["'Model' class Generated"=>$models],false);
 }
 //==============================================================================
 // schemaコマンドとmodelコマンドの連続実行、必須
@@ -231,21 +229,17 @@ private function SetupModel($model,$exec) {
 	$models = [];
 	foreach($files as $target) {
 		list($pp,$ff) = extract_path_filename($target);
-		echo str_repeat("=", 10)."<< {$ff} >>".str_repeat("=", 10)."\n";
+		echo "\n".str_repeat("=", 10)."<< {$ff} >>".str_repeat("=", 10)."\n";
 		$module = $this->makeModelSchema($target);
 		if($module) {
+			echo "Module '{$module}' Schema Generated.\n";
 			$models[] = $module;
 			$this->GenModel($module,$exec);
-			// $mod_folder = "{$this->AppRoot}/modules/{$module}";
-			// if(!is_dir($mod_folder)) {
-			// 	$this->createFolder("{$this->AppRoot}/modules/{$module}",$module,self::Module);
-			// }
 		} else {
 			debug_die(['FAIL STOP'=>$model]);
 		}
 	}
-	$model = implode(', ',$models);
-	echo "Setup Success '{$model}' module.\n";
+	debug_dump(["Setup Success module"=>$models],false);
 }
 //==============================================================================
 // スキーマからテーブルとビューを作成、CSVインポート、省略可
@@ -257,8 +251,9 @@ private function MakeTable($model,$exec) {
 	foreach($files as $mm) {
 		$schema = $this->$mm;
 		$schema->CreateDatabase($exec);
-		if($exec) $schema->ImportCSV($csv_path);
+//		if($exec) $schema->ImportCSV($csv_path);	// CREATEが終わる前に書き込みが発生する
 	}
+	$this->ImportCSV($model,$exec);
 	$this->MakeView($model,$exec);
 }
 //==============================================================================
@@ -283,18 +278,18 @@ private function MakeView($model,$exec) {
 		$schema = $this->$model;
 		$depend = $schema->DependList([]);
 		if($depend !== []) {
-debug_dump([$model => ['DEPEND-VIEW'=>$depend]]);
+			debug_dump([$model => ['DEPEND-VIEW'=>$depend]],false);
 			foreach($depend as $sub) {
 				$this->$sub->CreateTableView($exec);
 			}
 		}
-		$schema->CreateTableView($exec);
+		// 自分自身がCREATEされてなければ
+		if(!in_array($model,$depend)) $schema->CreateTableView($exec);
 	}
 }
 //==============================================================================
 // フォルダーツリーを作成
 private function createFolder($path,$module,$file) {
-	debug_die(['MOD-TREE'=>$module]);
 	$exist = true;
 	if(is_scalar($file)) {
 		$modfile = (substr($file,0,1)==='*') ? $module.substr($file,1) : $file;
@@ -328,8 +323,6 @@ private function createFolder($path,$module,$file) {
 //==============================================================================
 // CSV file Load (must be UTF-8)
 private function loadCSV($path) {
-//	list($p,$f) = extract_path_filename($path);
-//echo "CSV Load:{$f}\n";
 	$columns = [ 'No','名前','フィールド名','言語','タイプ','リレーション','表示フラグ','CSV','メモ'];
 	$Schema = [];
 	$Database = [];
@@ -407,8 +400,6 @@ private function createSchema($fields) {
 		case 'bind':	// self-bind or Link-Bind
 				$bind = bind_array($rel,$sep);
 				$col[$fname] = [ $type, $flag, $wd ,$bind ];
-				// self-bindは言語依存しない
-//				if(strpos($rel,'.') !== false && $lang) {
 				if($lang) {
 					list($sep,$bind) =	array_first_item($bind);
 					$flag &= 00700;			// CSVのみ残す
