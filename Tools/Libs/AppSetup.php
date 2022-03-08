@@ -348,6 +348,25 @@ private function loadCSV($path) {
 }
 //==============================================================================
 // CSV file Load (must be UTF-8)
+// 'Schema' => [
+// 	'id'	=> [ 'serial',	00100,	0 ],	通常フィールド
+//	'bind'	=> [ 'bind',	01110,	50,[ 'firstname','lastname' ] ],	// 結合フィールド
+// 	'os_id' => [ 'integer',	01110,	50,		リレーションビューフィールド
+// 		'Os.id' => [							リレーションモデル・キー
+// 			'os_name' => [ 'name',00100,20],	ビューフィールド
+// 			'os_name_en'=> 'name_en',			言語フィールド
+// 			'cat_id' => [ 'integer', 00000, NULL,						
+// 				'Oscat.id' => [					ネストリレーションモデル・キー
+// 					'os_providor' => [ 'provider',0100,40],		リレーション名
+// 					'group_id' => [	'integer', 00000, NULL,		ネスト
+// 						'Osgrp.id' => [
+// 							'os_group' => [ 'group',0010,50],
+// 						]
+// 					]
+// 				]
+// 			]
+// 		]
+// 	]
 private function createSchema($fields) {
 	$DispFlags = [
 		'L' => 00010,	// Left
@@ -548,7 +567,7 @@ private function makeModelField($Schema,$lang=NULL) {
 			if($defs === NULL) continue;
 			if(is_array($defs)) {
 				list($type,$flag,$wd,$rel) = array_extract($defs,4);
-				if(in_array($type,['alias','bind'])) $type = '____';
+				if(empty($type)||$type==='---') continue;	// no include model field
 				$flag = oct_fix($flag);
 				if($wd===NULL) $wd = 0;
 				$spc_len = 18 - strlen($key);
@@ -589,7 +608,8 @@ private function makeModelClass($model) {
 		$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
 		return $template;
 	};
-	$schema_txt = $this->makeModelField($schema->FieldSchema,$schema->Lang);
+debug_dump(['MODEL'=>$schema->ModelFields]);
+	$schema_txt = $this->makeModelField($schema->ModelFields,$schema->Lang);
 	$this->DatabaseSchema = [
 		'Handler' => $schema->Handler,
 		'DataTable' => $schema->DataTable,
@@ -597,7 +617,7 @@ private function makeModelClass($model) {
 		'Primary' => $schema->Primary,
 		'Lang_Alternate' => $schema->Lang_Alternate,
 		'*Schema' => $schema_txt,
-		'Virtual' => (isset($schema->Virtual)) ? $schema->Virtual : [],
+//		'Virtual' => (isset($schema->Virtual)) ? $schema->Virtual : [],
 	];
 	$db_def = $this->dump_array($this->DatabaseSchema,1);
 	$virtula_method = (isset($schema->Virtual))?$gen_virtual($schema->Virtual):NULL;
