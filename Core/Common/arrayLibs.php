@@ -285,6 +285,7 @@ function array_key_rename(&$arr,$renames) {
 //==============================================================================
 // set array element
 function array_set_key_value(&$arr,$keys,$vals) {
+	if(is_scalar($vals)) $vals = array_fill(0,count($keys),$vals);
 	foreach(array_combine($keys,$vals) as $key => $val) $arr[$key] = $val;
 }
 //==============================================================================
