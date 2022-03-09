@@ -162,52 +162,26 @@ public static function LangDebug() {
 // ネストされた配列変数を取得する、要素名はピリオドで連結したキー名
 //  ex. Menu.File.OPEN  大文字小文字は区別される
 public static function get_value($mod, $id, $allow = FALSE) {
-    $expand_id = function ($mod, $id, $allow) {
-		//-----------------------------------------
-		// 無名関数を定義して配列内の探索を行う
-		$array_finder = function ($lst, $arr, $allow) {
-				foreach($lst as $val) {
-					if(is_array($arr) && array_key_exists($val, $arr)) {
-						$val = str_replace(['　',' '],'',$val);
-						$arr = $arr[$val];
-					} else return FALSE;        // 見つからなかった時
-				}
-				if(is_array($arr)) {          // 見つけた要素が配列なら
-					return ($allow) ? $arr :    // 配列を要求されていれば配列で返す
-						( (isset($arr[0])) ? $arr[0] :     // 0番目の要素があれば値を返す
-											FALSE);         // そうでなければエラー
-				}
-				return $arr;        // スカラー値はそのまま返す
-			};
-		//-----------------------------------------
-		if($id[0] === '.') {        // 相対検索ならモジュール名を使う
-			$lst = explode('.', "{$mod}{$id}");
-			if( ($a=$array_finder($lst,static::$STRINGS,$allow)) !== FALSE) {
-				return $a;
-			}
-			array_shift($lst);      // 先頭のモジュール名要素を消す
-		} else $lst = explode('.', $id);    // 絶対検索
-		if( ($a=$array_finder($lst,static::$STRINGS,$allow)) !== FALSE) {     // 
-			return $a;
-		}
-		return FALSE;
+	$array_finder2 = function($id, $arr, $allow) {
+		$rep = array_member_value($arr,$id);
+		if($rep === NULL) return false;		//見つからない
+		if(is_scalar($rep)) return lang_string_token($rep,$arr);
+		// 配列要素ごとに展開
+		$list = array_map(function($v) use(&$arr) {
+			$s = lang_string_token($v,$arr);
+			return ($s === false) ? $v : $s;
+		},$rep);
+		if($allow) return $list;
+		return reset($list);
 	};
-    $a = $expand_id($mod, $id, $allow);
-	if($a === FALSE) {
-		$lst = explode('.', $id);   // 見つからなければ識別子の末尾要素を返す
-	    return array_pop($lst); 
+	//-----------------------------------------
+	if($id[0] === '.') {        // モジュール相対参照
+		if( ($a=$array_finder2("{$mod}{$id}",static::$STRINGS,$allow)) !== FALSE) return $a;
+		$id = substr($id,1);	// . を削除
 	}
-	// 2段階展開を許可
-	$a = preg_replace_callback('/(\$\{([^\}]+?)\})/',
-			function($mm) use(&$mod,&$expand_id)  {
-				$b = $expand_id($mod, $mm[2],false);
-				if($b === FALSE) {
-					$lst = explode('.', $mm[2]);   // 見つからなければ識別子の末尾要素を返す
-					$b = array_pop($lst); 
-				}
-				return $b;
-			},$a);
-	return $a;
+	// 絶対参照
+	if( ($a=$array_finder2($id,static::$STRINGS,$allow)) !== FALSE) return $a;
+	return lang_last_token($id);
 }
 //==============================================================================
 // ネストされた配列変数を取得する、要素名はピリオドで連結したキー名
@@ -217,6 +191,32 @@ public static function get_array($arr, $mod, $var) {
     return $arr[$element];
 }
 
+}
+
+//==============================================================================
+// read LOCALE resource value
+function lang_last_token($str) {
+	$wd = explode('.',$str);
+	return array_pop($wd);
+}
+function lang_string_token($str,$arr) {
+	if(is_array($str)) {
+		$v = reset($str);
+		return (is_string($v)) ? $v : false;
+	}
+	$p = '/\$\{[^\}]+?\}|(?:(?!\$\{[^\}]+?\}).+?)+/s';	// 改行を含むパターンに対応
+	preg_match_all($p,$str,$m);               // 全ての要素をトークン分離する
+	$lst = array_filter(array_map(function($v) use(&$arr) {
+					if(substr($v,0,2) === '${') {
+						$vv = substr($v,2,strlen($str)-3);
+						$rep = array_member_value($arr,$vv);
+						if($rep === NULL) return lang_last_token($vv);
+						return lang_string_token($rep,$arr);
+					}
+					return $v;
+				},$m[0]), function($v) { return $v;});	// NULL 要素を除外
+	if($lst === []) return false;
+	return implode('',$lst);
 }
 
 //==============================================================================
