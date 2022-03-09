@@ -65,14 +65,17 @@ private function SchemaSetup() {
 private function SchemaAnalyzer() {
 	$this->ModelFields = $this->TableFields = [];
 	// サブリレーションのフィールド抽出
-	$relation = function($rels) use(&$relation) {
+	$relation = function($base,$rels) use(&$relation) {
+		list($model) = explode('.',$base);
 		foreach($rels as $kk => $vv) {
 			list($alias,$flag,$width,$rel) = array_extract($vv,4);
 			if(is_array($rel)) {
-				$this->ModelFields[$kk] = [$alias,$flag,$width];
+//				if($alias !== '---') $this->ModelFields[$kk] = ["alias-{$alias}",$flag,$width];
 				list($link,$sub) = array_first_item($rel);
-				$relation($sub);
-			}// else  $this->ModelFields[$kk] = [$alias,$flag,$width];
+				$relation($link,$sub);
+			} else if(is_array($vv)) {
+				$this->ModelFields[$kk] = ["alias",$flag,$width,"{$model}.{$alias}"];
+			}
 		}
 	};
 	foreach($this->Schema as $key => $defs) {
@@ -85,7 +88,7 @@ private function SchemaAnalyzer() {
 		if($dtype !== 'virtual' && ($rel === NULL || !is_int($link))) {	// relation-field
 			$this->TableFields[$key] = [$dtype,$flag,$width];
 		}
-		if(!is_int($link) && is_array($def)) $relation($def);
+		if(!is_int($link) && is_array($def)) $relation($link,$def);
 	}
 }
 //==============================================================================
@@ -125,7 +128,10 @@ public function CreateDatabase($exec=false) {
 	foreach($this->TableFields as $column => $defs) {
 		list($ftype,$flag,$wd,$bind) = array_extract($defs,4);
 		if(is_scalar($ftype) && !in_array($ftype,['bind','virtual'])) {
-			if($ftype === '---') $ftype = 'integer';
+			switch($ftype) {
+			case '---': $ftype = 'integer';break;
+			case '***': $ftype = 'text';break;
+			}
 			$lftype = strtolower($ftype);
 			if(array_key_exists($lftype,static::typeXchanger[HANDLER])) $ftype = static::typeXchanger[HANDLER][$lftype];
 			$str = "{$column} {$ftype}";
@@ -194,7 +200,7 @@ private function get_view_name($n) {
 private function createView($view) {
 	$join = [];
 	$fields = [];
-// 	'cat_id' => [ 'Oscat.id' => [ ... ]  ]
+// 	'cat_id' => [ 'type', 0, NULL , 'Oscat.id' => [ ... ]  ]
 //   key         rels
 	$relations = function($table,$key,$rels) use(&$relations,&$join,&$fields) {
 xdebug_dump(['TABLE'=>$table,'KEY'=>$key,'RELS'=>$rels]);
@@ -217,7 +223,7 @@ xdebug_dump(['TABLE'=>$table,'KEY'=>$key,'RELS'=>$rels]);
 					$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$fn}";
 				} else {
 xdebug_dump(['FN'=>$fn,'DEF'=>$defs,'TABLE'=>$table,'TBL'=>$tbl,'TYPE'=>$type]);
-					if(!empty($type) && $type !== '---') $fields[] = "{$tbl}.\"$fn\"";
+					if(!empty($type) && $type !== '---' && $type !== '***') $fields[] = "{$tbl}.\"$fn\"";
 					$relations($tbl,$fn,$bind);
 				}
 			}
