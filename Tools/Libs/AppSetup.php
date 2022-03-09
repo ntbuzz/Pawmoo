@@ -566,15 +566,16 @@ private function makeModelField($Schema,$lang=NULL) {
 		foreach($schema as $key=>$defs) {
 			if($defs === NULL) continue;
 			if(is_array($defs)) {
-				list($type,$flag,$wd,$rel) = array_extract($defs,4);
-				if(empty($type)||$type==='---') continue;	// no include model field
+				list($type,$flag,$wd,$rel_model) = array_extract($defs,4);
+				if(empty($type)||$type==='---'||$type==='***') continue;	// no include model field
 				$flag = oct_fix($flag);
 				if($wd===NULL) $wd = 0;
 				$spc_len = 18 - strlen($key);
 				if($spc_len <= 0) $spc_len = 2;
 				$spc = str_repeat(' ',$spc_len);
 				$ln = str_repeat(' ',$indent*4) . "'{$key}'{$spc}=> [ '{$type}',\t{$flag},\t{$wd} ],";
-				if(array_key_exists($key,$lang)) $ln = "{$ln}\t// {$lang[$key]}";
+				$cmm = (is_string($rel_model)) ? " ({$rel_model})":'';
+				if(array_key_exists($key,$lang)) $ln = "{$ln}\t// {$lang[$key]}{$cmm}";
 				$line[] = $ln;
 			}
 		}
