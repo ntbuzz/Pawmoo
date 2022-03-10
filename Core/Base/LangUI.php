@@ -204,14 +204,14 @@ function lang_string_token($str,$arr) {
 		$v = reset($str);
 		return (is_string($v)) ? $v : false;
 	}
-	$p = '/\$\{[^\}]+?\}|(?:(?!\$\{[^\}]+?\}).+?)+/s';	// 改行を含むパターンに対応
+	$p = '/\$\{[^\}]+?\}|(?:(?!\$\{[^\}]+?\}).+?)*/s';	// 改行を含むパターンに対応
 	preg_match_all($p,$str,$m);               // 全ての要素をトークン分離する
 	$lst = array_filter(array_map(function($v) use(&$arr) {
 					if(substr($v,0,2) === '${') {
-						$vv = substr($v,2,strlen($str)-3);
+						$vv = substr($v,2,strlen($v)-3);
 						$rep = array_member_value($arr,$vv);
-						if($rep === NULL) return lang_last_token($vv);
-						return lang_string_token($rep,$arr);
+						if($rep === NULL) return lang_last_token($vv);	//見つからない
+						return lang_string_token($rep,$arr);		// 配列禁止
 					}
 					return $v;
 				},$m[0]), function($v) { return $v;});	// NULL 要素を除外
