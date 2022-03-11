@@ -1,4 +1,6 @@
 <?php
+define('ROOT_DIR', realpath(__DIR__ . '/../..'));
+
 /*
  * Object Oriented PHP MVC Framework
  *  Database Creator for command-line
@@ -13,15 +15,15 @@ $_SERVER['HTTP_REFERER'] = "localhost";
 $_SERVER['SERVER_PORT'] = '';
 $_SERVER['HTTP_HOST'] = 'localhost';
 // framework config
-require_once('site-config.php');
-require_once('Core/Config/appConfig.php');
+require_once(ROOT_DIR . '/site-config.php');
+require_once(ROOT_DIR . '/Core/Config/appConfig.php');
 if(!defined('CLI_DEBUG')) define('CLI_DEBUG',FALSE);
 
-require_once('Core/AppDebug.php');
-require_once('Core/Common/appLibs.php');
-require_once('Core/Common/coreLibs.php');
-require_once('Core/Handler/DatabaseHandler.php');
-require_once('Core/Base/AppDatabase.php');
+require_once(ROOT_DIR . '/Core/AppDebug.php');
+require_once(ROOT_DIR . '/Core/Common/appLibs.php');
+require_once(ROOT_DIR . '/Core/Common/coreLibs.php');
+require_once(ROOT_DIR . '/Core/Handler/DatabaseHandler.php');
+require_once(ROOT_DIR . '/Core/Base/AppDatabase.php');
 
 date_default_timezone_set('Asia/Tokyo');
 
@@ -35,7 +37,7 @@ $appname = strtolower(array_shift($in));
 $cmd = strtolower(array_shift($in));
 $list = array_filter($in,'strlen');
 
-$config_path = "app/{$appname}/Config";
+$config_path = ROOT_DIR . "/app/{$appname}/Config";
 $data_path = "{$config_path}/db_data/";
 $defsfile = "{$config_path}/Setup/Config.php";
 

@@ -11,14 +11,15 @@ define('DBMSG_RESOURCE',110);      // for Style/Script
 define('DBMSG_HANDLER', 111);      // for DB-Handler
 define('DBMSG_MODEL',   112);      // for Model
 define('DBMSG_VIEW',    113);      // for View, Helper
-define('DBMSG_LOCALE',  114);      // for LangUI
-define('DBMSG_SYSTEM',  115);      // for Main, App, Controller
+define('DBMSG_LOCALE',  0x1072);   // 0x1000 | 114 for LangUI
+define('DBMSG_SYSTEM',  0x1073);   // 0x1000 | 115 for Main, App, Controller
 define('DBMSG_DUMP',    116);      // DUMP ONLY
 define('DBMSG_NOLOG',   117);      // CLI dump ONLY
 define('DBMSG_STDERR',  118);      // STDERR output
 define('DBMSG_DIE',     119);      // die message
 define('DBMSG_NONE',    false);    // none
 define('DBMSG_CLI',     256);      // CLI BIT Mask for CLI_DEBUG
+define('DBMSG_NOTRACE', 0x1000);  // NO TRACE DUMP
 
 if(!defined('DEBUG_LEVEL'))  define('DEBUG_LEVEL', 10);
 
@@ -88,8 +89,10 @@ public static function get_logs($cont) {
 }
 //==========================================================================
 // 強制ダンプ
-public static function dump($items) {
-    debug_log((CLI_DEBUG)?DBMSG_STDERR:DBMSG_DUMP,$items);
+public static function dump($items,$trace) {
+    $flag = (CLI_DEBUG)?DBMSG_STDERR:DBMSG_DUMP;
+	if(!$trace) $flag |= DBMSG_NOTRACE;
+    debug_log($flag,$items);
 }
 //==========================================================================
 // デバッグレベルへのダンプ
@@ -142,8 +145,8 @@ function get_null_value($arg) {
 }
 //==========================================================================
 // sysLogクラスのエイリアス
-function debug_dump($items) {
-	sysLog::dump($items);
+function debug_dump($items,$trace=true) {
+	sysLog::dump($items,$trace);
 }
 function debug_die($items) {
 	sysLog::halt($items);
@@ -171,35 +174,41 @@ function debug_log($lvl,...$items) {
 	if(CLI_DEBUG) {
 		if(defined('CLI_SUPPRESS')) return;		// dump suppress in command-line mode
 	} else if($lvl === DBMSG_CLI) return;    	// not command-line invoked
+	$no_trace = (is_int($lvl)) ? ($lvl & DBMSG_NOTRACE) :false;	// no trace dump;
     $logging = sep_level($lvl);
     if($logging === FALSE) return;
     list($cli,$lvl) = $logging;
     if($lvl < -DBMSG_DIE) return;
     // バックトレースから呼び出し元の情報を取得
-    $dump_log_info = function($items) {
-        $dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
-        $trace = "";
-        foreach($dbinfo as $stack) {
-            if(isset($stack['file'])) {
-                $path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
-                list($pp,$fn,$ext) = extract_path_file_ext($path);
-                if($fn !== 'AppDebug') {                            // 自クラスの情報は不要
-                    $func = "{$fn}({$stack['line']})";
-                    $trace = (empty($trace)) ? $func : "{$func}>{$trace}";
-                }
-            }
-        }
-        $sep = 	str_repeat("-", 30);
-        $dmp_msg = "TRACE:: {$trace}\n";
+    $dump_log_info = function($items,$no_trace) {
+		if($no_trace) {	// システムと言語リソースはトレース情報省略
+			$dmp_msg =  '';
+		} else {
+			$dbinfo = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT,8);    // 呼び出し元のスタックまでの数
+			$trace = "";
+			foreach($dbinfo as $stack) {
+				if(isset($stack['file'])) {
+					$path = str_replace('\\','/',$stack['file']);             // Windowsパス対策
+					list($pp,$fn,$ext) = extract_path_file_ext($path);
+					if($fn !== 'AppDebug') {                            // 自クラスの情報は不要
+						$func = "{$fn}({$stack['line']})";
+						$trace = (empty($trace)) ? $func : "{$func}>{$trace}";
+					}
+				}
+			}
+			$sep = 	str_repeat("-", 30);
+			$dmp_msg = "TRACE:: {$trace}\n";
+		}
         // 子要素のオブジェクトをダンプする関数
         $dump_object = function ($obj,$indent) use (&$dump_object) {
 			$is_scalar_array = function($arr) {
-				foreach($arr as $element) if(!is_scalar($element)) return FALSE;
+				foreach($arr as $element) if($element!==NULL && !is_scalar($element)) return FALSE;
 				return TRUE;
 			};
-			if(array_values($obj) === $obj && $is_scalar_array($obj) && $indent>1) {
+			if(array_values($obj) === $obj && $is_scalar_array($obj) && $indent>=0) {
 				$vals = implode(", ",array_map(function($v) {
-					return (is_string($v)) ? str_replace(["\r\n","\r","\n","\t"],['\r\n', '\r', '\n', '\t'], $v) :$v;
+					if($v === NULL) return 'NULL';
+					else return (is_string($v)) ? str_replace(["\r\n","\r","\n","\t"],['\r\n', '\r', '\n', '\t'], $v):$v;
 				}, $obj));
 				$dmp = str_repeat(' ',$indent*2) . "[ {$vals} ]\n";
 			} else {
@@ -264,12 +273,12 @@ function debug_log($lvl,...$items) {
                 }
             }
         }
-        return "{$dmp_msg}\n";
+        return "{$dmp_msg}";
     };
 //    global $debug_log_str;
-    $dmp_info = $dump_log_info($items);
+    $dmp_info = $dump_log_info($items,$no_trace);
     if(!empty($dmp_info)) {
-		$pre_dump = (CLI_DEBUG) ? "\n{$dmp_info}\n" : "<pre>\n{$dmp_info}\n</pre>\n";
+		$pre_dump = (CLI_DEBUG) ? "{$dmp_info}\n" : "<pre>\n{$dmp_info}\n</pre>\n";
         switch($lvl) {
         case -DBMSG_STDERR:  stderr($dmp_info); break;
         case -DBMSG_DIE:    //Session::CloseSession(); // Session Close before die();

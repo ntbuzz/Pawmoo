@@ -55,6 +55,7 @@ class App {
             'REFERER'	=> static::$Referer,
             'REQURI'	=> $uri . array_to_query(static::$Query),
             'URI'		=> $uri,
+            'TODAY'		=> date('Y/m/d'),
             'controller'=> NULL,			// dummy , set by following ResetModule()
             'method'	=> NULL,			// dummy , set by following ResetModule()
             'extention' => NULL,			// dummy , set by following ResetModule()
@@ -96,6 +97,12 @@ public static function SetModuleExecution($module,$method,$change_filter=[],$rel
 	}
     if(!empty($module)) static::$execURI['controller'] = strtolower($module);
     static::$execURI['method'] = strtolower($method);
+    if(is_array($change_filter)) static::$execURI['filter'] = $change_filter;
+    static::$ReLocate = $relocate;
+}
+//==============================================================================
+// フィルタパスの書き換え
+public static function ChangeFilters($change_filter=[],$relocate = TRUE) { 
     if(is_array($change_filter)) static::$execURI['filter'] = $change_filter;
     static::$ReLocate = $relocate;
 }
@@ -203,6 +210,12 @@ public static function Get_ActionRoot($path = '',$lower = FALSE) {
 		trim((($lower)?strtolower($path):$path),'/'),
 	];
 	return implode('/',$URI);
+}
+//==============================================================================
+// カレントのURIを指定キーに保存する、既に保存されていれば何もしない
+public static function Save_MyURL($save_key) {  
+	$save_url = MySession::getAppData($save_key,false);
+	if(empty($save_url)) MySession::setAppData($save_key,static::$SysVAR['URI']);
 }
 //==============================================================================
 // POST/GET変数の要素名による取得

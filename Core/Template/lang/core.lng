@@ -40,6 +40,9 @@
 	FORBIDDEN	=> "実行可能なファイルをアップロードすることはできません！"
 	EMPTY		=> (空)
 	Placeholder	=> 選択または直接入力
+	NUMERIC		=> "数値 (##.#) で入力"
+	DATEFMT		=> "日付 (YYYY/mm/dd) で入力"
+	TIMESTAMP	=> "日時 (YYYY/mm/dd HH:nn:ss) で入力"
 ]
 .en => [
     // for Dialog
@@ -75,6 +78,9 @@
     BADFILE     => "'+','%','#' chars used,Bad Download by WebBrowser!"
 	EMPTY		=> (EMPTY)
 	Placeholder	=> "Select or DirectInput"
+	NUMERIC		=> "Input NUMERIC (##.#) charactors"
+	DATEFMT		=> "Input DATE (YYYY/mm/dd) format"
+	TIMESTAMP	=> "Input TIMESTAMP (YYYY/mm/dd HH:nn:ss)"
 ]
 // ページャーボタン表示用  for Pager Buttons
 Page=>[

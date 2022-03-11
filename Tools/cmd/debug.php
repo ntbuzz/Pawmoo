@@ -1,4 +1,6 @@
 <?php
+define('ROOT_DIR', realpath(__DIR__ . '/../..'));
+
 /*
  * Object Oriented PHP MVC Framework
  *  Comman Line Debugger
@@ -15,7 +17,7 @@ $_SERVER['HTTP_HOST'] = 'localhost';
 $_SERVER['REMOTE_ADDR'] = 'localhost';
 $_SERVER['HTTP_USER_AGENT'] = 'Chrome/94.0.4606.104';
 
-require_once("Core/Common/arrayLibs.php");
+require_once(ROOT_DIR . '/Core/Common/arrayLibs.php');
 
 $uri = $_SERVER['REQUEST_URI'];
 // command line parameter: app/module/method/param?QUERY??POST
@@ -40,4 +42,4 @@ $debvug_dump = [
 print_r($debvug_dump);
 echo "{$ln} START HERE ${ln}\n";
 
-require_once('index.php');		// リソース呼出しとの振分けも行う
+require_once(ROOT_DIR . '/index.php');		// リソース呼出しとの振分けも行う

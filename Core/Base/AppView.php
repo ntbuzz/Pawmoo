@@ -33,15 +33,15 @@ class AppView extends AppObject {
         ],
     );
 	const AttributeList = [
-		'style'			=> '||',
-		'data-type'		=> ' ^',
-		'data-element'	=> '{}',
-		'data-value'	=> '<>',
-		'value'			=> '()',
-		'name'			=> '[]',
-		'size'			=> ' :',
-		'id'			=> ' #',
-		'class'			=> ' .'
+		'style'			=> '||*',
+		'data-type'		=> ' ^*',
+		'data-element'	=> '{}*',
+		'data-value'	=> '<> ',
+		'value'			=> '() ',
+		'name'			=> '[]*',
+		'size'			=> ' :*',
+		'id'			=> ' #*',
+		'class'			=> ' .*'
 	];
     //==========================================================================
     // Constructor: Import Model Class by Owner Class, Create Helper
@@ -116,11 +116,11 @@ public function ViewTemplate($name,$vars = []) {
         $ix = array_search($ext, self::Extensions);
         switch($ix) {   //   [ .tpl, .php, .inc, .twg ]
         case 0:         // '.tpl'   div Section
-$run_time = microtime(TRUE);
+//$run_time = microtime(TRUE);		// パーサーの実行時間を測る
             $parser = new SectionParser($tmplate);
             $divSection = $parser->getSectionDef(true);
-$tm = round((microtime(TRUE) - $run_time), 5);     // 少数2位まで
-debug_log(DBMSG_DEBUG,["ExecTime({$tmplate})"=>"{$tm} sec"]);
+//$tm = round((microtime(TRUE) - $run_time), 5);     // 少数2位まで
+//debug_log(DBMSG_DEBUG,["ExecTime({$tmplate})"=>"{$tm} sec"]);
              $this->inlineSection = [];         // Clear Inline-Section in this TEMPLATE
              debug_log(DBMSG_VIEW,["SEC-VARS" => $vars,"SECTION @ {$name}" => $divSection]);
              $this->sectionAnalyze($divSection,$vars);
@@ -305,7 +305,7 @@ debug_log(DBMSG_DEBUG,["ExecTime({$tmplate})"=>"{$tm} sec"]);
         if($tag[0]==='<') return array($tag,$attrList); // html tag will be not separate
         // allow multi attribute, and separater not space
 		foreach(self::AttributeList as $key => $seps) {
-			list($sep,$tsep) = str_split($seps);
+			list($sep,$tsep,$emp) = str_split($seps);
 			while(($m=strrpos($tag,$tsep)) !== false) {
 				if($sep === ' ') $n = $m;		// single-separator
 				else if(($n=strpos($tag,$sep)) === false) break;	// wrapper-char
@@ -316,8 +316,8 @@ debug_log(DBMSG_DEBUG,["ExecTime({$tmplate})"=>"{$tm} sec"]);
 				} else if($n === $m && $pre_ch === $tsep) break;	// double-char
 				$str = ($n===$m) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
 				$tag = mb_strcut($tag,0,$n);
-				// if(!empty($str)) // allow empty attribute
-					$attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} ".$attrList[$key] : $str;
+				if(empty($str) && $emp ==='*') break;	// not-allow empty attribute
+				$attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} ".$attrList[$key] : $str;
 				if($key !== 'class') break;		// repeat allow 'class' only
 			}
 		}
@@ -647,8 +647,8 @@ debug_log(DBMSG_DEBUG,["ExecTime({$tmplate})"=>"{$tm} sec"]);
 			$atext = $this->expand_Strings("\n{$atext}\n\n",$vars);
 			$mtext = pseudo_markdown($atext,$cls);
 		} else {
-			// pre-expand for checkbox and radio/select markdown
-			$atext = preg_replace_callback('/(\[[^\]]*?\]\{(?:\$\{[^\}]+?\}|[^\}])+?\}|\^\[[^\]]*?\][%@:=+]\{(?:\$\{[^\}]+?\}|[^\}])+?\})/',
+			// pre-expand for checkbox and radio/select/combobox/checkbox/textbox markdown
+			$atext = preg_replace_callback('/((?:\[[^\]]*?\]|\^(?:\.[\w\-]+)?(?:#[\w\-]+)?\[[^\]]*?\][%@:=+])\{(?:\$\{[^\}]+?\}|[^\}])+?\})/',
 				function($m) use(&$vars) {
 					list($pat,$var) = $m;
 					$var = preg_replace_callback('/(\$\{[^\}]+?\})/',

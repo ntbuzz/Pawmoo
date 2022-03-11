@@ -25,6 +25,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	protected $LastBuild;	// for DEBUG
 	protected $LIKE_opr = 'LIKE';		// Ignore Upper/Lower case LIKE
 	protected $NULL_ORDER = ' NULLS LAST';	// NULL seq
+	private $register_callback = [ NULL,NULL];	// fetchDB Callback
 //==============================================================================
 //	abstruct method
 	abstract protected function Connect($table);
@@ -68,6 +69,18 @@ public function bind_columns($data) {
 	return array_combine($keys,$data);
 }
 //==============================================================================
+// fetchDB Callback method register
+public function register_method($class,$method) {
+	$cls = get_class($class);
+	if (is_subclass_of($class, 'AppModel',false)) {
+		if(method_exists($class,$method)) {
+			$this->register_callback = [$class,$method];
+		}
+	} else {
+		echo "'{$cls}' is not sub-class AppModel\n";
+	}
+}
+//==============================================================================
 // DEBUGGING for SQL Execute
 	private function SQLdebug($sql,$where,$sort=[]) {
     	$dbg = debug_backtrace();
@@ -96,6 +109,8 @@ public function doTruncate() {
 public function fetchDB() {
 	if($row = $this->fetch_array()) {
 		$this->fieldAlias->to_alias_bind($row);
+		list($obj,$method) = $this->register_callback;
+		if ($obj !== NULL) $obj->$method($row);	// already checked by refistered
 	}
 	return $row;
 }
@@ -120,7 +135,7 @@ public function getValueLists($table,$ref,$id,$cond=NULL) {
 	$sql = $this->sql_QueryValues($table,$ref,$id,$cond);
 	$this->execSQL($sql);
 	$values = array();
-	debug_log(9,["VALUE-LIST" => [$table,$ref,$id,$sql,'REL'=>$this->relations,'ALIAS'=>$this->fieldAlias->GetAlias()]]);
+//	debug_log(9,["VALUE-LIST" => [$table,$ref,$id,$sql,'REL'=>$this->relations,'ALIAS'=>$this->fieldAlias->GetAlias()]]);
 	while ($row = $this->fetch_array()) {	// other table refer is not bind!
 		$key = $row[$ref];
 		if(!empty($key)) $values[$key] = $row[$id];

@@ -371,8 +371,10 @@ $.fn.InitPopupSet = function () {
 	// カレンダー設定
 	this.find(".calendar").each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
+		var fmt = $(this).attr('class');
+		var dt_fmt = fmt.pickWord('date') ? 'yy-mm-dd' : 'yy-mm-dd 00:00:00';
 		var date_form = {
-			dateFormat: 'yy-mm-dd 00:00:00',
+			dateFormat: dt_fmt,
 			monthNames: [ '${#.core.monthNames}' ],
 			dayNamesMin: [ '${#.core.dayNames}' ],
 			yearSuffix: "${#.core.YearSuffix}",

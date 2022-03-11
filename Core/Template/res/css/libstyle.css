@@ -43,6 +43,10 @@
 .button:active {
 	background: #aaa;  
 }
+/* リンク下線省略 */
+a.nounder {
+	text-decoration: none;
+}
 /* 削除ボタン付きリスト */
 .delete-item-list {
 	list-style: none;

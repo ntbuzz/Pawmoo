@@ -35,9 +35,10 @@ class AppModel extends AppObject {
     public $TimeFormat;              // Time format for Database
     public $DateTimeFormat;          // TimeStamp format for Database
     public $SortDefault = SORTBY_ASCEND;    // findRecord Default Sort Sequence
-    private $FieldSchema = [];       // Pickup Record fields columns [ref_name, org_name]
-    private $Relations = [];         // Table Relation
-    private $SelectionDef = [];      // Selection JOIN list
+    protected $FieldSchema = [];       // Pickup Record fields columns [ref_name, org_name]
+    protected $Relations = [];         // Table Relation
+    protected $SelectionDef = [];      // Selection JOIN list
+	private $virtual_columns = [];
 //==============================================================================
 //	Constructor: Owner
 //==============================================================================
@@ -48,6 +49,7 @@ class AppModel extends AppObject {
 		if(empty($this->Schema) && $this->Handler !== 'Null') {
 			debug_stderr(["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
 		}
+		if(isset(static::$OptionSchema)) $this->setProperty(static::$OptionSchema);    // Set Option Schema, if exists
 		if(empty($this->Primary)) $this->Primary = 'id';	// default primary name
         if(isset($this->ModelTables)) {                 // Multi-Language Tabele exists
             $db_key = (array_key_exists(LangUI::$LocaleName,$this->ModelTables)) ? LangUI::$LocaleName : '*';
@@ -60,6 +62,9 @@ class AppModel extends AppObject {
         $this->TimeFormat = $this->dbDriver->TimeStyle;         // Time format from DB-Driver
         $this->DateTimeFormat = "{$this->DateFormat} {$this->TimeFormat}"; // DateTime
 		$this->dbDriver->fieldAlias->lang_alternate = $this->Lang_Alternate;
+		if(method_exists($this,'virtual_field')) {
+			$this->dbDriver->register_method($this,'virtual_field');
+		}
 	}
 //==============================================================================
 // Initializ Class Property
@@ -83,31 +88,30 @@ public function ResetSchema() {
     $this->SchemaAnalyzer();
     $this->RelationSetup();
     $this->SelectionSetup();
+	$this->virtual_columns = array_values(array_unique(array_merge(array_keys($this->FieldSchema),array_keys($this->HeaderSchema))));
     debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
-//            "Header"    => $this->HeaderSchema,
-//            "Field"     => $this->FieldSchema, 
-            "Join-Defs"     => $this->dbDriver->relations,
+            "Header"    => $this->HeaderSchema,
+			'Virtual'	=> $this->virtual_columns,
+			'Handler'	=> $this->Handler,
+            "Field"     => $this->FieldSchema, 
+            "Relations"     => $this->dbDriver->relations,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
-            "Select-Defs"   => $this->SelectionDef,
+//            "Select-Defs"   => $this->SelectionDef,
         ]
     ]);
 }
 //==============================================================================
 // Schema Define Analyzer
-    private function SchemaAnalyzer() {
-        $header = $relation = $locale = $bind = $field = [];
+    protected function SchemaAnalyzer() {
+        $header = $relation = $locale = $field = [];
         foreach($this->Schema as $key => $defs) {
             $ref_key = $key;
-            list($disp_name,$disp_flag,$width,$relations,$binds) = array_alternative($defs,5);
+            list($disp_name,$disp_flag,$width,$relations) = array_alternative($defs,5);
 			if($disp_flag < 0) continue;
             list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
             if(!empty($relations)) {
                 $relation[$key] = $relations;
-            }
-            if(!empty($binds)) {
-                $bind[$ref_key] = $binds;
-                $key = NULL;
             }
             $field[$ref_key] = $key;
             if($disp_head !== 0) {
@@ -125,7 +129,7 @@ public function ResetSchema() {
         $this->HeaderSchema = $header;
         $this->FieldSchema = $field;
         $this->Relations = $relation;
-        $this->dbDriver->fieldAlias->SetupAlias($locale,$bind);
+        $this->dbDriver->fieldAlias->SetupAlias($locale);
     }
 //==============================================================================
 // extract DataTable or Alternate DataView
@@ -162,7 +166,7 @@ public function ResetSchema() {
     }
 //==============================================================================
 // Table Relation setup DBMSG_MODEL
-    private function RelationSetup() {
+protected function RelationSetup() {
         $new_Relations = [];
         foreach($this->Relations as $key => $rel) {
             $base_name = id_relation_name($key);
@@ -203,7 +207,7 @@ public function ResetSchema() {
     }
 //==============================================================================
 // Selection Table Relation setup
-    private function SelectionSetup() {
+protected function SelectionSetup() {
         $new_Selection = [];
         $separate_rel_cond = function($defs) {
             $rel = $cond = [];
@@ -339,7 +343,7 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 				$this->Select[$key_name] = $this->$model->SelectFinder(true,$ref_list,$cond);
 			} else if(method_exists($this->$model,$method)) {	// case f.
 				$method_val = $this->$model->$method($args,$cond);
-				ksort($method_val,SORT_FLAG_CASE | SORT_STRING );
+//				ksort($method_val,SORT_FLAG_CASE | SORT_STRING );
 				$this->Select[$key_name] = $method_val;
 			}
 		} else {
@@ -347,12 +351,16 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 			$ref_list = array_filter(explode('.', $ref_list), "strlen" );
 			$this->Select[$key_name] = $this->$model->SelectFinder(false,$ref_list,$cond);
 		}
-		switch($sort_val) {
-		case true:
-		case SORTBY_ASCEND:	asort($this->Select[$key_name]); break;
-		case SORTBY_DESCEND:arsort($this->Select[$key_name]); break;
+		if($sort_val !== false) {
+			switch($sort_val) {
+			case true:
+			case SORTBY_ASCEND:	asort($this->Select[$key_name]); break;
+			case SORTBY_DESCEND:arsort($this->Select[$key_name]); break;
+			default: debug_log(8,['SORT-NONE'=>$this->Select[$key_name]]);
+			}
 		}
 	}
+	debug_log(8,['Select'=>$this->Select]);
 }
 //==============================================================================
 //   Get Relation Table fields data list.
@@ -399,7 +407,8 @@ public function getCount($cond) {
 //==============================================================================
 // Normalized Field-Filter
 	private function normalize_filter($filter) {
-		if(empty($filter)) $filter = array_keys($this->dbDriver->columns);
+		if(empty($filter)) $filter = $this->virtual_columns;
+//		if(empty($filter)) $filter = array_keys($this->dbDriver->columns);
 		else if(is_scalar($filter)) {
 			$filter = (strpos($filter,'.')!==FALSE) ? explode('.',$filter): [$filter];
 		}
@@ -465,9 +474,11 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
 // Get Raw Record List by FIND-CONDITION from RAW-TABLE.
 // Result:   $this->Records  Find-Result List
 public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
-	$filter = $this->normalize_filter($filter);
-    $fields_list = array_combine($filter,$filter);
-    $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
+    if(empty($filter)) $fields_list = $this->dbDriver->raw_columns;
+    else {
+        $fields_list = array_filter($this->dbDriver->raw_columns,function($v) { return in_array($v,$filter);},ARRAY_FILTER_USE_KEY);
+        $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
+    }
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => $this->SortDefault ];
     else if(is_scalar($sort)) {
@@ -475,7 +486,7 @@ public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
     }
     $this->dbDriver->findRecord($cond,FALSE,$sort,true);
 	$this->record_max = $this->dbDriver->recordMax;
-    while (($fields = $this->dbDriver->fetch_locale())) {
+    while(($fields = $this->dbDriver->fetch_array())) {
         unset($record);
         foreach($fields_list as $key => $val) {
             $record[$key] = $fields[$key];
@@ -642,16 +653,16 @@ public function UpdateRecord($num,$row) {
 public function UploadCSV($path) {
     if(file_exists($path)) {
 		if (($handle = fcsvopen($path, "r")) !== FALSE) {
-			$row_columns = $this->dbDriver->raw_columns;
+			$raw_columns = array_keys($this->dbDriver->raw_columns);
 			while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
-				if(count($data) !== count($row_columns)) {
+				if(count($data) !== count($raw_columns)) {
 					fclose($handle);
 					return false;
 				} else {
-					$diff_arr = array_diff($data,$row_columns);
+					$diff_arr = array_diff($data,$raw_columns);
 					if(empty($diff_arr)) continue;	// maybe CSV Header line
 				}
-				$row = array_combine($row_columns,$data);
+				$row = array_combine($raw_columns,$data);
 				list($primary,$id) = array_first_item($row);
 				$this->dbDriver->updateRecord([$primary=>$id],$row);
 			}
@@ -663,24 +674,30 @@ public function UploadCSV($path) {
 }
 //==============================================================================
 // CSV file download data
-public function RecordsCSV() {
+public function RecordsCSV($map=true,$limit=0) {
 	$records = $this->Records;
 	if(empty($records)) return false;
 	$col = reset($records);
 	// create header by Model Schema
-	$keys = array_map(function($v) {
+	$keys = array_keys($col);
+	if($map) {
+		$keys = array_map(function($v) {
 			if(isset($this->Model->Schema[$v])) {
 				list($disp_name,$disp_flag) = $this->Model->Schema[$v];
                 if(empty($disp_name)) return $v;
                 else if($disp_name[0] === '.') return $this->_(".Schema{$disp_name}");
 				return $disp_name;
 			} else return $v;
-		},array_keys($col));
+		},$keys);
+	}
 	$csv = [ implode(',',$keys) ];	// column header
 	foreach($records as $columns) {
-		$row = array_map(function($v) {
-			if(mb_strpos($v,'"') !== false) $v = str_replace('"','\\"',$v);
-			if(preg_match('/[\s,]/s',$v)) $v = "\"{$v}\"";
+		$row = array_map(function($v) use(&$limit) {
+			if($limit !== 0 && mb_strlen($v) > $limit) $v = mb_substr($v,0,$limit)."...";
+			if(mb_strpos($v,'"') !== false) $v = str_replace('"','""',$v);
+			foreach([' ',',',"\f","\t","\r","\n"] as $esc) {
+				if(strpos($v,$esc)!==false) return "\"{$v}\"";
+			}
 			return $v;
 		},$columns);
 		$csv[] = implode(',',$row);
