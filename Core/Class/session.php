@@ -13,13 +13,14 @@ else {
 	if (!is_writable(session_save_path())) {
 		debug_die(['NOT-WRITABLE'=>session_save_path(),'STAT'=>stat(session_save_path())]);
 	}
+	session_regenerate_id( true );		// session security
 	// GLOBAL SESSION LIFE LIMIT
 	if(defined('SESSION_INI_MODIFIED')) {
 		$global_limit_time = strtotime(SESSION_DEFAULT_LIMIT);	// tomorrow AM 3:00
 		$global_session_time = $global_limit_time - time();	// SESSION KEEP as NOW - AM 3:00
-		ini_set('session.gc_maxlifetime',"{$global_session_time}");
-		ini_set('session.gc_probability','1');
-		ini_set('session.gc_divisor','1');
+		ini_set('session.gc_maxlifetime',$global_session_time);
+		ini_set('session.gc_probability',1);
+		ini_set('session.gc_divisor',1);
 	}
 	session_start();
 }
