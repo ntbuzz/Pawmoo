@@ -115,11 +115,10 @@ retry:	while(($n=mb_strpos($this->current_line,$qend))===false) {
 retry:	do {
 			$ch = $this->current_ch();
 			if($ch === false) return false;
-			$is_set = self::skip_separator[$ch];
-		} while(isset($is_set)) ;	// for PHP5.6
+		} while(array_key_exists($ch,self::skip_separator)) ;	// for PHP5.6
 		$token = false;
 		do {
-			if(isset(self::token_quote[$ch])) {
+			if(array_key_exists($ch,self::token_quote)) {
 				$token = $this->quote($ch);
 			} else {
 				$token = $ch;
@@ -139,7 +138,7 @@ retry:	do {
 					}
 				}
 				$nest = 0;
-				while(!isset(self::token_separator[$token])) {
+				while(!array_key_exists($token,self::token_separator)) {
 					if($this->is_separator()) break;
 					// ] の先読み
 					if(mb_substr($this->current_line,0,1) === ']') {
