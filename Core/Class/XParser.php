@@ -115,7 +115,8 @@ retry:	while(($n=mb_strpos($this->current_line,$qend))===false) {
 retry:	do {
 			$ch = $this->current_ch();
 			if($ch === false) return false;
-		} while(isset(self::skip_separator[$ch])) ;
+			$is_set = self::skip_separator[$ch];
+		} while(isset($is_set)) ;	// for PHP5.6
 		$token = false;
 		do {
 			if(isset(self::token_quote[$ch])) {
