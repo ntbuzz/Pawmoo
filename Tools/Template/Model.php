@@ -1,7 +1,7 @@
 <?php
 //==============================================================================
 // 
-class %module%Model extends AppModel {
+class %module%Model extends AppModel2 {
     static $DatabaseSchema = [
         'Handler' => 'Null',
         'DataTable' => '',
