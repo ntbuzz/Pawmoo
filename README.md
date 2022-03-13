@@ -38,20 +38,20 @@ You will need the app repository and vendor libraries to run as an application.
 ## Application Setup
 
 1. Create Application Folder
-     # ./setup.sh create <appname>
+     $ ./setup.sh create <appname>
 1. Create Application Database Specification
-     # ./setup.sh spec <appname>
+     $ ./setup.sh spec <appname>
      (edit Database specification CSV into appSpec folder. See SpecCSV.)
 1. Create Model Scheama and Model Class,Lang resource from Spec CSV.
-     # ./setup.sh schema <appname>
+     $ ./setup.sh schema <appname>
         if specific module convert, 'setup <appname> <module>'
 1. Create Model Class and Lang resource from Model Schema.
-     # ./setup.sh model <appname>
+     $ ./setup.sh model <appname>
         if specific module, setup <appname> <module>
 　   ./setup.sh setup ... command execute <schema> and <model> at onece.
 1. Create Database Table (with table view,and import data-csv)
-     # ./setup.sh table <appname>
+     $ ./setup.sh table <appname>
 1. Create Module folder into 'app/<appname>/modules' folder.
-     # ./setup.sh module <appname> <module>
+     $ ./setup.sh module <appname> <module>
 1. Copy to Model class file from 'appSpec/<appname>/Models' folder to app module folder
 1. Edit 'Controller','Model','Helper' files for Application.
