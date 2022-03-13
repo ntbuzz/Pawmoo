@@ -31,89 +31,27 @@ You will need the app repository and vendor libraries to run as an application.
     vendor/webroot/js/jquery-3.2.1.min.js  
     vendor/webroot/js/jquery-ui-1.12.1/jquery-ui.min.js  
     vendor/webroot/js/jquery-ui-1.12.1/jquery-ui.min.css  
-1. tools/app_sample already copied to app directory.
 1. adjusted '.htaccess' or 'web.config' for your Web-Server.
-1. Open Browser, Typical URL is http://localhost/sample/index/
-
-## Folder Structure
-
-This framework does not create folders for each class.  
-Controllers, Views, and Models are managed as a group in a Module folder for each function.
-
-```
-(pawmoo) Framework body
-  ├ app
-  │ ├─ .share		  Application Share Classes
-  │ │ ├── common      Share basic function library
-  │ │ ├── Class       Share Class for each Application
-  │ │ ├── extends     Expand Base class for each Application
-  │ │ └── Models      Share Model class for each Application
-  │ │
-  │ ├─ (Application-1)
-  │ │ ├── Config    Configuration parameter
-  │ │ ├── common    Basic function library
-  │ │ ├── extends   Expand Base class for application uniq
-  │ │ ├── Models    Only Model Class without Controller
-  │ │ ├─┬ modules   eaach Module folders (Index, Sample, etc,...)
-  │ │ │  ├ Index		Index Module
-  │ │ │  ├…
-  │ │ │
-  │ │ ├── View     Common View Template for each Modules
-  │ │ └── webroot  Static resource
-  │ ├─ (Application-2)
-  │ ........
-  ├ Core      Framework core code folder
-  └ vendor    Vendor library folder
-```
-
-### SECTION template SAMPLE
-
-Detail specification is [Here](../../wiki/Home)
+1. execute application Setup
 
 
-```
-// Section layout definition
-@Header                           // call other template
-<body bgcolor='white'>            // HTML tag output
-.appWindow => [                   // Tag name omitted is DIV tag section
-  .split-pane.fixed-left => [
-    .split-pane-component.sitemap#left-component => [
-      @TreeMenu
-    ]
-    .split-pane-divider#v-divider => []
-    .split-pane-component#right-component => [
-      .split-pane-component.contents-view.fitWindow =>
-         // Area to display content
-         #ContentBody => [
-           &DocIndex
-         ]
-       ]
-    ]
-  ]
-]
-</body>
-```
-Rewriting the above section in HTML would be messy as follows:
-```
-<?php 
-  // Section layout definition
-  require('Header.php'); 
-?>
-<body bgcolor='white'>
-<div class="appWindow">
-  <div class="split-pane fixed-left">
-    <div class="split-pane-component sitemap" id="left-component">
-      <?php require('TreeMenu.php'); ?>
-    </div>
-    <div class="split-pane-divider" id="v-divider"></div>
-    <div class="split-pane-component" id="right-component">
-      <div class="split-pane-component contents-view fitWindow">
-        <div id="ContentBody">
-          <?php $Helper->DocIndex(); ?>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-</body>
-```
+## Application Setup
+
+1. Create Application Folder
+     # ./setup.sh create <appname>
+1. Create Application Database Specification
+     # ./setup.sh spec <appname>
+     (edit Database specification CSV into appSpec folder. See SpecCSV.)
+1. Create Model Scheama and Model Class,Lang resource from Spec CSV.
+     # ./setup.sh schema <appname>
+        if specific module convert, 'setup <appname> <module>'
+1. Create Model Class and Lang resource from Model Schema.
+     # ./setup.sh model <appname>
+        if specific module, setup <appname> <module>
+　   ./setup.sh setup ... command execute <schema> and <model> at onece.
+1. Create Database Table (with table view,and import data-csv)
+     # ./setup.sh table <appname>
+1. Create Module folder into 'app/<appname>/modules' folder.
+     # ./setup.sh module <appname> <module>
+1. Copy to Model class file from 'appSpec/<appname>/Models' folder to app module folder
+1. Edit 'Controller','Model','Helper' files for Application.
