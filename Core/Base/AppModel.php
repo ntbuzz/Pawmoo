@@ -673,6 +673,17 @@ public function UploadCSV($path) {
 	return false;
 }
 //==============================================================================
+// CSV download field flags
+public function get_csv_columns() {
+	if(isset($this->Schema2)) {
+		$cols = array_filter($this->Schema2,function($v) {
+				list($type,$flag,$wd) = $v;
+				return $flag & 00100;
+			});
+		return array_keys($cols);
+	} else return NULL;
+}
+//==============================================================================
 // CSV file download data
 public function RecordsCSV($map=true,$limit=0) {
 	$records = $this->Records;
@@ -682,12 +693,13 @@ public function RecordsCSV($map=true,$limit=0) {
 	$keys = array_keys($col);
 	if($map) {
 		$keys = array_map(function($v) {
-			if(isset($this->Model->Schema[$v])) {
-				list($disp_name,$disp_flag) = $this->Model->Schema[$v];
-                if(empty($disp_name)) return $v;
-                else if($disp_name[0] === '.') return $this->_(".Schema{$disp_name}");
-				return $disp_name;
-			} else return $v;
+			return $this->_(".Schema.{$v}");
+			// if(isset($this->Model->Schema[$v])) {
+			// 	list($disp_name,$disp_flag) = $this->Model->Schema[$v];
+            //     if(empty($disp_name)) return $v;
+            //     else if($disp_name[0] === '.') return $this->_(".Schema{$disp_name}");
+			// 	return $disp_name;
+			// } else return $v;
 		},$keys);
 	}
 	$csv = [ implode(',',$keys) ];	// column header
