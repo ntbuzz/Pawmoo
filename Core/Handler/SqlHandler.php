@@ -350,7 +350,7 @@ protected function sql_safe_convert($data) {
 			// 		$data[$key] = "'{$val}'";
 			// 		break;
 			// others, date, timestamp, etc...
-			default: $data[$key] = (empty($val))?'NULL':"'{$val}'";
+			default: $data[$key] = (empty($val))?'NULL':$val;
 			}
 		}
 	}
