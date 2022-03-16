@@ -5,8 +5,11 @@
  */
 //==============================================================================
 abstract class SQLHandler {	// extends SqlCreator {
-	public  $DateStyle = 'Y-m-d';	// Date format
-	public  $TimeStyle = 'H:i:s';
+	public $DateFormat = [
+		'Date' => 'Y-m-d',
+		'Time' => 'H:i:s',
+		'TimeStamp' => 'Y-m-d H:i:s',
+	];
 	public	$recordId;		// dummy for FMDB
 	public	$table;			// connect table
 	public	$columns;       // record column data
@@ -72,13 +75,18 @@ public function bind_columns($data) {
 // fetchDB Callback method register
 public function register_method($class,$method) {
 	$cls = get_class($class);
-	if (is_subclass_of($class, 'AppModel',false)) {
-		if(method_exists($class,$method)) {
-			$this->register_callback = [$class,$method];
-		}
+	if(method_exists($class,$method)) {
+		$this->register_callback = [$class,$method];
 	} else {
-		echo "'{$cls}' is not sub-class AppModel\n";
+		echo "'{$cls}' has not method '{$method}'\n";
 	}
+	// if (is_subclass_of($class, 'AppModel',false)) {
+	// 	if(method_exists($class,$method)) {
+	// 		$this->register_callback = [$class,$method];
+	// 	}
+	// } else {
+	// 	echo "'{$cls}' is not sub-class AppModel\n";
+	// }
 }
 //==============================================================================
 // DEBUGGING for SQL Execute
