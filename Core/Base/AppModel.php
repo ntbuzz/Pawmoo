@@ -58,9 +58,10 @@ class AppModel extends AppObject {
         $this->fields = [];
         $driver = $this->Handler . 'Handler';
         $this->dbDriver = new $driver($this->DataTable,$this->Primary); // connect Database Driver
-        $this->DateFormat = $this->dbDriver->DateStyle;         // Date format from DB-Driver
-        $this->TimeFormat = $this->dbDriver->TimeStyle;         // Time format from DB-Driver
-        $this->DateTimeFormat = "{$this->DateFormat} {$this->TimeFormat}"; // DateTime
+		list($dFormat,$tFormat,$dtFormat) = array_keys_value($this->dbDriver->DateFormat,['Date','Time','TimeStamp']);
+        $this->DateFormat = $dFormat;         	// Date format from DB-Driver
+        $this->TimeFormat = $tFormat;         	// Time format from DB-Driver
+        $this->DateTimeFormat = $dtFormat;		// DateTime
 		$this->dbDriver->fieldAlias->lang_alternate = $this->Lang_Alternate;
 		if(method_exists($this,'virtual_field')) {
 			$this->dbDriver->register_method($this,'virtual_field');
@@ -91,10 +92,10 @@ public function ResetSchema() {
 	$this->virtual_columns = array_values(array_unique(array_merge(array_keys($this->FieldSchema),array_keys($this->HeaderSchema))));
     debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
+//			'Handler'	=> $this->Handler,
             "Header"    => $this->HeaderSchema,
-			'Virtual'	=> $this->virtual_columns,
-			'Handler'	=> $this->Handler,
             "Field"     => $this->FieldSchema, 
+			'Virtual'	=> $this->virtual_columns,
             "Relations"     => $this->dbDriver->relations,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
 //            "Select-Defs"   => $this->SelectionDef,

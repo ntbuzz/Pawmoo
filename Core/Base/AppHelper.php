@@ -165,7 +165,8 @@ public function MakePageLinks($args) {
 		echo '<tr>';
 		foreach($this->Model->HeaderSchema as $key => $val) {
 			list($alias,$align,$flag,$wd) = $val;
-			$tsort = ($flag==2) ? '' : ' class="sorter-false"';
+			$alias = $this->_(".Schema.{$key}");
+			$tsort = (($flag&07)==2) ? '' : ' class="sorter-false"';
 			$style = ($wd==0) ? '' : " style='min-width:{$wd}px;max-width:{$wd}px;'";
 			echo "<th${tsort}{$style}>{$alias}</th>";
 		}
