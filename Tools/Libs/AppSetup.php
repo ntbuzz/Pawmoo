@@ -140,7 +140,7 @@ private function ModTree($model,$exec) {
 			$files = get_files($csv_dir,'.csv');
 		}
 		if(empty($files)) {
-			echo "SPEC define CSV file not found.\n";
+			echo "SPEC define CSV({$model}) file not found.\n";
 			return false;
 		}
 		return $files;
@@ -156,7 +156,7 @@ private function ModTree($model,$exec) {
 			if($files !== false) $files = array_map(function($v) { return str_replace('Schema.php','',$v);},$files);
 		}
 		if(empty($files)) {
-			echo "SCHEMA file not found.\n";
+			echo "SCHEMA({$model}) file not found.\n";
 			return false;
 		}
 		return $files;
