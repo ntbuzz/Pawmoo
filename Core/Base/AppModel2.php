@@ -29,16 +29,11 @@ class AppModel2 extends AppObject {
     public $RecData = NULL;          // ROW record data (no JOIN)
     public $Select = NULL;           // Select List for relation table field
     public $Records = NULL;          // get records lists (with JOIN field)
-    public $OnGetRecord = NULL;      // for feature FUNCTION
-    public $HeaderSchema = [];       // Display Header List [ field_name => [disp_name, align, sort_flag ]
     public $DateFormat;              // Date format for Database
     public $TimeFormat;              // Time format for Database
     public $DateTimeFormat;          // TimeStamp format for Database
     public $SortDefault = SORTBY_ASCEND;    // findRecord Default Sort Sequence
-    protected $FieldSchema = [];       // Pickup Record fields columns [ref_name, org_name]
-    protected $Relations = [];         // Table Relation
     protected $SelectionDef = [];      // Selection JOIN list
-	private $virtual_columns = [];
 //==============================================================================
 //	Constructor: Owner
 //==============================================================================
@@ -58,9 +53,10 @@ class AppModel2 extends AppObject {
         $this->fields = [];
         $driver = $this->Handler . 'Handler';
         $this->dbDriver = new $driver($this->DataTable,$this->Primary); // connect Database Driver
-        $this->DateFormat = $this->dbDriver->DateStyle;         // Date format from DB-Driver
-        $this->TimeFormat = $this->dbDriver->TimeStyle;         // Time format from DB-Driver
-        $this->DateTimeFormat = "{$this->DateFormat} {$this->TimeFormat}"; // DateTime
+		list($dFormat,$tFormat,$dtFormat) = array_keys_value($this->dbDriver->DateFormat,['Date','Time','TimeStamp']);
+        $this->DateFormat = $dFormat;         	// Date format from DB-Driver
+        $this->TimeFormat = $tFormat;         	// Time format from DB-Driver
+        $this->DateTimeFormat = $dtFormat;		// DateTime
 		$this->dbDriver->fieldAlias->lang_alternate = $this->Lang_Alternate;
 		if(method_exists($this,'virtual_field')) {
 			$this->dbDriver->register_method($this,'virtual_field');
@@ -85,21 +81,52 @@ public function get_exist_columns($names) {
 //==============================================================================
 // Switch Schema Language
 public function ResetSchema() {
-    $this->SchemaAnalyzer();
-    $this->RelationSetup();
+    $this->SchemaAnalyzer2();
     $this->SelectionSetup();
-	$this->virtual_columns = array_values(array_unique(array_merge(array_keys($this->FieldSchema),array_keys($this->HeaderSchema))));
     debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
             "Header"    => $this->HeaderSchema,
-			'Virtual'	=> $this->virtual_columns,
-			'Handler'	=> $this->Handler,
-            "Field"     => $this->FieldSchema, 
-            "Relations"     => $this->dbDriver->relations,
+			'Table'		=> $this->TableField,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
-//            "Select-Defs"   => $this->SelectionDef,
         ]
     ]);
+}
+//==============================================================================
+// Schema Define Analyzer
+private function SchemaAnalyzer2() {
+	$this->TableFields = $this->HeaderSchema = [];
+	foreach($this->Schema as $key => $defs) {
+		list($dtype,$flag,$width) = array_extract($defs,3);
+		$dtype = strtolower($dtype);
+		// リスト表示対象か
+		if($flag & 07) {
+			$align = ($flag >> 3) & 07;
+			$this->HeaderSchema[$key] = [$dtype, $align, $flag, $width];
+		}
+		switch($dtype) {
+		case 'alias':
+		case 'virtual':
+		case 'bind':	break;
+		default:
+			$this->TableFields[$key] = [$dtype,$flag,$width];
+		}
+	}
+	$this->ResetLocation();
+}
+//==============================================================================
+//	言語リソースの再設定
+protected function ResetLocation() {
+	$this->locale_columns=[];
+	foreach($this->Schema as $key => $defs) {
+		list($type,$flag,$wd) = array_extract($defs,3);
+		if($flag & 01000) {
+			$locale_name = "{$key}_" . LangUI::$LocaleName;
+			if(array_key_exists($locale_name,$this->dbDriver->columns)) {
+				$this->locale_columns[$key] = $locale_name;
+			}
+		}
+	}
+	$this->dbDriver->fieldAlias->SetupAlias($this->locale_columns);
 }
 //==============================================================================
 // Schema Define Analyzer
@@ -163,47 +190,6 @@ public function ResetSchema() {
             }
         }
         return $field;
-    }
-//==============================================================================
-// Table Relation setup DBMSG_MODEL
-protected function RelationSetup() {
-        $new_Relations = [];
-        foreach($this->Relations as $key => $rel) {
-            $base_name = id_relation_name($key);
-            $rel_array = is_array($rel);
-            if($rel_array) {            // multi-column refer
-                list($db,$ref_list) = array_first_item($rel);
-                if(is_numeric($db)) {       // maybe 'Model.id.Field'
-                    if(!is_scalar($ref_list)) continue;
-					list($d,$f,$r) = fix_explode('.',$ref_list,3);
-                    $db = "{$d}.{$f}";
-                    $ref_list = $r;
-                }
-                list($model,$table,$field) = $this->model_view($db);
-                $link = "{$table}.{$field}";
-                if(is_scalar($ref_list)) $ref_list = [$ref_list];    // force array
-				$rel_def = array_key_first($rel);
-            } else {
-                list($model,$table,$field,$refer) = $this->model_view($rel);
-                $link = "{$table}.{$field}";
-                $ref_list = [ $refer ];
-				$rel_def = $rel;
-            }
-            $sub_rel = [];
-			list($rel_tbl,$primary) = fix_explode('.',$rel_def,2);
-            foreach($ref_list as $refer) {
-                $sub_ref = $this->$model->JoinDefinition($table,$refer,$primary);
-                $alias_name = "{$base_name}_".id_relation_name($refer);
-                $this->FieldSchema[$alias_name] = NULL;   // $key; import MUST!
-                // locale if exist in relation-db
-                // $ref_name = "{$refer}_" . LangUI::$LocaleName;
-                // if(!$this->$model->dbDriver->fieldAlias->exists_locale($ref_name)) $ref_name = $refer;
-                $ref_name = $this->$model->dbDriver->fieldAlias->get_lang_alias($refer);
-                $sub_rel[$alias_name] = (is_array($sub_ref)) ? $sub_ref : "{$link}.{$ref_name}";
-            }
-            $new_Relations[$key] =  $sub_rel;
-        }
-        $this->dbDriver->setupRelations($new_Relations);
     }
 //==============================================================================
 // Selection Table Relation setup
@@ -407,12 +393,14 @@ public function getCount($cond) {
 //==============================================================================
 // Normalized Field-Filter
 	private function normalize_filter($filter) {
-		if(empty($filter)) $filter = $this->virtual_columns;
-//		if(empty($filter)) $filter = array_keys($this->dbDriver->columns);
-		else if(is_scalar($filter)) {
-			$filter = (strpos($filter,'.')!==FALSE) ? explode('.',$filter): [$filter];
+		if(is_scalar($filter)) $filter = explode('.',$filter);
+		if(empty($filter)) $filter = array_keys($this->Schema);
+		else {
+			$filter = array_filter($filter,function($v) {
+					return array_key_exists($v,$this->Scheam);
+			});
 		}
-		return $filter;
+		return array_combine($filter,$filter);
 	}
 //==============================================================================
 // Get Selection pair
@@ -448,10 +436,7 @@ public function SelectFinder($chain, $filter, $cond) {
 // Get Record List by FIND-CONDITION with JOIN Table.
 // Result:   $this->Records  Find-Result List
 public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
-	$filter = $this->normalize_filter($filter);
-    $fields_list = array_filter($this->FieldSchema, function($vv) use (&$filter) {
-        return in_array($vv,$filter,true) || ($vv === NULL);
-    });
+	$fields_list = $this->normalize_filter($filter);
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     $data = array();
     if(empty($sort)) $sort = [ $this->Primary => $this->SortDefault ];
@@ -464,7 +449,6 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
         unset($record);
         foreach($fields_list as $key => $val) {
             $record[$key] = $fields[$key];
-            if($val !== NULL && $key !== $val) $record[$val] = $fields[$val];
         }
         $data[] = $record;
     }
@@ -499,8 +483,7 @@ public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
 // Get First Record by condition w/o JOIN!
 // Result:   return field array or FALSE
 public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
-	$filter = $this->normalize_filter($filter);
-    $fields_list = array_combine($filter,$filter);
+	$fields_list = $this->normalize_filter($filter);
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     $fields = $this->dbDriver->firstRecord($cond,FALSE,$sort);
     return ($fields === FALSE) ? FALSE : array_filter($fields, function($val,$key) use (&$filter) {return in_array($key,$filter,true);},ARRAY_FILTER_USE_BOTH);
@@ -510,11 +493,8 @@ public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
 // Result:   $this->NearData  Find-Result List by $filter field only
 //           $this->RecData   $primary Record Data by all fields
 public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
-	$filter = $this->normalize_filter($filter);
+	$fields_list = $this->normalize_filter($filter);
     $fields_list = [$this->Primary => $this->Primary];  // must be include Primary-Key
-    foreach($filter as $key) {
-        if(isset($this->FieldSchema[$key])) $fields_list[$key] = $this->FieldSchema[$key];
-    }
     if(empty($sort)) $sort = [ $this->Primary => $this->SortDefault ];
     else if(is_scalar($sort)) $sort = [ $sort => $this->SortDefault ];
     $this->dbDriver->findRecord($cond,TRUE,$sort);
@@ -673,6 +653,15 @@ public function UploadCSV($path) {
 	return false;
 }
 //==============================================================================
+// CSV download field flags
+public function get_csv_columns() {
+	$cols = array_filter($this->Schema,function($v) {
+			list($type,$flag,$wd) = $v;
+			return $flag & 0100;
+		});
+	return array_keys($cols);
+}
+//==============================================================================
 // CSV file download data
 public function RecordsCSV($map=true,$limit=0) {
 	$records = $this->Records;
@@ -680,16 +669,7 @@ public function RecordsCSV($map=true,$limit=0) {
 	$col = reset($records);
 	// create header by Model Schema
 	$keys = array_keys($col);
-	if($map) {
-		$keys = array_map(function($v) {
-			if(isset($this->Model->Schema[$v])) {
-				list($disp_name,$disp_flag) = $this->Model->Schema[$v];
-                if(empty($disp_name)) return $v;
-                else if($disp_name[0] === '.') return $this->_(".Schema{$disp_name}");
-				return $disp_name;
-			} else return $v;
-		},$keys);
-	}
+	if($map) $keys = array_map(function($v) { return $this->_(".Schema.{$v}");},$keys);
 	$csv = [ implode(',',$keys) ];	// column header
 	foreach($records as $columns) {
 		$row = array_map(function($v) use(&$limit) {
