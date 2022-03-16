@@ -1,12 +1,6 @@
 <?php
 
 //==============================================================================
-function oct_extract($val,$n) {
-	$oct = [];
-	while($n--) { $oct[] = ($val & 07); $val >>= 3; }
-	return $oct;
-}
-//==============================================================================
 // フォルダ内のファイルを取得する
 function get_files($path,$ext,$full=true) {
     if(!file_exists ($path)) return false;

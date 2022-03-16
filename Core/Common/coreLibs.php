@@ -350,6 +350,13 @@ function re_build_array($cond) {
 	return $array_map_shurink('AND',$cond);
 }
 //==============================================================================
+// oct-digit separate each column
+function oct_extract($val,$n) {
+	$oct = [];
+	while($n--) { $oct[] = ($val & 07); $val >>= 3; }
+	return $oct;
+}
+//==============================================================================
 // UTF-8 CSV item remove of 'false',''
 function csv_false_remove($val,$sep) {
 	if(!is_array($val)) $val = explode(',',$val);
