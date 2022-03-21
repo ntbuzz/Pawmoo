@@ -20,6 +20,9 @@ class AppModel2 extends AppObject {
     ];
     protected $dbDriver;            // Database Driver
     protected $fields;              // Record-Data all fields value
+	public $HeaderSchema = [];		// Table Viewing Header Columns
+	public $TableFields = [];		// Table Columns List with attributes
+	public $ModelFields;			// Model class field within alias/bind/virtual
     public $pagesize = 0;           // get record count per PAGE
     public $page_num = 0;           // get Page Number
     public $record_max = 0;         // Total records count
@@ -86,7 +89,8 @@ public function ResetSchema() {
     debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
             "Header"    => $this->HeaderSchema,
-			'Table'		=> $this->TableField,
+			"Table"		=> $this->TableFields,
+			"Model"		=> $this->ModelFields,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
         ]
     ]);
@@ -99,9 +103,9 @@ private function SchemaAnalyzer2() {
 		list($dtype,$flag,$width) = array_extract($defs,3);
 		$dtype = strtolower($dtype);
 		// リスト表示対象か
-		if($flag & 07) {
-			$align = ($flag >> 3) & 07;
-			$this->HeaderSchema[$key] = [$dtype, $align, $flag, $width];
+		list($sort,$align,$csv,$lang) = oct_extract($flag,4);
+		if($sort) {
+			$this->HeaderSchema[$key] = [$dtype, $align, $sort, $width];
 		}
 		switch($dtype) {
 		case 'alias':
@@ -110,8 +114,14 @@ private function SchemaAnalyzer2() {
 		default:
 			$this->TableFields[$key] = [$dtype,$flag,$width];
 		}
+		$this->ModelFields[$key] = [$dtype,$csv,$lang];
 	}
 	$this->ResetLocation();
+}
+//==============================================================================
+//	移行用ダミーメソッド
+public function JoinDefinition($table,$field,$rel_key) {
+	return $field;
 }
 //==============================================================================
 //	言語リソースの再設定
@@ -129,36 +139,6 @@ protected function ResetLocation() {
 	$this->dbDriver->fieldAlias->SetupAlias($this->locale_columns);
 }
 //==============================================================================
-// Schema Define Analyzer
-    protected function SchemaAnalyzer() {
-        $header = $relation = $locale = $field = [];
-        foreach($this->Schema as $key => $defs) {
-            $ref_key = $key;
-            list($disp_name,$disp_flag,$width,$relations) = array_alternative($defs,5);
-			if($disp_flag < 0) continue;
-            list($accept_lang,$disp_align,$disp_head) = [intdiv($disp_flag,100),intdiv($disp_flag%100,10), $disp_flag%10];
-            if(!empty($relations)) {
-                $relation[$key] = $relations;
-            }
-            $field[$ref_key] = $key;
-            if($disp_head !== 0) {
-                if(empty($disp_name)) $disp_name = $ref_key;
-                else if($disp_name[0] === '.') $disp_name = $this->_(".Schema{$disp_name}");
-                $header[$ref_key] = [$disp_name,$disp_align,$disp_head,$width];
-            }
-            if($accept_lang) {
-                $ref_name = "{$ref_key}_" . LangUI::$LocaleName;
-                if(array_key_exists($ref_name,$this->dbDriver->columns)) {
-                    $locale[$ref_key] = $ref_name;
-                }
-            }
-        }
-        $this->HeaderSchema = $header;
-        $this->FieldSchema = $field;
-        $this->Relations = $relation;
-        $this->dbDriver->fieldAlias->SetupAlias($locale);
-    }
-//==============================================================================
 // extract DataTable or Alternate DataView
     private function model_view($db) {
 		list($model,$field,$refer) = fix_explode('.',$db,3);
@@ -169,27 +149,6 @@ protected function ResetLocation() {
                         : $this->$model->dbDriver->table;                 // illegal define
         } else $table = $this->$model->dbDriver->table;
         return [$model,$table,$field,$refer];
-    }
-//==============================================================================
-// nested relation model
-// CALL by Other Model Relation Analyzer
-    protected function JoinDefinition($table,$field,$rel_key) {
-        if(is_array($this->dbDriver->relations)) {
-            foreach($this->dbDriver->relations as $key => $refs) {
-                if(array_key_exists($field,$refs)) {
-                    $lnk = explode('.',$refs[$field]);
-                    return [
-                        $table,         // rel_table
-						$rel_key,		//   rel_key
-                        $key,           //   rel_filed
-                        $lnk[0],        // sub_table
-                        $lnk[1],        //   rel_id
-                        $lnk[2],        //   ref_name
-                    ];
-                }
-            }
-        }
-        return $field;
     }
 //==============================================================================
 // Selection Table Relation setup
@@ -397,7 +356,7 @@ public function getCount($cond) {
 		if(empty($filter)) $filter = array_keys($this->Schema);
 		else {
 			$filter = array_filter($filter,function($v) {
-					return array_key_exists($v,$this->Scheam);
+					return array_key_exists($v,$this->Schema);
 			});
 		}
 		return array_combine($filter,$filter);
