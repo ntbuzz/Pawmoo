@@ -175,7 +175,7 @@ public static function get_value($mod, $id, $allow = FALSE) {
 		return reset($list);
 	};
 	//-----------------------------------------
-	if($id[0] === '.') {        // モジュール相対参照
+	if($id[0] === '.' && !empty($mod)) {        // モジュール相対参照
 		if( ($a=$array_finder2("{$mod}{$id}",static::$STRINGS,$allow)) !== FALSE) return $a;
 		$id = substr($id,1);	// . を削除
 	}
