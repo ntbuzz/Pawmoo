@@ -44,9 +44,9 @@ class AppSetup  extends AppBase {
 	// 初期ファイル
 	const Template = [
 		'config.php'		=> true,
-		'*Controller.php'	=> 'Controller.php',
-		'*Helper.php'		=> 'Helper.php',
-		'*Model.php'		=> 'Model.php',
+		'*Controller.php'	=> 'Controller.setup',
+		'*Helper.php'		=> 'Helper.setup',
+		'*Model.php'		=> 'Model.setup',
 		'Layout.tpl'		=> true,
 		'Header.tpl'		=> true,
 		'Footer.tpl'		=> true,
@@ -356,7 +356,6 @@ private function loadCSV($path) {
 // 	'os_id' => [ 'integer',	01110,	50,		リレーションビューフィールド
 // 		'Os.id' => [							リレーションモデル・キー
 // 			'os_name' => [ 'name',00100,20],	ビューフィールド
-// 			'os_name_en'=> 'name_en',			言語フィールド
 // 			'cat_id' => [ 'integer', 00000, NULL,						
 // 				'Oscat.id' => [					ネストリレーションモデル・キー
 // 					'os_providor' => [ 'provider',0100,40],		リレーション名
@@ -528,7 +527,7 @@ private function makeModelSchema($csv_file) {
 			'%model%' => $this->Model,
 			'%databasedefs%' => $db_def,
 		];
-		$tmp_file = "Tools/Template/AppSchema.php";
+		$tmp_file = "Tools/Template/AppSchema.setup";
 		$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 		$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
 		$target = "{$this->AppConfig}/Schema/{$this->Model}Schema.php";
@@ -601,12 +600,11 @@ private function makeModelClass($model) {
 		$rep_array =[
 			'%virt_field%' => $virt_field,
 		];
-		$tmp_file = "Tools/Template/virtul_method.php";
+		$tmp_file = "Tools/Template/virtul_method.setup";
 		$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 		$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
 		return $template;
 	};
-debug_dump(['MODEL'=>$schema->ModelFields]);
 	$schema_txt = $this->makeModelField($schema->ModelFields,$schema->Lang);
 	$this->DatabaseSchema = [
 		'Handler' => $schema->Handler,
@@ -624,7 +622,7 @@ debug_dump(['MODEL'=>$schema->ModelFields]);
 		'%databasedefs%' => $db_def,
 		'%virtual_class%' => $virtula_method,
 	];
-	$tmp_file = "Tools/Template/AppModel.php";
+	$tmp_file = "Tools/Template/AppModel.setup";
 	$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 	$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
 	$target = "{$this->AppConfig}/Models/{$model}Model.php";
