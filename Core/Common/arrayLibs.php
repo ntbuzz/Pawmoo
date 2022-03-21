@@ -45,6 +45,7 @@ function array_first_item($arr) {
     return ['',''];
 }
 //==============================================================================
+// array item extract with associate key
 function array_extract($arr,$n) {
 	if(is_array($arr)) {
 		$slice = [];
