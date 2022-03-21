@@ -43,9 +43,9 @@ abstract class SQLHandler {	// extends SqlCreator {
 //==============================================================================v
 //	Constructor( table name, DB Handler)
 //==============================================================================
-function __construct($table,$handler,$primary) {
+function __construct($table,$handler,$primary,$db=NULL) {
 		list($this->raw_table,$this->table) = (is_array($table))?$table:[$table,$table];
-		$this->dbb = DatabaseHandler::get_database_handle($handler);
+		$this->dbb = DatabaseHandler::get_database_handle($handler,$db);
 		$this->is_offset = DatabaseHandler::$have_offset;
 		$this->load_columns();
 		$this->handler = $handler;
@@ -167,12 +167,6 @@ public function SetPaging($pagesize, $pagenum) {
 	$this->limitrec = $pagesize;		// get limit records
 	debug_log(FALSE,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
 }
-//==============================================================================
-//	QUERY Command: generate SELECT DISTINCT
-// private function QueryCommand($param) {
-// //	return "SELECT DISTINCT on({$this->Primary} {$param}";
-// 	return "SELECT DISTINCT {$param}";
-// }
 //==============================================================================
 //	getRecordCount($cond) 
 //		get $cond match record count

@@ -55,9 +55,10 @@ class AppModel extends AppObject {
             $db_key = (array_key_exists(LangUI::$LocaleName,$this->ModelTables)) ? LangUI::$LocaleName : '*';
             $this->DataTable = $this->ModelTables[$db_key]; // DataTable SWITCH
         }
+		list($han,$db) = array_alternative(explode('.',$this->Handler),2);
         $this->fields = [];
-        $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->DataTable,$this->Primary); // connect Database Driver
+        $driver = "{$han}Handler";
+        $this->dbDriver = new $driver($this->DataTable,$this->Primary,$db); // connect Database Driver
 		list($dFormat,$tFormat,$dtFormat) = array_keys_value($this->dbDriver->DateFormat,['Date','Time','TimeStamp']);
         $this->DateFormat = $dFormat;         	// Date format from DB-Driver
         $this->TimeFormat = $tFormat;         	// Time format from DB-Driver

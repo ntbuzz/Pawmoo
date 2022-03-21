@@ -11,7 +11,7 @@ class NullHandler {
 	public 	$raw_columns=[];   // target real column
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
-	function __construct($table,$primary) {
+	function __construct($table,$primary,$db=NULL) {
 		$this->fields = [];
 		$this->fieldAlias = new fieldAlias();
 	}

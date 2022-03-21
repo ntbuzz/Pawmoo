@@ -117,19 +117,23 @@ class DatabaseHandler {
     public static $have_offset = TRUE;
 //==============================================================================
 // データベースへ接続してハンドルを返す
-public static function get_database_handle($handler) {
+public static function get_database_handle($handler,$connectDB=NULL) {
 	$config = $GLOBALS['config'];
-    if(array_key_exists($handler,static::$dbHandle)) {
-        return static::$dbHandle[$handler];
+	$handle_key = ($connectDB===NULL)?$handler:"{$handler}.{$connectDB}";
+    if(array_key_exists($handle_key,static::$dbHandle)) {
+        list($handler,$dd) = static::$dbHandle[$handle_key];
+		return $dd;
     }
     if(array_key_exists($handler,static::DatabaseSpec)) {
 		$db = $config->$handler;
+		if($connectDB!==NULL) $db['database'] = $connectDB;
         debug_log(DBMSG_HANDLER,['HANDLER' => $handler, 'HOST' => $db['host'],'DATABASE' => $db['database']]);
         $defs = static::DatabaseSpec[$handler];
         $func = $defs['callback'];      // 呼び出し関数
         static::$have_offset = $defs['offset'];     // DBMS has OFFSET command?
-        static::$dbHandle[$handler] = static::$func($db,'open');
-        return static::$dbHandle[$handler];
+        $dd = static::$func($db,'open');
+        static::$dbHandle[$handle_key] = [$handler,$dd];
+        return $dd;
     }
     return NULL;
 }
@@ -147,8 +151,9 @@ public function get_callback_func($handler) {
 // クローズ処理
 private static function closeDb() {
     foreach(static::$dbHandle as $key => $handle) {
-        $func = static::DatabaseSpec[$key]['callback'];      // 呼び出し関数
-        static::$func($handle,NULL,'close');
+        list($handler,$dd) = $handle;
+        $func = static::DatabaseSpec[$handler]['callback'];      // 呼び出し関数
+        static::$func($dd,NULL,'close');
     }
     self:$dbHandle = [];
 }
