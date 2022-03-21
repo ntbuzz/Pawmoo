@@ -87,6 +87,12 @@ private function SchemaAnalyzer() {
 		if(is_int($link)) $def = $rel;
 		if($dtype !== 'virtual' && ($rel === NULL || !is_int($link))) {	// relation-field
 			$this->TableFields[$key] = [$dtype,$flag,$width];
+			list($sort,$align,$csv,$lang) = oct_extract($flag,4);
+			if($lang) {
+				foreach($this->Language as $lo) {
+					$this->TableFields["{$key}_{$lo}"] = [$dtype,0,NULL];
+				}
+			}
 		}
 		if(!is_int($link) && is_array($def)) $relation($link,$def);
 	}
@@ -121,7 +127,7 @@ public function CreateDatabase($exec=false) {
 	$this->doSQL($exec,$sql);
 	$sql = "SELECT COUNT(*) as \"total\" FROM sqlite_master WHERE TYPE='table' AND name='{$this->MyTable}';";
 	$this->doSQL($exec,$sql);
-	$field = $this->dbDriver->fetch_array();
+	if($exec) $field = $this->dbDriver->fetch_array();
 	$exist =  ($field) ? intval($field["total"]) : 0;
 	// Create Table
 	$fset = [];
@@ -137,6 +143,12 @@ public function CreateDatabase($exec=false) {
 			$str = "{$column} {$ftype}";
 			if($lftype === 'serial') $str .= " NOT NULL";
 			$fset[] = $str;
+			// list($sort,$align,$csv,$lang) = oct_extract($flag,4);
+			// if($lang) {
+			// 	foreach($this->Language as $lo) {
+			// 		$fset[] = "{$column}_{$lo} {$ftype}";
+			// 	}
+			// }
 		}
 	}
 	$fset[] = "PRIMARY KEY ({$this->Primary})";
@@ -203,26 +215,37 @@ private function createView($view) {
 // 	'cat_id' => [ 'type', 0, NULL , 'Oscat.id' => [ ... ]  ]
 //   key         rels
 	$relations = function($table,$key,$rels) use(&$relations,&$join,&$fields) {
-xdebug_dump(['TABLE'=>$table,'KEY'=>$key,'RELS'=>$rels]);
 		list($kk,$arr) = array_first_item($rels);
 		// kk = Oscat.id arr = []
 		list($tbl,$nm) = $this->model_view($kk);
 		$join[] = "LEFT JOIN {$tbl} ON {$table}.{$key}={$tbl}.{$nm}";
 		foreach($arr as $fn => $defs) {
 			list($type,$flag,$wd,$bind) = array_extract($defs,4);
+			list($sort,$align,$csv,$lang) = oct_extract($flag,4);
 			//  fn = cat_name, type  = 'name', flag= 00100, $wd=20
 			//  fn = cat_id type  = [ OScat.id => [...], NULL ,NULL ],
 			if(is_array($type)) {	// リレーション
 				$relations($tbl,$fn,$type);
 			} else if($bind===NULL) {
 				$fields[] = "{$tbl}.\"{$type}\" as {$fn}";
+				if($lang) {
+					foreach($this->Language as $lo) {
+						$fields[] = "{$tbl}.\"{$type}_{$lo}\" as {$fn}_{$lo}";
+					}
+				}
 			} else {	// BIND またはサブリレーション
 				list($kk,$rel) = array_first_item($bind);
 				if(is_int($kk)) {
 					list($sep,$bind) = array_first_item($rel);
 					$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$fn}";
+					if($lang) {
+						foreach($this->Language as $lo) {
+							$lo_bind = array_map(function($v) use(&$lo) { return "{$v}_{$lo}";},$bind);
+							$fields[] = $this->dbDriver->fieldConcat($sep,$lo_bind) . " as {$fn}_{$lo}";
+						}
+					}
+
 				} else {
-xdebug_dump(['FN'=>$fn,'DEF'=>$defs,'TABLE'=>$table,'TBL'=>$tbl,'TYPE'=>$type]);
 					if(!empty($type) && $type !== '---' && $type !== '***') $fields[] = "{$tbl}.\"$fn\"";
 					$relations($tbl,$fn,$bind);
 				}
@@ -234,7 +257,13 @@ xdebug_dump(['FN'=>$fn,'DEF'=>$defs,'TABLE'=>$table,'TBL'=>$tbl,'TYPE'=>$type]);
 		if(is_scalar($dtype)) {
 			if($dtype === 'virtual') continue;
 			if($bind === NULL) {
-				$fields[] = "{$this->MyTable}.\"$column\"";
+				$fields[] = "{$this->MyTable}.\"{$column}\"";
+				list($sort,$align,$csv,$lang) = oct_extract($flag,4);
+				if($lang) {
+					foreach($this->Language as $lo) {
+						$fields[] = "{$this->MyTable}.\"{$column}_{$lo}\"";
+					}
+				}
 			} else if(is_array($bind)) {
 				list($kk,$rel) = array_first_item($bind);
 				if(is_int($kk)) {		// Self Bind
@@ -256,8 +285,9 @@ debug_dump(["SQL({$this->Handler})"=>$sql]);
 }
 //==============================================================================
 // CSVデータが定義されていればデータを読み込む
-public function ImportCSV($data_path) {
+public function ImportCSV($data_path,$exec) {
 	echo "ImportCSV: ({$this->ModuleName}) TABLE ";
+	if($exec === false) return;
 	if(isset($this->InitCSV)) {
 		$path = "{$data_path}{$this->InitCSV}";
 		if(is_file($path)) {

@@ -253,19 +253,21 @@ private function MakeTable($model,$exec) {
 		$schema->CreateDatabase($exec);
 //		if($exec) $schema->ImportCSV($csv_path);	// CREATEが終わる前に書き込みが発生する
 	}
-	$this->ImportCSV($model,$exec);
-	$this->MakeView($model,$exec);
+	if($exec) {
+		$this->ImportCSV($model,$exec);
+		$this->MakeView($model,$exec);
+	}
 }
 //==============================================================================
 // CSVインポート、省略可
-private function ImportCSV($model) {
+private function ImportCSV($model,$exec) {
 	// 指定された、見つかったクラスファイルを全て処理する
 	$files = $this->get_schema_files($model);
 	if($files === false) return false;
 	$csv_path = "{$this->AppConfig}/InitCSV/";
 	foreach($files as $model) {
 		$schema = $this->$model;
-		$schema->ImportCSV($csv_path);
+		$schema->ImportCSV($csv_path,$exec);
 	}
 }
 //==============================================================================
@@ -379,6 +381,28 @@ private function createSchema($fields) {
 	$resource = [];
 	$virtual = [];
 	$depend = [];
+	$add_link = function(&$arr,$chain,$fn,$attr) use(&$add_link, &$depend) {
+		$nm = array_shift($chain);
+		if(array_key_exists($nm,$arr)) {
+			list($tt,$ff,$ww,$rel) = array_extract($arr[$nm],4);
+			list($rk,$rv) = array_first_item($rel);
+			if(is_array($rv)) {
+				return $add_link($arr[$nm][$rk],$chain,$fn,$attr);
+			}
+			die('BAD DEFINE!');
+		}
+		list($type,$flag,$wd) = $attr;
+		if($chain===[]) {
+			$attr = [ $nm, $flag, $wd ];
+		} else {
+			array_unshift($chain,$nm);
+			$rel = implode('.',$chain);
+			$attr = [ $type, $flag, $wd ,$rel => [] ];
+			$depend[] = $nm;
+		}
+		$arr[$fn] = $attr;
+		return 0;
+	};
 	foreach($fields as $key => $column) {
 		list($name,$field,$lang,$type,$rel,$disp,$csv,$note) = array_values($column);
 		$type = strtolower($type);
@@ -397,38 +421,13 @@ private function createSchema($fields) {
 		switch($type) {
 		case 'alias':
 				if(empty($rel)) break;
-				list($id,$rel_name,$rel_bind) = fix_explode('.',$rel,3,NULL);
-				if(!empty($rel_bind)) {
-					if($sep === NULL) $rel_name = [$rel_name,$rel_bind];
-					else $rel_name = [$rel_name, $sep => $rel_bind ];
-				}
-				list($link,$rels) =	array_first_item(array_slice($col[$id], 3, 1, true));
-				$rels[$fname] = [$rel_name, $flag, $wd ];
-				if($lang) {
-					foreach($this->Language as $lng) {
-						if(is_array($rel_name)) $bstr = [ array_map(function($v) use(&$lng) {
-							return "{$v}_{$lng}";
-						},$rel_name),NULL,NULL ];
-						else $bstr = "{$rel_name}_{$lng}";
-						$rels["{$fname}_{$lng}"] = $bstr;
-					}
-				}
-				$col[$id][$link] = $rels;
+				$chain = explode('.',$rel);
+				$add_link($col,$chain,$fname,[ $type,$flag, $wd]);
 				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_view"];
 				break;
 		case 'bind':	// self-bind or Link-Bind
 				$bind = bind_array($rel,$sep);
 				$col[$fname] = [ $type, $flag, $wd ,$bind ];
-				if($lang) {
-					list($sep,$bind) =	array_first_item($bind);
-					$flag &= 00700;			// CSVのみ残す
-					foreach($this->Language as $lng) {
-						$bstr = array_map(function($v) use(&$lng) {
-							return "{$v}_{$lng}";
-						},$bind);
-						$col["{$fname}_{$lng}"] = [ $type, $flag, NULL, [$sep => $bstr]];
-					}
-				}
 				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_view"];
 				break;
 		case 'virtual':	// 仮想フィールドは言語依存しない
@@ -436,18 +435,16 @@ private function createSchema($fields) {
 				$virtual[$fname] = bind_array($rel,$sep);
 				break;
 		default:
-				$col[$fname] = [ $type, $flag, $wd];
-				if($lang) {
-					$flag &= 00700;			// CSVのみ残す
-					foreach($this->Language as $lng) {
-						$col["{$fname}_{$lng}"] = $type;//[ $type, $flag];
-					}
-				}
 				if(!empty($rel)) {
-					list($m,$ix) = fix_explode('.',$rel,2);
-					$depend[] = $m;
-					$col[$fname][$rel] = [];
-				}
+					$chain = explode('.',$rel);
+					if(count($chain) === 3) {
+						$add_link($col,$chain,$fname,[$type,$flag, $wd]);
+					} else {
+						list($m,$ix) = $chain;
+						$depend[] = $m;
+						$col[$fname] = [ $type, $flag, $wd, $rel => [] ];
+					}
+				} else $col[$fname] = [ $type, $flag, $wd];
 		}
 	}
 	return [$resource,$col,$virtual,$depend];
