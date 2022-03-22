@@ -1,21 +1,14 @@
 <?php
 //==============================================================================
 // 
-class %module%Model extends AppModel2 {
-    static $DatabaseSchema = [
-        'Handler' => 'Null',
-        'DataTable' => '',
-        'Primary' => '',
-        'LoginID' => '',
-        'Schema' => [],
-        'PostRenames' => [],
-        'Selection' => [],
-		'Lang_Alternate' => FALSE,
-    ];
+class %module%Model extends %model%Class {
+  	static $OptionSchema = [
+        'PostRenames' => [
+        ],
+        'Selection' => [
+		],
+  	];
 //==============================================================================
-//	クラス初期化処理
-protected function ClassInit() {
-
-}
+// メソッド定義
 
 }
