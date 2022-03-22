@@ -286,11 +286,13 @@ function debug_log($lvl,...$items) {
         case -DBMSG_DUMP:    echo $pre_dump; break;
         case -DBMSG_NOLOG:   $lvl  = -99;
         default:
-            if((-DBMSG_LEVEL < $lvl && $lvl < 0) || (CLI_DEBUG && $cli !== 0)) {
-                echo "{$dmp_info}\n";
-            } else if(!CLI_DEBUG) {     // WEB Access logging $lvl, donot worry CLI_MODE
-				MySession::syslog_SetData(sysLog::getLogName($lvl),$dmp_info,TRUE);
-            }
+			if(!CLI_DEBUG) {
+	            if((-DBMSG_LEVEL < $lvl && $lvl < 0) || (CLI_DEBUG && $cli !== 0)) {
+    	            echo "{$dmp_info}\n";
+        	    } else {     // WEB Access logging $lvl, donot worry CLI_MODE
+					MySession::syslog_SetData(sysLog::getLogName($lvl),$dmp_info,TRUE);
+            	}
+			}
         }
     }
 }
