@@ -9,7 +9,10 @@ class AppSetup  extends AppBase {
 			"Class"		=> [],
 			"Config"	=> ['config.php'],
 			"extends"	=> [],
-			"Models"	=> [],
+			"Models"	=> [
+				"Common"=> [],
+				"Misc"	=> [],
+			],
 			"modules"	=> [],
 			'View'	=> [
 				'lang' => [ 'common.lng', 'resource.lng' ],
@@ -625,7 +628,7 @@ private function makeModelClass($model) {
 	$tmp_file = "Tools/Template/AppModel.setup";
 	$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 	$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
-	$target = "{$this->AppConfig}/Models/{$model}Model.php";
+	$target = "{$this->AppConfig}/Models/{$model}Class.php";
 	file_put_contents($target,$template);
 	return $model;
 }
