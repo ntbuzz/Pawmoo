@@ -2,6 +2,7 @@
 //==============================================================================
 // Databas Table Create Class
 class AppSchema extends AppBase {
+	public $Language = [];		// Language list for safety
 	public $ModelFields;		// read-only column => view column
 	public $TableFields;		// read/write column => table column
 	public $locale_columns;
