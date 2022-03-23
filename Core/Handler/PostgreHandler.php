@@ -92,9 +92,9 @@ public function getLastError() {
 // pg_update($this->dbb,$this->raw_table,$row,$wh);
 //==============================================================================
 private function safe_convert($row,$func) {
-//	$aa = $this->sql_str_quote($row);
+	$aa = $this->sql_str_quote($row,'\\','\\\\');	// escape back-slash
 	// PostgreSQLのデータ型に変換
-	$aa = pg_convert($this->dbb,$this->raw_table,$row,PGSQL_CONV_FORCE_NULL );
+	$aa = pg_convert($this->dbb,$this->raw_table,$aa,PGSQL_CONV_FORCE_NULL );
 	if($aa === FALSE) {
 		$res1 = pg_get_result($this->dbb);
 		debug_log(DBMSG_ERROR,[
