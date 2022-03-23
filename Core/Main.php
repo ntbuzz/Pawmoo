@@ -53,7 +53,6 @@ if($controller === 'Error') {       // ERROR PAGE
 require_once("app/{$appname}/Config/config.php");
 require_once('Base/AppController.php');
 require_once('Base/AppModel.php');
-require_once('Base/AppModel2.php');
 require_once('Base/AppView.php');
 require_once('Base/AppHelper.php');
 
