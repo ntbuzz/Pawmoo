@@ -2,13 +2,16 @@
 //==============================================================================
 //	データベースに接続しないNULLハンドラー
 class NullHandler {
-	public  $DateStyle = 'Y-m-d';
-	public  $TimeStyle = 'H:i:s';
+	public $DateFormat = [
+		'Date' => 'Y-m-d',
+		'Time' => 'H:i:s',
+		'TimeStamp' => 'Y-m-d H:i:s',
+	];
 	public	$columns = [];       // record column data
 	public 	$raw_columns=[];   // target real column
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
-	function __construct($table,$primary) {
+	function __construct($table,$primary,$db=NULL) {
 		$this->fields = [];
 		$this->fieldAlias = new fieldAlias();
 	}

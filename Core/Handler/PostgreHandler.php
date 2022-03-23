@@ -9,8 +9,8 @@ class PostgreHandler extends SQLHandler {
 	protected $LIKE_opr = 'LIKE';		// 大文字小文字の無視比較
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
-	function __construct($table,$primary) {
-		parent::__construct($table,'Postgre',$primary);
+	function __construct($table,$primary,$db=NULL) {
+		parent::__construct($table,'Postgre',$primary,$db);
 	}
 //==============================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
@@ -69,6 +69,7 @@ public function doQuery($sql) {
 			"COND" => $this->LastCond,
 			"BUILD" => $this->LastBuild,
 			'QUERY失敗' => pg_last_error(),
+			'PRIMARY' => $this->updatePrimary,
 		]);
 	}
 	return $this->rows;
@@ -91,7 +92,7 @@ public function getLastError() {
 // pg_update($this->dbb,$this->raw_table,$row,$wh);
 //==============================================================================
 private function safe_convert($row,$func) {
-	$aa = $this->sql_str_quote($row);
+	$aa = $this->sql_str_quote($row,'\\','\\\\');	// escape back-slash
 	// PostgreSQLのデータ型に変換
 	$aa = pg_convert($this->dbb,$this->raw_table,$aa,PGSQL_CONV_FORCE_NULL );
 	if($aa === FALSE) {
@@ -104,6 +105,8 @@ private function safe_convert($row,$func) {
 			"{$func} CONVERT失敗" => pg_result_status($res1),	// pg_last_error(),
 			"ROW" => $row,
 		]);
+		$id = $row[$this->Primary];
+		echo "**** PG_CONV:ERROR({$id})\n";
 		$aa = $this->sql_safe_convert($row);	// 自力で書き込み型変換
 	}
 	return $aa;
@@ -154,6 +157,7 @@ public function upsertRecord($wh,$row) {
 		$sep = ",";
 	}
 	// UPSERT 文を生成
+	$this->updatePrimary = $aa[$this->Primary];
 	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) ON CONFLICT ({$primary}) DO UPDATE {$set} RETURNING *;";
 	$this->doQuery($sql);
 	$a = $this->fetch_array();		// 書込みはraw-tableなのでAlias無し

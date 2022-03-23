@@ -41,7 +41,7 @@ class AppView extends AppObject {
 		'name'			=> '[]*',
 		'size'			=> ' :*',
 		'id'			=> ' #*',
-		'class'			=> ' .*'
+		'class'			=> ' . '
 	];
     //==========================================================================
     // Constructor: Import Model Class by Owner Class, Create Helper
@@ -317,7 +317,7 @@ public function ViewTemplate($name,$vars = []) {
 				$str = ($n===$m) ? mb_strcut($tag,$n+1) : mb_strcut($tag,$n+1,$m-$n-1);
 				$tag = mb_strcut($tag,0,$n);
 				if(empty($str) && $emp ==='*') break;	// not-allow empty attribute
-				$attrList[$key] = (array_key_exists($key,$attrList)) ? "{$str} ".$attrList[$key] : $str;
+				$attrList[$key] = (array_key_exists($key,$attrList)) ? trim("{$str} ".$attrList[$key]) : $str;
 				if($key !== 'class') break;		// repeat allow 'class' only
 			}
 		}

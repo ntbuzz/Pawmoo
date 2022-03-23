@@ -9,7 +9,10 @@ class AppSetup  extends AppBase {
 			"Class"		=> [],
 			"Config"	=> ['config.php'],
 			"extends"	=> [],
-			"Models"	=> [],
+			"Models"	=> [
+				"Common"=> [],
+				"Misc"	=> [],
+			],
 			"modules"	=> [],
 			'View'	=> [
 				'lang' => [ 'common.lng', 'resource.lng' ],
@@ -44,9 +47,9 @@ class AppSetup  extends AppBase {
 	// 初期ファイル
 	const Template = [
 		'config.php'		=> true,
-		'*Controller.php'	=> 'Controller.php',
-		'*Helper.php'		=> 'Helper.php',
-		'*Model.php'		=> 'Model.php',
+		'*Controller.php'	=> 'Controller.setup',
+		'*Helper.php'		=> 'Helper.setup',
+		'*Model.php'		=> 'Model.setup',
 		'Layout.tpl'		=> true,
 		'Header.tpl'		=> true,
 		'Footer.tpl'		=> true,
@@ -140,7 +143,7 @@ private function ModTree($model,$exec) {
 			$files = get_files($csv_dir,'.csv');
 		}
 		if(empty($files)) {
-			echo "SPEC define CSV file not found.\n";
+			echo "SPEC define CSV({$model}) file not found.\n";
 			return false;
 		}
 		return $files;
@@ -156,7 +159,7 @@ private function ModTree($model,$exec) {
 			if($files !== false) $files = array_map(function($v) { return str_replace('Schema.php','',$v);},$files);
 		}
 		if(empty($files)) {
-			echo "SCHEMA file not found.\n";
+			echo "SCHEMA({$model}) file not found.\n";
 			return false;
 		}
 		return $files;
@@ -253,19 +256,21 @@ private function MakeTable($model,$exec) {
 		$schema->CreateDatabase($exec);
 //		if($exec) $schema->ImportCSV($csv_path);	// CREATEが終わる前に書き込みが発生する
 	}
-	$this->ImportCSV($model,$exec);
-	$this->MakeView($model,$exec);
+	if($exec) {
+		$this->ImportCSV($model,$exec);
+		$this->MakeView($model,$exec);
+	}
 }
 //==============================================================================
 // CSVインポート、省略可
-private function ImportCSV($model) {
+private function ImportCSV($model,$exec) {
 	// 指定された、見つかったクラスファイルを全て処理する
 	$files = $this->get_schema_files($model);
 	if($files === false) return false;
 	$csv_path = "{$this->AppConfig}/InitCSV/";
 	foreach($files as $model) {
 		$schema = $this->$model;
-		$schema->ImportCSV($csv_path);
+		$schema->ImportCSV($csv_path,$exec);
 	}
 }
 //==============================================================================
@@ -354,7 +359,6 @@ private function loadCSV($path) {
 // 	'os_id' => [ 'integer',	01110,	50,		リレーションビューフィールド
 // 		'Os.id' => [							リレーションモデル・キー
 // 			'os_name' => [ 'name',00100,20],	ビューフィールド
-// 			'os_name_en'=> 'name_en',			言語フィールド
 // 			'cat_id' => [ 'integer', 00000, NULL,						
 // 				'Oscat.id' => [					ネストリレーションモデル・キー
 // 					'os_providor' => [ 'provider',0100,40],		リレーション名
@@ -379,6 +383,28 @@ private function createSchema($fields) {
 	$resource = [];
 	$virtual = [];
 	$depend = [];
+	$add_link = function(&$arr,$chain,$fn,$attr) use(&$add_link, &$depend) {
+		$nm = array_shift($chain);
+		if(array_key_exists($nm,$arr)) {
+			list($tt,$ff,$ww,$rel) = array_extract($arr[$nm],4);
+			list($rk,$rv) = array_first_item($rel);
+			if(is_array($rv)) {
+				return $add_link($arr[$nm][$rk],$chain,$fn,$attr);
+			}
+			die('BAD DEFINE!');
+		}
+		list($type,$flag,$wd) = $attr;
+		if($chain===[]) {
+			$attr = [ $nm, $flag, $wd ];
+		} else {
+			array_unshift($chain,$nm);
+			$rel = implode('.',$chain);
+			$attr = [ $type, $flag, $wd ,$rel => [] ];
+			$depend[] = $nm;
+		}
+		$arr[$fn] = $attr;
+		return 0;
+	};
 	foreach($fields as $key => $column) {
 		list($name,$field,$lang,$type,$rel,$disp,$csv,$note) = array_values($column);
 		$type = strtolower($type);
@@ -397,38 +423,13 @@ private function createSchema($fields) {
 		switch($type) {
 		case 'alias':
 				if(empty($rel)) break;
-				list($id,$rel_name,$rel_bind) = fix_explode('.',$rel,3,NULL);
-				if(!empty($rel_bind)) {
-					if($sep === NULL) $rel_name = [$rel_name,$rel_bind];
-					else $rel_name = [$rel_name, $sep => $rel_bind ];
-				}
-				list($link,$rels) =	array_first_item(array_slice($col[$id], 3, 1, true));
-				$rels[$fname] = [$rel_name, $flag, $wd ];
-				if($lang) {
-					foreach($this->Language as $lng) {
-						if(is_array($rel_name)) $bstr = [ array_map(function($v) use(&$lng) {
-							return "{$v}_{$lng}";
-						},$rel_name),NULL,NULL ];
-						else $bstr = "{$rel_name}_{$lng}";
-						$rels["{$fname}_{$lng}"] = $bstr;
-					}
-				}
-				$col[$id][$link] = $rels;
+				$chain = explode('.',$rel);
+				$add_link($col,$chain,$fname,[ $type,$flag, $wd]);
 				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_view"];
 				break;
 		case 'bind':	// self-bind or Link-Bind
 				$bind = bind_array($rel,$sep);
 				$col[$fname] = [ $type, $flag, $wd ,$bind ];
-				if($lang) {
-					list($sep,$bind) =	array_first_item($bind);
-					$flag &= 00700;			// CSVのみ残す
-					foreach($this->Language as $lng) {
-						$bstr = array_map(function($v) use(&$lng) {
-							return "{$v}_{$lng}";
-						},$bind);
-						$col["{$fname}_{$lng}"] = [ $type, $flag, NULL, [$sep => $bstr]];
-					}
-				}
 				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_view"];
 				break;
 		case 'virtual':	// 仮想フィールドは言語依存しない
@@ -436,18 +437,16 @@ private function createSchema($fields) {
 				$virtual[$fname] = bind_array($rel,$sep);
 				break;
 		default:
-				$col[$fname] = [ $type, $flag, $wd];
-				if($lang) {
-					$flag &= 00700;			// CSVのみ残す
-					foreach($this->Language as $lng) {
-						$col["{$fname}_{$lng}"] = $type;//[ $type, $flag];
-					}
-				}
 				if(!empty($rel)) {
-					list($m,$ix) = fix_explode('.',$rel,2);
-					$depend[] = $m;
-					$col[$fname][$rel] = [];
-				}
+					$chain = explode('.',$rel);
+					if(count($chain) === 3) {
+						$add_link($col,$chain,$fname,[$type,$flag, $wd]);
+					} else {
+						list($m,$ix) = $chain;
+						$depend[] = $m;
+						$col[$fname] = [ $type, $flag, $wd, $rel => [] ];
+					}
+				} else $col[$fname] = [ $type, $flag, $wd];
 		}
 	}
 	return [$resource,$col,$virtual,$depend];
@@ -531,7 +530,7 @@ private function makeModelSchema($csv_file) {
 			'%model%' => $this->Model,
 			'%databasedefs%' => $db_def,
 		];
-		$tmp_file = "Tools/Template/AppSchema.php";
+		$tmp_file = "Tools/Template/AppSchema.setup";
 		$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 		$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
 		$target = "{$this->AppConfig}/Schema/{$this->Model}Schema.php";
@@ -604,12 +603,11 @@ private function makeModelClass($model) {
 		$rep_array =[
 			'%virt_field%' => $virt_field,
 		];
-		$tmp_file = "Tools/Template/virtul_method.php";
+		$tmp_file = "Tools/Template/virtul_method.setup";
 		$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 		$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
 		return $template;
 	};
-debug_dump(['MODEL'=>$schema->ModelFields]);
 	$schema_txt = $this->makeModelField($schema->ModelFields,$schema->Lang);
 	$this->DatabaseSchema = [
 		'Handler' => $schema->Handler,
@@ -627,10 +625,10 @@ debug_dump(['MODEL'=>$schema->ModelFields]);
 		'%databasedefs%' => $db_def,
 		'%virtual_class%' => $virtula_method,
 	];
-	$tmp_file = "Tools/Template/AppModel.php";
+	$tmp_file = "Tools/Template/AppModel.setup";
 	$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 	$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
-	$target = "{$this->AppConfig}/Models/{$model}Model.php";
+	$target = "{$this->AppConfig}/Models/{$model}Class.php";
 	file_put_contents($target,$template);
 	return $model;
 }

@@ -1,23 +1,5 @@
 <?php
-//==============================================================================
-function array_extract($arr,$n) {
-	if(is_array($arr)) {
-		$slice = [];
-		foreach($arr as $key => $val) {
-			if(is_int($key)) $slice[] = (is_array($val))?[$val]:$val;
-			else $slice[] = [$key => $val];
-			--$n;
-		}
-	} else $slice = [$arr];
-	while($n-- > 0)$slice[]=NULL;
-	return $slice;
-}
-//==============================================================================
-function oct_extract($val,$n) {
-	$oct = [];
-	while($n--) { $oct[] = ($val & 07); $val >>= 3; }
-	return $oct;
-}
+
 //==============================================================================
 // フォルダ内のファイルを取得する
 function get_files($path,$ext,$full=true) {

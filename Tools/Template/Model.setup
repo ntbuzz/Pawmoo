@@ -1,15 +1,14 @@
 <?php
 //==============================================================================
 // 
-class %model%Model extends AppModel {
-static $DatabaseSchema = [
-%databasedefs%
-	];
-}
+class %module%Model extends %model%Class {
+  	static $OptionSchema = [
+        'PostRenames' => [
+        ],
+        'Selection' => [
+		],
+  	];
 //==============================================================================
-//	クラス初期化処理
-protected function ClassInit() {
-}
-%virtual_class%
+// メソッド定義
 
 }

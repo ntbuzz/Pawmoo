@@ -48,6 +48,11 @@ public static function SwitchLangs($newlang,$newregion) {
 	ClassManager::ChangeModelSchema();	// 生成済みモデルを全てスイッチ
 }
 //==============================================================================
+//  モジュールリソースのロード
+public static function LoadModuleResource($module) {
+	self::LangFiles(static::$LangDir,$module);
+}
+//==============================================================================
 //  言語・地域のセット
 public static function LocaleSet() {
 	return [static::$LocaleName,static::$ReginName];
@@ -175,7 +180,7 @@ public static function get_value($mod, $id, $allow = FALSE) {
 		return reset($list);
 	};
 	//-----------------------------------------
-	if($id[0] === '.') {        // モジュール相対参照
+	if($id[0] === '.' && !empty($mod)) {        // モジュール相対参照
 		if( ($a=$array_finder2("{$mod}{$id}",static::$STRINGS,$allow)) !== FALSE) return $a;
 		$id = substr($id,1);	// . を削除
 	}

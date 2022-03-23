@@ -11,8 +11,8 @@ class SQLiteHandler extends SQLHandler {
 
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
-	function __construct($table,$primary) {
-		parent::__construct($table,'SQLite',$primary);
+	function __construct($table,$primary,$db=NULL) {
+		parent::__construct($table,'SQLite',$primary,$db);
 	}
 //==============================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする
@@ -20,6 +20,7 @@ protected function Connect($table) {
 	// テーブル属性を取得
 	$sql = "PRAGMA table_info({$table});";
 	$rows = $this->dbb->query($sql);
+	if($rows === false) die('FALSE');
 	$columns = array();
 	while ($row = $rows->fetchArray(SQLITE3_ASSOC)) {
 		$columns[$row['name']] = strtolower($row['type']);

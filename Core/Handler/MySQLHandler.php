@@ -9,8 +9,8 @@
 class MySQLHandler extends SQLHandler {
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
-	function __construct($table,$primary) {
-		parent::__construct($table,'MariaDB',$primary);
+	function __construct($table,$primary,$db=NULL) {
+		parent::__construct($table,'MariaDB',$primary,$db);
 	}
 //==============================================================================
 //	Connect: テーブルに接続し、columns[] 配列にフィールド名をセットする

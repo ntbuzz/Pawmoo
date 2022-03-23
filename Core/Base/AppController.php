@@ -143,6 +143,8 @@ protected function ActionPostProcess($action) {
 //==============================================================================
 // Spoofing the Model class in self/View/Helper.
 protected function SpoofingViewModel($model) {
+	// Load Module Locale Resource
+	LangUI::LoadModuleResource($model->ModuleName);
 	$this->View->Model = $this->Helper->Model = $this->Model = $model;
 }
 //==============================================================================
@@ -165,7 +167,7 @@ private function exec_Logging($action) {
 //==============================================================================
 // Method Dispatcher before Pre-Process, after Post-Processing
 public function ActionDispatch($action) {
-	$discard = (is_scalar($this->discardParams)) ? [$this->discardParams] : $this->discardParams;
+	$discard = (is_array($this->discardParams)) ? $this->discardParams : [$this->discardParams];
 	if(in_array($action,$discard)) App::CleareParams();
 	if($this->ActionPreProcess($action)) {
 		if(array_key_exists($action,$this->aliasAction)) {
@@ -359,9 +361,9 @@ protected function ListFilter() {
 //==============================================================================
 // CSV Output
 public function CsvAction() {
-//	$cond = $this->ListFilter();
 	$cond = MySession::getAppData("Filter.{$this->ModuleName}",false);
-	$this->Model->RecordFinder($cond);
+	$filter = $this->Model->get_csv_columns();
+	$this->Model->RecordFinder($cond,$filter);
 	$csv = $this->Model->RecordsCSV(true,255);
 	if($csv === false) {
 		die('CSV FAIL');
@@ -369,6 +371,5 @@ public function CsvAction() {
 	$name = strtolower(App::$Controller);
 	$this->Helper->CsvResponse($name,$csv);
 }
-
 
 }

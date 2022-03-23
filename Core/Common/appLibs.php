@@ -275,6 +275,10 @@ function menu_box($menu,$label=true) {
 // label_val	false | true(ラベル名を値に使う)
 // split		分割個数 0=分割なし
 function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=false,$split=0) {
+	if(!is_array($menu)) {
+		echo "<p class='alert'>MENU NOT FOUND</p>";
+		return;
+	}
 	if(!empty($item_name)) $item_name = " name='{$item_name}'";
 	$tab_contents = function($subsec,$split) use(&$item_name,&$item_type,&$label_val) {
 		echo "<div class='check-itemset'>";

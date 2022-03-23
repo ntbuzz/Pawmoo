@@ -45,6 +45,20 @@ function array_first_item($arr) {
     return ['',''];
 }
 //==============================================================================
+// array item extract with associate key
+function array_extract($arr,$n) {
+	if(is_array($arr)) {
+		$slice = [];
+		foreach($arr as $key => $val) {
+			if(is_int($key)) $slice[] = (is_array($val))?[$val]:$val;
+			else $slice[] = [$key => $val];
+			--$n;
+		}
+	} else $slice = [$arr];
+	while($n-- > 0)$slice[]=NULL;
+	return $slice;
+}
+//==============================================================================
 // exists item in array of KEY
 function array_item_value($arr,$key,$default=NULL) {
     return (isset($arr[$key])) ? $arr[$key] : $default;

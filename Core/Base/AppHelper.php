@@ -3,39 +3,72 @@
  * Object Oriented PHP MVC Framework
  * 	 AppHelper: HTML generate for ViewTemplate
  */
+const TableAlignAttrs = [
+	'',						// 0
+	' align="left"',		// 1 = left
+	' align="center"',		// 2 = center
+	' align="right"',		// 3 right
+];
 //==============================================================================
 class RecordColumns {
 	public $Primary;			// Primary-Key Values
+	public $PrimaryKey;			// Primary-Key Values
+	public $Headers;			//
+	private $numbering = false;
+//==============================================================================
+//	Constructor: Owner
+//==============================================================================
+	function __construct($model) {
+		$this->PrimaryKey = $model->Primary;
+		$this->HeaderAttrs = [];
+		foreach($model->HeaderSchema as $key => $val) {
+			list($type,$align,$sort,$wd) = $val;
+			$alias = lang_get_module(NULL,"{$model->ModuleName}.Schema.{$key}");
+			$this->Headers[$key] = [$alias,$align,$sort,$wd];
+		}
+	}
 	//==============================================================================
 	// extract column name, value set
-	public function SetColumns($primary,$data) {
-		$this->Primary = $data[$primary];
+	public function SetColumns($data) {
+		$this->Primary = $data[$this->PrimaryKey];
 		foreach($data as $key => $val) {
 			$this->$key = $val;
 		}
 	}
+//==============================================================================
+// PUT TABLE List Header
+	public function putTableHeader($disp_no=false) {
+		$this->numbering = $disp_no;
+		echo '<tr>';
+		if($this->numbering) echo '<th class="sorter-false">No.</th>';
+		foreach($this->Headers as $key => $val) {
+			list($alias,$align,$sort,$wd) = $val;
+			$tsort = ($sort===2) ? '' : ' class="sorter-false"';
+			$style = ($wd > 0) ? " style='min-width:{$wd}px;max-width:{$wd}px;'" : '';
+			echo "<th${tsort}{$style}>{$alias}</th>";
+		}
+		echo "</tr>\n";
+	}
+//==============================================================================
+// Put Each record columns
+	public function putColumnData($lno) {
+		echo "<tr class='item' id='{$this->Primary}'>";
+		if($this->numbering) echo '<td align="right">'.$lno.'</td>';
+		foreach($this->Headers as $key => $val) {
+			list($alias,$align,$sort,$wd) = $val;
+			$pos = TableAlignAttrs[$align];
+			echo "<td nowrap{$pos}>{$this->$key}</td>";
+		}
+		echo "</tr>\n";
+	}
 }
 //==============================================================================
 class AppHelper  extends AppObject {
-	const AttrAlign = [
-		'',						// 0
-		' align="left"',		// 1 = left
-		' align="center"',		// 2 = center
-		' align="right"',		// 3 right
-	];
 //==============================================================================
 // Call for Owner(AppView) Template Processing Method
 public function ViewTemplate($layout) {
 	$this->AOwner->ViewTemplate($layout);
 }
-//==============================================================================
-// Runtime output
-// public function Runtime() {
-// 	if(!is_bool_false(MySession::getSysData('debugger'))) {
-// 		echo "<hr>\n";
-// 		sysLog::run_time(-1);
-// 	}
-// }
 //==============================================================================
 // Resource(.css/.js) Output (Not USE!)
 public function Resource($res) {
@@ -161,26 +194,13 @@ public function MakePageLinks($args) {
 }
 //==============================================================================
 // PUT TABLE List Header
-	protected function putTableHeader() {
-		echo '<tr>';
-		foreach($this->Model->HeaderSchema as $key => $val) {
-			list($alias,$align,$flag,$wd) = $val;
-			$tsort = ($flag==2) ? '' : ' class="sorter-false"';
-			$style = ($wd==0) ? '' : " style='min-width:{$wd}px;max-width:{$wd}px;'";
-			echo "<th${tsort}{$style}>{$alias}</th>";
-		}
-		echo "</tr>\n";
+	protected function putTableHeader($columns) {
+		$columns->putTableHeader(false);
 	}
 //==============================================================================
 // Put Each record columns
 	protected function putColumnData($lno,$columns) {
-		echo "<tr class='item' id='{$columns->Primary}'>";
-		foreach($this->Model->HeaderSchema as $key => $val) {
-			list($alias,$align,$flag,$c_wd) = $val;
-			$pos = self::AttrAlign[$align];
-			echo "<td{$pos}>{$columns->$key}</td>";
-		}
-		echo "</tr>\n";
+		$columns->putColumnData($lno);
 	}
 //==============================================================================
 // Output Table List for Records
@@ -198,13 +218,13 @@ public function MakeListTable($deftab) {
 		$tab = $deftab;
 		$tbl = '_TableList';
 	}
+	$col = new RecordColumns($this->Model);
 	echo "<table id='{$tbl}' class='tablesorter {$tab}'>\n<thead>\n";
-	$this->putTableHeader($tab);
+	$this->putTableHeader($col);
 	echo "</thead>\n<tbody>\n";
-	$col = new RecordColumns();
 	$lno = ($this->Model->page_num-1)*$this->Model->pagesize + 1;
 	foreach($this->Model->Records as $columns) {
-		$col->SetColumns($this->Model->Primary,$columns);
+		$col->SetColumns($columns);
 		$this->putColumnData($lno++, $col);
 	}
 	echo "</tbody></table>";
@@ -237,7 +257,7 @@ public function TableListView($header,$primary,$Records=NULL,$max=0) {
 			list($alias,$align,$flag,$c_wd) = $val;
 			$data = $columns[$key];
 			$style = ($c_wd > 0) ? " style='width:{$c_wd}px;max-width:{$c_wd}px;overflow:hidden;'":'';
-			$pos = self::AttrAlign[$align];
+			$pos = TableAlignAttrs[$align];
 			echo "<td{$pos}{$style}>{$data}</td>";
 		}
 		echo "</tr>\n";

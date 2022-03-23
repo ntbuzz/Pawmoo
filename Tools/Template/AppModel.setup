@@ -1,0 +1,10 @@
+<?php
+//==============================================================================
+// 
+class %model%Class extends AppModel {
+static $DatabaseSchema = [
+%databasedefs%
+	];
+%virtual_class%
+
+}

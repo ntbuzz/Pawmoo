@@ -1,0 +1,17 @@
+## Application Setup
+
+
+### Overview.
+
+1. Create Application Folder Tree.
+1. Create Application Database Specification
+     (edit Database specification CSV into appSpec folder. See SpecCSV.)
+1. Convert SpecCSV to Schema, and Create Database Table.
+1. Copy to Module Files 'appSpec/<appname>/' folder into 'app/<appname>/modules' folder.
+1. Edit 'Controller','Model','Helper' files for Application.
+
+## Application Folder Tree.
+
+## SpecCSV format.
+
+## Setup Command Options.

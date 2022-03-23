@@ -338,7 +338,7 @@ function re_build_array($cond) {
 		$wd = [];
 		foreach($arr as $key => $val) {
 			$child = $array_item_shurink((is_numeric($key))?$opr:$key,$val);
-			if(is_numeric($key) && ($child === [] || $child === NULL)) continue;		// empty condition value
+			if((is_numeric($key)||isset($AND_OR[$key])) && ($child === [] || $child === NULL)) continue;		// empty condition value
 			if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
 				$array_merged($opr,$wd,$child);
 			} else {
@@ -348,6 +348,13 @@ function re_build_array($cond) {
 		return $wd;
 	};
 	return $array_map_shurink('AND',$cond);
+}
+//==============================================================================
+// oct-digit separate each column
+function oct_extract($val,$n) {
+	$oct = [];
+	while($n--) { $oct[] = ($val & 07); $val >>= 3; }
+	return $oct;
 }
 //==============================================================================
 // UTF-8 CSV item remove of 'false',''
