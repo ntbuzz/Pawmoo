@@ -143,6 +143,8 @@ protected function ActionPostProcess($action) {
 //==============================================================================
 // Spoofing the Model class in self/View/Helper.
 protected function SpoofingViewModel($model) {
+	// Load Module Locale Resource
+	LangUI::LoadModuleResource($model->ModuleName);
 	$this->View->Model = $this->Helper->Model = $this->Model = $model;
 }
 //==============================================================================

@@ -48,6 +48,11 @@ public static function SwitchLangs($newlang,$newregion) {
 	ClassManager::ChangeModelSchema();	// 生成済みモデルを全てスイッチ
 }
 //==============================================================================
+//  モジュールリソースのロード
+public static function LoadModuleResource($module) {
+	self::LangFiles(static::$LangDir,$module);
+}
+//==============================================================================
 //  言語・地域のセット
 public static function LocaleSet() {
 	return [static::$LocaleName,static::$ReginName];
