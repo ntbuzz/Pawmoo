@@ -50,7 +50,7 @@ public static function SwitchLangs($newlang,$newregion) {
 //==============================================================================
 //  モジュールリソースのロード
 public static function LoadModuleResource($module) {
-	self::LangFiles(static::$LangDir,$module);
+	self::LoadLang(static::$LangDir,$module);
 }
 //==============================================================================
 //  言語・地域のセット
