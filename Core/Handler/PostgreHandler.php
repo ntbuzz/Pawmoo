@@ -156,8 +156,8 @@ public function upsertRecord($wh,$row) {
 		$set .= "{$sep}{$key}={$val}";
 		$sep = ",";
 	}
-	// UPSERT 文を生成
-	$this->updatePrimary = $aa[$this->Primary];
+	// UPSERT 文を生成 pg_convert()を通すとキーに""が付く
+	$this->updatePrimary = $aa["\"{$this->Primary}\""];
 	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) ON CONFLICT ({$primary}) DO UPDATE {$set} RETURNING *;";
 	$this->doQuery($sql);
 	$a = $this->fetch_array();		// 書込みはraw-tableなのでAlias無し
