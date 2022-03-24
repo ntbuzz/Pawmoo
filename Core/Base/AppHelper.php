@@ -57,7 +57,8 @@ class RecordColumns {
 		foreach($this->Headers as $key => $val) {
 			list($alias,$align,$sort,$wd) = $val;
 			$pos = TableAlignAttrs[$align];
-			echo "<td nowrap{$pos}>{$this->$key}</td>";
+			$style = ($wd > 0) ? " style='min-width:{$wd}px;max-width:{$wd}px;'" : '';
+			echo "<td nowrap{$pos}{$style}>{$this->$key}</td>";
 		}
 		echo "</tr>\n";
 	}

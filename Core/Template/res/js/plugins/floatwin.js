@@ -30,7 +30,7 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 		var button_bar = $(buttontag);
 		self.append(button_bar);
 		// 高さの調整
-		self.find('dd').css('height', 'calc(100% - ' + (button_bar.outerHeight()+36) +'px)');
+		self.find('dd').css('height', 'calc(100% - ' + (button_bar.outerHeight()+11) +'px)');
 	};
 //	操作ボタンパーツを追加
     var controlls = ["close:${#core.Close}", "fw_resize:${#core.Resize}", "fw_resize_message:${#core.SizeDisplay}"];
