@@ -224,8 +224,10 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		Hint:'',
 		MenuContents:'',
 		Preload: null,
+		Modified: false,
 //		Preload: function () { return '<div class="check-itemset"></div>'; },
 		SetValue: function (value, label) {
+			this.Modified = true;
 			if (typeof this.Selected === "function") {
 				return this.Selected.call(self, value, label);
 			} else {
@@ -236,6 +238,12 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		},
 		GetValue: function () { return setting.TargetObj.val(); },
 		Selected: null,
+		OnClose: null,
+		OnClosedFunc: function () {
+			if (typeof this.OnClose === "function" && this.Modified) {
+				this.OnClose.call(self, this.GetValue());
+			};
+		},
 	};
 	if (typeof preload_func === 'function') setting.Preload = preload_func;
 	switch (typeof param_obj) {
@@ -243,7 +251,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		case 'boolean': setting.CheckAll = param_obj; break;
 		case 'object':
 			if (param_obj !== null && param_obj !== undefined) {
-				$.each(param_obj, function (key, value) { setting[key] = value; });
+				$.each(param_obj, function (key, value) { setting[key] = value;});
 			};
 			break;
 	};
@@ -251,6 +259,11 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 	// 選択時のコールバック登録
 	self.SelectedItem = function (callback) {
 		if (typeof callback === 'function') setting.Selected = callback;
+		return self;
+	};
+	// 選択時のコールバック登録
+	self.OnClosed = function (callback) {
+		if (typeof callback === 'function') setting.OnClose = callback;
 		return self;
 	};
 	// [X]マークのタグが無ければ追加する
@@ -278,6 +291,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		};
 	};
 	self.css("cursor", "pointer").off('click').on('click', function () {
+		setting.Modified = false;
 		// プリロード関数でメニューを取得
 		$.busy_cursor(true);
 		var Template = setting.Preload.call(self,setting.CheckType);
@@ -312,6 +326,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 			$(window).off('scroll.drop-menu');
 			bk_panel.remove();
 			menu_box.remove();
+			setting.OnClosedFunc();
 		});
 		// スクロールはリアルタイムで位置移動
 		$(window).on('scroll.drop-menu', function () {
