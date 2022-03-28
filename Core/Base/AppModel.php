@@ -115,7 +115,7 @@ private function SchemaAnalyzer2() {
 		default:
 			$this->TableFields[$key] = [$dtype,$flag,$width];
 		}
-		$this->ModelFields[$key] = [$dtype,$csv,$lang];
+		$this->ModelFields[$key] = [$dtype,$flag,$width];
 	}
 }
 //==============================================================================
