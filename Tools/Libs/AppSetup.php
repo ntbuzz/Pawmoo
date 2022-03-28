@@ -620,7 +620,7 @@ private function makeModelClass($model) {
 		$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
 		return $template;
 	};
-	$schema_txt = $this->makeModelField($schema->ModelFields,$schema->Lang);
+	$schema_txt = $this->makeModelField($schema->Schema,$schema->Lang);
 	$this->DatabaseSchema = [
 		'Handler' => $schema->Handler,
 		'DataTable' => $schema->DataTable,
