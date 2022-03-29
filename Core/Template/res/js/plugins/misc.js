@@ -204,10 +204,34 @@ $.busy_cursor = function (disp) {
 	else $('.loader_icon').remove();
 };
 // Yes/No ダイアログボックスを開く
-$.dialogBox = function (title, msg, callback) {
+$.dialogBox = function () {
+	var params = {
+		title  : "Dialog",
+		message: "...",
+		buttons: true,
+		callback: null,
+		Invoke: function (val) {
+			if (this.callback !== null) this.callback(val);
+		},
+	};
+	// 可変引数の解釈
+	var sn = 0;
+	for (i = 0; i < arguments.length; i++) {
+		switch (typeof arguments[i]) {
+			case "string":
+				switch (sn++) {
+					case 0: params.title = arguments[i]; break;
+					case 1: params.message = arguments[i]; break;
+				};
+				break;
+			case "boolean": params.buttons = arguments[i]; break;
+			case "function": params.callback = arguments[i];
+				break;
+		}
+	};
 	var bk_panel = $('<div class="popup-BK"></div>');
-	var dialog_box = '<div class="dialog-box"><dl class="title"><dt>'+title+'</dt><dd><span class="dialog-msg">'+msg+'</span></dd></dl><div class="buttonList">';
-	var controlls = ["okButton:${#.core.Yes}", "cancelButton:${#.core.No}"];
+	var dialog_box = '<div class="dialog-box"><dl class="title"><dt>' + params.title + '</dt><dd><span class="dialog-msg">' + params.message + '</span></dd></dl><div class="buttonList">';
+	var controlls = (params.buttons) ? ["okButton:${#.core.Yes}", "cancelButton:${#.core.No}"]:["okButton:${#.core.OK}"];
 	controlls.forEach(function (value) {
 		var cls = value.split(':');
 		dialog_box = dialog_box + '<span class="'+cls[0]+'">'+cls[1]+'</span>';
@@ -235,12 +259,12 @@ $.dialogBox = function (title, msg, callback) {
 	dialog.find(".okButton").off().click(function () {
 		dialog.fadeOut('fast');
 		bk_panel.remove();
-		callback(true);
+		params.Invoke(true);
 	});
 	dialog.find(".cancelButton").off().click(function () {
 		dialog.fadeOut('fast');
 		bk_panel.remove();
-		callback(false);
+		params.Invoke(false);
 	});
 };
 //==========================================================
