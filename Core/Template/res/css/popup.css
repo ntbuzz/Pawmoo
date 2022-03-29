@@ -358,11 +358,16 @@ opacity: 0.25; */
     font-weight:bold;
     padding:0 8px 4px 26px;
     color:black;
+	border:1px solid #697B95;
+	border-bottom: 1px solid gray;
+}
+.dialog-box dl dt.alert {
+    background: url(res/img/alert.png) no-repeat 4px top;
+	background-color:#FED800;
+}
+.dialog-box dl dt.confirm {
     background: url(res/img/confirm.png) no-repeat 4px top;
 	background-color:#A4BEE4; /* #D9B526 */
-	border:1px solid #697B95;
-	color:white;
-	border-bottom: 1px solid gray;
 }
 .dialog-box .dialog-msg {
     position:relative;

@@ -210,6 +210,7 @@ $.dialogBox = function () {
 		message: "...",
 		buttons: true,
 		callback: null,
+		iconclass: "alert",
 		Invoke: function (val) {
 			if (this.callback !== null) this.callback(val);
 		},
@@ -224,13 +225,15 @@ $.dialogBox = function () {
 					case 1: params.message = arguments[i].replace(/(\r\n|\n|\r)/gm, '<br>'); break;
 				};
 				break;
+			case "number": params.iconclass = (arguments[i]===0)?'confirm':'alert'; break;
 			case "boolean": params.buttons = arguments[i]; break;
-			case "function": params.callback = arguments[i];
-				break;
+			case "function": params.callback = arguments[i]; break;
 		}
 	};
 	var bk_panel = $('<div class="popup-BK"></div>');
-	var dialog_box = '<div class="dialog-box"><dl class="title"><dt>' + params.title + '</dt><dd><span class="dialog-msg">' + params.message + '</span></dd></dl><div class="buttonList">';
+//	var dialog_box = '<div class="dialog-box"><dl class="title"><dt class="'+params.iconclass+'">' + params.title + '</dt><dd><span class="dialog-msg">' + params.message + '</span></dd></dl><div class="buttonList">';
+	var dialog_box = '<div class="dialog-box"><dl class="title"><dt class="%class%">%title%</dt><dd><span class="dialog-msg">%msg%</span></dd></dl><div class="buttonList">';
+	dialog_box = dialog_box.replace('%class%', params.iconclass).replace('%title%', params.title).replace('%msg%', params.message);
 	var controlls = (params.buttons) ? ["okButton:${#.core.Yes}", "cancelButton:${#.core.No}"]:["okButton:${#.core.OK}"];
 	controlls.forEach(function (value) {
 		var cls = value.split(':');
