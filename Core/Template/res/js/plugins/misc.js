@@ -221,7 +221,7 @@ $.dialogBox = function () {
 			case "string":
 				switch (sn++) {
 					case 0: params.title = arguments[i]; break;
-					case 1: params.message = arguments[i]; break;
+					case 1: params.message = arguments[i].replace(/(\r\n|\n|\r)/gm, '<br>'); break;
 				};
 				break;
 			case "boolean": params.buttons = arguments[i]; break;
