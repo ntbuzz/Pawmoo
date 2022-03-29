@@ -34,23 +34,25 @@ $(document).on('change','.combobox>select',function () {
 // 文字種チェック
 function InputCharsetCheck(target, kind, msg) {
 	var str = target.val().hankaku();
-	if(str.charsetCheck(kind)) {
-		target.val(str);
-		return false;
+	switch (str.charsetCheck(kind)) {
+		case true: target.val(str); break;
+		case false:
+			$.dialogBox('${#core.CAUTION}', msg, false, function () { target.focus(); target.select();});
+			break;
 	};
-	alert(msg);
-	target.focus();
-}
+	return false;
+};
 // INPUT 数字
-$(document).on('change', 'input.numeric[type="text"]', function () {
+$(document).on('blur', 'input.numeric[type="text"]', function (e) {
 	InputCharsetCheck($(this), '#', '${#core.NUMERIC}');
+	return false;
 });
 // INPUT 日付
-$(document).on('change', 'input.date[type="text"]', function () {
+$(document).on('blur', 'input.date[type="text"]', function () {
 	InputCharsetCheck($(this), '@', '${#core.DATEFMT}');
 });
 // INPUT 日時
-$(document).on('change', 'input.datetime[type="text"]', function () {
+$(document).on('blur', 'input.datetime[type="text"]', function () {
 	InputCharsetCheck($(this), ':', '${#core.TIMESTAMP}');
 });
 // ウィンドウサイズ調整
