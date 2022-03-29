@@ -130,7 +130,7 @@ String.prototype.includeOf = function (reg) {
 // charset include check for password
 String.prototype.charsetCheck = function (kind,mxlen) {
 	var len = this.length;
-	if (len == 0) return true;
+	if (len == 0) return undefined;
 	if(mxlen && len < mxlen) return false;
 	for(var i=0;i<=kind.length;++i) {
 		switch(kind.charAt(i)) {
