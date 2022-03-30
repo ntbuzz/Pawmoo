@@ -420,7 +420,7 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                     return (mb_substr($nm,0,1)==='@') ? $recdata[mb_substr($nm,1)]:$nm;
                 };
                 list($all,$raw,$fn) = $m;
-				$var = trim(isset($recdata[$fn]) ? $recdata[$fn] : '');     // get FIELD DATA
+				$var = (isset($recdata[$fn])) ? $recdata[$fn] : '';     // get FIELD DATA
 				switch(count($m)) {
 				case 7:		// limitation
 					$limit = intval($m[6]);
