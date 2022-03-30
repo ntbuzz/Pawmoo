@@ -381,15 +381,17 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 // スクロール連動
 $.fn.BindScrollSetup = function () {
 	this.find(".bind-scroll").each(function () {
-		var self = $(this); // jQueryオブジェクトを変数に代入しておく
-		var id = self.attr('id');	// 自分のID
-		var rel = self.attr("data-element");  // 紐付けるID
-		if (id !== rel) {					// 自分自身を指していなければ連動設定
-			$("#"+rel).on('scroll', function () {
-				self.scrollTop($(this).scrollTop());
-				self.scrollLeft($(this).scrollLeft());
-			});
+		var sync_scroll = function (e) {
+			var self = $(this); // jQueryオブジェクトを変数に代入しておく
+			var rel_obj = $('#' + self.attr("data-element"));  // 紐付けるID
+			if (!rel_obj.is(self)) {	// 自分自身を指していなければ連動設定
+				var sel_pos = self.scrollTop();
+				if (sel_pos != rel_obj.scrollTop()) {
+					rel_obj.scrollTop(sel_pos);
+				};
+			};
 		};
+		$(this).on('scroll', sync_scroll);
 	});
 	return this;
 };
