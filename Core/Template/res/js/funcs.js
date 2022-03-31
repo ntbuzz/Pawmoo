@@ -160,6 +160,46 @@ function SelectLink(setupobj, id, first_call, callback) {
         return pid;
     };
 };
+//===============================================
+// Nested SCROLL function
+function ScrollLink(self_obj,parent) {
+	var self = this;
+	self.myobj = self_obj;
+	self.linkobj = null;
+	if (parent === null) parent = self;
+	// リンク先を登録
+	var link_id = self_obj.attr('data-element');	// 同期先の要素ID
+	if (link_id !== undefined) {
+		var child_obj = $('#' + link_id);
+		if (child_obj.length > 0) {
+			self.linkobj = (parent.myobj.is(child_obj)) ? parent : new ScrollLink(child_obj, parent);
+		};
+	};
+	// 子要素を含めてイベントOFF
+	self.StopScroll = function (top) {
+		self.myobj.off('scroll');
+		if (self.linkobj === top) return;
+		self.linkobj.StopScroll(top);
+	};
+	// Scroll\イベント登録
+	self.StartScroll = function (top) {
+		self.myobj.on('scroll', function () {
+			var pos = $(this).scrollTop();
+			self.StopScroll(self);
+			self.linkobj.SetScrollTop(pos, self);
+			self.StartScroll(self);
+			
+		});
+		if (self.linkobj === top) return;
+		self.linkobj.StartScroll(top);
+	};
+	// スクロール位置の設定
+	self.SetScrollTop = function (top_pos, top) {
+		self.myobj.scrollTop(top_pos);
+		if (self.linkobj === top) return;
+		self.linkobj.SetScrollTop(top_pos, top);
+    };
+};
 //====================================================
 // ターゲット位置を元に自身のポジションを決定する
 function calcPosition(target, self) {
