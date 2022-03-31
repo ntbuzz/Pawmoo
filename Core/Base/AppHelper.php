@@ -155,17 +155,19 @@ public function MakePageLinks($args) {
 	if($this->Model->pagesize == 0) return;
 	$npage = intval(($this->Model->record_max+$this->Model->pagesize-1)/$this->Model->pagesize);
 	$pnum = $this->Model->page_num;
-	$bound = 7;
+	$bound = 4;
 	$begp = max( 2, min( $npage - 1, $pnum + intval($bound/2)) - $bound);
 	$endp = min($npage - 1, $begp + $bound);
 	echo "<div class='pager'><div class='navigate'>";
 	$ptitle = $this->__(".Page", FALSE);
 	echo "<span class='pager_title' id='pager_help'>{$ptitle}</span>";
-	echo "<span class='separator'>";
-	echo $this->get_MoveButton(-1,$this->__(".PrevPage"),$npage);
-	echo "|";
-	echo $this->get_MoveButton(1,$this->__(".NextPage"),$npage);
-	echo "</span>";
+	if(!empty($arg)) {
+		echo "<span class='separator'>";
+		echo $this->get_MoveButton(-1,$this->__(".PrevPage"),$npage);
+		echo "|";
+		echo $this->get_MoveButton(1,$this->__(".NextPage"),$npage);
+		echo "</span>";
+	}
 	if($npage > 1 && $begp > 1) {		// Top Page-Jump
 		echo $this->get_PageButton(1,1,$npage);
 		if($begp > 2) echo '<span class="disable">…</span>';
