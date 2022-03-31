@@ -123,7 +123,7 @@ public function fetchDB() {
 	return $row;
 }
 //==============================================================================
-// fetchDB: get record data , and replace alias and bind column
+// fetch_locale: get record data , and replace alias
 public function fetch_locale() {
 	if($row = $this->fetch_array()) {
 		$this->fieldAlias->to_lang_alias($row);
@@ -131,7 +131,7 @@ public function fetch_locale() {
 	return $row;
 }
 //==============================================================================
-// fetchDB: get record data , and replace alias and bind column
+// execSQL: Logging SQL, and execute SQL
 public function execSQL($sql,$logs = false) {
 	if($logs) debug_log(DBMSG_HANDLER,['SQL' => $sql]);
 	$this->doQuery($sql);
