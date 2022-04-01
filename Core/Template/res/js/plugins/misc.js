@@ -413,7 +413,7 @@ $.fn.InitPopupSet = function () {
 		};
 		self.datepicker(date_form);
 	});
-	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().MenuSetup().BindScrollSetup();
+	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().MenuSetup().BindScrollSetup().FormModifiedSetup();
 };
 //----------------------------------------------------------------------------------------------
 // フォーム部品(INPUT,SELECT,TEXTAREA)の変更時にクラス属性をセットする
@@ -431,6 +431,15 @@ $.fn.onChangeClass = function (cls) {
 			};
 		});
 	});
+};
+// フォーム部品の変更クラス付加
+$.fn.FormModifiedSetup = function () {
+	this.find(".set-modified").each(function () {
+		var cls = $(this).attr('data-element');
+		if (cls === undefined) cls = 'modified';
+		$(this).onChangeClass(cls);
+	});
+	return this;
 };
 //----------------------------------------------------------------------------------------------
 // FormSubmit用のオブジェクトを生成
