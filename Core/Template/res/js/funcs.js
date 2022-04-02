@@ -161,44 +161,51 @@ function SelectLink(setupobj, id, first_call, callback) {
     };
 };
 //===============================================
-// Nested SCROLL function
-function ScrollLink(self_obj,parent) {
+// Bind SCROLL function
+function BindScroll(self_obj) {
 	var self = this;
-	self.myobj = self_obj;
-	self.linkobj = null;
-	if (parent === null) parent = self;
-	// リンク先を登録
-	var link_id = self_obj.attr('data-element');	// 同期先の要素ID
-	if (link_id !== undefined) {
-		var child_obj = $('#' + link_id);
-		if (child_obj.length > 0) {
-			self.linkobj = (parent.myobj.is(child_obj)) ? parent : new ScrollLink(child_obj, parent);
+	function child_obj(obj) {
+		this.self_obj = obj;
+		this.child = null;
+		child_id = obj.attr('data-element');	// 同期先の要素ID
+		if (child_id !== undefined) {
+			alert("child:"+child_id);
+			obj = $('#' + child_id);
+			// ループしていないか確認
+			if (!self_obj.is(obj)) this.child = new child_obj(obj);
 		};
 	};
+	self.TopObject = new child_obj(self_obj);
 	// 子要素を含めてイベントOFF
-	self.StopScroll = function (top) {
-		self.myobj.off('scroll');
-		if (self.linkobj === top) return;
-		self.linkobj.StopScroll(top);
-	};
-	// Scroll\イベント登録
-	self.StartScroll = function (top) {
-		self.myobj.on('scroll', function () {
-			var pos = $(this).scrollTop();
-			self.StopScroll(self);
-			self.linkobj.SetScrollTop(pos, self);
-			self.StartScroll(self);
-			
-		});
-		if (self.linkobj === top) return;
-		self.linkobj.StartScroll(top);
+	self.StopScroll = function () {
+		var lnk = self.TopObject;
+		while (lnk !== null) {
+			lnk.self_obj.off('scroll');
+			lnk = lnk.child;
+		};
 	};
 	// スクロール位置の設定
-	self.SetScrollTop = function (top_pos, top) {
-		self.myobj.scrollTop(top_pos);
-		if (self.linkobj === top) return;
-		self.linkobj.SetScrollTop(top_pos, top);
+	self.SetScrollTop = function (top,myself) {
+		var lnk = self.TopObject;
+		while (lnk !== null) {
+			// 発火元でなければスクロール位置を設定
+			if(!lnk.self_obj.is(myself)) lnk.self_obj.scrollTop(top);
+			lnk = lnk.child;
+		};
     };
+	// Scroll\イベント登録
+	self.StartScroll = function () {
+		var lnk = self.TopObject;
+		while (lnk !== null) {
+			lnk.self_obj.on('scroll', function () {
+				var pos = $(this).scrollTop();
+				self.StopScroll();
+				self.SetScrollTop(pos,$(this));
+				self.StartScroll();
+			});
+			lnk = lnk.child;
+		};
+	};
 };
 //====================================================
 // ターゲット位置を元に自身のポジションを決定する

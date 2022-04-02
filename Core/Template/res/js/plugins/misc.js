@@ -382,8 +382,8 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 $.fn.BindScrollSetup = function () {
 	this.find(".bind-scroll").each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
-		var bind = new ScrollLink(self, null);
-		bind.StartScroll(bind);
+		var bind = new BindScroll(self);
+		bind.StartScroll();
 	});
 	return this;
 };
