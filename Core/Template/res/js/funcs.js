@@ -169,7 +169,6 @@ function BindScroll(self_obj) {
 		this.child = null;
 		child_id = obj.attr('data-element');	// 同期先の要素ID
 		if (child_id !== undefined) {
-			alert("child:"+child_id);
 			obj = $('#' + child_id);
 			// ループしていないか確認
 			if (!self_obj.is(obj)) this.child = new child_obj(obj);
