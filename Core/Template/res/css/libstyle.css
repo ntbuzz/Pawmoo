@@ -72,7 +72,7 @@ option.disable {
 /* フォーム部品 */
 .set-modified .modified,
 .set-modified .changed {
-	background-color: #ffdfef;
+	background-color: #ffdfef !important;
 }
 .set-modified input,
 .set-modified textarea,
