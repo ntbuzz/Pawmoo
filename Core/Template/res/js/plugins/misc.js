@@ -204,10 +204,37 @@ $.busy_cursor = function (disp) {
 	else $('.loader_icon').remove();
 };
 // Yes/No ダイアログボックスを開く
-$.dialogBox = function (title, msg, callback) {
+$.dialogBox = function () {
+	var params = {
+		title  : "Dialog",
+		message: "...",
+		buttons: true,
+		callback: null,
+		iconclass: "alert",
+		Invoke: function (val) {
+			if (this.callback !== null) this.callback(val);
+		},
+	};
+	// 可変引数の解釈
+	var sn = 0;
+	for (i = 0; i < arguments.length; i++) {
+		switch (typeof arguments[i]) {
+			case "string":
+				switch (sn++) {
+					case 0: params.title = arguments[i]; break;
+					case 1: params.message = arguments[i].replace(/(\r\n|\n|\r)/gm, '<br>'); break;
+				};
+				break;
+			case "number": params.iconclass = (arguments[i]===0)?'confirm':'alert'; break;
+			case "boolean": params.buttons = arguments[i]; break;
+			case "function": params.callback = arguments[i]; break;
+		}
+	};
 	var bk_panel = $('<div class="popup-BK"></div>');
-	var dialog_box = '<div class="dialog-box"><dl class="title"><dt>'+title+'</dt><dd><span class="dialog-msg">'+msg+'</span></dd></dl><div class="buttonList">';
-	var controlls = ["okButton:${#.core.Yes}", "cancelButton:${#.core.No}"];
+//	var dialog_box = '<div class="dialog-box"><dl class="title"><dt class="'+params.iconclass+'">' + params.title + '</dt><dd><span class="dialog-msg">' + params.message + '</span></dd></dl><div class="buttonList">';
+	var dialog_box = '<div class="dialog-box"><dl class="title"><dt class="%class%">%title%</dt><dd><span class="dialog-msg">%msg%</span></dd></dl><div class="buttonList">';
+	dialog_box = dialog_box.replace('%class%', params.iconclass).replace('%title%', params.title).replace('%msg%', params.message);
+	var controlls = (params.buttons) ? ["okButton:${#.core.Yes}", "cancelButton:${#.core.No}"]:["okButton:${#.core.OK}"];
 	controlls.forEach(function (value) {
 		var cls = value.split(':');
 		dialog_box = dialog_box + '<span class="'+cls[0]+'">'+cls[1]+'</span>';
@@ -235,12 +262,12 @@ $.dialogBox = function (title, msg, callback) {
 	dialog.find(".okButton").off().click(function () {
 		dialog.fadeOut('fast');
 		bk_panel.remove();
-		callback(true);
+		params.Invoke(true);
 	});
 	dialog.find(".cancelButton").off().click(function () {
 		dialog.fadeOut('fast');
 		bk_panel.remove();
-		callback(false);
+		params.Invoke(false);
 	});
 };
 //==========================================================
@@ -355,14 +382,8 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 $.fn.BindScrollSetup = function () {
 	this.find(".bind-scroll").each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
-		var id = self.attr('id');	// 自分のID
-		var rel = self.attr("data-element");  // 紐付けるID
-		if (id !== rel) {					// 自分自身を指していなければ連動設定
-			$("#"+rel).on('scroll', function () {
-				self.scrollTop($(this).scrollTop());
-				self.scrollLeft($(this).scrollLeft());
-			});
-		};
+		var bind = new BindScroll(self);
+		bind.StartScroll();
 	});
 	return this;
 };
@@ -392,7 +413,7 @@ $.fn.InitPopupSet = function () {
 		};
 		self.datepicker(date_form);
 	});
-	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().MenuSetup().BindScrollSetup();
+	return this.PopupBaloonSetup().InfoBoxSetup().PopupBoxSetup().MenuSetup().BindScrollSetup().FormModifiedSetup();
 };
 //----------------------------------------------------------------------------------------------
 // フォーム部品(INPUT,SELECT,TEXTAREA)の変更時にクラス属性をセットする
@@ -410,6 +431,15 @@ $.fn.onChangeClass = function (cls) {
 			};
 		});
 	});
+};
+// フォーム部品の変更クラス付加
+$.fn.FormModifiedSetup = function () {
+	this.find(".set-modified").each(function () {
+		var cls = $(this).attr('data-element');
+		if (cls === undefined) cls = 'modified';
+		$(this).onChangeClass(cls);
+	});
+	return this;
 };
 //----------------------------------------------------------------------------------------------
 // FormSubmit用のオブジェクトを生成

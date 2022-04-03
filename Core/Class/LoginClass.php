@@ -72,9 +72,9 @@ public function is_validLoginUser($values,$pass_check) {
 	// FORM POST name, renamed to Database column name
     foreach($values as $key => $val) {
         $xkey = $this->get_post_field($key);
-        if(array_key_exists($xkey,$this->Schema)) {     // pickup exists field name
-            list($alt,$disp,$flag) = $this->Schema[$xkey];   // need encrypt password
-            $dval = ($flag === -1) ? passwd_encrypt($val) : $val;
+        if(array_key_exists($xkey,$this->ModelFields)) {     // pickup exists field name
+            list($dtype,$flag,$wd) = $this->ModelFields[$xkey];   // need encrypt password
+            $dval = ($wd === -1) ? passwd_encrypt($val) : $val;
             if(!empty($dval)) $Login[$xkey] = $dval;    // accepta NULL value
 	}
 }
@@ -113,10 +113,10 @@ public function is_validLoginUser($values,$pass_check) {
 //==============================================================================
 // Recieved LOGIN POST FORM, do accept USER LOGIN correct
 private function update_password($userid,$passwd,$limit = true) {
-    if(array_key_exists($this->PasswdID,$this->Schema)) {     	// exist password field
+    if(array_key_exists($this->PasswdID,$this->ModelFields)) {     	// exist password field
     	$data = $this->getRecordBy($this->LoginID,$userid);		// check userid
 		if(!empty($data)) {
-			list($alt,$disp,$flag) = $this->Schema[$this->PasswdID];   // need encrypt password
+			list($alt,$disp,$flag) = $this->ModelFields[$this->PasswdID];   // need encrypt password
 			$dval = ($flag === -1) ? passwd_encrypt($passwd) : $passwd;
 			$id = $data[$this->Primary];
 			$row[$this->PasswdID] = $dval;

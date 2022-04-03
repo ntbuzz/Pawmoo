@@ -160,7 +160,7 @@ public function upsertRecord($wh,$row) {
 	$this->updatePrimary = $aa["\"{$this->Primary}\""];
 	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) ON CONFLICT ({$primary}) DO UPDATE {$set} RETURNING *;";
 	$this->doQuery($sql);
-	$a = $this->fetch_array();		// 書込みはraw-tableなのでAlias無し
+	$a = $this->fetchDB();		// 言語alias&virtual処理を加える
 	//view が定義されていれば取り直す
 	if($this->raw_table !== $this->table) {
 		$a = $this->doQueryBy($this->Primary,$a[$this->Primary]);

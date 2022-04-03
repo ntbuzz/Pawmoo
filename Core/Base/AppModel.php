@@ -90,8 +90,8 @@ public function ResetSchema() {
     debug_log(DBMSG_CLI|DBMSG_MODEL,[             // DEBUG LOG information
         $this->ModuleName => [
             "Header"    => $this->HeaderSchema,
-			"Table"		=> $this->TableFields,
-			"Model"		=> $this->ModelFields,
+			// "Table"		=> $this->TableFields,
+			// "Model"		=> $this->ModelFields,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
         ]
     ]);
@@ -115,7 +115,7 @@ private function SchemaAnalyzer2() {
 		default:
 			$this->TableFields[$key] = [$dtype,$flag,$width];
 		}
-		$this->ModelFields[$key] = [$dtype,$csv,$lang];
+		$this->ModelFields[$key] = [$dtype,$flag,$width];
 	}
 }
 //==============================================================================
@@ -353,10 +353,10 @@ public function getCount($cond) {
 // Normalized Field-Filter
 	private function normalize_filter($filter) {
 		if(is_scalar($filter)) $filter = explode('.',$filter);
-		if(empty($filter)) $filter = array_keys($this->Schema);
+		if(empty($filter)) $filter = array_keys($this->ModelFields);
 		else {
 			$filter = array_filter($filter,function($v) {
-					return array_key_exists($v,$this->Schema);
+					return array_key_exists($v,$this->ModelFields);
 			});
 		}
 		return array_combine($filter,$filter);
@@ -616,7 +616,7 @@ public function UploadCSV($path) {
 //==============================================================================
 // CSV download field flags
 public function get_csv_columns() {
-	$cols = array_filter($this->Schema,function($v) {
+	$cols = array_filter($this->ModelFields,function($v) {
 			list($type,$flag,$wd) = $v;
 			return $flag & 0100;
 		});

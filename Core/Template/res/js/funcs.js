@@ -160,6 +160,46 @@ function SelectLink(setupobj, id, first_call, callback) {
         return pid;
     };
 };
+//===============================================
+// Bind SCROLL function
+function BindScroll(self_obj) {
+	var self = this;
+	function child_obj(obj) {
+		this.self_obj = obj;
+		this.child = null;
+		child_id = obj.attr('data-element');	// 同期先の要素ID
+		if (child_id !== undefined) {
+			obj = $('#' + child_id);
+			// ループしていないか確認
+			if (!self_obj.is(obj)) this.child = new child_obj(obj);
+		};
+	};
+	self.TopObject = new child_obj(self_obj);
+	// 子要素を含めてイベントOFF
+	self.StopScroll = function () {
+		for (lnk = self.TopObject; lnk!==null; lnk = lnk.child) {
+			lnk.self_obj.off('scroll');
+		};
+	};
+	// スクロール位置の設定
+	self.SetScrollTop = function (top,myself) {
+		for (lnk = self.TopObject; lnk!==null; lnk = lnk.child) {
+			// 発火元でなければスクロール位置を設定
+			if(!lnk.self_obj.is(myself)) lnk.self_obj.scrollTop(top);
+		};
+    };
+	// Scroll\イベント登録
+	self.StartScroll = function () {
+		for (lnk = self.TopObject; lnk!==null; lnk = lnk.child) {
+			lnk.self_obj.on('scroll', function () {
+				pos = $(this).scrollTop();
+				self.StopScroll();
+				self.SetScrollTop(pos,$(this));
+				self.StartScroll();
+			});
+		};
+	};
+};
 //====================================================
 // ターゲット位置を元に自身のポジションを決定する
 function calcPosition(target, self) {

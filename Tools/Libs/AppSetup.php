@@ -279,18 +279,30 @@ private function MakeView($model,$exec) {
 	// 指定された、見つかったクラスファイルを全て処理する
 	$files = $this->get_schema_files($model);
 	if($files === false) return false;
+	$depend = [];
 	foreach($files as $model) {
 		$schema = $this->$model;
-		$depend = $schema->DependList([]);
-		if($depend !== []) {
-			debug_dump([$model => ['DEPEND-VIEW'=>$depend]],false);
-			foreach($depend as $sub) {
-				$this->$sub->CreateTableView($exec);
-			}
-		}
-		// 自分自身がCREATEされてなければ
-		if(!in_array($model,$depend)) $schema->CreateTableView($exec);
+		if($schema->ViewSet !== []) array_unshift($depend,$model);
+		$depend = $schema->DependList($depend);
 	}
+	$list = array_filter($depend,function($model) { return ($this->$model->ViewSet!==[]);});
+	foreach($list as $model) {
+		if(!empty($this->$model->ViewSet)) {
+			$this->$model->CreateTableView($exec);
+		}
+	}
+	// foreach($files as $model) {
+	// 	$schema = $this->$model;
+	// 	$depend = $schema->DependList([]);
+	// 	if($depend !== []) {
+	// 		debug_dump([$model => ['DEPEND-VIEW'=>$depend]],false);
+	// 		foreach($depend as $sub) {
+	// 			$this->$sub->CreateTableView($exec);
+	// 		}
+	// 	}
+	// 	// 自分自身がCREATEされてなければ
+	// 	if(!in_array($model,$depend)) $schema->CreateTableView($exec);
+	// }
 }
 //==============================================================================
 // フォルダーツリーを作成
@@ -608,7 +620,7 @@ private function makeModelClass($model) {
 		$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
 		return $template;
 	};
-	$schema_txt = $this->makeModelField($schema->ModelFields,$schema->Lang);
+	$schema_txt = $this->makeModelField($schema->Schema,$schema->Lang);
 	$this->DatabaseSchema = [
 		'Handler' => $schema->Handler,
 		'DataTable' => $schema->DataTable,

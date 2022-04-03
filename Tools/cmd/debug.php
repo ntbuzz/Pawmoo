@@ -34,12 +34,13 @@ parse_str($q_str, $query);
 $_GET =  $query;
 
 $ln = str_repeat("=", 50);
-$debvug_dump = [
+$debug_dump = [
+	'URL' => $url,
 	'ARG' => $argv,
 	'GET' => $_GET,
 	'POST' => $_POST,
 ];
-print_r($debvug_dump);
+print_r($debug_dump);
 echo "{$ln} START HERE ${ln}\n";
 
 require_once(ROOT_DIR . '/index.php');		// リソース呼出しとの振分けも行う

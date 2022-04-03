@@ -126,10 +126,11 @@ public function CreateDatabase($exec=false) {
 	// DEOP TABLE
 	$sql = $this->dbDriver->drop_sql("TABLE",$this->MyTable);
 	$this->doSQL($exec,$sql);
-	$sql = "SELECT COUNT(*) as \"total\" FROM sqlite_master WHERE TYPE='table' AND name='{$this->MyTable}';";
-	$this->doSQL($exec,$sql);
-	if($exec) $field = $this->dbDriver->fetch_array();
-	$exist =  ($field) ? intval($field["total"]) : 0;
+	// $sql = "SELECT COUNT(*) as \"total\" FROM sqlite_master WHERE TYPE='table' AND name='{$this->MyTable}';";
+	// $sql = SELECT COUNT(*) as \"total\" FROM pg_stat_user_tables WHERE name='{$this->MyTable}';";
+	// $this->doSQL($exec,$sql);
+	// if($exec) $field = $this->dbDriver->fetch_array();
+	// $exist =  ($field) ? intval($field["total"]) : 0;
 	// Create Table
 	$fset = [];
 	foreach($this->TableFields as $column => $defs) {
