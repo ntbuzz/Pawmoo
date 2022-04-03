@@ -177,32 +177,26 @@ function BindScroll(self_obj) {
 	self.TopObject = new child_obj(self_obj);
 	// 子要素を含めてイベントOFF
 	self.StopScroll = function () {
-		var lnk = self.TopObject;
-		while (lnk !== null) {
+		for (lnk = self.TopObject; lnk!==null; lnk = lnk.child) {
 			lnk.self_obj.off('scroll');
-			lnk = lnk.child;
 		};
 	};
 	// スクロール位置の設定
 	self.SetScrollTop = function (top,myself) {
-		var lnk = self.TopObject;
-		while (lnk !== null) {
+		for (lnk = self.TopObject; lnk!==null; lnk = lnk.child) {
 			// 発火元でなければスクロール位置を設定
 			if(!lnk.self_obj.is(myself)) lnk.self_obj.scrollTop(top);
-			lnk = lnk.child;
 		};
     };
 	// Scroll\イベント登録
 	self.StartScroll = function () {
-		var lnk = self.TopObject;
-		while (lnk !== null) {
+		for (lnk = self.TopObject; lnk!==null; lnk = lnk.child) {
 			lnk.self_obj.on('scroll', function () {
-				var pos = $(this).scrollTop();
+				pos = $(this).scrollTop();
 				self.StopScroll();
 				self.SetScrollTop(pos,$(this));
 				self.StartScroll();
 			});
-			lnk = lnk.child;
 		};
 	};
 };
