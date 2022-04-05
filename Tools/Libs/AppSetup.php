@@ -592,10 +592,13 @@ private function makeModelField($Schema,$lang=NULL) {
 				$spc_len = 18 - strlen($key);
 				if($spc_len <= 0) $spc_len = 2;
 				$spc = str_repeat(' ',$spc_len);
-				$ln = str_repeat(' ',$indent*4) . "'{$key}'{$spc}=> [ '{$type}',\t{$flag},\t{$wd} ],";
 				if(empty($prefix)) $cmm = (is_string($rel_model)) ? " ({$rel_model})":'';
-				else if(in_array($type,$base_type)) $cmm = " ({$prefix}.{$key})";
-				else $cmm = " ({$prefix}.{$type})";
+				else {
+					if(in_array($type,$base_type)) $cmm = " ({$prefix}.{$key})";
+					else $cmm = " ({$prefix}.{$type})";
+					$type = 'alias';
+				}
+				$ln = str_repeat(' ',$indent*4) . "'{$key}'{$spc}=> [ '{$type}',\t{$flag},\t{$wd} ],";
 				if(array_key_exists($key,$lang)) $ln = "{$ln}\t// {$lang[$key]}{$cmm}";
 				$line[] = $ln;
 				if(is_array($rel_field)) {
