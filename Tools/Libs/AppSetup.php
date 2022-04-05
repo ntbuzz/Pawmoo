@@ -572,27 +572,44 @@ private function makeResource($lang,$list) {
 //==============================================================================
 // モデルクラスのスキーマ変換
 private function makeModelField($Schema,$lang=NULL) {
-	$dump_schema = function($schema,$indent) use(&$lang,&$dump_schema) {
+	$dump_schema = function($prefix,$schema,$indent) use(&$lang,&$dump_schema) {
+		$base_type =['integer','serial','text','float','boolean'];
 		$line = [];
 		foreach($schema as $key=>$defs) {
 			if($defs === NULL) continue;
 			if(is_array($defs)) {
 				list($type,$flag,$wd,$rel_model) = array_extract($defs,4);
 				if(empty($type)||$type==='---'||$type==='***') continue;	// no include model field
+				if(is_array($rel_model)) {
+					list($rel_model,$rel_field) = array_first_item($rel_model);
+					if(is_int($rel_model)) {
+						$rel_model = implode(',',$rel_field[0]);
+						$rel_field = NULL;
+					}
+				} else $rel_field = NULL;
 				$flag = oct_fix($flag);
 				if($wd===NULL) $wd = 0;
 				$spc_len = 18 - strlen($key);
 				if($spc_len <= 0) $spc_len = 2;
 				$spc = str_repeat(' ',$spc_len);
+				if(empty($prefix)) $cmm = (is_string($rel_model)) ? " ({$rel_model})":'';
+				else {
+					if(in_array($type,$base_type)) $cmm = " ({$prefix}.{$key})";
+					else $cmm = " ({$prefix}.{$type})";
+					$type = 'alias';
+				}
 				$ln = str_repeat(' ',$indent*4) . "'{$key}'{$spc}=> [ '{$type}',\t{$flag},\t{$wd} ],";
-				$cmm = (is_string($rel_model)) ? " ({$rel_model})":'';
 				if(array_key_exists($key,$lang)) $ln = "{$ln}\t// {$lang[$key]}{$cmm}";
 				$line[] = $ln;
+				if(is_array($rel_field)) {
+					list($pre,$rel_id) = explode('.',$rel_model);
+					$line[] = $dump_schema($pre,$rel_field,$indent);
+				}
 			}
 		}
 		return implode("\n",$line);
 	};
-	return $dump_schema($Schema,2);
+	return $dump_schema('',$Schema,2);
 }
 //==============================================================================
 // スキーマからモデルクラス作成、必須

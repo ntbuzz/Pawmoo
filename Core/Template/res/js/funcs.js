@@ -164,6 +164,7 @@ function SelectLink(setupobj, id, first_call, callback) {
 // Bind SCROLL function
 function BindScroll(self_obj) {
 	var self = this;
+	// スクロール同期リスト
 	function child_obj(obj) {
 		this.self_obj = obj;
 		this.child = null;
@@ -175,27 +176,16 @@ function BindScroll(self_obj) {
 		};
 	};
 	self.TopObject = new child_obj(self_obj);
-	// 子要素を含めてイベントOFF
-	self.StopScroll = function () {
-		for (lnk = self.TopObject; lnk!==null; lnk = lnk.child) {
-			lnk.self_obj.off('scroll');
-		};
-	};
-	// スクロール位置の設定
-	self.SetScrollTop = function (top,myself) {
-		for (lnk = self.TopObject; lnk!==null; lnk = lnk.child) {
-			// 発火元でなければスクロール位置を設定
-			if(!lnk.self_obj.is(myself)) lnk.self_obj.scrollTop(top);
-		};
-    };
-	// Scroll\イベント登録
+	// Scrollイベント登録
 	self.StartScroll = function () {
 		for (lnk = self.TopObject; lnk!==null; lnk = lnk.child) {
 			lnk.self_obj.on('scroll', function () {
-				pos = $(this).scrollTop();
-				self.StopScroll();
-				self.SetScrollTop(pos,$(this));
-				self.StartScroll();
+				myself = $(this);
+				pos = myself.scrollTop();
+				for (slnk = self.TopObject; slnk!==null; slnk = slnk.child) {
+					// 発火元でなくTOP位置が異なれば位置を設定
+					if(!slnk.self_obj.is(myself) && pos !== slnk.self_obj.scrollTop()) slnk.self_obj.scrollTop(pos);
+				};
 			});
 		};
 	};
