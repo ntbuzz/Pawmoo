@@ -320,35 +320,112 @@ function remove_comment_str($content) {
 // re-build condition array flat, possible
 function re_build_array($cond) {
 	$array_map_shurink = function($opr,$arr) use(&$array_map_shurink) {
-		$array_merged = function($opr,&$arr,$val) use(&$array_merged) {
-			if(is_array($val)) {
-				foreach($val as $kk => $vv) {
-					if($opr === $kk) {
-						$array_merged($opr,$arr,$vv);
-					} else {
-						set_array_key_unique($arr,$kk,$vv);
-					}
+		$child_separate = function($key,$values) {
+			if(is_array($values)) {
+				$sub=[];
+				foreach($values as $val) {
+					$kk = array_key_unique($key,$sub);
+					$sub[$kk] = $val;
 				}
-			} else if($val !== '') $arr[] = $val;
+				return ['OR', $sub];
+			}
+			return [$key,$values];
 		};
-		$array_item_shurink = function($opr,$val) use(&$array_map_shurink) {
-			return (is_array($val)) ? $array_map_shurink($opr,$val) : $val;
+		$array_merged = function(&$arr,$val) {
+			foreach($val as $kk => $vv) {
+				$k = array_key_unique($kk,$arr);
+				$arr[$k] = $vv;
+			}
 		};
-		$AND_OR = [ 'AND' => TRUE, 'OR' => TRUE ];
+		$AND_OR = [ 'AND' => TRUE, 'OR' => TRUE, 'NOT' => TRUE ];
 		$wd = [];
 		foreach($arr as $key => $val) {
-			$child = $array_item_shurink((is_numeric($key))?$opr:$key,$val);
-			if((is_numeric($key)||isset($AND_OR[$key])) && ($child === [] || $child === NULL)) continue;		// empty condition value
-			if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
-				$array_merged($opr,$wd,$child);
+			$key = tag_body_name($key);
+			if(is_scalar($val)) {
+				if(isset($AND_OR[$key]) || is_numeric($key)) continue;
 			} else {
-				set_array_key_unique($wd,$key,$child);
+				if(isset($AND_OR[$key]) || is_numeric($key)) {
+					$opc = (is_numeric($key))?$opr:$key;
+					$child = (is_array($val)) ? $array_map_shurink($opc,$val) : $val;
+					if($child === [] || is_scalar($child)) continue;
+					if(count($child)===1) {
+						list($k,$v) = array_first_item($child);
+						if($opr === $k) $child = $v;
+					}
+					$array_merged($wd,$child);
+					continue;
+				}
+				if($opr === $key) {
+					$array_merged($wd,$val);
+					continue;
+				}
+				// Separate Operation ,IF include NULL value
+				if(in_array(NULL,$val)) {
+					list($key,$val) = $child_separate($key,$val);
+				}
 			}
+			$kk = array_key_unique($key,$wd);
+			$wd[$kk] = $val;
 		}
-		return $wd;
+		return ($opr===NULL) ? $wd : [$opr => $wd];
 	};
-	return $array_map_shurink('AND',$cond);
+	if(isset($cond[REBUILD_MARK])) return $cond;
+debug_log(DBMSG_HANDLER,["ReBuild New COND" => $cond]);
+	$cond = $array_map_shurink(NULL,$cond);
+	$cond[REBUILD_MARK] = true;		// mark re-build complete
+	return $cond;
 }
+// function re_build_arrayX($cond) {
+// 	$array_map_shurink = function($opr,$arr) use(&$array_map_shurink) {
+// 		$array_merged = function($opr,&$arr,$val) use(&$array_merged) {
+// 			if(is_array($val)) {
+// 				foreach($val as $kk => $vv) {
+// 					if($opr === $kk) {
+// 						$array_merged($opr,$arr,$vv);
+// 					} else {
+// 						set_array_key_unique($arr,$kk,$vv);
+// 					}
+// 				}
+// 			} else if($val !== '') $arr[] = $val;
+// 		};
+// 		$array_item_shurink = function($opr,$val) use(&$array_map_shurink) {
+// 			return (is_array($val)) ? $array_map_shurink($opr,$val) : $val;
+// 		};
+// 		$child_separate = function($key,$values) {
+// 			if(is_array($values)) {
+// 				$sub=[];
+// 				foreach($values as $val) {
+// 					$kk = array_key_unique($key,$sub);
+// 					$sub[$kk] = $val;
+// 				}
+// 				return ['OR', $sub];
+// 			}
+// 			return [$key,$values];
+// 		};
+// 		$AND_OR = [ 'AND' => TRUE, 'OR' => TRUE, 'NOT' => TRUE ];
+// 		$wd = [];
+// 		foreach($arr as $key => $val) {
+// 			$key = tag_body_name($key);
+// 			if(isset($AND_OR[$key]) || is_numeric($key)) {
+// 				$child = $array_item_shurink((is_numeric($key))?$opr:$key,$val);
+// 				if($child === [] || $child === NULL) continue;
+// 			} else $child = $val;
+// 			if(is_numeric($key) || (isset($AND_OR[$key]) && (count($child)===1 || ($opr===$key)))) {
+// 				$array_merged($opr,$wd,$child);
+// 			} else {
+// 				if(!isset($AND_OR[$key]) && is_array($child) && in_array(NULL,$child)) {
+// 					list($key,$child) = $child_separate($key,$child);
+// 				}
+// 				set_array_key_unique($wd,$key,$child);
+// 			}
+// 		}
+// 		return $wd;
+// 	};
+// 	if(isset($cond[REBUILD_MARK])) return $cond;
+// 	$cond = $array_map_shurink('AND',$cond);
+// 	$cond[REBUILD_MARK] = true;		// mark re-build complete
+// 	return $cond;
+// }
 //==============================================================================
 // oct-digit separate each column
 function oct_extract($val,$n) {
