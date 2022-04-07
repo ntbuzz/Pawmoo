@@ -93,6 +93,7 @@ public function ResetSchema() {
 			// "Table"		=> $this->TableFields,
 			// "Model"		=> $this->ModelFields,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
+			"Selection"		=> $this->SelectionDef,
         ]
     ]);
 }
