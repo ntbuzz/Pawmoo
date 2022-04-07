@@ -467,6 +467,7 @@ protected function fetch_convert($data) {
 			};
 			$opc = ''; $and_or_op = ['AND','OR','NOT'];
 			foreach($items as $key => $val) {
+				if($key === REBUILD_MARK) continue;	// re-build mark
 				if(empty($key)) { echo "EMPTY({$val})!!!"; continue;}
 				list($key,$op) = keystr_opr($key);
 				if(empty($op) || $op === '%') {			// non-exist op or LIKE-op(%)
@@ -481,15 +482,17 @@ protected function fetch_convert($data) {
 					} else { // not have op code
 						if(mb_strpos($val,'...') !== FALSE) {
 							list($from,$to) = fix_explode('...',$val,2);
-							if(empty($from)) {
+							if($from===NULL) {
 								$op = '<=';
 								$val = $to;
-							} else if(empty($to)) {
+							} else if($to===NULL) {
 								$op = '>=';
 								$val = $from;
 							} else {
 								$op = 'BETWEEN';
-								$val = "'{$from}' AND '{$to}'";
+								if(is_numeric($from) && is_numeric($to))
+									$val = "{$from} AND {$to}";
+								else $val = "'{$from}' AND '{$to}'";
 							}
 						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';
