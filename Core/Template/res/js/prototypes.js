@@ -136,7 +136,7 @@ String.prototype.charsetCheck = function (kind,mxlen) {
 		switch(kind.charAt(i)) {
 		case 'a': str = this.replace(/[a-z]/g,'');break;
 		case 'A': str = this.replace(/[A-Z]/g,'');break;
-		case '0': str = this.replace(/[+\-]?[0-9]/g,'');break;
+		case '0': str = this.replace(/[+\-]?[0-9]+/g,'');break;
 		case '!': str = this.replace(/[!#$%&=^@;:,_~\"\'\(\)\[\]\.\?\+\-\/\*]/g, ''); break;
 		case '#': str = this.replace(/^[+\-]?([1-9]\d*|0)(\.\d+)?$/, ''); break;
 		case '@': str = this.replace(/^\d{4}[\/\-]\d{2}[\/\-]\d{2}$/, ''); break;
