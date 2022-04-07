@@ -14,4 +14,18 @@
 
 ## SpecCSV format.
 
+```
+0,Model,<Model-Name>
+0,Handler,<DB-Handler> or NULL
+0,DataTable,<Data Table>
+0,DataView,<View Names if NEED>
+0,InitCSV,<Initial Data CSV file>
+0,Primary,<Primary KEY Name>
+0,Language,<Languate List, ex. ja;en>
+No,LabelName,FieldName,Language,Data-Type,Relation,Dispaly,CSV,Note
+1,...
+2,...
+...
+```
+
 ## Setup Command Options.
