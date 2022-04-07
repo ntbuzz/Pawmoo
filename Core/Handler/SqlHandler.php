@@ -93,7 +93,7 @@ public function register_method($class,$method) {
 	private function SQLdebug($sql,$where,$sort=[]) {
     	$dbg = debug_backtrace();
     	$func = $dbg[1]['function'];
-		debug_log(DBMSG_HANDLER,["SQL-Execute ({$func} @ {$this->table})"=> [ 'COND'=>$this->LastBuild,'SORT'=>$sort,'SQL' => $sql,'WHERE'=>$where]]);
+		debug_log(DBMSG_HANDLER,["SQL-Execute ({$func} @ {$this->table})"=> [ 'SORT'=>$sort,'SQL' => $sql,'WHERE'=>$where]]);
 	}
 //==============================================================================
 // setupRelations: relation table reminder
