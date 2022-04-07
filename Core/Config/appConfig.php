@@ -52,6 +52,7 @@ define('DEFAULT_HELPER_EXPAND',		'__x');
  
 define('DEFAULT_ENCRYPT_INIT','encrypt-pawmoo_iv');
 
+define('REBUILD_MARK',	're-build-mark');
 /*
 GlobalConfig structure
 array(
