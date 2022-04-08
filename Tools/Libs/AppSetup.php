@@ -454,8 +454,9 @@ private function createSchema($fields) {
 					if(count($chain) === 3) {
 						$add_link($col,$chain,$fname,[$type,$flag, $wd]);
 					} else {
-						list($m,$ix) = $chain;
-						$depend[] = $m;
+				        preg_match('/(\w+)(?:\[\d+\])?\.(\w+)/',$rel,$match);
+						list($tmp,$m,$ix) = $match;
+						if(!in_array($m,$depend)) $depend[] = $m;
 						$col[$fname] = [ $type, $flag, $wd, $rel => [] ];
 					}
 				} else $col[$fname] = [ $type, $flag, $wd];
