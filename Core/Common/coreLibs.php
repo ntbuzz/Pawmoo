@@ -322,12 +322,10 @@ function re_build_array($cond) {
 	$array_map_shurink = function($opr,$arr) use(&$array_map_shurink) {
 		$child_separate = function($key,$values) {
 			if(is_array($values)) {
-				$sub=[];
-				foreach($values as $val) {
-					$kk = array_key_unique($key,$sub);
-					$sub[$kk] = $val;
+				$sub = array_filter($values,function($v) { return $v!==NULL;});
+				if(count($sub) !== count($values)) {
+					return ['OR',[ $key => $sub, "{$key}::#1" => NULL]];
 				}
-				return ['OR', $sub];
 			}
 			return [$key,$values];
 		};
