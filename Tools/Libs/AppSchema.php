@@ -270,6 +270,7 @@ private function createView($view) {
 				list($kk,$rel) = array_first_item($bind);
 				if(is_int($kk)) {		// Self Bind
 					list($sep,$bind) = array_first_item($rel);
+					if(is_int($sep)) $sep = ' ';
 		 			$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$column}";
 					list($sort,$align,$csv,$lang) = oct_extract($flag,4);
 					if($lang) {
