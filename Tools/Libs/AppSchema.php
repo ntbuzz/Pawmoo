@@ -271,6 +271,13 @@ private function createView($view) {
 				if(is_int($kk)) {		// Self Bind
 					list($sep,$bind) = array_first_item($rel);
 		 			$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$column}";
+					list($sort,$align,$csv,$lang) = oct_extract($flag,4);
+					if($lang) {
+						foreach($this->Language as $lo) {
+							$lo_bind = array_map(function($v) use(&$lo) { return "{$v}_{$lo}";},$bind);
+							$fields[] = $this->dbDriver->fieldConcat($sep,$lo_bind) . " as {$column}_{$lo}";
+						}
+					}
 				} else {	// リレーション
 					$fields[] = "{$this->MyTable}.\"$column\"";
 					$relations($this->MyTable,$column,$bind);
