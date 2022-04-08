@@ -583,7 +583,8 @@ private function makeModelField($Schema,$lang=NULL) {
 				if(is_array($rel_model)) {
 					list($rel_model,$rel_field) = array_first_item($rel_model);
 					if(is_int($rel_model)) {
-						$rel_model = implode(',',$rel_field[0]);
+						list($bind_str,$bind_fields) = array_first_item($rel_field);
+						$rel_model = implode(',',$bind_fields);
 						$rel_field = NULL;
 					}
 				} else $rel_field = NULL;

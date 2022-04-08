@@ -316,7 +316,7 @@ function array_member_value($nVal,$names) {
 }
 //==============================================================================
 // get AND condition array by separate SPC word from find keyword
-function condition_array($keyset,$keystr) {
+function condition_array_simple($keyset,$keystr) {
 	$cond = [];
 	$and = explode(' ',str_replace(['　','  '],' ',$keystr));
     foreach($and as $val) {
@@ -328,13 +328,18 @@ function condition_array($keyset,$keystr) {
     return $cond;
 }
 //==============================================================================
-// get AND condition array by separate SPC word from find keyword
-function condition_array_multi($keyset,$keystr) {
+// get OR/AND condition array by separate SPC word from find keyword
+function condition_array($keyset,$keystr) {
     $and_str = str_explode(['　',' '],$keystr);
 	$and_cond = [];
     foreach($and_str as $and_val) {
+		if(mb_substr($val,0,1)==='-') {
+			$val = mb_substr($val,1);
+			$opr ='NOT';
+		} else $opr = NULL;
 		if(mb_strpos($and_val,'|')!==false) $and_val = explode('|',$and_val);
-		$and_cond[] = [$keyset => $and_val];
+		$cond = [$keyset => $and_val];
+		$and_cond[] = ($opr===NULL) ? $cond : [$opr => $cond];
 	}
     return $and_cond;
 }

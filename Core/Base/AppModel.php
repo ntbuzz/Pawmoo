@@ -93,6 +93,7 @@ public function ResetSchema() {
 			// "Table"		=> $this->TableFields,
 			// "Model"		=> $this->ModelFields,
             "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
+			"Selection"		=> $this->SelectionDef,
         ]
     ]);
 }
@@ -154,28 +155,25 @@ protected function ResetLocation() {
 // Selection Table Relation setup
 protected function SelectionSetup() {
         $new_Selection = [];
-        $separate_rel_cond = function($defs) {
-            $rel = $cond = [];
-            foreach($defs as $key => $val) {
-                if(is_int($key)) {
-                    if(is_array($val)) {
-		                list($kk,$vv) = array_first_item($val);
-						if(is_int($kk)) $rel = $val;
-						else $cond = $val;
-					} else $rel = $val;
-                } else {
-                    $rel[$key] = $val;
-                }
-            }
-            return [$rel,$cond];
-        };
+		$extract_array = function($arr,$n) {
+			if(is_array($arr)) {
+				$slice = [];
+				foreach($arr as $key => $val) {
+					if(is_int($key)) $slice[] = $val;
+					else $slice[] = [$key => $val];
+					--$n;
+				}
+			} else $slice = [$arr];
+			while($n-- > 0)$slice[]=NULL;
+			return $slice;
+		};
         foreach($this->Selection as $key_name => $seldef) {
             $lnk = [];
             if(is_scalar($seldef)) {
                 $lnk[0] = $seldef;
                 $cond = [];
             } else {
-                list($target,$cond) = $separate_rel_cond($seldef);
+                list($target,$cond,$sort) = $extract_array($seldef,3);
                 list($model,$ref_list) = array_first_item($target);
                 if($model === 0) {
                     $lnk = $target;
@@ -198,7 +196,7 @@ protected function SelectionSetup() {
                     }
                 }
             }
-            $new_Selection[$key_name] =  [$lnk,$cond];
+            $new_Selection[$key_name] =  [$lnk,$cond,$sort];
         }
         $this->SelectionDef = $new_Selection;
     }
@@ -274,27 +272,26 @@ public function ChangeSelectCondition($name,$cond) {
 public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 	$selections = (is_array($key_names)) ? $key_names : [$key_names];
     foreach($selections as $key_name) {
-		list($target,$cond) = $this->SelectionDef[$key_name];
+		list($target,$cond,$sort) = $this->SelectionDef[$key_name];
 		$cond = array_override($cond,$opt_cond);	// additional cond
 		list($model,$ref_list) = array_first_item($target);
 		if(is_int($model)) {        // self list
 			// case b., e.
-			$this->Select[$key_name] = $this->SelectFinder(is_array($target),$target,$cond);
+			$this->Select[$key_name] = $this->SelectFinder(is_array($target),$target,$cond,$sort);
 		} else if(is_array($ref_list)) {
 			// case a., f.
 			list($method,$args) = array_first_item($ref_list);
 			if(is_numeric($method)) {
 				// case a.
-				$this->Select[$key_name] = $this->$model->SelectFinder(true,$ref_list,$cond);
+				$this->Select[$key_name] = $this->$model->SelectFinder(true,$ref_list,$cond,$sort);
 			} else if(method_exists($this->$model,$method)) {	// case f.
 				$method_val = $this->$model->$method($args,$cond);
-//				ksort($method_val,SORT_FLAG_CASE | SORT_STRING );
 				$this->Select[$key_name] = $method_val;
 			}
 		} else {
 			// case c., d.
 			$ref_list = array_filter(explode('.', $ref_list), "strlen" );
-			$this->Select[$key_name] = $this->$model->SelectFinder(false,$ref_list,$cond);
+			$this->Select[$key_name] = $this->$model->SelectFinder(false,$ref_list,$cond,$sort);
 		}
 		if($sort_val !== false) {
 			switch($sort_val) {
@@ -305,7 +302,7 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 			}
 		}
 	}
-	debug_log(8,['Select'=>$this->Select]);
+	debug_log(false,['Select'=>$this->Select]);
 }
 //==============================================================================
 //   Get Relation Table fields data list.
@@ -364,11 +361,11 @@ public function getCount($cond) {
 //==============================================================================
 // Get Selection pair
 // Result:   Select array
-public function SelectFinder($chain, $filter, $cond) {
+public function SelectFinder($chain, $filter, $cond, $sort=[]) {
 	$filter = $this->normalize_filter($filter);
 	list($id,$fn,$pid) = array_alternative($filter,3);
 	$data = [];
-    $this->dbDriver->findRecord($cond,TRUE);
+    $this->dbDriver->findRecord($cond,false,$sort);
     while (($fields = $this->dbDriver->fetchDB())) {
 		if($chain) {
 			if(empty($fn)) {
@@ -383,8 +380,8 @@ public function SelectFinder($chain, $filter, $cond) {
 			$data[$key] = $pval;
 		}
 	}
-	if(!$chain) ksort($data,SORT_FLAG_CASE|SORT_STRING);
-    xdebug_log(DBMSG_NONE, [
+	if(!$chain && $sort === NULL) ksort($data,SORT_FLAG_CASE|SORT_STRING);
+    debug_log(false, [
         "Filter" => $filter,
         "COND" => $cond,
         "RECORDS" => $data,

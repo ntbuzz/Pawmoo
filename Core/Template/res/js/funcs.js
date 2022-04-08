@@ -10,14 +10,16 @@ function PawmooLocations() {
     this.protocol = window.location.protocol;
     this.host = window.location.host;
     this.qstr = window.location.search.replace('?','');
-    this.items = window.location.pathname.replace(/^[\/]+|[\/]+$/g, '').split('/');
+    this.item_array = window.location.pathname.replace(/^[\/]+|[\/]+$/g, '').split('/');
     this.query_str = function () { return (this.qstr == "") ? "" : "?"+this.qstr.replace(";","%3B"); };
     this.set_query = function (q) { this.qstr = q; };
     this.clear_query = function () { this.qstr = ""; };
-    this.last_item = function (n) { return this.items[this.items.length - n]; };
+    this.last_item = function (n) { return this.item_array[this.item_array.length - n]; };
+    this.items = function (n) { return this.item_array[n]; };
 	this.fullpath = function (url) {
 		if (url.startOfString(['http://', 'https://', 'ftp://', 'file://'])) {
 			this.type = LOC_FULL;
+		    this.item_array = url.replace(/^[\/]+|[\/]+$/g, '').split('/');
 			return url;
 		};
         this.type = "./:".indexOf(url.charAt(0)) + 1;
@@ -31,10 +33,11 @@ function PawmooLocations() {
             case 3: path = "/" + path; break;
 		};
 		if (path.slice(-1) === "/") path = path.slice(0, -1);
+		this.item_array = path.replace(/^[\/]+|[\/]+$/g, '').split('/');
         return  path;
     };
     this.trunc_path = function (n, e, is_num) {
-        var path = this.items.slice();
+        var path = this.item_array.slice();
         if (is_num === true) {
             for (var i = path.length; (i > 1) && (!isNaN(path[i - 1])); --i);
             nums = "/" + path.slice(i).join("/");
@@ -46,10 +49,10 @@ function PawmooLocations() {
     this.cont_path = function (e, isnum) { return this.trunc_path(1, e, isnum); };
     this.act_path = function (e, isnum) { return this.trunc_path(2, e, isnum); };
     this.filter_path = function (e, isnum) { return this.trunc_path(3, e, isnum); };
-    this.get_action = function () { return this.items[2]; };
-    this.get_filter = function () { return this.items[3]; };
+    this.get_action = function () { return this.item_array[2]; };
+    this.get_filter = function () { return this.item_array[3]; };
     this.param_path = function (e) {
-        var path = this.items;
+        var path = this.item_array;
         for (var n=0; (n < path.length) && (isNaN(path[n])); ++n);
         return this.trunc_path(n,e,false);
 	};
