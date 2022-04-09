@@ -46,7 +46,7 @@ class AppSetup  extends AppBase {
 	];
 	// 初期ファイル
 	const Template = [
-		'config.php'		=> true,
+		'config.php'		=> false,		// copy from appSpec
 		'*Controller.php'	=> 'Controller.setup',
 		'*Helper.php'		=> 'Helper.setup',
 		'*Model.php'		=> 'Model.setup',
@@ -313,10 +313,15 @@ private function createFolder($path,$module,$file) {
 		$target = "{$path}/{$modfile}";
 		if(!is_file($target)) {
 			if(array_key_exists($file,self::Template)) {
-				$tmp_file = (self::Template[$file]===true)? $file : self::Template[$file];
-				$tmp_file = "Tools/Template/{$tmp_file}";
+				switch(self::Template[$file]) {
+				case true:	$tmp_file = "Tools/Template/{$file}";break;
+				case false:	$tmp_file = "appSpec/{$this->AppName}/Config/{$file}";
+							if(!is_file($tmp_file)) $tmp_file = "Tools/Template/{$file}";
+							break;
+				default:	$tmp_file = "Tools/Template/".self::Template[$file];
+				}
 		        $contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
-				$template = str_replace('%module%',$module,$contents);
+				$template = str_replace(['%module%','%model%'],$module,$contents);
 				file_put_contents($target,$template);
 			} else {
 				touch($target);
