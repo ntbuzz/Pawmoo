@@ -2,7 +2,7 @@
 Stylesheet => [
 	common => [
 		+import => [
-			myscrupt.css
+			mystyle.css
 		]
 		+section => ^common
 	]
