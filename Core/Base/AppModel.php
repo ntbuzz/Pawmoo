@@ -254,7 +254,10 @@ public function GetRecord($num,$join=FALSE,$values=FALSE) {
         else $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],TRUE);
     } else $this->getRecordBy($this->Primary,$num);
     $this->RecData= $this->fields;
-    if($values) $this->GetValueList();
+    if($values) {
+		$this->GetValueList();
+		debug_log(DBMSG_MODEL,['SELECT'=>$this->Select]);
+	}
 }
 //==============================================================================
 // Selection define condition change.
@@ -298,11 +301,9 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 			case true:
 			case SORTBY_ASCEND:	asort($this->Select[$key_name]); break;
 			case SORTBY_DESCEND:arsort($this->Select[$key_name]); break;
-			default: debug_log(8,['SORT-NONE'=>$this->Select[$key_name]]);
 			}
 		}
 	}
-	debug_log(false,['Select'=>$this->Select]);
 }
 //==============================================================================
 //   Get Relation Table fields data list.
