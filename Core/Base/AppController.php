@@ -273,20 +273,30 @@ public function FindAction() {
 	$this->View->PutLayout();
 }
 //==============================================================================
+// Display Record by SECTION template
+public function viewRecord($num,$layout,$part=false) {
+	MySession::setAppData('RecordNo',$num);
+	$this->Model->GetRecord($num,TRUE,TRUE);
+	if($part) $this->View->ViewTemplate($layout);
+	else $this->View->PutLayout($layout);
+}
+//==============================================================================
 // Default View Action (Full Page)
 public function ViewAction() {
 	$num = App::$Params[0];
-	MySession::setAppData('RecordNo',$num);
-	$this->Model->GetRecord($num,TRUE,TRUE);
-	$this->View->PutLayout('ContentView');
+	$this->viewRecord($num,'ContentView');
 }
 //==============================================================================
 // Default Item View Action (Parts of Page)
 public function ItemAction() {
 	$num = App::$Params[0];
-	MySession::setAppData('RecordNo',$num);
-	$this->Model->GetRecord($num,TRUE,TRUE);
-	$this->View->ViewTemplate('ItemView');
+	$this->viewRecord($num,'ItemView',true);
+}
+//==============================================================================
+// Default Item Edit Action (Parts of Page)
+public function ItemeditAction() {
+	$num = App::$Params[0];
+	$this->viewRecord($num,'ItemEditForm',true);
 }
 //==============================================================================
 // Contents Template Action in AJAX access for like a SPA
