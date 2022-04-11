@@ -16,6 +16,8 @@ require_once(ROOT_DIR . '/Tools/Libs/AppBase.php');
 require_once(ROOT_DIR . '/Tools/Libs/AppSchema.php');
 require_once(ROOT_DIR . '/Tools/Libs/AppSetup.php');
 
+require_once(ROOT_DIR . '/site-config.php');
+
 date_default_timezone_set('Asia/Tokyo');
 
 //if(!defined('DEFAULT_LANG'))	 define('DEFAULT_LANG', 'ja');				// Language
@@ -32,7 +34,7 @@ SetupLoader::Setup($appname);
 $usrconfig = ROOT_DIR ."/appSpec/{$appname}/Config/config.php";
 if(is_file($usrconfig)) {
 	require_once($usrconfig);
-	$config->Setup(GlobalConfig,'development');
+	$config->Setup(GlobalConfig,SITE_PRODUCTION);
 }
 
 $pawmoo = new AppSetup($appname);
