@@ -173,9 +173,9 @@ function BindScroll(self_obj) {
 		this.child = null;
 		child_id = obj.attr('data-element');	// 同期先の要素ID
 		if (child_id !== undefined) {
-			obj = $('#' + child_id);
+			c_obj = $('#' + child_id);
 			// ループしていないか確認
-			if (!self_obj.is(obj)) this.child = new child_obj(obj);
+			if (!self_obj.is(c_obj) && !this.self_obj.is(c_obj)) this.child = new child_obj(c_obj);
 		};
 	};
 	self.TopObject = new child_obj(self_obj);
