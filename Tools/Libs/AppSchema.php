@@ -29,7 +29,7 @@ class AppSchema extends AppBase {
         $this->dbDriver = new $driver($this->MyTable,$this->Primary);        // connect Database Driver
 		$this->SchemaSetup();
 		echo sprintf("  * %-14s schema use %s Handler.\n",$this->ModuleName,$this->Handler);
-		$dbname = DatabaseHandler::get_database_name($this->dbDriver->handler);
+		$dbname = DatabaseHandler::get_database_name($this->Handler);
 		echo "ConnectDB:{$dbname}\n";
     }
 //==============================================================================
