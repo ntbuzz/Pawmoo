@@ -323,7 +323,9 @@ function re_build_array($cond) {
 		$child_separate = function($key,$values) {
 			if(is_array($values)) {
 				$sub = array_filter($values,function($v) { return $v!==NULL;});
-				if(count($sub) !== count($values)) {
+				$n = count($sub);
+				if($n !== count($values)) {
+					if($n === 1) $sub = $sub[0];
 					return ['OR',[ $key => $sub, "{$key}::#1" => NULL]];
 				}
 			}
@@ -339,18 +341,23 @@ function re_build_array($cond) {
 		$wd = [];
 		foreach($arr as $key => $val) {
 			$key = tag_body_name($key);
-			if(is_scalar($val)) {
+			if(is_scalar($val) || $val===NULL) {
 				if(isset($AND_OR[$key]) || is_numeric($key)) continue;
 			} else {
 				if(isset($AND_OR[$key]) || is_numeric($key)) {
 					$opc = (is_numeric($key))?$opr:$key;
 					$child = (is_array($val)) ? $array_map_shurink($opc,$val) : $val;
-					if($child === [] || is_scalar($child)) continue;
-					if(count($child)===1) {
-						list($k,$v) = array_first_item($child);
-						if($opr === $k) $child = $v;
+					if($child === [] || is_scalar($child) ||(is_numeric($key)&&$child===NULL)) continue;
+					if($child === NULL) {
+						$k = array_key_unique($key,$arr);
+						$arr[$k] = NULL;
+					} else {
+						if(count($child)===1) {
+							list($k,$v) = array_first_item($child);
+							if($opr === $k) $child = $v;
+						}
+						$array_merged($wd,$child);
 					}
-					$array_merged($wd,$child);
 					continue;
 				}
 				if($opr === $key) {
