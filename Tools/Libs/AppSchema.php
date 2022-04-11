@@ -29,6 +29,8 @@ class AppSchema extends AppBase {
         $this->dbDriver = new $driver($this->MyTable,$this->Primary);        // connect Database Driver
 		$this->SchemaSetup();
 		echo sprintf("  * %-14s schema use %s Handler.\n",$this->ModuleName,$this->Handler);
+		$dbname = DatabaseHandler::get_database_name($this->dbDriver->handler);
+		echo "ConnectDB:{$dbname}\n";
     }
 //==============================================================================
 // Switch Schema Language
