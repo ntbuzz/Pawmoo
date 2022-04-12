@@ -365,6 +365,7 @@ public function getCount($cond) {
 public function SelectFinder($chain, $filter, $cond, $sort=[]) {
 	$filter = $this->normalize_filter($filter);
 	list($id,$fn,$pid) = array_alternative($filter,3);
+	if($sort === true) $sort = [ $this->Primary => SORTBY_ASCEND];
 	$data = [];
     $this->dbDriver->findRecord($cond,false,$sort);
     while (($fields = $this->dbDriver->fetchDB())) {
