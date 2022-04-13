@@ -274,7 +274,7 @@ public function FindAction() {
 }
 //==============================================================================
 // Display Record by SECTION template
-public function viewRecord($num,$layout,$part=false) {
+private function viewRecord($num,$layout,$part=false) {
 	MySession::setAppData('RecordNo',$num);
 	$this->Model->GetRecord($num,TRUE,TRUE);
 	if($part) $this->View->ViewTemplate($layout);
