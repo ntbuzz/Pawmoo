@@ -349,8 +349,8 @@ function re_build_array($cond) {
 					$child = (is_array($val)) ? $array_map_shurink($opc,$val) : $val;
 					if($child === [] || is_scalar($child) ||(is_numeric($key)&&$child===NULL)) continue;
 					if($child === NULL) {
-						$k = array_key_unique($key,$arr);
-						$arr[$k] = NULL;
+						$k = array_key_unique($key,$wd);
+						$wd[$k] = NULL;
 					} else {
 						if(count($child)===1) {
 							list($k,$v) = array_first_item($child);
