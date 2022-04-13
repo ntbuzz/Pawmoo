@@ -2,6 +2,7 @@
 //==============================================================================
 // Databas Table Create Class
 class AppSchema extends AppBase {
+	protected $DatabaseName;		// different dbname from GlobalConfig
 	public $Language = [];		// Language list for safety
 	public $ModelFields;		// read-only column => view column
 	public $TableFields;		// read/write column => table column
@@ -25,12 +26,15 @@ class AppSchema extends AppBase {
 		} else $table = $this->DataTable;
 		$this->MyTable = $table;
 		$this->ViewSet = $viewset;
+		// multi database within same HANDLER
+		list($base,$customdb) = fix_explode('.',$this->Handler,2,NULL);
+		$this->Handler = $base;
+		$this->DatabaseName = $customdb;
         $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->MyTable,$this->Primary);        // connect Database Driver
+        $this->dbDriver = new $driver($this->MyTable,$this->Primary,$customdb);        // connect Database Driver
 		$this->SchemaSetup();
 		echo sprintf("  * %-14s schema use %s Handler.\n",$this->ModuleName,$this->Handler);
-		$dbname = DatabaseHandler::get_database_name($this->Handler);
-		echo "ConnectDB:{$dbname}\n";
+		if(!empty($customdb)) echo "Connect-DB:{$customdb}\n";
     }
 //==============================================================================
 // Switch Schema Language

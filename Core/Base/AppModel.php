@@ -20,6 +20,7 @@ class AppModel extends AppObject {
     ];
     protected $dbDriver;            // Database Driver
     protected $fields;              // Record-Data all fields value
+	protected $DatabaseName;		// different dbname from GlobalConfig
 	public $HeaderSchema = [];		// Table Viewing Header Columns
 	public $TableFields = [];		// Table Columns List with attributes
 	public $ModelFields;			// Model class field within alias/bind/virtual
@@ -54,8 +55,12 @@ class AppModel extends AppObject {
             $this->DataTable = $this->ModelTables[$db_key]; // DataTable SWITCH
         }
         $this->fields = [];
+		// multi database within same HANDLER
+		list($base,$customdb) = fix_explode('.',$this->Handler,2,NULL);
+		$this->Handler = $base;
+		$this->DatabaseName = $customdb;
         $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->DataTable,$this->Primary); // connect Database Driver
+        $this->dbDriver = new $driver($this->DataTable,$this->Primary,$customdb); // connect Database Driver
 		list($dFormat,$tFormat,$dtFormat) = array_keys_value($this->dbDriver->DateFormat,['Date','Time','TimeStamp']);
         $this->DateFormat = $dFormat;         	// Date format from DB-Driver
         $this->TimeFormat = $tFormat;         	// Time format from DB-Driver
