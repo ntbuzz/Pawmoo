@@ -59,9 +59,11 @@ public function GetAttribute($path) {
 public function MoveFile($fromfile,$tofile) {
 	$srcname = LocalCharset($fromfile);		// 移動元ファイルパス
 	$tagname = LocalCharset($tofile);		// 移動先ファイルパス
-	if(!file_move($srcname, $tagname)) {		// ファイル移動、移動先のフォルダがなければ作成
+	$ret = file_move($srcname, $tagname);		// ファイル移動、移動先のフォルダがなければ作成
+	if(!$ret) {		// 失敗
 		debug_log(DBMSG_CLI|DBMSG_ERROR,"{$srcname} の移動に失敗しました");
 	}
+	return $ret;
 }
 //==============================================================================
 // トップフォルダの下へ移動
@@ -72,39 +74,49 @@ public function FileMoveTo($fromfile,$tofile) {
 // フォルダ内の全ファイル移動
 public function MoveAllFiles($fromdir,$todir) {
 	$this->get_FolderLists($fromdir);			// 移動元のファイルリスト
+	$ret = true;
 	foreach($this->Files as $filelist) {
 		$srcname = LocalCharset($filelist['fullname']);	// 対象ファイルパス
 		$filename = $filelist['filename'];
 		$tagname = LocalCharset("{$todir}{$filename}");
-		if(!file_move($srcname, $tagname)) {
+		$part = file_move($srcname, $tagname);
+		if(!$part) {
 			debug_log(DBMSG_CLI|DBMSG_ERROR,"{$srcname} の移動に失敗しました");
+			$ret = false;
 		}
 	}
+	return $ret;
 }
 //==============================================================================
 // ファイル削除
 public function DeleteFile($fullname) {
 	$srcname = LocalCharset($fullname);
+	$ret = true;
 	if(file_exists($srcname)) {
 		if(!unlink($srcname)) {
 			list($path,$fname) = extract_path_filename($srcname);
 			debug_log(DBMSG_CLI|DBMSG_ERROR,"{$fname} の削除に失敗しました");
+			$ret = false;
 		}
 	}
+	return $ret;
 }
 //==============================================================================
 // 指定フォルダのファイル一括削除
 public function DeleteAllFiles($topdir) {
 	$this->get_FolderLists($topdir);	// 削除フォルダのファイルリスト
+	$ret = true;
 	foreach($this->Files as $filelist) {
 		$srcname = LocalCharset($filelist['fullname']);	// 対象ファイルパス
 		if(file_exists($srcname)) {
 			if(!unlink($srcname)) {
 				list($path,$fname) = extract_path_filename($srcname);
 				debug_log(DBMSG_CLI|DBMSG_ERROR,"{$fname} の削除に失敗しました");
+				$ret = false;
 			}
 		}
 	}
+	return $ret;
 }
 //==============================================================================
 // フォルダ内を探査する
