@@ -30,6 +30,7 @@ class AppView extends AppObject {
             'hidden'    => 'cmd_taginput',
             'textbox'   => 'cmd_taginput',
             'passbox'   => 'cmd_taginput',
+            'dump'   	=> 'cmd_dump',
         ],
     );
 	const AttributeList = [
@@ -511,6 +512,13 @@ public function ViewTemplate($name,$vars = []) {
     }
     //--------------------------------------------------------------------------
     // cmd_xxxx method
+    //--------------------------------------------------------------------------
+    //  debug dump
+    //  +dump => [ dumpvar ... ]
+    private function cmd_dump($tag,$attrs,$sec,$vars) {
+        $wsec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
+        debug_dump($wsec);
+    }
     //--------------------------------------------------------------------------
     //  include external file, for CSS/JS/...
     //  +include => [ inlclude-filename ... ]
