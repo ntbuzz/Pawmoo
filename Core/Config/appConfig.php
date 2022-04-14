@@ -99,6 +99,13 @@ private function database_Setup($host,$config) {
 	}
 }
 //===============================================================
+public function dumpEnviroment() {
+	debug_dump(['ENV'=>$this->Enviroment]);
+	foreach($this->HandlerList as $val) {
+		debug_dump([$val => $this->$val]);
+	}
+}
+//===============================================================
 public function Setup($spec,$enviroment) {
 	list($host) = explode('.',gethostname());		// exclude domain-name
 	// Create HandlerList parameter by empty value

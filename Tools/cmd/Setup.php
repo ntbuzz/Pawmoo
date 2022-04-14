@@ -36,6 +36,7 @@ if(is_file($usrconfig)) {
 	require_once($usrconfig);
 	$config->Setup(GlobalConfig,SITE_PRODUCTION);
 }
+$config->dumpEnviroment();
 
 $pawmoo = new AppSetup($appname);
 $pawmoo->execute($cmd,$model,$exec);
