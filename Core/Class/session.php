@@ -76,6 +76,9 @@ static function ClearSession() {
 //==============================================================================
 // セッションに保存する
 static function CloseSession() {
+	if(CLI_DEBUG) {
+		debug_dump(['ENV'=>static::$EnvData,'SYS'=>static::$SysData]);
+	}
 //	sysLog::dump(['SESSION'=>static::$EnvData,'SYSTEM'=>static::$SysData]);
 	$_SESSION[static::$MY_SESSION_ID] = static::$EnvData;
 	$_SESSION[static::$SYS_SESSION_ID] = static::$SysData;
