@@ -34,15 +34,16 @@ class AppSetup  extends AppBase {
 			'Models' => [],		// モデルスキーマから生成するモデルクラスファイル格納
 			'Lang' => [],		// 仕様CSVから生成する言語リソース
 			'InitCSV' => [],	// テーブルの初期データCSV
-			"Config"	=> ['config.php'],	// GlobalConfig定義(aooフォルダへコピー)
+			"Config"	=> ['config.php'],	// GlobalConfig定義(appフォルダへコピー)
+			'XLS'	=> [],		// テーブル作成Excelフォルダ
 		],
-	];
-    const Module = [
-		'res' => ['css' => [ 'mystyle.css' ],'js' => ['myscript.js' ],'template.mss'],
-		'View' => [ 'Layout.tpl' ],
-		"*Controller.php",
-		"*Helper.php",
-		"*Model.php",
+    	'module' = [
+			'res' => ['css' => [ 'mystyle.css' ],'js' => ['myscript.js' ],'template.mss'],
+			'View' => [ 'Layout.tpl' ],
+			"*Controller.php",
+			"*Helper.php",
+			"*Model.php",
+		],
 	];
 	// 初期ファイル
 	const TemplateFiles = [
@@ -127,7 +128,7 @@ private function SpecTree($model,$exec) {
 // モジュールフォルダツリーの作成、必須
 private function ModTree($model,$exec) {
 	$path = "{$this->AppRoot}/modules/{$model}";
-	if($this->createFolder($path,$model,self::Module) === false)
+	if($this->createFolder($path,$model,self::SpecFolder['module']) === false)
 		echo "Create Module '{$model}'\n";
 	else echo "Module '{$model}' allready exist.\n";
 }
