@@ -59,9 +59,10 @@ public function GetAttribute($path) {
 public function MoveFile($fromfile,$tofile) {
 	$srcname = LocalCharset($fromfile);		// 移動元ファイルパス
 	$tagname = LocalCharset($tofile);		// 移動先ファイルパス
-	$ret = file_move($srcname, $tagname);		// ファイル移動、移動先のフォルダがなければ作成
-	if(!$ret) {		// 失敗
+	$ret = true;
+	if(!file_move($srcname, $tagname)) {	// ファイル移動、移動先のフォルダがなければ作成
 		debug_log(DBMSG_CLI|DBMSG_ERROR,"{$srcname} の移動に失敗しました");
+		$ret = false;
 	}
 	return $ret;
 }
@@ -79,8 +80,7 @@ public function MoveAllFiles($fromdir,$todir) {
 		$srcname = LocalCharset($filelist['fullname']);	// 対象ファイルパス
 		$filename = $filelist['filename'];
 		$tagname = LocalCharset("{$todir}{$filename}");
-		$part = file_move($srcname, $tagname);
-		if(!$part) {
+		if(!file_move($srcname, $tagname)) {
 			debug_log(DBMSG_CLI|DBMSG_ERROR,"{$srcname} の移動に失敗しました");
 			$ret = false;
 		}
