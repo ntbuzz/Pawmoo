@@ -29,15 +29,15 @@ class AppSetup  extends AppBase {
 			],
 		],
 		'appSpec' => [
-			'Setup' => [],		// 仕様CSVの格納フォルダ
-			'Schema' => [],		// 仕様CSVから生成するモデルスキーマファイル格納
-			'Models' => [],		// モデルスキーマから生成するモデルクラスファイル格納
-			'Lang' => [],		// 仕様CSVから生成する言語リソース
-			'InitCSV' => [],	// テーブルの初期データCSV
+			'Setup'		=> [],		// 仕様CSVの格納フォルダ
+			'Schema'	=> [],		// 仕様CSVから生成するモデルスキーマファイル格納
+			'Models'	=> [],		// モデルスキーマから生成するモデルクラスファイル格納
+			'Lang'		=> [],		// 仕様CSVから生成する言語リソース
+			'InitCSV'	=> [],	// テーブルの初期データCSV
 			"Config"	=> ['config.php'],	// GlobalConfig定義(appフォルダへコピー)
-			'XLS'	=> [],		// テーブル作成Excelフォルダ
+			'XLS'		=> ['@_defs.xls'],		// テーブル作成Excelフォルダ
 		],
-    	'module' = [
+    	'-module' => [
 			'res' => ['css' => [ 'mystyle.css' ],'js' => ['myscript.js' ],'template.mss'],
 			'View' => [ 'Layout.tpl' ],
 			"*Controller.php",
@@ -47,7 +47,7 @@ class AppSetup  extends AppBase {
 	];
 	// 初期ファイル
 	const TemplateFiles = [
-		'config.php'		=> ['config.setup','Config/config.php'],
+		'config.php'		=> ['config.php','Config/config.php'],
 		'*Controller.php'	=> 'module/Controller.setup',
 		'*Helper.php'		=> 'module/Helper.setup',
 		'*Model.php'		=> 'module/Model.setup',
@@ -57,6 +57,7 @@ class AppSetup  extends AppBase {
 		'mystyle.css'		=> 'module/res/mystyle.css',
 		'myscript.js'		=> 'module/res/myscript.js',
 		'template.mss'		=> 'module/res/template.mss',
+		'@_defs.xls'		=> 'spec_defs.xls',
 	];
 	private $AppName;
 	private $AppRoot;
@@ -108,6 +109,7 @@ public function execute($cmd,$model,$exec) {
 // appフォルダツリーの作成、省略可
 private function AppTree($model,$exec) {
 	foreach(self::SpecFolder as $top => $tree) {
+		if(substr($top,0,1)==='-') continue;
 		$folder = ROOT_DIR . "/{$top}/{$this->AppName}";
 		if($this->createFolder($folder,NULL,$tree) === false)
 			echo "Create '{$this->AppName}' {$top}-Folder\n";
@@ -120,15 +122,19 @@ private function AppTree($model,$exec) {
 // appSpecフォルダツリーの作成、省略可
 private function SpecTree($model,$exec) {
 	$folder = ROOT_DIR . "/appSpec/{$this->AppName}";
-	if($this->createFolder($folder,NULL,self::SpecFolder['appSpec']) === false)
+	if($this->createFolder($folder,NULL,self::SpecFolder['appSpec']) === false) {
+		if(!copy("Tools/Template/spec_defs.xls", "{$folder}/XLS/{$this->AppName}_defs.xls")) {
+			echo "Excel Copt Fail.\n";
+		}
 		echo "Create '{$this->AppName}' Spec-Folder\n";
+}
 	else echo "'{$this->AppName}' Spec-Folder allready exist.\n";
 }
 //==============================================================================
 // モジュールフォルダツリーの作成、必須
 private function ModTree($model,$exec) {
 	$path = "{$this->AppRoot}/modules/{$model}";
-	if($this->createFolder($path,$model,self::SpecFolder['module']) === false)
+	if($this->createFolder($path,$model,self::SpecFolder['-module']) === false)
 		echo "Create Module '{$model}'\n";
 	else echo "Module '{$model}' allready exist.\n";
 }
@@ -292,25 +298,17 @@ private function MakeView($model,$exec) {
 			$this->$model->CreateTableView($exec);
 		}
 	}
-	// foreach($files as $model) {
-	// 	$schema = $this->$model;
-	// 	$depend = $schema->DependList([]);
-	// 	if($depend !== []) {
-	// 		debug_dump([$model => ['DEPEND-VIEW'=>$depend]],false);
-	// 		foreach($depend as $sub) {
-	// 			$this->$sub->CreateTableView($exec);
-	// 		}
-	// 	}
-	// 	// 自分自身がCREATEされてなければ
-	// 	if(!in_array($model,$depend)) $schema->CreateTableView($exec);
-	// }
 }
 //==============================================================================
 // フォルダーツリーを作成
 private function createFolder($path,$module,$file) {
 	$exist = true;
 	if(is_scalar($file)) {
-		$modfile = (substr($file,0,1)==='*') ? $module.substr($file,1) : $file;
+		switch(substr($file,0,1)) {
+		case '*': $modfile = $module.substr($file,1); break;
+		case '@': $modfile = $this->AppName.substr($file,1); break;
+		default: $modfile = $file;
+		}
 		$target = "{$path}/{$modfile}";
 		if(!is_file($target)) {
 			if(array_key_exists($file,self::TemplateFiles)) {
@@ -320,12 +318,13 @@ private function createFolder($path,$module,$file) {
 					$tmp_file = "appSpec/{$this->AppName}/{$app_file}";
 					if(!is_file($tmp_file)) $tmp_file = "Tools/Template/{$base_file}";
 				} else $tmp_file = "Tools/Template/{$tmp_file}";
-		        $contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
-				$template = str_replace(['%module%','%model%'],$module,$contents);
-				file_put_contents($target,$template);
-			} else {
-				touch($target);
-			}
+				$ext = extract_extension($tmp_file);
+				if($ext === 'setup') {
+					$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
+					$template = str_replace(['%module%','%model%'],$module,$contents);
+					file_put_contents($target,$template);
+				} else copy($tmp_file, $target);
+			} else touch($target);
 			$exist = false;
 		}
 	} else if(is_array($file)) {
