@@ -45,17 +45,17 @@ class AppSetup  extends AppBase {
 		"*Model.php",
 	];
 	// 初期ファイル
-	const Template = [
-		'config.php'		=> false,		// copy from appSpec
-		'*Controller.php'	=> 'Controller.setup',
-		'*Helper.php'		=> 'Helper.setup',
-		'*Model.php'		=> 'Model.setup',
-		'Layout.tpl'		=> true,
-		'Header.tpl'		=> true,
-		'Footer.tpl'		=> true,
-		'mystyle.css'		=> true,
-		'myscript.js'		=> true,
-		'template.mss'		=> true,
+	const TemplateFiles = [
+		'config.php'		=> ['config.setup','Config/config.php'],
+		'*Controller.php'	=> 'module/Controller.setup',
+		'*Helper.php'		=> 'module/Helper.setup',
+		'*Model.php'		=> 'module/Model.setup',
+		'Layout.tpl'		=> 'module/View/Layout.tpl',
+		'Header.tpl'		=> 'module/View/Header.tpl',
+		'Footer.tpl'		=> 'module/View/Footer.tpl',
+		'mystyle.css'		=> 'module/res/mystyle.css',
+		'myscript.js'		=> 'module/res/myscript.js',
+		'template.mss'		=> 'module/res/template.mss',
 	];
 	private $AppName;
 	private $AppRoot;
@@ -113,7 +113,7 @@ private function AppTree($model,$exec) {
 		else echo "{$top} '{$this->AppName}' allready exist.\n";
 	}
 	// モジュール指定があればモジュールフォルダも作成
-	if(!empty($model)) $this->ModTree($model);
+	if(!empty($model)) $this->ModTree($model,$exec);
 }
 //==============================================================================
 // appSpecフォルダツリーの作成、省略可
@@ -312,14 +312,13 @@ private function createFolder($path,$module,$file) {
 		$modfile = (substr($file,0,1)==='*') ? $module.substr($file,1) : $file;
 		$target = "{$path}/{$modfile}";
 		if(!is_file($target)) {
-			if(array_key_exists($file,self::Template)) {
-				switch(self::Template[$file]) {
-				case true:	$tmp_file = "Tools/Template/{$file}";break;
-				case false:	$tmp_file = "appSpec/{$this->AppName}/Config/{$file}";
-							if(!is_file($tmp_file)) $tmp_file = "Tools/Template/{$file}";
-							break;
-				default:	$tmp_file = "Tools/Template/".self::Template[$file];
-				}
+			if(array_key_exists($file,self::TemplateFiles)) {
+				$tmp_file = self::TemplateFiles[$file];
+				if(is_array($tmp_file)) {
+					list($base_file,$app_file) = $tmp_file;
+					$tmp_file = "appSpec/{$this->AppName}/{$app_file}";
+					if(!is_file($tmp_file)) $tmp_file = "Tools/Template/{$base_file}";
+				} else $tmp_file = "Tools/Template/{$tmp_file}";
 		        $contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 				$template = str_replace(['%module%','%model%'],$module,$contents);
 				file_put_contents($target,$template);
