@@ -133,6 +133,7 @@ private function SpecTree($model,$exec) {
 //==============================================================================
 // モジュールフォルダツリーの作成、必須
 private function ModTree($model,$exec) {
+	$model = ucfirst(strtolower($model));
 	$path = "{$this->AppRoot}/modules/{$model}";
 	if($this->createFolder($path,$model,self::SpecFolder['-module']) === false)
 		echo "Create Module '{$model}'\n";
@@ -216,7 +217,7 @@ private function GenSchema($model,$exec) {
 	if($files === false) return false;
 	$models = [];
 	foreach($files as $target) $models[] = $this->makeModelSchema($target);
-	debug_dump(["'Schema' class Generated"=>$models],false);
+	_dump(["'Schema' class Generated"=>$models],false);
 }
 //==============================================================================
 // スキーマからモデルクラス作成、省略可
@@ -228,7 +229,7 @@ private function GenModel($model,$exec) {
 	foreach($files as $target) {
 		$models[] = $this->makeModelClass($target);
 	}
-	debug_dump(["'Model' class Generated"=>$models],false);
+	_dump(["'Model' class Generated"=>$models],false);
 }
 //==============================================================================
 // schemaコマンドとmodelコマンドの連続実行、必須
@@ -246,10 +247,10 @@ private function SetupModel($model,$exec) {
 			$models[] = $module;
 			$this->GenModel($module,$exec);
 		} else {
-			debug_die(['FAIL STOP'=>$model]);
+			_die(['FAIL STOP'=>$model]);
 		}
 	}
-	debug_dump(["Setup Success module"=>$models],false);
+	_dump(["Setup Success module"=>$models],false);
 }
 //==============================================================================
 // スキーマからテーブルとビューを作成、CSVインポート、省略可
@@ -359,7 +360,7 @@ private function loadCSV($path) {
 				if(is_int($no)) $Schema[$no] = $data;
 			} else {
 				if($data[0] === '-') continue;	// skip
-				debug_dump(['CHECK'=>$data]);
+				_dump(['CHECK'=>$data]);
 			}
 		}
 		fclose($handle);
@@ -645,7 +646,7 @@ private function makeModelClass($model) {
 	};
 	$schema_txt = $this->makeModelField($schema->Schema,$schema->Lang);
 	$this->DatabaseSchema = [
-		'Handler' => $schema->Handler,
+		'Handler' => $schema->dbHandler,
 		'DataTable' => $schema->DataTable,
 		'DataView' =>	(isset($schema->DataView)) ? $schema->DataView : [],
 		'Primary' => $schema->Primary,
@@ -663,7 +664,7 @@ private function makeModelClass($model) {
 	$tmp_file = "Tools/Template/AppModel.setup";
 	$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 	$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
-	$target = "{$this->AppConfig}/Models/{$model}Class.php";
+	$target = "{$this->AppConfig}/Models/{$model}Model.php";
 	file_put_contents($target,$template);
 	return $model;
 }

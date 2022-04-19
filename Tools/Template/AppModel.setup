@@ -1,7 +1,7 @@
 <?php
 //==============================================================================
 // 
-class %model%Class extends AppModel {
+class %model%Model extends AppModel {
 static $DatabaseSchema = [
 %databasedefs%
 	];

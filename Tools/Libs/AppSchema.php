@@ -3,6 +3,7 @@
 // Databas Table Create Class
 class AppSchema extends AppBase {
 	protected $DatabaseName;		// different dbname from GlobalConfig
+	public $dbHandler;
 	public $Language = [];		// Language list for safety
 	public $ModelFields;		// read-only column => view column
 	public $TableFields;		// read/write column => table column
@@ -24,6 +25,7 @@ class AppSchema extends AppBase {
 			list($table,$view) = $this->DataTable;
 			if($table !== $view) array_unshift($viewset, $view);
 		} else $table = $this->DataTable;
+		$this->dbHandler = $this->Handler;
 		$this->MyTable = $table;
 		$this->ViewSet = $viewset;
 		// multi database within same HANDLER
@@ -40,7 +42,7 @@ class AppSchema extends AppBase {
 // Switch Schema Language
 private function SchemaSetup() {
     $this->SchemaAnalyzer();
-	xdebug_dump([             // DEBUG LOG information
+	x_dump([             // DEBUG LOG information
 		$this->ModuleName => [
 			'SCHEMA' => $this->Schema,
 			'VIEW' => $this->ViewSet,
@@ -162,7 +164,7 @@ public function CreateDatabase($exec=false) {
 	$fset[] = "PRIMARY KEY ({$this->Primary})";
 	$sql = "CREATE TABLE {$this->MyTable} (\n";
 	$sql .= implode(",\n",$fset) . "\n);";
-debug_dump(["SQL({$this->Handler})"=>$sql]);
+_dump(["SQL({$this->Handler})"=>$sql]);
 	$this->doSQL($exec,$sql);
 	// initCSVがあるときはデータロード
 }
@@ -180,7 +182,7 @@ public function DependList($list) {
 //	テーブルとビューを作成
 public function CreateTableView($exec=false) {
 	if(empty($this->ViewSet)) {
-		debug_dump([$this->ModuleName=>'has no VIEW'],false);
+		_dump([$this->ModuleName=>'has no VIEW'],false);
 		return false;
 	}
 	// DROP-VIEW
@@ -190,7 +192,7 @@ public function CreateTableView($exec=false) {
 	}
 	// CREATE-VIEW
 	foreach($this->ViewSet as $view) {
-		debug_dump(["Create View" => $view],false);
+		_dump(["Create View" => $view],false);
 		$sql = $this->createView($view);
 		$this->doSQL($exec,$sql);
 	}
@@ -296,7 +298,7 @@ private function createView($view) {
 	}
 	$join_sql = (empty($join)) ? '':"\n".implode("\n",$join)."";
 	$sql = "CREATE VIEW {$view} AS SELECT\n".implode(",\n",$fields) ."\nFROM {$this->MyTable}{$join_sql};";
-debug_dump(["SQL({$this->Handler})"=>$sql]);
+_dump(["SQL({$this->Handler})"=>$sql]);
 	return $sql;
 }
 //==============================================================================
@@ -314,7 +316,7 @@ public function ImportCSV($data_path,$exec) {
 				$row_columns = array_keys($this->TableFields);
 				while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
 					if(count($data) !== count($row_columns)) {
-						debug_die(['CHECK-CSV'=>['FILE'=>$path,'COL'=>$row_columns,'CSV'=>$data]]);
+						_die(['CHECK-CSV'=>['FILE'=>$path,'COL'=>$row_columns,'CSV'=>$data]]);
 					} else {
 						$diff_arr = array_diff($data,$row_columns);
 						if(empty($diff_arr)) continue;	// maybe CSV Header line
