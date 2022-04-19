@@ -198,9 +198,9 @@ public function ViewTemplate($name,$vars = []) {
             if($key[0]==='&') {
                 $tag = mb_substr($key,1);
                 $sec = $this->expand_SectionVar($sec,$vars,TRUE);
-                if(method_exists($this->Helper,$tag)) {
-                    return $this->Helper->$tag($sec);
-                }
+				if(method_exists($this->Helper,$tag)) {
+					return $this->Helper->$tag($sec);
+				}
                 echo "Helper Method:'{$tag}' not found. Please Create this method.\n";
                 return [];
             }
@@ -493,9 +493,16 @@ public function ViewTemplate($name,$vars = []) {
 			$arg = explode(',',$attrs['value']);
 			if(count($arg)===1) $arg = $arg[0];
 		} else $arg = NULL;
-        if(method_exists($this->Helper,$tag)) {
-			if($arg === NULL) $this->Helper->$tag($sec);
-			else $this->Helper->$tag($arg,$sec);
+		// other module Helper CALL
+		list($mod,$method) = explode('::',$tag);
+		if($method === NULL) {
+			$method = $mod;
+			$mod = '';
+		} 
+		$mod = "{$mod}Helper";
+        if(method_exists($this->$mod,$method)) {
+			if($arg === NULL) $this->$mod->$method($sec);
+			else $this->$mod->$method($arg,$sec);
         } else if(method_exists('App',$tag)) {
 			if($arg === NULL) App::$tag($sec);
 			else App::$tag($arg,$sec);
