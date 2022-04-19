@@ -145,24 +145,24 @@ function get_null_value($arg) {
 }
 //==========================================================================
 // sysLogクラスのエイリアス
-function debug_dump($items,$trace=true) {
+function _dump($items,$trace=true) {
 	sysLog::dump($items,$trace);
 }
-function debug_die($items) {
+function _die($items) {
 	sysLog::halt($items);
 }
-function debug_stderr($items) {
+function _stderr($items) {
 	sysLog::stderr($items);
 }
-function debug($items) {
+function _debug($items) {
 	sysLog::debugLvl($items);
 }
 function stderr($str) {
 	fputs(STDERR,"{$str}\n");
 }
 // dummy function
-function xdebug_dump($items) {}
-function xdebug_die($items) {}
+function x_dump($items) {}
+function x_die($items) {}
 function xdebug_log($items) {}
 function reuire_debugbar() {
 	$debug = __DIR__ . '/Template/View/debugbar.php';
@@ -177,8 +177,9 @@ function debug_log($lvl,...$items) {
 	$no_trace = (is_int($lvl)) ? ($lvl & DBMSG_NOTRACE) :false;	// no trace dump;
     $logging = sep_level($lvl);
     if($logging === FALSE) return;
-    list($cli,$lvl) = $logging;
-    if($lvl < -DBMSG_DIE) return;
+    list($cli,$log_lvl) = $logging;
+	if($lvl === DBMSG_CLI) $log_lvl = -DBMSG_DUMP;
+    if($log_lvl < -DBMSG_DIE) return;
     // バックトレースから呼び出し元の情報を取得
     $dump_log_info = function($items,$no_trace) {
 		if($no_trace) {	// システムと言語リソースはトレース情報省略
@@ -275,22 +276,21 @@ function debug_log($lvl,...$items) {
         }
         return "{$dmp_msg}";
     };
-//    global $debug_log_str;
     $dmp_info = $dump_log_info($items,$no_trace);
     if(!empty($dmp_info)) {
 		$pre_dump = (CLI_DEBUG) ? "{$dmp_info}\n" : "<pre>\n{$dmp_info}\n</pre>\n";
-        switch($lvl) {
+        switch($log_lvl) {
         case -DBMSG_STDERR:  stderr($dmp_info); break;
         case -DBMSG_DIE:    //Session::CloseSession(); // Session Close before die();
 							die($pre_dump);
         case -DBMSG_DUMP:    echo $pre_dump; break;
-        case -DBMSG_NOLOG:   $lvl  = -99;
+        case -DBMSG_NOLOG:   $log_lvl  = -99;
         default:
 			if(!CLI_DEBUG) {
-	            if((-DBMSG_LEVEL < $lvl && $lvl < 0) || (CLI_DEBUG && $cli !== 0)) {
+	            if((-DBMSG_LEVEL < $log_lvl && $log_lvl < 0) || (CLI_DEBUG && $cli !== 0)) {
     	            echo "{$dmp_info}\n";
-        	    } else {     // WEB Access logging $lvl, donot worry CLI_MODE
-					MySession::syslog_SetData(sysLog::getLogName($lvl),$dmp_info,TRUE);
+        	    } else {     // WEB Access logging $log_lvl, donot worry CLI_MODE
+					MySession::syslog_SetData(sysLog::getLogName($log_lvl),$dmp_info,TRUE);
             	}
 			}
         }

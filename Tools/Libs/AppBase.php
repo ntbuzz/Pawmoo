@@ -60,7 +60,7 @@ class AppBase {
 //==============================================================================
 // dynamic construct OBJECT Class for 'modules'
 public function __get($PropName) {
-//debug_dump(['PROP'=>$PropName]);
+//_dump(['PROP'=>$PropName]);
     if(isset($this->$PropName)) return $this->$PropName;
     $prop_name = "{$PropName}Schema";
     if(class_exists($prop_name)) {

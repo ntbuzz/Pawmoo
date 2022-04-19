@@ -11,7 +11,7 @@ else {
 	session_cache_limiter('nocache');		// no-chace
 	session_save_path(SESSION_SAVE_PATH);	// session data save path in this system
 	if (!is_writable(session_save_path())) {
-		debug_die(['NOT-WRITABLE'=>session_save_path(),'STAT'=>stat(session_save_path())]);
+		_die(['NOT-WRITABLE'=>session_save_path(),'STAT'=>stat(session_save_path())]);
 	}
 	// GLOBAL SESSION LIFE LIMIT
 	if(defined('SESSION_INI_MODIFIED')) {
@@ -76,10 +76,7 @@ static function ClearSession() {
 //==============================================================================
 // セッションに保存する
 static function CloseSession() {
-	if(CLI_DEBUG) {
-		debug_dump(['ENV'=>static::$EnvData,'SYS'=>static::$SysData]);
-	}
-//	sysLog::dump(['SESSION'=>static::$EnvData,'SYSTEM'=>static::$SysData]);
+	sysLog::debug(['ENV'=>static::$EnvData,'SYS'=>static::$SysData]);
 	$_SESSION[static::$MY_SESSION_ID] = static::$EnvData;
 	$_SESSION[static::$SYS_SESSION_ID] = static::$SysData;
 }

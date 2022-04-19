@@ -100,9 +100,9 @@ private function database_Setup($host,$config) {
 }
 //===============================================================
 public function dumpEnviroment() {
-	debug_dump(['ENV'=>$this->Enviroment]);
+	_dump(['ENV'=>$this->Enviroment]);
 	foreach($this->HandlerList as $val) {
-		if(isset($this->$val)) debug_dump([$val => $this->$val]);
+		if(isset($this->$val)) _dump([$val => $this->$val]);
 	}
 }
 //===============================================================
