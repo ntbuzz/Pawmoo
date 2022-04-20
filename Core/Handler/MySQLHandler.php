@@ -69,7 +69,7 @@ public function doQuery($sql) {
 	$this->rows = $this->dbb->query($sql);
 	if($this->rows === false) {
 		echo($this->dbb->error);
-		_die(['MySQLi'=>$this->dbb,'RESULT'=>$this->rows,'SQL'=>$sql]);
+		debug_die(['MySQLi'=>$this->dbb,'RESULT'=>$this->rows,'SQL'=>$sql]);
 	}
 	return $this->rows;
 }

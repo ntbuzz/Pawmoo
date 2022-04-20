@@ -287,12 +287,12 @@ public function ViewTemplate($name,$vars = []) {
 							if(method_exists($this, $cmd)) {
 								$this->$cmd($tag,$attrs,$sec,$vars);
 							} else {
-								_dump(["*** NOT FOUND IN {$this->currentTemplate}" => $token,$cmd => [ $tag,'ATTR'=>$attrs,'SEC'=>$sec,'VARS'=>$vars]]);
+							 debug_dump(["*** NOT FOUND IN {$this->currentTemplate}" => $token,$cmd => [ $tag,'ATTR'=>$attrs,'SEC'=>$sec,'VARS'=>$vars]]);
 							}
                         } else if(method_exists($this, $func)) {
                             $this->$func($tag,$attrs,$sec,$vars);
                         } else {
-							_dump(['FAIL'=>[$func,$tag,$sec]]);
+						 debug_dump(['FAIL'=>[$func,$tag,$sec]]);
 						}
                 }
             }
@@ -493,16 +493,9 @@ public function ViewTemplate($name,$vars = []) {
 			$arg = explode(',',$attrs['value']);
 			if(count($arg)===1) $arg = $arg[0];
 		} else $arg = NULL;
-		// other module Helper CALL
-		list($mod,$method) = explode('::',$tag);
-		if($method === NULL) {
-			$method = $mod;
-			$mod = '';
-		} 
-		$mod = "{$mod}Helper";
-        if(method_exists($this->$mod,$method)) {
-			if($arg === NULL) $this->$mod->$method($sec);
-			else $this->$mod->$method($arg,$sec);
+        if(method_exists($this->Helper,$tag)) {
+			if($arg === NULL) $this->Helper->$tag($sec);
+			else $this->Helper->$tag($arg,$sec);
         } else if(method_exists('App',$tag)) {
 			if($arg === NULL) App::$tag($sec);
 			else App::$tag($arg,$sec);
@@ -524,7 +517,7 @@ public function ViewTemplate($name,$vars = []) {
     //  +dump => [ dumpvar ... ]
     private function cmd_dump($tag,$attrs,$sec,$vars) {
         $wsec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
-        _dump($wsec);
+        debug_dump($wsec);
     }
     //--------------------------------------------------------------------------
     //  include external file, for CSS/JS/...

@@ -11,7 +11,7 @@ else {
 	session_cache_limiter('nocache');		// no-chace
 	session_save_path(SESSION_SAVE_PATH);	// session data save path in this system
 	if (!is_writable(session_save_path())) {
-		_die(['NOT-WRITABLE'=>session_save_path(),'STAT'=>stat(session_save_path())]);
+		debug_die(['NOT-WRITABLE'=>session_save_path(),'STAT'=>stat(session_save_path())]);
 	}
 	// GLOBAL SESSION LIFE LIMIT
 	if(defined('SESSION_INI_MODIFIED')) {

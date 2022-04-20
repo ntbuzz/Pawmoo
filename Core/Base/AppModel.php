@@ -46,7 +46,7 @@ class AppModel extends AppObject {
         $this->setProperty(self::$DatabaseSchema);      // Set Default Database Schema Property
         $this->setProperty(static::$DatabaseSchema);    // Set Instance Property from Database Schema Array
 		if(empty($this->Schema) && $this->Handler !== 'Null') {
-			_stderr(["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
+			debug_stderr(["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
 		}
 		if(isset(static::$OptionSchema)) $this->setProperty(static::$OptionSchema);    // Set Option Schema, if exists
 		if(empty($this->Primary)) $this->Primary = 'id';	// default primary name

@@ -145,13 +145,13 @@ function get_null_value($arg) {
 }
 //==========================================================================
 // sysLogクラスのエイリアス
-function _dump($items,$trace=true) {
+function debug_dump($items,$trace=true) {
 	sysLog::dump($items,$trace);
 }
-function _die($items) {
+function debug_die($items) {
 	sysLog::halt($items);
 }
-function _stderr($items) {
+function debug_stderr($items) {
 	sysLog::stderr($items);
 }
 function _debug($items) {
@@ -161,9 +161,10 @@ function stderr($str) {
 	fputs(STDERR,"{$str}\n");
 }
 // dummy function
-function x_dump($items) {}
-function x_die($items) {}
+function xdebug_dump($items) {}
+function xdebug_die($items) {}
 function xdebug_log($items) {}
+function xdebug_stderr($items) {}
 function reuire_debugbar() {
 	$debug = __DIR__ . '/Template/View/debugbar.php';
 	require_once($debug);
