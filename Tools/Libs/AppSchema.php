@@ -42,7 +42,7 @@ class AppSchema extends AppBase {
 // Switch Schema Language
 private function SchemaSetup() {
     $this->SchemaAnalyzer();
-	x_dump([             // DEBUG LOG information
+	xdebug_dump([             // DEBUG LOG information
 		$this->ModuleName => [
 			'SCHEMA' => $this->Schema,
 			'VIEW' => $this->ViewSet,
@@ -164,35 +164,41 @@ public function CreateDatabase($exec=false) {
 	$fset[] = "PRIMARY KEY ({$this->Primary})";
 	$sql = "CREATE TABLE {$this->MyTable} (\n";
 	$sql .= implode(",\n",$fset) . "\n);";
-_dump(["SQL({$this->Handler})"=>$sql]);
+debug_dump(["SQL({$this->Handler})"=>$sql]);
 	$this->doSQL($exec,$sql);
 	// initCSVがあるときはデータロード
 }
 //==============================================================================
-//	テーブルとビューを作成
+//	依存リストを返す
 public function DependList($list) {
 	if(empty($this->Dependent)) return $list;
-	$new = array_unique(array_merge($this->Dependent,$list));
-	foreach($this->Dependent as $sub) {
-		if(!in_array($sub,$list)) $new = $this->$sub->DependList($new);
+	$new = [];
+	foreach($this->Dependent as $dep) {
+		array_unshift($new,$dep);
+		$new = $this->$dep->DependList($new);
 	}
+	$list = array_unique(array_merge($new,$list));
 	return $new;
 }
 //==============================================================================
-//	テーブルとビューを作成
-public function CreateTableView($exec=false) {
-	if(empty($this->ViewSet)) {
-		_dump([$this->ModuleName=>'has no VIEW'],false);
-		return false;
-	}
+//	ビューを削除する
+public function DropTableView($exec=false) {
 	// DROP-VIEW
 	foreach($this->ViewSet as $view) {
 		$sql = $this->dbDriver->drop_sql("VIEW",$view);
 		$this->doSQL($exec,$sql);
 	}
+}
+//==============================================================================
+//	テーブルとビューを作成
+public function CreateTableView($exec=false) {
+	if(empty($this->ViewSet)) {
+	 debug_dump([$this->ModuleName=>'has no VIEW'],false);
+		return false;
+	}
 	// CREATE-VIEW
 	foreach($this->ViewSet as $view) {
-		_dump(["Create View" => $view],false);
+	 debug_dump(["Create View" => $view],false);
 		$sql = $this->createView($view);
 		$this->doSQL($exec,$sql);
 	}
@@ -201,6 +207,7 @@ public function CreateTableView($exec=false) {
 // extract DataTable or Alternate DataView
     private function model_view($db) {
 		list($model,$field) = fix_explode('.',$db,2);
+		if(empty($field)) return [NULL,$model];
         if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
             list($tmp,$model,$n) = $m;
         } else $n = NULL;
@@ -278,6 +285,9 @@ private function createView($view) {
 				list($kk,$rel) = array_first_item($bind);
 				if(is_int($kk)) {		// Self Bind
 					list($sep,$bind) = array_first_item($rel);
+					$bind = array_map(function($v) {
+						list($tbl,$nm) = $this->model_view($v);
+						return ($tbl===NULL) ? $nm:"{$tbl}.{$nm}";},$bind);
 					if(is_int($sep)) $sep = ' ';
 		 			$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$column}";
 					list($sort,$align,$csv,$lang) = oct_extract($flag,4);
@@ -298,7 +308,7 @@ private function createView($view) {
 	}
 	$join_sql = (empty($join)) ? '':"\n".implode("\n",$join)."";
 	$sql = "CREATE VIEW {$view} AS SELECT\n".implode(",\n",$fields) ."\nFROM {$this->MyTable}{$join_sql};";
-_dump(["SQL({$this->Handler})"=>$sql]);
+debug_dump(["SQL({$this->Handler})"=>$sql]);
 	return $sql;
 }
 //==============================================================================
@@ -316,7 +326,7 @@ public function ImportCSV($data_path,$exec) {
 				$row_columns = array_keys($this->TableFields);
 				while (($data = fcsvget($handle))) {	// for Windows/UTF-8 trouble avoidance
 					if(count($data) !== count($row_columns)) {
-						_die(['CHECK-CSV'=>['FILE'=>$path,'COL'=>$row_columns,'CSV'=>$data]]);
+						debug_die(['CHECK-CSV'=>['FILE'=>$path,'COL'=>$row_columns,'CSV'=>$data]]);
 					} else {
 						$diff_arr = array_diff($data,$row_columns);
 						if(empty($diff_arr)) continue;	// maybe CSV Header line
