@@ -2,6 +2,8 @@
 //==============================================================================
 // Databas Table Create Class
 class AppSetup  extends AppBase {
+//	private $ViewExt = 'view';
+	private $ViewExt = 'list';
 	// アプリケーションツリー構造
 	const SpecFolder = [
 		'app' => [
@@ -217,7 +219,7 @@ private function GenSchema($model,$exec) {
 	if($files === false) return false;
 	$models = [];
 	foreach($files as $target) $models[] = $this->makeModelSchema($target);
-	_dump(["'Schema' class Generated"=>$models],false);
+ debug_dump(["'Schema' class Generated"=>$models],false);
 }
 //==============================================================================
 // スキーマからモデルクラス作成、省略可
@@ -229,7 +231,7 @@ private function GenModel($model,$exec) {
 	foreach($files as $target) {
 		$models[] = $this->makeModelClass($target);
 	}
-	_dump(["'Model' class Generated"=>$models],false);
+ debug_dump(["'Model' class Generated"=>$models],false);
 }
 //==============================================================================
 // schemaコマンドとmodelコマンドの連続実行、必須
@@ -247,10 +249,10 @@ private function SetupModel($model,$exec) {
 			$models[] = $module;
 			$this->GenModel($module,$exec);
 		} else {
-			_die(['FAIL STOP'=>$model]);
+			debug_die(['FAIL STOP'=>$model]);
 		}
 	}
-	_dump(["Setup Success module"=>$models],false);
+ debug_dump(["Setup Success module"=>$models],false);
 }
 //==============================================================================
 // スキーマからテーブルとビューを作成、CSVインポート、省略可
@@ -294,10 +296,13 @@ private function MakeView($model,$exec) {
 		$depend = $schema->DependList($depend);
 	}
 	$list = array_filter($depend,function($model) { return ($this->$model->ViewSet!==[]);});
+	// 関連ビューを全て削除する
 	foreach($list as $model) {
-		if(!empty($this->$model->ViewSet)) {
-			$this->$model->CreateTableView($exec);
-		}
+		$this->$model->DropTableView($exec);
+	}
+	// 関連ビューを全て作成する
+	foreach($list as $model) {
+		$this->$model->CreateTableView($exec);
 	}
 }
 //==============================================================================
@@ -360,7 +365,7 @@ private function loadCSV($path) {
 				if(is_int($no)) $Schema[$no] = $data;
 			} else {
 				if($data[0] === '-') continue;	// skip
-				_dump(['CHECK'=>$data]);
+			 debug_dump(['CHECK'=>$data]);
 			}
 		}
 		fclose($handle);
@@ -442,12 +447,12 @@ private function createSchema($fields) {
 				if(empty($rel)) break;
 				$chain = explode('.',$rel);
 				$add_link($col,$chain,$fname,[ $type,$flag, $wd]);
-				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_view"];
+				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_{$this->ViewExt}"];
 				break;
 		case 'bind':	// self-bind or Link-Bind
 				$bind = bind_array($rel,$sep);
 				$col[$fname] = [ $type, $flag, $wd ,$bind ];
-				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_view"];
+				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_{$this->ViewExt}"];
 				break;
 		case 'virtual':	// 仮想フィールドは言語依存しない
 				$col[$fname] = [ $type, $flag, $wd ];
