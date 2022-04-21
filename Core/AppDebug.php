@@ -89,11 +89,14 @@ public static function get_logs($cont) {
 }
 //==========================================================================
 // 強制ダンプ
-public static function dump($items,$trace) {
+public static function dump($items,$trace=true) {
     $flag = (CLI_DEBUG)?DBMSG_STDERR:DBMSG_DUMP;
 	if(!$trace) $flag |= DBMSG_NOTRACE;
     debug_log($flag,$items);
 }
+//==========================================================================
+// ダミーダンプ
+public static function xdump($items,$trace=true) {}
 //==========================================================================
 // デバッグレベルへのダンプ
 public static function debugLvl($items) {
@@ -145,26 +148,15 @@ function get_null_value($arg) {
 }
 //==========================================================================
 // sysLogクラスのエイリアス
-function debug_dump($items,$trace=true) {
-	sysLog::dump($items,$trace);
-}
 function debug_die($items) {
 	sysLog::halt($items);
-}
-function debug_stderr($items) {
-	sysLog::stderr($items);
-}
-function _debug($items) {
-	sysLog::debugLvl($items);
 }
 function stderr($str) {
 	fputs(STDERR,"{$str}\n");
 }
 // dummy function
-function xdebug_dump($items) {}
 function xdebug_die($items) {}
 function xdebug_log($items) {}
-function xdebug_stderr($items) {}
 function reuire_debugbar() {
 	$debug = __DIR__ . '/Template/View/debugbar.php';
 	require_once($debug);
