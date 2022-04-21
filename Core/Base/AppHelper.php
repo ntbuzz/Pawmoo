@@ -61,7 +61,8 @@ class RecordColumns {
 			list($alias,$align,$sort,$wd) = $val;
 			$pos = TableAlignAttrs[$align];
 			$style = ($wd > 0) ? " style='min-width:{$wd}px;max-width:{$wd}px;'" : '';
-			echo "<td nowrap{$pos}{$style}>{$this->$key}</td>";
+			$dat = ($this->$key=='') ? '&nbsp;' : $this->$key;
+			echo "<td nowrap{$pos}{$style}>{$dat}</td>";
 		}
 		echo "</tr>\n";
 	}
@@ -398,7 +399,6 @@ function CheckRadioMenu($param,$menu) {
 //==============================================================================
 // CSV Output for Model->Records
 function CsvResponse($file_name,$csv) {
-xdebug_die(['FILE'=>$file_name,'CSV'=>$csv]);
 	$data = pack('C*',0xEF,0xBB,0xBF) . implode("\n",$csv);	// BOM付きUTF-8
     header('Content-Type: application/octet-stream');
     header("Content-Disposition: attachment; filename={$file_name}.csv");
