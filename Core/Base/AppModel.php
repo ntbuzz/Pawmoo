@@ -46,7 +46,7 @@ class AppModel extends AppObject {
         $this->setProperty(self::$DatabaseSchema);      // Set Default Database Schema Property
         $this->setProperty(static::$DatabaseSchema);    // Set Instance Property from Database Schema Array
 		if(empty($this->Schema) && $this->Handler !== 'Null') {
-			debug_stderr(["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
+			sysLog::stderr(["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
 		}
 		if(isset(static::$OptionSchema)) $this->setProperty(static::$OptionSchema);    // Set Option Schema, if exists
 		if(empty($this->Primary)) $this->Primary = 'id';	// default primary name
@@ -65,7 +65,7 @@ class AppModel extends AppObject {
         $this->DateFormat = $dFormat;         	// Date format from DB-Driver
         $this->TimeFormat = $tFormat;         	// Time format from DB-Driver
         $this->DateTimeFormat = $dtFormat;		// DateTime
-		$this->dbDriver->fieldAlias->lang_alternate = $this->Lang_Alternate;
+		$this->dbDriver->lang_alternate = $this->Lang_Alternate;
 		if(method_exists($this,'virtual_field')) {
 			$this->dbDriver->register_method($this,'virtual_field');
 		}
@@ -97,7 +97,10 @@ public function ResetSchema() {
             "Header"    => $this->HeaderSchema,
 			// "Table"		=> $this->TableFields,
 			// "Model"		=> $this->ModelFields,
-            "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
+            "Locale-Bind"   => 	[
+				'Locale'	=> $this->dbDriver->lang_alias,
+				'Relation'	=> $this->dbDriver->relations,
+			],
 			"Selection"		=> $this->SelectionDef,
         ]
     ]);
@@ -142,7 +145,7 @@ protected function ResetLocation() {
 			}
 		}
 	}
-	$this->dbDriver->fieldAlias->SetupAlias($this->locale_columns);
+	$this->dbDriver->setupFieldTransfer($this->locale_columns);
 }
 //==============================================================================
 // extract DataTable or Alternate DataView
@@ -527,7 +530,7 @@ public function is_valid(&$row) {
     private function field_lang_alias($row) {
         $this->fields = array();
         foreach($row as $key => $val) {
-            $alias = ($this->AliasMode) ? $this->dbDriver->fieldAlias->get_lang_alias($key) :$key;
+            $alias = ($this->AliasMode) ? $this->dbDriver->get_lang_alias($key) :$key;
             $this->fields[$alias] = $val;
         }
     }

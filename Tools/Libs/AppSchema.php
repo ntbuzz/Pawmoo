@@ -42,14 +42,14 @@ class AppSchema extends AppBase {
 // Switch Schema Language
 private function SchemaSetup() {
     $this->SchemaAnalyzer();
-	xdebug_dump([             // DEBUG LOG information
-		$this->ModuleName => [
-			'SCHEMA' => $this->Schema,
-			'VIEW' => $this->ViewSet,
-			'TABLE' => [ $this->TableFields ],	// row table field
-			'FIELD' => [ $this->ModelFields ],	// model field
-		]
-	]);
+	// sysLog::stderr([             // DEBUG LOG information
+	// 	$this->ModuleName => [
+	// 		'SCHEMA' => $this->Schema,
+	// 		'VIEW' => $this->ViewSet,
+	// 		'TABLE' => [ $this->TableFields ],	// row table field
+	// 		'FIELD' => [ $this->ModelFields ],	// model field
+	// 	]
+	// ]);
 }
 //==============================================================================
 //	スキーマ解析
@@ -119,7 +119,7 @@ protected function ResetLocation() {
 			}
 		}
 	}
-	$this->dbDriver->fieldAlias->SetupAlias($this->locale_columns);
+	$this->dbDriver->setupFieldTransfer($this->locale_columns);
 }
 //==============================================================================
 // execute SQL
@@ -164,7 +164,6 @@ public function CreateDatabase($exec=false) {
 	$fset[] = "PRIMARY KEY ({$this->Primary})";
 	$sql = "CREATE TABLE {$this->MyTable} (\n";
 	$sql .= implode(",\n",$fset) . "\n);";
-debug_dump(["SQL({$this->Handler})"=>$sql]);
 	$this->doSQL($exec,$sql);
 	// initCSVがあるときはデータロード
 }
@@ -178,7 +177,7 @@ public function DependList($list) {
 		$new = $this->$dep->DependList($new);
 	}
 	$list = array_unique(array_merge($new,$list));
-	return $new;
+	return $list;
 }
 //==============================================================================
 //	ビューを削除する
@@ -193,12 +192,12 @@ public function DropTableView($exec=false) {
 //	テーブルとビューを作成
 public function CreateTableView($exec=false) {
 	if(empty($this->ViewSet)) {
-	 debug_dump([$this->ModuleName=>'has no VIEW'],false);
+	 sysLog::stderr([$this->ModuleName=>'has no VIEW'],false);
 		return false;
 	}
 	// CREATE-VIEW
 	foreach($this->ViewSet as $view) {
-	 debug_dump(["Create View" => $view],false);
+	 sysLog::stderr(["Create View" => $view],false);
 		$sql = $this->createView($view);
 		$this->doSQL($exec,$sql);
 	}
@@ -308,7 +307,7 @@ private function createView($view) {
 	}
 	$join_sql = (empty($join)) ? '':"\n".implode("\n",$join)."";
 	$sql = "CREATE VIEW {$view} AS SELECT\n".implode(",\n",$fields) ."\nFROM {$this->MyTable}{$join_sql};";
-debug_dump(["SQL({$this->Handler})"=>$sql]);
+sysLog::stderr(["SQL({$this->Handler})"=>$sql]);
 	return $sql;
 }
 //==============================================================================
