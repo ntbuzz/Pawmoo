@@ -287,12 +287,12 @@ public function ViewTemplate($name,$vars = []) {
 							if(method_exists($this, $cmd)) {
 								$this->$cmd($tag,$attrs,$sec,$vars);
 							} else {
-							 debug_dump(["*** NOT FOUND IN {$this->currentTemplate}" => $token,$cmd => [ $tag,'ATTR'=>$attrs,'SEC'=>$sec,'VARS'=>$vars]]);
+							 sysLog::stderr(["*** NOT FOUND IN {$this->currentTemplate}" => $token,$cmd => [ $tag,'ATTR'=>$attrs,'SEC'=>$sec,'VARS'=>$vars]]);
 							}
                         } else if(method_exists($this, $func)) {
                             $this->$func($tag,$attrs,$sec,$vars);
                         } else {
-						 debug_dump(['FAIL'=>[$func,$tag,$sec]]);
+						 sysLog::stderr(['FAIL'=>[$func,$tag,$sec]]);
 						}
                 }
             }
@@ -517,7 +517,7 @@ public function ViewTemplate($name,$vars = []) {
     //  +dump => [ dumpvar ... ]
     private function cmd_dump($tag,$attrs,$sec,$vars) {
         $wsec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
-        debug_dump($wsec);
+        sysLog::dump($wsec,false);
     }
     //--------------------------------------------------------------------------
     //  include external file, for CSS/JS/...

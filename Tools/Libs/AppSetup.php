@@ -219,7 +219,7 @@ private function GenSchema($model,$exec) {
 	if($files === false) return false;
 	$models = [];
 	foreach($files as $target) $models[] = $this->makeModelSchema($target);
- debug_dump(["'Schema' class Generated"=>$models],false);
+ 	sysLog::stderr(["'Schema' class Generated"=>$models],false);
 }
 //==============================================================================
 // スキーマからモデルクラス作成、省略可
@@ -231,7 +231,7 @@ private function GenModel($model,$exec) {
 	foreach($files as $target) {
 		$models[] = $this->makeModelClass($target);
 	}
- debug_dump(["'Model' class Generated"=>$models],false);
+ 	sysLog::stderr(["'Model' class Generated"=>$models],false);
 }
 //==============================================================================
 // schemaコマンドとmodelコマンドの連続実行、必須
@@ -252,7 +252,7 @@ private function SetupModel($model,$exec) {
 			debug_die(['FAIL STOP'=>$model]);
 		}
 	}
- debug_dump(["Setup Success module"=>$models],false);
+ 	sysLog::stderr(["Setup Success module"=>$models],false);
 }
 //==============================================================================
 // スキーマからテーブルとビューを作成、CSVインポート、省略可
@@ -365,7 +365,7 @@ private function loadCSV($path) {
 				if(is_int($no)) $Schema[$no] = $data;
 			} else {
 				if($data[0] === '-') continue;	// skip
-			 debug_dump(['CHECK'=>$data]);
+			 sysLog::stderr(['CHECK'=>$data]);
 			}
 		}
 		fclose($handle);
