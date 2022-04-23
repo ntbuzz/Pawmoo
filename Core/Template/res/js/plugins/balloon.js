@@ -252,7 +252,7 @@ $.fn.PopupBaloonSetup = function () {
 			var icon_obj = $('#' + icon);
 			if (ev == "click") icon_obj.css("cursor", "help");
 			icon_obj.off(ev).on(ev, function () {
-				if (ref_obj.hasClass('disabled')) return false;
+				if (ref_obj.hasClass('balloon-disabled')) return false;
 				var disp_id = ref_obj.attr('data-value');		// 表示するタグID
 				// 選択タグがあればそれをバルーンにする、なければ自身がバルーン
 				if (typeof disp_id === 'string') {
