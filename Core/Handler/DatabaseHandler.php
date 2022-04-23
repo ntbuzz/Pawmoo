@@ -13,22 +13,6 @@ require_once('Core/Handler/PostgreHandler.php');
 require_once('Core/Handler/NullHandler.php');
 
 //==============================================================================
-// field ALIAS and BIND-columns class
-class fieldAlias {
-	public $lang_alternate = FALSE;			// use origin field, when lang field empty
-	private	$lang_alias = [];
-//==============================================================================
-// Setup ALIAS parameter,and BIND-column parameter
-public function setupFieldTransfer($alias) {
-	$this->lang_alias = $alias;
-}
-public function GetAlias() {
-	return [ 'Locale' => $this->lang_alias];
-}
-
-// End-OF-CLASS
-}
-//==============================================================================
 // データベースの接続情報を保持するクラス
 // 全体で１度だけ呼び出す
 class DatabaseHandler {

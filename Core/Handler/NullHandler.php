@@ -16,7 +16,6 @@ class NullHandler {
 //	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table,$primary,$db=NULL) {
 		$this->fields = [];
-		$this->fieldAlias = new fieldAlias();
 	}
 	protected function Connect($table) { }
 	protected function getLastError() { return ''; }
