@@ -259,6 +259,7 @@ public function findRecord($cond,$use_relations = FALSE,$sort = [],$raw=false) {
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	$sql = $this->sql_JoinTable($use_relations,$table);
 	if(!empty($sort)) {
+		if(is_scalar($sort)) $sort = [ $sort => SORTBY_ASCEND];
 		$orderby = "";
 		foreach($sort as $key => $val) {
 			$order = ($val === SORTBY_DESCEND) ? "desc" : "asc";
