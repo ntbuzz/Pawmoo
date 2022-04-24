@@ -148,6 +148,9 @@ function get_null_value($arg) {
 }
 //==========================================================================
 // sysLogクラスのエイリアス
+function debug_dump($items) {
+	sysLog::dump($items);
+}
 function debug_die($items) {
 	sysLog::halt($items);
 }
@@ -155,6 +158,7 @@ function stderr($str) {
 	fputs(STDERR,"{$str}\n");
 }
 // dummy function
+function xdebug_dump($items) {}
 function xdebug_die($items) {}
 function xdebug_log($items) {}
 function reuire_debugbar() {
