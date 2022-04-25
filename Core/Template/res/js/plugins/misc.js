@@ -403,6 +403,7 @@ $.fn.InitPopupSet = function () {
 			buttonImageOnly: true,           // 画像として表示
 			showOn: "both",                   // カレンダー呼び出し元の定義
 			buttonText: "${#.core.ToolTip}", // ツールチップ表示文言
+			showButtonPanel: true,				// todayボタン表示
 			showMonthAfterYear: true,
 		};
 		if (self.hasClass('no_icon')) {
