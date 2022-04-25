@@ -95,9 +95,6 @@ public static function dump($items,$trace=true) {
     debug_log($flag,$items);
 }
 //==========================================================================
-// ダミーダンプ
-public static function xdump($items,$trace=true) {}
-//==========================================================================
 // デバッグレベルへのダンプ
 public static function debugLvl($items) {
     debug_log(DBMSG_DEBUG,$items);
@@ -113,6 +110,12 @@ public static function halt($items) {
 public static function stderr($items) {
     debug_log(DBMSG_STDERR,$items);
 }
+//==========================================================================
+// ダミーダンプ
+public static function xdump($items,$trace=true) {}
+//==========================================================================
+// ダミーダンプ
+public static function xstderr($items,$trace=true) {}
 
 }
 //==========================================================================
@@ -148,8 +151,8 @@ function get_null_value($arg) {
 }
 //==========================================================================
 // sysLogクラスのエイリアス
-function debug_dump($items) {
-	sysLog::dump($items);
+function debug_dump($items,$trace=true) {
+	sysLog::dump($items,$trace);
 }
 function debug_die($items) {
 	sysLog::halt($items);
