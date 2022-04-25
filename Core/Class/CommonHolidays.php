@@ -131,7 +131,7 @@ class CommonHolidays {
 	}
 //==============================================================================
 // 休日判定
-	private function isholiday($dt) {
+	public function isholiday($dt) {
 		$yyyy = intval(date('Y',$dt));
 		if(array_key_exists($yyyy,$this->HolidayTable)) {
 			$begday = mktime(0,0,0,1,1,$yyyy);		// 1月1日を起点にする
