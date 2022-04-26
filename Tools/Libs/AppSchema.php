@@ -2,6 +2,8 @@
 //==============================================================================
 // Databas Table Create Class
 class AppSchema extends AppBase {
+	protected $DatabaseName;		// different dbname from GlobalConfig
+	public $dbHandler;
 	public $Language = [];		// Language list for safety
 	public $ModelFields;		// read-only column => view column
 	public $TableFields;		// read/write column => table column
@@ -23,25 +25,31 @@ class AppSchema extends AppBase {
 			list($table,$view) = $this->DataTable;
 			if($table !== $view) array_unshift($viewset, $view);
 		} else $table = $this->DataTable;
+		$this->dbHandler = $this->Handler;
 		$this->MyTable = $table;
 		$this->ViewSet = $viewset;
+		// multi database within same HANDLER
+		list($base,$customdb) = fix_explode('.',$this->Handler,2,NULL);
+		$this->Handler = $base;
+		$this->DatabaseName = $customdb;
         $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->MyTable,$this->Primary);        // connect Database Driver
+        $this->dbDriver = new $driver($this->MyTable,$this->Primary,$customdb);        // connect Database Driver
 		$this->SchemaSetup();
 		echo sprintf("  * %-14s schema use %s Handler.\n",$this->ModuleName,$this->Handler);
+		if(!empty($customdb)) echo "Connect-DB:{$customdb}\n";
     }
 //==============================================================================
 // Switch Schema Language
 private function SchemaSetup() {
     $this->SchemaAnalyzer();
-	xdebug_dump([             // DEBUG LOG information
-		$this->ModuleName => [
-			'SCHEMA' => $this->Schema,
-			'VIEW' => $this->ViewSet,
-			'TABLE' => [ $this->TableFields ],	// row table field
-			'FIELD' => [ $this->ModelFields ],	// model field
-		]
-	]);
+	// sysLog::stderr([             // DEBUG LOG information
+	// 	$this->ModuleName => [
+	// 		'SCHEMA' => $this->Schema,
+	// 		'VIEW' => $this->ViewSet,
+	// 		'TABLE' => [ $this->TableFields ],	// row table field
+	// 		'FIELD' => [ $this->ModelFields ],	// model field
+	// 	]
+	// ]);
 }
 //==============================================================================
 //	スキーマ解析
@@ -111,7 +119,7 @@ protected function ResetLocation() {
 			}
 		}
 	}
-	$this->dbDriver->fieldAlias->SetupAlias($this->locale_columns);
+	$this->dbDriver->setupFieldTransfer($this->locale_columns);
 }
 //==============================================================================
 // execute SQL
@@ -156,35 +164,40 @@ public function CreateDatabase($exec=false) {
 	$fset[] = "PRIMARY KEY ({$this->Primary})";
 	$sql = "CREATE TABLE {$this->MyTable} (\n";
 	$sql .= implode(",\n",$fset) . "\n);";
-debug_dump(["SQL({$this->Handler})"=>$sql]);
 	$this->doSQL($exec,$sql);
 	// initCSVがあるときはデータロード
 }
 //==============================================================================
-//	テーブルとビューを作成
+//	依存リストを返す
 public function DependList($list) {
 	if(empty($this->Dependent)) return $list;
-	$new = array_unique(array_merge($this->Dependent,$list));
-	foreach($this->Dependent as $sub) {
-		if(!in_array($sub,$list)) $new = $this->$sub->DependList($new);
+	$new = [];
+	foreach($this->Dependent as $dep) {
+		array_unshift($new,$dep);
+		$new = $this->$dep->DependList($new);
 	}
-	return $new;
+	$list = array_unique(array_merge($new,$list));
+	return $list;
 }
 //==============================================================================
-//	テーブルとビューを作成
-public function CreateTableView($exec=false) {
-	if(empty($this->ViewSet)) {
-		debug_dump([$this->ModuleName=>'has no VIEW'],false);
-		return false;
-	}
+//	ビューを削除する
+public function DropTableView($exec=false) {
 	// DROP-VIEW
 	foreach($this->ViewSet as $view) {
 		$sql = $this->dbDriver->drop_sql("VIEW",$view);
 		$this->doSQL($exec,$sql);
 	}
+}
+//==============================================================================
+//	テーブルとビューを作成
+public function CreateTableView($exec=false) {
+	if(empty($this->ViewSet)) {
+	 sysLog::stderr([$this->ModuleName=>'has no VIEW'],false);
+		return false;
+	}
 	// CREATE-VIEW
 	foreach($this->ViewSet as $view) {
-		debug_dump(["Create View" => $view],false);
+	 sysLog::stderr(["Create View" => $view],false);
 		$sql = $this->createView($view);
 		$this->doSQL($exec,$sql);
 	}
@@ -193,6 +206,7 @@ public function CreateTableView($exec=false) {
 // extract DataTable or Alternate DataView
     private function model_view($db) {
 		list($model,$field) = fix_explode('.',$db,2);
+		if(empty($field)) return [NULL,$model];
         if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
             list($tmp,$model,$n) = $m;
         } else $n = NULL;
@@ -270,7 +284,18 @@ private function createView($view) {
 				list($kk,$rel) = array_first_item($bind);
 				if(is_int($kk)) {		// Self Bind
 					list($sep,$bind) = array_first_item($rel);
+					$bind = array_map(function($v) {
+						list($tbl,$nm) = $this->model_view($v);
+						return ($tbl===NULL) ? $nm:"{$tbl}.{$nm}";},$bind);
+					if(is_int($sep)) $sep = ' ';
 		 			$fields[] = $this->dbDriver->fieldConcat($sep,$bind) . " as {$column}";
+					list($sort,$align,$csv,$lang) = oct_extract($flag,4);
+					if($lang) {
+						foreach($this->Language as $lo) {
+							$lo_bind = array_map(function($v) use(&$lo) { return "{$v}_{$lo}";},$bind);
+							$fields[] = $this->dbDriver->fieldConcat($sep,$lo_bind) . " as {$column}_{$lo}";
+						}
+					}
 				} else {	// リレーション
 					$fields[] = "{$this->MyTable}.\"$column\"";
 					$relations($this->MyTable,$column,$bind);
@@ -282,7 +307,7 @@ private function createView($view) {
 	}
 	$join_sql = (empty($join)) ? '':"\n".implode("\n",$join)."";
 	$sql = "CREATE VIEW {$view} AS SELECT\n".implode(",\n",$fields) ."\nFROM {$this->MyTable}{$join_sql};";
-debug_dump(["SQL({$this->Handler})"=>$sql]);
+sysLog::stderr(["SQL({$this->Handler})"=>$sql]);
 	return $sql;
 }
 //==============================================================================

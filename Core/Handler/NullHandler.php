@@ -9,11 +9,13 @@ class NullHandler {
 	];
 	public	$columns = [];       // record column data
 	public 	$raw_columns=[];   // target real column
+	public	$relations;			// for compatible othre handler
+	public	$lang_alias = [];	// from fieldAlias:language field.
+	public	$lang_alternate = FALSE; // from fieldAlias:use orijin field when lang-field empty.
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table,$primary,$db=NULL) {
 		$this->fields = [];
-		$this->fieldAlias = new fieldAlias();
 	}
 	protected function Connect($table) { }
 	protected function getLastError() { return ''; }
@@ -28,7 +30,7 @@ public function fetchDB() { return [];}
 public function fieldConcat($sep,$arr) { return "";}
 public function drop_sql($kind,$table) { return "";}
 public function truncate_sql($table) { return "";}		// TRUNCATE SQL
-public function setupRelations($relations) { $this->relations = $relations; }
+public function setupFieldTransfer($alias,$relations=NULL) { $this->lang_alias = $alias; $this->relations = $relations; }
 public function SetPaging($pagesize, $pagenum) { }
 public function getValueLists($table,$ref,$id,$cond) { return []; }
 public function getRecordValue($row,$relations) { return []; }

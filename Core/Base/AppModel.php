@@ -20,6 +20,7 @@ class AppModel extends AppObject {
     ];
     protected $dbDriver;            // Database Driver
     protected $fields;              // Record-Data all fields value
+	protected $DatabaseName;		// different dbname from GlobalConfig
 	public $HeaderSchema = [];		// Table Viewing Header Columns
 	public $TableFields = [];		// Table Columns List with attributes
 	public $ModelFields;			// Model class field within alias/bind/virtual
@@ -45,7 +46,7 @@ class AppModel extends AppObject {
         $this->setProperty(self::$DatabaseSchema);      // Set Default Database Schema Property
         $this->setProperty(static::$DatabaseSchema);    // Set Instance Property from Database Schema Array
 		if(empty($this->Schema) && $this->Handler !== 'Null') {
-			debug_stderr(["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
+			sysLog::stderr(["BAD Schema"=>static::$DatabaseSchema,"CLASS"=>$this->ClassName]);
 		}
 		if(isset(static::$OptionSchema)) $this->setProperty(static::$OptionSchema);    // Set Option Schema, if exists
 		if(empty($this->Primary)) $this->Primary = 'id';	// default primary name
@@ -54,13 +55,17 @@ class AppModel extends AppObject {
             $this->DataTable = $this->ModelTables[$db_key]; // DataTable SWITCH
         }
         $this->fields = [];
+		// multi database within same HANDLER
+		list($base,$customdb) = fix_explode('.',$this->Handler,2,NULL);
+		$this->Handler = $base;
+		$this->DatabaseName = $customdb;
         $driver = $this->Handler . 'Handler';
-        $this->dbDriver = new $driver($this->DataTable,$this->Primary); // connect Database Driver
+        $this->dbDriver = new $driver($this->DataTable,$this->Primary,$customdb); // connect Database Driver
 		list($dFormat,$tFormat,$dtFormat) = array_keys_value($this->dbDriver->DateFormat,['Date','Time','TimeStamp']);
         $this->DateFormat = $dFormat;         	// Date format from DB-Driver
         $this->TimeFormat = $tFormat;         	// Time format from DB-Driver
         $this->DateTimeFormat = $dtFormat;		// DateTime
-		$this->dbDriver->fieldAlias->lang_alternate = $this->Lang_Alternate;
+		$this->dbDriver->lang_alternate = $this->Lang_Alternate;
 		if(method_exists($this,'virtual_field')) {
 			$this->dbDriver->register_method($this,'virtual_field');
 		}
@@ -92,7 +97,10 @@ public function ResetSchema() {
             "Header"    => $this->HeaderSchema,
 			// "Table"		=> $this->TableFields,
 			// "Model"		=> $this->ModelFields,
-            "Locale-Bind"   => $this->dbDriver->fieldAlias->GetAlias(),
+            "Locale-Bind"   => 	[
+				'Locale'	=> $this->dbDriver->lang_alias,
+				'Relation'	=> $this->dbDriver->relations,
+			],
 			"Selection"		=> $this->SelectionDef,
         ]
     ]);
@@ -137,7 +145,7 @@ protected function ResetLocation() {
 			}
 		}
 	}
-	$this->dbDriver->fieldAlias->SetupAlias($this->locale_columns);
+	$this->dbDriver->setupFieldTransfer($this->locale_columns);
 }
 //==============================================================================
 // extract DataTable or Alternate DataView
@@ -254,7 +262,10 @@ public function GetRecord($num,$join=FALSE,$values=FALSE) {
         else $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],TRUE);
     } else $this->getRecordBy($this->Primary,$num);
     $this->RecData= $this->fields;
-    if($values) $this->GetValueList();
+    if($values) {
+		$this->GetValueList();
+		debug_log(DBMSG_MODEL,['SELECT'=>$this->Select]);
+	}
 }
 //==============================================================================
 // Selection define condition change.
@@ -298,11 +309,9 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 			case true:
 			case SORTBY_ASCEND:	asort($this->Select[$key_name]); break;
 			case SORTBY_DESCEND:arsort($this->Select[$key_name]); break;
-			default: debug_log(8,['SORT-NONE'=>$this->Select[$key_name]]);
 			}
 		}
 	}
-	debug_log(false,['Select'=>$this->Select]);
 }
 //==============================================================================
 //   Get Relation Table fields data list.
@@ -364,6 +373,7 @@ public function getCount($cond) {
 public function SelectFinder($chain, $filter, $cond, $sort=[]) {
 	$filter = $this->normalize_filter($filter);
 	list($id,$fn,$pid) = array_alternative($filter,3);
+	if($sort === true) $sort = [ $this->Primary => SORTBY_ASCEND];
 	$data = [];
     $this->dbDriver->findRecord($cond,false,$sort);
     while (($fields = $this->dbDriver->fetchDB())) {
@@ -520,7 +530,7 @@ public function is_valid(&$row) {
     private function field_lang_alias($row) {
         $this->fields = array();
         foreach($row as $key => $val) {
-            $alias = ($this->AliasMode) ? $this->dbDriver->fieldAlias->get_lang_alias($key) :$key;
+            $alias = ($this->AliasMode) ? $this->dbDriver->get_lang_alias($key) :$key;
             $this->fields[$alias] = $val;
         }
     }

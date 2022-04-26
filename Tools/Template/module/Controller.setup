@@ -1,0 +1,18 @@
+<?php
+
+class %module%Controller extends AppController {
+// 制御変数
+	public $defaultAction = 'List';		// Omitted URI, Default Action 
+	public $disableAction = [];			// Ban Action
+	protected $needLogin = FALSE;		// Login NEED flag
+	protected $aliasAction = [];		// Action Method Alias [ Alias => Real,... ]
+	protected $discardParams = [];		// Params Discard method
+    protected $noLogging = NULL;		// execute log save exception method list ex. [ 'List',... ]
+	protected $LoggingMethod = NULL;	// execute log save Model "class.method". ex. 'Access.Logging'
+	protected $BypassMethod = '';		// Login bypass method,if NEDD LOGIN(ex.Logout)
+	protected $AutoLogin = '';		    // DefaultUser AutoLogin method,if NEDD LOGIN(ex. MailsendAction)
+//==============================================================================
+// メソッド定義
+
+
+}

@@ -21,7 +21,9 @@ abstract class SQLHandler {	// extends SqlCreator {
 	private	$startrec;		// start record number
 	private	$limitrec;		// get record count
 	private $handler;		// Databas Handler Name
-	public $relations;		// relation tables
+	public	$relations;		// relation tables
+	public	$lang_alias = [];	// from fieldAlias:language field.
+	public	$lang_alternate = FALSE; // from fieldAlias:use orijin field when lang-field empty.
 	private $LastSQL;		// Last Query WHERE term
 	protected $Primary;		// for FUTURE
 	protected $LastCond;	// for DEBUG
@@ -50,7 +52,6 @@ function __construct($table,$handler,$primary,$db=NULL) {
 		$this->load_columns();
 		$this->handler = $handler;
 		$this->Primary = $primary;
-		$this->fieldAlias = new fieldAlias();
 	}
 //==============================================================================
 // load columns info
@@ -80,13 +81,6 @@ public function register_method($class,$method) {
 	} else {
 		echo "'{$cls}' has not method '{$method}'\n";
 	}
-	// if (is_subclass_of($class, 'AppModel',false)) {
-	// 	if(method_exists($class,$method)) {
-	// 		$this->register_callback = [$class,$method];
-	// 	}
-	// } else {
-	// 	echo "'{$cls}' is not sub-class AppModel\n";
-	// }
 }
 //==============================================================================
 // DEBUGGING for SQL Execute
@@ -96,8 +90,23 @@ public function register_method($class,$method) {
 		debug_log(DBMSG_HANDLER,["SQL-Execute ({$func} @ {$this->table})"=> [ 'SORT'=>$sort,'SQL' => $sql,'WHERE'=>$where]]);
 	}
 //==============================================================================
+// Move to here from fieldAlias class.
+//	if exists LOCALE alias, get LOCALE fields name
+public function get_lang_alias($field_name) {
+     return (array_key_exists($field_name,$this->lang_alias)) ? $this->lang_alias[$field_name] : $field_name;
+}
+//==============================================================================
+// ALIAS fields replace to standard field, and BIND-column to record field
+public function to_lang_alias(&$row) {
+    foreach($this->lang_alias as $key => $lang) {
+        if(!empty($row[$lang]) || $this->lang_alternate === FALSE) $row[$key] = $row[$lang];
+        unset($row[$lang]);
+    }
+}
+//==============================================================================
 // setupRelations: relation table reminder
-public function setupRelations($relations) {
+public function setupFieldTransfer($alias,$relations=NULL) {
+	$this->lang_alias = $alias;
 	$this->relations = $relations;
 }
 //==============================================================================
@@ -116,7 +125,7 @@ public function doTruncate() {
 // fetchDB: get record data , and replace alias and bind column
 public function fetchDB() {
 	if($row = $this->fetch_array()) {
-		$this->fieldAlias->to_alias_bind($row);
+		$this->to_lang_alias($row);
 		list($obj,$method) = $this->register_callback;
 		if ($obj !== NULL) $obj->$method($row);	// already checked by refistered
 	}
@@ -126,7 +135,7 @@ public function fetchDB() {
 // fetch_locale: get record data , and replace alias
 public function fetch_locale() {
 	if($row = $this->fetch_array()) {
-		$this->fieldAlias->to_lang_alias($row);
+		$this->to_lang_alias($row);
 	}
 	return $row;
 }
@@ -143,7 +152,6 @@ public function getValueLists($table,$ref,$id,$cond=NULL) {
 	$sql = $this->sql_QueryValues($table,$ref,$id,$cond);
 	$this->execSQL($sql);
 	$values = array();
-//	debug_log(9,["VALUE-LIST" => [$table,$ref,$id,$sql,'REL'=>$this->relations,'ALIAS'=>$this->fieldAlias->GetAlias()]]);
 	while ($row = $this->fetch_array()) {	// other table refer is not bind!
 		$key = $row[$ref];
 		if(!empty($key)) $values[$key] = $row[$id];
@@ -251,6 +259,7 @@ public function findRecord($cond,$use_relations = FALSE,$sort = [],$raw=false) {
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	$sql = $this->sql_JoinTable($use_relations,$table);
 	if(!empty($sort)) {
+		if(is_scalar($sort)) $sort = [ $sort => SORTBY_ASCEND];
 		$orderby = "";
 		foreach($sort as $key => $val) {
 			$order = ($val === SORTBY_DESCEND) ? "desc" : "asc";
@@ -307,7 +316,7 @@ public function deleteRecord($wh) {
 		$where = empty($cond) ? "" : $this->sql_makeWHERE($cond,$table);
 		$alias = [];
 		foreach([$ref,$id] as $field) {
-			$key = $this->fieldAlias->get_lang_alias($field);
+			$key = $this->get_lang_alias($field);
 			$alias[$field] = $key;
 		}
 		$fields = array_map(function($k,$v)  {
@@ -434,7 +443,7 @@ protected function fetch_convert($data) {
 			$multi_field = function($key,$op,$table,$val) {
 				// field name arranged
 				$expr = array_map( function($v) use(&$table) {
-					$cmp = $this->fieldAlias->get_lang_alias($v);
+					$cmp = $this->get_lang_alias($v);
 					return "{$table}.\"{$cmp}\"";
 				},str_explode('+',$key));
 				if($op === NULL) {		// need LIKE or NOT LIKE

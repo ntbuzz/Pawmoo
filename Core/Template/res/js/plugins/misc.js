@@ -393,7 +393,7 @@ $.fn.InitPopupSet = function () {
 	this.find(".calendar").each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var fmt = $(this).attr('class');
-		var dt_fmt = fmt.pickWord('date') ? 'yy-mm-dd' : 'yy-mm-dd 00:00:00';
+		var dt_fmt = fmt.pickWord('date') ? 'yy/mm/dd' : 'yy/mm/dd 00:00:00';
 		var date_form = {
 			dateFormat: dt_fmt,
 			monthNames: [ '${#.core.monthNames}' ],
@@ -403,6 +403,7 @@ $.fn.InitPopupSet = function () {
 			buttonImageOnly: true,           // 画像として表示
 			showOn: "both",                   // カレンダー呼び出し元の定義
 			buttonText: "${#.core.ToolTip}", // ツールチップ表示文言
+			showButtonPanel: true,				// todayボタン表示
 			showMonthAfterYear: true,
 		};
 		if (self.hasClass('no_icon')) {

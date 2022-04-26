@@ -32,9 +32,11 @@ define('RESOURCE_ID','Resource');
 class MySession {
 	public static $EnvData;
 	public static $SysData;			// for SysLog, Resource Push
+	public static $ShmData;		// for app shared memry
 	public static $SESSION_LIFE;	// session data alived limit time
 	public static $MY_SESSION_ID;	// public prop is DEBUG for Main.php
 	private static $SYS_SESSION_ID;
+	private static $SHM_SESSION_ID;	// shared memory session env
 	private static $Controller;
 //==============================================================================
 // static クラスにおける初期化処理
@@ -45,12 +47,23 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 
 	$appname = strtolower($appname);
 	static::$Controller = (empty($controller)) ? 'Res' : $controller;
-	static::$MY_SESSION_ID = $session_id = SESSION_PREFIX . "_{$appname}";
-	static::$SYS_SESSION_ID= $session_sys="{$session_id}_sys";
-	$session_life = "{$session_id}_life";
-	list($s_limit,$env,$sys) = array_keys_value($_SESSION,[$session_life,$session_id,$session_sys],[0,[],[]]);
+	$session_id = SESSION_PREFIX . "_{$appname}";
+	$session_id_set = [
+		$session_id,
+		"{$session_id}_sys",
+		"{$session_id}_life",
+		SESSION_PREFIX . "_share_mem",
+	];
+	list(static::$MY_SESSION_ID,static::$SYS_SESSION_ID,$session_life,static::$SHM_SESSION_ID) = $session_id_set;
+	list($env,static::$SysData,$s_limit,static::$ShmData) = array_keys_value($_SESSION,$session_id_set,[[],[],0,[]]);
+	// static::$MY_SESSION_ID = $session_id = SESSION_PREFIX . "_{$appname}";
+	// static::$SYS_SESSION_ID= $session_sys="{$session_id}_sys";
+	// static::$SHM_SESSION_ID= SESSION_PREFIX . "_share_mem";
+	// $session_life = "{$session_id}_life";
+	// list($s_limit,$env,$sys,$shm) = array_keys_value($_SESSION,[$session_life,$session_id,$session_sys,static::$SHM_SESSION_ID],[0,[],[],[]]);
 	static::$EnvData = array_intval_recursive($env);
-	static::$SysData = $sys;
+	// static::$SysData = $sys;
+	// static::$ShmData = $shm;
 	// call from Main.php must be application session limit refresh
 	if($env_life_limit) {
 		$limit_time = (isset($config->SESSION_LIMIT)) ?$config->SESSION_LIMIT : SESSION_DEFAULT_LIMIT;
@@ -71,14 +84,15 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 //==============================================================================
 // セッション保存の変数を破棄
 static function ClearSession() {
-	static::$EnvData = static::$SysData = [];
+	static::$EnvData = static::$SysData = static::$ShmData = [];
 }
 //==============================================================================
 // セッションに保存する
 static function CloseSession() {
-//	sysLog::dump(['SESSION'=>static::$EnvData,'SYSTEM'=>static::$SysData]);
+	sysLog::debug(['ENV'=>static::$EnvData,'SYS'=>static::$SysData,'SHM'=>static::$ShmData]);
 	$_SESSION[static::$MY_SESSION_ID] = static::$EnvData;
 	$_SESSION[static::$SYS_SESSION_ID] = static::$SysData;
+	$_SESSION[static::$SHM_SESSION_ID] = static::$ShmData;
 }
 //==============================================================================
 // ENV変数値を返す
@@ -117,16 +131,17 @@ static function getEnvIDs($id_name,$scalar=TRUE) {
 //==============================================================================
 // ENV変数にドット識別子指定で保存する
 static function setEnvIDs($nameID,$val,$append = FALSE) {
-    $ee = &static::$EnvData;
-    $mem_arr = explode('.',$nameID);
-    foreach($mem_arr as $key) {
-        if(!isset($ee[$key])) $ee[$key] = [];
-        $ee = &$ee[$key];
-    }
-	if($append) {
-		$prev = (empty($ee)) ? '':"{$ee}\n";
-		$ee = "{$prev}{$val}";
-	} else $ee = $val;
+	self::setIDs(static::$EnvData,$nameID,$val,$append);
+    // $ee = &static::$EnvData;
+    // $mem_arr = explode('.',$nameID);
+    // foreach($mem_arr as $key) {
+    //     if(!isset($ee[$key])) $ee[$key] = [];
+    //     $ee = &$ee[$key];
+    // }
+	// if($append) {
+	// 	$prev = (empty($ee)) ? '':"{$ee}\n";
+	// 	$ee = "{$prev}{$val}";
+	// } else $ee = $val;
 }
 //==============================================================================
 // ドット識別子指定でENV変数を削除
@@ -188,6 +203,47 @@ static function unsetAppData($names='') {
 		unset(static::$EnvData[APPDATA_NAME]);
 	} else {
 		$nVal = &static::$EnvData[APPDATA_NAME];
+		if(empty($nVal)) return;
+		foreach($key_arr as $nm) {
+			if(!array_key_exists($nm,$nVal)) return;
+			$nVal = &$nVal[$nm];
+			if(!is_array($nVal)) return;
+		}
+		unset($nVal[$tag]);           	// Delete Style Parameter for AppStyle
+	}
+}
+//==============================================================================
+// アプリケーション共通データ(AppShm)
+static function getShmData($names,$unset=false) {
+	$nVal = array_member_value(static::$ShmData, $names);
+	if($unset) self::unsetShmData($names);
+	return $nVal;
+}
+//==============================================================================
+// 配列にドット識別子指定で保存する
+private static function setIDs(&$ee,$nameID,$val,$append = FALSE) {
+    $mem_arr = explode('.',$nameID);
+    foreach($mem_arr as $key) {
+        if(!isset($ee[$key])) $ee[$key] = [];
+        $ee = &$ee[$key];
+    }
+	if($append) {
+		$prev = (empty($ee)) ? '':"{$ee}\n";
+		$ee = "{$prev}{$val}";
+	} else $ee = $val;
+}
+//==============================================================================
+static function setShmData($names,$val) {
+	self::setIDs(static::$ShmData,$names,$val);
+}
+//==============================================================================
+static function unsetShmData($names='') {
+    $key_arr = array_filter(explode('.',$names),'strlen');
+	$tag = array_pop($key_arr);
+	if(empty($tag)) {
+		static::$ShmData = [];
+	} else {
+		$nVal = &static::$ShmData;
 		if(empty($nVal)) return;
 		foreach($key_arr as $nm) {
 			if(!array_key_exists($nm,$nVal)) return;

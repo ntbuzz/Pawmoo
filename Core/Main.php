@@ -208,8 +208,8 @@ if($controllerInstance->is_authorised($exemethod)) {
 debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
 	-1 => "#Closing",
 //    "CLASS-MANAGER" => ClassManager::DumpObject(),
-     "#SessionClose"  => MySession::$EnvData,     // included App::[sysVAR]
-//	'SESSION'	=> $_SESSION,
+    "#SessionClose" => MySession::$EnvData,     // included App::[sysVAR]
+    "Share Session" => MySession::$ShmData,
 ]);
 sysLog::run_time(DBMSG_CLI|DBMSG_SYSTEM);
 MySession::CloseSession();

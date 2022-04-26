@@ -15,11 +15,13 @@ class RecordColumns {
 	public $PrimaryKey;			// Primary-Key Values
 	public $Headers;			//
 	private $numbering = false;
+	private $selected = false;
 //==============================================================================
 //	Constructor: Owner
 //==============================================================================
-	function __construct($model) {
+	function __construct($model,$sel_no=false) {
 		$this->PrimaryKey = $model->Primary;
+		$this->selected = $sel_no;
 		$this->HeaderAttrs = [];
 		foreach($model->HeaderSchema as $key => $val) {
 			list($type,$align,$sort,$wd) = $val;
@@ -52,13 +54,15 @@ class RecordColumns {
 //==============================================================================
 // Put Each record columns
 	public function putColumnData($lno) {
-		echo "<tr class='item' id='{$this->Primary}'>";
+		$sel = ($this->selected === $this->Primary) ? ' selected':'';
+		echo "<tr class='item{$sel}' id='{$this->Primary}'>";
 		if($this->numbering) echo '<td align="right">'.$lno.'</td>';
 		foreach($this->Headers as $key => $val) {
 			list($alias,$align,$sort,$wd) = $val;
 			$pos = TableAlignAttrs[$align];
 			$style = ($wd > 0) ? " style='min-width:{$wd}px;max-width:{$wd}px;'" : '';
-			echo "<td nowrap{$pos}{$style}>{$this->$key}</td>";
+			$dat = ($this->$key=='') ? '&nbsp;' : $this->$key;
+			echo "<td nowrap{$pos}{$style}>{$dat}</td>";
 		}
 		echo "</tr>\n";
 	}
@@ -208,6 +212,7 @@ public function MakePageLinks($args) {
 //==============================================================================
 // Output Table List for Records
 public function MakeListTable($deftab) {
+	$sel_no = (empty($this->Model->RecData)) ? false:$this->Model->RecData[$this->Model->Primary];
 	// デバッグ情報
 	debug_log(DBMSG_VIEW,[
 		'deftab' => $deftab,
@@ -221,7 +226,7 @@ public function MakeListTable($deftab) {
 		$tab = $deftab;
 		$tbl = '_TableList';
 	}
-	$col = new RecordColumns($this->Model);
+	$col = new RecordColumns($this->Model,$sel_no);
 	echo "<table id='{$tbl}' class='tablesorter {$tab}'>\n<thead>\n";
 	$this->putTableHeader($col);
 	echo "</thead>\n<tbody>\n";
@@ -394,7 +399,6 @@ function CheckRadioMenu($param,$menu) {
 //==============================================================================
 // CSV Output for Model->Records
 function CsvResponse($file_name,$csv) {
-xdebug_die(['FILE'=>$file_name,'CSV'=>$csv]);
 	$data = pack('C*',0xEF,0xBB,0xBF) . implode("\n",$csv);	// BOM付きUTF-8
     header('Content-Type: application/octet-stream');
     header("Content-Disposition: attachment; filename={$file_name}.csv");

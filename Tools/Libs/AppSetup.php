@@ -2,6 +2,8 @@
 //==============================================================================
 // Databas Table Create Class
 class AppSetup  extends AppBase {
+//	private $ViewExt = 'view';
+	private $ViewExt = 'list';
 	// アプリケーションツリー構造
 	const SpecFolder = [
 		'app' => [
@@ -29,33 +31,35 @@ class AppSetup  extends AppBase {
 			],
 		],
 		'appSpec' => [
-			'Setup' => [],		// 仕様CSVの格納フォルダ
-			'Schema' => [],		// 仕様CSVから生成するモデルスキーマファイル格納
-			'Models' => [],		// モデルスキーマから生成するモデルクラスファイル格納
-			'Lang' => [],		// 仕様CSVから生成する言語リソース
-			'InitCSV' => [],	// テーブルの初期データCSV
-			"Config"	=> ['config.php'],	// GlobalConfig定義(aooフォルダへコピー)
+			'Setup'		=> [],		// 仕様CSVの格納フォルダ
+			'Schema'	=> [],		// 仕様CSVから生成するモデルスキーマファイル格納
+			'Models'	=> [],		// モデルスキーマから生成するモデルクラスファイル格納
+			'Lang'		=> [],		// 仕様CSVから生成する言語リソース
+			'InitCSV'	=> [],	// テーブルの初期データCSV
+			"Config"	=> ['config.php'],	// GlobalConfig定義(appフォルダへコピー)
+			'XLS'		=> ['@_defs.xls'],		// テーブル作成Excelフォルダ
+		],
+    	'-module' => [
+			'res' => ['css' => [ 'mystyle.css' ],'js' => ['myscript.js' ],'template.mss'],
+			'View' => [ 'Layout.tpl' ],
+			"*Controller.php",
+			"*Helper.php",
+			"*Model.php",
 		],
 	];
-    const Module = [
-		'res' => ['css' => [ 'mystyle.css' ],'js' => ['myscript.js' ],'template.mss'],
-		'View' => [ 'Layout.tpl' ],
-		"*Controller.php",
-		"*Helper.php",
-		"*Model.php",
-	];
 	// 初期ファイル
-	const Template = [
-		'config.php'		=> true,
-		'*Controller.php'	=> 'Controller.setup',
-		'*Helper.php'		=> 'Helper.setup',
-		'*Model.php'		=> 'Model.setup',
-		'Layout.tpl'		=> true,
-		'Header.tpl'		=> true,
-		'Footer.tpl'		=> true,
-		'mystyle.css'		=> true,
-		'myscript.js'		=> true,
-		'template.mss'		=> true,
+	const TemplateFiles = [
+		'config.php'		=> ['config.php','Config/config.php'],
+		'*Controller.php'	=> 'module/Controller.setup',
+		'*Helper.php'		=> 'module/Helper.setup',
+		'*Model.php'		=> 'module/Model.setup',
+		'Layout.tpl'		=> 'module/View/Layout.tpl',
+		'Header.tpl'		=> 'module/View/Header.tpl',
+		'Footer.tpl'		=> 'module/View/Footer.tpl',
+		'mystyle.css'		=> 'module/res/mystyle.css',
+		'myscript.js'		=> 'module/res/myscript.js',
+		'template.mss'		=> 'module/res/template.mss',
+		'@_defs.xls'		=> 'spec_defs.xls',
 	];
 	private $AppName;
 	private $AppRoot;
@@ -107,27 +111,33 @@ public function execute($cmd,$model,$exec) {
 // appフォルダツリーの作成、省略可
 private function AppTree($model,$exec) {
 	foreach(self::SpecFolder as $top => $tree) {
+		if(substr($top,0,1)==='-') continue;
 		$folder = ROOT_DIR . "/{$top}/{$this->AppName}";
 		if($this->createFolder($folder,NULL,$tree) === false)
 			echo "Create '{$this->AppName}' {$top}-Folder\n";
 		else echo "{$top} '{$this->AppName}' allready exist.\n";
 	}
 	// モジュール指定があればモジュールフォルダも作成
-	if(!empty($model)) $this->ModTree($model);
+	if(!empty($model)) $this->ModTree($model,$exec);
 }
 //==============================================================================
 // appSpecフォルダツリーの作成、省略可
 private function SpecTree($model,$exec) {
 	$folder = ROOT_DIR . "/appSpec/{$this->AppName}";
-	if($this->createFolder($folder,NULL,self::SpecFolder['appSpec']) === false)
+	if($this->createFolder($folder,NULL,self::SpecFolder['appSpec']) === false) {
+		if(!copy("Tools/Template/spec_defs.xls", "{$folder}/XLS/{$this->AppName}_defs.xls")) {
+			echo "Excel Copt Fail.\n";
+		}
 		echo "Create '{$this->AppName}' Spec-Folder\n";
+}
 	else echo "'{$this->AppName}' Spec-Folder allready exist.\n";
 }
 //==============================================================================
 // モジュールフォルダツリーの作成、必須
 private function ModTree($model,$exec) {
+	$model = ucfirst(strtolower($model));
 	$path = "{$this->AppRoot}/modules/{$model}";
-	if($this->createFolder($path,$model,self::Module) === false)
+	if($this->createFolder($path,$model,self::SpecFolder['-module']) === false)
 		echo "Create Module '{$model}'\n";
 	else echo "Module '{$model}' allready exist.\n";
 }
@@ -209,7 +219,7 @@ private function GenSchema($model,$exec) {
 	if($files === false) return false;
 	$models = [];
 	foreach($files as $target) $models[] = $this->makeModelSchema($target);
-	debug_dump(["'Schema' class Generated"=>$models],false);
+ 	sysLog::stderr(["'Schema' class Generated"=>$models],false);
 }
 //==============================================================================
 // スキーマからモデルクラス作成、省略可
@@ -221,7 +231,7 @@ private function GenModel($model,$exec) {
 	foreach($files as $target) {
 		$models[] = $this->makeModelClass($target);
 	}
-	debug_dump(["'Model' class Generated"=>$models],false);
+ 	sysLog::stderr(["'Model' class Generated"=>$models],false);
 }
 //==============================================================================
 // schemaコマンドとmodelコマンドの連続実行、必須
@@ -242,7 +252,7 @@ private function SetupModel($model,$exec) {
 			debug_die(['FAIL STOP'=>$model]);
 		}
 	}
-	debug_dump(["Setup Success module"=>$models],false);
+ 	sysLog::stderr(["Setup Success module"=>$models],false);
 }
 //==============================================================================
 // スキーマからテーブルとビューを作成、CSVインポート、省略可
@@ -286,41 +296,41 @@ private function MakeView($model,$exec) {
 		$depend = $schema->DependList($depend);
 	}
 	$list = array_filter($depend,function($model) { return ($this->$model->ViewSet!==[]);});
+	// 関連ビューを全て削除する
 	foreach($list as $model) {
-		if(!empty($this->$model->ViewSet)) {
-			$this->$model->CreateTableView($exec);
-		}
+		$this->$model->DropTableView($exec);
 	}
-	// foreach($files as $model) {
-	// 	$schema = $this->$model;
-	// 	$depend = $schema->DependList([]);
-	// 	if($depend !== []) {
-	// 		debug_dump([$model => ['DEPEND-VIEW'=>$depend]],false);
-	// 		foreach($depend as $sub) {
-	// 			$this->$sub->CreateTableView($exec);
-	// 		}
-	// 	}
-	// 	// 自分自身がCREATEされてなければ
-	// 	if(!in_array($model,$depend)) $schema->CreateTableView($exec);
-	// }
+	// 関連ビューを全て作成する
+	foreach($list as $model) {
+		$this->$model->CreateTableView($exec);
+	}
 }
 //==============================================================================
 // フォルダーツリーを作成
 private function createFolder($path,$module,$file) {
 	$exist = true;
 	if(is_scalar($file)) {
-		$modfile = (substr($file,0,1)==='*') ? $module.substr($file,1) : $file;
+		switch(substr($file,0,1)) {
+		case '*': $modfile = $module.substr($file,1); break;
+		case '@': $modfile = $this->AppName.substr($file,1); break;
+		default: $modfile = $file;
+		}
 		$target = "{$path}/{$modfile}";
 		if(!is_file($target)) {
-			if(array_key_exists($file,self::Template)) {
-				$tmp_file = (self::Template[$file]===true)? $file : self::Template[$file];
-				$tmp_file = "Tools/Template/{$tmp_file}";
-		        $contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
-				$template = str_replace('%module%',$module,$contents);
-				file_put_contents($target,$template);
-			} else {
-				touch($target);
-			}
+			if(array_key_exists($file,self::TemplateFiles)) {
+				$tmp_file = self::TemplateFiles[$file];
+				if(is_array($tmp_file)) {
+					list($base_file,$app_file) = $tmp_file;
+					$tmp_file = "appSpec/{$this->AppName}/{$app_file}";
+					if(!is_file($tmp_file)) $tmp_file = "Tools/Template/{$base_file}";
+				} else $tmp_file = "Tools/Template/{$tmp_file}";
+				$ext = extract_extension($tmp_file);
+				if($ext === 'setup') {
+					$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
+					$template = str_replace(['%module%','%model%'],$module,$contents);
+					file_put_contents($target,$template);
+				} else copy($tmp_file, $target);
+			} else touch($target);
 			$exist = false;
 		}
 	} else if(is_array($file)) {
@@ -355,7 +365,7 @@ private function loadCSV($path) {
 				if(is_int($no)) $Schema[$no] = $data;
 			} else {
 				if($data[0] === '-') continue;	// skip
-				debug_dump(['CHECK'=>$data]);
+			 sysLog::stderr(['CHECK'=>$data]);
 			}
 		}
 		fclose($handle);
@@ -437,12 +447,12 @@ private function createSchema($fields) {
 				if(empty($rel)) break;
 				$chain = explode('.',$rel);
 				$add_link($col,$chain,$fname,[ $type,$flag, $wd]);
-				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_view"];
+				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_{$this->ViewExt}"];
 				break;
 		case 'bind':	// self-bind or Link-Bind
 				$bind = bind_array($rel,$sep);
 				$col[$fname] = [ $type, $flag, $wd ,$bind ];
-				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_view"];
+				if(is_scalar($this->DataTable)) $this->DataTable = [$this->DataTable,"{$this->DataTable}_{$this->ViewExt}"];
 				break;
 		case 'virtual':	// 仮想フィールドは言語依存しない
 				$col[$fname] = [ $type, $flag, $wd ];
@@ -454,8 +464,9 @@ private function createSchema($fields) {
 					if(count($chain) === 3) {
 						$add_link($col,$chain,$fname,[$type,$flag, $wd]);
 					} else {
-						list($m,$ix) = $chain;
-						$depend[] = $m;
+				        preg_match('/(\w+)(?:\[\d+\])?\.(\w+)/',$rel,$match);
+						list($tmp,$m,$ix) = $match;
+						if(!in_array($m,$depend)) $depend[] = $m;
 						$col[$fname] = [ $type, $flag, $wd, $rel => [] ];
 					}
 				} else $col[$fname] = [ $type, $flag, $wd];
@@ -640,7 +651,7 @@ private function makeModelClass($model) {
 	};
 	$schema_txt = $this->makeModelField($schema->Schema,$schema->Lang);
 	$this->DatabaseSchema = [
-		'Handler' => $schema->Handler,
+		'Handler' => $schema->dbHandler,
 		'DataTable' => $schema->DataTable,
 		'DataView' =>	(isset($schema->DataView)) ? $schema->DataView : [],
 		'Primary' => $schema->Primary,
@@ -658,7 +669,7 @@ private function makeModelClass($model) {
 	$tmp_file = "Tools/Template/AppModel.setup";
 	$contents = file_get_contents($tmp_file);          // ファイルから全て読み込む
 	$template = str_replace(array_keys($rep_array),array_values($rep_array),$contents);
-	$target = "{$this->AppConfig}/Models/{$model}Class.php";
+	$target = "{$this->AppConfig}/Models/{$model}Model.php";
 	file_put_contents($target,$template);
 	return $model;
 }

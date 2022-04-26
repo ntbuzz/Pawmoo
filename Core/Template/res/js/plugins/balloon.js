@@ -252,19 +252,20 @@ $.fn.PopupBaloonSetup = function () {
 			var icon_obj = $('#' + icon);
 			if (ev == "click") icon_obj.css("cursor", "help");
 			icon_obj.off(ev).on(ev, function () {
-				// 他要素の mouseover防止とバルーンを消すための領域設定
-				var bk_panel = $('<div class="balloon-BK"></div>').appendTo('body');
-				bk_panel.fadeIn('fast');
-				var Balloon = new balloonPosition(icon_obj,onside,3,true);
+				if (ref_obj.hasClass('balloon-disabled')) return false;
 				var disp_id = ref_obj.attr('data-value');		// 表示するタグID
 				// 選択タグがあればそれをバルーンにする、なければ自身がバルーン
 				if (typeof disp_id === 'string') {
-					ballon_obj = self.find('#' + disp_id);
 					self.children('div').hide();					// 他の要素を非表示
+					ballon_obj = self.find('#' + disp_id);
 					self.show();						// 親を表示
 					self.css('display','block');
 				} else ballon_obj = self;
 				if (ballon_obj.text() == "") ballon_obj.text("${#core.EMPTY}");
+				var Balloon = new balloonPosition(icon_obj,onside,3,true);
+				// 他要素の mouseover防止とバルーンを消すための領域設定
+				var bk_panel = $('<div class="balloon-BK"></div>').appendTo('body');
+				bk_panel.fadeIn('fast');
 				ballon_obj.addClass('popup-balloon');		// popup-balloon のスタイルを適用する
 				ballon_obj.fadeIn('fast');		// 表示されていないとサイズが取得できない
 				icon_obj.addClass('active');

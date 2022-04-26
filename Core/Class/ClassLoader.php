@@ -5,7 +5,7 @@
 class ClassLoader {
     const CLASSMAP = [
         'FlatFolder' => 'fileclass',
-        'SectionParser' => 'XParser',
+        'SectionParser' => 'Parser',
         'MySession' => 'session',
     ];
     private static $LoadDirs = [];
