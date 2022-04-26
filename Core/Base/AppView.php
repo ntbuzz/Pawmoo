@@ -875,33 +875,58 @@ public function ViewTemplate($name,$vars = []) {
     //--------------------------------------------------------------------------
     //  TABLE OUTPUT
     // +table => [ attr => value
-    //    [  th=>[ TH-CELL ] .td_attr=>[ TD-CELL ]  [ TD-CELL ] ]
+	//		thead.class => [ th_list ]
+	//		tbody.class => [ tr_list ]
+	//  or	tr_list
+	// TR-LIST is
+    //    	[  th=>[ TH-CELL ] .td_attr=>[ TD-CELL ]  [ TD-CELL ] ]
     // ]
     private function cmd_table($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
+		$tr_output = function($sec,$cell_tag) use(&$vars) {
+			foreach($sec as $key => $val) {        // tr loop
+				if(!is_numeric($key)) {
+					list($key,$tr_attrs) = $this->tag_Separate($key,$vars);
+				} else $tr_attrs = [];
+				list($tr_attrs,$tmp,$val) = $this->subsec_separate($val,$tr_attrs,$vars,FALSE);	// scalar ONLY
+				$tr_attr = $this->gen_Attrs($tr_attrs,$vars);
+				echo "<TR{$tr_attr}>";
+				if(is_array($val)) {
+					foreach($val as $td_key => $td_val) {         // th,td loop
+						list($tag,$attrs) = $this->tag_Separate($td_key,$vars);
+						list($attrs,$innerText,$sec) = $this->subsec_separate($td_val,$attrs,$vars);
+						$td_attr = $this->gen_Attrs($attrs,$vars);
+						if(is_numeric($tag) || $tag === 'div') $tag=$cell_tag;     // omitted TAG is DIV tag setting
+						echo "<{$tag}{$td_attr}>{$innerText}";
+						$this->sectionAnalyze($sec,$vars);
+						echo "</{$tag}>";
+					}
+				}
+				echo "</TR>\n";
+			}
+		};
         list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
         $attr = $this->gen_Attrs($attrs,$vars);
         echo "<TABLE{$attr}>\n";
-        foreach($sec as $key => $val) {        // tr loop
-            if(!is_numeric($key)) {
-                list($key,$tr_attrs) = $this->tag_Separate($key,$vars);
-            } else $tr_attrs = [];
-	        list($tr_attrs,$tmp,$val) = $this->subsec_separate($val,$tr_attrs,$vars,FALSE);	// scalar ONLY
-            $tr_attr = $this->gen_Attrs($tr_attrs,$vars);
-            echo "<TR{$tr_attr}>";
-            if(is_array($val)) {
-                foreach($val as $td_key => $td_val) {         // th,td loop
-                    list($tag,$attrs) = $this->tag_Separate($td_key,$vars);
-                    list($attrs,$innerText,$sec) = $this->subsec_separate($td_val,$attrs,$vars);
-                    $td_attr = $this->gen_Attrs($attrs,$vars);
-                    if(is_numeric($tag) || $tag === 'div') $tag='td';     // omitted TAG is DIV tag setting
-                    echo "<{$tag}{$td_attr}>{$innerText}";
-                    $this->sectionAnalyze($sec,$vars);
-                    echo "</{$tag}>";
-                }
-            }
-            echo "</TR>\n";
-        }
+		$body_attr = '';
+        list($thead, $tr_list) = array_first_item($sec);
+		list($keytag,$key_attrs) = $this->tag_Separate($thead,$vars);
+		if($keytag === 'thead') {
+	        $key_attr = $this->gen_Attrs($key_attrs,$vars);
+	        echo "<thead{$key_attr}>\n";
+			$tr_output([$tr_list],'th');
+	        echo "</thead>\n";
+			array_shift($sec);
+			list($tbody, $tr_list) = array_first_item($sec);
+			list($keytag,$key_attrs) = $this->tag_Separate($tbody,$vars);
+			if($keytag === 'tbody') {
+				$body_attr = $this->gen_Attrs($key_attrs,$vars);
+				$sec = $tr_list;
+			}
+		};
+		echo "<tbody{$body_attr}>\n";
+		$tr_output($sec,'td');
+		echo "</tbody>\n";
         echo "</TABLE>";
     }
     //--------------------------------------------------------------------------
