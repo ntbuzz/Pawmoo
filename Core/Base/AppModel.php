@@ -262,10 +262,7 @@ public function GetRecord($num,$join=FALSE,$values=FALSE) {
         else $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],TRUE);
     } else $this->getRecordBy($this->Primary,$num);
     $this->RecData= $this->fields;
-    if($values) {
-		$this->GetValueList();
-		debug_log(DBMSG_MODEL,['SELECT'=>$this->Select]);
-	}
+    if($values) $this->GetValueList();
 }
 //==============================================================================
 // Selection define condition change.
@@ -320,6 +317,7 @@ public function GetValueList() {
     $this->Select= [];
 	$keyset = array_keys($this->SelectionDef);
 	$this->LoadSelection($keyset);
+	debug_log(DBMSG_MODEL,['SELECT'=>$this->Select]);
 }
 //==============================================================================
 //   Get Field Value List
@@ -426,7 +424,7 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
 public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
     if(empty($filter)) $fields_list = $this->dbDriver->raw_columns;
     else {
-        $fields_list = array_filter($this->dbDriver->raw_columns,function($v) use(&$filter) { return in_array($v,$filter);},ARRAY_FILTER_USE_KEY);
+        $fields_list = array_filter($this->dbDriver->raw_columns,function($v) use(&$filter) { return in_array($v,$filter,true);},ARRAY_FILTER_USE_KEY);
         $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
     }
     $data = array();
