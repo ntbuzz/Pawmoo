@@ -466,7 +466,7 @@ private function createSchema($fields) {
 					} else {
 				        preg_match('/(\w+)(?:\[\d+\])?\.(\w+)/',$rel,$match);
 						list($tmp,$m,$ix) = $match;
-						if(!in_array($m,$depend)) $depend[] = $m;
+						if(!in_array($m,$depend,true)) $depend[] = $m;
 						$col[$fname] = [ $type, $flag, $wd, $rel => [] ];
 					}
 				} else $col[$fname] = [ $type, $flag, $wd];
@@ -606,7 +606,7 @@ private function makeModelField($Schema,$lang=NULL) {
 				$spc = str_repeat(' ',$spc_len);
 				if(empty($prefix)) $cmm = (is_string($rel_model)) ? " ({$rel_model})":'';
 				else {
-					if(in_array($type,$base_type)) $cmm = " ({$prefix}.{$key})";
+					if(in_array($type,$base_type,true)) $cmm = " ({$prefix}.{$key})";
 					else $cmm = " ({$prefix}.{$type})";
 					$type = 'alias';
 				}

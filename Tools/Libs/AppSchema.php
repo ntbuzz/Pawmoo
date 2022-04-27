@@ -143,7 +143,7 @@ public function CreateDatabase($exec=false) {
 	$fset = [];
 	foreach($this->TableFields as $column => $defs) {
 		list($ftype,$flag,$wd,$bind) = array_extract($defs,4);
-		if(is_scalar($ftype) && !in_array($ftype,['bind','virtual'])) {
+		if(is_scalar($ftype) && !in_array($ftype,['bind','virtual'],true)) {
 			switch($ftype) {
 			case '---': $ftype = 'integer';break;
 			case '***': $ftype = 'text';break;

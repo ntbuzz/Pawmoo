@@ -365,7 +365,7 @@ function re_build_array($cond) {
 					continue;
 				}
 				// Separate Operation ,IF include NULL value
-				if(in_array(NULL,$val)) {
+				if(in_array(NULL,$val,true)) {
 					list($key,$val) = $child_separate($key,$val);
 				}
 			}
