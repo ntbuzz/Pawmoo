@@ -168,23 +168,27 @@ $.fn.floatWin = function (setupObj, callback) {
 	else if(typeof setupObj === 'object') $.each(setupObj, function (key, value) { setting[key] = value;});
 	// Formparameter setup
 	$.each(setting.formObj, function (key, value) {
-		var target = self.find('[name="' + key + '"]');
-		if (target.length) {
-			switch (target.prop("tagName")) {
-			case 'INPUT':
-				if (target.attr("type") == "checkbox" || target.attr("type") == "radio" ) {
-					target.prop('checked', (value == 't'));
-				} else target.val(value);   // 自ID
-				break;
-			case 'SELECT':
-				target.val(value);   // 自ID
-				break;
-			case 'TEXTAREA':
-				var w = target.attr("cols");
-				var h = target.attr("rows");
-				target.css({"width": w+"em","height": h+"em"});
-			default:
-				target.text(value);   // 自ID
+		if (key.charAt(0) === '#') {
+			$(key).html(value);
+		} else {
+			var target = self.find('[name="' + key + '"]');
+			if (target.length) {
+				switch (target.prop("tagName")) {
+				case 'INPUT':
+					if (target.attr("type") == "checkbox" || target.attr("type") == "radio" ) {
+						target.prop('checked', (value == 't'));
+					} else target.val(value);   // 自ID
+					break;
+				case 'SELECT':
+					target.val(value);   // 自ID
+					break;
+				case 'TEXTAREA':
+					var w = target.attr("cols");
+					var h = target.attr("rows");
+					target.css({"width": w+"em","height": h+"em"});
+				default:
+					target.text(value);   // 自ID
+				};
 			};
 		};
 	});
