@@ -14,7 +14,6 @@ class AppStyleHelper {
 public function monthNameText() {
     $month = LangUI::get_value('core', '.monthNameArray', true);
 	return "'".implode("','",$month)."'";
-debug_die(['MONTH'=>$month]);
 }
 //==============================================================================
 //	Indirect Language Resource
