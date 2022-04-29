@@ -228,7 +228,7 @@ $.dialogBox = function () {
 			case "number": params.iconclass = (arguments[i]===0)?'confirm':'alert'; break;
 			case "boolean": params.buttons = arguments[i]; break;
 			case "function": params.callback = arguments[i]; break;
-		}
+		};
 	};
 	var bk_panel = $('<div class="popup-BK"></div>');
 //	var dialog_box = '<div class="dialog-box"><dl class="title"><dt class="'+params.iconclass+'">' + params.title + '</dt><dd><span class="dialog-msg">' + params.message + '</span></dd></dl><div class="buttonList">';
