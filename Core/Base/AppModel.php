@@ -248,7 +248,7 @@ public function getRecordBy($key,$value) {
 // Get Primary Value by Field Name
 // Result:   Primary Value or FALSE
 public function getPrimaryOf($key,$value,$default=false) {
-	if(empty($value)) return $default;		// not-allow NULL value
+	if($value==='' || $value===NULL) return $default;		// not-allow NULL value
 	$row = $this->dbDriver->doQueryBy($key,$value);
 	if($row === false) return $default;
     return $row[$this->Primary];
