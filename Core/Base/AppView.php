@@ -506,7 +506,8 @@ public function ViewTemplate($name,$vars = []) {
     //==============================================================================
     // TAG section direct OUTPUT for +jquery,+script,*style
     private function directOutput($beg_tag, $end_tag,$sec,$vars) {
-        $txt = $this->expand_Strings(((is_array($sec)) ? array_to_text($sec) : $sec),$vars);
+		if(is_array($sec)) $sec = array_to_text($sec);
+        $txt = $this->expand_Strings($sec,$vars);
 		if(is_array($txt)) $txt = array_to_text($txt);
         echo "{$beg_tag}\n{$txt}\n{$end_tag}\n";
     }
@@ -1037,7 +1038,7 @@ public function ViewTemplate($name,$vars = []) {
 					list($opt,$bc,$ec) = tag_label_value($opt);
 					list($val,$ss) = fix_explode('.',$val,2);
 					if($check_onece) {
-						$cmp = (empty($sel_item)) ? ($ss==='checked'):($val===$sel_item);
+						$cmp = ($sel_item==='') ? ($ss==='checked'):($val===$sel_item);
 						if($cmp) $check_onece = false;
 					} else $cmp = false;
 					$sel = ($cmp) ? ' checked':'';
