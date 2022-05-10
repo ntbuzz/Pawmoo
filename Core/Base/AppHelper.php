@@ -16,21 +16,30 @@ class RecordColumns {
 	public $Headers;			//
 	private $numbering = false;
 	private $selected = false;
+	protected $altHead;
 //==============================================================================
 //	Constructor: Owner
 //==============================================================================
-	function __construct($model,$sel_no=false) {
+	function __construct($model,$sel_no=false,$altHeader=NULL) {
 		$this->PrimaryKey = $model->Primary;
 		$this->selected = $sel_no;
-		$this->HeaderAttrs = [];
-		foreach($model->HeaderSchema as $key => $val) {
+		$schema = ($altHeader === NULL) ? $model->HeaderSchema:$altHeader;
+		$this->SetHeaderList($model->ModuleName,$schema);
+	}
+//==============================================================================
+// extract column name, value set
+	protected function SetHeaderList($modelName,$HeaderSchema) {
+		$this->Headers = [];
+		$this->altHeadFields = [];
+		foreach($HeaderSchema as $key => $val) {
 			list($type,$align,$sort,$wd) = $val;
-			$alias = lang_get_module(NULL,"{$model->ModuleName}.Schema.{$key}");
+			$alias = lang_get_module(NULL,"{$modelName}.Schema.{$key}");
 			$this->Headers[$key] = [$alias,$align,$sort,$wd];
+			$this->altHead[$key] = $type;
 		}
 	}
-	//==============================================================================
-	// extract column name, value set
+//==============================================================================
+// extract column name, value set
 	public function SetColumns($data) {
 		$this->Primary = $data[$this->PrimaryKey];
 		foreach($data as $key => $val) {

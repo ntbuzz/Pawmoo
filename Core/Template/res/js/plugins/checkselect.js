@@ -229,7 +229,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		SetValue: function (value, label) {
 			this.Modified = true;
 			if (typeof this.Selected === "function") {
-				return this.Selected.call(self, value, label);
+				return this.Selected.call(self, value, label, this.TargetObj);
 			} else {
 				this.TargetObj.val(value);
 				this.TargetObj.trigger('change');
@@ -354,10 +354,12 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 				var current = setting.TargetObj.val().split(setting.Separator);		// 区切り文字に置換予定
 				var direct_data = current.filter(function (i) { return all_items.indexOf(i) === -1 });
 				var vals = check_obj.map(function () { return $(this).val(); }).get();
+				var labels = check_obj.map(function () { return $(this).parent().text(); }).get();
 				vals = direct_data.concat(vals);
+				labels = direct_data.concat(labels);
 				// IEでも動くようにfilterで重複を削除して結合
 				uniq = vals.filter(function (x, i, menu_box) { return (menu_box.indexOf(x) === i)&&(![null,undefined,""].is_exists(x)); }).join(setting.Separator).trim();
-				label = uniq;
+				label = labels.filter(function (x, i, menu_box) { return (menu_box.indexOf(x) === i)&&(![null,undefined,""].is_exists(x)); }).join(setting.Separator).trim();
 			};
 			if (setting.SetValue(uniq, label) === true) {		// 値を書き込む
 				menu_box.trigger('close-me');			// メニューを閉じる

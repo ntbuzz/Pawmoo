@@ -238,6 +238,27 @@ var ajaxLoadSync = function (url, obj, default_data) {
 	return default_data;
 };
 //====================================================
+// SYNC JSON
+var ajaxJsonSync = function (url, obj, default_data) {
+	$.busy_cursor(true);
+    $.ajax({
+        type:"post",
+		url: url,
+		async: false,
+        data:JSON.stringify(obj),
+        contentType: 'application/json',
+        dataType: "json",
+        success: function(json_data) {   // 200 OK
+			default_data = json_data;
+        },
+        error: function() {
+            alert(url+": Server Error. Please try again later.");
+        },
+    });
+	$.busy_cursor(false);
+	return default_data;
+};
+//====================================================
 // create FORM and SUBMIT
 var formSubmit = function (obj, url, new_win) {
 	$.busy_cursor(true);

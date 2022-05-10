@@ -325,8 +325,8 @@ function re_build_array($cond) {
 				$sub = array_filter($values,function($v) { return $v!==NULL;});
 				$n = count($sub);
 				if($n !== count($values)) {
-					if($n === 1) $sub = $sub[0];
-					return ['OR',[ $key => $sub, "{$key}::#1" => NULL]];
+					$val = ($n === 1) ? array_shift($sub):$sub;
+					return ['OR',[ $key => $val, "{$key}::#1" => NULL]];
 				}
 			}
 			return [$key,$values];
@@ -365,7 +365,7 @@ function re_build_array($cond) {
 					continue;
 				}
 				// Separate Operation ,IF include NULL value
-				if(in_array(NULL,$val)) {
+				if(in_array(NULL,$val,true)) {
 					list($key,$val) = $child_separate($key,$val);
 				}
 			}

@@ -133,10 +133,11 @@ class CommonHolidays {
 // 休日判定
 	public function isholiday($dt) {
 		$yyyy = intval(date('Y',$dt));
+		$w = intval(date('w',$dt));		// 日曜が "0" (文字列)になる
 		if(array_key_exists($yyyy,$this->HolidayTable)) {
 			$begday = mktime(0,0,0,1,1,$yyyy);		// 1月1日を起点にする
 			$dm = (strtotime(date("Y/m/d",$dt)) - $begday)/86400;
-			return array_key_exists($dm,$this->HolidayTable[$yyyy]) or in_array(date('w',$dt),[0,6]);
+			return array_key_exists($dm,$this->HolidayTable[$yyyy]) or in_array($w,[0,6],true);
 		}
 	}
 //==============================================================================

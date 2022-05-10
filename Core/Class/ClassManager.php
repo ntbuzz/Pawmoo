@@ -12,7 +12,7 @@ public static function Create($module_name,$class_name,$owner) {
         if($state !== 0) {
             if(++$ini > 2 ) die("Conflict '{$module_name}' Create during initializing @ {$this->ClassName}.\n");
         } else $ini = 0;
-        if(!in_array($oname,$owlist)) $owlist[] = $oname;
+        if(!in_array($oname,$owlist,true)) $owlist[] = $oname;
         static::$ObjectList[$module_name] = [ $state,$ini,++$cnt,$owlist,$obj];
         return $obj;
     }

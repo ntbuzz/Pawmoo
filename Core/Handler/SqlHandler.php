@@ -189,12 +189,12 @@ public function getRecordCount($cond) {
 	return ($field) ? intval($field["total"]) : 0;
 }
 //==============================================================================
-//	getRecordValue($cond,$use_relations) 
+//	getRecordValue($cond) 
 //	find $cond match record
 //==============================================================================
-public function getRecordValue($cond,$use_relations) {
+public function getRecordValue($cond) {
 	$where = $this->sql_makeWHERE($cond);		// 検索条件
-	$sql = $this->sql_JoinTable($use_relations);
+	$sql = $this->sql_JoinTable();
 	$where .= ($this->is_offset) ? " offset 0 limit 1" : " limit 0,1";
 	$this->SQLdebug($sql,$where);
 	$sql .= "{$where};";
@@ -250,14 +250,14 @@ debug_log(DBMSG_HANDLER,["LOG-Aggregate" => [ 'COND' => $cond,'SQL'=>$sql]]);
 // pgSQL: SELECT *, count('No') over() as full_count FROM public.mydb offset 10 limit 50;
 // SQLite3: SELECT *, count('No') over as full_count FROM public.mydb offset 10 limit 50;
 //==============================================================================
-public function findRecord($cond,$use_relations = FALSE,$sort = [],$raw=false) {
+public function findRecord($cond,$sort = [],$raw=false) {
 	$table = ($raw) ? $this->raw_table : $this->table;
 	$where = $this->sql_makeWHERE($cond,$table);
 	$sql = "SELECT DISTINCT  count(*) as \"total\" FROM {$table}";
 	$this->execSQL("{$sql}{$where};",FALSE);		// No Logging
 	$field = $this->fetch_array();
 	$this->recordMax = ($field) ? $field["total"] : 0;
-	$sql = $this->sql_JoinTable($use_relations,$table);
+	$sql = $this->sql_JoinTable($table);
 	if(!empty($sort)) {
 		if(is_scalar($sort)) $sort = [ $sort => SORTBY_ASCEND];
 		$orderby = "";
@@ -279,12 +279,12 @@ public function findRecord($cond,$use_relations = FALSE,$sort = [],$raw=false) {
 	$this->execSQL($sql);
 }
 //==============================================================================
-//	firstRecord(cond,use-relation,sort): 
+//	firstRecord(cond,sort): 
 // returned col-data or FALSE
 //==============================================================================
-public function firstRecord($cond,$use_relations = FALSE,$sort) {
+public function firstRecord($cond,$sort) {
 	$where = $this->sql_makeWHERE($cond);
-	$sql = $this->sql_JoinTable($use_relations);
+	$sql = $this->sql_JoinTable();
 	if(!empty($sort)) {
 		$orderby = "";
 		foreach($sort as $key => $val) {
@@ -394,30 +394,10 @@ protected function fetch_convert($data) {
 //		[alias] = [ ref_table, ref_name, rel_id, ref_id  ]	sub-relations
 //		....
 //	]
-	private function sql_JoinTable($use_relations,$target_table=NULL) {
+	private function sql_JoinTable($target_table=NULL) {
 		if($target_table === NULL) $target_table = $this->table;
-		$sql = "SELECT DISTINCT  {$target_table}.*";
-		$frm = " FROM {$target_table}";
-		$jstr = '';
-		if($use_relations && !empty($this->relations)) {
-			$join = [];//['L0'=>[],'L1'=>[]];
-			foreach($this->relations as $key => $val) {
-				foreach($val as $alias => $lnk) {
-					if(is_array($lnk)) {	// [ refer]
-						list($rel_tbl,$rel_fn,$fn,$table,$primary,$ref) = $lnk;
-						$rel = "{$rel_tbl}.\"{$fn}\"={$table}.\"{$primary}\"";
-						if(!isset($join[$table])) $join[$table] = $rel;			// duplicate-refer
-					} else {
-						list($table,$fn,$ref) = explode('.', $lnk);
-						$rel = "{$target_table}.\"{$key}\"={$table}.\"{$fn}\"";
-						if(!isset($join[$table])) $join = [$table => $rel] + $join;	// duplicate-refer
-					}
-					$sql .= ",{$table}.\"{$ref}\" AS \"{$alias}\"";
-				}
-			}
-			foreach($join as $table => $val) $jstr .= " LEFT JOIN {$table} ON {$val}";
-		}
-		return "{$sql}{$frm}{$jstr}";
+		$sql = "SELECT DISTINCT  {$target_table}.* FROM {$target_table}";
+		return $sql;
 	}
 //==============================================================================
 // Re-Build Condition ARRAY, Create SQL-WHERE statement.
@@ -514,26 +494,38 @@ protected function fetch_convert($data) {
 					if(array_key_exists($key,$this->relations)) {		// check exists relations
 						$rel_defs = $this->relations[$key];
 						list($cond_fn,$op) = keystr_opr(array_key_first($val));
-						$rel_key = id_relation_name($key)."_{$cond_fn}";
-						if(array_key_exists($rel_key,$rel_defs)) {		// exists relation-defs
-							$rel = $rel_defs[$rel_key];
-						} else {
-							list($kk,$rel) = array_first_item($rel_defs);
-							if(is_array($rel)) $rel = implode('.',$rel);	// force scalar-value
-						}
-						if(is_scalar($rel)) {
-							list($tbl,$fn) = fix_explode('.',$rel,2);
-							$ops = $dump_object('AND',$val,$tbl);
-							$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE ({$ops}))";
-						} else {
-							list($tbl,$tbl_prim,$tbl_rel,$rel_tbl,$rel_fn,$fn) = $rel;
-							$fid = id_relation_name($tbl_rel)."_{$fn}";
-							list($kk,$vv) = array_first_item($val);		// because each element will be same table,id
-							$val = [str_replace($fid,$fn,$kk) => $vv]; // change rel-level field key
-							$ops = $dump_object('AND',$val,$rel_tbl);
-							$ops = "{$tbl}.\"{$tbl_rel}\" IN (SELECT Distinct({$rel_tbl}.\"{$rel_fn}\") FROM {$rel_tbl} WHERE ({$ops}))";
-							$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$tbl_prim}\") FROM {$tbl} WHERE ({$ops}))";
-						}
+						// $rel_key = id_relation_name($key)."_{$cond_fn}";
+						// if(array_key_exists($rel_key,$rel_defs)) {		// exists relation-defs
+						// 	$rel = $rel_defs[$rel_key];
+						// } else {
+						// 	list($kk,$rel) = array_first_item($rel_defs);
+						// 	if(is_array($rel)) $rel = implode('.',$rel);	// force scalar-value
+						// }
+						// if(array_key_exists($key,$rel_defs)) {		// exists relation-defs
+						// 	$rel = $rel_defs[$rel_key];
+						// } else {
+						// 	list($kk,$rel) = array_first_item($rel_defs);
+						// 	if(is_array($rel)) $rel = implode('.',$rel);	// force scalar-value
+						// }
+						// if(is_scalar($rel)) {
+						// 	list($tbl,$fn) = fix_explode('.',$rel,2);
+						// 	$ops = $dump_object('AND',$val,$tbl);
+						// 	$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE ({$ops}))";
+						// } else {
+						// 	list($tbl,$tbl_prim,$tbl_rel,$rel_tbl,$rel_fn,$fn) = $rel;
+						// 	$fid = id_relation_name($tbl_rel)."_{$fn}";
+						// 	list($kk,$vv) = array_first_item($val);		// because each element will be same table,id
+						// 	$val = [str_replace($fid,$fn,$kk) => $vv]; // change rel-level field key
+						// 	$ops = $dump_object('AND',$val,$rel_tbl);
+						// 	$ops = "{$tbl}.\"{$tbl_rel}\" IN (SELECT Distinct({$rel_tbl}.\"{$rel_fn}\") FROM {$rel_tbl} WHERE ({$ops}))";
+						// 	$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$tbl_prim}\") FROM {$tbl} WHERE ({$ops}))";
+						// }
+						//--------------------------------------------------------------------
+//debug_dump(['SUB'=>$key,'COND'=>$cond_fn,'OP'=>$op,'VAL'=>$val,'REL'=>$rel_defs,'RELS'=>$this->relations]);
+						// V.2 New-Relations
+						list($tbl,$fn) = array_first_item($rel_defs);
+						$ops = $dump_object('AND',$val,$tbl);
+						$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE ({$ops}))";
 					} else continue;
 				} else if(is_array($val)) {
 					$in_op = [ '=' => 'IN', '==' => 'IN', '<>' => 'NOT IN', '!=' => 'NOT IN'];

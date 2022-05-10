@@ -67,6 +67,7 @@ public function CreateAction() {
 // check active METHOD
 public function is_enable_action($action) {
 	if(empty($action)) return false;
+	if(isset($this->aliasAction['*'])) return true;		//any action
 	if(	array_key_exists($action,$this->aliasAction) ||		// exists Alias Action
 		in_array($action,$this->my_method,true)) return TRUE;	// exist ENABLED List
 	return FALSE;	// diable ActionMethod
@@ -86,7 +87,7 @@ public function is_authorised($method) {
 		$bypass_method = (is_array($this->BypassMethod)) ? $this->BypassMethod : [$this->BypassMethod];
 		$bypass_method[] = 'Logout';	// must be append LogoutAction
 		$pass_check = false;	// NO password check.
-		if(in_array($method,$autologin) || CLI_DEBUG) {
+		if(in_array($method,$autologin,true) || CLI_DEBUG) {
 			$data = $Login->defaultUser();		// auto-login user
 			if(isset(App::$Post['login'])) $data = array_override($data,App::$Post);
 		} else if(isset(App::$Post['login'])) {	// Distinction Normal Login POST
@@ -98,7 +99,7 @@ public function is_authorised($method) {
 		}
 		$udata = $Login->is_validLoginUser($data,$pass_check);	// is valid user check
 		if($udata === false) {	// fail valid user => not login, or unknown user
-			if($this->needLogin && !in_array($method,$bypass_method)) {
+			if($this->needLogin && !in_array($method,$bypass_method,true)) {
 				$userid = (isset($data[$login_key])) ? $data[$login_key] : '';
 				$login_page = (defined('LOGIN_PAGE')) ? LOGIN_PAGE : 'app-login.php';
 				page_response($login_page,$Login->retryMessages($userid));
@@ -173,9 +174,11 @@ private function exec_Logging($action) {
 // Method Dispatcher before Pre-Process, after Post-Processing
 public function ActionDispatch($action) {
 	$discard = (is_array($this->discardParams)) ? $this->discardParams : [$this->discardParams];
-	if(in_array($action,$discard)) App::CleareParams();
+	if(in_array($action,$discard,true)) App::CleareParams();
 	if($this->ActionPreProcess($action)) {
-		if(array_key_exists($action,$this->aliasAction)) {
+		if(isset($this->aliasAction['*'])) {
+			$action = $this->aliasAction['*'];
+		} else if(array_key_exists($action,$this->aliasAction)) {
 			$action = $this->aliasAction[$action];
 		}
 		$method = "{$action}Action";
