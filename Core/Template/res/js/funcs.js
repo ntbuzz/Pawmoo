@@ -249,10 +249,6 @@ var ajaxJsonSync = function (url, obj, default_data) {
         contentType: 'application/json',
         dataType: "json",
         success: function(json_data) {   // 200 OK
-            if (!json_data[0]) {    // json error
-                alert("Transaction error. " + json_data[1]);
-                return;
-            }
 			default_data = json_data;
         },
         error: function() {
