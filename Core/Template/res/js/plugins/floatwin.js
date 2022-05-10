@@ -160,7 +160,7 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 $.fn.floatWin = function (setupObj, callback) {
 	var self = this;	// Reminder jQuery Self Object
 	var setting = {
-		Title: '',
+		Title: self.find('dt').innerText,	// デフォルトのタイトル
 		execButton: '.execButton',
 		formObj: {},
 	};
