@@ -33,9 +33,9 @@ public function truncate_sql($table) { return "";}		// TRUNCATE SQL
 public function setupFieldTransfer($alias,$relations=NULL) { $this->lang_alias = $alias; $this->relations = $relations; }
 public function SetPaging($pagesize, $pagenum) { }
 public function getValueLists($table,$ref,$id,$cond) { return []; }
-public function getRecordValue($row,$relations) { return []; }
+public function getRecordValue($row) { return []; }
 public function doQueryBy($key,$val) { return []; }
-public function findRecord($row,$relations,$sort = []) { $this->recordMax = 0; $this->fields = []; }
+public function findRecord($row,$sort = []) { $this->recordMax = 0; $this->fields = []; }
 public function insertRecord($row) { }
 public function deleteRecord($wh) { }
 

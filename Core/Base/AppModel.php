@@ -108,9 +108,9 @@ public function ResetSchema() {
 //==============================================================================
 // Schema Define Analyzer
 private function SchemaAnalyzer2() {
-	$this->TableFields = $this->HeaderSchema = [];
+	$this->TableFields = $this->HeaderSchema = $this->Relations = [];
 	foreach($this->Schema as $key => $defs) {
-		list($dtype,$flag,$width) = array_extract($defs,3);
+		list($dtype,$flag,$width,$rel) = array_extract($defs,4);
 		$dtype = strtolower($dtype);
 		// リスト表示対象か
 		list($sort,$align,$csv,$lang) = oct_extract($flag,4);
@@ -125,6 +125,21 @@ private function SchemaAnalyzer2() {
 			$this->TableFields[$key] = [$dtype,$flag,$width];
 		}
 		$this->ModelFields[$key] = [$dtype,$flag,$width];
+		// サブクエリ用リレーション作成
+		if(is_string($rel)) {
+			list($model,$field) = fix_explode('.',$rel,2);
+			$rel = [ $model => $field];
+		}
+		if(is_array($rel)) {
+            list($model,$fn) = array_first_item($rel);
+	        if(preg_match('/(\w+)(?:\[(\d+)\])/',$model,$m)===1) {
+    	        $model = $m[1];
+        	    $table = (is_array($this->$model->DataView))
+            	            ? $this->$model->DataView[$m[2]]            // View Element Index
+                	        : $this->$model->dbDriver->table;                 // illegal define
+        	} else $table = $this->$model->dbDriver->table;
+			$this->Relations[$key] = [ $table => $fn];
+		}
 	}
 }
 //==============================================================================
@@ -145,7 +160,7 @@ protected function ResetLocation() {
 			}
 		}
 	}
-	$this->dbDriver->setupFieldTransfer($this->locale_columns);
+	$this->dbDriver->setupFieldTransfer($this->locale_columns,$this->Relations);
 }
 //==============================================================================
 // extract DataTable or Alternate DataView
@@ -259,7 +274,7 @@ public function getPrimaryOf($key,$value,$default=false) {
 public function GetRecord($num,$join=FALSE,$values=FALSE) {
     if($join) {
         if($num === '') $this->fields = array();
-        else $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num],TRUE);
+        else $this->fields = $this->dbDriver->getRecordValue([$this->Primary => $num]);
     } else $this->getRecordBy($this->Primary,$num);
     $this->RecData= $this->fields;
     if($values) $this->GetValueList();
@@ -373,7 +388,7 @@ public function SelectFinder($chain, $filter, $cond, $sort=[]) {
 	list($id,$fn,$pid) = array_alternative($filter,3);
 	if($sort === true) $sort = [ $this->Primary => SORTBY_ASCEND];
 	$data = [];
-    $this->dbDriver->findRecord($cond,false,$sort);
+    $this->dbDriver->findRecord($cond,$sort);
     while (($fields = $this->dbDriver->fetchDB())) {
 		if($chain) {
 			if(empty($fn)) {
@@ -407,7 +422,7 @@ public function RecordFinder($cond,$filter=NULL,$sort=NULL) {
     else if(is_scalar($sort)) {
         $sort = [ $sort => $this->SortDefault ];
     }
-    $this->dbDriver->findRecord($cond,TRUE,$sort);
+    $this->dbDriver->findRecord($cond,$sort);
 	$this->record_max = $this->dbDriver->recordMax;
     while (($fields = $this->dbDriver->fetchDB())) {
         unset($record);
@@ -432,7 +447,7 @@ public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
     else if(is_scalar($sort)) {
         $sort = [ $sort => $this->SortDefault ];
     }
-    $this->dbDriver->findRecord($cond,FALSE,$sort,true);
+    $this->dbDriver->findRecord($cond,$sort,true);
 	$this->record_max = $this->dbDriver->recordMax;
     while(($fields = $this->dbDriver->fetch_array())) {
         unset($record);
@@ -449,7 +464,7 @@ public function RawRecordFinder($cond,$filter=NULL,$sort=NULL) {
 public function firstRecord($cond=[],$filter=NULL,$sort=NULL) {
 	$fields_list = $this->normalize_filter($filter);
     $fields_list[$this->Primary] = $this->Primary;  // must be include Primary-Key
-    $fields = $this->dbDriver->firstRecord($cond,FALSE,$sort);
+    $fields = $this->dbDriver->firstRecord($cond,$sort);
     return ($fields === FALSE) ? FALSE : array_filter($fields, function($val,$key) use (&$fields_list) {
 							return in_array($key,$fields_list,true);
 						},ARRAY_FILTER_USE_BOTH);
@@ -463,7 +478,7 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
     $fields_list = [$this->Primary => $this->Primary];  // must be include Primary-Key
     if(empty($sort)) $sort = [ $this->Primary => $this->SortDefault ];
     else if(is_scalar($sort)) $sort = [ $sort => $this->SortDefault ];
-    $this->dbDriver->findRecord($cond,TRUE,$sort);
+    $this->dbDriver->findRecord($cond,$sort);
     $this->record_max = $this->dbDriver->recordMax;
     $r_prev = $r_next = NULL;
     $prev = true;
