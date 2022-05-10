@@ -76,8 +76,9 @@ public function SetLayout($layoutfile) {
 //==============================================================================
 // Output layout
 //==============================================================================
-public function PutLayout($layout = NULL,$vars=[]) {
+public function PutLayout($layout = NULL,$vars=NULL) {
     if($layout === NULL) $layout = $this->Layout;
+    if($vars === NULL) $vars = [];
     debug_log(DBMSG_VIEW, "\$Layout = {$layout}");
 	$this->LayoutMode = TRUE;
 	$tmplate = $this->get_TemplateName('Preface');
