@@ -6,25 +6,31 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 	var self = this;
 	var eventButtons = ['.close', '.cancel', '.closeButton', '.execButton'];
 	if (typeof callbackBtn === "string" && eventButtons.is_exists(callbackBtn)===false) eventButtons.push(callbackBtn);
-	var elements = eventButtons.join(',');
-	var callbacks = eventButtons.slice(3).join(',');
 	var id = "#" + self.attr("id");
     var val = self.attr("value");
     var buttons = (val) ? val.split(",") : Array();
 	var message_id = id + " .fw_resize_message";
-	var id_name = function (obj) {
-		return obj.prop('tagName')+'.'+obj.prop('class')+'#'+obj.prop('id');
+//  ボタンバーが存在すれば削除する（ボタンの動的配置に対応）
+	if (self.find(".buttons-bar").length === 0) {
+		self.find(".buttons-bar").remove();
 	};
 //  ユーザー定義ボタンパーツを追加
-	if (buttons.length && self.find(".center").length===0) {
-        var buttontag = "<div class='center'>";
+	if (buttons.length) {
+        var buttontag = "<div class='buttons-bar'>";
         var buttonClass = [ "execButton", "closeButton"];
 		$.each(buttons, function (index, val) {
 			var label_array = val.split(":");
 			var btn_label = label_array[0];
 			var action = label_array[1];
-			if(action === undefined || action === "") action = buttonClass[index];
+			if (action === undefined || action === "") action = buttonClass.shift(); // buttonClass[index];
+			if (action === undefined) action = 'closeButton';
 			buttontag = buttontag + '<span class="Button ' + action + '">' + btn_label + '</span>';
+			if (typeof action === "string") {
+				var aclass = "." + action;
+				if (eventButtons.indexOf(aclass) === -1) {
+					eventButtons.push(aclass);
+				};
+			};
         });
 		buttontag = buttontag + "</div>";
 		var button_bar = $(buttontag);
@@ -32,6 +38,8 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 		// 高さの調整
 		self.find('dd').css('height', 'calc(100% - ' + (button_bar.outerHeight()+11) +'px)');
 	};
+	var elements = eventButtons.join(',');
+	var callbacks = eventButtons.slice(3).join(',');
 //	操作ボタンパーツを追加
     var controlls = ["close:${#core.Close}", "fw_resize:${#core.Resize}", "fw_resize_message:${#core.SizeDisplay}"];
     controlls.forEach(function (value) {
@@ -48,13 +56,12 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 	var bk_panel = $('<div class="floatWin-BK"></div>');
     // イベントボタンリストを登録
 	self.off('click').on('click', elements, function (e) {
-//		alert(elements+"\nMe:"+$(this).prop('class'));
 		e.stopPropagation();
 		e.preventDefault();
 		// 実行イベントボタンを判定
 		if ($(callbacks).is($(this))) {
-//			alert(callbacks);
-			if (typeof callback === 'function') callback.call($(this));
+			var cls = $(this).attr("class").split(" ");
+			if (typeof callback === 'function') callback.call($(this),cls[1]);
 		};
 		self.trigger('close-me');
 	});
@@ -111,7 +118,6 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 		if (e.key === 'Enter') {
 			e.stopPropagation();
 			e.preventDefault();
-//			$('.execButton').click();
 			$(callbackBtn).click();
 		};
 	});
@@ -163,6 +169,7 @@ $.fn.floatWin = function (setupObj, callback) {
 		Title: self.find('dt').innerText,	// デフォルトのタイトル
 		execButton: '.execButton',
 		formObj: {},
+		ButtonSet: '',
 	};
 	if(typeof setupObj === 'string') setting.Title = setupObj;
 	else if(typeof setupObj === 'object') $.each(setupObj, function (key, value) { setting[key] = value;});
@@ -192,7 +199,11 @@ $.fn.floatWin = function (setupObj, callback) {
 			};
 		};
 	});
-	self.innerWindow(setting.Title, setting.execButton, function () {
+	// ボタンセットの再定義
+	if (setting.ButtonSet.length > 0) {
+		self.attr("value",setting.ButtonSet);
+	};
+	self.innerWindow(setting.Title, setting.execButton, function (invoke) {
 		var setobj = {};
 		self.find("*").each(function () {
 			var nm = $(this).attr('name');
@@ -205,7 +216,7 @@ $.fn.floatWin = function (setupObj, callback) {
 				};
 			};
 		});
-		if (typeof callback === "function") callback.call($(this), setobj);
+		if (typeof callback === "function") callback.call($(this), setobj,invoke);
 		return false;
 	});
 	return self;
