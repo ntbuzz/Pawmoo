@@ -226,10 +226,10 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		Preload: null,
 		Modified: false,
 //		Preload: function () { return '<div class="check-itemset"></div>'; },
-		SetValue: function (value, label) {
+		SetValue: function (obj, value, label) {
 			this.Modified = true;
 			if (typeof this.Selected === "function") {
-				return this.Selected.call(self, value, label, this.TargetObj);
+				return this.Selected.call(obj, value, label, this.TargetObj);
 			} else {
 				this.TargetObj.val(value);
 				this.TargetObj.trigger('change');
@@ -275,7 +275,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		clearBtn.off().on('click',function(e){
 			e.stopPropagation();
 			e.preventDefault();
-			setting.SetValue('');
+			setting.SetValue(self,'','');
 		});
 	};
 	// ▼マークのタグが無ければ追加する
@@ -361,7 +361,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 				uniq = vals.filter(function (x, i, menu_box) { return (menu_box.indexOf(x) === i)&&(![null,undefined,""].is_exists(x)); }).join(setting.Separator).trim();
 				label = labels.filter(function (x, i, menu_box) { return (menu_box.indexOf(x) === i)&&(![null,undefined,""].is_exists(x)); }).join(setting.Separator).trim();
 			};
-			if (setting.SetValue(uniq, label) === true) {		// 値を書き込む
+			if (setting.SetValue(check_obj, uniq, label) === true) {		// 値を書き込む
 				menu_box.trigger('close-me');			// メニューを閉じる
 			};
 		});
