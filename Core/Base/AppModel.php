@@ -565,7 +565,7 @@ public function get_post_field($key) {
         foreach($row as $key => $val) {
             $xkey = $this->get_post_field($key);
             if(array_key_exists($xkey,$this->dbDriver->raw_columns)) {
-                $data[$xkey] = $val;
+                $data[$xkey] = str_replace("\r\n","\n",$val);
             }
         }
         unset($data[$this->Primary]);
