@@ -313,7 +313,7 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 			}
 		} else {
 			// case c., d.
-			$ref_list = array_filter(explode('.', $ref_list), "strlen" );
+			$ref_list = array_filter(explode('.', $ref_list), 'strlen' );
 			$this->Select[$key_name] = $this->$model->SelectFinder(false,$ref_list,$cond,$sort);
 		}
 		if($sort_val !== false) {
@@ -565,7 +565,7 @@ public function get_post_field($key) {
         foreach($row as $key => $val) {
             $xkey = $this->get_post_field($key);
             if(array_key_exists($xkey,$this->dbDriver->raw_columns)) {
-                $data[$xkey] = str_replace("\r\n","\n",$val);
+                $data[$xkey] = $val;
             }
         }
         unset($data[$this->Primary]);
