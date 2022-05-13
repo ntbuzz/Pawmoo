@@ -11,7 +11,7 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
     var buttons = (val) ? val.split(",") : Array();
 	var message_id = id + " .fw_resize_message";
 //  ボタンバーが存在すれば削除する（ボタンの動的配置に対応）
-	if (self.find(".buttons-bar").length === 0) {
+	if (self.find(".buttons-bar").length > 0) {
 		self.find(".buttons-bar").remove();
 	};
 //  ユーザー定義ボタンパーツを追加
@@ -23,7 +23,7 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 			var btn_label = label_array[0];
 			var action = label_array[1];
 			if (action === undefined || action === "") action = buttonClass.shift(); // buttonClass[index];
-			if (action === undefined) action = 'closeButton';
+			if (action === undefined) action = 'closeButton';	// 未定義クラスはクローズを割当て
 			buttontag = buttontag + '<span class="Button ' + action + '">' + btn_label + '</span>';
 			if (typeof action === "string") {
 				var aclass = "." + action;
@@ -39,7 +39,7 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 		self.find('dd').css('height', 'calc(100% - ' + (button_bar.outerHeight()+11) +'px)');
 	};
 	var elements = eventButtons.join(',');
-	var callbacks = eventButtons.slice(3).join(',');
+	var callbacks = eventButtons.slice(3).join(',');	// 戦闘の３つはコールバックしない
 //	操作ボタンパーツを追加
     var controlls = ["close:${#core.Close}", "fw_resize:${#core.Resize}", "fw_resize_message:${#core.SizeDisplay}"];
     controlls.forEach(function (value) {
