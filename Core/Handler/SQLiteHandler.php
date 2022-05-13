@@ -73,13 +73,13 @@ public function getLastError() {
 //		return sqlite_last_error($this->rows);
 }
 //==============================================================================
-//	レコードの追加 
-//==============================================================================
+// エスケープ処理
 private function safe_convert($row,$func) {
 	$row = $this->sql_str_quote($row,"'","''");	// 書き込み型変換
 	return $this->sql_safe_convert($row);	// 書き込み型変換
 }
 //==============================================================================
+//	レコードの追加 
 public function insertRecord($row) {
 	$row = $this->safe_convert($row);
 	// UPDATE OR INSERT => REPLACE SQL生成
