@@ -381,6 +381,8 @@ protected function fetch_convert($data) {
 			// 		 $val = str_replace(["''",'\\\\'],["'",'\\'],$val);
 			// 		 $data[$key] = $val;
 			// 		break;
+			default:
+                if(gettype($val) === 'string') $data[$key] = str_replace("\r\n","\n",$val);
 			}
 		}
 	}
