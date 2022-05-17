@@ -45,6 +45,7 @@ class AppController extends AppObject {
 								function($v) use ($except) {
 									return !in_array($v,$except,true);
 								});
+		LangUI::LoadModuleResource($this->ModuleName);
 	}
 //==============================================================================
 // Initialized Class Property
