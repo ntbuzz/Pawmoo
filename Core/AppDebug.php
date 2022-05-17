@@ -113,8 +113,6 @@ public static function stderr($items) {
 //==========================================================================
 // ダミーダンプ
 public static function xdump($items,$trace=true) {}
-//==========================================================================
-// ダミーダンプ
 public static function xstderr($items,$trace=true) {}
 
 }
