@@ -140,21 +140,21 @@ function UploadFiles(files,url, callback_func) {
     $('body').append(bk_panel);
     if (topBar === null) {
         self.CloseWait('FILES EMPTY!!');
-        alert("FILES EMPTY!!");
+        alert('FILES EMPTY!!');
         return;
     };
     // メッセージ表示
     self.RestMessage = function (n) {
-        rest.text("${#.core.RestFiiles}" + n);
+        rest.text('${#.core.RestFiiles}' + n);
     };
     // ダイアログを閉じる
     self.CloseDialog = function () {
-        bk_panel.fadeOut("fast");
+        bk_panel.fadeOut('fast');
         bk_panel.remove();
     };
     self.CloseWait = function (data) {
         $.busy_cursor(false);
-        if (typeof callback_func === "function") callback_func(upload,data);
+        if (typeof callback_func === 'function') callback_func(upload,data);
         if (!upload.abort) {
             self.CloseDialog();  // ABORTせずに完了したら即ダイアログを閉じる
         } else {
@@ -196,9 +196,9 @@ function PairUploadDialog(files,url,callback_func) {
     var upload_msg = $('<span></span>').appendTo(dialog);
     // セカンドファイル名をセット
     self.SecondFileName = function (obj, file, fname) {
-        fmsg = (file === undefined) ? "${#.core.ENTER}" :file.name;
-        if (file !== undefined && fmsg.is_invalid_name()) alert("${#.core.BADFILE}");
-        ttl = fname.split(".").reverse().slice(1).reverse().join(".");
+        fmsg = (file === undefined) ? '${#.core.ENTER}' :file.name;
+        if (file !== undefined && fmsg.is_invalid_name()) alert('${#.core.BADFILE}');
+        ttl = fname.split('.').reverse().slice(1).reverse().join('.');
         var cell = obj.find('td.second');
         if (file === undefined) cell.addClass('error');
         else cell.removeClass('error');
@@ -208,16 +208,16 @@ function PairUploadDialog(files,url,callback_func) {
     // プロセスバーのリスト生成
     for (var i = 0; i < files.length; ++i) {
         var f = files[i];
-        var labels = "file_select_" + i;
+        var labels = 'file_select_' + i;
         var panel = $('<div class="files-pair" id="' + i + '"></div>').appendTo(dialog);;
-        var list = "${#.core.FILES}" + (i + 1) + "\
+        var list = '${#.core.FILES}' + (i + 1) + '\
         <table><tr>\
-        <th>${#.core.FIRSTFILE}</th><td class='first'>"+ f.name +"</td>\
-        <th class='labels'><label for='"+labels+"'>${#.core.SECONDFILE}<input type='file' id='"+labels+"' name='second_file'></label></th>\
-        <td class='second'></td></tr>\
-        <tr class='title_bar'><th>${#.core.UPTITLE}</th><td colspan=3>\
-        <input type='text' name='title' value=''></td>\
-        </tr></table>";
+        <th>${#.core.FIRSTFILE}</th><td class="first">'+ f.name +'</td>\
+        <th class="labels"><label for="'+labels+'">${#.core.SECONDFILE}<input type="file" id="'+labels+'" name="second_file"></label></th>\
+        <td class="second"></td></tr>\
+        <tr class="title_bar"><th>${#.core.UPTITLE}</th><td colspan=3>\
+        <input type="text" name="title" value=""></td>\
+        </tr></table>';
         panel.append(list);
         self.SecondFileName(panel, undefined, f.name);
     };
@@ -236,7 +236,7 @@ function PairUploadDialog(files,url,callback_func) {
     var send_abort = $('<span class="button">${#.core.SEND}</span>').appendTo(button_bar);
     var cancel_close = $('<span class="button">${#.core.UNDO}</span>').appendTo(button_bar);
     cancel_close.off().click(function () {
-        bk_panel.fadeOut("fast");
+        bk_panel.fadeOut('fast');
         bk_panel.remove();
     });
     dialog.append(button_bar);
@@ -247,8 +247,8 @@ function PairUploadDialog(files,url,callback_func) {
             var num = $(this).attr('id');
             var ttl = $(this).find('input[name="title"]').val();
             var ff2 = $(this).find('input[type=file]').prop('files')[0];
-            if (ff2 === undefined || ttl === "") {
-                msg = (ff2 === undefined) ? "${#.core.NO_SECOND}":"${#.core.NO_TITLE}";
+            if (ff2 === undefined || ttl === '') {
+                msg = (ff2 === undefined) ? '${#.core.NO_SECOND}':'${#.core.NO_TITLE}';
                 alert(msg.replace('%s',files[num].name));
                 secondf_set = false;
                 return false;
@@ -278,15 +278,15 @@ function PairUploadDialog(files,url,callback_func) {
             return true;
         });
         if (topBar === null) {
-            self.CloseWait("FILES EMPTY!!");
-            alert("FILES EMPTY!!");
+            self.CloseWait('FILES EMPTY!!');
+            alert('FILES EMPTY!!');
             return false;
         };
         upload_msg.text('${#.core.Uploading}');
         self.RestMessage(upload.rest);
         dialog.find('label').each(function () {
             $(this).Visible(false); // 押せないように消す
-            $(this).closest('th').html("${#.core.SECONDFILE}");
+            $(this).closest('th').html('${#.core.SECONDFILE}');
         });
         cancel_close.Visible(false);   // 押せないように消す
         $(this).text('${#.core.ABORT}');     // 送信→中止ボタンに切替
@@ -299,11 +299,11 @@ function PairUploadDialog(files,url,callback_func) {
     });
     // 残りファイル数表示
     self.RestMessage = function (n) {
-        rest.text("${#.core.RestFiiles}" + n);
+        rest.text('${#.core.RestFiiles}' + n);
     };
     self.CloseWait = function (data) {
         $.busy_cursor(false);
-        if (typeof callback_func === "function") callback_func(upload,data);
+        if (typeof callback_func === 'function') callback_func(upload,data);
         if (!upload.abort) {
             cancel_close.click();
         } else {
@@ -322,13 +322,13 @@ function isFileCharsetOK(files) {
 		var fname = files[i].name;
         // URL禁則文字のチェック
         if (fname.is_invalid_name()) {
-            if (confirm(fname+"\n${#.core.BADFILE}")) {
+            if (confirm(fname+'\n${#.core.BADFILE}')) {
                 return false;
             };
 		};
         // 実行可能ファイルのチェック
 		if (fname.is_executable()) {
-			alert(fname+"\n${#.core.FORBIDDEN}");
+			alert(fname+'\n${#.core.FORBIDDEN}');
             return false;
 		};
     };
@@ -390,7 +390,7 @@ $.fn.dropfiles2 = function (maxfiles,url, callback_func) {
             self.removeClass('drag-over');
             var files = e.originalEvent.dataTransfer.files;
             if (maxfiles>0  && files.length > maxfiles) {
-                alert("${#.core.MAXFILE}".replace('%d',maxfiles));
+                alert('${#.core.MAXFILE}'.replace('%d',maxfiles));
                 return false;
             };
             if(isFileCharsetOK(files)) PairUploadDialog(files, url,callback_func);
