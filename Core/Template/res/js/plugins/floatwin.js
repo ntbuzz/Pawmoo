@@ -5,46 +5,46 @@
 $.fn.innerWindow = function (title,callbackBtn, callback) {
 	var self = this;
 	var eventButtons = ['.close', '.cancel', '.closeButton', '.execButton'];
-	if (typeof callbackBtn === "string" && eventButtons.is_exists(callbackBtn)===false) eventButtons.push(callbackBtn);
-	var id = "#" + self.attr("id");
-    var val = self.attr("value");
-    var buttons = (val) ? val.split(",") : Array();
-	var message_id = id + " .fw_resize_message";
+	if (typeof callbackBtn === 'string' && eventButtons.is_exists(callbackBtn)===false) eventButtons.push(callbackBtn);
+	var id = '#' + self.attr('id');
+    var val = self.attr('value');
+    var buttons = (val) ? val.split(',') : Array();
+	var message_id = id + ' .fw_resize_message';
 //  ボタンバーが存在すれば削除する（ボタンの動的配置に対応）
-	if (self.find(".buttons-bar").length > 0) {
-		self.find(".buttons-bar").remove();
+	if (self.find('.buttons-bar').length > 0) {
+		self.find('.buttons-bar').remove();
 	};
 //  ユーザー定義ボタンパーツを追加
 	if (buttons.length) {
-        var buttontag = "<div class='buttons-bar'>";
-        var buttonClass = [ "execButton", "closeButton"];
+        var buttontag = '<div class="uttons-bar">';
+        var buttonClass = [ 'execButton', 'closeButton'];
 		$.each(buttons, function (index, val) {
-			var label_array = val.split(":");
+			var label_array = val.split(':');
 			var btn_label = label_array[0];
 			var action = label_array[1];
-			if (action === undefined || action === "") action = buttonClass.shift(); // buttonClass[index];
+			if (action === undefined || action === '') action = buttonClass.shift(); // buttonClass[index];
 			if (action === undefined) action = 'closeButton';	// 未定義クラスはクローズを割当て
 			buttontag = buttontag + '<span class="Button ' + action + '">' + btn_label + '</span>';
-			if (typeof action === "string") {
-				var aclass = "." + action;
+			if (typeof action === 'string') {
+				var aclass = '.' + action;
 				if (eventButtons.indexOf(aclass) === -1) {
 					eventButtons.push(aclass);
 				};
 			};
         });
-		buttontag = buttontag + "</div>";
+		buttontag = buttontag + '</div>';
 		var button_bar = $(buttontag);
 		self.append(button_bar);
 		// 高さの調整
 		self.find('dd').css('height', 'calc(100% - ' + (button_bar.outerHeight()+11) +'px)');
 	};
 	var elements = eventButtons.join(',');
-	var callbacks = eventButtons.slice(3).join(',');	// 戦闘の３つはコールバックしない
+	var callbacks = eventButtons.slice(3).join(',');	// 先頭の３つはコールバックしない
 //	操作ボタンパーツを追加
-    var controlls = ["close:${#core.Close}", "fw_resize:${#core.Resize}", "fw_resize_message:${#core.SizeDisplay}"];
+    var controlls = ['close:${#core.Close}', 'fw_resize:${#core.Resize}', 'fw_resize_message:${#core.SizeDisplay}'];
     controlls.forEach(function (value) {
 		var cls = value.split(':');
-		var clsname = "span." + cls[0];
+		var clsname = 'span.' + cls[0];
 		var btn = self.find(clsname);
         if (btn.length === 0) {
 			var alt = (cls[1] != '') ? '" alt="' + cls[1] : '';
@@ -60,38 +60,38 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 		e.preventDefault();
 		// 実行イベントボタンを判定
 		if ($(callbacks).is($(this))) {
-			var cls = $(this).attr("class").split(" ");
+			var cls = $(this).attr('class').split(' ');
 			if (typeof callback === 'function') callback.call($(this),cls[1]);
 		};
 		self.trigger('close-me');
 	});
 	// 閉じるためのカスタムイベントを定義する(trigger()で呼び出す)
 	self.off('close-me').on('close-me', function (e) {
-		self.fadeOut("fast");
+		self.fadeOut('fast');
 		self.find('#init_contents').html('');      // clear contents
-		$(document).unbind("mousemove");
+		$(document).unbind('mousemove');
 		bk_panel.remove();
 	});
 	// ドロップ属性があればエレメントを初期化する
-	var cls = self.attr("class");
-	if( cls!==undefined && cls.indexOf("drop") !== -1) {
-		self.find("#datalist").empty();
-		var initdata = self.find("#init").attr("value");
-		self.find("#datalist").append(initdata);
+	var cls = self.attr('class');
+	if( cls!==undefined && cls.indexOf('drop') !== -1) {
+		self.find('#datalist').empty();
+		var initdata = self.find('#init').attr('value');
+		self.find('#datalist').append(initdata);
 	};
 	// サイズ属性があればウィンドウサイズを指定する
 	if (self.is('[size]')) {
-		var sz = self.attr("size").split(',');
+		var sz = self.attr('size').split(',');
 		self.css({
-			"width": sz[0] + "px",
-			"height": sz[1] + "px",
-			"min-width": sz[0] + "px",
-			"min-height": sz[1] + "px"
+			'width': sz[0] + 'px',
+			'height': sz[1] + 'px',
+			'min-width': sz[0] + 'px',
+			'min-height': sz[1] + 'px'
 		});
 		if (sz.length == 4) {
 			self.css({
-				"min-width": sz[2] + "px",
-				"min-height": sz[3] + "px"
+				'min-width': sz[2] + 'px',
+				'min-height': sz[3] + 'px'
 			});
 		};
 		var x = ($(window).innerWidth() - self.width())/2;  // 中央
@@ -123,42 +123,42 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 	});
     // タイトルバーのドラッグ
 	self.on('mousedown', 'dl dt', function (e) {
-        self.data("clickPointX", e.pageX - self.offset().left)
-            .data("clickPointY", e.pageY - self.offset().top);
+        self.data('clickPointX', e.pageX - self.offset().left)
+            .data('clickPointY', e.pageY - self.offset().top);
         $(document).mousemove( function(e) {
             self.css({
-                top: (e.pageY - self.data("clickPointY")) + "px",
-                left: (e.pageX - self.data("clickPointX")) + "px"
+                top: (e.pageY - self.data('clickPointY')) + 'px',
+                left: (e.pageX - self.data('clickPointX')) + 'px'
             });
         }).mouseup( function(e) {
-            $(document).unbind("mousemove");
+            $(document).unbind('mousemove');
         });
     });     // mousedown()
     // リサイズのドラッグ
 	self.on('mousedown', '.fw_resize', function (e) {
-        self.data("clickPointX", e.pageX)
-            .data("clickPointY", e.pageY);
+        self.data('clickPointX', e.pageX)
+            .data('clickPointY', e.pageY);
         $(message_id).fadeIn('fast');
         self.css('user-select', 'none');    // テキスト選択不可
         $(document).mousemove(function (e) {
             var new_width = Math.floor(e.pageX - self.offset().left + 6);
             var new_height= Math.floor(e.pageY - self.offset().top + 6);
             self.css({
-                width: new_width + "px",
-                height: new_height + "px"
+                width: new_width + 'px',
+                height: new_height + 'px'
             });
-            var txt = new_width + " x " + new_height;
+            var txt = new_width + ' x ' + new_height;
             $(message_id).text(txt);
         }).mouseup(function (e) {
             $(message_id).fadeOut('fast');
             self.css('user-select', '');    // テキスト選択可能
-			$(document).unbind("mousemove").unbind("mouseup");
+			$(document).unbind('mousemove').unbind('mouseup');
 			self.fitWindow();
         });
     });
 	$('body').append(bk_panel);
 	bk_panel.fadeIn('fast');
-	self.fadeIn("fast");
+	self.fadeIn('fast');
 	return self;
 };
 //=============================================================================================
@@ -180,9 +180,9 @@ $.fn.floatWin = function (setupObj, callback) {
 		} else {
 			var target = self.find('[name="' + key + '"]');
 			if (target.length) {
-				switch (target.prop("tagName")) {
+				switch (target.prop('tagName')) {
 				case 'INPUT':
-					if (target.attr("type") == "checkbox" || target.attr("type") == "radio" ) {
+					if (target.attr('type') == 'checkbox' || target.attr('type') == 'radio' ) {
 						target.prop('checked', (value == 't'));
 					} else target.val(value);   // 自ID
 					break;
@@ -190,9 +190,9 @@ $.fn.floatWin = function (setupObj, callback) {
 					target.val(value);   // 自ID
 					break;
 				case 'TEXTAREA':
-					var w = target.attr("cols");
-					var h = target.attr("rows");
-					target.css({"width": w+"em","height": h+"em"});
+					var w = target.attr('cols');
+					var h = target.attr('rows');
+					target.css({'width': w+'em','height': h+'em'});
 				default:
 					target.text(value);   // 自ID
 				};
@@ -201,11 +201,11 @@ $.fn.floatWin = function (setupObj, callback) {
 	});
 	// ボタンセットの再定義
 	if (setting.ButtonSet.length > 0) {
-		self.attr("value",setting.ButtonSet);
+		self.attr('value',setting.ButtonSet);
 	};
 	self.innerWindow(setting.Title, setting.execButton, function (invoke) {
 		var setobj = {};
-		self.find("*").each(function () {
+		self.find('*').each(function () {
 			var nm = $(this).attr('name');
 			if (nm) {
 				var tt = $(this).attr('type');
@@ -216,7 +216,7 @@ $.fn.floatWin = function (setupObj, callback) {
 				};
 			};
 		});
-		if (typeof callback === "function") callback.call($(this), setobj,invoke);
+		if (typeof callback === 'function') callback.call($(this), setobj,invoke);
 		return false;
 	});
 	return self;

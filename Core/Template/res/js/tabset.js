@@ -17,9 +17,9 @@ $(document).on('click','.tabControll>.tabPanel>.tabmenu>li',function () {
 	$.fn.stickyTabMenu = function (e) {
 		var self = this;
 		var stickyTab = $(e).find('.tabPanel');
-		self.on("scroll", function () {
+		self.on('scroll', function () {
             var top = self.scrollTop();
-            stickyTab.css("top", top + "px");
+            stickyTab.css('top', top + 'px');
 		});
 	};
 })(jQuery);

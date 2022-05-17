@@ -3,9 +3,9 @@
 $.fn.popupCheckSelect = function (setupobj, callback) {
 	var setting = {
 		PopupLabel: false,
-		DialogTitle: "${#.core.CheckTITLE}",
-		ConfirmLabel: "${#.core.CheckConfirm}",
-		MultiSelect: true,				// true or object-type use "checkbox",other will be radio
+		DialogTitle: '${#.core.CheckTITLE}',
+		ConfirmLabel: '${#.core.CheckConfirm}',
+		MultiSelect: true,				// true or object-type use 'checkbox',other will be radio
 		Columns: 2,
 		Rows: 0,
 		ItemsList: [],
@@ -13,8 +13,8 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 	// checkbox select dialog options.
 	var CheckListOption = {
 		FlipCheck: true,
-		FlipLabel: "${#.core.CheckALL}",
-		Separate: "\n",
+		FlipLabel: '${#.core.CheckALL}',
+		Separate: '\n',
 	};
 	$.each(setupobj, function (key, value) { setting[key] = value; });
 	// Is CheckList Dialog Type
@@ -29,24 +29,24 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 	var tag_obj = this.find('[name='+tag_name+']');
 	if (tag_obj.length == 0) {
 		var self_name = this.attr('id');
-		alert("popupCheckSelect:NOT FOUND="+tag_name+' @ '+self_name);
+		alert('popupCheckSelect:NOT FOUND='+tag_name+' @ '+self_name);
 		return false;
 	};
-	tag_obj.css("padding", "0 5px");
+	tag_obj.css('padding', '0 5px');
 	var btn = $('<span class="dropdown"></span>');
-	if (typeof setting.PopupLabel === "string") {
+	if (typeof setting.PopupLabel === 'string') {
 		var label = $('<label>' + setting.PopupLabel + '</label>');
 		this.prepend(label);
 		label.after(btn);
-		tag_obj.css("width", "100%");
+		tag_obj.css('width', '100%');
 	} else {
 		var ww = this.innerWidth() - tag_obj.position().left - 20;
-		tag_obj.css("width", ww);
+		tag_obj.css('width', ww);
 		this.append(btn);
 	};
-	var input_tag = "type='radio' name='" + tag_name + "'";
+	var input_tag = 'type="radio" name="' + tag_name + '"';
 	if (setting.MultiSelect === true) {
-		input_tag = "type='checkbox' class='multi-check'";
+		input_tag = 'type="checkbox" class="multi-check"';
 	};
 	// set ALL-CHECK checkbox addition
 	var check_all_flip = (setting.MultiSelect === true && CheckListOption.FlipCheck);
@@ -57,7 +57,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 		var bk_panel = $('<div class="dialog-BK"></div>').appendTo($('body'));
 		var dialog = $('<div class="checklist-dialog"></div>').appendTo(bk_panel);
 		dialog.click(function (e) { e.stopPropagation(); });	// イベントの伝播を止める
-		if(typeof setting.DialogTitle === "string") {
+		if(typeof setting.DialogTitle === 'string') {
 			var title_bar = $('<div class="titleBar"></div>').appendTo(dialog);
 			title_bar.append(setting.DialogTitle);
 		};
@@ -81,8 +81,8 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 			// item list convert to label object.
 			var label_val = {};
 			check_items.forEach(function (val) {
-				if(typeof val === "string" &&  val.indexOf('=') >= 0) {
-					var dat = val.split("=");
+				if(typeof val === 'string' &&  val.indexOf('=') >= 0) {
+					var dat = val.split('=');
 					label = dat[0];
 					value = dat[1];
 				} else label = value = val;
@@ -139,7 +139,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 		var active_list = check_contents.find('.checklist-box').first();
 		current_list = make_list_box(active_list, current_list, current_list);
 		if (setting.Rows > 0) {
-			check_contents.css('max-height', setting.Rows*1.5 + "em");
+			check_contents.css('max-height', setting.Rows*1.5 + 'em');
 		};
 		btn_bar.trigger('check-flip');
 		btn_bar.appendTo(dialog);
@@ -171,7 +171,7 @@ $.fn.popupCheckSelect = function (setupobj, callback) {
 				uniq = $('input[name="'+tag_name+'"]:checked').val();
 			};
 			bk_panel.click();
-			if (typeof callback === "function") callback.call(tag_obj, uniq);
+			if (typeof callback === 'function') callback.call(tag_obj, uniq);
 			return false;
 		});
 		bk_panel.click(function (e) {
@@ -220,7 +220,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		ClearTag: '<span class="clear"></span>',
 		DropDown: '<span class="arrow"></span>',
 		addClear: true,			// クリアボタンが必要
-		Separator: " ",
+		Separator: ' ',
 		Hint:'',
 		MenuContents:'',
 		Preload: null,
@@ -228,7 +228,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 //		Preload: function () { return '<div class="check-itemset"></div>'; },
 		SetValue: function (obj, value, label) {
 			this.Modified = true;
-			if (typeof this.Selected === "function") {
+			if (typeof this.Selected === 'function') {
 				return this.Selected.call(obj, value, label, this.TargetObj);
 			} else {
 				this.TargetObj.val(value);
@@ -240,7 +240,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		Selected: null,
 		OnClose: null,
 		OnClosedFunc: function () {
-			if (typeof this.OnClose === "function" && this.Modified) {
+			if (typeof this.OnClose === 'function' && this.Modified) {
 				this.OnClose.call(self, this.GetValue());
 			};
 		},
@@ -290,7 +290,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 			setting.Preload = function () { return $(setting.MenuContents).html(); };
 		};
 	};
-	self.css("cursor", "pointer").off('click').on('click', function () {
+	self.css('cursor', 'pointer').off('click').on('click', function () {
 		setting.Modified = false;
 		// プリロード関数でメニューを取得
 		$.busy_cursor(true);
@@ -300,7 +300,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		var menu_box = $(data).appendTo('body');
 		if (typeof setting.Hint === 'string') menu_box.attr('title', setting.Hint);
 		// checkbox の時だけ
-		if (setting.CheckType && setting.CheckAll) menu_box.append("<div class='check-all'>${#.core.CheckALL}<input type='checkbox' class='flip_all' /></div>");
+		if (setting.CheckType && setting.CheckAll) menu_box.append('<div class="check-all">${#.core.CheckALL}<input type="checkbox" class="flip_all" /></div>');
 		menu_box.show();
 		// 移動している可能性があるため、クリック時に位置計算
 		var menuPos = new calcPosition(self, menu_box);
@@ -358,8 +358,8 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 				vals = direct_data.concat(vals);
 				labels = direct_data.concat(labels);
 				// IEでも動くようにfilterで重複を削除して結合
-				uniq = vals.filter(function (x, i, menu_box) { return (menu_box.indexOf(x) === i)&&(![null,undefined,""].is_exists(x)); }).join(setting.Separator).trim();
-				label = labels.filter(function (x, i, menu_box) { return (menu_box.indexOf(x) === i)&&(![null,undefined,""].is_exists(x)); }).join(setting.Separator).trim();
+				uniq = vals.filter(function (x, i, menu_box) { return (menu_box.indexOf(x) === i)&&(![null,undefined,''].is_exists(x)); }).join(setting.Separator).trim();
+				label = labels.filter(function (x, i, menu_box) { return (menu_box.indexOf(x) === i)&&(![null,undefined,''].is_exists(x)); }).join(setting.Separator).trim();
 			};
 			if (setting.SetValue(check_obj, uniq, label) === true) {		// 値を書き込む
 				menu_box.trigger('close-me');			// メニューを閉じる

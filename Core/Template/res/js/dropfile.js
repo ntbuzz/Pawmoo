@@ -14,7 +14,7 @@ function ProgressBar(child, fmd, name,size,callback_func) {
     self.FileSize = $('<span class="filesize right"></span>').appendTo(self.progressPanel);
     self.gainBar = $('<div class="progress-gain"></div>').appendTo(self.progressPanel);
     self.Cancel.click(function () {
-        if (confirm("${#.core.Confirm}".replace('%s',name))) {
+        if (confirm('${#.core.Confirm}'.replace('%s',name))) {
             self.Abort(false);
         };
     });
@@ -22,13 +22,13 @@ function ProgressBar(child, fmd, name,size,callback_func) {
     sz = size;	// fmd.get('size');
     if (sz>0) {
         for (i = 0; sz > 1024; i += 3, sz /= 1024) ;
-        szStr = sz.toFixed(2) +" B  KB MB GB TB PB".substr(i,3);
+        szStr = sz.toFixed(2) +' B  KB MB GB TB PB'.substr(i,3);
         if (i >= 9 && sz > 1.0) {
-            szStr = "Size Over > 1.0 GB";
+            szStr = 'Size Over > 1.0 GB';
             self.Aborted = true;
         };
     } else {
-        szStr = "Size ZERO or Directory";
+        szStr = 'Size ZERO or Directory';
         self.Aborted = true;
     };
     self.FileSize.html(szStr);
@@ -78,8 +78,8 @@ function ProgressBar(child, fmd, name,size,callback_func) {
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 if(!self.Aborted) {
                     alert(
-                        'XMLHttpRequest:' + XMLHttpRequest.status + "\n" +
-                        'textStatus:' + textStatus + "\n" +
+                        'XMLHttpRequest:' + XMLHttpRequest.status + '\n' +
+                        'textStatus:' + textStatus + '\n' +
                         'errorThrown:' + errorThrown.message
                     );
                 };

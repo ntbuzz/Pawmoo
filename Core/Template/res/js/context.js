@@ -2,17 +2,17 @@
 // jquery => コマンドでインクルードすること
 // グローバルオブジェクト popup_menu_function が定義されているときだけ処理
 // popup_menu_function にはコンテキストメニューの処理関数を登録しておく
-if (typeof popup_menu_function == "object") {
-    var selector = $(".context-menu");
+if (typeof popup_menu_function == 'object') {
+    var selector = $('.context-menu');
     selector.each(function () {
         var self = $(this); // jQueryオブジェクトを変数に代入しておく
-        var ref_id = self.attr("data-element");  // 紐付けるID
-        if (ref_id != "") {
+        var ref_id = self.attr('data-element');  // 紐付けるID
+        if (ref_id != '') {
             ref = $(ref_id);
             self.find('li').each(function (index) {
                 //クリックされたタブのみにクラスselectをつけます。
                 var func = $(this).attr('id');
-                var func_id = "#" + func;
+                var func_id = '#' + func;
                 // メニュー関数が定義されているものだけ
                 if (func) {
                     var func_type = (typeof popup_menu_function[func]);
@@ -20,9 +20,9 @@ if (typeof popup_menu_function == "object") {
                     $(func_id).mousedown(function (e) {
                         self.hide();
                         $(ref_id).removeClass('hilight');  // 全部のクラスを変更
-                        if (func_type == "function") {      // 関数なら
-                            func_elem($(ref_id + ".selected"));
-                        } else if(func_type == "string") {              // 参照なら
+                        if (func_type == 'function') {      // 関数なら
+                            func_elem($(ref_id + '.selected'));
+                        } else if(func_type == 'string') {              // 参照なら
                             $(func_elem).click();
                         } else {        // IDそのものをクリック
                             $(func_id).click();
@@ -33,7 +33,7 @@ if (typeof popup_menu_function == "object") {
                     $(this).addClass('disable');
                 };
             });
-            ref.bind("contextmenu", function(e){
+            ref.bind('contextmenu', function(e){
                 // イベント発生位置(クリック位置)を基準にメニューを表示
                 self.css({'left': e.pageX + 'px','top': e.pageY + 'px'}).show();
                 // 画面クリックでメニュー非表示

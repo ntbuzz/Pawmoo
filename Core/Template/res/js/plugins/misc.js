@@ -57,7 +57,7 @@ $.fn.ChainSelect = function () {
 // 指定要素 e のスクロールに追従する
 $.fn.stickyOn = function (e) {
 	var self = this;	// Reminder jQuery Self Object
-	$(e).on("scroll", function () {
+	$(e).on('scroll', function () {
 		var top = $(e).scrollTop();
 		self.css({
 			'position': 'relative',
@@ -72,7 +72,7 @@ $.fn.css_value = function (css_name) {
 	return parseInt(this.css(css_name),10) || 0;
 };
 $.fn.debug_id = function () {
-	return this.prop('tagName') + '.' + this.prop('class') + "#" + this.prop('id');
+	return this.prop('tagName') + '.' + this.prop('class') + '#' + this.prop('id');
 };
 // ウィンドウ高さ調整
 $.fn.fitWindow = function () {
@@ -114,7 +114,7 @@ $.fn.fitWindow = function () {
 		};
 	};
 	self.find('.fitWindow').each(function () {
-		var ref = $(this).attr("data-element");  // 紐付けるIDが指定されているか
+		var ref = $(this).attr('data-element');  // 紐付けるIDが指定されているか
 		var fit_obj = (ref === undefined) ? self : $('#'+ref);
 		var my_box = new bound_box($(this));	// self space will be with-margin
 		var pbox = my_box.ParentRect(fit_obj);
@@ -122,9 +122,9 @@ $.fn.fitWindow = function () {
 		var s_width  = pbox.BottomRight.x - pbox.accSpace.x  - my_box.TopLeft.x;
 //		alertDump({ SELF: my_box, PARENT: pbox, SIZE: [s_height, s_width] });
 		$(this).css({
-//			'width': s_width + "px",
-			'height': s_height + "px",
-			'overflow': "auto"
+//			'width': s_width + 'px',
+			'height': s_height + 'px',
+			'overflow': 'auto'
 		});
 	});
 	return self;
@@ -151,7 +151,7 @@ $.fn.LoadContents = function () {
 	// フェイルメソッドバージョン
 	self.fail = function (callback_error) {
 		if (result === false && callback_error !== undefined) {
-			alert("CALL-FAIL");
+			alert('CALL-FAIL');
 			callback_error.call(self, false);
 		};
 	};
@@ -169,7 +169,7 @@ $.fn.LoadContents = function () {
 			if (target.callback !== null) target.callback.call(self);
 		})
 		.fail(function () {
-			console.log("FAIL POST:"+target.url+"\n");
+			console.log('FAIL POST:'+target.url+'\n');
 			$.busy_cursor(false);
 			DebugSlider();
 			result = false;
@@ -206,11 +206,11 @@ $.busy_cursor = function (disp) {
 // Yes/No ダイアログボックスを開く
 $.dialogBox = function () {
 	var params = {
-		title  : "Dialog",
-		message: "...",
+		title  : 'Dialog',
+		message: '...',
 		buttons: true,
 		callback: null,
-		iconclass: "alert",
+		iconclass: 'alert',
 		Invoke: function (val) {
 			if (this.callback !== null) this.callback(val);
 		},
@@ -219,27 +219,27 @@ $.dialogBox = function () {
 	var sn = 0;
 	for (i = 0; i < arguments.length; i++) {
 		switch (typeof arguments[i]) {
-			case "string":
+			case 'string':
 				switch (sn++) {
 					case 0: params.title = arguments[i]; break;
 					case 1: params.message = arguments[i].replace(/(\r\n|\n|\r)/gm, '<br>'); break;
 				};
 				break;
-			case "number": params.iconclass = (arguments[i]===0)?'confirm':'alert'; break;
-			case "boolean": params.buttons = arguments[i]; break;
-			case "function": params.callback = arguments[i]; break;
+			case 'number': params.iconclass = (arguments[i]===0)?'confirm':'alert'; break;
+			case 'boolean': params.buttons = arguments[i]; break;
+			case 'function': params.callback = arguments[i]; break;
 		};
 	};
 	var bk_panel = $('<div class="popup-BK"></div>');
 //	var dialog_box = '<div class="dialog-box"><dl class="title"><dt class="'+params.iconclass+'">' + params.title + '</dt><dd><span class="dialog-msg">' + params.message + '</span></dd></dl><div class="buttonList">';
 	var dialog_box = '<div class="dialog-box"><dl class="title"><dt class="%class%">%title%</dt><dd><span class="dialog-msg">%msg%</span></dd></dl><div class="buttonList">';
 	dialog_box = dialog_box.replace('%class%', params.iconclass).replace('%title%', params.title).replace('%msg%', params.message);
-	var controlls = (params.buttons) ? ["okButton:${#.core.Yes}", "cancelButton:${#.core.No}"]:["okButton:${#.core.OK}"];
+	var controlls = (params.buttons) ? ['okButton:${#.core.Yes}', 'cancelButton:${#.core.No}']:['okButton:${#.core.OK}'];
 	controlls.forEach(function (value) {
 		var cls = value.split(':');
 		dialog_box = dialog_box + '<span class="'+cls[0]+'">'+cls[1]+'</span>';
 	});
-	dialog_box = dialog_box + "</div></div>";
+	dialog_box = dialog_box + '</div></div>';
 	bk_panel.append(dialog_box);
 	$('body').append(bk_panel);
 	// ボタン以外をクリックできないようにする
@@ -259,12 +259,12 @@ $.dialogBox = function () {
 	dialog.css({'left': x + 'px','top': y + 'px'});
 	dialog.fadeIn('fast');
 	// クローズイベントを登録
-	dialog.find(".okButton").off().click(function () {
+	dialog.find('.okButton').off().click(function () {
 		dialog.fadeOut('fast');
 		bk_panel.remove();
 		params.Invoke(true);
 	});
-	dialog.find(".cancelButton").off().click(function () {
+	dialog.find('.cancelButton').off().click(function () {
 		dialog.fadeOut('fast');
 		bk_panel.remove();
 		params.Invoke(false);
@@ -276,10 +276,10 @@ $.dialogBox = function () {
 $.fn.MenuSetup = function () {
 	this.find('.menu-container').each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
-		var kind = self.attr("data-value");
-		var ref_id = self.attr("data-element");
+		var kind = self.attr('data-value');
+		var ref_id = self.attr('data-element');
 		if (ref_id === undefined) return true;		// continue
-		var ref_obj = $("#" + ref_id);  // 紐付けるID
+		var ref_obj = $('#' + ref_id);  // 紐付けるID
 		if (ref_obj instanceof jQuery) {
 			var hint = self.attr('hint');
 			if (kind === 'dropdown') {
@@ -303,7 +303,7 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 		Selected: function () { return this;},
 		SetValue: function (val) {
 			this.TargetObj.val(val).trigger('change');
-			if (typeof this.Selected === "function") {
+			if (typeof this.Selected === 'function') {
 				this.Selected.call(self,val);
 			};
 		},
@@ -337,7 +337,7 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 		if (typeof callback === 'function') setting.Selected = callback;
 		return this;
 	};
-	self.css("cursor", "pointer");
+	self.css('cursor', 'pointer');
 	self.off('click').on('click', function () {
 		// テンプレート関数でメニューを取得
 		$.busy_cursor(true);
@@ -380,7 +380,7 @@ $.fn.DropDownMenuBox = function (param_obj,preload_func) {
 };
 // スクロール連動
 $.fn.BindScrollSetup = function () {
-	this.find(".bind-scroll").each(function () {
+	this.find('.bind-scroll').each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var bind = new BindScroll(self);
 		bind.StartScroll();
@@ -390,7 +390,7 @@ $.fn.BindScrollSetup = function () {
 // 動的コンテンツに対して、プラグイン要素を初期化する
 $.fn.InitPopupSet = function () {
 	// カレンダー設定
-	this.find(".calendar").each(function () {
+	this.find('.calendar').each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var fmt = $(this).attr('class');
 		var dt_fmt = fmt.pickWord('date') ? 'yy/mm/dd' : 'yy/mm/dd 00:00:00';
@@ -398,11 +398,11 @@ $.fn.InitPopupSet = function () {
 			dateFormat: dt_fmt,
 			monthNames: [ '${#.core.monthNames}' ],
 			dayNamesMin: [ '${#.core.dayNames}' ],
-			yearSuffix: "${#.core.YearSuffix}",
-			buttonImage: "/res/images/calender_icon.png",   // カレンダーアイコン画像
+			yearSuffix: '${#.core.YearSuffix}',
+			buttonImage: '/res/images/calender_icon.png',   // カレンダーアイコン画像
 			buttonImageOnly: true,           // 画像として表示
-			showOn: "both",                   // カレンダー呼び出し元の定義
-			buttonText: "${#.core.ToolTip}", // ツールチップ表示文言
+			showOn: 'both',                   // カレンダー呼び出し元の定義
+			buttonText: '${#.core.ToolTip}', // ツールチップ表示文言
 			showButtonPanel: true,				// todayボタン表示
 			showMonthAfterYear: true,
 		};
@@ -435,7 +435,7 @@ $.fn.onChangeClass = function (cls) {
 };
 // フォーム部品の変更クラス付加
 $.fn.FormModifiedSetup = function () {
-	this.find(".set-modified").each(function () {
+	this.find('.set-modified').each(function () {
 		var cls = $(this).attr('data-element');
 		if (cls === undefined) cls = 'modified';
 		$(this).onChangeClass(cls);
@@ -451,7 +451,7 @@ $.fn.formObject = function (false_check, filter, callback) {
 	this.find(filter).each(function () {
 		var nm = $(this).attr('name');
 		if (nm === undefined) return true;		// name属性が無ければ次へ
-		var is_arr = (nm.slice(-2) === "[]");	// 配列名か確認
+		var is_arr = (nm.slice(-2) === '[]');	// 配列名か確認
 		if (is_arr) nm = nm.slice(0, -2);		// 括弧を除外
 		if ($(this).prop('tagName') === 'UL') {
 			value = $(this).text().trim();
