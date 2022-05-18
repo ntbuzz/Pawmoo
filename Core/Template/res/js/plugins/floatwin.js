@@ -16,7 +16,7 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 	};
 //  ユーザー定義ボタンパーツを追加
 	if (buttons.length) {
-        var buttontag = '<div class="uttons-bar">';
+        var buttontag = '<div class="buttons-bar">';
         var buttonClass = [ 'execButton', 'closeButton'];
 		$.each(buttons, function (index, val) {
 			var label_array = val.split(':');
@@ -61,7 +61,9 @@ $.fn.innerWindow = function (title,callbackBtn, callback) {
 		// 実行イベントボタンを判定
 		if ($(callbacks).is($(this))) {
 			var cls = $(this).attr('class').split(' ');
-			if (typeof callback === 'function') callback.call($(this),cls[1]);
+			if (typeof callback === 'function') {
+				if (callback.call($(this), cls[1]) === false) return false;
+			};
 		};
 		self.trigger('close-me');
 	});
@@ -216,8 +218,8 @@ $.fn.floatWin = function (setupObj, callback) {
 				};
 			};
 		});
-		if (typeof callback === 'function') callback.call($(this), setobj,invoke);
-		return false;
+		if (typeof callback === 'function') return callback.call($(this), setobj,invoke);
+		return true;
 	});
 	return self;
 };
