@@ -79,8 +79,8 @@ class RecordColumns {
 class AppHelper  extends AppObject {
 //==============================================================================
 // Call for Owner(AppView) Template Processing Method
-public function ViewTemplate($layout) {
-	$this->AOwner->ViewTemplate($layout);
+public function ViewTemplate($layout,$vars=[]) {
+	$this->AOwner->ViewTemplate($layout,$vars);
 }
 //==============================================================================
 // Resource(.css/.js) Output (Not USE!)
