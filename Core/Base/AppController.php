@@ -139,12 +139,12 @@ public function SetHelperProps($arr) {
 }
 //==============================================================================
 // Pre-Processing before Action method invoke
-protected function ActionPreProcess($action) {
+protected function ActionPreProcess($action,$kind) {
 	return TRUE;
 }
 //==============================================================================
 // Post-Processing after Action method complete
-protected function ActionPostProcess($action) {
+protected function ActionPostProcess($action,$kind) {
 	return TRUE;
 }
 //==============================================================================
@@ -176,7 +176,7 @@ private function exec_Logging($action) {
 public function ActionDispatch($action) {
 	$discard = (is_array($this->discardParams)) ? $this->discardParams : [$this->discardParams];
 	if(in_array($action,$discard,true)) App::CleareParams();
-	if($this->ActionPreProcess($action)) {
+	if($this->ActionPreProcess($action,'Action')) {
 		if(isset($this->aliasAction['*'])) {
 			$action = $this->aliasAction['*'];
 		} else if(array_key_exists($action,$this->aliasAction)) {
@@ -188,8 +188,21 @@ public function ActionDispatch($action) {
 		} else {
             stderr("Controller Method:'{$method}' not found. Please Create this method.\n");
 		}
-		$this->ActionPostProcess($action);
+		$this->ActionPostProcess($action,'Action');
 		$this->exec_Logging($action);
+	}
+}
+//==============================================================================
+// Method Dispatcher before Pre-Process, after Post-Processing
+public function ViewDispatch($action,$vars) {
+	if($this->ActionPreProcess($action,'View')) {
+		$method = "{$action}View";
+		if(method_exists($this,$method)) {
+			$this->$method($vars);
+		} else {
+            stderr("Controller Method:'{$method}' not found. Please Create this method.\n");
+		}
+		$this->ActionPostProcess($action,'View');
 	}
 }
 //==============================================================================
