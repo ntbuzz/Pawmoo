@@ -56,18 +56,10 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 	];
 	list(static::$MY_SESSION_ID,static::$SYS_SESSION_ID,$session_life,static::$SHM_SESSION_ID) = $session_id_set;
 	list($env,static::$SysData,$s_limit,static::$ShmData) = array_keys_value($_SESSION,$session_id_set,[[],[],0,[]]);
-	// static::$MY_SESSION_ID = $session_id = SESSION_PREFIX . "_{$appname}";
-	// static::$SYS_SESSION_ID= $session_sys="{$session_id}_sys";
-	// static::$SHM_SESSION_ID= SESSION_PREFIX . "_share_mem";
-	// $session_life = "{$session_id}_life";
-	// list($s_limit,$env,$sys,$shm) = array_keys_value($_SESSION,[$session_life,$session_id,$session_sys,static::$SHM_SESSION_ID],[0,[],[],[]]);
 	static::$EnvData = array_intval_recursive($env);
-	// static::$SysData = $sys;
-	// static::$ShmData = $shm;
 	// call from Main.php must be application session limit refresh
 	if($env_life_limit) {
 		$limit_time = (isset($config->SESSION_LIMIT)) ?$config->SESSION_LIMIT : SESSION_DEFAULT_LIMIT;
-//		$limit_time = defined('SESSION_LIMIT')) ? SESSION_LIMIT : SESSION_DEFAULT_LIMIT;
 		$session_limit_time = strtotime($limit_time);
 		$now_time = time();
 		if($s_limit <= $now_time) self::ClearSession();
@@ -88,7 +80,7 @@ static function ClearSession() {
 }
 //==============================================================================
 // セッションに保存する
-static function CloseSession() {
+static function SaveSession() {
 	sysLog::debug(['ENV'=>static::$EnvData,'SYS'=>static::$SysData,'SHM'=>static::$ShmData]);
 	$_SESSION[static::$MY_SESSION_ID] = static::$EnvData;
 	$_SESSION[static::$SYS_SESSION_ID] = static::$SysData;
