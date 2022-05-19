@@ -212,7 +212,7 @@ debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
     "Share Session" => MySession::$ShmData,
 ]);
 sysLog::run_time(DBMSG_CLI|DBMSG_SYSTEM);
-MySession::CloseSession();
+MySession::SaveSession();
 // call OUTPUT terminate
 $controllerInstance->__TerminateApp();
 // Database connection closed.

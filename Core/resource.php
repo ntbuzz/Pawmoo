@@ -73,4 +73,4 @@ $AppStyle->ViewHeader();
 // 結合ファイルの出力
 $AppStyle->ViewStyle($filename);
 
-MySession::CloseSession();
+MySession::SaveSession();

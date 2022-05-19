@@ -279,7 +279,7 @@ function debug_log($lvl,...$items) {
 		$pre_dump = (CLI_DEBUG) ? "{$dmp_info}\n" : "<pre>\n{$dmp_info}\n</pre>\n";
         switch($log_lvl) {
         case -DBMSG_STDERR:  stderr($dmp_info); break;
-        case -DBMSG_DIE:    //Session::CloseSession(); // Session Close before die();
+        case -DBMSG_DIE:    //Session::SaveSession(); // Session Close before die();
 							die($pre_dump);
         case -DBMSG_DUMP:    echo $pre_dump; break;
         case -DBMSG_NOLOG:   $log_lvl  = -99;
