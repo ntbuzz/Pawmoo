@@ -426,8 +426,9 @@ public function ViewTemplate($name,$vars = []) {
 				$method = "{$act}View";
 				if(class_exists($class)) {
 					$viewer = $this->$class;
-					if(method_exists($viewer,$method)) $viewer->ViewDispatch($act,$vars);
-					else echo "Bad Viewer Method:: {$method}\n";
+					if($viewer->ViewDispatch($this->ModuleName,$act,$vars) === false) {
+						echo "Bad Viewer Method:: {$method}\n";
+					}
 				} else echo "Bad ClassName:: {$cont}\n";
 			}
         }

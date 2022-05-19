@@ -76,8 +76,8 @@ public function is_enable_action($action) {
 //==============================================================================
 // authorised login mode, if need view LOGIN form, return FALSE
 public function is_authorised($method) {
-	$sh_login = MySession::getShmData('Login',true);	// check Login-Info from other App,and remove 'Login'
 	if($this->import_login) {
+		$sh_login = MySession::getShmData('Login',true);	// check Login-Info from other App,and remove 'Login'
 		if(!empty($sh_login)) MySession::set_LoginValue($sh_login);
 	}
 	if(defined('LOGIN_CLASS')) {			// enable Login Class
@@ -139,12 +139,12 @@ public function SetHelperProps($arr) {
 }
 //==============================================================================
 // Pre-Processing before Action method invoke
-protected function ActionPreProcess($action,$kind) {
+protected function ActionPreProcess($action) {
 	return TRUE;
 }
 //==============================================================================
 // Post-Processing after Action method complete
-protected function ActionPostProcess($action,$kind) {
+protected function ActionPostProcess($action) {
 	return TRUE;
 }
 //==============================================================================
@@ -176,7 +176,7 @@ private function exec_Logging($action) {
 public function ActionDispatch($action) {
 	$discard = (is_array($this->discardParams)) ? $this->discardParams : [$this->discardParams];
 	if(in_array($action,$discard,true)) App::CleareParams();
-	if($this->ActionPreProcess($action,'Action')) {
+	if($this->ActionPreProcess($action)) {
 		if(isset($this->aliasAction['*'])) {
 			$action = $this->aliasAction['*'];
 		} else if(array_key_exists($action,$this->aliasAction)) {
@@ -188,22 +188,21 @@ public function ActionDispatch($action) {
 		} else {
             stderr("Controller Method:'{$method}' not found. Please Create this method.\n");
 		}
-		$this->ActionPostProcess($action,'Action');
+		$this->ActionPostProcess($action);
 		$this->exec_Logging($action);
 	}
 }
 //==============================================================================
-// Method Dispatcher before Pre-Process, after Post-Processing
-public function ViewDispatch($action,$vars) {
-	if($this->ActionPreProcess($action,'View')) {
-		$method = "{$action}View";
-		if(method_exists($this,$method)) {
-			$this->$method($vars);
-		} else {
-            stderr("Controller Method:'{$method}' not found. Please Create this method.\n");
-		}
-		$this->ActionPostProcess($action,'View');
-	}
+// View Method Dispatcher before Pre-Process, after Post-Processing
+public function ViewDispatch($module,$action,$vars) {
+	$method = "{$action}View";
+	if(!method_exists($this,$method)) return false;
+	// check call by other controller
+	$pre_call = ($module === $this->ModuleName);
+	if($pre_call && ($this->ActionPreProcess($action) === false) return true;
+	$this->$method($vars);
+	if($pre_call) $this->ActionPostProcess($action);
+	return true;
 }
 //==============================================================================
 // Auto Paging.
@@ -390,6 +389,7 @@ public function LanguageAction() {
 public function RelocateAction() {
 	if(isset(MySession::$EnvData['Login'])) {
 		MySession::$ShmData['Login'] = MySession::$EnvData['Login'];
+		MySession::SaveSession();
 	}
 	list($app,$cont,$act) = array_alternative(App::$Filters,3,[$this->ModuleName,'index','list']);
 	$url = "/{$app}/{$cont}/{$act}/";
