@@ -1172,7 +1172,7 @@ f)    セレクション名 => [ Model名.  => [ メソッド名 => メソッド
 static::$appRoot
 ・静的メソッド
   MySession::InitSession()              // セッション変数を初期化する(Main/resource/debuglogのスタートアップのみで使用)
-  MySession::CloseSession()             // セッション変数を書き戻す(Main.phpのみで使用)
+  MySession::SaveSession()             // セッション変数を書き戻す(Main.phpのみで使用)
   MySession::ClearSession()             // セッションに保存する変数を消去(Logoutメソッド)
   MySession::getVariables($tt,...$arr)  // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から値を取得した配列で返す
   MySession::setVariables($tt,$arr)     // ENV(tt=TRUE) または REQ(tt=FALSE) 変数に値をセット
