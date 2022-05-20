@@ -198,7 +198,7 @@ public function ViewDispatch($module,$action,$vars) {
 	$method = "{$action}View";
 	if(!method_exists($this,$method)) return false;
 	// check call by other controller
-	$pre_call = ($module === $this->ModuleName);
+	$pre_call = ($module !== $this->ModuleName);
 	if($pre_call && ($this->ActionPreProcess($action) === false)) return true;
 	$this->$method($vars);
 	if($pre_call) $this->ActionPostProcess($action);
