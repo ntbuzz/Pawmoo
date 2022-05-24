@@ -48,14 +48,14 @@ function balloonPosition(target, onside, margin, no_icon) {
 			if(ypos !== false) this.pointY = ypos;
 			var box = targetPos.Box();
 			switch(this.pointY) {
-			case "top": this.top =  box.bottom - 8; break;
-			case "bottom":this.top = box.top - this.height; break;
+			case 'top': this.top =  box.bottom - 8; break;
+			case 'bottom':this.top = box.top - this.height; break;
 				default: this.top = box.centerY - parseInt(this.height/2);
 			};
 			this.bottom = this.top + this.height;
 			switch(this.pointX) {
-			case "left": this.left = box.right - 6; break;
-			case "right":this.left = box.left - this.width + ((this.pointY==='')?-6:12); break;
+			case 'left': this.left = box.right - 6; break;
+			case 'right':this.left = box.left - this.width + ((this.pointY==='')?-6:12); break;
 			default:	 this.left = box.centerX - parseInt(this.width/2);
 			};
 			this.right = this.left + this.width;
@@ -86,35 +86,35 @@ function balloonPosition(target, onside, margin, no_icon) {
 		};
 		// default top-center default
 		if (onside === false) {
-			bBox.PointSet('top',"center");
+			bBox.PointSet('top','center');
 			if (bBox.bottom > parentBox.bottom) {
 				bBox.PointSet('bottom',false);
 			};
 			if (bBox.right > parentBox.right) {
-				bBox.PointSet(false,"right");
+				bBox.PointSet(false,'right');
 			};
 			if (bBox.left < parentBox.left) {
-				bBox.PointSet(false,"left");
+				bBox.PointSet(false,'left');
 			};
 			if (bBox.top < parentBox.top) {
 				bBox.PointSet('',false);
 			};
 		} else {
-			var side_pos = (onside + "-right").split('-');
+			var side_pos = (onside + '-right').split('-');
 			switch (side_pos[1]) {
-				case "left":
+				case 'left':
 					bBox.PointSet('', 'right');
 					if (bBox.left < parentBox.left) bBox.PointSet('','left');
 					if (bBox.bottom < parentBox.bottom && bBox.top > parentBox.top) break;
-				case "bottom":
+				case 'bottom':
 					bBox.PointSet('top', 'center');
 					if (bBox.bottom > parentBox.bottom) bBox.PointSet('bottom','center');
 					if (bBox.left > parentBox.left && bBox.right < parentBox.right) break;
-				case "right":
+				case 'right':
 					 bBox.PointSet('','left');
 					if (bBox.right > parentBox.right) bBox.PointSet('','right');
 					if (bBox.bottom < parentBox.bottom && bBox.top > parentBox.top) break;
-				case "top":
+				case 'top':
 					bBox.PointSet('bottom','center');
 					if (bBox.top < parentBox.top) bBox.PointSet('top','center');
 					if (bBox.left > parentBox.left && bBox.right < parentBox.right) break;
@@ -156,11 +156,11 @@ $.fn.PopupBaloonSetup = function () {
 // .popup-balloon.onside{@!item-id} => [
 //		Balloon Message
 // ]
-	this.find(".popup-balloon").each(function () {
+	this.find('.popup-balloon').each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
 		var cls = self.attr('class');
 		var onside = (cls === undefined) ? false : cls.pickWord('onside');
-		var ref = self.attr("data-element");  // 紐付けるID
+		var ref = self.attr('data-element');  // 紐付けるID
 		if (ref === undefined) return true;	// continue
 		var ev = 'click';
 		if (ref.charAt(0) == '@') { 
@@ -172,12 +172,12 @@ $.fn.PopupBaloonSetup = function () {
 			ref = ref.slice(1);
 			var icon = ref;
 		} else {
-			var icon = ref + "-help";
+			var icon = ref + '-help';
 			$('#' + ref).after('<span class="help_icon" id="' + icon + '"></span>')
-							.css("margin-right", '2px');
+							.css('margin-right', '2px');
 		};
 		var icon_obj = $('#' + icon);
-		if (ev == "click") icon_obj.css("cursor", "help");
+		if (ev == 'click') icon_obj.css('cursor', 'help');
 		icon_obj.off(ev).on(ev, function () {
 			// 他要素の mouseover防止とバルーンを消すための領域設定
 			var bk_panel = $('<div class="balloon-BK"></div>').appendTo('body');
@@ -232,7 +232,7 @@ $.fn.PopupBaloonSetup = function () {
 			var self = $(this); // jQueryオブジェクトを変数に代入しておく
 			var cls = self.attr('class');
 			var onside = (cls === undefined) ? false : cls.pickWord('onside');
-			var ref = self.attr("data-element");  // 紐付けるID
+			var ref = self.attr('data-element');  // 紐付けるID
 			if (ref === undefined) return true;	// continue
 			var ev = 'click';
 			if (ref.charAt(0) == '@') { 
@@ -244,13 +244,13 @@ $.fn.PopupBaloonSetup = function () {
 				ref = ref.slice(1);
 				var icon = ref;
 			} else {
-				var icon = ref + "-help";
+				var icon = ref + '-help';
 				$('#' + ref).after('<span class="help_icon" id="' + icon + '"></span>')
-								.css("margin-right", '2px');
+								.css('margin-right', '2px');
 			};
 			var ref_obj = $('#' + ref);
 			var icon_obj = $('#' + icon);
-			if (ev == "click") icon_obj.css("cursor", "help");
+			if (ev == 'click') icon_obj.css('cursor', 'help');
 			icon_obj.off(ev).on(ev, function () {
 				if (ref_obj.hasClass('balloon-disabled')) return false;
 				var disp_id = ref_obj.attr('data-value');		// 表示するタグID
@@ -261,7 +261,7 @@ $.fn.PopupBaloonSetup = function () {
 					self.show();						// 親を表示
 					self.css('display','block');
 				} else ballon_obj = self;
-				if (ballon_obj.text() == "") ballon_obj.text("${#core.EMPTY}");
+				if (ballon_obj.text() == '') ballon_obj.text('${#core.EMPTY}');
 				var Balloon = new balloonPosition(icon_obj,onside,3,true);
 				// 他要素の mouseover防止とバルーンを消すための領域設定
 				var bk_panel = $('<div class="balloon-BK"></div>').appendTo('body');

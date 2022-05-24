@@ -46,7 +46,7 @@ public function truncate_sql($table) {
 }
 //==============================================================================
 //	RESET SEQ to PRIMARY
-protected function reset_seq($table,$primary) {
+protected function reset_seq($table) {
 	return FALSE;
 }
 //==============================================================================
@@ -73,10 +73,16 @@ public function getLastError() {
 //		return sqlite_last_error($this->rows);
 }
 //==============================================================================
+// エスケープ処理
+private function safe_convert($row) {
+	$row = $this->sql_str_quote($row,"'","''");
+	return $this->sql_safe_convert($row);	// 書き込み型変換
+}
+//==============================================================================
 //	レコードの追加 
 //==============================================================================
 public function insertRecord($row) {
-	$row = $this->sql_safe_convert($this->sql_str_quote($row,["'"],["''"]));	// 書き込み型変換
+	$row = $this->safe_convert($row);
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';
 	$vstr = implode(",", $row);
@@ -96,7 +102,7 @@ public function insertRecord($row) {
 //	レコードの更新 $row[key] value
 //==============================================================================
 public function updateRecord($wh,$row) {
-	$row = $this->sql_safe_convert($this->sql_str_quote($row,["'"],["''"]));	// 書き込み型変換
+	$row = $this->safe_convert($row);
 	list($pkey,$pval) = array_first_item($wh);
 	unset($row[$pkey]);			// プライマリキーは削除しておく
 	$where = " WHERE \"{$pkey}\"={$pval}";		// プライマリキー名を取得
@@ -122,7 +128,7 @@ public function updateRecord($wh,$row) {
 //	on confilict は SQLite 3.24.0 以降
 public function upsertRecord($wh,$row) {
 	$row = array_merge($wh,$row);			// INSERT 用にプライマリキー配列とデータ配列をマージ
-	$row = $this->sql_safe_convert($this->sql_str_quote($row,["'"],["''"]));	// 書き込み型変換
+	$row = $this->safe_convert($row);
 	list($pkey,$pval) = array_first_item($wh);
 	// UPDATE OR INSERT => REPLACE SQL生成
 	$kstr = '"' . implode('","', array_keys($row)) . '"';

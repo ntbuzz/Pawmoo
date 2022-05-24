@@ -45,6 +45,7 @@ class AppController extends AppObject {
 								function($v) use ($except) {
 									return !in_array($v,$except,true);
 								});
+		LangUI::LoadModuleResource($this->ModuleName);
 	}
 //==============================================================================
 // Initialized Class Property
@@ -75,8 +76,8 @@ public function is_enable_action($action) {
 //==============================================================================
 // authorised login mode, if need view LOGIN form, return FALSE
 public function is_authorised($method) {
-	$sh_login = MySession::getShmData('Login',true);	// check Login-Info from other App,and remove 'Login'
 	if($this->import_login) {
+		$sh_login = MySession::getShmData('Login',true);	// check Login-Info from other App,and remove 'Login'
 		if(!empty($sh_login)) MySession::set_LoginValue($sh_login);
 	}
 	if(defined('LOGIN_CLASS')) {			// enable Login Class
@@ -190,6 +191,18 @@ public function ActionDispatch($action) {
 		$this->ActionPostProcess($action);
 		$this->exec_Logging($action);
 	}
+}
+//==============================================================================
+// View Method Dispatcher before Pre-Process, after Post-Processing
+public function ViewDispatch($module,$action,$vars) {
+	$method = "{$action}View";
+	if(!method_exists($this,$method)) return false;
+	// check call by other controller
+	$pre_call = ($module !== $this->ModuleName);
+	if($pre_call && ($this->ActionPreProcess($action) === false)) return true;
+	$this->$method($vars);
+	if($pre_call) $this->ActionPostProcess($action);
+	return true;
 }
 //==============================================================================
 // Auto Paging.
@@ -376,6 +389,7 @@ public function LanguageAction() {
 public function RelocateAction() {
 	if(isset(MySession::$EnvData['Login'])) {
 		MySession::$ShmData['Login'] = MySession::$EnvData['Login'];
+		MySession::SaveSession();
 	}
 	list($app,$cont,$act) = array_alternative(App::$Filters,3,[$this->ModuleName,'index','list']);
 	$url = "/{$app}/{$cont}/{$act}/";

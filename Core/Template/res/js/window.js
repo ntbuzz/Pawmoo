@@ -1,15 +1,15 @@
 // ***************************************************************************
 // セレクタを使う
 // スティッキー動作設定
-var selector = $(".stickyBar");
+var selector = $('.stickyBar');
 selector.each(function () {
 	var self = $(this); // jQueryオブジェクトを変数に代入しておく
 	var stickyWin = self.closest('.fitWindow');
 	if (stickyWin.length == 0) stickyWin = self.parent();
 	// 親要素 のスクロールに追従する
-	stickyWin.on("scroll", function () {
+	stickyWin.on('scroll', function () {
 		var top = stickyWin.scrollTop();
-		self.css("top", top + "px");
+		self.css('top', top + 'px');
 	});
 });
 
@@ -18,11 +18,11 @@ $(window).resize(function () {
 	$('body').fitWindow();
 });
 // マークダウン外部リンク
-$('.easy_markdown a[href^=http]:not(:has(img))').addClass("externalLink");
+$('.easy_markdown a[href^=http]:not(:has(img))').addClass('externalLink');
 // externalLinkを別ウィンドウ表示
 $('.externalLink').attr('target', '_blank');
 
-$("body").InitPopupSet();
+$('body').InitPopupSet();
 // コンボボックスの処理
 $(document).on('change','.combobox>select',function () {
 	var txt = $(this).find('option:selected').html();

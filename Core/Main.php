@@ -137,7 +137,7 @@ foreach($libs as $files) {
     require_once $files;
 }
 // Load Common Locale tranlate parameter
-LangUI::construct($lang,$region,App::Get_AppPath("View/lang/"),['#common',$controller]);
+LangUI::construct($lang,$region,App::Get_AppPath("View/lang/"),['#common']);
 // Load Application MODULE files. (Controller,Model,View,Helpe)
 App::LoadModuleFiles($controller);
 $ContClass = "{$controller}Controller";
@@ -212,7 +212,7 @@ debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
     "Share Session" => MySession::$ShmData,
 ]);
 sysLog::run_time(DBMSG_CLI|DBMSG_SYSTEM);
-MySession::CloseSession();
+MySession::SaveSession();
 // call OUTPUT terminate
 $controllerInstance->__TerminateApp();
 // Database connection closed.

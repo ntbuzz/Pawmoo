@@ -43,12 +43,14 @@ public function drop_sql($kind,$table) {
 //==============================================================================
 //	TRUNCATE TABLE
 public function truncate_sql($table) {
-	return "TRUNCATE TABLE {$table};";
+	$reset=($this->raw_columns[$this->Primary]==='integer') ?"select setval('{$table}_{$this->Primary}_seq',1,false);":'';
+	return "TRUNCATE TABLE {$table};{$reset}";
 }
 //==============================================================================
 //	RESET SEQ to PRIMARY
-protected function reset_seq($table,$primary) {
-	$sql = "select setval('{$table}_{$primary}_seq',(select max({$primary}) from {$table}));";
+protected function reset_seq($table) {
+	if($this->raw_columns[$this->Primary]!=='integer') return false;
+	$sql = "select setval('{$table}_{$this->Primary}_seq',(select max({$this->Primary}) from {$table}));";
 	return $sql;
 }
 //==============================================================================

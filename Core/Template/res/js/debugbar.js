@@ -1,7 +1,7 @@
 /* デバッグバー用のイベント処理 */
-$(".debugBar").mouseenter(function() {
+$('.debugBar').mouseenter(function() {
     var mode = $('.debugBK').css('display');            // クローズ判定領域が有効になっているか
-    if(mode == "none") {
+    if(mode == 'none') {
         $('.debugBK').Visible('block');           // クローズ判定領域を有効
         $('#debugMenu li').removeClass('selected');     // select状態を解除
         $('.dbcontent li').Visible(false);      		// コンテンツを一旦すべて非表示にする

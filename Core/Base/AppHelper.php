@@ -29,8 +29,7 @@ class RecordColumns {
 //==============================================================================
 // extract column name, value set
 	protected function SetHeaderList($modelName,$HeaderSchema) {
-		$this->Headers = [];
-		$this->altHeadFields = [];
+		$this->Headers = $this->altHead = [];
 		foreach($HeaderSchema as $key => $val) {
 			list($type,$align,$sort,$wd) = $val;
 			$alias = lang_get_module(NULL,"{$modelName}.Schema.{$key}");
@@ -70,7 +69,7 @@ class RecordColumns {
 			list($alias,$align,$sort,$wd) = $val;
 			$pos = TableAlignAttrs[$align];
 			$style = ($wd > 0) ? " style='min-width:{$wd}px;max-width:{$wd}px;'" : '';
-			$dat = ($this->$key=='') ? '&nbsp;' : $this->$key;
+			$dat = ($this->$key=='') ? '&nbsp;' : nl2br($this->$key);
 			echo "<td nowrap{$pos}{$style}>{$dat}</td>";
 		}
 		echo "</tr>\n";
@@ -80,8 +79,8 @@ class RecordColumns {
 class AppHelper  extends AppObject {
 //==============================================================================
 // Call for Owner(AppView) Template Processing Method
-public function ViewTemplate($layout) {
-	$this->AOwner->ViewTemplate($layout);
+public function ViewTemplate($layout,$vars=[]) {
+	$this->AOwner->ViewTemplate($layout,$vars);
 }
 //==============================================================================
 // Resource(.css/.js) Output (Not USE!)

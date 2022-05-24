@@ -324,7 +324,8 @@ function re_build_array($cond) {
 			if(is_array($values)) {
 				$sub = array_filter($values,function($v) { return $v!==NULL;});
 				$n = count($sub);
-				if($n !== count($values)) {
+				if($n === 0) $values = NULL;
+				else if($n !== count($values)) {
 					$val = ($n === 1) ? array_shift($sub):$sub;
 					return ['OR',[ $key => $val, "{$key}::#1" => NULL]];
 				}
@@ -561,7 +562,13 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
 					}
 				}
 				break;
+			case '_':
+				$var = mb_substr($var,1);     // argument var name
+                if($var==='vars') { $val = $vars; break; }
+                if($var==='data') { $val = $recdata; break; }
+				// otherwise try env element
             default:
+				$val = '';
                 if(isset($vars[$var])) {            // is LOCAL VAR-SET?
                     $val = $vars[$var];
                 } else if(isset($class)) {

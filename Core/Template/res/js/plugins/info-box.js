@@ -1,23 +1,23 @@
 // 中央に情報表示のポップアップボックスを表示する
 // インフォメーション用
 $.fn.InfoBoxSetup = function () {
-	this.find(".info-box").each(function () {
+	this.find('.info-box').each(function () {
 		var self = $(this); // jQueryオブジェクトを変数に代入しておく
-		var ref = "#" + self.attr("data-element");  // 紐付けるID
-		var self_id = "#"+self.attr("id");
-		if (ref != "#" && self_id != "#") {
-			$(ref).css("cursor", "pointer");
+		var ref = '#' + self.attr('data-element');  // 紐付けるID
+		var self_id = '#'+self.attr('id');
+		if (ref != '#' && self_id != '#') {
+			$(ref).css('cursor', 'pointer');
 			// サイズ属性があればウィンドウサイズを指定する
 			if (self.is('[size]')) {
-				var sz = self.attr("size").split(',');
+				var sz = self.attr('size').split(',');
 				self.css({
-					"width": sz[0] + "px",
-					"height": sz[1] + "px",
+					'width': sz[0] + 'px',
+					'height': sz[1] + 'px',
 				});
 				if (sz.length == 4) {
 					self.css({
-						"min-width": sz[2] + "px",
-						"min-height": sz[3] + "px"
+						'min-width': sz[2] + 'px',
+						'min-height': sz[3] + 'px'
 					});
 				};
 			};

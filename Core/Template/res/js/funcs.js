@@ -11,9 +11,9 @@ function PawmooLocations() {
     this.host = window.location.host;
     this.qstr = window.location.search.replace('?','');
     this.item_array = window.location.pathname.replace(/^[\/]+|[\/]+$/g, '').split('/');
-    this.query_str = function () { return (this.qstr == "") ? "" : "?"+this.qstr.replace(";","%3B"); };
+    this.query_str = function () { return (this.qstr == '') ? '' : '?'+this.qstr.replace(';','%3B'); };
     this.set_query = function (q) { this.qstr = q; };
-    this.clear_query = function () { this.qstr = ""; };
+    this.clear_query = function () { this.qstr = ''; };
     this.last_item = function (n) { return this.item_array[this.item_array.length - n]; };
     this.items = function (n) { return this.item_array[n]; };
 	this.fullpath = function (url) {
@@ -22,17 +22,17 @@ function PawmooLocations() {
 		    this.item_array = url.replace(/^[\/]+|[\/]+$/g, '').split('/');
 			return url;
 		};
-        this.type = "./:".indexOf(url.charAt(0)) + 1;
+        this.type = './:'.indexOf(url.charAt(0)) + 1;
         var path = (this.type == 0) ? url : url.slice(1);
         switch (this.type) {
             case 1:
                 if (path.charAt(0) === '/') path = path.slice(1);
                 else this.type = 0;
-            case 0: path = "${$APPROOT$}" + path; break;
-            case 2: path = "${$SYSROOT$}" + path; break;
-            case 3: path = "/" + path; break;
+            case 0: path = '${$APPROOT$}' + path; break;
+            case 2: path = '${$SYSROOT$}' + path; break;
+            case 3: path = '/' + path; break;
 		};
-		if (path.slice(-1) === "/") path = path.slice(0, -1);
+		if (path.slice(-1) === '/') path = path.slice(0, -1);
 		this.item_array = path.replace(/^[\/]+|[\/]+$/g, '').split('/');
         return  path;
     };
@@ -40,11 +40,11 @@ function PawmooLocations() {
         var path = this.item_array.slice();
         if (is_num === true) {
             for (var i = path.length; (i > 1) && (!isNaN(path[i - 1])); --i);
-            nums = "/" + path.slice(i).join("/");
-        } else nums = "";
+            nums = '/' + path.slice(i).join('/');
+        } else nums = '';
         for (var i = 0; i < e.length; i++) path[n + i] = e[i];
         n = n + e.length;
-        return "/" + path.slice(0, n).join("/") + nums + this.query_str();
+        return '/' + path.slice(0, n).join('/') + nums + this.query_str();
     };
     this.cont_path = function (e, isnum) { return this.trunc_path(1, e, isnum); };
     this.act_path = function (e, isnum) { return this.trunc_path(2, e, isnum); };
@@ -129,7 +129,7 @@ function SelectLink(setupobj, id, first_call, callback) {
 		return (opt > 0);		// SELECT 要素があるかどうかを返す
 	};
 	self.doCallback = function (val, pid) {
-		if (typeof callback === "function") {	// 最終コールバック関数
+		if (typeof callback === 'function') {	// 最終コールバック関数
 			var my_txt = self_obj.children(':selected').text();
 			callback.call(self, val, my_txt, id, pid);
 		};
@@ -140,7 +140,7 @@ function SelectLink(setupobj, id, first_call, callback) {
 		var pid = self.myParent(my_val);
 		// 自分が親になっている子要素を更新
 		if (child_obj.selfList(-1, my_val)) {	// 子要素のリストが存在するなら
-			if (typeof in_progress === "function") {	// 中間コールバック関数
+			if (typeof in_progress === 'function') {	// 中間コールバック関数
 				in_progress.call(self, my_val, id, pid);
 			};
 		} else self.doCallback(my_val,pid);
@@ -232,7 +232,7 @@ var ajaxLoadSync = function (url, obj, default_data) {
 	$.post(url,obj).done(function (data) { //リクエストが成功した際に実行する関数
 		default_data = data;
 	}).fail(function () {
-		alert("error:" + url);
+		alert('error:' + url);
 	});
 	$.busy_cursor(false);
 	return default_data;
@@ -242,17 +242,17 @@ var ajaxLoadSync = function (url, obj, default_data) {
 var ajaxJsonSync = function (url, obj, default_data) {
 	$.busy_cursor(true);
     $.ajax({
-        type:"post",
+        type:'post',
 		url: url,
 		async: false,
         data:JSON.stringify(obj),
         contentType: 'application/json',
-        dataType: "json",
+        dataType: 'json',
         success: function(json_data) {   // 200 OK
 			default_data = json_data;
         },
         error: function() {
-            alert(url+": Server Error. Please try again later.");
+            alert(url+': Server Error. Please try again later.');
         },
     });
 	$.busy_cursor(false);
@@ -289,7 +289,7 @@ function get_browserInfo() {
 	};
 	for(var name in browsObj) {
 		var element = browsObj[name];
-		var id = element[0].split(",");
+		var id = element[0].split(',');
 		for(var i=0;i<id.length;++i) {
 			var v = id[i];
 			if(agent.indexOf(v) != -1) {
@@ -310,13 +310,13 @@ function get_browserInfo() {
 			for (var key in obj) {
 				result += indent + key + ' = ';
 				if (obj[key] instanceof jQuery) {
-					result += key +" is jQuery Object" + br;
+					result += key +' is jQuery Object' + br;
 				} else if (typeof obj[key] === 'function') {
-					result += key +" is function()" + br;
+					result += key +' is function()' + br;
 				} else if (typeof obj[key] === 'object') {
-					if (key === "ownerDocument") result += "own:"+dumpStr(obj[key], indent);
-					else if(Array.isArray(obj[key])) result += "["+obj[key].join(",")+"]"+br;
-					else result += "Object:" + key + br;
+					if (key === 'ownerDocument') result += 'own:'+dumpStr(obj[key], indent);
+					else if(Array.isArray(obj[key])) result += '['+obj[key].join(',')+']'+br;
+					else result += 'Object:' + key + br;
 				} else {
 					result += obj[key] + br;
 				};
@@ -331,26 +331,26 @@ function get_browserInfo() {
 //====================================================
 // dump alert()
 var alertDump = function() {
-	var str = "";
+	var str = '';
 	$.each(arguments,function (index,argv) {
-		if (typeof argv === 'object') str += dumpStr(argv)+"\n";
-		else str += argv+"\n";
+		if (typeof argv === 'object') str += dumpStr(argv)+'\n';
+		else str += argv+'\n';
 	});
 	alert(str);
 };
 //====================================================
 // dump console()
 var consoleDump = function() {
-	var str = "";
+	var str = '';
 	$.each(arguments,function (index,argv) {
-		if (typeof argv === 'object') str += dumpStr(argv)+"\n";
-		else str += argv+"\n";
+		if (typeof argv === 'object') str += dumpStr(argv)+'\n';
+		else str += argv+'\n';
 	});
 	console.log(str);
 };
 //====================================================
 function DebugSlider() {
-    if (typeof LoadDebugBar == "function") LoadDebugBar();
+    if (typeof LoadDebugBar == 'function') LoadDebugBar();
 };
 //====================================================
 // platform Location Object

@@ -12,8 +12,8 @@
     Close       => 閉じる
     Resize      => サイズ変更
     SelectMe    => 【選択してください】
-    DeleteFail  => "'%s' の削除に失敗しました"
-    MoveFail    => "'%s' の移動に失敗しました"
+    DeleteFail  => '"%s" の削除に失敗しました'
+    MoveFail    => '"%s" の移動に失敗しました'
 // チェックリストダイアログ
 	CheckList	=> チェックリスト
 	CheckALL	=> 全てチェック:
@@ -22,93 +22,93 @@
     SEND        => 送信
 // ファイルアップロード
     UNDO        => 取消
-    FILES       => "送信ファイル:"
-    FIRSTFILE   => "1st"
-    SECONDFILE  => "2nd"
-    UPTITLE     => "タイトル"
-    ENTER       => "2ndファイルを登録してください"
-    ABORT       => "中止"
-    NO_SECOND   => "'%s' の2ndファイルが未登録です"
-    NO_TITLE    => "'%s' のタイトルが未入力です"
-    Uploading   => "ファイルをアップロード中..."
-    RestFiiles  => "残り: "
-    Confirm     => "'%s' の送信を中止しますか"
-    CancelTitle => "送信を中止します"
-    AbortDone   => "送信完了しました."
-    MAXFILE     => "送信ァイルは %d 個までです"
-    BADFILE     => "'+','%','#' 文字を使用するとブラウザからダウンロードできなくなります！"
-	FORBIDDEN	=> "実行可能なファイルをアップロードすることはできません！"
+    FILES       => '送信ファイル:'
+    FIRSTFILE   => '1st'
+    SECONDFILE  => '2nd'
+    UPTITLE     => 'タイトル'
+    ENTER       => '2ndファイルを登録してください'
+    ABORT       => '中止'
+    NO_SECOND   => '"%s" の2ndファイルが未登録です'
+    NO_TITLE    => '"%s" のタイトルが未入力です'
+    Uploading   => 'ファイルをアップロード中...'
+    RestFiiles  => '残り: '
+    Confirm     => '"%s" の送信を中止しますか'
+    CancelTitle => '送信を中止します'
+    AbortDone   => '送信完了しました.'
+    MAXFILE     => '送信ァイルは %d 個までです'
+    BADFILE     => ''+','%','#' 文字を使用するとブラウザからダウンロードできなくなります！'
+	FORBIDDEN	=> '実行可能なファイルをアップロードすることはできません！'
 	EMPTY		=> (空)
 	Placeholder	=> 選択または直接入力
-	NUMERIC		=> "数値 (##.#) で入力してください"
-	DATEFMT		=> "日付 (YYYY/mm/dd) で入力してください"
-	TIMESTAMP	=> "日時 (YYYY/mm/dd HH:nn:ss) で入力してください"
-	CAUTION		=> "警告！"
+	NUMERIC		=> '数値 (##.#) で入力してください'
+	DATEFMT		=> '日付 (YYYY/mm/dd) で入力してください'
+	TIMESTAMP	=> '日時 (YYYY/mm/dd HH:nn:ss) で入力してください'
+	CAUTION		=> '警告！'
 ]
 .en => [
     // for Dialog
     Yes     => Yes
     No      => No
     Cancel      => Cancel
-    SizeDisplay => "Display Size"
-    Close       => "Close"
-    Resize      => "Resize"
-    SelectMe    => "[Select Item]"
-    DeleteFail  => "'%s' delete FAIL"
-    MoveFail    => "'%s' move FAIL"
-	CheckList	=> "Select Check"
-	CheckALL	=> "ALL Check:"
-	CheckConfirm	=> "Confirm"
+    SizeDisplay => 'Display Size'
+    Close       => 'Close'
+    Resize      => 'Resize'
+    SelectMe    => '[Select Item]'
+    DeleteFail  => '"%s" delete FAIL'
+    MoveFail    => '"%s" move FAIL'
+	CheckList	=> 'Select Check'
+	CheckALL	=> 'ALL Check:'
+	CheckConfirm	=> 'Confirm'
     SEND        => Send
 // for drag&drop upload
     UNDO        => Cancel
-    FILES       => "Send Files:"
-    FIRSTFILE   => "1st"
-    SECONDFILE  => "2nd"
-    UPTITLE     => "Title"
-    ENTER       => "Enter 2nd File"
-    ABORT       => "Abort"
-    NO_SECOND   => "'%s' 2nd file unknown"
-    NO_TITLE    => "'%s' title empty"
-    Uploading   => "Now Uploading..."
-    RestFiiles  => "Rest: "
-    Confirm     => "'%s' is ABORT?"
-    CancelTitle => "Send Abort"
-    AbortDone   => "Send Complete."
-    MAXFILE     => "Upload Max %d Files"
-    BADFILE     => "'+','%','#' chars used,Bad Download by WebBrowser!"
+    FILES       => 'Send Files:'
+    FIRSTFILE   => '1st'
+    SECONDFILE  => '2nd'
+    UPTITLE     => 'Title'
+    ENTER       => 'Enter 2nd File'
+    ABORT       => 'Abort'
+    NO_SECOND   => '"%s" 2nd file unknown'
+    NO_TITLE    => '"%s" title empty'
+    Uploading   => 'Now Uploading...'
+    RestFiiles  => 'Rest: '
+    Confirm     => '"%s" is ABORT?'
+    CancelTitle => 'Send Abort'
+    AbortDone   => 'Send Complete.'
+    MAXFILE     => 'Upload Max %d Files'
+    BADFILE     => ''+','%','#' chars used,Bad Download by WebBrowser!'
 	EMPTY		=> (EMPTY)
-	Placeholder	=> "Select or DirectInput"
-	NUMERIC		=> "Input NUMERIC (##.#) charactors"
-	DATEFMT		=> "Input DATE (YYYY/mm/dd) format"
-	TIMESTAMP	=> "Input TIMESTAMP (YYYY/mm/dd HH:nn:ss)"
-	CAUTION		=> "CAUTION !"
+	Placeholder	=> 'Select or DirectInput'
+	NUMERIC		=> 'Input NUMERIC (##.#) charactors'
+	DATEFMT		=> 'Input DATE (YYYY/mm/dd) format'
+	TIMESTAMP	=> 'Input TIMESTAMP (YYYY/mm/dd HH:nn:ss)'
+	CAUTION		=> 'CAUTION !'
 ]
 // ページャーボタン表示用  for Pager Buttons
 Page=>[
 	.ja=> ページ:
-    .en=> "Page:"
+    .en=> 'Page:'
 ]
 Total=>[
-	.ja=> "(全 %d件)"
-    .en=> "(Total %d)"
+	.ja=> '(全 %d件)'
+    .en=> '(Total %d)'
 ]
 Display=>[
 	.ja=> 表示数:
     .en=> Count:
 ]
 NextPage=>[
-	.ja=> "次へ＞"
-    .en=> "Next&gt;"
+	.ja=> '次へ＞'
+    .en=> 'Next&gt;'
 ]
 PrevPage=>[
-	.ja=> "＜前へ"
-    .en=> "&lt;Prev"
+	.ja=> '＜前へ'
+    .en=> '&lt;Prev'
 ]
 // カレンダー用
 ToolTip =>[
-	.ja=> "カレンダーから選択"
-	.en=> "Pickup from CALENDER"
+	.ja=> 'カレンダーから選択'
+	.en=> 'Pickup from CALENDER'
 ]
 // JSの配列に入れるため前後のクオートは省く
 monthNames =>[
@@ -124,25 +124,25 @@ YearSuffix =>[
 	.en=> ', '
 ]
 calendarTitle =>[
-	.ja=> "%y年%mのカレンダー"
-	.en=> "%y, %m Calendar"
+	.ja=> '%y年%mのカレンダー'
+	.en=> '%y, %m Calendar'
 ]
 dateNames => [
 	shortMonth => [
-		.ja=> "1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月"
-		.en=> "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec"
+		.ja=> '1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月'
+		.en=> 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec'
 	]
 	oldMonth => [
-		.ja=> "睦月,如月,弥生,卯月,皐月,水無月,文月,葉月,長月,神無月,霜月,師走"
-		.en=> "January,February,March,April,May,June,July,August,September,October,November,December"
+		.ja=> '睦月,如月,弥生,卯月,皐月,水無月,文月,葉月,長月,神無月,霜月,師走'
+		.en=> 'January,February,March,April,May,June,July,August,September,October,November,December'
 	]
 	shortWeek => [
-		.ja=> "日,月,火,水,木,金,土"
-		.en=> "Sun,Mon,Tue,Wed,Thu,Fri,Sat"
+		.ja=> '日,月,火,水,木,金,土'
+		.en=> 'Sun,Mon,Tue,Wed,Thu,Fri,Sat'
 	]
 	weekNames =>[
-		.ja=> "日曜,月曜,火曜,水曜,木曜,金曜,土曜"
-		.en=> "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday"
+		.ja=> '日曜,月曜,火曜,水曜,木曜,金曜,土曜'
+		.en=> 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'
 	]
 ]
 #Login => [
@@ -156,7 +156,7 @@ dateNames => [
 	]
 	UserName=>[
 		.ja=> ユーザー名
-		.en=> "User Name"
+		.en=> 'User Name'
 	]
 	Password=>[
 		.ja=> パスワード
@@ -176,45 +176,45 @@ dateNames => [
 	]
 	EmptyPass=>[
 		.ja=> パスワードが未登録です
-		.en=> "Password EMPTY"
+		.en=> 'Password EMPTY'
 	]
 	NeedLogin=>[
 		.ja=> ログインしてください
-		.en=> "Please Login"
+		.en=> 'Please Login'
 	]
 	UnknownUser=>[
 		.ja=> 不明なユーザー
-		.en=> "Unknown USER"
+		.en=> 'Unknown USER'
 	]
 	PassLimit=>[
 		.ja=> パスワード期限切れ
-		.en=> "Password Expired"
+		.en=> 'Password Expired'
 	]
 ]
 
 SiteMenu=>[
 	System=>[
 		.ja=> システムメニュー
-		.en=> "System Menu"
+		.en=> 'System Menu'
 	]
 	WEB=>[
 		.ja=> WEB開発
-		.en=> "WEB Develop"
+		.en=> 'WEB Develop'
 		SPIDER-MASTER=>[
 			.ja=> SPIDER-MASTER
 			.en=> SPIDER-MASTER
 		]
 		PawmooHelp=>[
 			.ja=> ヘルプアプリ
-			.en=> "Pawmoo Help App"
+			.en=> 'Pawmoo Help App'
 		]
 		PC管理=>[
 			.ja=> PC管理アプリ
-			.en=> "PC-Manage App"
+			.en=> 'PC-Manage App'
 		]
 		ブログ=>[
 			.ja=> ブログアプリ
-			.en=> "BLOG App"
+			.en=> 'BLOG App'
 		]
 		Sample=>[
 			.ja=> サンプル
@@ -222,7 +222,7 @@ SiteMenu=>[
 		]
 		Video管理=>[
 			.ja=> ビデオ管理アプリ
-			.en=> "Video-Manage App"
+			.en=> 'Video-Manage App'
 		]
 	]
 	管理=>[

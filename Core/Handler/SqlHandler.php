@@ -38,7 +38,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	abstract protected function fetch_array();
 	abstract protected function getLastError();
 	abstract protected function updateRecord($wh, $row);	// INSERT or UPDATE
-	abstract protected function reset_seq($table,$primary);	// Reset SEQ #
+	abstract protected function reset_seq($table);			// Reset SEQ #
 	abstract public function fieldConcat($sep,$arr);		// CONCAT()
 	abstract public function drop_sql($kind,$table);		// DROP TABLE SQL
 	abstract public function truncate_sql($table);			// TRUNCATE SQL
@@ -112,7 +112,7 @@ public function setupFieldTransfer($alias,$relations=NULL) {
 //==============================================================================
 // reset primary seq value
 public function resetPrimary() {
-	$sql = $this->reset_seq($this->raw_table,$this->Primary);
+	$sql = $this->reset_seq($this->raw_table);
 	if($sql) $this->doQuery($sql);
 }
 //==============================================================================
@@ -381,6 +381,8 @@ protected function fetch_convert($data) {
 			// 		 $val = str_replace(["''",'\\\\'],["'",'\\'],$val);
 			// 		 $data[$key] = $val;
 			// 		break;
+			default:
+                if(gettype($val) === 'string') $data[$key] = str_replace("\r\n","\n",$val);
 			}
 		}
 	}
@@ -454,6 +456,22 @@ protected function fetch_convert($data) {
 				}
 				return "{$expr[0]} {$op} {$val}";
 			};
+			$between_field = function($val) {
+				list($from,$to) = fix_explode('...',$val,2);
+				if(empty($from)) {
+					$op = '<=';
+					$val = "'{$to}'";
+				} else if(empty($to)) {
+					$op = '>=';
+					$val = "'{$from}'";
+				} else {
+					$op = 'BETWEEN';
+					if(is_numeric($from) && is_numeric($to))
+						$val = "{$from} AND {$to}";
+					else $val = "'{$from}' AND '{$to}'";
+				}
+				return [$op,$val];
+			};
 			$opc = ''; $and_or_op = ['AND','OR','NOT'];
 			foreach($items as $key => $val) {
 				if($key === REBUILD_MARK) continue;	// re-build mark
@@ -470,19 +488,7 @@ protected function fetch_convert($data) {
 						}
 					} else { // not have op code
 						if(mb_strpos($val,'...') !== FALSE) {
-							list($from,$to) = fix_explode('...',$val,2);
-							if($from===NULL) {
-								$op = '<=';
-								$val = $to;
-							} else if($to===NULL) {
-								$op = '>=';
-								$val = $from;
-							} else {
-								$op = 'BETWEEN';
-								if(is_numeric($from) && is_numeric($to))
-									$val = "{$from} AND {$to}";
-								else $val = "'{$from}' AND '{$to}'";
-							}
+							list($op,$val) = $between_field($val);
 						} else if(is_numeric($val) && empty($op)) {
 							$op = '=';
 						} else {
@@ -494,34 +500,6 @@ protected function fetch_convert($data) {
 					if(array_key_exists($key,$this->relations)) {		// check exists relations
 						$rel_defs = $this->relations[$key];
 						list($cond_fn,$op) = keystr_opr(array_key_first($val));
-						// $rel_key = id_relation_name($key)."_{$cond_fn}";
-						// if(array_key_exists($rel_key,$rel_defs)) {		// exists relation-defs
-						// 	$rel = $rel_defs[$rel_key];
-						// } else {
-						// 	list($kk,$rel) = array_first_item($rel_defs);
-						// 	if(is_array($rel)) $rel = implode('.',$rel);	// force scalar-value
-						// }
-						// if(array_key_exists($key,$rel_defs)) {		// exists relation-defs
-						// 	$rel = $rel_defs[$rel_key];
-						// } else {
-						// 	list($kk,$rel) = array_first_item($rel_defs);
-						// 	if(is_array($rel)) $rel = implode('.',$rel);	// force scalar-value
-						// }
-						// if(is_scalar($rel)) {
-						// 	list($tbl,$fn) = fix_explode('.',$rel,2);
-						// 	$ops = $dump_object('AND',$val,$tbl);
-						// 	$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$fn}\") FROM {$tbl} WHERE ({$ops}))";
-						// } else {
-						// 	list($tbl,$tbl_prim,$tbl_rel,$rel_tbl,$rel_fn,$fn) = $rel;
-						// 	$fid = id_relation_name($tbl_rel)."_{$fn}";
-						// 	list($kk,$vv) = array_first_item($val);		// because each element will be same table,id
-						// 	$val = [str_replace($fid,$fn,$kk) => $vv]; // change rel-level field key
-						// 	$ops = $dump_object('AND',$val,$rel_tbl);
-						// 	$ops = "{$tbl}.\"{$tbl_rel}\" IN (SELECT Distinct({$rel_tbl}.\"{$rel_fn}\") FROM {$rel_tbl} WHERE ({$ops}))";
-						// 	$opp = "{$table}.\"{$key}\" IN (SELECT Distinct({$tbl}.\"{$tbl_prim}\") FROM {$tbl} WHERE ({$ops}))";
-						// }
-						//--------------------------------------------------------------------
-//debug_dump(['SUB'=>$key,'COND'=>$cond_fn,'OP'=>$op,'VAL'=>$val,'REL'=>$rel_defs,'RELS'=>$this->relations]);
 						// V.2 New-Relations
 						list($tbl,$fn) = array_first_item($rel_defs);
 						$ops = $dump_object('AND',$val,$tbl);
@@ -537,13 +515,15 @@ protected function fetch_convert($data) {
 						$opp = $multi_field($key,NULL,$table,$val);
 					}
 				} else {
-					if($val === NULL) {
+					if(mb_strpos($val,'...') !== FALSE) {
+						list($op,$val) = $between_field($val);
+					} else if($val === NULL) {
 						$in_op = [ '=' => 'IS', '==' => 'IS', '<>' => 'IS NOT', '!=' => 'IS NOT'];
 						if(!array_key_exists($op,$in_op)) $op = '==';
 						$op = $in_op[$op];
 						$val = 'NULL';
 					} else if(is_bool($val)) $val = ($val) ? "'t'" : "'f'";
-					else if(!is_numeric($val)) $val = "'{$val}'";
+					else if(!is_int($val)) $val = "'{$val}'";
 					$opp = $multi_field($key,$op,$table,$val);
 				}
 				$opc = (empty($opc)) ? $opp : "({$opc}) {$opr} ({$opp})";

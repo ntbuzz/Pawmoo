@@ -139,7 +139,7 @@
 	background: #aaa;  
 	padding: 6px 10px 4px;  
 }
-.floatWindow .center {
+.floatWindow .buttons-bar {
 	z-index:1;
 	position:absolute;
 	bottom:6px;

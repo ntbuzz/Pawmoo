@@ -5,7 +5,7 @@
 Number.prototype.size_unit = function () {
 	var sz = this;
 	for (var i = 0; sz > 1000; i += 3, sz /= 1000) ;
-	szStr = sz.toFixed(2) + " B  KB MB GB TB PB".substr(i, 3);
+	szStr = sz.toFixed(2) + ' B  KB MB GB TB PB'.substr(i, 3);
 	return szStr;
 };
 //====================================================
@@ -180,7 +180,7 @@ Array.prototype.uniq = function () {
 Array.prototype.mymerged = function (b) {
 	var new_array =  this.slice();	// 配列コピー
 	b.forEach(function (val) {
-		if (val !== "" & new_array.is_exists(val) == false) {
+		if (val !== '' & new_array.is_exists(val) == false) {
 			new_array.push(val);
 		};
 	});

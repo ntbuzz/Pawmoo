@@ -164,6 +164,7 @@ public function CreateDatabase($exec=false) {
 	$fset[] = "PRIMARY KEY ({$this->Primary})";
 	$sql = "CREATE TABLE {$this->MyTable} (\n";
 	$sql .= implode(",\n",$fset) . "\n);";
+	sysLog::stderr(["SQL({$this->Handler})"=>$sql]);
 	$this->doSQL($exec,$sql);
 	// initCSVがあるときはデータロード
 }

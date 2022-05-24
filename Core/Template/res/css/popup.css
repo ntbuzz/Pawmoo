@@ -345,6 +345,7 @@ opacity: 0.25; */
 }
 .dialog-box dl {
     width:100%;
+	margin:0;
 }
 .dialog-box dl dd {
     width:100%;
@@ -506,6 +507,10 @@ opacity: 0.25; */
 .navi-checklist>p {
 	margin:5px 10px;
 }
+.navi-checklist ul {
+	margin: 0;
+	padding: 0;
+}
 .navi-checklist li {
 	list-style-type: none;
 	white-space: nowrap;
@@ -562,6 +567,47 @@ opacity: 0.25; */
 	height: calc(100% - 10);
 	margin: 5px 0;
 }
+/* タイトルブロックメニュー */
+.navi-checklist .title-menu {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-radius:5px;
+  padding:0 !important;
+  margin:0 !important;
+}
+/* 横並びタイトルチェックリスト */
+.navi-checklist .title-menu dl {
+	width:100%;
+	margin: 0;
+	padding: 0;
+}
+.navi-checklist .title-menu dl:nth-child(even) {
+	border-left:1px solid black;
+}
+/* タイトルスタイル */
+.navi-checklist .title-menu dt {
+	border-radius:5px 5px 0 0;
+	text-align:center;
+	border-bottom:1px solid gray;
+	background-color:silver;
+}
+/* チェックリストコンテナ */
+.navi-checklist .title-menu dd {
+	padding:5px;
+	margin: 0;
+}
+/* チェックリスト表示 */
+.navi-checklist .title-menu ul.input-list>li {
+	display:block;
+}
+/* カラム段組み */
+.navi-checklist .title-menu .columns2 {columns:2;}
+.navi-checklist .title-menu .columns3 {columns:3;}
+.navi-checklist .title-menu .columns4 {columns:4;}
+.navi-checklist .title-menu .columns5 {columns:5;}
+.navi-checklist .title-menu .columns6 {columns:6;}
+
 /* (X)と▼付きのドロップダウンメニューのコンテナ */
 .dropdown-menu {
 	display:inline-flex;

@@ -55,7 +55,7 @@ public function truncate_sql($table) {
 }
 //==============================================================================
 //	RESET SEQ to PRIMARY
-protected function reset_seq($table,$primary) {
+protected function reset_seq($table) {
 	return FALSE;
 }
 //==============================================================================
