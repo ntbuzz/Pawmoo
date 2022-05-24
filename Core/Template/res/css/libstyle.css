@@ -74,17 +74,17 @@ option.disable {
 .set-modified .changed {
 	background-color: #ffdfef !important;
 }
-.set-modified input,
+.set-modified input[type="text"],
 .set-modified textarea,
 .set-modified select {
 	background-color: lightcyan;
 	border: 1px solid #7f9db9; /* 枠線は淡い青色 */
 	padding:2px 4px;
 }
-.set-modified table input,
+.set-modified table input[type="text"],
 .set-modified table textarea,
 .set-modified table select {
-	border:none !important;
+	border:1px dotted silver !important;
 }
 .set-modified .fullsize {
 	width:100%;
