@@ -49,6 +49,7 @@ public function truncate_sql($table) {
 //==============================================================================
 //	RESET SEQ to PRIMARY
 protected function reset_seq($table) {
+	if($this->raw_columns[$this->Primary]!=='integer') return false;
 	$sql = "select setval('{$table}_{$this->Primary}_seq',(select max({$this->Primary}) from {$table}));";
 	return $sql;
 }
