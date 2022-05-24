@@ -22,7 +22,7 @@ class NullHandler {
 	protected function doQuery($sql) { return NULL; }
 	protected function fetch_array() { return FALSE; }
 	protected function updateRecord($wh,$row) { }
-	protected function reset_seq($table,$primary) { return FALSE;}
+	protected function reset_seq($table) { return FALSE;}
 	protected function concat_fields($arr) {return implode(',',$arr); }
 //==============================================================================
 public function register_method($class,$method) { }

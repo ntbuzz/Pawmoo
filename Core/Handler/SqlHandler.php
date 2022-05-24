@@ -38,7 +38,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	abstract protected function fetch_array();
 	abstract protected function getLastError();
 	abstract protected function updateRecord($wh, $row);	// INSERT or UPDATE
-	abstract protected function reset_seq($table,$primary);	// Reset SEQ #
+	abstract protected function reset_seq($table);			// Reset SEQ #
 	abstract public function fieldConcat($sep,$arr);		// CONCAT()
 	abstract public function drop_sql($kind,$table);		// DROP TABLE SQL
 	abstract public function truncate_sql($table);			// TRUNCATE SQL
@@ -112,7 +112,7 @@ public function setupFieldTransfer($alias,$relations=NULL) {
 //==============================================================================
 // reset primary seq value
 public function resetPrimary() {
-	$sql = $this->reset_seq($this->raw_table,$this->Primary);
+	$sql = $this->reset_seq($this->raw_table);
 	if($sql) $this->doQuery($sql);
 }
 //==============================================================================
@@ -523,7 +523,7 @@ protected function fetch_convert($data) {
 						$op = $in_op[$op];
 						$val = 'NULL';
 					} else if(is_bool($val)) $val = ($val) ? "'t'" : "'f'";
-					else if(!is_numeric($val)) $val = "'{$val}'";
+					else if(!is_int($val)) $val = "'{$val}'";
 					$opp = $multi_field($key,$op,$table,$val);
 				}
 				$opc = (empty($opc)) ? $opp : "({$opc}) {$opr} ({$opp})";
