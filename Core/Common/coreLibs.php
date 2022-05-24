@@ -324,7 +324,8 @@ function re_build_array($cond) {
 			if(is_array($values)) {
 				$sub = array_filter($values,function($v) { return $v!==NULL;});
 				$n = count($sub);
-				if($n !== count($values)) {
+				if($n === 0) $values = NULL;
+				else if($n !== count($values)) {
 					$val = ($n === 1) ? array_shift($sub):$sub;
 					return ['OR',[ $key => $val, "{$key}::#1" => NULL]];
 				}
