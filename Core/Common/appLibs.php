@@ -267,14 +267,15 @@ function menu_box($menu,$label=true) {
 };
 //==============================================================================
 // チェックリスト・ラジオボタンのメニュー作成
-// menu:		キー名 => 値(未使用)
-//				タブを使うときは２次元連想配列
-//				タブ名 => [	キー名 => 値, ...	]
+// menu:		キー名 => 値(未使用)	チェック済はJS側で処理する
+//				タブまたはプレーン表示を使うときは２次元連想配列
+//				タイトル名 => [	キー名 => 値, ...	]
 // item_name	ラジオボタンのときは必須
 // item_type	checkbox | radio
 // label_val	false | true(ラベル名を値に使う)
 // split		分割個数 0=分割なし
-function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=false,$split=0) {
+// plane		false | true(タブを使わずプレーン表示)
+function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=false,$split=0,$plane) {
 	if(!is_array($menu)) {
 		echo "<p class='alert'>MENU NOT FOUND</p>";
 		return;
@@ -298,7 +299,7 @@ function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=fals
 				echo "<li>";
 				$item_val = ($label_val)?$val:$label;
 				if($brk === 1) echo "<hr>";
-				else echo "<label><input type='{$item_type}' class='check-item' value='{$item_val}'{$item_name} />{$label}</label>";;
+				else echo "<label><input type='{$item_type}' class='check-item' value='{$item_val}'{$item_name} />{$label}</label>";
 				echo "</li>\n";
 			}
 		}
@@ -308,6 +309,16 @@ function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=fals
 	$tabset = array_filter($menu,function($v) {return is_array($v);});
 	if(empty($tabset)) {			// 単一タブ＝タブなし
 		$tab_contents($menu,$split);
+	} else if($plane) {	// プレーンタイトル表示
+		echo "<div class='plane-menu'>\n";
+		foreach($tabset as $label => $value) {
+			echo "<dl><dt>{$label}</dt>\n";
+			$label = tag_body_name($label);
+			list($label,$sel) = fix_explode('.',$label,2);
+			echo "<dd>\n";
+			$tab_contents($value,$split);
+			echo "</dd></dl>\n";
+		}
 	} else {	// 複数タブ
 		echo "<ul class='tabmenu'>\n";
 		foreach($tabset as $label => $subsec) {
