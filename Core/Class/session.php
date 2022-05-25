@@ -55,7 +55,9 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 		SESSION_PREFIX . "_share_mem",
 	];
 	list(static::$MY_SESSION_ID,static::$SYS_SESSION_ID,$session_life,static::$SHM_SESSION_ID) = $session_id_set;
-	list($env,static::$SysData,$s_limit,static::$ShmData) = array_keys_value($_SESSION,$session_id_set,[[],[],0,[]]);
+	list($env,$sys,$s_limit,$shm) = array_keys_value($_SESSION,$session_id_set,[[],[],0,[]]);
+	static::$SysData = $sys;
+	static::$ShmData = $shm;
 	static::$EnvData = array_intval_recursive($env);
 	// call from Main.php must be application session limit refresh
 	if($env_life_limit) {
@@ -76,7 +78,7 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 //==============================================================================
 // セッション保存の変数を破棄
 static function ClearSession() {
-	static::$EnvData = static::$SysData = static::$ShmData = [];
+	static::$EnvData = static::$SysData = [];	// static::$ShmData = [];
 }
 //==============================================================================
 // セッションに保存する
@@ -85,6 +87,7 @@ static function SaveSession() {
 	$_SESSION[static::$MY_SESSION_ID] = static::$EnvData;
 	$_SESSION[static::$SYS_SESSION_ID] = static::$SysData;
 	$_SESSION[static::$SHM_SESSION_ID] = static::$ShmData;
+	session_write_close();
 }
 //==============================================================================
 // ENV変数値を返す
