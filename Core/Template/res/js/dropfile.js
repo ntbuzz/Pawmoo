@@ -14,7 +14,7 @@ function ProgressBar(child, fmd, name,size,callback_func) {
     self.FileSize = $('<span class="filesize right"></span>').appendTo(self.progressPanel);
     self.gainBar = $('<div class="progress-gain"></div>').appendTo(self.progressPanel);
     self.Cancel.click(function () {
-        if (confirm('${#.core.Confirm}'.replace('%s',name))) {
+        if (confirm("${#.core.Confirm}".replace('%s',name))) {
             self.Abort(false);
         };
     });
@@ -197,7 +197,7 @@ function PairUploadDialog(files,url,callback_func) {
     // セカンドファイル名をセット
     self.SecondFileName = function (obj, file, fname) {
         fmsg = (file === undefined) ? '${#.core.ENTER}' :file.name;
-        if (file !== undefined && fmsg.is_invalid_name()) alert('${#.core.BADFILE}');
+        if (file !== undefined && fmsg.is_invalid_name()) alert("${#.core.BADFILE}");
         ttl = fname.split('.').reverse().slice(1).reverse().join('.');
         var cell = obj.find('td.second');
         if (file === undefined) cell.addClass('error');
@@ -248,7 +248,7 @@ function PairUploadDialog(files,url,callback_func) {
             var ttl = $(this).find('input[name="title"]').val();
             var ff2 = $(this).find('input[type=file]').prop('files')[0];
             if (ff2 === undefined || ttl === '') {
-                msg = (ff2 === undefined) ? '${#.core.NO_SECOND}':'${#.core.NO_TITLE}';
+                msg = (ff2 === undefined) ? "${#.core.NO_SECOND}":"${#.core.NO_TITLE}";
                 alert(msg.replace('%s',files[num].name));
                 secondf_set = false;
                 return false;
@@ -322,13 +322,13 @@ function isFileCharsetOK(files) {
 		var fname = files[i].name;
         // URL禁則文字のチェック
         if (fname.is_invalid_name()) {
-            if (confirm(fname+'\n${#.core.BADFILE}')) {
+            if (confirm(fname+"\n${#.core.BADFILE}")) {
                 return false;
             };
 		};
         // 実行可能ファイルのチェック
 		if (fname.is_executable()) {
-			alert(fname+'\n${#.core.FORBIDDEN}');
+			alert(fname+"\n${#.core.FORBIDDEN}");
             return false;
 		};
     };
@@ -390,7 +390,7 @@ $.fn.dropfiles2 = function (maxfiles,url, callback_func) {
             self.removeClass('drag-over');
             var files = e.originalEvent.dataTransfer.files;
             if (maxfiles>0  && files.length > maxfiles) {
-                alert('${#.core.MAXFILE}'.replace('%d',maxfiles));
+                alert("${#.core.MAXFILE}".replace('%d',maxfiles));
                 return false;
             };
             if(isFileCharsetOK(files)) PairUploadDialog(files, url,callback_func);
