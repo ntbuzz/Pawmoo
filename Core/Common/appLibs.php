@@ -266,7 +266,7 @@ function menu_box($menu,$label=true) {
 	$select_list('',$menu,$label);
 };
 //==============================================================================
-// チェックリスト・ラジオボタンのメニュー作成
+// 新チェックリスト・ラジオボタンのメニュー作成
 // menu:		キー名 => 値(未使用)	チェック済はJS側で処理する
 //				タブまたはプレーン表示を使うときは２次元連想配列
 //				タイトル名 => [	キー名 => 値, ...	]
@@ -275,7 +275,7 @@ function menu_box($menu,$label=true) {
 // label_val	false | true(ラベル名を値に使う)
 // split		分割個数 0=分割なし
 // plane		false | true(タブを使わずプレーン表示)
-function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=false,$split=0,$plane) {
+function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=false,$split=0,$plane=false) {
 	if(!is_array($menu)) {
 		echo "<p class='alert'>MENU NOT FOUND</p>";
 		return;
