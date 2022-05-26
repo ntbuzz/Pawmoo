@@ -63,6 +63,16 @@ public function set_last_login($userid) {
 	return false;				// no logging
 }
 //==============================================================================
+// get login user addribute, by first hit
+public function login_attr_find($keylist,$default='') {
+	if(empty(static::$LoginUser)) return $default;
+	foreach($keylist as $key) {
+		$val = (array_key_exists($key,static::$LoginUser))?static::$LoginUser[$key]:NULL;
+		if(!empty($val)) return $val;
+	}
+	return $default;
+}
+//==============================================================================
 // Recieved LOGIN POST FORM, do accept USER LOGIN correct
 //	Success: [ID,LANG,REGION]
 //	NO-POST: NULL
