@@ -167,7 +167,7 @@ function array_keys_value($arr,$filter,$alt=[]) {
 	return $val;
 }
 //==============================================================================
-// import $filter keys from $items..., overttide latest item.
+// import $filter keys from $items..., override latest item.
 function array_filter_import($ignore,$filter,...$items) {
 	if($ignore) $filter = array_map(function($v) { return strtolower($v);},$filter);
 	$vals = array_combine($filter,array_fill(0,count($filter),NULL));
