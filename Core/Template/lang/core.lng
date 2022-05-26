@@ -32,7 +32,7 @@
     NO_TITLE    => "'%s' のタイトルが未入力です"
     Uploading   => 'ファイルをアップロード中...'
     RestFiiles  => '残り: '
-    Confirm     => '"%s" の送信を中止しますか'
+    Confirm     => "'%s' の送信を中止しますか"
     CancelTitle => '送信を中止します'
     AbortDone   => '送信完了しました.'
     MAXFILE     => '送信ァイルは %d 個までです'
