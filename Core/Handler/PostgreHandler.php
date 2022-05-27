@@ -107,8 +107,6 @@ private function safe_convert($row,$func) {
 			"{$func} CONVERT失敗" => pg_result_status($res1),	// pg_last_error(),
 			"ROW" => $row,
 		]);
-		$id = $row[$this->Primary];
-		echo "**** PG_CONV:ERROR({$id})\n";
 		$aa = $this->sql_safe_convert($row);	// 自力で書き込み型変換
 	}
 	return $aa;
