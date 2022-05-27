@@ -788,7 +788,7 @@ public function ViewTemplate($name,$vars = []) {
         $sel_item = (is_numeric($opt_key)) ? intval($opt_key) : $this->expand_Strings($opt_key,$vars);
         $opt_val = array_flat_reduce($this->expand_SectionVar($opt_val,$vars));
         echo "<{$tag}{$attr}>\n";
-		if($default_opt !== '') echo  "<OPTION>{$default_opt}</OPTION>\n";
+		if($default_opt !== '') echo  "<OPTION value=''>{$default_opt}</OPTION>\n";
 		foreach($opt_val as $opt => $val) {
 			$sel = ($val === "{$sel_item}") ? ' selected':'';	// force string compare
 			echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
