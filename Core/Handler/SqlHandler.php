@@ -435,7 +435,7 @@ protected function fetch_convert($data) {
 							$v = mb_substr($v,1);
 							$op = "NOT {$this->LIKE_opr}";
 						} else $op = $this->LIKE_opr;
-						if(is_int($v) || trim($v,'%') === $v) $v = "%{$v}%";
+						if(is_int($v) || (is_string($v) && trim($v,'%') === $v)) $v = "%{$v}%";
 						return (empty($v)) ? 'IS NULL' : "{$op} '{$v}'";
 					};
 					$opc = $this->concat_fields($expr);
