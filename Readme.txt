@@ -3,7 +3,7 @@
  * 
  * @copyright  Copyright (c) 2017 - 2022 by nTak
  * @license    MIT
- * @version 2.0.6, 2022-05-24
+ * @version 2.0.7, 2022-05-27
  * System Require: PHP 5.6 or Higher
  *
 
@@ -48,6 +48,9 @@
   それに伴うバージョンアップの義務も負いませんのでご了承下さい。
 
 3. 変更履歴
+【2.0.7】2022/05/27
+	(Git log参照)
+
 【2.0.6】2022/05/24
 	(Git log参照)
 
