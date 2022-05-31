@@ -8,7 +8,7 @@
 //	SQLite3用の抽象メソッドを実装する
 class SQLiteHandler extends SQLHandler {
 	protected $NULL_ORDER = '';	// NULL の順序
-
+	protected $LIKE_OPR = ['%'=>['GLOB','*'],'$'=>['LIKE','%']];
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table,$primary,$db=NULL) {

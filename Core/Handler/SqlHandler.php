@@ -28,7 +28,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	protected $Primary;		// for FUTURE
 	protected $LastCond;	// for DEBUG
 	protected $LastBuild;	// for DEBUG
-	protected $LIKE_opr = 'LIKE';		// Ignore Upper/Lower case LIKE
+	protected $LIKE_OPR = ['%'=>['LIKE','%'],'$'=>['LIKE','%']];
 	protected $NULL_ORDER = ' NULLS LAST';	// NULL seq
 	private $register_callback = [ NULL,NULL];	// fetchDB Callback
 //==============================================================================
@@ -428,14 +428,16 @@ protected function fetch_convert($data) {
 					$cmp = $this->get_lang_alias($v);
 					return "{$table}.\"{$cmp}\"";
 				},str_explode('+',$key));
-				if($op === NULL) {		// need LIKE or NOT LIKE
+				if(in_array($op,['%','$','',NULL])) {	// need LIKE/ILIKE or NOT LIKE/ILIKE
+					$op_pat = (isset($this->LIKE_OPR[$op]))?$op:'%';
+					list($like_opc,$pat) = $this->LIKE_OPR[$op_pat];
 					// LIKE operation build
-					$like_opstr = function($v) {
+					$like_opstr = function($v) use(&$like_opc,&$pat){
 						if($v[0] == '-' && strlen($v) > 1) {
 							$v = mb_substr($v,1);
-							$op = "NOT {$this->LIKE_opr}";
-						} else $op = $this->LIKE_opr;
-						if(is_int($v) || (is_string($v) && trim($v,'%') === $v)) $v = "%{$v}%";
+							$op = "NOT {$like_opc}";
+						} else $op = $like_opc;
+						if(is_int($v) || (is_string($v) && trim($v,$pat) === $v)) $v = "{$pat}{$v}{$pat}";
 						return (empty($v)) ? 'IS NULL' : "{$op} '{$v}'";
 					};
 					$opc = $this->concat_fields($expr);
@@ -477,22 +479,20 @@ protected function fetch_convert($data) {
 				if($key === REBUILD_MARK) continue;	// re-build mark
 				if(empty($key)) { echo "EMPTY({$val})!!!"; continue;}
 				list($key,$op) = keystr_opr($key);
-				if(empty($op) || $op === '%') {			// non-exist op or LIKE-op(%)
+				if(in_array($op,['%','$',''])) {	// non-exist op or LIKE(%,$)
 					if(is_array($val)) {
 						if(in_array($key,$and_or_op,true)) {
 							$opx = ($key === 'NOT') ? 'AND' : $key; 
 							$opp = $dump_object($opx,$val,$table);
 							if($key === 'NOT') $opp = "NOT ({$opp})";
 						} else { // LIKE [ array ]
-							$opp = $multi_field($key,NULL,$table,$val);
+							$opp = $multi_field($key,$op,$table,$val);
 						}
-					} else { // not have op code
+					} else { // not have array
 						if(mb_strpos($val,'...') !== FALSE) {
 							list($op,$val) = $between_field($val);
-						} else if(is_numeric($val) && empty($op)) {
-							$op = '=';
-						} else {
-							$op = NULL;
+						} else if(empty($op)) {
+							$op = (is_numeric($val)) ? '=' : NULL;
 						}
 						$opp = $multi_field($key,$op,$table,$val);
 					}

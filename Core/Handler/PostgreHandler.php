@@ -6,7 +6,7 @@
 //==============================================================================
 //	PostgreSQL用の抽象メソッドを実装する
 class PostgreHandler extends SQLHandler {
-	protected $LIKE_opr = 'LIKE';		// 大文字小文字の無視比較
+	protected $LIKE_OPR = ['%'=>['LIKE','%'],'$'=>['ILIKE','%']];
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table,$primary,$db=NULL) {
