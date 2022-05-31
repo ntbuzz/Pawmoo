@@ -217,6 +217,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		CheckType:(self.attr('data-type') !== 'radio'),
 		CheckAll: false,
 		TargetObj: self.find('input:first-child'),	//$('[name="' + self.attr('data-value') + '"'),  	// 書き込むINPUT name
+		TextContent: null,
 		ClearTag: '<span class="clear"></span>',
 		DropDown: '<span class="arrow"></span>',
 		addClear: true,			// クリアボタンが必要
@@ -225,14 +226,16 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		MenuContents:'',
 		Preload: null,
 		Modified: false,
-//		Preload: function () { return '<div class="check-itemset"></div>'; },
 		SetValue: function (obj, value, label) {
 			this.Modified = true;
 			if (typeof this.Selected === 'function') {
 				return this.Selected.call(obj, value, label, this.TargetObj,self);
 			} else {
-				this.TargetObj.val(value);
-				this.TargetObj.trigger('change');
+				this.TargetObj.val(value).trigger('change');
+				if (typeof this.TextContent === 'string') {
+					$(this.TextContent).val(label);
+				};
+//				this.TargetObj.trigger('change');
 			};
 			return false;
 		},
