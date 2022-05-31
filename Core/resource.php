@@ -57,6 +57,8 @@ if($appname === 'res') {		// template rsource-direct
 	$default_dir = "app/{$appname}/View/lang/";
 	require_once("app/{$appname}/Config/config.php");
 }
+if(!defined('DEFAULT_REGION')) define('DEFAULT_REGION','?');
+
 MySession::InitSession($appname,$controller);
 // 言語ファイルの対応
 if(array_key_exists('lang', $query)) {
