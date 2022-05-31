@@ -1501,7 +1501,6 @@ static::$appRoot
   pseudo_markdown($atext)                 簡易マークダウン
   str_fixwidth($exp,$pading,$width)       $exp を固定長に変換する
   strlen_limit($str,$maxlen)              文字列を $maxlenで切り取る
-  strpos_of_array($str,$hayz)             $hayz 配列内に $str 文字列があるか
   text_to_html($atext)                    テキストをHTML文字列への変換
 
 ・配列操作
