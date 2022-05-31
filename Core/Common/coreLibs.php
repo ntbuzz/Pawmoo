@@ -542,7 +542,7 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
 							 if($val !== '') break;	// empty will be try to POST
 					case '"':$val = App::PostElements($var);break;
 					case '~':$val = MySession::getAppData($var);break;
-					case '`':$val = MySession::getEnvIDs(PARAMS_NAME.".{$var}");break;
+					case '`':$val = MySession::getSysData($var);break;
 					}
                 }
                 break;
