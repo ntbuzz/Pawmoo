@@ -303,6 +303,7 @@ public function ViewTemplate($name,$vars = []) {
     // TAG string SEPARATE
     protected function tag_Separate($tag,$vars) {
         $tag = $this->expand_Strings(tag_body_name($tag),$vars);
+        if(empty($tag)) return array('div',[]); // empty tag
         $attrList = [];
         if($tag[0]==='<') return array($tag,$attrList); // html tag will be not separate
         // allow multi attribute, and separater not space
