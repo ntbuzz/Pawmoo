@@ -77,7 +77,7 @@ class AppStyle {
             'SERVER' => $_SERVER['SERVER_NAME'],
             'SYSROOT' => $sysRoot,
             'APPROOT' => $appRoot,
-            'appName' => $appname,
+            'APPNAME' => $appname,
             'controller' => strtolower($this->ModuleName),
             'filename' => $filename,
             'extension' => $ext,
