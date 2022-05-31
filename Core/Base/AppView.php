@@ -790,7 +790,7 @@ public function ViewTemplate($name,$vars = []) {
         echo "<{$tag}{$attr}>\n";
 		if($default_opt !== '') echo  "<OPTION value=''>{$default_opt}</OPTION>\n";
 		foreach($opt_val as $opt => $val) {
-			$sel = ($val === "{$sel_item}") ? ' selected':'';	// force string compare
+			$sel = ($val == $sel_item) ? ' selected':'';	// dirty compare
 			echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
 		}
         echo "</{$tag}>\n";
