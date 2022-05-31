@@ -289,13 +289,13 @@ function id_relation_name($str) {
 // SQL Compare operator separate
 function keystr_opr($str) {
     $opr_set = ['=='=>NULL, '<>'=>NULL, '>='=>NULL, '<='=>NULL, '=>'=>'>=', '=<'=>'<=', '!='=>'<>',
-                '='=>NULL, '>'=>NULL, '<'=>NULL, '@'=>NULL, '%'=>NULL ];
+                '='=>NULL, '>'=>NULL, '<'=>NULL, '@'=>NULL, '%'=>NULL, '$'=>NULL ];
     $str = tag_body_name($str);
     foreach([-2,-1] as $nn) {
         $opr = mb_substr($str,$nn);      // last-2char
         if(array_key_exists($opr,$opr_set)) {
             $key = mb_substr($str,0,$nn);    // exclude last 2-char
-            if(isset($opr_set[$opr])) $opr = $opr_set[$opr];    // Replace OPR string for SQL
+            if($opr_set[$opr] !== NULL) $opr = $opr_set[$opr];    // Replace OPR string for SQL
             return array($key,$opr);
         }
     }
