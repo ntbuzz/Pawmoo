@@ -589,7 +589,7 @@ opacity: 0.25; */
 .navi-checklist .plane-menu dt {
 	border-radius:5px 5px 0 0;
 	text-align:center;
-	border-bottom:1px solid gray;
+	border-bottom:2px solid #666;
 	background-color:silver;
 }
 /* チェックリストコンテナ */
