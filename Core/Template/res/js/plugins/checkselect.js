@@ -229,7 +229,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 		SetValue: function (obj, value, label) {
 			this.Modified = true;
 			if (typeof this.Selected === 'function') {
-				return this.Selected.call(obj, value, label, this.TargetObj,self);
+				return this.Selected.call(self, value, label, this.TargetObj, obj);
 			} else {
 				this.TargetObj.val(value).trigger('change');
 				if (typeof this.TextContent === 'string') {
