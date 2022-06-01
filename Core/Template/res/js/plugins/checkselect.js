@@ -233,9 +233,8 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 			} else {
 				this.TargetObj.val(value).trigger('change');
 				if (typeof this.TextContent === 'string') {
-					$(this.TextContent).val(label);
+					$(this.TextContent).val(label).trigger('change');
 				};
-//				this.TargetObj.trigger('change');
 			};
 			return false;
 		},
