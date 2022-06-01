@@ -196,7 +196,7 @@ public function ViewTemplate($name,$vars = []) {
         if(is_scalar($arr)) return $arr;
         // analyze IF-SELECTOR and EXPAND KEY
         $if_selector = function($sec,$key) use(&$vars) {
-            if($key[0]==='&') {
+            if(mb_substr($key,0,1)==='&') {
                 $tag = mb_substr($key,1);
                 $sec = $this->expand_SectionVar($sec,$vars,TRUE);
 				if(method_exists($this->Helper,$tag)) {
@@ -234,7 +234,7 @@ public function ViewTemplate($name,$vars = []) {
         };
         $wd = [];       // re-build array
         foreach($arr as $key => $val) {
-            if($key[0]==='?') {
+            if(mb_substr($key,0,1)==='?') {
                 $ret = $if_selector($val,mb_substr($key,1));
 				$ret2 = (is_scalar($ret)) ? [ $ret ] : $this->array_if_selector($ret, $vars);
 				foreach($ret2 as $kk => $vv) {
