@@ -135,7 +135,9 @@ function page_response($app_page,$msg_array) {
             break;
         }
     }
-	require_once('Core/Template/View/debugbar.php');
+	if(!is_bool_false(MySession::getSysData('debugger'))) {
+		require_once('Core/Template/View/debugbar.php');
+	}
 //    exit;
 }
 //==============================================================================
@@ -313,7 +315,7 @@ function remove_space_comment_str($content) {
 // remove comment
 function remove_comment_str($content) {
 	$content = preg_replace('/([\r\n])+/s',"\n",                  // remove empty line
-			preg_replace('/\/\*[\s\S]*?\*\/|\s+\/\/.*|^\/\/.*/','',$content));
+			preg_replace('/\/\*[\s\S]*?\*\/|(^|[\s;]+)\/\/.*/','\1',$content));
 	return trim($content);
 }
 //==============================================================================
@@ -512,7 +514,7 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                 break;
 			// cannot use in RESOURCE (AppStyle)
             case '?': $var = mb_substr($var,1);     // Query parameter
-				$val = App::$Query[$var];          // Query[] property
+				$val = isset(App::$Query[$var])?App::$Query[$var]:'';          // Query[] property
                 break;
 			// cannot use in RESOURCE (AppStyle)
             case ':':                                   // Class Property
