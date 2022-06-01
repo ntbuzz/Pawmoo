@@ -1,8 +1,8 @@
 // stylesheeet/javascript Template
-//
-@message => yes
-@comment => off
-//@compact => on
+// USE_DEBUGGERが定義されていればデバッグモードに従う
+@@message => on
+@@comment => off
+@@compact => off
 // =====================================================
 // stylesheet SECTION
 Stylesheet => [
