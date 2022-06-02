@@ -378,10 +378,10 @@ function re_build_array($cond) {
 		}
 		return ($opr===NULL) ? $wd : [$opr => $wd];
 	};
-	if(isset($cond[REBUILD_MARK])) return $cond;
+	if(empty($cond) || isset($cond[REBUILD_MARK])) return $cond;
 	$rebuild = $array_map_shurink(NULL,$cond);
 	$rebuild[REBUILD_MARK] = true;		// mark re-build complete
-debug_log(DBMSG_HANDLER,["INPUT COND" => $cond,"ReBuild COND" => $rebuild]);
+//debug_log(DBMSG_HANDLER,["INPUT COND" => $cond,"ReBuild COND" => $rebuild]);
 	return $rebuild;
 }
 //==============================================================================
