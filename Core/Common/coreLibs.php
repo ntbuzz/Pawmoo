@@ -514,7 +514,7 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                 break;
 			// cannot use in RESOURCE (AppStyle)
             case '?': $var = mb_substr($var,1);     // Query parameter
-				$val = isset(App::$Query[$var])?App::$Query[$var]:'';          // Query[] property
+				$val = (isset(App::$Query[$var]))?App::$Query[$var]:'';          // Query[] property
                 break;
 			// cannot use in RESOURCE (AppStyle)
             case ':':                                   // Class Property
