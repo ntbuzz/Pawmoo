@@ -28,7 +28,6 @@ class AppStyle {
         ],
 
     ];
-    const BoolConst = [ 'yes' => TRUE, 'no' => FALSE, 'true' => TRUE, 'false' => FALSE, 'on' => TRUE, 'off' => FALSE ];
     const FunctionList = array(
         '@'    => [
             'compact'   => [ 'cmd_modeset','do_min' ],
@@ -124,8 +123,8 @@ public function ViewStyle($file_name) {
     list($filename,$ext) = extract_base_name($file_name);
 	if($this->debug_mode === false) {
 		$this->do_min = ($ext == 'min');           // Is Compact Output?
-		$this->do_msg = TRUE ;                     // Is Import Message?
-		$this->do_com = TRUE ;                     // Is Comment Output?
+		$this->do_msg = false;                     // Is Import Message?
+		$this->do_com = true;                      // Is Comment Output?
 	} else {	// for debug-mode setup
 		foreach(self::DebugModeSet as $mode => $val) {
 			$this->$mode = $val;
@@ -251,12 +250,12 @@ public function ViewStyle($file_name) {
 // compact/comment/message Command
 // パラメータはプロパティ変数名
     private function cmd_modeset($secParam, $param,$sec) {
-        $val = strtolower($sec);                        // 設定値を取り出す
-		if(substr($val,0,1) === '@') {
-			$param = substr($val,1);
-			$val = ($this->debug_mode)?self::DebugModeSet[$param]:self::BoolConst[$val];
-		} else $val = self::BoolConst[$val];
-        $this->$param = $val;            // 指定プロパティ変数にセット
+        $mode = !is_bool_false(strtolower($sec));
+		if(substr($param,0,1) === '@' && $this->debug_mode) {
+			$param = substr($param,1);
+			$mode = self::DebugModeSet[$param];
+		}
+        $this->$param = $mode;            // 指定プロパティ変数にセット
     }
 //------------------------------------------------------------------------------
 // jquery Command
