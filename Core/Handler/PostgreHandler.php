@@ -68,8 +68,7 @@ public function doQuery($sql) {
 		debug_log(DBMSG_DIE,[
 			"ERROR" => pg_result_error($res1),
 			"SQL" => $sql,
-			"COND" => $this->LastCond,
-			"BUILD" => $this->LastBuild,
+			"BUILD-COND" => $this->LastBuild,
 			'QUERY失敗' => pg_last_error(),
 			'PRIMARY' => $this->updatePrimary,
 		]);
