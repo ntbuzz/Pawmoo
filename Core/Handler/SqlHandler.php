@@ -26,8 +26,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	public	$lang_alternate = FALSE; // from fieldAlias:use orijin field when lang-field empty.
 	private $LastSQL;		// Last Query WHERE term
 	protected $Primary;		// for FUTURE
-	protected $LastCond;	// for DEBUG
-	protected $LastBuild;	// for DEBUG
+	protected $LastBuild;	// for COND re-buld DEBUG
 	protected $LIKE_OPR = ['%'=>['LIKE','%'],'$'=>['LIKE','%']];
 	protected $NULL_ORDER = ' NULLS LAST';	// NULL seq
 	private $register_callback = [ NULL,NULL];	// fetchDB Callback
@@ -83,13 +82,6 @@ public function register_method($class,$method) {
 	}
 }
 //==============================================================================
-// DEBUGGING for SQL Execute
-	private function SQLdebug($sql,$where,$sort=[]) {
-    	$dbg = debug_backtrace();
-    	$func = $dbg[1]['function'];
-		debug_log(DBMSG_HANDLER,["SQL-Execute ({$func} @ {$this->table})"=> [ 'SORT'=>$sort,'SQL' => $sql,'WHERE'=>$where]]);
-	}
-//==============================================================================
 // Move to here from fieldAlias class.
 //	if exists LOCALE alias, get LOCALE fields name
 public function get_lang_alias($field_name) {
@@ -141,8 +133,12 @@ public function fetch_locale() {
 }
 //==============================================================================
 // execSQL: Logging SQL, and execute SQL
-public function execSQL($sql,$logs = false) {
-	if($logs) debug_log(DBMSG_HANDLER,['SQL' => $sql]);
+public function execSQL($sql,$logs = false,$where='') {
+	if($logs) {		// DEBUGGING for SQL Execute
+    	$dbg = debug_backtrace();
+    	$func = $dbg[1]['function'];
+		debug_log(DBMSG_HANDLER,["execSQL ({$func} @ {$this->table})"=> [ 'COND'=>$this->LastBuild,'WHERE'=>$where,'SQL' => $sql]]);
+	}
 	$this->doQuery($sql);
 }
 //==============================================================================
@@ -183,8 +179,7 @@ public function getRecordCount($cond) {
 	$where = $this->sql_makeWHERE($cond);	// 検索条件
 	$sql = "SELECT DISTINCT count(*) as \"total\" FROM {$this->table}";
 //	$sql = $this->QueryCommand("count(*) as \"total\" FROM {$this->table}";
-	$this->SQLdebug($sql,$where);
-	$this->execSQL("{$sql}{$where};");
+	$this->execSQL("{$sql}{$where};",true,$where);
 	$field = $this->fetch_array();
 	return ($field) ? intval($field["total"]) : 0;
 }
@@ -196,9 +191,8 @@ public function getRecordValue($cond) {
 	$where = $this->sql_makeWHERE($cond);		// 検索条件
 	$sql = $this->sql_JoinTable();
 	$where .= ($this->is_offset) ? " offset 0 limit 1" : " limit 0,1";
-	$this->SQLdebug($sql,$where);
 	$sql .= "{$where};";
-	$this->execSQL($sql);
+	$this->execSQL($sql,true,$where);
 	$row = $this->fetchDB();
 	return ($row === FALSE) ? []:$row;
 }
@@ -239,8 +233,7 @@ public function getGroupCalcList($cond,$groups,$calc,$sortby,$max) {
 	}
 	$limit = ($max > 0) ? (($this->is_offset) ? " offset 0 limit {$max}" : " limit 0,{$max}"):'';
 	$sql = "SELECT DISTINCT  {$sel} FROM {$this->raw_table}{$where} GROUP BY {$grp}{$sort}{$limit};";
-	$this->execSQL($sql,false);
-debug_log(DBMSG_HANDLER,["LOG-Aggregate" => [ 'COND' => $cond,'SQL'=>$sql]]);
+	$this->execSQL($sql,true,$where);
 	return $sql;
 }
 //==============================================================================
@@ -254,7 +247,7 @@ public function findRecord($cond,$sort = [],$raw=false) {
 	$table = ($raw) ? $this->raw_table : $this->table;
 	$where = $this->sql_makeWHERE($cond,$table);
 	$sql = "SELECT DISTINCT  count(*) as \"total\" FROM {$table}";
-	$this->execSQL("{$sql}{$where};",FALSE);		// No Logging
+	$this->execSQL("{$sql}{$where};");		// No Logging
 	$field = $this->fetch_array();
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	$sql = $this->sql_JoinTable($table);
@@ -274,9 +267,8 @@ public function findRecord($cond,$sort = [],$raw=false) {
 			$where .= " limit {$this->startrec},{$this->limitrec}";
 		}
 	}
-	$this->SQLdebug($sql,$where,$sort);
 	$sql .= "{$where};";
-	$this->execSQL($sql);
+	$this->execSQL($sql,true,$where);
 }
 //==============================================================================
 //	firstRecord(cond,sort): 
@@ -294,9 +286,8 @@ public function firstRecord($cond,$sort) {
 		$where .=  " ORDER BY ".trim($orderby,",");
 	}
 	$where .= " limit 1";
-	$this->SQLdebug($sql,$where);
 	$sql .= "{$where};";
-	$this->execSQL($sql);
+	$this->execSQL($sql,true,$where);
 	$row = $this->fetchDB();
 	return ($row === FALSE) ? FALSE:$row;
 }
@@ -305,7 +296,7 @@ public function firstRecord($cond,$sort) {
 public function deleteRecord($wh) {
 	$where = $this->sql_makeWHERE($wh,$this->raw_table);	// delete by real-table
 	$sql = "DELETE FROM {$this->raw_table}{$where};";
-	$this->execSQL($sql);
+	$this->execSQL($sql,true,$where);
 }
 //==============================================================================
 // Common SQL(SELECT ～ WHERE ～) generate
@@ -325,7 +316,6 @@ public function deleteRecord($wh) {
 		},array_keys($alias),array_values($alias));
 		$sql = implode(',',$fields);
 //		$groupby = (empty($grp)) ? '' : " GROUP BY \"{$grp}\"";
-		$this->SQLdebug($sql,$where);
 		$sql = "SELECT DISTINCT  {$sql} FROM {$table}{$where} ORDER BY \"{$id}\";";
 		return $sql;
 	}
@@ -335,9 +325,9 @@ public function deleteRecord($wh) {
 		if(is_array($key)) {
 			$expr = [];
 			foreach(array_combine($key,$val) as $k => $v) $expr[] = "(\"{$k}\"='{$v}')";
-			$sql = implode(' AND ',$expr);
-		} else $sql = "\"{$key}\"='{$val}'";
-		return "SELECT DISTINCT  * FROM {$this->table} WHERE {$sql};";
+			$where = implode(' AND ',$expr);
+		} else $where = "\"{$key}\"='{$val}'";
+		return "SELECT DISTINCT  * FROM {$this->table} WHERE {$where};";
 	}
 //==============================================================================
 // escape to single-quote(') in string value
@@ -406,7 +396,6 @@ protected function fetch_convert($data) {
 	private function sql_makeWHERE($cond,$target_table=NULL) {
 		if($target_table === NULL) $target_table = $this->table;
 		if($cond ===NULL) return $this->LastSQL;
-		$this->LastCond = $cond;
 		$this->LastBuild= $new_cond = re_build_array($cond);
 		$sql = $this->makeExpr($new_cond,$target_table);
 		if(strlen($sql)) $sql = ' WHERE '.$sql;
