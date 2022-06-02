@@ -434,14 +434,14 @@ private function createSchema($fields) {
 		$fname = strtolower($fname);
 		$resource[$fname] = $name;
 		$flag = 0;
-        if(preg_match('/([LCR])?([SN]?)(\d+)/',$disp,$m)===1) {
+        if(preg_match('/([LCR])?([SN]?)([\-+]?\d+)/',$disp,$m)===1) {
 			list($tmp,$align,$sort,$wd) = $m;
 			$disp = 0;
 			if(isset($DispFlags[$align])) $flag |= $DispFlags[$align];
 			if(isset($DispFlags[$sort])) $flag |= $DispFlags[$sort];
 		} else list($align,$sort,$wd) = [NULL,NULL,NULL];
 		if(!empty($csv)) $flag |= 00100;
-		if($lang) $flag |= 01000;
+		if(!is_bool_false($lang)) $flag |= 01000;
 		switch($type) {
 		case 'alias':
 				if(empty($rel)) break;
