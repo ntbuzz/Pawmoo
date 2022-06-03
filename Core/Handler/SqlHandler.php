@@ -153,7 +153,7 @@ private function executeSQL($build_sql,$logs = false) {
 	if($logs) {		// DEBUGGING LOG for SQL Execute
     	$dbg = debug_backtrace();
     	$func = $dbg[1]['function'];
-		debug_log(DBMSG_HANDLER,["execute-SQL ({$func} @ {$this->table})"=> [ 'COND'=>$this->LastBuild,'CMD'=>$build_sql,'SQL'=>$sql]]);
+		debug_log(DBMSG_HANDLER,["SQL: {$func} @ {$this->table}"=> [ 'COND'=>$this->LastBuild,'CMD'=>$build_sql,'SQL'=>$sql]]);
 	}
 	$this->doQuery($sql);
 }
@@ -212,7 +212,7 @@ public function getRecordCount($cond) {
 		'FROM'	=> $this->table,
 		'WHERE'	=> $this->sql_buildWHERE($cond,$this->table),
 	];
-	$this->executeSQL($build_sql,true);
+	$this->executeSQL($build_sql);
 	$field = $this->fetch_array();
 	return ($field) ? intval($field["total"]) : 0;
 }
@@ -286,7 +286,7 @@ public function findRecord($cond,$sort = [],$raw=false) {
 		'WHERE'		=> $this->sql_buildWHERE($cond,$table),
 		'ORDER BY'	=> NULL,
 	];
-	$this->executeSQL($build_sql,true);
+	$this->executeSQL($build_sql);
 	$field = $this->fetch_array();
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	// re-make get all fields
