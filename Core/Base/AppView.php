@@ -331,10 +331,10 @@ public function ViewTemplate($name,$vars = []) {
 // Analyzed Section, and Dispatch Command method
     protected function subsec_separate($section,$attrList,$vars,$all_item=TRUE) {
 		$attr_set = function($key,$val) use(&$attrList) {
-			if(empty($val)) return;
-			$exists = (isset($attrList[$key]))?$attrList[$key]:'';
-			if(is_array($val)) $val = implode('',$val);
-			$attrList[$key] = trim("{$exists} {$val}");
+            if(is_array($val)) $val = implode('',$val);
+            if(isset($attrList[$key])) {
+                if(!empty($val)) $attrList[$key] .= " {$val}";
+            } else $attrList[$key] = $val;
 		};
         $subsec = [];
         if(is_scalar($section)) {
@@ -348,7 +348,8 @@ public function ViewTemplate($name,$vars = []) {
 							// separate attribute
 							$p = '/^([a-zA-Z][a-zA-Z\-]+[^\\\]):(.*)$/';
 							if(preg_match($p,$sec,$m) === 1) {
-								$attr_set($m[1],trim($m[2],"\"'"));   // quote-char trim
+                                $v = (empty($m[2]))?NULL:trim($m[2],"\"'");   // quote-char trim
+								$attr_set($m[1],$v);
 							} else $innerText .= $sec;
                         } else $subsec[] = $sec;
                     } else {
