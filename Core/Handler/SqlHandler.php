@@ -172,7 +172,7 @@ public function getValueLists($table,$ref,$id,$cond=NULL) {
 	},array_keys($alias),array_values($alias));
 	$items = implode(',',$fields);
 	$build_sql = [
-		'SELECT' => "DISTINCT {$items}",
+		'SELECT' => $items,
 		'FROM'	=> $table,
 		'WHERE'	=> $this->sql_buildWHERE($cond,$table),
 		'ORDER BY' => "\"{$id}\"",
@@ -195,7 +195,7 @@ public function doQueryBy($key,$val) {
 		$where = implode(' AND ',$expr);
 	} else $where = "\"{$key}\"='{$val}'";
 	$build_sql = [
-		'SELECT' => "DISTINCT *",
+		'SELECT' => "*",
 		'FROM'	=> $this->table,
 		'WHERE'	=> $where,
 	];
@@ -208,7 +208,7 @@ public function doQueryBy($key,$val) {
 //==============================================================================
 public function getRecordCount($cond) {
 	$build_sql = [
-		'SELECT' => "DISTINCT count(*) as \"total\"",
+		'SELECT' => "count(*) as \"total\"",
 		'FROM'	=> $this->table,
 		'WHERE'	=> $this->sql_buildWHERE($cond,$this->table),
 	];
@@ -222,7 +222,7 @@ public function getRecordCount($cond) {
 //==============================================================================
 public function getRecordValue($cond) {
 	$build_sql = [
-		'SELECT'=> "DISTINCT {$this->table}.*",
+		'SELECT'=> "{$this->table}.*",
 		'FROM'	=> $this->table,
 		'WHERE'	=> $this->sql_buildWHERE($cond,$this->table),
 		($this->is_offset) ? "offset 0 limit 1" : "limit 0,1",
@@ -259,7 +259,7 @@ public function getGroupCalcList($cond,$groups,$calc,$sortby,$max) {
 	}
 	$sel = implode(',',$fields);
 	$build_sql = [
-		'SELECT'	=> "DISTINCT {$sel}",
+		'SELECT'	=> $sel,
 		'FROM'		=> $this->raw_table,
 		'WHERE'		=> $this->sql_buildWHERE($cond,$this->raw_table),
 		'GROUP BY'	=> implode(',',$groups),
@@ -281,7 +281,7 @@ public function findRecord($cond,$sort = [],$raw=false) {
 	$table = ($raw) ? $this->raw_table : $this->table;
 	// get record count
 	$build_sql = [
-		'SELECT'	=> "DISTINCT count(*) as \"total\"",
+		'SELECT'	=> "count(*) as \"total\"",
 		'FROM'		=> $table,
 		'WHERE'		=> $this->sql_buildWHERE($cond,$table),
 		'ORDER BY'	=> NULL,
@@ -290,7 +290,7 @@ public function findRecord($cond,$sort = [],$raw=false) {
 	$field = $this->fetch_array();
 	$this->recordMax = ($field) ? $field["total"] : 0;
 	// re-make get all fields
-	$build_sql['SELECT']   = "DISTINCT {$table}.*";
+	$build_sql['SELECT']   = "{$table}.*";
 	$build_sql['ORDER BY'] = $this->sql_sortby($sort);
 	if($this->limitrec > 0) {
 		if($this->is_offset) {
@@ -307,7 +307,7 @@ public function findRecord($cond,$sort = [],$raw=false) {
 //==============================================================================
 public function firstRecord($cond,$sort) {
 	$build_sql = [
-		'SELECT'	=> "DISTINCT {$this->table}.*",
+		'SELECT'	=> "{$this->table}.*",
 		'FROM'		=> $this->table,
 		'WHERE'		=> $this->sql_buildWHERE($cond,$this->table),
 		'ORDER BY'	=> $this->sql_sortby($sort),
