@@ -24,7 +24,7 @@ abstract class SQLHandler {	// extends SqlCreator {
 	public	$relations;		// relation tables
 	public	$lang_alias = [];	// from fieldAlias:language field.
 	public	$lang_alternate = FALSE; // from fieldAlias:use orijin field when lang-field empty.
-	private $LastSQL;		// Last Query WHERE term
+	private $LastWHERE;		// Last COND WHWEW
 	protected $Primary;		// for FUTURE
 	protected $LastBuild;	// for COND re-buld DEBUG
 	protected $LIKE_OPR = ['%'=>['LIKE','%'],'$'=>['LIKE','%']];
@@ -102,6 +102,14 @@ public function setupFieldTransfer($alias,$relations=NULL) {
 	$this->relations = $relations;
 }
 //==============================================================================
+// SETUP Paging Parmeter
+// pagenum must be >=1 on call function
+public function SetPaging($pagesize, $pagenum) {
+	$this->startrec = $pagesize * ($pagenum - 1);		// start record num calc
+	if($this->startrec < 0) $this->startrec = 0;
+	$this->limitrec = $pagesize;		// get limit records
+}
+//==============================================================================
 // reset primary seq value
 public function resetPrimary() {
 	$sql = $this->reset_seq($this->raw_table);
@@ -111,7 +119,7 @@ public function resetPrimary() {
 // TRUNCATE TABLE
 public function doTruncate() {
 	$sql = $this->truncate_sql($this->raw_table);
-    $this->execSQL($sql);
+	$this->doQuery($sql);
 }
 //==============================================================================
 // fetchDB: get record data , and replace alias and bind column
@@ -133,11 +141,19 @@ public function fetch_locale() {
 }
 //==============================================================================
 // execSQL: Logging SQL, and execute SQL
-public function execSQL($sql,$logs = false,$where='') {
-	if($logs) {		// DEBUGGING for SQL Execute
+private function executeSQL($build_sql,$logs = false) {
+	$sql = "";
+	foreach($build_sql as $cmd => $val) {
+		if($val !== NULL) {
+			$expr = (is_int($cmd)) ? $val : "{$cmd} {$val}";
+			$sql = "{$sql} {$expr}";
+		}
+	}
+	$sql = trim($sql).";";
+	if($logs) {		// DEBUGGING LOG for SQL Execute
     	$dbg = debug_backtrace();
     	$func = $dbg[1]['function'];
-		debug_log(DBMSG_HANDLER,["execSQL ({$func} @ {$this->table})"=> [ 'COND'=>$this->LastBuild,'WHERE'=>$where,'SQL' => $sql]]);
+		debug_log(DBMSG_HANDLER,["execute-SQL ({$func} @ {$this->table})"=> [ 'COND'=>$this->LastBuild,'CMD'=>$build_sql,'SQL'=>$sql]]);
 	}
 	$this->doQuery($sql);
 }
@@ -145,8 +161,23 @@ public function execSQL($sql,$logs = false,$where='') {
 //	getValueLists: list-colum name, value-colums
 public function getValueLists($table,$ref,$id,$cond=NULL) {
 	if(empty($table)) $table = $this->table;
-	$sql = $this->sql_QueryValues($table,$ref,$id,$cond);
-	$this->execSQL($sql);
+	$alias = [];
+	foreach([$ref,$id] as $field) {
+		$key = $this->get_lang_alias($field);
+		$alias[$field] = $key;
+	}
+	$fields = array_map(function($k,$v)  {
+		if($k === $v) return "\"{$v}\"";
+		else return "\"{$v}\" AS \"{$k}\"";
+	},array_keys($alias),array_values($alias));
+	$items = implode(',',$fields);
+	$build_sql = [
+		'SELECT' => "DISTINCT {$items}",
+		'FROM'	=> $table,
+		'WHERE'	=> $this->sql_buildWHERE($cond,$table),
+		'ORDER BY' => "\"{$id}\"",
+	];
+	$this->executeSQL($build_sql,true);
 	$values = array();
 	while ($row = $this->fetch_array()) {	// other table refer is not bind!
 		$key = $row[$ref];
@@ -158,28 +189,30 @@ public function getValueLists($table,$ref,$id,$cond=NULL) {
 //==============================================================================
 //	doQueryBy: query by KEY-NAME
 public function doQueryBy($key,$val) {
-	$sql = $this->sql_GetRecordByKey($key,$val);
-	$this->execSQL($sql);
+	if(is_array($key)) {
+		$expr = [];
+		foreach(array_combine($key,$val) as $k => $v) $expr[] = "(\"{$k}\"='{$v}')";
+		$where = implode(' AND ',$expr);
+	} else $where = "\"{$key}\"='{$val}'";
+	$build_sql = [
+		'SELECT' => "DISTINCT *",
+		'FROM'	=> $this->table,
+		'WHERE'	=> $where,
+	];
+	$this->executeSQL($build_sql,true);
 	return $this->fetchDB();
-}
-//==============================================================================
-// SETUP Paging Parmeter
-// pagenum must be >=1 on call function
-public function SetPaging($pagesize, $pagenum) {
-	$this->startrec = $pagesize * ($pagenum - 1);		// start record num calc
-	if($this->startrec < 0) $this->startrec = 0;
-	$this->limitrec = $pagesize;		// get limit records
-	debug_log(FALSE,["size" => $pagesize, "limit" => $this->limitrec, "start" => $this->startrec, "page" => $pagenum]);
 }
 //==============================================================================
 //	getRecordCount($cond) 
 //		get $cond match record count
 //==============================================================================
 public function getRecordCount($cond) {
-	$where = $this->sql_makeWHERE($cond);	// 検索条件
-	$sql = "SELECT DISTINCT count(*) as \"total\" FROM {$this->table}";
-//	$sql = $this->QueryCommand("count(*) as \"total\" FROM {$this->table}";
-	$this->execSQL("{$sql}{$where};",true,$where);
+	$build_sql = [
+		'SELECT' => "DISTINCT count(*) as \"total\"",
+		'FROM'	=> $this->table,
+		'WHERE'	=> $this->sql_buildWHERE($cond,$this->table),
+	];
+	$this->executeSQL($build_sql,true);
 	$field = $this->fetch_array();
 	return ($field) ? intval($field["total"]) : 0;
 }
@@ -188,11 +221,13 @@ public function getRecordCount($cond) {
 //	find $cond match record
 //==============================================================================
 public function getRecordValue($cond) {
-	$where = $this->sql_makeWHERE($cond);		// 検索条件
-	$sql = $this->sql_JoinTable();
-	$where .= ($this->is_offset) ? " offset 0 limit 1" : " limit 0,1";
-	$sql .= "{$where};";
-	$this->execSQL($sql,true,$where);
+	$build_sql = [
+		'SELECT'=> "DISTINCT {$this->table}.*",
+		'FROM'	=> $this->table,
+		'WHERE'	=> $this->sql_buildWHERE($cond,$this->table),
+		($this->is_offset) ? "offset 0 limit 1" : "limit 0,1",
+	];
+	$this->executeSQL($build_sql,true);
 	$row = $this->fetchDB();
 	return ($row === FALSE) ? []:$row;
 }
@@ -201,8 +236,11 @@ public function getRecordValue($cond) {
 //		get MAX value into field_name by this-table
 //==============================================================================
 public function getMaxValueRecord($field_name) {
-	$sql = "SELECT MAX({$field_name}) as \"max_val\" FROM {$this->table}";
-	$this->execSQL($sql);
+	$build_sql = [
+		'SELECT'=> "MAX({$field_name}) as \"max_val\"",
+		'FROM'	=> $this->table,
+	];
+	$this->executeSQL($build_sql,true);
 	$row = $this->fetchDB();
 	return ($row) ? $row['max_val'] : 0;
 }
@@ -211,7 +249,6 @@ public function getMaxValueRecord($field_name) {
 //		GROUP
 //==============================================================================
 public function getGroupCalcList($cond,$groups,$calc,$sortby,$max) {
-	$where = $this->sql_makeWHERE($cond);
 	$this->active_column = $fields = $groups;
 	if(!empty($calc)) {
 		foreach($calc as $func => $alias) {
@@ -221,20 +258,17 @@ public function getGroupCalcList($cond,$groups,$calc,$sortby,$max) {
 		}
 	}
 	$sel = implode(',',$fields);
-	$grp = implode(',',$groups);
-	$sort = "";
-	if($sortby !== []) {
-		$col = [];
-		foreach($sortby as $column => $seq) {
-			$order = ($seq === SORTBY_DESCEND) ? "desc" : "asc";
-			$col[]= "{$column} {$order}{$this->NULL_ORDER}";
-		}
-		$sort = " ORDER BY ".implode(',',$col);
+	$build_sql = [
+		'SELECT'	=> "DISTINCT {$sel}",
+		'FROM'		=> $this->raw_table,
+		'WHERE'		=> $this->sql_buildWHERE($cond,$this->raw_table),
+		'GROUP BY'	=> implode(',',$groups),
+		'ORDER BY'	=> $this->sql_sortby($sortby),
+	];
+	if($max > 0) {
+		$build_sql[] = (($this->is_offset) ? " offset 0 limit {$max}" : " limit 0,{$max}");
 	}
-	$limit = ($max > 0) ? (($this->is_offset) ? " offset 0 limit {$max}" : " limit 0,{$max}"):'';
-	$sql = "SELECT DISTINCT  {$sel} FROM {$this->raw_table}{$where} GROUP BY {$grp}{$sort}{$limit};";
-	$this->execSQL($sql,true,$where);
-	return $sql;
+	$this->executeSQL($build_sql,true);
 }
 //==============================================================================
 //	findRecord(cond): 
@@ -245,90 +279,54 @@ public function getGroupCalcList($cond,$groups,$calc,$sortby,$max) {
 //==============================================================================
 public function findRecord($cond,$sort = [],$raw=false) {
 	$table = ($raw) ? $this->raw_table : $this->table;
-	$where = $this->sql_makeWHERE($cond,$table);
-	$sql = "SELECT DISTINCT  count(*) as \"total\" FROM {$table}";
-	$this->execSQL("{$sql}{$where};");		// No Logging
+	// get record count
+	$build_sql = [
+		'SELECT'	=> "DISTINCT count(*) as \"total\"",
+		'FROM'		=> $table,
+		'WHERE'		=> $this->sql_buildWHERE($cond,$table),
+		'ORDER BY'	=> NULL,
+	];
+	$this->executeSQL($build_sql,true);
 	$field = $this->fetch_array();
 	$this->recordMax = ($field) ? $field["total"] : 0;
-	$sql = $this->sql_JoinTable($table);
-	if(!empty($sort)) {
-		if(is_scalar($sort)) $sort = [ $sort => SORTBY_ASCEND];
-		$orderby = "";
-		foreach($sort as $key => $val) {
-			$order = ($val === SORTBY_DESCEND) ? "desc" : "asc";
-			$orderby .=  "{$table}.\"{$key}\" {$order}{$this->NULL_ORDER},";
-		}
-		$where .=  " ORDER BY ".trim($orderby,",");
-	}
+	// re-make get all fields
+	$build_sql['SELECT']   = "DISTINCT {$table}.*";
+	$build_sql['ORDER BY'] = $this->sql_sortby($sort);
 	if($this->limitrec > 0) {
 		if($this->is_offset) {
-			$where .= " offset {$this->startrec} limit {$this->limitrec}";
+			$build_sql[] = " offset {$this->startrec} limit {$this->limitrec}";
 		} else {
-			$where .= " limit {$this->startrec},{$this->limitrec}";
+			$build_sql[] = " limit {$this->startrec},{$this->limitrec}";
 		}
 	}
-	$sql .= "{$where};";
-	$this->execSQL($sql,true,$where);
+	$this->executeSQL($build_sql,true);
 }
 //==============================================================================
 //	firstRecord(cond,sort): 
 // returned col-data or FALSE
 //==============================================================================
 public function firstRecord($cond,$sort) {
-	$where = $this->sql_makeWHERE($cond);
-	$sql = $this->sql_JoinTable();
-	if(!empty($sort)) {
-		$orderby = "";
-		foreach($sort as $key => $val) {
-			$order = ($val === SORTBY_DESCEND) ? "desc" : "asc";
-			$orderby .=  "{$this->table}.\"{$key}\" {$order}{$this->NULL_ORDER},";
-		}
-		$where .=  " ORDER BY ".trim($orderby,",");
-	}
-	$where .= " limit 1";
-	$sql .= "{$where};";
-	$this->execSQL($sql,true,$where);
+	$build_sql = [
+		'SELECT'	=> "DISTINCT {$this->table}.*",
+		'FROM'		=> $this->table,
+		'WHERE'		=> $this->sql_buildWHERE($cond,$this->table),
+		'ORDER BY'	=> $this->sql_sortby($sort),
+	];
+	$build_sql[] = "limit 1";
+	$this->executeSQL($build_sql,true);
 	$row = $this->fetchDB();
 	return ($row === FALSE) ? FALSE:$row;
 }
 //==============================================================================
 //	deleteRecord(wh): 
-public function deleteRecord($wh) {
-	$where = $this->sql_makeWHERE($wh,$this->raw_table);	// delete by real-table
-	$sql = "DELETE FROM {$this->raw_table}{$where};";
-	$this->execSQL($sql,true,$where);
+public function deleteRecord($cond) {
+	$build_sql = [
+		'DELETE' => '',
+		'FROM'	=> $this->raw_table,
+		'WHERE'	=> $this->sql_buildWHERE($cond,$this->raw_table),
+	];
+	$this->executeSQL($build_sql,true);
 }
-//==============================================================================
-// Common SQL(SELECT ～ WHERE ～) generate
-// SQlite3, PostgreSQL, mariaDB unique SQL command(update, insert, replace) will be generate instance class
-//==============================================================================
-// get value lists
-	private function sql_QueryValues($table,$ref,$id,$cond) {
-		$where = empty($cond) ? "" : $this->sql_makeWHERE($cond,$table);
-		$alias = [];
-		foreach([$ref,$id] as $field) {
-			$key = $this->get_lang_alias($field);
-			$alias[$field] = $key;
-		}
-		$fields = array_map(function($k,$v)  {
-			if($k === $v) return "\"{$v}\"";
-			else return "\"{$v}\" AS \"{$k}\"";
-		},array_keys($alias),array_values($alias));
-		$sql = implode(',',$fields);
-//		$groupby = (empty($grp)) ? '' : " GROUP BY \"{$grp}\"";
-		$sql = "SELECT DISTINCT  {$sql} FROM {$table}{$where} ORDER BY \"{$id}\";";
-		return $sql;
-	}
-//==============================================================================
-//
-	private function sql_GetRecordByKey($key,$val) {
-		if(is_array($key)) {
-			$expr = [];
-			foreach(array_combine($key,$val) as $k => $v) $expr[] = "(\"{$k}\"='{$v}')";
-			$where = implode(' AND ',$expr);
-		} else $where = "\"{$key}\"='{$val}'";
-		return "SELECT DISTINCT  * FROM {$this->table} WHERE {$where};";
-	}
 //==============================================================================
 // escape to single-quote(') in string value
 protected function sql_str_quote($data,$find=["'",'\\'],$rep=["''",'\\\\']) {
@@ -379,27 +377,29 @@ protected function fetch_convert($data) {
 	return $data;
 }
 //==============================================================================
-// generate JOIN token
-// relation table
-//  [id] = [
-//		[alias] = table.id.name
-//		[alias] = [ ref_table, ref_name, rel_id, ref_id  ]	sub-relations
-//		....
-//	]
-	private function sql_JoinTable($target_table=NULL) {
-		if($target_table === NULL) $target_table = $this->table;
-		$sql = "SELECT DISTINCT  {$target_table}.* FROM {$target_table}";
-		return $sql;
+//	sql_sortby(sortby)
+//		generate ORDER BY expr
+//==============================================================================
+private function sql_sortby($sortby,$table=NULL) {
+	if($sortby === NULL || $sortby ===[]) return NULL;
+	if(is_scalar($sortby)) $sortby = [ $sortby => SORTBY_ASCEND];
+	$col = [];
+	foreach($sortby as $column => $seq) {
+		$order = ($seq === SORTBY_DESCEND) ? "desc" : "asc";
+		$field = (empty($table)) ? $column : "{$table}.\"{$column}\"";
+		$col[]= "{$field} {$order}{$this->NULL_ORDER}";
 	}
+	return implode(',',$col);
+}
 //==============================================================================
 // Re-Build Condition ARRAY, Create SQL-WHERE statement.
-	private function sql_makeWHERE($cond,$target_table=NULL) {
+	private function sql_buildWHERE($cond,$target_table=NULL) {
 		if($target_table === NULL) $target_table = $this->table;
-		if($cond ===NULL) return $this->LastSQL;
-		$this->LastBuild= $new_cond = re_build_array($cond);
-		$sql = $this->makeExpr($new_cond,$target_table);
-		if(strlen($sql)) $sql = ' WHERE '.$sql;
-		return ($this->LastSQL = $sql);
+		if($cond ===NULL) return $this->LastWHERE;
+		$this->LastBuild = re_build_array($cond);
+		$where = $this->makeExpr($this->LastBuild,$target_table);
+		if(empty($where)) $where = NULL;
+		return ($this->LastWHERE = $where);
 	}
 //==============================================================================
 // GENERATE WHERE token from ARRAY[] expression
