@@ -233,7 +233,7 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 			} else {
 				this.TargetObj.val(value).trigger('change');
 				if (typeof this.TextContent === 'string') {
-					$(this.TextContent).val(label).trigger('change');
+					self.find(this.TextContent).val(label).trigger('change');
 				};
 			};
 			return false;
@@ -256,6 +256,9 @@ $.fn.SingleCheckBox = function (param_obj, preload_func) {
 				$.each(param_obj, function (key, value) { setting[key] = value;});
 			};
 			break;
+	};
+	if (typeof setting.TargetObj === 'string') {
+		setting.TargetObj = self.find(setting.TargetObj);
 	};
 	if (setting.TargetObj.length === 0) return self;
 	// 選択時のコールバック登録
