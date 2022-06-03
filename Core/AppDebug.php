@@ -155,12 +155,16 @@ function debug_dump($items,$trace=true) {
 function debug_die($items) {
 	sysLog::halt($items);
 }
+function debug_stderr($items) {
+	sysLog::stderr($items);
+}
 function stderr($str) {
 	fputs(STDERR,"{$str}\n");
 }
 // dummy function
 function xdebug_dump($items) {}
 function xdebug_die($items) {}
+function xdebug_stderr($items) {}
 function xdebug_log($items) {}
 function reuire_debugbar() {
 	$debug = __DIR__ . '/Template/View/debugbar.php';
