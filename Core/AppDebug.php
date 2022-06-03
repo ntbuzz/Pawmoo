@@ -24,11 +24,13 @@ define('DBMSG_NOTRACE', 0x1000);  // NO TRACE DUMP
 if(!defined('DEBUG_LEVEL'))  define('DEBUG_LEVEL', 10);
 
 const EMPTY_MSG = " EMPTY\n";
+// ダンプ対象外のキー	0:Dump, 1:Skip
 const EXCLUSION = [
-    'Syslog' => 1,
-    'Paging' => 1,  // ページングデバッグ時はコメントアウト
-    'password' => 1,
-    'passwd' => 1,
+    'Syslog'		=> 1,	// セッション内のシステムログ
+    'Paging'		=> 1,	// セッション内のページング条件
+    'password'		=> 1,	// パスワードPOST
+    'passwd'		=> 1,	// パスワードPOST
+	're-build-mark'	=> 1,	// リビルド済マーク
 ];
 /*
     アプリケーションデバッグ情報
@@ -217,7 +219,7 @@ function debug_log($lvl,...$items) {
 			} else {
 	            $dmp = "";
 				foreach($obj as $key => $val) {
-					if(array_key_exists($key,EXCLUSION)) continue;      // not dump element check
+					if(array_key_exists($key,EXCLUSION) && EXCLUSION[$key]) continue;      // not dump element check
 					$dmp .= str_repeat(' ',$indent*2) . "[{$key}] = ";
 					if(gettype($val)==='object') {
 						$clsnm = get_class($val);
