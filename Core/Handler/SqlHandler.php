@@ -149,7 +149,7 @@ private function executeSQL($build_sql,$logs = false) {
 			$sql = "{$sql} {$expr}";
 		}
 	}
-	$sql = trim($sql).";";
+	$sql = trim($sql).';';
 	if($logs) {		// DEBUGGING LOG for SQL Execute
     	$dbg = debug_backtrace();
     	$func = $dbg[1]['function'];
