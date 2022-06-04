@@ -508,7 +508,7 @@ public function NearRecordFinder($primary,$cond,$filter=NULL,$sort=NULL) {
 //	and except NOT NULL COLUMN and RECORD count Limited
 protected function tableAggregate($cond,$groups,$calc = NULL,$filter=NULL,$sortby = [],$limit=0) {
     $data = array();
-	$sql = $this->dbDriver->getGroupCalcList($cond,$groups,$calc,$sortby,$limit);
+	$this->dbDriver->getGroupCalcList($cond,$groups,$calc,$sortby,$limit);
     while (($fields = $this->dbDriver->fetchDB())) {
 		$data[] = $fields;
     }

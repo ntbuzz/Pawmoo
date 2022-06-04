@@ -28,7 +28,6 @@ class AppStyle {
         ],
 
     ];
-    const BoolConst = [ 'yes' => TRUE, 'no' => FALSE, 'true' => TRUE, 'false' => FALSE, 'on' => TRUE, 'off' => FALSE ];
     const FunctionList = array(
         '@'    => [
             'compact'   => [ 'cmd_modeset','do_min' ],
@@ -53,6 +52,12 @@ class AppStyle {
     private $repVARS;           // Replace Variable
     private $importFiles;       // import-DEBUG
     private $myname;
+	private $debug_mode = false;	// for debug
+	const DebugModeSet = [
+            'do_min' => false,		// Is Compact Output?
+            'do_com' => true,		// Is Import Message?
+            'do_msg' => true,		// Is Comment Output?
+	];
 //==============================================================================
 // Constructor
     function __construct($appname, $app_uri, $modname, $filename, $ext) {
@@ -77,7 +82,7 @@ class AppStyle {
             'SERVER' => $_SERVER['SERVER_NAME'],
             'SYSROOT' => $sysRoot,
             'APPROOT' => $appRoot,
-            'appName' => $appname,
+            'APPNAME' => $appname,
             'controller' => strtolower($this->ModuleName),
             'filename' => $filename,
             'extension' => $ext,
@@ -88,6 +93,7 @@ class AppStyle {
         } else {
             $this->repVARS = $myVARS;
         }
+		$this->debug_mode = !is_bool_false(MySession::getSysData('debugger'));
     }
 //==============================================================================
 // Search resource Folder, Module, Application, Framework
@@ -115,9 +121,15 @@ public function ViewHeader() {
 public function ViewStyle($file_name) {
     $temlatelist = $this->get_exists_files('template.mss');
     list($filename,$ext) = extract_base_name($file_name);
-    $this->do_min = ($ext == 'min');           // Is Compact Output?
-    $this->do_msg = TRUE ;                     // Is Import Message?
-    $this->do_com = TRUE ;                     // Is Comment Output?
+	if($this->debug_mode === false) {
+		$this->do_min = ($ext == 'min');           // Is Compact Output?
+		$this->do_msg = false;                     // Is Import Message?
+		$this->do_com = true;                      // Is Comment Output?
+	} else {	// for debug-mode setup
+		foreach(self::DebugModeSet as $mode => $val) {
+			$this->$mode = $val;
+		}
+	}
     $this->importFiles = [];
     // Processing Template Style
     if($this->section_styles($temlatelist, $filename) === FALSE) {
@@ -201,10 +213,13 @@ public function ViewStyle($file_name) {
             $tag = mb_substr($key,1);      // 先頭文字を削除
             $func = self::FunctionList[$top_char];
             if(is_array($func)) {       // サブコマンドテーブルがある
-                if(array_key_exists($tag,$func)) {
-                    $def_func = $func[$tag];
+				$dbg_tag = (substr($tag,0,1) === '@');
+				$cmd_tag = ($dbg_tag) ? substr($tag,1):$tag;
+                if(array_key_exists($cmd_tag,$func)) {
+                    $def_func = $func[$cmd_tag];
                     // 配列ならパラメータ要素を取出す
-                    list($cmd,$param) = (is_array($def_func)) ? $def_func:[$def_func,'']; 
+                    list($cmd,$param) = (is_array($def_func)) ? $def_func:[$def_func,''];
+					if($dbg_tag) $param = "@{$param}";
                     if((method_exists($this, $cmd))) {
                         $this->$cmd($secParam,$param,$sec);
                     } else debug_log(DBMSG_RESOURCE,['+++ Method Not Found'=>$cmd]);
@@ -235,8 +250,12 @@ public function ViewStyle($file_name) {
 // compact/comment/message Command
 // パラメータはプロパティ変数名
     private function cmd_modeset($secParam, $param,$sec) {
-        $val = strtolower($sec);                        // 設定値を取り出す
-        $this->$param = self::BoolConst[$val];            // 指定プロパティ変数にセット
+        $mode = !is_bool_false(strtolower($sec));
+		if(substr($param,0,1) === '@' && $this->debug_mode) {
+			$param = substr($param,1);
+			$mode = self::DebugModeSet[$param];
+		}
+        $this->$param = $mode;            // 指定プロパティ変数にセット
     }
 //------------------------------------------------------------------------------
 // jquery Command

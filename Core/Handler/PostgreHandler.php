@@ -6,7 +6,7 @@
 //==============================================================================
 //	PostgreSQL用の抽象メソッドを実装する
 class PostgreHandler extends SQLHandler {
-	protected $LIKE_opr = 'LIKE';		// 大文字小文字の無視比較
+	protected $LIKE_OPR = ['%'=>['LIKE','%'],'$'=>['ILIKE','%']];
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table,$primary,$db=NULL) {
@@ -68,8 +68,7 @@ public function doQuery($sql) {
 		debug_log(DBMSG_DIE,[
 			"ERROR" => pg_result_error($res1),
 			"SQL" => $sql,
-			"COND" => $this->LastCond,
-			"BUILD" => $this->LastBuild,
+			"BUILD-COND" => $this->LastBuild,
 			'QUERY失敗' => pg_last_error(),
 			'PRIMARY' => $this->updatePrimary,
 		]);
@@ -107,8 +106,6 @@ private function safe_convert($row,$func) {
 			"{$func} CONVERT失敗" => pg_result_status($res1),	// pg_last_error(),
 			"ROW" => $row,
 		]);
-		$id = $row[$this->Primary];
-		echo "**** PG_CONV:ERROR({$id})\n";
 		$aa = $this->sql_safe_convert($row);	// 自力で書き込み型変換
 	}
 	return $aa;

@@ -205,6 +205,7 @@ if($controllerInstance->is_authorised($exemethod)) {
     // Controller Method Dispacher
     $controllerInstance->ActionDispatch($exemethod);
 }
+LangUI::LangDebug();
 debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
 	-1 => "#Closing",
 //    "CLASS-MANAGER" => ClassManager::DumpObject(),

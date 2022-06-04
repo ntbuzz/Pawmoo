@@ -196,7 +196,7 @@ public function ViewTemplate($name,$vars = []) {
         if(is_scalar($arr)) return $arr;
         // analyze IF-SELECTOR and EXPAND KEY
         $if_selector = function($sec,$key) use(&$vars) {
-            if($key[0]==='&') {
+            if(mb_substr($key,0,1)==='&') {
                 $tag = mb_substr($key,1);
                 $sec = $this->expand_SectionVar($sec,$vars,TRUE);
 				if(method_exists($this->Helper,$tag)) {
@@ -234,7 +234,7 @@ public function ViewTemplate($name,$vars = []) {
         };
         $wd = [];       // re-build array
         foreach($arr as $key => $val) {
-            if($key[0]==='?') {
+            if(mb_substr($key,0,1)==='?') {
                 $ret = $if_selector($val,mb_substr($key,1));
 				$ret2 = (is_scalar($ret)) ? [ $ret ] : $this->array_if_selector($ret, $vars);
 				foreach($ret2 as $kk => $vv) {
@@ -303,6 +303,7 @@ public function ViewTemplate($name,$vars = []) {
     // TAG string SEPARATE
     protected function tag_Separate($tag,$vars) {
         $tag = $this->expand_Strings(tag_body_name($tag),$vars);
+        if(empty($tag)) return array('div',[]); // empty tag
         $attrList = [];
         if($tag[0]==='<') return array($tag,$attrList); // html tag will be not separate
         // allow multi attribute, and separater not space
@@ -329,6 +330,12 @@ public function ViewTemplate($name,$vars = []) {
 //==============================================================================
 // Analyzed Section, and Dispatch Command method
     protected function subsec_separate($section,$attrList,$vars,$all_item=TRUE) {
+		$attr_set = function($key,$val) use(&$attrList) {
+            if(is_array($val)) $val = implode('',$val);
+            if(isset($attrList[$key])) {
+                if(!empty($val)) $attrList[$key] .= " {$val}";
+            } else $attrList[$key] = $val;
+		};
         $subsec = [];
         if(is_scalar($section)) {
             $innerText = array_to_text($this->expand_Strings($section,$vars));
@@ -341,13 +348,14 @@ public function ViewTemplate($name,$vars = []) {
 							// separate attribute
 							$p = '/^([a-zA-Z][a-zA-Z\-]+[^\\\]):(.*)$/';
 							if(preg_match($p,$sec,$m) === 1) {
-								$attrList[$m[1]] = ($m[2]==='') ? NULL : trim($m[2],"\"'");   // quote-char trim
+                                $v = (empty($m[2]))?NULL:trim($m[2],"\"'");   // quote-char trim
+								$attr_set($m[1],$v);
 							} else $innerText .= $sec;
                         } else $subsec[] = $sec;
                     } else {
                         $token = $this->expand_Strings(tag_body_name($token),$vars);
 						if($all_item && preg_match('/^[a-zA-Z][a-zA-Z\-]+$/',$token)) {	// attr-name
-							$attrList[$token] = $sec;		// empty sec is single attr
+							$attr_set($token,$sec);		// empty sec is single attr
                         } else {
                             set_array_key_unique($subsec,$token,$sec);
                         }
@@ -368,8 +376,8 @@ public function ViewTemplate($name,$vars = []) {
         if(!empty($attrs)) {
             ksort($attrs);
             foreach($attrs as $name => $val) {
-				if($val === [] || $val === NULL) $attr .= " {$name}"; 
-				else {
+				if($val === NULL) $attr .= " {$name}"; 
+				else if(!empty($val)) {
 					$str = (is_array($val)) ? implode("",$val) :$val;
 					$str = $this->expand_Strings($str,$vars);
 					$quote = mb_substr($str,0,1).mb_substr($str,-1);
@@ -781,14 +789,16 @@ public function ViewTemplate($name,$vars = []) {
     private function cmd_select($tag,$attrs,$sec,$vars) {
         if(!is_array($sec)) return;     // not allow scalar value
         list($attrs,$text,$sec) = $this->subsec_separate($sec,$attrs,$vars);
+		$default_opt = $this->expand_Strings(attr_extract_element($attrs,'data-option'),$vars);
         $attr = $this->gen_Attrs($attrs,$vars);
         list($opt_key, $opt_val) = array_first_item($sec);
 		if(mb_substr($opt_key,0,1)==='@') $opt_key = mb_substr($opt_key,1);
         $sel_item = (is_numeric($opt_key)) ? intval($opt_key) : $this->expand_Strings($opt_key,$vars);
         $opt_val = array_flat_reduce($this->expand_SectionVar($opt_val,$vars));
         echo "<{$tag}{$attr}>\n";
+		if($default_opt !== '') echo  "<OPTION value=''>{$default_opt}</OPTION>\n";
 		foreach($opt_val as $opt => $val) {
-			$sel = ($val == $sel_item) ? ' selected':'';	// allow dirty compare
+			$sel = ($val == $sel_item) ? ' selected':'';	// dirty compare
 			echo "<OPTION value='{$val}'{$sel}>{$opt}</OPTION>\n";
 		}
         echo "</{$tag}>\n";

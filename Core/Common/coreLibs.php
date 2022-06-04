@@ -135,7 +135,9 @@ function page_response($app_page,$msg_array) {
             break;
         }
     }
-	require_once('Core/Template/View/debugbar.php');
+	if(!is_bool_false(MySession::getSysData('debugger'))) {
+		require_once('Core/Template/View/debugbar.php');
+	}
 //    exit;
 }
 //==============================================================================
@@ -289,13 +291,13 @@ function id_relation_name($str) {
 // SQL Compare operator separate
 function keystr_opr($str) {
     $opr_set = ['=='=>NULL, '<>'=>NULL, '>='=>NULL, '<='=>NULL, '=>'=>'>=', '=<'=>'<=', '!='=>'<>',
-                '='=>NULL, '>'=>NULL, '<'=>NULL, '@'=>NULL, '%'=>NULL ];
+                '='=>NULL, '>'=>NULL, '<'=>NULL, '@'=>NULL, '%'=>NULL, '$'=>NULL ];
     $str = tag_body_name($str);
     foreach([-2,-1] as $nn) {
         $opr = mb_substr($str,$nn);      // last-2char
         if(array_key_exists($opr,$opr_set)) {
             $key = mb_substr($str,0,$nn);    // exclude last 2-char
-            if(isset($opr_set[$opr])) $opr = $opr_set[$opr];    // Replace OPR string for SQL
+            if($opr_set[$opr] !== NULL) $opr = $opr_set[$opr];    // Replace OPR string for SQL
             return array($key,$opr);
         }
     }
@@ -313,7 +315,7 @@ function remove_space_comment_str($content) {
 // remove comment
 function remove_comment_str($content) {
 	$content = preg_replace('/([\r\n])+/s',"\n",                  // remove empty line
-			preg_replace('/\/\*[\s\S]*?\*\/|\s+\/\/.*|^\/\/.*/','',$content));
+			preg_replace('/\/\*[\s\S]*?\*\/|(^|[\s;]+)\/\/.*/','\1',$content));
 	return trim($content);
 }
 //==============================================================================
@@ -326,7 +328,8 @@ function re_build_array($cond) {
 				$n = count($sub);
 				if($n === 0) $values = NULL;
 				else if($n !== count($values)) {
-					$val = ($n === 1) ? array_shift($sub):$sub;
+					$sub = array_flat_reduce($sub);
+					$val = (count($sub) === 1) ? reset($sub):$sub;
 					return ['OR',[ $key => $val, "{$key}::#1" => NULL]];
 				}
 			}
@@ -375,10 +378,10 @@ function re_build_array($cond) {
 		}
 		return ($opr===NULL) ? $wd : [$opr => $wd];
 	};
-	if(isset($cond[REBUILD_MARK])) return $cond;
+	if(empty($cond) || isset($cond[REBUILD_MARK])) return $cond;
 	$rebuild = $array_map_shurink(NULL,$cond);
 	$rebuild[REBUILD_MARK] = true;		// mark re-build complete
-debug_log(DBMSG_HANDLER,["INPUT COND" => $cond,"ReBuild COND" => $rebuild]);
+//debug_log(DBMSG_HANDLER,["INPUT COND" => $cond,"ReBuild COND" => $rebuild]);
 	return $rebuild;
 }
 //==============================================================================
@@ -511,7 +514,7 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                 break;
 			// cannot use in RESOURCE (AppStyle)
             case '?': $var = mb_substr($var,1);     // Query parameter
-				$val = App::$Query[$var];          // Query[] property
+				$val = (isset(App::$Query[$var]))?App::$Query[$var]:'';          // Query[] property
                 break;
 			// cannot use in RESOURCE (AppStyle)
             case ':':                                   // Class Property
@@ -541,7 +544,7 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
 							 if($val !== '') break;	// empty will be try to POST
 					case '"':$val = App::PostElements($var);break;
 					case '~':$val = MySession::getAppData($var);break;
-					case '`':$val = MySession::getEnvIDs(PARAMS_NAME.".{$var}");break;
+					case '`':$val = MySession::getSysData($var);break;
 					}
                 }
                 break;

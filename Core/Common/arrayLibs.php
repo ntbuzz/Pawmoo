@@ -167,7 +167,7 @@ function array_keys_value($arr,$filter,$alt=[]) {
 	return $val;
 }
 //==============================================================================
-// import $filter keys from $items..., overttide latest item.
+// import $filter keys from $items..., override latest item.
 function array_filter_import($ignore,$filter,...$items) {
 	if($ignore) $filter = array_map(function($v) { return strtolower($v);},$filter);
 	$vals = array_combine($filter,array_fill(0,count($filter),NULL));
@@ -333,8 +333,8 @@ function condition_array($keyset,$keystr) {
     $and_str = str_explode(['　',' '],$keystr);
 	$and_cond = [];
     foreach($and_str as $and_val) {
-		if(mb_substr($val,0,1)==='-') {
-			$val = mb_substr($val,1);
+		if(mb_substr($and_val,0,1)==='-') {
+			$and_val = mb_substr($and_val,1);
 			$opr ='NOT';
 		} else $opr = NULL;
 		if(mb_strpos($and_val,'|')!==false) $and_val = explode('|',$and_val);

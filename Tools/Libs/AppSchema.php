@@ -126,7 +126,7 @@ protected function ResetLocation() {
 	private function doSQL($exec,$sql) {
 		if(empty($sql)) return;
 //		echo "SQL: {$sql}\n";
-		if($exec) $this->dbDriver->execSQL($sql);
+		if($exec) $this->dbDriver->doQuery($sql);
     }
 //==============================================================================
 //	データベーステーブルを作成

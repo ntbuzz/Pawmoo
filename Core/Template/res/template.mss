@@ -1,8 +1,8 @@
 // stylesheeet/javascript Template
-//
-@message => yes
-@comment => off
-//@compact => on
+// Follow of USE_DEBUGGER defined.
+@@compact => off	// compact response
+@@comment => off	// display comment
+@@message => on		// display 'import' comment
 // =====================================================
 // stylesheet SECTION
 Stylesheet => [

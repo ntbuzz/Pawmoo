@@ -163,7 +163,7 @@ public function ALink_str($lnk,$txt,$attrs=false) {
 	}
 //==============================================================================
 // Pager Buttons
-public function MakePageLinks($args) {
+public function MakePageLinks() {
 	if($this->Model->pagesize == 0) return;
 	$npage = intval(($this->Model->record_max+$this->Model->pagesize-1)/$this->Model->pagesize);
 	$pnum = $this->Model->page_num;
@@ -395,14 +395,15 @@ function DropdownMenu($arg,$menu) {
 	menu_box($menu,string_boolean($arg));
 }
 //==============================================================================
-// チェック・ラジオボタンメニュー
-//	&CheckRadioMenu(name,kind,label,count) => [ menu-array ]
-function CheckRadioMenu($param,$menu) {
-	list($name,$kind,$label,$cnt) = fix_explode([',',':'],$param,4);
+// ポップアップチェック・ラジオボタンメニュー
+//	&PopupCheckBox(name,kind,label,count,plane) => [ menu-array ]
+function PopupCheckBox($param,$menu) {
+	list($name,$kind,$label,$cnt,$plane) = fix_explode([',',':'],$param,5);
 	$kind_arr = ['checkbox'=>true,'radio'=>true];
 	if(!array_key_exists($kind,$kind_arr)) $kind = 'checkbox';
 	$label = string_boolean($label);
-	check_boxmenu($menu,$name,$kind,$label,$cnt);
+	$plane = string_boolean($plane);
+	check_boxmenu($menu,$name,$kind,$label,$cnt,$plane);
 }
 //==============================================================================
 // CSV Output for Model->Records

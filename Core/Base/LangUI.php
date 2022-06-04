@@ -44,12 +44,14 @@ public static function SwitchLangs($newlang,$newregion) {
 //    self::LangFiles('Core/Template/lang/','core');
     // アプリケーションの言語リソースパス
 	if(!empty($default)) self::LangFiles($default,static::$controllers);
-    self::LangDebug();
+//    self::LangDebug();
 	ClassManager::ChangeModelSchema();	// 生成済みモデルを全てスイッチ
 }
 //==============================================================================
 //  モジュールリソースのロード
 public static function LoadModuleResource($module) {
+	if(in_array($module,static::$controllers)) return;	// 既に読み込んでいる
+	static::$controllers[] = $module;
 	self::LoadLang(static::$LangDir,$module);
 }
 //==============================================================================
