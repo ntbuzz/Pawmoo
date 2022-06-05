@@ -372,7 +372,7 @@ public function ViewTemplate($name,$vars = []) {
     //==========================================================================
     // Convert ATTRIBUTE-LIST ARRAY to tag attribute strings
     protected function gen_Attrs($attrs,$vars) {
-        $attr = "";
+        $attr = '';
         if(!empty($attrs)) {
             ksort($attrs);
             foreach($attrs as $name => $val) {
