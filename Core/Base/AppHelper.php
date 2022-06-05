@@ -253,8 +253,9 @@ public function TableListView($header,$primary,$Records=NULL,$max=0) {
 		$max = count($Records);
 	}
 	$cnt = count($Records);
-	echo "<h3>検索結果: {$cnt}/{$max}</h3>";
-	if($max > $cnt) echo "検索結果が多すぎます。キーワードを追加して絞り込んでください.";
+	$msg = $this->_('core.FIND_RESULT');
+	echo "<h3>{$msg} {$cnt}/{$max}</h3>";
+	if($max > $cnt) echo $this->_('core.FIND_MANY');
 	echo '<div class="result_list_view fitWindow" id="sticky_header">';
 	echo "<table id='find_result_table' class='tablesorter'>\n<thead>\n";
 	echo '<tr>';

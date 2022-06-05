@@ -44,6 +44,9 @@
 	DATEFMT		=> '日付 (YYYY/mm/dd) で入力してください'
 	TIMESTAMP	=> '日時 (YYYY/mm/dd HH:nn:ss) で入力してください'
 	CAUTION		=> '警告！'
+// 検索結果表示
+	FIND_RESULT	=> 検索結果:
+	FIND_MANY	=> "検索結果が多すぎます。キーワードを追加して絞り込んでください."
 ]
 .en => [
     // for Dialog
@@ -83,6 +86,9 @@
 	DATEFMT		=> 'Input DATE (YYYY/mm/dd) format'
 	TIMESTAMP	=> 'Input TIMESTAMP (YYYY/mm/dd HH:nn:ss)'
 	CAUTION		=> 'CAUTION !'
+// 検索結果表示
+	FIND_RESULT	=> Result:
+	FIND_MANY	=> "Too Many Result. Please Resty change KEYWORD."
 ]
 // ページャーボタン表示用  for Pager Buttons
 Page=>[
