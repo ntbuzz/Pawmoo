@@ -333,18 +333,5 @@ static function setup_Login($login=NULL) {
 }
 
 }
-/*
-==============================================================================
-POST変数値の操作は App クラスへ移動
-==============================================================================
-		App::PostElements($filter)				getPostValues(...$keys)
-												getPostData($keys)
-		App::setPostElements($arr)				setPostVariables($arr)
-		App::set_if_empty($arr)					setPost_if_empty($arr)
-		App::preservReqData($envKey,...$keys)	preservReqData(,...$keys)
-		App::rollbackReqData($envKey,...$keys)	rollbackReqData(...$keys)
--------------------------
-	旧メソッド読み替えコメントは終了
-==============================================================================
-*/
+
 
