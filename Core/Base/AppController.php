@@ -226,7 +226,7 @@ public function AutoPaging($cond, $max_count = 100) {
 		foreach($pair_arrs as $pair) {
 			list($base,$save) = $pair;
 			$pcomp = (is_array($base) && is_array($save));
-			if($pcomp) $pcomp = (array_intersect($save,$base) === $base);
+			if($pcomp) $pcomp = (array_intersect_recursive($save,$base) === $base);
 			if(!$pcomp) return false;
 		}
 		return true;
