@@ -1177,7 +1177,6 @@ static::$appRoot
   MySession::ClearSession()             // セッションに保存する変数を消去(Logoutメソッド)
   MySession::getVariables($tt,...$arr)  // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から値を取得した配列で返す
   MySession::setVariables($tt,$arr)     // ENV(tt=TRUE) または REQ(tt=FALSE) 変数に値をセット
-  MySession::set_if_empty($tt,$arr)     // setVariables と同じだが、未定義キーだけを値セットする
   MySession::get_varIDs($tt,$names)     // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から識別子指定で取得する
   MySession::setAppData($val)           // 'AppData.($name)'要素として値を格納する
   MySession::getAppData($name,$rm)      // 'AppData.($name)'要素から値を取得する,$rmがTRUEなら要素を消去
