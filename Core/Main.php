@@ -42,13 +42,18 @@ list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filters,$params) = $module;
 
 // is enabled application name
-if(empty($appname) || !file_exists("app/$appname")) {
+if(empty($appname) || !is_dir("app/{$appname}/")) {
     // 404 not found page
     error_response('app-404.php',$appname,$app_uri,$module);
 }
 if($controller === 'Error') {       // ERROR PAGE
     $code = $params[0];
     error_response("page-{$code}.php",$appname,$app_uri,$module);
+}
+if(!file_exists("app/{$appname}/Config/config.php")) {
+	$req_uri = $_SERVER['HTTP_HOST'].'/'.$_SERVER['REQUEST_URI'];
+	error_log("***** Check:({$appname}) by {$req_uri}");
+    error_response('app-404.php',$appname,$app_uri,$module);
 }
 require_once("app/{$appname}/Config/config.php");
 require_once('Base/AppController.php');
@@ -126,18 +131,18 @@ $browser = client_Browser();
 MySession::set_LoginValue(['LANG'=>$lang, 'REGION'=>$region, 'BROWSER'=>$browser[0]]);
 // Load if .share folder use, common library load
 if(SHARE_FOLDER_USE) {
-	$libs = get_php_files("app/.share/common/");
+	$libs = get_php_files('app/.share/common/');
 	foreach($libs as $files) {
 		require_once $files;
 	}
 }
 // Load Application Common library
-$libs = get_php_files(App::Get_AppPath("common/"));
+$libs = get_php_files(App::Get_AppPath('common/'));
 foreach($libs as $files) {
     require_once $files;
 }
 // Load Common Locale tranlate parameter
-LangUI::construct($lang,$region,App::Get_AppPath("View/lang/"),['#common']);
+LangUI::construct($lang,$region,App::Get_AppPath('View/lang/'),['#common']);
 // Load Application MODULE files. (Controller,Model,View,Helpe)
 App::LoadModuleFiles($controller);
 $ContClass = "{$controller}Controller";
@@ -175,30 +180,30 @@ if($controllerInstance->is_authorised($exemethod)) {
     // Debugging Message
 	$life_time = MySession::$SESSION_LIFE;
     debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
-		-1 => "#Opening",
+		-1 => '#Opening',
         '#PathInfo' => [
             'SERVER'    => $_SERVER['SERVER_NAME'],
-            "DOCROOT"   => App::$DocRoot,
-            "REQ_URI"   => $_SERVER['REQUEST_URI'],
-            "REFERER"   => App::$Referer,
+            'DOCROOT'   => App::$DocRoot,
+            'REQ_URI'   => $_SERVER['REQUEST_URI'],
+            'REFERER'   => App::$Referer,
         ],
         '#DebugInfo' => [
-            "AppName"       => App::$AppName,
-            "Class"         => $ContClass,
-            "Controller"    => App::$Controller,
-            "Action"        => App::$Method,
-            "Filters"       => App::$Filters,
-            "Re-Location"	=> App::Get_RelocateURL(),
-    		"Execution"		=> App::$execURI,
+            'AppName'       => App::$AppName,
+            'Class'         => $ContClass,
+            'Controller'    => App::$Controller,
+            'Action'        => App::$Method,
+            'Filters'       => App::$Filters,
+            'Re-Location'	=> App::Get_RelocateURL(),
+    		'Execution'		=> App::$execURI,
         ],
 		'FORM' => [
-			"GET"	=> App::$Query,
-			"POST"	=> App::$Post,
+			'GET'	=> App::$Query,
+			'POST'	=> App::$Post,
 		],
-        "SESSION-ALIVE"	=> date('Y/m/d H:i:s',$life_time)." ({$life_time})",
-        "SESSION Variables" => [
-            "SESSION_ID"=> MySession::$MY_SESSION_ID,
-            "ENV"       => MySession::$EnvData,     // included App::[sysVAR]
+        'SESSION-ALIVE'	=> date('Y/m/d H:i:s',$life_time)." ({$life_time})",
+        'SESSION Variables' => [
+            'SESSION_ID'=> MySession::$MY_SESSION_ID,
+            'ENV'       => MySession::$EnvData,     // included App::[sysVAR]
         ],
         'LockDB OWNER' => LockDB::GetOwner(),
     ]);
@@ -207,10 +212,10 @@ if($controllerInstance->is_authorised($exemethod)) {
 }
 LangUI::LangDebug();
 debug_log(DBMSG_CLI|DBMSG_SYSTEM, [
-	-1 => "#Closing",
-//    "CLASS-MANAGER" => ClassManager::DumpObject(),
-    "#SessionClose" => MySession::$EnvData,     // included App::[sysVAR]
-    "Share Session" => MySession::$ShmData,
+	-1 => '#Closing',
+//    'CLASS-MANAGER' => ClassManager::DumpObject(),
+    '#SessionClose' => MySession::$EnvData,     // included App::[sysVAR]
+    'Share Session' => MySession::$ShmData,
 ]);
 sysLog::run_time(DBMSG_CLI|DBMSG_SYSTEM);
 MySession::SaveSession();
