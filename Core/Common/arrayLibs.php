@@ -18,7 +18,7 @@ if (!function_exists('array_key_first')) {
 function str_explode($delm,$string,$trim_empty = true) {
     $str_arr = (is_array($delm)) ? explode($delm[0],str_replace($delm, $delm[0], $string)) : explode($delm,$string);
 	if($trim_empty) $str_arr = array_map(function($v) { return trim($v);} , array_filter($str_arr, 'strlen'));
-    return $str_arr;
+    return array_values($str_arr);	// re-arrange index
 }
 //==============================================================================
 // fix count explode
@@ -125,6 +125,20 @@ function array_reduce_recursive($array,$callback, $init='') {
         else $init .= $callback($key,$val);
     }
     return $init;
+}
+//==============================================================================
+// array intersect recursive version from PHP Manual
+function array_intersect_recursive($arr1, $arr2) {
+	foreach($arr1 as $key => $value){
+		if (!isset($arr2[$key])){
+			unset($arr1[$key]);
+		} else if (is_array($arr1[$key])){
+			$arr1[$key] = array_intersect_recursive($arr1[$key], $arr2[$key]);
+		} else if ($arr2[$key] !== $value){
+			unset($arr1[$key]);
+		}
+	}
+	return $arr1;
 }
 //==============================================================================
 // array value concatinate to TEXT
