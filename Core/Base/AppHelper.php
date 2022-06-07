@@ -322,7 +322,7 @@ public function SelectObject($args) {
 // 'id' => identifir
 //
 public function Form($act, $attr) {
-	if ($act[0] !== '/') $act = App::Get_AppRoot($act,TRUE);
+	$act = make_hyperlink($act,$this->ModuleName);
 	$arg = '';
 	foreach($attr as $key => $val) {
 		$arg .= $key .'="' . $val . '"';
