@@ -194,6 +194,7 @@ public function doQueryBy($key,$val) {
 		foreach(array_combine($key,$val) as $k => $v) $expr[] = "(\"{$k}\"='{$v}')";
 		$where = implode(' AND ',$expr);
 	} else $where = "\"{$key}\"='{$val}'";
+	$this->LastBuild = [$key => $val];
 	$build_sql = [
 		'SELECT' => "*",
 		'FROM'	=> $this->table,
@@ -240,6 +241,7 @@ public function getMaxValueRecord($field_name) {
 		'SELECT'=> "MAX({$field_name}) as \"max_val\"",
 		'FROM'	=> $this->table,
 	];
+	$this->LastBuild = NULL;
 	$this->executeSQL($build_sql,true);
 	$row = $this->fetchDB();
 	return ($row) ? $row['max_val'] : 0;
