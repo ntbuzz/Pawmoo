@@ -114,8 +114,7 @@ function error_response($error_page,$app_name, $app_uri, $module) {
         return (gettype($a) === 'string')?strtolower($a):'';},$module);
     list($sys_root,$app_root) = $app_uri;
     require_once("Core/error/{$error_page}");
-	require_once('Core/Template/View/debugbar.php');
-//    exit;
+    exit;
 }
 //==============================================================================
 // Output Message Page
@@ -135,10 +134,7 @@ function page_response($app_page,$msg_array) {
             break;
         }
     }
-	if(!is_bool_false(MySession::getSysData('debugger'))) {
-		require_once('Core/Template/View/debugbar.php');
-	}
-//    exit;
+    exit;
 }
 //==============================================================================
 // check exist of CONTOLLER folder
@@ -601,7 +597,7 @@ function array_associate_convert($str) {
 	$arr = [];
 	foreach(explode(',',$str) as $itemval) {
 		if($itemval !== '') {
-			list($opt_text,$opt_val) = explode('=',$itemval); 
+			list($opt_text,$opt_val) = fix_explode('=',$itemval,2); 
 			$arr[$opt_text] = $opt_val;
 		}
 	}
