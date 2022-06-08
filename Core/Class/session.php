@@ -192,7 +192,7 @@ static function setAppData($names,$val) {
 	self::setEnvIDs(APPDATA_NAME.".{$names}",$val);
 }
 static function unsetAppData($names='') {
-    $key_arr = array_filter(explode('.',$names),'strlen');
+    $key_arr = str_explode('.',$names);
 	$tag = array_pop($key_arr);
 	if(empty($tag)) {
 		unset(static::$EnvData[APPDATA_NAME]);
@@ -233,7 +233,7 @@ static function setShmData($names,$val) {
 }
 //==============================================================================
 static function unsetShmData($names='') {
-    $key_arr = array_filter(explode('.',$names),'strlen');
+    $key_arr = str_explode('.',$names);
 	$tag = array_pop($key_arr);
 	if(empty($tag)) {
 		static::$ShmData = [];
@@ -264,7 +264,7 @@ static function getSysData($names) {
 static function syslog_SetData($names,$val,$append = FALSE,$resource = FALSE) {
 	$kid = ($resource) ? RESOURCE_ID : SYSLOG_ID;
 	$ee = &static::$SysData[$kid];
-	$mem_arr = array_filter(explode('.',$names),'strlen');
+	$mem_arr = str_explode('.',$names);
 	foreach($mem_arr as $key) {
 		if(!isset($ee[$key])) $ee[$key] = [];
 		$ee = &$ee[$key];

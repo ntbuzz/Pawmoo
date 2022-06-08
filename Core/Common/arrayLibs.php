@@ -14,11 +14,13 @@ if (!function_exists('array_key_first')) {
     }
 }
 //==============================================================================
-// multi delimitter explode
+// multi delimitter explode and filter empty elements by trim()
 function str_explode($delm,$string,$trim_empty = true) {
     $str_arr = (is_array($delm)) ? explode($delm[0],str_replace($delm, $delm[0], $string)) : explode($delm,$string);
-	if($trim_empty) $str_arr = array_map(function($v) { return trim($v);} , array_filter($str_arr, 'strlen'));
-    return array_values($str_arr);	// re-arrange index
+	if($trim_empty) {
+        $str_arr = array_values(array_filter(array_map('trim',$str_arr),'strlen'));
+    }
+    return $str_arr;
 }
 //==============================================================================
 // fix count explode
@@ -30,7 +32,7 @@ function fix_explode($delm,$string,$max,$pad = '') {
 //==============================================================================
 // text line split by NL char, and reverse element with trim
 function explode_reverse($delm,$text) {
-	$array = array_reverse(array_filter(explode($delm,trim($text)),'strlen'));
+	$array = array_reverse(str_explode($delm,trim($text)));
     return $array;
 }
 //==============================================================================
@@ -81,13 +83,6 @@ function strpos_of_array($str,$hayz) {
     }
     return FALSE;
 }
-//==============================================================================
-// Array depth calculation, short priority 1-row version
-function array_depth($a, $c = 0) {
-    return (is_array($a) && count($a))
-          ? max(array_map("array_depth", $a, array_fill(0, count($a), ++$c)))
-          : $c;
-  }
 //==============================================================================
 // alternative array_merge(), Overwrite existing index elements
 function array_override($a, $b) {
@@ -237,14 +232,15 @@ function array_intval_recursive($arr) {
 }
 //==============================================================================
 // convert nexting array to flat array
-function array_flat_reduce($arr) {
+function array_flat_reduce($arr,$filter=false) {
     $wx = [];
-    $reduce_array = function ($arr) use(&$reduce_array,&$wx) {
+    $reduce_array = function ($arr) use(&$reduce_array,&$wx,&$filter) {
         if(is_array($arr)) {
             foreach($arr as $key => $val) {
                 if(is_array($val)) {
                     $reduce_array($val);
-                } else if(isset($wx[$key])) {
+                } else if($filter && empty($val)) continue;
+                else if(isset($wx[$key])) {
                     $wx[] = $val;
                 } else {
                     $wx[$key] = $val;
@@ -320,7 +316,7 @@ function array_set_key_value(&$arr,$keys,$vals) {
 // get array element by structured-name
 function array_member_value($nVal,$names) {
     if(empty($names)) return $nVal;
-    $vset = (mb_strpos($names,'.') !== FALSE) ? array_filter(explode('.',$names),'strlen'):[$names];
+    $vset = (mb_strpos($names,'.') !== FALSE) ? str_explode('.',$names):[$names];
     foreach($vset as $nm) {
         if(is_array($nVal) && array_key_exists($nm,$nVal)) {
             $nVal = $nVal[$nm];
