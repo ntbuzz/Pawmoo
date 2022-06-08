@@ -42,18 +42,16 @@ list($fwroot,$approot) = $app_uri;
 list($controller,$method,$filters,$params) = $module;
 
 // is enabled application name
+clearstatcache();
 if(empty($appname) || !is_dir("app/{$appname}/")) {
+	list($host,$uri,$ref) = array_keys_value($_SERVER,['HTTP_HOST','REQUEST_URI','HTTP_REFERER']);
+	error_log("*** Apps Error:'{$appname}' by {$host}{$uri} from '{$ref}'");
     // 404 not found page
     error_response('app-404.php',$appname,$app_uri,$module);
 }
 if($controller === 'Error') {       // ERROR PAGE
     $code = $params[0];
     error_response("page-{$code}.php",$appname,$app_uri,$module);
-}
-if(!file_exists("app/{$appname}/Config/config.php")) {
-	$req_uri = $_SERVER['HTTP_HOST'].'/'.$_SERVER['REQUEST_URI'];
-	error_log("***** Check:({$appname}) by {$req_uri}");
-    error_response('app-404.php',$appname,$app_uri,$module);
 }
 require_once("app/{$appname}/Config/config.php");
 require_once('Base/AppController.php');
