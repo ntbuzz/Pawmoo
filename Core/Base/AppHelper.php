@@ -220,7 +220,7 @@ public function MakePageLinks() {
 //==============================================================================
 // Output Table List for Records
 public function MakeListTable($deftab) {
-	$sel_no = (empty($this->Model->RecData)) ? false:$this->Model->RecData[$this->Model->Primary];
+	$sel_no = array_item_value($this->Model->RecData,$this->Model->Primary,false);
 	// デバッグ情報
 	debug_log(DBMSG_VIEW,[
 		'deftab' => $deftab,
