@@ -377,7 +377,7 @@ public function ViewTemplate($name,$vars = []) {
             ksort($attrs);
             foreach($attrs as $name => $val) {
 				if($val === NULL) $attr .= " {$name}"; 
-				else if(!empty($val)) {
+				else if($val!=='' || $val!==[]) {
 					$str = (is_array($val)) ? implode("",$val) :$val;
 					$str = $this->expand_Strings($str,$vars);
 					$quote = mb_substr($str,0,1).mb_substr($str,-1);
@@ -667,7 +667,7 @@ public function ViewTemplate($name,$vars = []) {
 			$mtext = pseudo_markdown($atext,$cls);
 		} else {
 			// pre-expand for checkbox and radio/select/combobox/checkbox/textbox markdown
-			$atext = preg_replace_callback('/((?:\[[^\]]*?\]|\^(?:\.[\w\-]+)?(?:#[\w\-]+)?\[[^\]]*?\][%@:=+])\{(?:\$\{[^\}]+?\}|[^\}])+?\})/',
+			$atext = preg_replace_callback('/((?:\[[^\]]*?\]|\^(?:\.[\w\-]+)?(?:#[\w\-]+)?\[[^\]]*?\][%@:=+])\{(?:\$\{[^\}\s]+?\}|\\\}|[^\}])+?\})/',
 				function($m) use(&$vars) {
 					list($pat,$var) = $m;
 					$var = preg_replace_callback('/(\$\{[^\}]+?\})/',
