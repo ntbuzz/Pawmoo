@@ -25,7 +25,7 @@ function str_explode($delm,$string,$trim_empty = true) {
 //==============================================================================
 // fix count explode
 function fix_explode($delm,$string,$max,$pad = '') {
-	$arr = str_explode($delm,$string);
+	$arr = str_explode($delm,$string,false);
 	for($n=count($arr); $n < $max ; ++$n ) $arr[] = $pad;
     return $arr;
 }
@@ -62,9 +62,9 @@ function array_extract($arr,$n) {
 }
 //==============================================================================
 // exists item in array of KEY
-function array_item_value($arr,$key,$default=NULL) {
-    return (isset($arr[$key])) ? $arr[$key] : $default;
-}
+// function array_item_value($arr,$key,$default=NULL) {
+//     return (isset($arr[$key])) ? $arr[$key] : $default;
+// }
 //==============================================================================
 //  To compensate array, fixed count
 function array_alternative($a,$max = 0, $b = []) {
@@ -156,7 +156,9 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
 }
 //==============================================================================
 function array_items_list($arr,$sep=',',$quote='') {
+	if(!is_array($arr)) return "{$quote}{$arr}{$quote}";
     array_walk($arr,function(&$item,$key) use(&$quote) {
+		if(is_array($item)) $item = implode(',',$item);
 		if(!empty($quote) && strpos($item,$quote) !== false) $item = str_replace($quote,"\\{$quote}",$item);
 		$item = "{$key}={$quote}{$item}{$quote}"; });
     return implode($sep,$arr);
@@ -164,14 +166,18 @@ function array_items_list($arr,$sep=',',$quote='') {
 //==============================================================================
 // array filter by key,not exist key to alt[] value
 function array_keys_value($arr,$filter,$alt=[]) {
-	if(is_array($arr)) {
-		$val = array_map(function($k,$v) use(&$arr) {
-					$v = (array_key_exists($k,$arr) && ($arr[$k] !== NULL)) ? $arr[$k] : $v;
-					return is_numeric($v) ? intval($v) : $v;
-//					return array_key_exists($k,$arr) ? $arr[$k] : $v;
-					},$filter,$alt);
+	if(is_scalar($filter)) {
+		if(!is_scalar($alt)) $alt = NULL;
+		$val = (isset($arr[$filter])) ? $arr[$filter] : $alt;
 	} else {
-		$val = array_fill(0,count($filter),NULL);
+		if(is_array($arr)) {
+			$val = array_map(function($k,$v) use(&$arr) {
+						$v = (array_key_exists($k,$arr) && ($arr[$k] !== NULL)) ? $arr[$k] : $v;
+						return is_numeric($v) ? intval($v) : $v;
+						},$filter,$alt);
+		} else {
+			$val = array_fill(0,count($filter),NULL);
+		}
 	}
 	return $val;
 }
