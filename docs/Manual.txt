@@ -1505,7 +1505,7 @@ static::$appRoot
 ・配列操作
   array_alternative($a,$max = 0, $b = [])       配列 $a を $bにより $max要素数に拡張する
   array_concat_keys(&$arr,$keys)                $keys で指示されたキー名の要素を連結する
-  array_keys_value($arr,$filter.$alt)           配列内から$filterで支持されたキー名の値を配列で返す、$filterがスカラーなら戻り値もスカラー
+  array_keys_value($arr,$filter,$alt)           配列内から$filterで指示されたキー名の値を配列で返す、$filterがスカラー値なら戻り値もスカラー値
   array_first_item($arr)                        連想配列の最初の要素をキー名、値の配列で返す
   array_flat_reduce($arr,$filter)               ネストされた配列をフラットな配列に変換,$filterがTRUEなら空要素を除外
   array_intval($arr)                            配列要素にintval()を適用する
@@ -1527,7 +1527,7 @@ static::$appRoot
   strpos_of_array($str,$hayz)                   配列要素に $str が含まれれば TRUE
   text_line_array($del,$txt [,$trim])           テキストを配列に変換 $trimがTRUEなら空行削除
 
-  array_item_value(&$arr,$key,$default=NULL)    廃止 → array_keys_valueへ統合
+  array_item_value(&$arr,$key,$default=NULL)    廃止 → array_keys_valueに統合
   string_to_array($sep, $str)                   廃止 → str_explode() へ
   array_merge_combine(&$arr,$keyset,$valset)    廃止 → array_set_key_value() へ
 
