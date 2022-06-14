@@ -377,7 +377,7 @@ public function ViewTemplate($name,$vars = []) {
             ksort($attrs);
             foreach($attrs as $name => $val) {
 				if($val === NULL) $attr .= " {$name}"; 
-				else if($val!=='' || $val!==[]) {
+				else if($val!=='' && $val!==[]) {
 					$str = (is_array($val)) ? implode("",$val) :$val;
 					$str = $this->expand_Strings($str,$vars);
 					$quote = mb_substr($str,0,1).mb_substr($str,-1);
