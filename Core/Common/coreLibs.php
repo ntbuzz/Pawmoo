@@ -333,6 +333,7 @@ function re_build_array($cond) {
 		};
 		$array_merged = function(&$arr,$val) {
 			foreach($val as $kk => $vv) {
+				if($vv === []) continue;
 				$k = array_key_unique($kk,$arr);
 				$arr[$k] = $vv;
 			}
