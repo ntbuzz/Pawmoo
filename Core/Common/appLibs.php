@@ -237,7 +237,11 @@ function passwd_random($n = 8) {
 //				ネストするときは3次元連想配列
 //				メニューキー名 => [	グループ名 => [ キー名 => 値, ... ]	]
 // label		TRUE: グループ名をタイトルとして表示
-function menu_box($menu,$label=true) {
+function dropdown_menu($menu,$label=true) {
+	if(!is_array($menu)) {
+		echo "<p class='alert'>MENU NOT FOUND</p>";
+		return;
+	}
 	// flexリストを出力
 	$select_list = function($title,$list,$label) use(&$select_list) {
 		echo "<ul>\n";
@@ -276,7 +280,7 @@ function menu_box($menu,$label=true) {
 // label_val	false | true(ラベル名を値に使う)
 // split		分割個数 0=分割なし
 // plane		false | true(タブを使わずプレーン表示)
-function check_boxmenu($menu,$item_name='',$item_type='checkbox',$label_val=false,$split=0,$plane=false) {
+function checkbox_menu($menu,$item_name='',$item_type='checkbox',$label_val=false,$split=0,$plane=false) {
 	if(!is_array($menu)) {
 		echo "<p class='alert'>MENU NOT FOUND</p>";
 		return;

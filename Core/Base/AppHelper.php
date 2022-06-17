@@ -393,7 +393,7 @@ public static function define_array_object($arr,$name) {
 // ドロップダウンメニュー
 //	&DropdownMenu(true|false) => [ menu-array ]
 function DropdownMenu($arg,$menu) {
-	menu_box($menu,string_boolean($arg));
+	dropdown_menu($menu,string_boolean($arg));
 }
 //==============================================================================
 // ポップアップチェック・ラジオボタンメニュー
@@ -404,7 +404,7 @@ function PopupCheckBox($param,$menu) {
 	if(!array_key_exists($kind,$kind_arr)) $kind = 'checkbox';
 	$label = string_boolean($label);
 	$plane = string_boolean($plane);
-	check_boxmenu($menu,$name,$kind,$label,$cnt,$plane);
+	checkbox_menu($menu,$name,$kind,$label,$cnt,$plane);
 }
 //==============================================================================
 // CSV Output for Model->Records
