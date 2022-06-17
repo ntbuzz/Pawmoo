@@ -163,7 +163,7 @@ private function executeSQL($build_sql,$logs = false) {
 		$lst = array_reverse(array_slice($lst,0,2));
 		$func = implode('>',$lst);
 */
-		debug_log(DBMSG_HANDLER,["{$func} @ {$this->table}"=>['COND'=>$this->LastBuild,'CMD'=>$build_sql,'SQL'=>$sql]]);
+		debug_log(DBMSG_HANDLER,["{$func} @ {$this->raw_table}"=>['COND'=>$this->LastBuild,'CMD'=>$build_sql,'SQL'=>$sql]]);
 	}
 	$this->doQuery($sql);
 }
@@ -503,11 +503,11 @@ private function sql_sortby($sortby,$table=NULL) {
 						list($k,$v) = array_first_item($val);
 						if(is_array($v)) {
 							$sub = array_filter(array_flat_reduce($v),function($v) { return $v!==NULL;});
-							if(count($sub) > 1) {
+							$n = count($sub);
+							if($n === 0) $val = [ $k => NULL ];
+							else {
+								if($n === 1) $sub = reset($sub);
 								$val = ['OR'=>[ $k => $sub, "{$k}::#1" => NULL]];
-							} else {
-								$sub = reset($sub);		// empty array is FALSE
-								$val = [ $k => (($sub===false) ? NULL : $sub) ];
 							}
 						}
 						$rel_defs = $this->relations[$key];
