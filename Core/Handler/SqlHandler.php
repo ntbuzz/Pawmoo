@@ -502,13 +502,12 @@ private function sql_sortby($sortby,$table=NULL) {
 						// compare array
 						list($k,$v) = array_first_item($val);
 						if(is_array($v)) {
-							$sub = array_filter($v,function($v) { return $v!==NULL;});
-							$n = count($sub);
-							if($n === 0) $val = [ $k => NULL ];
-							else if($n !== count($v)) {
-								$sub = array_flat_reduce($sub);
-								if(count($sub) === 1) $sub = reset($sub);
+							$sub = array_filter(array_flat_reduce($v),function($v) { return $v!==NULL;});
+							if(count($sub) > 1) {
 								$val = ['OR'=>[ $k => $sub, "{$k}::#1" => NULL]];
+							} else {
+								$sub = reset($sub);		// empty array is FALSE
+								$val = [ $k => (($sub===false) ? NULL : $sub) ];
 							}
 						}
 						$rel_defs = $this->relations[$key];
