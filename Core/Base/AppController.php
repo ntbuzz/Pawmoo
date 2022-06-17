@@ -249,13 +249,12 @@ public function AutoPaging($cond, $max_count = 100) {
 	if($size === 0) $size = $max_count;
 	if($size !== intval($sSize)) $num = 1;	// different size must be jump to Page-1
 	$cnt = $this->Model->getCount($cond);
-	if($cnt < $size )  $Page = NULL;	// no-NEED Paging
-	else {
+	if($cnt >= $size )  {
 		$last = ($num - 1) * $size;		// check LAST-Page#
 		if($last  > $cnt) $num = 1;
 		App::ChangeParams([$num,0]);
 		$this->Model->SetPage($size,$num);
-	}
+	} // else $Page = NULL;	// no-NEED Paging
 	MySession::setPagingIDs('Size',$size);
 	MySession::setPagingIDs('Setup',$Page);
 	return $cond;
