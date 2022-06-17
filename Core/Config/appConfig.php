@@ -32,15 +32,7 @@ if(php_sapi_name() === 'cli') {
 } else {
 	define('CLI_DEBUG',FALSE);
 }
-// // argument of MySession
-// define('S_ENV',TRUE);		// App::$EnvData
-// define('S_REQ',FALSE);		// App::$ReqData
-
-// define('SECTION_TOKEN','<@&+*%-${[');
-
-// define('SESSION_PARAMS_CLEAR',	01);
-// define('SESSION_LIFE_LIMIT',	02);
-
+// SESSION ENV CONTROL
 define('SESSION_ENV_NOP',			0b0000);
 define('SESSION_ENV_UNSET_PARAMS',	0b0001);
 define('SESSION_ENV_LIFE_LIMIT',	0b0010);
