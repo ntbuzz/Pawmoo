@@ -163,7 +163,7 @@ private function executeSQL($build_sql,$logs = false) {
 		$lst = array_reverse(array_slice($lst,0,2));
 		$func = implode('>',$lst);
 */
-		debug_log(DBMSG_HANDLER,[$func=>['COND'=>$this->LastBuild,'CMD'=>$build_sql,'SQL'=>$sql]]);
+		debug_log(DBMSG_HANDLER,["{$func} @ {$this->table}"=>['COND'=>$this->LastBuild,'CMD'=>$build_sql,'SQL'=>$sql]]);
 	}
 	$this->doQuery($sql);
 }
@@ -499,6 +499,18 @@ private function sql_sortby($sortby,$table=NULL) {
 					}
 				} else if($op === '@') {	// SUBQUERY op
 					if(array_key_exists($key,$this->relations)) {		// check exists relations
+						// compare array
+						list($k,$v) = array_first_item($val);
+						if(is_array($v)) {
+							$sub = array_filter($v,function($v) { return $v!==NULL;});
+							$n = count($sub);
+							if($n === 0) $val = [ $k => NULL ];
+							else if($n !== count($v)) {
+								$sub = array_flat_reduce($sub);
+								if(count($sub) === 1) $sub = reset($sub);
+								$val = ['OR'=>[ $k => $sub, "{$k}::#1" => NULL]];
+							}
+						}
 						$rel_defs = $this->relations[$key];
 						list($cond_fn,$op) = keystr_opr(array_key_first($val));
 						// V.2 New-Relations
