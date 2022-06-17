@@ -220,7 +220,7 @@ public function MakePageLinks() {
 //==============================================================================
 // Output Table List for Records
 public function MakeListTable($deftab) {
-	$sel_no = (empty($this->Model->RecData)) ? false:$this->Model->RecData[$this->Model->Primary];
+	$sel_no = array_keys_value($this->Model->RecData,$this->Model->Primary,false);
 	// デバッグ情報
 	debug_log(DBMSG_VIEW,[
 		'deftab' => $deftab,
@@ -253,8 +253,9 @@ public function TableListView($header,$primary,$Records=NULL,$max=0) {
 		$max = count($Records);
 	}
 	$cnt = count($Records);
-	echo "<h3>検索結果: {$cnt}/{$max}</h3>";
-	if($max > $cnt) echo "検索結果が多すぎます。キーワードを追加して絞り込んでください.";
+	$msg = $this->_('core.FIND_RESULT');
+	echo "<h3>{$msg} {$cnt}/{$max}</h3>";
+	if($max > $cnt) echo $this->_('core.FIND_MANY');
 	echo '<div class="result_list_view fitWindow" id="sticky_header">';
 	echo "<table id='find_result_table' class='tablesorter'>\n<thead>\n";
 	echo '<tr>';
@@ -321,7 +322,7 @@ public function SelectObject($args) {
 // 'id' => identifir
 //
 public function Form($act, $attr) {
-	if ($act[0] !== '/') $act = App::Get_AppRoot($act,TRUE);
+	$act = make_hyperlink($act,$this->ModuleName);
 	$arg = '';
 	foreach($attr as $key => $val) {
 		$arg .= $key .'="' . $val . '"';
@@ -392,7 +393,7 @@ public static function define_array_object($arr,$name) {
 // ドロップダウンメニュー
 //	&DropdownMenu(true|false) => [ menu-array ]
 function DropdownMenu($arg,$menu) {
-	menu_box($menu,string_boolean($arg));
+	dropdown_menu($menu,string_boolean($arg));
 }
 //==============================================================================
 // ポップアップチェック・ラジオボタンメニュー
@@ -403,7 +404,7 @@ function PopupCheckBox($param,$menu) {
 	if(!array_key_exists($kind,$kind_arr)) $kind = 'checkbox';
 	$label = string_boolean($label);
 	$plane = string_boolean($plane);
-	check_boxmenu($menu,$name,$kind,$label,$cnt,$plane);
+	checkbox_menu($menu,$name,$kind,$label,$cnt,$plane);
 }
 //==============================================================================
 // CSV Output for Model->Records

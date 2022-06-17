@@ -142,7 +142,7 @@ public function fetch_locale() {
 //==============================================================================
 // execSQL: Logging SQL, and execute SQL
 private function executeSQL($build_sql,$logs = false) {
-	$sql = "";
+	$sql = '';
 	foreach($build_sql as $cmd => $val) {
 		if($val !== NULL) {
 			$expr = (is_int($cmd)) ? $val : "{$cmd} {$val}";
@@ -153,7 +153,17 @@ private function executeSQL($build_sql,$logs = false) {
 	if($logs) {		// DEBUGGING LOG for SQL Execute
     	$dbg = debug_backtrace();
     	$func = $dbg[1]['function'];
-		debug_log(DBMSG_HANDLER,["SQL: {$func} @ {$this->table}"=> [ 'COND'=>$this->LastBuild,'CMD'=>$build_sql,'SQL'=>$sql]]);
+//		全トレースを出力するなら以下を有効化
+/*
+		$lst = array_map(function($v) {return [$v['function'],$v['line']];},$dbg);
+		list($self,$ln) = array_shift($lst);
+		$lst = array_map(function($v) use(&$ln) {
+			$ret = "{$v[0]}({$ln})";
+			$ln = $v[1];return $ret;},$lst);
+		$lst = array_reverse(array_slice($lst,0,2));
+		$func = implode('>',$lst);
+*/
+		debug_log(DBMSG_HANDLER,["{$func} @ {$this->raw_table}"=>['COND'=>$this->LastBuild,'CMD'=>$build_sql,'SQL'=>$sql]]);
 	}
 	$this->doQuery($sql);
 }
@@ -194,8 +204,9 @@ public function doQueryBy($key,$val) {
 		foreach(array_combine($key,$val) as $k => $v) $expr[] = "(\"{$k}\"='{$v}')";
 		$where = implode(' AND ',$expr);
 	} else $where = "\"{$key}\"='{$val}'";
+	$this->LastBuild = [$key => $val];
 	$build_sql = [
-		'SELECT' => "*",
+		'SELECT' => '*',
 		'FROM'	=> $this->table,
 		'WHERE'	=> $where,
 	];
@@ -208,13 +219,13 @@ public function doQueryBy($key,$val) {
 //==============================================================================
 public function getRecordCount($cond) {
 	$build_sql = [
-		'SELECT' => "count(*) as \"total\"",
+		'SELECT' => 'count(*) as "total"',
 		'FROM'	=> $this->table,
 		'WHERE'	=> $this->sql_buildWHERE($cond,$this->table),
 	];
 	$this->executeSQL($build_sql);
 	$field = $this->fetch_array();
-	return ($field) ? intval($field["total"]) : 0;
+	return ($field) ? intval($field['total']) : 0;
 }
 //==============================================================================
 //	getRecordValue($cond) 
@@ -222,10 +233,10 @@ public function getRecordCount($cond) {
 //==============================================================================
 public function getRecordValue($cond) {
 	$build_sql = [
-		'SELECT'=> "{$this->table}.*",
+		'SELECT'=> '*',
 		'FROM'	=> $this->table,
 		'WHERE'	=> $this->sql_buildWHERE($cond,$this->table),
-		($this->is_offset) ? "offset 0 limit 1" : "limit 0,1",
+		($this->is_offset) ? 'offset 0 limit 1' : 'limit 0,1',
 	];
 	$this->executeSQL($build_sql,true);
 	$row = $this->fetchDB();
@@ -240,6 +251,7 @@ public function getMaxValueRecord($field_name) {
 		'SELECT'=> "MAX({$field_name}) as \"max_val\"",
 		'FROM'	=> $this->table,
 	];
+	$this->LastBuild = NULL;
 	$this->executeSQL($build_sql,true);
 	$row = $this->fetchDB();
 	return ($row) ? $row['max_val'] : 0;
@@ -281,16 +293,16 @@ public function findRecord($cond,$sort = [],$raw=false) {
 	$table = ($raw) ? $this->raw_table : $this->table;
 	// get record count
 	$build_sql = [
-		'SELECT'	=> "count(*) as \"total\"",
+		'SELECT'	=> 'count(*) as "total"',
 		'FROM'		=> $table,
 		'WHERE'		=> $this->sql_buildWHERE($cond,$table),
 		'ORDER BY'	=> NULL,
 	];
 	$this->executeSQL($build_sql);
 	$field = $this->fetch_array();
-	$this->recordMax = ($field) ? $field["total"] : 0;
+	$this->recordMax = ($field) ? $field['total'] : 0;
 	// re-make get all fields
-	$build_sql['SELECT']   = "{$table}.*";
+	$build_sql['SELECT']   = '*';
 	$build_sql['ORDER BY'] = $this->sql_sortby($sort);
 	if($this->limitrec > 0) {
 		if($this->is_offset) {
@@ -307,12 +319,12 @@ public function findRecord($cond,$sort = [],$raw=false) {
 //==============================================================================
 public function firstRecord($cond,$sort) {
 	$build_sql = [
-		'SELECT'	=> "{$this->table}.*",
+		'SELECT'	=> '*',
 		'FROM'		=> $this->table,
 		'WHERE'		=> $this->sql_buildWHERE($cond,$this->table),
 		'ORDER BY'	=> $this->sql_sortby($sort),
 	];
-	$build_sql[] = "limit 1";
+	$build_sql[] = 'limit 1';
 	$this->executeSQL($build_sql,true);
 	$row = $this->fetchDB();
 	return ($row === FALSE) ? FALSE:$row;
@@ -385,7 +397,7 @@ private function sql_sortby($sortby,$table=NULL) {
 	if(is_scalar($sortby)) $sortby = [ $sortby => SORTBY_ASCEND];
 	$col = [];
 	foreach($sortby as $column => $seq) {
-		$order = ($seq === SORTBY_DESCEND) ? "desc" : "asc";
+		$order = ($seq === SORTBY_DESCEND) ? 'desc' : 'asc';
 		$field = (empty($table)) ? $column : "{$table}.\"{$column}\"";
 		$col[]= "{$field} {$order}{$this->NULL_ORDER}";
 	}
@@ -487,6 +499,17 @@ private function sql_sortby($sortby,$table=NULL) {
 					}
 				} else if($op === '@') {	// SUBQUERY op
 					if(array_key_exists($key,$this->relations)) {		// check exists relations
+						// compare array
+						list($k,$v) = array_first_item($val);
+						if(is_array($v)) {
+							$sub = array_filter(array_flat_reduce($v),function($v) { return $v!==NULL;});
+							$n = count($sub);
+							if($n === 0) $val = [ $k => NULL ];
+							else {
+								if($n === 1) $sub = reset($sub);
+								$val = ['OR'=>[ $k => $sub, "{$k}::#1" => NULL]];
+							}
+						}
 						$rel_defs = $this->relations[$key];
 						list($cond_fn,$op) = keystr_opr(array_key_first($val));
 						// V.2 New-Relations

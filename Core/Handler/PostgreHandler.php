@@ -159,11 +159,11 @@ public function upsertRecord($wh,$row) {
 	$this->updatePrimary = $aa["\"{$this->Primary}\""];
 	$sql = "INSERT INTO \"{$this->raw_table}\" ({$kstr}) VALUES ({$vstr}) ON CONFLICT ({$primary}) DO UPDATE {$set} RETURNING *;";
 	$this->doQuery($sql);
-	$a = $this->fetchDB();		// 言語alias&virtual処理を加える
 	//view が定義されていれば取り直す
 	if($this->raw_table !== $this->table) {
+		$a = $this->fetch_array();		// Primary値を取得する
 		$a = $this->doQueryBy($this->Primary,$a[$this->Primary]);
-	}
+	} else $a = $this->fetchDB();		// 言語alias&virtual処理を加える
 	return $a;
 }
 

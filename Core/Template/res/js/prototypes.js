@@ -128,24 +128,24 @@ String.prototype.includeOf = function (reg) {
 };
 //====================================================
 // charset include check for password
-String.prototype.charsetCheck = function (kind,mxlen) {
-	var len = this.length;
+String.prototype.charsetCheck = function (kind, mxlen) {
+	var str = this;
+	var len = str.length;
 	if (len == 0) return undefined;
 	if(mxlen && len < mxlen) return false;
 	for(var i=0;i<=kind.length;++i) {
 		switch(kind.charAt(i)) {
-		case 'a': str = this.replace(/[a-z]/g,'');break;
-		case 'A': str = this.replace(/[A-Z]/g,'');break;
-		case '0': str = this.replace(/[+\-]?[0-9]+/g,'');break;
-		case '!': str = this.replace(/[!#$%&=^@;:,_~\"\'\(\)\[\]\.\?\+\-\/\*]/g, ''); break;
-		case '#': str = this.replace(/^[+\-]?([1-9]\d*|0)(\.\d+)?$/, ''); break;
-		case '@': str = this.replace(/^\d{4}[\/\-]\d{2}[\/\-]\d{2}$/, ''); break;
-		case ':': str = this.replace(/^\d{4}[\/\-]\d{2}[\/\-]\d{2} \d{2}:\d{2}:\d{2}$/, ''); break;
-		default: str = this.replace(/[a-zA-Z0-9_]/g,'');
+		case 'a': str = str.replace(/[a-z]/g,'');break;
+		case 'A': str = str.replace(/[A-Z]/g,'');break;
+		case '0': str = str.replace(/[+\-]?[0-9]+/g,'');break;
+		case '!': str = str.replace(/[!#$%&=^@;:,_~\"\'\(\)\[\]\.\?\+\-\/\*]/g, ''); break;
+		case '#': str = str.replace(/^[+\-]?([1-9]\d*|0)(\.\d+)?$/, ''); break;
+		case '@': str = str.replace(/^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}$/, ''); break;
+		case ':': str = str.replace(/^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$/, ''); break;
+		default: str = str.replace(/[a-zA-Z0-9_]/g,'');
 		};
-		if(str.length == len) return false;
 	};
-	return true;
+	return (str.length === 0);		// replace all charset
 };
 //====================================================
 // element search: IE-11 is not have includes() method.

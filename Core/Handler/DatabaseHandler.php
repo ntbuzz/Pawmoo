@@ -50,7 +50,12 @@ public static function get_database_handle($handler,$connectDB=NULL) {
     if(array_key_exists($handler,static::DatabaseSpec)) {
 		$db = $config->$handler;
 		if($connectDB!==NULL) $db['database'] = $connectDB;
-        debug_log(DBMSG_HANDLER,['HANDLER' => $handler, 'HOST' => $db['host'],'DATABASE' => $db['database']]);
+        debug_log(DBMSG_HANDLER,[
+				'HANDLER' => $handler,
+				'HOST' => $db['host'],
+				'DATABASE' => $db['database'],
+				'ENVIROMENT'=>"{$config->hostname} ({$config->Enviroment})",
+			]);
         $defs = static::DatabaseSpec[$handler];
         $func = $defs['callback'];      // 呼び出し関数
         static::$have_offset = $defs['offset'];     // DBMS has OFFSET command?

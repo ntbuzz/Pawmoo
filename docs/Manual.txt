@@ -1177,7 +1177,6 @@ static::$appRoot
   MySession::ClearSession()             // セッションに保存する変数を消去(Logoutメソッド)
   MySession::getVariables($tt,...$arr)  // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から値を取得した配列で返す
   MySession::setVariables($tt,$arr)     // ENV(tt=TRUE) または REQ(tt=FALSE) 変数に値をセット
-  MySession::set_if_empty($tt,$arr)     // setVariables と同じだが、未定義キーだけを値セットする
   MySession::get_varIDs($tt,$names)     // ENV(tt=TRUE) または REQ(tt=FALSE) 変数から識別子指定で取得する
   MySession::setAppData($val)           // 'AppData.($name)'要素として値を格納する
   MySession::getAppData($name,$rm)      // 'AppData.($name)'要素から値を取得する,$rmがTRUEなら要素を消去
@@ -1506,13 +1505,11 @@ static::$appRoot
 ・配列操作
   array_alternative($a,$max = 0, $b = [])       配列 $a を $bにより $max要素数に拡張する
   array_concat_keys(&$arr,$keys)                $keys で指示されたキー名の要素を連結する
-  array_depth($a, $c = 0)                       配列のネスト数を返す
-  array_keys_value($arr,$filter)                配列内から$filterで支持されたキー名の値を配列で返す
+  array_keys_value($arr,$filter,$alt)           配列内から$filterで指示されたキー名の値を配列で返す、$filterがスカラー値なら戻り値もスカラー値
   array_first_item($arr)                        連想配列の最初の要素をキー名、値の配列で返す
-  array_flat_reduce($arr)                       ネストされた配列をフラットな配列に変換
+  array_flat_reduce($arr,$filter)               ネストされた配列をフラットな配列に変換,$filterがTRUEなら空要素を除外
   array_intval($arr)                            配列要素にintval()を適用する
   array_intval_recursive($arr)                  array_intval() の再帰版
-  array_item_value(&$arr,$key,$default=NULL)    連想配列の要素値、存在しないときは$defaultを返す
   array_key_exists_recursive($key,$arr)         array_key_exists() のネスト版
   array_key_unique($key,&$arr)                  配列内のキー名重複を回避するキー名を返す
   array_items_list($arr,$sep=',',$quote='')     配列を キー名＝値  のテキスト変換
@@ -1530,6 +1527,7 @@ static::$appRoot
   strpos_of_array($str,$hayz)                   配列要素に $str が含まれれば TRUE
   text_line_array($del,$txt [,$trim])           テキストを配列に変換 $trimがTRUEなら空行削除
 
+  array_item_value(&$arr,$key,$default=NULL)    廃止 → array_keys_valueに統合
   string_to_array($sep, $str)                   廃止 → str_explode() へ
   array_merge_combine(&$arr,$keyset,$valset)    廃止 → array_set_key_value() へ
 
@@ -1740,7 +1738,7 @@ static::$appRoot
 
     チェックリスト本体を出力するための関数が定義してあります。
 
-        function check_boxmenu(連想配列, タグ名, チェックタイプ)
+        function checkbox_menu(連想配列, タグ名, チェックタイプ)
 
     リストは連想配列名で指示します。
     ２次元連想配列にすると、タブ形式で表示できます。
@@ -1773,7 +1771,7 @@ static::$appRoot
         コールバック関数はドロップダウンメニューのHTMLを返すようにします。
         ドロップダウン用HTML生成用の関数が定義してあります。
 
-        function menu_box(連想配列, ラベル表示有無)
+        function dropdown_menu(連想配列, ラベル表示有無)
 
         ２次元以上の連想配列はネストしたドロップダウンメニューになります。
         ２段目以降の要素が連想配列の場合、キー名ごとに段組み表示となります。
@@ -1783,7 +1781,7 @@ static::$appRoot
         (セレクタ).CheckRadioBox(オブジェクト, コールバック関数)
 
         コールバック関数はチェックリストメニューのHTMLを返すようにします。
-        前述の「check_boxmenu()」関数を利用することで連想配列から簡単にリスト生成できます。
+        前述の「checkbox_menu()」関数を利用することで連想配列から簡単にリスト生成できます。
 
     セレクタはコンテナ形式で指示した対象タグIDと同じタグを指定します。
 

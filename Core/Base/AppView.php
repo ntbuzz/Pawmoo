@@ -372,12 +372,12 @@ public function ViewTemplate($name,$vars = []) {
     //==========================================================================
     // Convert ATTRIBUTE-LIST ARRAY to tag attribute strings
     protected function gen_Attrs($attrs,$vars) {
-        $attr = "";
+        $attr = '';
         if(!empty($attrs)) {
             ksort($attrs);
             foreach($attrs as $name => $val) {
 				if($val === NULL) $attr .= " {$name}"; 
-				else if(!empty($val)) {
+				else if($val!=='' && $val!==[]) {
 					$str = (is_array($val)) ? implode("",$val) :$val;
 					$str = $this->expand_Strings($str,$vars);
 					$quote = mb_substr($str,0,1).mb_substr($str,-1);
@@ -610,11 +610,11 @@ public function ViewTemplate($name,$vars = []) {
     //  FOR loop
     //  +for[repeat-list](var-name) => section
 	// 		repeat-list:	@list-name	=> $var[list-name]
-	//						v0:v1:v2:...	colon separate value
+	//						v0:v1:v2:...	colon or semicolon separate value
     private function cmd_for($tag,$attrs,$sec,$vars) {
 		list($list,$name) = array_keys_value($attrs,['name','value']);
 		if($list[0] === '@') $list = $vars[mb_substr($list,1)];
-		else $list = explode("\n",$list);
+		$list = str_explode([':',';'],$list);
 		foreach($list as $var) {
 			if(mb_substr($var,0,1) === '\\') $var = mb_substr($var,1);
 			$vars[$name] = $var;
@@ -667,7 +667,7 @@ public function ViewTemplate($name,$vars = []) {
 			$mtext = pseudo_markdown($atext,$cls);
 		} else {
 			// pre-expand for checkbox and radio/select/combobox/checkbox/textbox markdown
-			$atext = preg_replace_callback('/((?:\[[^\]]*?\]|\^(?:\.[\w\-]+)?(?:#[\w\-]+)?\[[^\]]*?\][%@:=+])\{(?:\$\{[^\}]+?\}|[^\}])+?\})/',
+			$atext = preg_replace_callback('/((?:\[[^\]]*?\]|\^(?:\.[\w\-]+)?(?:#[\w\-]+)?\[[^\]]*?\][%@:=+])\{(?:\$\{[^\}\s]+?\}|\\\}|[^\}])+?\})/',
 				function($m) use(&$vars) {
 					list($pat,$var) = $m;
 					$var = preg_replace_callback('/(\$\{[^\}]+?\})/',

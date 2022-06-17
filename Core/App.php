@@ -212,6 +212,11 @@ public static function Get_ActionRoot($path = '',$lower = FALSE) {
 	return implode('/',$URI);
 }
 //==============================================================================
+// フィルターパスのリスト
+public static function Get_FiltersList() {  
+	return implode('/',array_filter(static::$Filters,'strlen'));
+}
+//==============================================================================
 // カレントのURIを指定キーに保存する、既に保存されていれば何もしない
 public static function Save_MyURL($save_key) {  
 	$save_url = MySession::getAppData($save_key,false);
@@ -252,7 +257,7 @@ public static function GetPostElements($filter) {
 //==============================================================================
 // setPostElements と同じだが、未定義キーだけを値セットする
 // 冗長だが PHP5.6 でも動作する方法をとる
-public static function set_if_empty($arr) {
+public static function setPost_if_empty($arr) {
 	foreach($arr as $key => $val) {
 		if(!array_key_exists($key,static::$Post)) static::$Post[$key] = $val;
 	}

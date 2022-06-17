@@ -51,7 +51,7 @@ function pseudo_markdown_sub($atext) {
                 preg_match('/^(.*?)(?=[ ,\n]+)(.*)$/s',$v,$match);
                 $dd = $match[2];
                 return "<dt>{$match[1]}</dt><dd>{$dd}</dd>";
-            }, array_filter(explode(':',$m[1]),function($v) {return strlen($v)>0;}));
+            }, str_explode(':',$m[1]));
             return "<dl class='dl_list'>".implode("\n",$dtdd)."</dl>";
         }],$atext);
 //------------------------------------------------------------------------------
@@ -273,7 +273,7 @@ function pseudo_markdown_sub($atext) {
 //  select      => ^[name]%{select-val:option1=val1,option2=val2,...}
 //  combobox    => ^[name]+{select-val:option1=val1,option2=val2,...:size}
 //		Grant class & id name,description between '^' and '[', like ^class#id[name]...
-        '/(\s)\^([\w\-\.]+)?(?:#([\w\-]+))?\[([\w\-]+)?\]([@:!=#%+])\{((?:\$\{[^\}\s]+\}|\\\}|.)*?)\}/s' => function ($m) use(&$item_array) {
+        '/(\s)\^([\w\-\.]+)?(?:#([\w\-]+))?\[([\w\-]+)?\]([@:!=#%+])\{((?:\$\{[^\}\s]+\}|\\\}|[^\}])*?)\}/s' => function ($m) use(&$item_array) {
             $type = [ '@' => 'radio',':' => 'checkbox','=' => 'text','#' => 'password','!' => 'textarea','%' => 'select','+' => 'combo'];
 			list($tmp,$spc,$cls,$id,$nm,$kind,$val) = $m;
 			if(strpos($val,'\\}')) $val = str_replace('\\}','}',$val);

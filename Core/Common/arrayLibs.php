@@ -14,23 +14,25 @@ if (!function_exists('array_key_first')) {
     }
 }
 //==============================================================================
-// multi delimitter explode
+// multi delimitter explode and filter empty elements by trim()
 function str_explode($delm,$string,$trim_empty = true) {
     $str_arr = (is_array($delm)) ? explode($delm[0],str_replace($delm, $delm[0], $string)) : explode($delm,$string);
-	if($trim_empty) $str_arr = array_map(function($v) { return trim($v);} , array_filter($str_arr, 'strlen'));
+	if($trim_empty) {
+        $str_arr = array_values(array_filter(array_map('trim',$str_arr),'strlen'));
+    }
     return $str_arr;
 }
 //==============================================================================
 // fix count explode
 function fix_explode($delm,$string,$max,$pad = '') {
-	$arr = str_explode($delm,$string);
+	$arr = str_explode($delm,$string,false);
 	for($n=count($arr); $n < $max ; ++$n ) $arr[] = $pad;
     return $arr;
 }
 //==============================================================================
 // text line split by NL char, and reverse element with trim
 function explode_reverse($delm,$text) {
-	$array = array_reverse(array_filter(explode($delm,trim($text)),'strlen'));
+	$array = array_reverse(str_explode($delm,trim($text)));
     return $array;
 }
 //==============================================================================
@@ -60,9 +62,9 @@ function array_extract($arr,$n) {
 }
 //==============================================================================
 // exists item in array of KEY
-function array_item_value($arr,$key,$default=NULL) {
-    return (isset($arr[$key])) ? $arr[$key] : $default;
-}
+// function array_item_value($arr,$key,$default=NULL) {
+//     return (isset($arr[$key])) ? $arr[$key] : $default;
+// }
 //==============================================================================
 //  To compensate array, fixed count
 function array_alternative($a,$max = 0, $b = []) {
@@ -81,13 +83,6 @@ function strpos_of_array($str,$hayz) {
     }
     return FALSE;
 }
-//==============================================================================
-// Array depth calculation, short priority 1-row version
-function array_depth($a, $c = 0) {
-    return (is_array($a) && count($a))
-          ? max(array_map("array_depth", $a, array_fill(0, count($a), ++$c)))
-          : $c;
-  }
 //==============================================================================
 // alternative array_merge(), Overwrite existing index elements
 function array_override($a, $b) {
@@ -127,6 +122,20 @@ function array_reduce_recursive($array,$callback, $init='') {
     return $init;
 }
 //==============================================================================
+// array intersect recursive version from PHP Manual
+function array_intersect_recursive($arr1, $arr2) {
+	foreach($arr1 as $key => $value){
+		if (!isset($arr2[$key])){
+			unset($arr1[$key]);
+		} else if (is_array($arr1[$key])){
+			$arr1[$key] = array_intersect_recursive($arr1[$key], $arr2[$key]);
+		} else if ($arr2[$key] !== $value){
+			unset($arr1[$key]);
+		}
+	}
+	return $arr1;
+}
+//==============================================================================
 // array value concatinate to TEXT
 function array_to_text($array,$sep = "\n", $in_key = TRUE) {
     $dump_text = function ($indent, $items)  use (&$dump_text,&$sep,&$in_key)  {
@@ -147,7 +156,9 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
 }
 //==============================================================================
 function array_items_list($arr,$sep=',',$quote='') {
+	if(!is_array($arr)) return "{$quote}{$arr}{$quote}";
     array_walk($arr,function(&$item,$key) use(&$quote) {
+		if(is_array($item)) $item = implode(',',$item);
 		if(!empty($quote) && strpos($item,$quote) !== false) $item = str_replace($quote,"\\{$quote}",$item);
 		$item = "{$key}={$quote}{$item}{$quote}"; });
     return implode($sep,$arr);
@@ -155,14 +166,18 @@ function array_items_list($arr,$sep=',',$quote='') {
 //==============================================================================
 // array filter by key,not exist key to alt[] value
 function array_keys_value($arr,$filter,$alt=[]) {
-	if(is_array($arr)) {
-		$val = array_map(function($k,$v) use(&$arr) {
-					$v = (array_key_exists($k,$arr) && ($arr[$k] !== NULL)) ? $arr[$k] : $v;
-					return is_numeric($v) ? intval($v) : $v;
-//					return array_key_exists($k,$arr) ? $arr[$k] : $v;
-					},$filter,$alt);
+	if(is_scalar($filter)) {
+		if(!is_scalar($alt)) $alt = NULL;
+		$val = (isset($arr[$filter])) ? $arr[$filter] : $alt;
 	} else {
-		$val = array_fill(0,count($filter),NULL);
+		if(is_array($arr)) {
+			$val = array_map(function($k,$v) use(&$arr) {
+						$v = (array_key_exists($k,$arr) && ($arr[$k] !== NULL)) ? $arr[$k] : $v;
+						return is_numeric($v) ? intval($v) : $v;
+						},$filter,$alt);
+		} else {
+			$val = array_fill(0,count($filter),NULL);
+		}
 	}
 	return $val;
 }
@@ -223,14 +238,15 @@ function array_intval_recursive($arr) {
 }
 //==============================================================================
 // convert nexting array to flat array
-function array_flat_reduce($arr) {
+function array_flat_reduce($arr,$filter=false) {
     $wx = [];
-    $reduce_array = function ($arr) use(&$reduce_array,&$wx) {
+    $reduce_array = function ($arr) use(&$reduce_array,&$wx,&$filter) {
         if(is_array($arr)) {
             foreach($arr as $key => $val) {
                 if(is_array($val)) {
                     $reduce_array($val);
-                } else if(isset($wx[$key])) {
+                } else if($filter && empty($val)) continue;
+                else if(isset($wx[$key])) {
                     $wx[] = $val;
                 } else {
                     $wx[$key] = $val;
@@ -306,7 +322,7 @@ function array_set_key_value(&$arr,$keys,$vals) {
 // get array element by structured-name
 function array_member_value($nVal,$names) {
     if(empty($names)) return $nVal;
-    $vset = (mb_strpos($names,'.') !== FALSE) ? array_filter(explode('.',$names),'strlen'):[$names];
+    $vset = (mb_strpos($names,'.') !== FALSE) ? str_explode('.',$names):[$names];
     foreach($vset as $nm) {
         if(is_array($nVal) && array_key_exists($nm,$nVal)) {
             $nVal = $nVal[$nm];

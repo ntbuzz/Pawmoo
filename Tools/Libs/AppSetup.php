@@ -527,7 +527,7 @@ private function makeModelSchema($csv_file) {
 		if(empty($this->Handler)) $this->Handler = HANDLER;
 		if(empty($this->Model)) {
 			list($path,$fname,$ext) = extract_path_file_ext($csv_file);
-			list($fname,$opt) = explode('_',$fname);
+			list($fname,$opt) = fix_explode('_',$fname,2);
 			$this->Model = ucfirst($fname);
 		}
 		if(isset($this->Language)) {
@@ -614,7 +614,7 @@ private function makeModelField($Schema,$lang=NULL) {
 				if(array_key_exists($key,$lang)) $ln = "{$ln}\t// {$lang[$key]}{$cmm}";
 				$line[] = $ln;
 				if(is_array($rel_field)) {
-					list($pre,$rel_id) = explode('.',$rel_model);
+					list($pre,$rel_id) = fix_explode('.',$rel_model,2);
 					$line[] = $dump_schema($pre,$rel_field,$indent);
 				}
 			}

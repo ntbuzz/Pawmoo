@@ -43,7 +43,7 @@ class AppObject {
 //	set on EVENT function
 //==============================================================================
     protected function setEvent($event,$Instance,$method) {
-        list($class,$ev) = explode('.',$event);
+        list($class,$ev) = fix_explode('.',$event,2);
         if(empty($ev)) {
             $this->$event = [$Instance,$method];
         } else {
