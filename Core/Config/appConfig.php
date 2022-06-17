@@ -78,27 +78,6 @@ class appConfig {
 	public $SESSION_LIMIT	= 'tomorrow 03:00:00';
 	private $HandlerList = [ 'Postgre', 'SQLite'];
 //===============================================================
-private function database_Setup($host,$config) {
-	foreach($this->HandlerList as $val) {
-		// OS, Hostname, Common config Setuo
-		if(array_key_exists($val,$config)) {
-			$db_setup = $config[$val];
-			// Common config Parameter
-			$db_common = array_filter($db_setup,function($v) { return is_scalar($v);});
-			$db_config = array_filter($db_setup,function($v) { return is_array($v);});
-			if(!empty($db_config)) {
-				// extract [ OS, Hostname] config Parameter
-				foreach([PHP_OS, $host] as $db_key) {
-					if(array_key_exists($db_key,$db_config)) {
-						$db_common = array_override($db_common,$db_config[$db_key]);
-					}
-				}
-			}
-			$this->$val = array_override($this->$val, $db_common);
-		}
-	}
-}
-//===============================================================
 public function dumpEnviroment() {
  	sysLog::stderr(['ENV'=>$this->Enviroment]);
 	foreach($this->HandlerList as $val) {
@@ -106,22 +85,47 @@ public function dumpEnviroment() {
 	}
 }
 //===============================================================
+private function config_plane($config) {
+	// plane define
+	$plane_config = array_filter($config,function($v) { return is_scalar($v);});
+	// host => plane-define
+	foreach([PHP_OS, $this->hostname] as $db_key) {
+		if(array_key_exists($db_key,$config)) {
+			$host_config = array_filter($config[$db_key],function($v) { return is_scalar($v);});
+			$plane_config = array_override($plane_config, $host_config);
+		}
+	}
+	return $plane_config;
+}
+//===============================================================
+private function config_Setup($config) {
+	// setup plane define
+	$plane_config = $this->config_plane($config);
+	foreach($plane_config as $key => $val) $this->$key = $val;
+	// setup DB parameter
+	foreach($this->HandlerList as $val) {
+		// OS, Hostname, Common config Setuo
+		if(array_key_exists($val,$config)) {
+			// Common config Parameter
+			$db_common = $this->config_plane($config[$val]);
+			$this->$val = array_override($this->$val, $db_common);
+		}
+	}
+}
+//===============================================================
 public function Setup($spec,$enviroment) {
 	list($host) = explode('.',gethostname());		// exclude domain-name
+	$this->hostname = $host;
 	// Create HandlerList parameter by empty value
 	if(defined('HANDLER_LIST')) $this->HandlerList = HANDLER_LIST;
+	// init DBMS array
 	foreach($this->HandlerList as $val) $this->$val = [];
 	// setup Global-Config for Database
-	$this->database_Setup($host,$spec);
+	$this->config_Setup($spec);
 	// check enviroment config
 	if(array_key_exists($enviroment,$spec)) {
 		$config = $spec[$enviroment];
-		// common config property
-		$common_config = array_filter($config,function($v) { return !is_array($v);});
-		foreach($common_config as $key => $val) $this->$key = $val;
-		// database select property
-		$select_config = array_filter($config,function($v) { return is_array($v);});
-		$this->database_Setup($host,$select_config);
+		$this->config_Setup($config);
 		$this->Enviroment = $enviroment;
 	}
 }
