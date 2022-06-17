@@ -3,7 +3,7 @@
  * Object Oriented PHP MVC Framework
  *  appConfig: Framework Configuration
  */
-define('CURRENT_VERSION','2.0.11 2022-06-14');
+define('CURRENT_VERSION','2.0.12 2022-06-17');
 define('COPYTIGHT','Copyright (c) 2017 - 2022 by nTak');
 define('PLATFORM_NAME','pawmoo');
 define('SESSION_PREFIX','_minimvc_pawmoo_maps');
@@ -73,6 +73,7 @@ array(
 */
 class appConfig {
 	// default config parameter
+	public $hostname		= "";
 	public $Enviroment		= "";
 	public $USE_DEBUGGER	= false;
 	public $SESSION_LIMIT	= 'tomorrow 03:00:00';
