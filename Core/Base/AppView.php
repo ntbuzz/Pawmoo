@@ -610,11 +610,11 @@ public function ViewTemplate($name,$vars = []) {
     //  FOR loop
     //  +for[repeat-list](var-name) => section
 	// 		repeat-list:	@list-name	=> $var[list-name]
-	//						v0:v1:v2:...	colon separate value
+	//						v0:v1:v2:...	colon or semicolon separate value
     private function cmd_for($tag,$attrs,$sec,$vars) {
 		list($list,$name) = array_keys_value($attrs,['name','value']);
 		if($list[0] === '@') $list = $vars[mb_substr($list,1)];
-		else $list = explode("\n",$list);
+		$list = str_explode([':',';'],$list);
 		foreach($list as $var) {
 			if(mb_substr($var,0,1) === '\\') $var = mb_substr($var,1);
 			$vars[$name] = $var;
