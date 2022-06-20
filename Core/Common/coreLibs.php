@@ -449,7 +449,11 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
 				$p = '/(@{1,2})([^=!:#]+)(?:=([^!:#]+))?(?:!([^:#]*))?(?:\:([^#]+))?(?:#(\d+))?/';
                 preg_match($p,$var,$m);
                 $get_field_data = function($nm) use(&$recdata) {
-                    return (mb_substr($nm,0,1)==='@') ? $recdata[mb_substr($nm,1)]:$nm;
+                    if(mb_substr($nm,0,1)==='@') {
+						$fn = mb_substr($nm,1);
+						return (isset($recdata[$fn]))?$recdata[$fn]:'';
+					}
+					return $nm;
                 };
                 list($all,$raw,$fn) = $m;
 				$var = (isset($recdata[$fn])) ? $recdata[$fn] : '';     // get FIELD DATA
