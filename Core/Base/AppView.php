@@ -79,7 +79,7 @@ public function SetLayout($layoutfile) {
 public function PutLayout($layout = NULL,$vars=NULL) {
     if($layout === NULL) $layout = $this->Layout;
     if($vars === NULL) $vars = [];
-    debug_log(DBMSG_VIEW, "\$Layout = {$layout}");
+    debug_log(DBMSG_VIEW|DBMSG_NOTRACE, "\$Layout = {$layout}");
 	$this->LayoutMode = TRUE;
 	$tmplate = $this->get_TemplateName('Preface');
     if($tmplate !== NULL) {
