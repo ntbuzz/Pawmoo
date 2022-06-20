@@ -169,25 +169,26 @@ public static function LangDebug() {
 // ネストされた配列変数を取得する、要素名はピリオドで連結したキー名
 //  ex. Menu.File.OPEN  大文字小文字は区別される
 public static function get_value($mod, $id, $allow = FALSE) {
-	$array_finder2 = function($id, $arr, $allow) {
+	$array_finder2 = function($mod,$id, $arr, $allow) {
+		if(!empty($mod)) $id = "{$mod}.{$id}";
 		$rep = array_member_value($arr,$id);
 		if($rep === NULL) return false;		//見つからない
-		if(is_scalar($rep)) return lang_string_token($rep,$arr);
+		if(is_scalar($rep)) return lang_string_token($mod,$rep,$arr);
 		// 配列要素ごとに展開
-		$list = array_map(function($v) use(&$arr) {
-			$s = lang_string_token($v,$arr);
+		$list = array_map(function($v) use(&$arr,&$mod) {
+			$s = lang_string_token($mod,$v,$arr);
 			return ($s === false) ? $v : $s;
 		},$rep);
 		if($allow) return $list;
 		return reset($list);
 	};
 	//-----------------------------------------
-	if($id[0] === '.' && !empty($mod)) {        // モジュール相対参照
-		if( ($a=$array_finder2("{$mod}{$id}",static::$STRINGS,$allow)) !== FALSE) return $a;
+	if($id[0] === '.') {        // モジュール相対参照
 		$id = substr($id,1);	// . を削除
+		if( ($a=$array_finder2($mod,$id,static::$STRINGS,$allow)) !== FALSE) return $a;
 	}
 	// 絶対参照
-	if( ($a=$array_finder2($id,static::$STRINGS,$allow)) !== FALSE) return $a;
+	if( ($a=$array_finder2(null,$id,static::$STRINGS,$allow)) !== FALSE) return $a;
 	return lang_last_token($id);
 }
 //==============================================================================
@@ -206,19 +207,20 @@ function lang_last_token($str) {
 	$wd = explode('.',$str);
 	return array_pop($wd);
 }
-function lang_string_token($str,$arr) {
+function lang_string_token($mod,$str,$arr) {
 	if(is_array($str)) {
 		$v = reset($str);
 		return (is_string($v)) ? $v : false;
 	}
 	$p = '/\$\{[^\}]+?\}|(?:(?!\$\{[^\}]+?\}).+?)*/s';	// 改行を含むパターンに対応
 	preg_match_all($p,$str,$m);               // 全ての要素をトークン分離する
-	$lst = array_filter(array_map(function($v) use(&$arr) {
+	$lst = array_filter(array_map(function($v) use(&$arr,&$mod) {
 					if(substr($v,0,2) === '${') {
 						$vv = substr($v,2,strlen($v)-3);
+						if(substr($vv,0,)==='.' && !empty($mod)) $vv = "{$mod}{$vv}";
 						$rep = array_member_value($arr,$vv);
 						if($rep === NULL) return lang_last_token($vv);	//見つからない
-						return lang_string_token($rep,$arr);		// 配列禁止
+						return lang_string_token($mod,$rep,$arr);		// 配列禁止
 					}
 					return $v;
 				},$m[0]), function($v) { return $v;});	// NULL 要素を除外
