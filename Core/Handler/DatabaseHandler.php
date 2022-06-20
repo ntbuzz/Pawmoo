@@ -50,10 +50,10 @@ public static function get_database_handle($handler,$connectDB=NULL) {
     if(array_key_exists($handler,static::DatabaseSpec)) {
 		$db = $config->$handler;
 		if($connectDB!==NULL) $db['database'] = $connectDB;
-        debug_log(DBMSG_HANDLER,[
+        debug_log(DBMSG_HANDLER|DBMSG_NOTRACE,[
 				'HANDLER' => $handler,
-				'HOST' => $db['host'],
-				'DATABASE' => $db['database'],
+				'DB-HOST' => $db['host'],
+				'DB-NAME' => $db['database'],
 				'ENVIROMENT'=>"{$config->hostname} ({$config->Enviroment})",
 			]);
         $defs = static::DatabaseSpec[$handler];
