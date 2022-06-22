@@ -217,7 +217,7 @@ function lang_string_token($mod,$str,$arr) {
 	$lst = array_filter(array_map(function($v) use(&$arr,&$mod) {
 					if(substr($v,0,2) === '${') {
 						$vv = substr($v,2,strlen($v)-3);
-						if(substr($vv,0,)==='.' && !empty($mod)) $vv = "{$mod}{$vv}";
+						if(substr($vv,0,1)==='.' && !empty($mod)) $vv = "{$mod}{$vv}";
 						$rep = array_member_value($arr,$vv);
 						if($rep === NULL) return lang_last_token($vv);	//見つからない
 						return lang_string_token($mod,$rep,$arr);		// 配列禁止
