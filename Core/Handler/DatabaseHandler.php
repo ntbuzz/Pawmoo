@@ -29,12 +29,12 @@ class DatabaseHandler {
             'callback' => 'PgDatabase',
             'offset' => TRUE,
         ],
-        // // MariaDB(MySQL)データベースへの接続情報
-        // 'MySQL' => [
-        //     'datasource' => 'Database/MariaDB',
-        //     'callback' => 'MySQLDatabase',
-        //     'offset' => false,
-        // ],
+        // MariaDB(MySQL)データベースへの接続情報
+        'MySQL' => [
+            'datasource' => 'Database/MariaDB',
+            'callback' => 'MySQLDatabase',
+            'offset' => false,
+        ],
     ];
     private static $dbHandle = [];
     public static $have_offset = TRUE;
