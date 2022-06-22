@@ -421,6 +421,7 @@ public function ViewTemplate($name,$vars = []) {
         }
         $is_inline = ($tag[0] === '.');
         if($is_inline) $tag = substr($tag,1);
+        $save_currebt = $this->currentTemplate;
         if($is_inline && array_key_exists($tag,$this->inlineSection)) {
             $this->sectionAnalyze($this->inlineSection[$tag],$vars);
         } else {
@@ -440,6 +441,7 @@ public function ViewTemplate($name,$vars = []) {
 				} else echo "Bad ClassName:: {$cont}\n";
 			}
         }
+        $this->currentTemplate = $save_currebt;
     }
     //==========================================================================
     //  single tag for attribute only (for <meta>)
