@@ -122,7 +122,7 @@ retry:	do {
 				$token = $this->quote($ch);
 			} else {
 				$token = $ch;
-				if($token === '[' || $token === ']') break;
+				if($token === '[' || $token === ']' || $token === '`') break;
 				if($token === '/') {
 					$ch = mb_substr($this->current_line,0,1);	// 先読み
 					if($ch === '/') {		// 行コメント
@@ -164,6 +164,11 @@ next_wd:    if($wd == ']') return $arr;            // セクション終了な�
                     $wd=$this->get_token();         // 次のトークン
                 } while( $wd == '[');               // さらにセクション要素が続く間繰り返す
                 if($wd == ']') return $arr;         // セクション終了なら配列を返す
+            }
+            if($wd == '`') {
+				$arr[] = trim($this->current_line);
+				$this->next_line();
+				continue;
             }
             $nwd = $this->get_token();          	// 次のトークン
             if($nwd === '=>') {                     // 連想配列要素なら
