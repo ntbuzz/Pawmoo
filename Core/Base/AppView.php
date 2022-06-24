@@ -30,6 +30,7 @@ class AppView extends AppObject {
             'hidden'    => 'cmd_taginput',
             'textbox'   => 'cmd_taginput',
             'passbox'   => 'cmd_taginput',
+            'resoure'  	=> 'cmd_resoure',
             'dump'   	=> 'cmd_dump',
         ],
     );
@@ -54,6 +55,7 @@ class AppView extends AppObject {
         $helper_class = (class_exists($helper)) ? $helper:'AppHelper';
 		$this->Helper = ClassManager::Create($helper,$helper_class,$this);
         $this->Helper->Model = $this->Model;
+        $this->Resource = new AppResource($this);
     }
     //==========================================================================
     // Class Initialized
@@ -421,7 +423,7 @@ public function ViewTemplate($name,$vars = []) {
         }
         $is_inline = ($tag[0] === '.');
         if($is_inline) $tag = substr($tag,1);
-        $save_currebt = $this->currentTemplate;
+        $save_current = $this->currentTemplate;
         if($is_inline && array_key_exists($tag,$this->inlineSection)) {
             $this->sectionAnalyze($this->inlineSection[$tag],$vars);
         } else {
@@ -441,7 +443,7 @@ public function ViewTemplate($name,$vars = []) {
 				} else echo "Bad ClassName:: {$cont}\n";
 			}
         }
-        $this->currentTemplate = $save_currebt;
+        $this->currentTemplate = $save_current;
     }
     //==========================================================================
     //  single tag for attribute only (for <meta>)
@@ -531,6 +533,21 @@ public function ViewTemplate($name,$vars = []) {
     private function cmd_dump($tag,$attrs,$sec,$vars) {
         $wsec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
         sysLog::dump($wsec,false);
+    }
+    //--------------------------------------------------------------------------
+    //  gen resource
+    //  +resource => [ resource ... ]
+    private function cmd_resource($tag,$attrs,$sec,$vars) {
+        $wsec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
+		$this->Resource->SetTemplate($this->currentTemplate);
+		foreach($wsec as $key => $defs) {
+			list($filetype,$filename) = fix_explode('.',$key,2);
+			ob_start();
+			$this->Resource->SectionAnalyz($filetype,$defs);
+			$content = ob_get_contents();
+			ob_end_clean();
+			debug_log(0,['TYPE'=>$filetype,'FILE'=>$filename,'DEFS'=>$content]);
+		}
     }
     //--------------------------------------------------------------------------
     //  include external file, for CSS/JS/...
