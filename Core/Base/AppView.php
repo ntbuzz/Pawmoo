@@ -30,7 +30,7 @@ class AppView extends AppObject {
             'hidden'    => 'cmd_taginput',
             'textbox'   => 'cmd_taginput',
             'passbox'   => 'cmd_taginput',
-            'resoure'  	=> 'cmd_resoure',
+            'resource'  => 'cmd_resource',
             'dump'   	=> 'cmd_dump',
         ],
     );
@@ -539,22 +539,55 @@ public function ViewTemplate($name,$vars = []) {
     //  +resource => [ resource ... ]
     private function cmd_resource($tag,$attrs,$sec,$vars) {
         $wsec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
-		$this->Resource->SetTemplate($this->currentTemplate);
-		foreach($wsec as $key => $defs) {
-			list($filetype,$filename) = fix_explode('.',$key,2);
-			ob_start();
-			$this->Resource->SectionAnalyz($filetype,$defs);
-			$content = ob_get_contents();
-			ob_end_clean();
-			debug_log(0,['TYPE'=>$filetype,'FILE'=>$filename,'DEFS'=>$content]);
-		}
+		$this->Resource->ResourceMode($wsec);
     }
     //--------------------------------------------------------------------------
     //  include external file, for CSS/JS/...
     //  +include => [ inlclude-filename ... ]
+    //==============================================================================
     private function cmd_include($tag,$attrs,$sec,$vars) {
         $wsec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
-        App::WebInclude($wsec);
+        $flat_list = function($arr,$vars) use(&$flat_list,&$ln) {
+			$include_path = function($path) {
+				//separate query string if exist
+				list($file,$q_str) = fix_explode('?',$path,2);
+				if(!empty($q_str)) $q_str = "?{$q_str}";
+				$ext = substr($file,strrpos($file,'.') + 1);    // 拡張子を確認
+				$path = make_hyperlink($file,App::$Controller).$q_str;
+				switch($ext) {
+				case 'js':
+					echo "<script src='{$path}' charset='UTF-8'></script>\n";
+					break;
+				case 'css':
+					echo "<link rel='stylesheet' href='{$path}' />\n";
+					break;
+				case 'ico':
+					echo "<link rel='shortcut icon' href='{$path}' type='image/x-icon' />\n";
+					break;
+				default:
+				}
+			};
+            if(is_array($arr)) {
+                foreach($arr as $k => $v) {
+                    if(is_int($k)) $flat_list($v,$vars);
+                    else {
+						list($modname,$file) = fix_explode(':',$k,2);
+						if(empty($file)) {
+							$file = $modname;
+							$modname = strtolower($this->ModuleName);
+						}
+						$this->Resource->RecData = $this->Model->RecData;
+						$imp = $this->Resource->ResourceSection($modname,$file,$v,$vars);
+						$include_path($imp);
+	                }
+				}
+            } else {
+				$include_path($arr);
+            }
+        };
+		$variable = array_override_recursive($this->env_vars,$vars);
+debug_log(1,['SEC'=>$wsec,'VAR'=>$variable]);
+        $flat_list($wsec,$variable);
     }
     //--------------------------------------------------------------------------
     //  SET GLOBAL VARIABLE
