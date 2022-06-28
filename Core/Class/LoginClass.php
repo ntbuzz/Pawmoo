@@ -107,6 +107,7 @@ public function is_validLoginUser($values,$pass_check) {
 	// user-data value override from request value
 	$data = array_override($login_data,$Login);
 	list($lang,$region) = array_keys_value($data,['language','region'],[DEFAULT_LANG,DEFAULT_REGION]);
+	if(!array_key_exists('region',$data)) $region = NULL;	// user-info not have 'region'
 	// RELOAD user-data when user-locale not match current language
 		if($lang !== LangUI::$LocaleName) {
 			// Reload UserDataa when User Locale not match current Locale
