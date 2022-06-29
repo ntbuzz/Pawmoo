@@ -467,7 +467,7 @@ public function ViewTemplate($name,$vars = []) {
 		list($lnk,$nm) = array_keys_value($sec,['href','name'],['#','_new']);
 		unset($sec['href'],$sec['name']);
 		$href = make_hyperlink($lnk,$this->ModuleName);
-		$run = "window.open('{$href}','{$nm}','".implode($sec,',')."')";
+		$run = "window.open('{$href}','{$nm}','".implode(',',$sec)."')";
 		$attr['onClick'] = "{$run};return false;";
 	}
     //==========================================================================
@@ -547,7 +547,7 @@ public function ViewTemplate($name,$vars = []) {
     //==============================================================================
     private function cmd_include($tag,$attrs,$sec,$vars) {
         $wsec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
-        $flat_list = function($arr,$vars) use(&$flat_list,&$ln) {
+        $flat_list = function($arr,$vars) use(&$flat_list) {
 			$include_path = function($path) {
 				//separate query string if exist
 				list($file,$q_str) = fix_explode('?',$path,2);
