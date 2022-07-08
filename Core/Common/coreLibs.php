@@ -310,7 +310,7 @@ function remove_space_comment_str($content) {
 //==============================================================================
 // remove comment
 function remove_comment_str($content) {
-	$content = preg_replace('/([\r\n])+/s',"\n",                  // remove empty line
+	$content = preg_replace('/\n(?:\s*[\r\n])+/',"\n",                  // remove empty line
 			preg_replace('/\/\*[\s\S]*?\*\/|(^|[\s;]+)\/\/.*/','\1',$content));
 	return trim($content);
 }
