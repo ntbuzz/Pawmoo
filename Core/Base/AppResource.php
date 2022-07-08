@@ -19,28 +19,22 @@ class AppResource extends AppObject {
             'compact'   => [ 'cmd_modeset','do_min' ],
             'comment'   => [ 'cmd_modeset','do_com' ],
             'message'   => [ 'cmd_modeset','do_msg' ],
-            'charset'   => [ 'cmd_modeset','charset'],
+            'charset'   => [ 'cmd_charset','charset'],
         ],
         '+'    => [
             'import'    => 'cmd_import',
             'section'   => 'cmd_section',
             'jquery'    => 'cmd_jquery',
-            'style'    => 'cmd_style',
+			'style'    => 'cmd_style',
+			'script'   => 'cmd_script',
         ],
         '*'  => 'do_comment',
 	];
-    const ResourceFunctions = [
-		'import'   => 'res_import',
-		'section'  => 'res_section',
-		'jquery'   => 'res_jquery',
-		'style'    => 'res_style',
-		'script'   => 'res_script0',
-    ];
 	private $debug_mode = false;	// for debug
-	private $do_min = false;		// no-compact
-	private $do_com = true;			// echo Import Message
-	private $do_msg = true;			// echo Comment Line
-	private $charset = 'UTF-8';
+	private $do_min = true;			// compact
+	private $do_com = false;		// echo Import Message
+	private $do_msg = false;		// echo Comment Line
+	private $charset = '';
 	const DebugModeSet = [
             'do_min' => false,		// Is Compact Output?
             'do_com' => true,		// Is Import Message?
@@ -60,7 +54,7 @@ private function set_search_folders($name,$ext,$modname) {
 	switch(substr($name,0,1)) {
 	case '!':					// include (app)/res/css/common.css
 		$name = substr($name,1);
-		$prefix = ':res';
+		$prefix = App::Get_AppRoot('res');
 		$Folders = [
 			"{$appname}共通" => App::Get_AppPath('View/res'),
 			'Libs' => 'Core/Template/res',
@@ -74,7 +68,8 @@ private function set_search_folders($name,$ext,$modname) {
 		];
 		break;
 	default:					// include (app)/(module)/css/common.css
-		$prefix = ":{$modname}";
+		$prefix = App::Get_AppRoot($modname);
+		$modname = ucfirst($modname);
 		$Folders = [
 			"{$modname}固有" => App::Get_AppPath("modules/{$modname}/res"),
 			"{$appname}共通" => App::Get_AppPath('View/res'),
@@ -84,7 +79,7 @@ private function set_search_folders($name,$ext,$modname) {
 	}
 	$path = "{$prefix}/{$ext}/{$name}.{$ext}";
 	$templatelist = $this->get_exists_files($Folders,'template.mss');
-	return [$path,$templatelist];
+	return [$path,$name,$templatelist];
 }
 //==============================================================================
 // Search resource Folder, Module, Application, Framework
@@ -92,7 +87,7 @@ private function set_search_folders($name,$ext,$modname) {
         $arr = array();
         foreach($Folders as $key => $file) {
             $fn ="{$file}/{$name}";
-            if(file_exists($fn)) {
+            if(is_file($fn)) {
                 $arr[$key] = $fn;
             }
         }
@@ -105,29 +100,36 @@ public function ResourceMode($sec) {
 		if(substr($cmd,0,1)==='@' && is_scalar($mode)) {
 			$cmd = substr($cmd,1);
 			$funcs = self::FunctionList['@'];
-			if(!array_key_exists($cmd,$funcs)) {
-				$method = $funcs[$cmd];
-				if(is_array($method)) {
-					list($method,$arg) = $method;
-				} else $arg = '';
+			if(array_key_exists($cmd,$funcs)) {
+				list($method,$arg) = $funcs[$cmd];
 				if(method_exists($this,$method)) {
 					$this->$method($arg,$mode);
-				}
+				} else debug_log(DBMSG_RESOURCE,['NOT FOUND'=>$method]);
 			}
+		} else if(substr($cmd,0,1)==='*') {
+			$cmd = substr($cmd,1);
+		    $this->do_comment(NULL,NULL,NULL,$cmd,$vars);
 		}
 	}
 }
 //------------------------------------------------------------------------------
-// charset/compact/comment/message Command
+// compact/comment/message Command
 // パラメータはプロパティ変数名
-    private function cmd_modeset($param,$mode) {
-        $mode = !is_bool_false(strtolower($mode));
-		if(substr($param,0,1) === '@' && $this->debug_mode) {
-			$param = substr($param,1);
+private function cmd_modeset($param,$mode) {
+	if(substr($mode,0,1) === '@') {
+		if($this->debug_mode) {
 			$mode = self::DebugModeSet[$param];
-		}
-        $this->$param = $mode;            // 指定プロパティ変数にセット
-    }
+		} else $mode = substr($mode,1);
+	}
+	$mode = !is_bool_false(strtolower($mode));
+	$this->$param = $mode;            // 指定プロパティ変数にセット
+}
+//------------------------------------------------------------------------------
+// charset
+// パラメータはプロパティ変数名
+private function cmd_charset($param,$mode) {
+	$this->charset = $mode;            // 指定プロパティ変数にセット
+}
 //------------------------------------------------------------------------------
 // Resource Te,plate Output
 //	mod-rewrite
@@ -135,49 +137,116 @@ public function ResourceMode($sec) {
 //		/res/(css|js|images)/(.*)$			Core/Template/webroot/$1/$2
 //		/(app)/(css|js|images)/(.*)$		app/$1/webroot/$2/$3
 //	dynamic resource
-//		/(app)/(module)/(css|js)/(.*)$		resource,(module).(css|js).*
-//		/(app)/res/(css|js)/(.*)$			resource,res.(css|js).*
-//		/res/res/(css|js)/(.*)$				resource,core.(css|js).*
-public function ResourceSection($modname,$fname,$defs,$vars) {
-	if(is_scalar($defs)) $defs = [$defs];
+//		/(app)/(module)/(css|js)/(.*)$		resource.(module).(css|js).*
+//		/(app)/res/(css|js)/(.*)$			resource.res.(css|js).*
+//		/res/res/(css|js)/(.*)$				resource.core.(css|js).*
+public function ResourceSection($modname,$fname,$sec,$vars) {
 	list($file,$ext) = fix_explode('.',$fname,2);
-	list($path,$templatelist) = $this->set_search_folders($file,$ext,$modname);
-	debug_log(7,['FILE'=>$fname,'DEF'=>$defs,'PATH'=>$path]);
 	$this->FolderInfo = self::ResourceList[$ext];
-	$this->FolderInfo['template_dir'] = $templatelist;
+	list($path,$name,$templatelist) = $this->set_search_folders($file,$ext,$modname);
+	$res = [ "{$name}.{$ext}" => $sec];
+	array_unshift($templatelist,'Layout');
+	$this->importFiles = [];
+	$this->charset = '';
+//debug_log(7,['MODE'=>['MIN'=>$this->do_min,'COM'=>$this->do_com,'MSG'=>$this->do_msg]]);
 	ob_start();
-	foreach($defs as $id => $val) {
-		if(is_int($id)) {
-			$this->Template($templatelist,$val,$vars);
+	$this->RunResource($modname,$templatelist,$res,$fname,$vars);
+	$resource = ob_get_contents();		// バッファ内容を取り出す
+	ob_end_clean();						// バッファを消去
+	if(!empty($this->charset)) {
+		$resource = "@charset \"{$this->charset}\";\n{$resource}";
+ 	}
+	 $pval = array_values(array_filter(explode('/',$path),'strlen'));
+	 $fname = array_pop($pval);
+	 $idname = str_replace('.','_',$fname);
+//	debug_dump(['PATH'=>$pval]);
+	 if($pval[0]==='res') $pval[1] = 'core';
+	 $pval = array_slice($pval,1);
+	 $ppath = implode('/',$pval);
+	 $target = App::Get_AppPath("resource_files/{$ppath}");
+	if(!is_dir($target)) mkdir($target,0777,true);
+	file_put_contents("{$target}/{$fname}",$resource);
+	$id = implode('.',$pval);
+	$id = "^^Resource.{$id}.{$idname}";
+	MySession::setEnvIDs($id,$path);
+//	MySession::setEnvIDs($id,$resource);
+    // sort($this->importFiles);
+    // $res = array_filter(array_count_values($this->importFiles), function($v) {return --$v;});
+    // if(!empty($res)) {
+    //     debug_log(DBMSG_RESOURCE,['duplicate-import files'=>$res]);
+    // }
+	return $path;
+}
+//==============================================================================
+// $templist から secname セクションが存在するものを探索する
+private function RunResource($modname,$templatelist,$res,$name,$vars) {
+	list($res_type,$ext) = array_keys_value($this->FolderInfo,['section','folder']);
+	list($pp,$name,$tmplist) = $this->set_search_folders($name,$ext,$modname);
+	$msslist = $templatelist;//array_intersect($templatelist,$tmplist);
+	if($this->ExecResource($modname,$msslist,$res,$name,$vars) === false) {
+		// templatelist からセクションを探索
+		while(!empty($msslist)) {
+			$template = reset($msslist);
+            $parser = new SectionParser($template);
+            $resource = array_change_key_case( $parser->getSectionDef(FALSE), CASE_LOWER);
+            unset($parser);         // 解放
+            if(array_key_exists($res_type,$resource)) {		// css or js section
+				$res = $resource[$res_type];
+				if($this->ExecResource($modname,$msslist,$res,$name,$vars)) return;
+            }
+			array_shift($msslist);
+        }
+		debug_log(DBMSG_RESOURCE,['NOT-FOUND-SECTION'=>$name]);
+	}
+}
+//==============================================================================
+// ExecResource:
+//	$modname		モジュール名
+//	$templist		template.mss のリスト配列
+//	$resource		処理中のファイルセクション
+//	$name			処理するセクション名
+//	$vars			環境変数
+private function ExecResource($modname,$templatelist,$resource,$name,$vars) {
+	if(!array_key_exists($name,$resource))  return false;
+	$mySec = $resource[$name];
+	foreach($mySec as $key => $val) {
+		if(is_int($key)) {
+			if(!is_scalar($val)) {    // 単純配列は認めない
+				debug_log(DBMSG_RESOURCE,['BAD SECTION'=>$val]);
+				continue;
+			}
+			if($name !== $val) {
+				if($this->ExecResource($modname,$templatelist,$resource,$val,$vars)) continue;
+			}
+			$sublist = array_slice($templatelist,1);
+			$this->RunResource($modname,$sublist,[],$val,$vars);
 		} else {
-			$id = tag_body_name($id);			// 重複回避用の識別子を除去
-			$top_char = mb_substr($id,0,1);
-			$cmd = mb_substr($id,1);
-			$funcs = self::ResourceFunctions;
-			switch($top_char) {
-			case '*': echo "/* {$cmd} */\n"; break;		// コメント出力
-			case '@':		// インポートコマンドに読替え
-					$val = $cmd;
-					$cmd = 'import';
-			case '+':		// コマンド
-					if(array_key_exists($cmd,$funcs)) {
-						$method = $funcs[$cmd];
-						if(method_exists($this,$method)) {
-							$this->$method($val,$vars);
-						} else echo "Method({$method}): NOT IMPLEMENTED\n";
-					} else echo "ERROR: NOT FOUND CMD({$id})\n";
-					break;
-			default:
-					$mod = ucfirst($id);
-					list($tmp,$sublist) = $this->set_search_folders($file,$ext,$mod);
-					$this->Template($sublist,$val,$vars);
+			$key = tag_body_name($key);         // 重複回避用の文字を削除
+			$top_char = $key[0];
+			if(array_key_exists($top_char,self::FunctionList)) {
+				$cmd_tag = mb_substr($key,1);      // 先頭文字を削除
+				$func = self::FunctionList[$top_char];
+				if(is_array($func)) {       // サブコマンドテーブルがある
+					if(array_key_exists($cmd_tag,$func)) {
+						$def_func = $func[$cmd_tag];
+						list($cmd,$param) = is_array($def_func) ? $def_func:[$def_func,''];
+						if((method_exists($this, $cmd))) {
+							if($top_char === '@') $this->$cmd($param,$val);
+							else $this->$cmd($modname,$templatelist, $resource,$val,$vars);
+						} else debug_log(DBMSG_RESOURCE,['+++ Method Not Found'=>$cmd]);
+					} else debug_log(DBMSG_RESOURCE,['*** In Feature Command...'=>$cmd_tag]);
+				} else if(method_exists($this, $func)) {
+					$this->$func($modname,$templatelist, $resource,$cmd_tag,$vars);
+				} else debug_log(DBMSG_RESOURCE,["Undefined Func CALL:{$func}"=>[$cmd_tag,$val]]);  // 未定義のコマンド
+			} else {
+				$mod = ucfirst($key);
+				$ext = $this->FolderInfo['folder'];
+				list($tmp,$name,$sublist) = $this->set_search_folders($val,$ext,$mod);
+				$this->RunResource($mod,$sublist,[],$name,$vars);
 			}
 		}
 	}
-	$resource = ob_get_contents();		// バッファ内容を取り出す
-	ob_end_clean();						// バッファを消去
-	debug_log(8,['RESOURCE'=>$$resource]);
-	return $path;
+	return true;
 }
 //==============================================================================
 //  文字列の変数置換を行う
@@ -186,69 +255,72 @@ public function ResourceSection($modname,$fname,$defs,$vars) {
 		return expand_text($this,$str,$this->RecData,$vars);
 }
 //------------------------------------------------------------------------------
-// section Command
-// +section => [ files , ... ] or section => scalar
-    private function cmd_section($secParam, $param,$sec,$vars) {
-		debug_dump(['TEMPLATE-SECTION'=>$sec,'VARS'=>$vars,'TEMPLATE'=>$this->FolderInfo]);
+// * comment Command
+    private function do_comment($modname,$tmplist, $resource,$sec,$vars) {
+		if($this->do_com) {         // コメントを出力する
+        	$vv = trim($this->expand_Strings($sec,$vars));
+        	echo "/* {$vv} */\n";
+		}
     }
-//==============================================================================
-// Style Template Output
-	private function Template($tmplist,$secname,$vars) {
-		$secType = $this->FolderInfo['section'];
-        foreach($tmplist as $category => $file) {
-            $parser = new SectionParser($file);
-            $SecTemplate = array_change_key_case( $parser->getSectionDef(FALSE), CASE_LOWER);
-            unset($parser);         // 解放
-            if(array_key_exists($secType,$SecTemplate)) {
-                $secData = $SecTemplate[$secType];
-                $secParam = array($secname,$secData,$tmplist);
-                if(array_key_exists($secname,$secData)) {
-					foreach($secData[$secname] as $key => $sec) {
-	                    $this->function_Dispath($secParam, $key, $sec, $vars);
-					}
-                    return TRUE;
-                }
-            }
-        }
-        return FALSE;
-	}
-//==============================================================================
-// key 文字列を元に処理関数へディスパッチする
-// key => sec (vars)
-    private function function_Dispath($secParam, $key,$sec,$vars) {
-        if(is_numeric($key)) {
-            if(!is_scalar($sec)) return FALSE;    // 単純配列は認めない
-            $key = $sec;
-        } else $key = tag_body_name($key);         // 重複回避用の文字を削除
-        $top_char = $key[0];
-        if(array_key_exists($top_char,self::FunctionList)) {
-            $tag = mb_substr($key,1);      // 先頭文字を削除
-            $func = self::FunctionList[$top_char];
-            if(is_array($func)) {       // サブコマンドテーブルがある
-				$dbg_tag = (substr($tag,0,1) === '@');
-				$cmd_tag = ($dbg_tag) ? substr($tag,1):$tag;
-                if(array_key_exists($cmd_tag,$func)) {
-                    $def_func = $func[$cmd_tag];
-                    // 配列ならパラメータ要素を取出す
-                    list($cmd,$param) = (is_array($def_func)) ? $def_func:[$def_func,''];
-					if($dbg_tag) $param = "@{$param}";
-                    if((method_exists($this, $cmd))) {
-                        $this->$cmd($secParam,$param,$sec,$vars);
-                    } else debug_log(DBMSG_RESOURCE,['+++ Method Not Found'=>$cmd]);
-                } else debug_log(DBMSG_RESOURCE,['*** In Feature Command...'=>$tag]);
-            } else if(method_exists($this, $func)) {
-                $this->$func($tag,$sec,$vars);        // ダイレクトコマンド
-            } else debug_log(DBMSG_RESOURCE,["Undefined Func CALL:{$func}"=>[$tag,$sec]]);  // 未定義のコマンド
-            return TRUE;    // コマンド処理を実行
-        } else {
-            return FALSE;   // コマンド処理ではない
-        }
+//------------------------------------------------------------------------------
+// +section Command
+//
+    private function cmd_section($modname,$tmplist, $resource,$sec,$vars) {
+		if($this->ExecResource($modname,$tmplist,$resource,$sec,$vars)) return;
+		$sublist = array_slice($tmplist,1);
+		$this->RunResource($modname,$sublist,[],$sec,$vars);
+    }
+//------------------------------------------------------------------------------
+// +import Command
+//		+import => [ ... ] or +import => file or @file
+    private function cmd_import($modname,$tmplist, $resource,$sec,$vars) {
+		$this->filesImport('',$tmplist, $sec);
+    }
+//------------------------------------------------------------------------------
+// +jquery Command
+//		+jquery => [ ... ] or +import => file or @file
+    private function cmd_jquery($modname,$tmplist, $resource,$sec,$vars) {
+		if($this->FolderInfo['folder']!=='js') return;
+		echo "$(function() { ";
+		$this->filesImport('jquery-',$tmplist,array_filter($sec,function($v) { return is_scalar($v);}));
+		echo "});\n";
+		$plugins = array_filter($sec,function($v) { return is_array($v);});
+		if(!empty($plugins)) {
+			echo "(function ($) {\n";
+			foreach($plugins as $subdir => $files) {
+				$files = array_map(function($v) use(&$subdir) { return "{$subdir}/{$v}"; },$files);
+				$this->filesImport('plugins-',$tmplist,$files);
+			}
+			echo "})(jQuery);\n";
+		}
     }
 //------------------------------------------------------------------------------
 // ファイルのインポート処理
     private function filesImport($scope,$tmplist, $files) {
+		if(empty($files)) return;
 		if(is_scalar($files)) $files = [$files];
+//debug_log(7,['IMPORT-FILE'=>$tmplist,'FILES'=>$files]);
         foreach($files as $key=>$vv) {
+            $imported = FALSE;
+            if(empty($vv)) {
+				$p = '/@(?:\$(.+)|(\w+):(.+))$/';
+                if(preg_match($p,$key,$m)) {
+					if(count($m)===2) {
+		                list($tmp,$id_name) = $m;
+						$id = "{$this->ModuleName}.{$id_name}";
+						$data = MySession::syslog_GetData($id,TRUE);
+                        if($this->do_msg) echo "/* {$scope} import from session '{$id}' */\n";
+						$this->outputContents($data);
+			            $imported = true;
+		                $this->importFiles[] = $vv; // for-DEBUG
+						continue;
+					} else {
+		                list($tmp,$id_name,$flag,$vv) = $m;
+						$test_value = MySession::getSysData($flag);
+						if(is_bool_false($test_value)) continue;
+					}
+				}
+            }
             if(get_protocol($vv) !== NULL) {    // IMPORT from INTERNET URL
 				list($filename,$v_str) = fix_explode(';',$vv,2);
                 parse_str($v_str, $vars);
@@ -259,39 +331,40 @@ public function ResourceSection($modname,$fname,$defs,$vars) {
                 if(!empty($replace_keys)) $content = str_replace($replace_keys,$replace_values, $content);
                 echo "{$content}\n";
                 $imported = TRUE;
+                $this->importFiles[] = $vv; // for-DEBUG
                 continue;
             }
+			$ext = $this->FolderInfo['folder'];
 			list($filename,$v_str) = fix_explode('?',$vv,2);	// クエリ文字列を変数セットとして扱う
             parse_str($v_str, $vars);
-            $vars = is_array($vars) ? array_merge($this->repVARS,$vars) : $this->repVARS;
-            $imported = FALSE;
-			$ext = $this->FolderInfo['folder'];
             foreach($tmplist as $key => $file) {
                 list($path,$tmp) = extract_path_filename($file);
-                $fn ="{$path}{$this->Filetype}/{$filename}";
-                if(file_exists($fn)) {
-                    list($name,$ext) = extract_base_name($fn);
-                    if($ext === 'php') {        // PHPファイルをインポートする
-                        $self_name = $this->myname; // 処理中のファイル名を渡す
-                        $extention = $this->Template['extention'];  // 拡張子
-                        require($fn);           // PHPファイルを読み込む
-                    } else {
-                        // @charset を削除して読み込む
-                        $content = preg_replace('/(@charset.*;)/','/* $1 */',trim(file_get_contents($fn)) );
-						// C++ 風コメントを許す
-                        $content = preg_replace('/\/\/.*$/','',$content);
-                        $content = $this->expand_Strings($content,$vars);
-                        if($this->do_msg) echo "/* {$scope}import({$filename}) in {$key} */\n";
-                        $this->outputContents($content);
-                    }
+                $fn ="{$path}{$ext}/{$filename}";
+                if(is_file($fn)) {
+                	if(!in_array($fn,$this->importFiles)) {
+						$this->importFiles[] = $fn; // for-DEBUG
+						list($name,$ext) = extract_base_name($fn);
+						if($ext === 'php') {        // PHPファイルをインポートする
+							$self_name = $this->myname; // 処理中のファイル名を渡す
+							$extention = $ext;  		// 拡張子
+							require($fn);           	// PHPファイルを読み込む
+						} else {
+							// @charset を削除して読み込む
+							$content = preg_replace('/(@charset.*;)/','/* $1 */',trim(file_get_contents($fn)) );
+							// C++ 風コメントを許す
+							$content = preg_replace('/\/\/.*$/','',$content);
+							$content = $this->expand_Strings($content,$vars);
+							if($this->do_msg) echo "/* {$scope}import({$filename}) in {$key} */\n";
+							$this->outputContents($content);
+						}
+					}
                     $imported = TRUE;
-                    array_push($this->importFiles,$fn); // for-DEBUG
                     break;
                 }
             }
             if(!$imported) {
-                echo "/* NOT FOUND {$filename} */\n";
-                debug_log(DBMSG_RESOURCE,['LIST'=>$tmplist,'NOT FOUND'=>$filename]);
+                echo "/* FILE NOT FOUND '{$filename}'@{$fn} */\n";
+                debug_log(DBMSG_RESOURCE,['LIST'=>$tmplist,'FILE NOT FOUND'=>$filename,'FN'=>$fn,'IMPORT'=>$this->importFiles]);
             }
         }
     }
@@ -309,31 +382,26 @@ public function ResourceSection($modname,$fname,$defs,$vars) {
 // Resource Command
 //==============================================================================
 // +style => [ css-defs ]
-	private function res_style($val, $vars) {
-		$val = array_to_text($val);
-		// C++ 風コメントを許す
-		$content = preg_replace('/\/\/.*$/','',$val);
+	private function cmd_style($modname,$tmplist, $res_sec,$sec,$vars) {
+		if($this->FolderInfo['folder']!=='css') return;
+		$val = array_to_text($sec);
+		// C++ 風コメントをCSSに許す
+		$content = preg_replace('/\s*\/\/.*$/','',$val);
 		$content = $this->expand_Strings($content,$vars);
 		$this->outputContents($content);
 	}
-
 //==============================================================================
 // +stript => [ javascript & jquery defs ]
-	private function res_script($sec, $vars) {
+	private function cmd_script($modname,$tmplist, $res_sec,$sec,$vars) {
+		if($this->FolderInfo['folder']!=='js') return;
 		$script = array_filter($sec,function($v) { return is_scalar($v);});
 		$jquery = array_filter($sec,function($v) { return is_array($v);});
 		if(!empty($jquery)) {
 			$script = [$script, '$(function() {',$jquery,'});'];
 		}
 		$val = array_to_text($script);
-		$content = $this->expand_Strings($content,$vars);
+		$content = $this->expand_Strings($val,$vars);
 		$this->outputContents($content);
 	}
-//------------------------------------------------------------------------------
-// Import Command
-// +import => [ files , ... ] or import => scalar or @import-file
-    private function res_import($sec, $vars) {
-		debug_dump(['IMPORT'=>$sec,'VARS'=>$vars,'TEMPLATE'=>$this->FolderInfo],false);
-    }
 
 }
