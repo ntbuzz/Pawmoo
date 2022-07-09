@@ -127,16 +127,6 @@ static function getEnvIDs($id_name,$scalar=TRUE) {
 // ENV変数にドット識別子指定で保存する
 static function setEnvIDs($nameID,$val,$append = FALSE) {
 	self::setIDs(static::$EnvData,$nameID,$val,$append);
-    // $ee = &static::$EnvData;
-    // $mem_arr = explode('.',$nameID);
-    // foreach($mem_arr as $key) {
-    //     if(!isset($ee[$key])) $ee[$key] = [];
-    //     $ee = &$ee[$key];
-    // }
-	// if($append) {
-	// 	$prev = (empty($ee)) ? '':"{$ee}\n";
-	// 	$ee = "{$prev}{$val}";
-	// } else $ee = $val;
 }
 //==============================================================================
 // ドット識別子指定でENV変数を削除
@@ -260,6 +250,32 @@ static function getSysData($names) {
 	return $nVal;
 }
 //==============================================================================
+// PATH　から リソースID を生成
+static private function get_resouceID($path) {
+	$pval = explode('/',$path);
+	if($pval[1]==='res') $pval[2] = 'core';
+	$pval[1] = '^^ResFile';
+	$pval = array_map(function($v) { return str_replace('.','_',$v);},array_slice($pval,1));
+	return implode('.',$pval);
+}
+//==============================================================================
+// リソースを格納
+static function resource_SetData($path,$resource) {
+	$id = self::get_resouceID($path);
+	self::setEnvIDs($id,$resource);
+	$fullpath = "resource_files/{$path}";
+	list($target,$file) = extract_path_filename($fullpath);
+	if(!is_dir($target)) mkdir($target,0777,true);
+	file_put_contents($fullpath,$resource);
+}
+//==============================================================================
+// システムログを取得
+static function resource_GetData($path) {
+	$id = self::get_resouceID($path);
+	$nVal = array_member_value(static::$EnvData, $id);
+	return $nVal;
+}
+//==============================================================================
 // システムログを格納
 static function syslog_SetData($names,$val,$append = FALSE,$resource = FALSE) {
 	$kid = ($resource) ? RESOURCE_ID : SYSLOG_ID;
@@ -333,5 +349,3 @@ static function setup_Login($login=NULL) {
 }
 
 }
-
-
