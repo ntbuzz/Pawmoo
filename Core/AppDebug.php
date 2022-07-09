@@ -31,7 +31,7 @@ const EXCLUSION = [
     'password'		=> 1,	// パスワードPOST
     'passwd'		=> 1,	// パスワードPOST
 	're-build-mark'	=> 1,	// リビルド済マーク
-    '^^*'			=> 0,	// 隠しID
+    '^^*'			=> 1,	// 隠しID
 ];
 /*
     アプリケーションデバッグ情報
