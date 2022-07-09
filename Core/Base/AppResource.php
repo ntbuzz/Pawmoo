@@ -31,14 +31,14 @@ class AppResource extends AppObject {
         '*'  => 'do_comment',
 	];
 	private $debug_mode = false;	// for debug
-	private $do_min = true;			// compact
-	private $do_com = false;		// echo Import Message
-	private $do_msg = false;		// echo Comment Line
+	private $do_min = true;			// compact mode
+	private $do_com = false;		// Import Message
+	private $do_msg = false;		// Comment Line
 	private $charset = '';
 	const DebugModeSet = [
-            'do_min' => false,		// Is Compact Output?
-            'do_com' => true,		// Is Import Message?
-            'do_msg' => true,		// Is Comment Output?
+		'do_min' => false,		// No Compact
+		'do_com' => true,		// Do Import Message
+		'do_msg' => true,		// Do Comment Output
 	];
 //==============================================================================
 // Constructor
@@ -148,7 +148,6 @@ public function ResourceSection($modname,$fname,$sec,$vars) {
 	array_unshift($templatelist,'Layout');
 	$this->importFiles = [];
 	$this->charset = '';
-//debug_log(7,['MODE'=>['MIN'=>$this->do_min,'COM'=>$this->do_com,'MSG'=>$this->do_msg]]);
 	ob_start();
 	$this->RunResource($modname,$templatelist,$res,$fname,$vars);
 	$resource = ob_get_contents();		// バッファ内容を取り出す
@@ -156,25 +155,7 @@ public function ResourceSection($modname,$fname,$sec,$vars) {
 	if(!empty($this->charset)) {
 		$resource = "@charset \"{$this->charset}\";\n{$resource}";
  	}
-	 $pval = array_values(array_filter(explode('/',$path),'strlen'));
-	 $fname = array_pop($pval);
-	 $idname = str_replace('.','_',$fname);
-//	debug_dump(['PATH'=>$pval]);
-	 if($pval[0]==='res') $pval[1] = 'core';
-	 $pval = array_slice($pval,1);
-	 $ppath = implode('/',$pval);
-	 $target = App::Get_AppPath("resource_files/{$ppath}");
-	if(!is_dir($target)) mkdir($target,0777,true);
-	file_put_contents("{$target}/{$fname}",$resource);
-	$id = implode('.',$pval);
-	$id = "^^Resource.{$id}.{$idname}";
-	MySession::setEnvIDs($id,$path);
-//	MySession::setEnvIDs($id,$resource);
-    // sort($this->importFiles);
-    // $res = array_filter(array_count_values($this->importFiles), function($v) {return --$v;});
-    // if(!empty($res)) {
-    //     debug_log(DBMSG_RESOURCE,['duplicate-import files'=>$res]);
-    // }
+	MySession::resource_SetData($path,$resource);
 	return $path;
 }
 //==============================================================================
@@ -209,6 +190,7 @@ private function RunResource($modname,$templatelist,$res,$name,$vars) {
 private function ExecResource($modname,$templatelist,$resource,$name,$vars) {
 	if(!array_key_exists($name,$resource))  return false;
 	$mySec = $resource[$name];
+	if(is_scalar($mySec)) $mySec = [$mySec];
 	foreach($mySec as $key => $val) {
 		if(is_int($key)) {
 			if(!is_scalar($val)) {    // 単純配列は認めない
@@ -299,7 +281,7 @@ private function ExecResource($modname,$templatelist,$resource,$name,$vars) {
     private function filesImport($scope,$tmplist, $files) {
 		if(empty($files)) return;
 		if(is_scalar($files)) $files = [$files];
-//debug_log(7,['IMPORT-FILE'=>$tmplist,'FILES'=>$files]);
+debug_log(7,['IMPORT-FILE'=>$tmplist,'FILES'=>$files]);
         foreach($files as $key=>$vv) {
             $imported = FALSE;
             if(empty($vv)) {
@@ -340,6 +322,7 @@ private function ExecResource($modname,$templatelist,$resource,$name,$vars) {
             foreach($tmplist as $key => $file) {
                 list($path,$tmp) = extract_path_filename($file);
                 $fn ="{$path}{$ext}/{$filename}";
+	debug_log(7,['IMPORT'=>[$key,$file],'FILE'=>$fn]);
                 if(is_file($fn)) {
                 	if(!in_array($fn,$this->importFiles)) {
 						$this->importFiles[] = $fn; // for-DEBUG
@@ -359,12 +342,14 @@ private function ExecResource($modname,$templatelist,$resource,$name,$vars) {
 						}
 					}
                     $imported = TRUE;
+					debug_log(7,['**** INCLUDE'=>$fn]);
                     break;
                 }
+				debug_log(7,['NOT-EXIST'=>$fn]);
             }
             if(!$imported) {
                 echo "/* FILE NOT FOUND '{$filename}'@{$fn} */\n";
-                debug_log(DBMSG_RESOURCE,['LIST'=>$tmplist,'FILE NOT FOUND'=>$filename,'FN'=>$fn,'IMPORT'=>$this->importFiles]);
+                debug_log(DBMSG_RESOURCE,['FILE NOT FOUND'=>$filename,'LIST'=>$tmplist]);
             }
         }
     }
