@@ -281,7 +281,7 @@ private function ExecResource($modname,$templatelist,$resource,$name,$vars) {
     private function filesImport($scope,$tmplist, $files) {
 		if(empty($files)) return;
 		if(is_scalar($files)) $files = [$files];
-debug_log(7,['IMPORT-FILE'=>$tmplist,'FILES'=>$files]);
+//debug_log(7,['IMPORT-FILE'=>$tmplist,'FILES'=>$files]);
         foreach($files as $key=>$vv) {
             $imported = FALSE;
             if(empty($vv)) {
@@ -322,7 +322,6 @@ debug_log(7,['IMPORT-FILE'=>$tmplist,'FILES'=>$files]);
             foreach($tmplist as $key => $file) {
                 list($path,$tmp) = extract_path_filename($file);
                 $fn ="{$path}{$ext}/{$filename}";
-	debug_log(7,['IMPORT'=>[$key,$file],'FILE'=>$fn]);
                 if(is_file($fn)) {
                 	if(!in_array($fn,$this->importFiles)) {
 						$this->importFiles[] = $fn; // for-DEBUG
@@ -342,10 +341,8 @@ debug_log(7,['IMPORT-FILE'=>$tmplist,'FILES'=>$files]);
 						}
 					}
                     $imported = TRUE;
-					debug_log(7,['**** INCLUDE'=>$fn]);
                     break;
                 }
-				debug_log(7,['NOT-EXIST'=>$fn]);
             }
             if(!$imported) {
                 echo "/* FILE NOT FOUND '{$filename}'@{$fn} */\n";
