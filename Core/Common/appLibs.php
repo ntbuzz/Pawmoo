@@ -160,10 +160,6 @@ function control_escape($a) {
 function is_bool_false($bool) {
     $bool = strtolower(trim($bool,"'"));
 	return in_array($bool,['','f','false','no','off',NULL],true);
-    // foreach(['','f','false',NULL] as $val) {
-    //     if($bool === $val) return TRUE;
-    // }
-    // return FALSE;
 }
 //==============================================================================
 // check for protocol or label or query
