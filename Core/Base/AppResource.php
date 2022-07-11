@@ -31,14 +31,16 @@ class AppResource extends AppObject {
         '*'  => 'do_comment',
 	];
 	private $debug_mode = false;	// for debug
-	private $do_min = true;			// compact mode
-	private $do_com = false;		// Import Message
-	private $do_msg = false;		// Comment Line
-	private $charset = '';
 	const DebugModeSet = [
 		'do_min' => false,		// No Compact
 		'do_com' => true,		// Do Import Message
 		'do_msg' => true,		// Do Comment Output
+	];
+	private $ModeSet = [
+		'do_min' => true,		// Compact Mode
+		'do_com' => false,		// Import Message
+		'do_msg' => false,		// Comment Output
+		'charset'=> '',			// CSS charset
 	];
 //==============================================================================
 // Constructor
@@ -122,13 +124,13 @@ private function cmd_modeset($param,$mode) {
 		} else $mode = substr($mode,1);
 	}
 	$mode = !is_bool_false(strtolower($mode));
-	$this->$param = $mode;            // 指定プロパティ変数にセット
+	$this->ModeSet[$param] = $mode;
 }
 //------------------------------------------------------------------------------
 // charset
 // パラメータはプロパティ変数名
 private function cmd_charset($param,$mode) {
-	$this->charset = $mode;            // 指定プロパティ変数にセット
+	$this->ModeSet['charset'] = $mode;
 }
 //------------------------------------------------------------------------------
 // Resource Te,plate Output
@@ -147,15 +149,16 @@ public function ResourceSection($modname,$fname,$sec,$vars) {
 	$res = [ "{$name}.{$ext}" => $sec];
 	array_unshift($templatelist,'Layout');
 	$this->importFiles = [];
-	$this->charset = '';
+	$save_modeset = $this->ModeSet;
 	ob_start();
 	$this->RunResource($modname,$templatelist,$res,$fname,$vars);
 	$resource = ob_get_contents();		// バッファ内容を取り出す
 	ob_end_clean();						// バッファを消去
-	if(!empty($this->charset)) {
-		$resource = "@charset \"{$this->charset}\";\n{$resource}";
+	if($ext==='css' && !empty($this->ModeSet['charset'])) {
+		$resource = "@charset \"{$this->ModeSet['charset']}\";\n{$resource}";
  	}
 	MySession::resource_SetData($path,$resource);
+	$this->ModeSet = $save_modeset;
 	return $path;
 }
 //==============================================================================
@@ -239,7 +242,7 @@ private function ExecResource($modname,$templatelist,$resource,$name,$vars) {
 //------------------------------------------------------------------------------
 // * comment Command
     private function do_comment($modname,$tmplist, $resource,$sec,$vars) {
-		if($this->do_com) {         // コメントを出力する
+		if($this->ModeSet['do_com']) {         // コメントを出力する
         	$vv = trim($this->expand_Strings($sec,$vars));
         	echo "/* {$vv} */\n";
 		}
@@ -291,7 +294,7 @@ private function ExecResource($modname,$templatelist,$resource,$name,$vars) {
 		                list($tmp,$id_name) = $m;
 						$id = "{$this->ModuleName}.{$id_name}";
 						$data = MySession::syslog_GetData($id,TRUE);
-                        if($this->do_msg) echo "/* {$scope} import from session '{$id}' */\n";
+                        if($this->ModeSet['do_msg']) echo "/* {$scope} import from session '{$id}' */\n";
 						$this->outputContents($data);
 			            $imported = true;
 		                $this->importFiles[] = $vv; // for-DEBUG
@@ -306,7 +309,7 @@ private function ExecResource($modname,$templatelist,$resource,$name,$vars) {
             if(get_protocol($vv) !== NULL) {    // IMPORT from INTERNET URL
 				list($filename,$v_str) = fix_explode(';',$vv,2);
                 parse_str($v_str, $vars);
-                if($this->do_msg) echo "/* {$scope}import from {$filename} */\n";
+                if($this->ModeSet['do_msg']) echo "/* {$scope}import from {$filename} */\n";
                 $content = file_get_contents($filename);
                 $replace_keys   = array_keys($vars);
                 $replace_values = array_values($vars);
@@ -336,7 +339,7 @@ private function ExecResource($modname,$templatelist,$resource,$name,$vars) {
 							// C++ 風コメントを許す
 							$content = preg_replace('/\/\/.*$/','',$content);
 							$content = $this->expand_Strings($content,$vars);
-							if($this->do_msg) echo "/* {$scope}import({$filename}) in {$key} */\n";
+							if($this->ModeSet['do_msg']) echo "/* {$scope}import({$filename}) in {$key} */\n";
 							$this->outputContents($content);
 						}
 					}
@@ -353,9 +356,9 @@ private function ExecResource($modname,$templatelist,$resource,$name,$vars) {
 //==============================================================================
 //    ファイルをコンパクト化して出力
     private function outputContents($content) {
-        if($this->do_min) {         // コメント・改行を削除して最小化して出力する
+        if($this->ModeSet['do_min']) {         // コメント・改行を削除して最小化して出力する
 			$content = remove_space_comment_str($content);
-        } else if(!$this->do_com) {         // コメントと不要な改行を削除して出力する
+        } else if(!$this->ModeSet['do_com']) {         // コメントと不要な改行を削除して出力する
 			$content = remove_comment_str($content);
         }
         echo "{$content}\n";
