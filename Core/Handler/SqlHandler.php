@@ -439,7 +439,9 @@ private function sql_sortby($sortby,$table=NULL) {
 							$op = "NOT {$like_opc}";
 						} else $op = $like_opc;
 						if(is_int($v) || (is_string($v) && trim($v,$pat) === $v)) $v = "{$pat}{$v}{$pat}";
-						return (empty($v)) ? 'IS NULL' : "{$op} '{$v}'";
+						if(empty($v)) return 'IS NULL';
+						$v = str_replace(["''","'"],["'","''"],$v);		// escape single-quote
+						return "{$op} '{$v}'";
 					};
 					$opc = $this->concat_fields($expr);
 					if(is_array($val)) {

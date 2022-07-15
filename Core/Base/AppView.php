@@ -30,6 +30,7 @@ class AppView extends AppObject {
             'hidden'    => 'cmd_taginput',
             'textbox'   => 'cmd_taginput',
             'passbox'   => 'cmd_taginput',
+            'resource'  => 'cmd_resource',
             'dump'   	=> 'cmd_dump',
         ],
     );
@@ -54,6 +55,7 @@ class AppView extends AppObject {
         $helper_class = (class_exists($helper)) ? $helper:'AppHelper';
 		$this->Helper = ClassManager::Create($helper,$helper_class,$this);
         $this->Helper->Model = $this->Model;
+        $this->Resource = new AppResource($this);
     }
     //==========================================================================
     // Class Initialized
@@ -79,7 +81,7 @@ public function SetLayout($layoutfile) {
 public function PutLayout($layout = NULL,$vars=NULL) {
     if($layout === NULL) $layout = $this->Layout;
     if($vars === NULL) $vars = [];
-    debug_log(DBMSG_VIEW, "\$Layout = {$layout}");
+    debug_log(DBMSG_VIEW|DBMSG_NOTRACE, "\$Layout = {$layout}");
 	$this->LayoutMode = TRUE;
 	$tmplate = $this->get_TemplateName('Preface');
     if($tmplate !== NULL) {
@@ -421,6 +423,7 @@ public function ViewTemplate($name,$vars = []) {
         }
         $is_inline = ($tag[0] === '.');
         if($is_inline) $tag = substr($tag,1);
+        $save_current = $this->currentTemplate;
         if($is_inline && array_key_exists($tag,$this->inlineSection)) {
             $this->sectionAnalyze($this->inlineSection[$tag],$vars);
         } else {
@@ -440,6 +443,7 @@ public function ViewTemplate($name,$vars = []) {
 				} else echo "Bad ClassName:: {$cont}\n";
 			}
         }
+        $this->currentTemplate = $save_current;
     }
     //==========================================================================
     //  single tag for attribute only (for <meta>)
@@ -463,7 +467,7 @@ public function ViewTemplate($name,$vars = []) {
 		list($lnk,$nm) = array_keys_value($sec,['href','name'],['#','_new']);
 		unset($sec['href'],$sec['name']);
 		$href = make_hyperlink($lnk,$this->ModuleName);
-		$run = "window.open('{$href}','{$nm}','".implode($sec,',')."')";
+		$run = "window.open('{$href}','{$nm}','".implode(',',$sec)."')";
 		$attr['onClick'] = "{$run};return false;";
 	}
     //==========================================================================
@@ -531,11 +535,59 @@ public function ViewTemplate($name,$vars = []) {
         sysLog::dump($wsec,false);
     }
     //--------------------------------------------------------------------------
+    //  gen resource
+    //  +resource => [ resource ... ]
+    private function cmd_resource($tag,$attrs,$sec,$vars) {
+        $wsec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
+		$this->Resource->ResourceMode($wsec);
+    }
+    //--------------------------------------------------------------------------
     //  include external file, for CSS/JS/...
     //  +include => [ inlclude-filename ... ]
+    //==============================================================================
     private function cmd_include($tag,$attrs,$sec,$vars) {
         $wsec = $this->expand_SectionVar($sec,$vars,TRUE);   // EXPAND CHILD
-        App::WebInclude($wsec);
+        $flat_list = function($arr,$vars) use(&$flat_list) {
+			$include_path = function($path) {
+				//separate query string if exist
+				list($file,$q_str) = fix_explode('?',$path,2);
+				if(!empty($q_str)) $q_str = "?{$q_str}";
+				$ext = substr($file,strrpos($file,'.') + 1);    // 拡張子を確認
+				$path = make_hyperlink($file,App::$Controller).$q_str;
+				switch($ext) {
+				case 'js':
+					echo "<script src='{$path}' charset='UTF-8'></script>\n";
+					break;
+				case 'css':
+					echo "<link rel='stylesheet' href='{$path}' />\n";
+					break;
+				case 'ico':
+					echo "<link rel='shortcut icon' href='{$path}' type='image/x-icon' />\n";
+					break;
+				default:
+				}
+			};
+            if(is_array($arr)) {
+                foreach($arr as $k => $v) {
+                    if(is_int($k)) $flat_list($v,$vars);
+                    else {
+						list($modname,$file) = fix_explode(':',$k,2);
+						if(empty($file)) {
+							$file = $modname;
+							$modname = strtolower($this->ModuleName);
+						}
+						$this->Resource->RecData = $this->Model->RecData;
+						$imp = $this->Resource->ResourceSection($modname,$file,$v,$vars);
+						$include_path($imp);
+	                }
+				}
+            } else {
+				$include_path($arr);
+            }
+        };
+		$variable = array_override_recursive($this->env_vars,$vars);
+debug_log(1,['SEC'=>$wsec,'VAR'=>$variable]);
+        $flat_list($wsec,$variable);
     }
     //--------------------------------------------------------------------------
     //  SET GLOBAL VARIABLE

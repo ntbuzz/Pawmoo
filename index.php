@@ -16,8 +16,8 @@ require_once('site-config.php');
 preg_match('/\/(css|js|logs)\/.*/',$_SERVER['REQUEST_URI'], $m);
 $dispatch = [
 	'logs'	=> 'debuglog.php',
-	'css'	=> 'resource.php',
-	'js'	=> 'resource.php',
+	'css'	=> 'resource2.php',
+	'js'	=> 'resource2.php',
 ];
 $inc = (count($m) === 2) ? $m[1] : 'main';
 $reqfile = (array_key_exists($inc,$dispatch)) ? $dispatch[$inc] : 'Main.php';

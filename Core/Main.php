@@ -57,6 +57,7 @@ require_once("app/{$appname}/Config/config.php");
 require_once('Base/AppController.php');
 require_once('Base/AppModel.php');
 require_once('Base/AppView.php');
+require_once('Base/AppResource.php');
 require_once('Base/AppHelper.php');
 
 $config->Setup(GlobalConfig,SITE_PRODUCTION);
@@ -118,8 +119,8 @@ list($lang,$region) = explode('.',$locale_set);
 $defs = array_filter_import(true,['lang','region'],	//'REGION','LANG',
 			['lang'=>$lang, 'region'=>$region],	// BROWSER config
 			MySession::get_LoginValue(),	// LANG,REGION LOGIN
-			(USE_QUERY_LANG)?App::$Query:[],// ?lang=&region=
-			App::$Post						// lang=&region=
+			(USE_QUERY_LANG)?App::$Query:[]	// ?lang=&region=
+//			App::$Post						// lang=&region=
 		);
 list($lang,$region) = $defs;
 if(empty($lang)) $lang = DEFAULT_LANG;

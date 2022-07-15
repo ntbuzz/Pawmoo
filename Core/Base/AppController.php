@@ -376,6 +376,7 @@ public function MakepdfAction() {
 // Language Switch Action
 public function LanguageAction() {
 	list($lang,$region,$refer) = array_keys_value(App::$Post,['lang','region','referer'],[DEFAULT_LANG,DEFAULT_REGION,App::$Referer]);
+	$lang = implode(';',array_reverse(explode(';',$lang)));
 	$login_data = [
 		'LANG' => $lang,
 //		'REGION' => $region,

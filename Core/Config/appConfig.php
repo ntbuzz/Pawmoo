@@ -3,7 +3,7 @@
  * Object Oriented PHP MVC Framework
  *  appConfig: Framework Configuration
  */
-define('CURRENT_VERSION','2.0.12 2022-06-17');
+define('CURRENT_VERSION','2.1.0 2022-06-24');
 define('COPYTIGHT','Copyright (c) 2017 - 2022 by nTak');
 define('PLATFORM_NAME','pawmoo');
 define('SESSION_PREFIX','_minimvc_pawmoo_maps');
@@ -32,15 +32,7 @@ if(php_sapi_name() === 'cli') {
 } else {
 	define('CLI_DEBUG',FALSE);
 }
-// // argument of MySession
-// define('S_ENV',TRUE);		// App::$EnvData
-// define('S_REQ',FALSE);		// App::$ReqData
-
-// define('SECTION_TOKEN','<@&+*%-${[');
-
-// define('SESSION_PARAMS_CLEAR',	01);
-// define('SESSION_LIFE_LIMIT',	02);
-
+// SESSION ENV CONTROL
 define('SESSION_ENV_NOP',			0b0000);
 define('SESSION_ENV_UNSET_PARAMS',	0b0001);
 define('SESSION_ENV_LIFE_LIMIT',	0b0010);

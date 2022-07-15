@@ -97,7 +97,7 @@ public function is_validLoginUser($values,$pass_check) {
     if($login_data === false) return false;	// not-exist user
 	if($pass_check) {
 		    $this->error_type = $this->__('Login.PassError');
-		if($passwd !== $login_data['password']) return false;
+		if($passwd !== array_keys_value($login_data,'password')) return false;
 			// limitation check
 		if($this->is_passwd_limitation($login_data)) {
 			    $this->error_type = $this->__('Login.PassLimit');
@@ -107,6 +107,7 @@ public function is_validLoginUser($values,$pass_check) {
 	// user-data value override from request value
 	$data = array_override($login_data,$Login);
 	list($lang,$region) = array_keys_value($data,['language','region'],[DEFAULT_LANG,DEFAULT_REGION]);
+	if(!array_key_exists('region',$data)) $region = NULL;	// user-info not have 'region'
 	// RELOAD user-data when user-locale not match current language
 		if($lang !== LangUI::$LocaleName) {
 			// Reload UserDataa when User Locale not match current Locale

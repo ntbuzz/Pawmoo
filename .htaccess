@@ -15,7 +15,7 @@ RewriteRule ^([^/]+).ico$   Core/Template/webroot/images/$1.ico [END]
 # アプリごとに異なるリダイレクト
 # app/css|js|images/
 RewriteRule ^([^/]+)/(.+/)?css/img/(.*)$ app/$1/webroot/cssimg/$3 [END]
-RewriteRule ^([^/]+)/images/(.*)$   app/$1/webroot/images/$2 [END]
+RewriteRule ^([^/]+)/(css|js|images)/(.*)$   app/$1/webroot/$2/$3 [END]
 RewriteRule ^([^/]+)/files/(.*)$  app/$1/upload_files/$2 [END]
 
 # 実体があるかもしれないファイルは条件判定

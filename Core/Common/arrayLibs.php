@@ -142,8 +142,8 @@ function array_to_text($array,$sep = "\n", $in_key = TRUE) {
         $txt = ''; $spc = str_repeat(' ', $indent);
         foreach($items as $key => $val) {
             if(is_array($val)) {
-            	if(!is_numeric($key))  $txt .= "{$spc}===== {$key} =====\n";
-                $txt .= $dump_text($indent+2, $val);
+//            	if(!is_numeric($key))  $txt .= "{$spc}===== {$key} =====\n";
+                $txt .= $dump_text($indent+2, $val) . $sep;
             } else if(is_numeric($key) || $in_key === FALSE) {
                 $txt .= "{$spc}{$val}{$sep}";
             } else {

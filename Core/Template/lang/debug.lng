@@ -67,16 +67,3 @@ Closing => [
 	.ja => クロージング情報
     .en => "AFTER METHOD"
 ]
-// 言語デバッグ
-#BaseID => [
-	.ja => ベース言語
-	.en => "Base Lang"
-	Refer => [
-		.ja => "${BaseID}の参照"
-		.en => "Refer of ${BaseID}"
-	]
-	Nest => [
-		.ja => "${BaseID.Refer}のネスト"
-		.en => "Nesting of ${BaseID.Refer}"
-	]
-]

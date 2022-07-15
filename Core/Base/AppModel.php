@@ -197,6 +197,7 @@ protected function SelectionSetup() {
                 $cond = [];
             } else {
                 list($target,$cond,$sort) = $extract_array($seldef,3);
+				if($cond === NULL) $cond =[];
                 list($model,$ref_list) = array_first_item($target);
                 if($model === 0) {
                     $lnk = $target;
@@ -300,6 +301,7 @@ public function LoadSelection($key_names, $sort_val = false,$opt_cond=[]) {
 		list($model,$ref_list) = array_first_item($target);
 		if(is_int($model)) {        // self list
 			// case b., e.
+			if(is_array($target) && count($target)===2) array_unshift($target,$this->Primary);
 			$this->Select[$key_name] = $this->SelectFinder(is_array($target),$target,$cond,$sort);
 		} else if(is_array($ref_list)) {
 			// case a., f.
@@ -391,10 +393,6 @@ public function SelectFinder($chain, $filter, $cond, $sort=[]) {
     $this->dbDriver->findRecord($cond,$sort);
     while (($fields = $this->dbDriver->fetchDB())) {
 		if($chain) {
-			if(empty($fn)) {
-				$fn = $id;
-				$id = $this->Primary;
-			}
 			$pval = (empty($pid)) ? 0 : $fields[$pid];
 			$data[] = [ $fields[$id], $fields[$fn], $pval];
 		} else {

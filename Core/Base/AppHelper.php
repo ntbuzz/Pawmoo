@@ -83,14 +83,6 @@ public function ViewTemplate($layout,$vars=[]) {
 	$this->AOwner->ViewTemplate($layout,$vars);
 }
 //==============================================================================
-// Resource(.css/.js) Output (Not USE!)
-public function Resource($res) {
-	list($filename,$ext) = extract_base_name($res);
-	$AppStyle = new AppStyle($this->ModuleName, $ext);
-	$AppStyle->ViewStyle($filename);
-	unset($AppStyle);
-}
-//==============================================================================
 // check Request Controller is Me?
 public function IsRequestController($comp) {
 	$hit = (is_scalar($comp)) ? $comp === App::$Controller : in_array(App::$Controller,$comp,true);

@@ -71,7 +71,7 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 	if(!isset(static::$EnvData['Login'])) static::$EnvData['Login'] = [];
 	// POST variables moved App CLASS
 	if($env_unset_param) {
-		unset(static::$EnvData[SYSDATA_NAME]);           	// Delete Style Parameter for AppStyle
+		unset(static::$EnvData[SYSDATA_NAME]);           	// Delete Enviroment
 		unset(static::$SysData[SYSLOG_ID][$controller]);	// delete contoller LOG
 	}
 }
@@ -127,16 +127,6 @@ static function getEnvIDs($id_name,$scalar=TRUE) {
 // ENV変数にドット識別子指定で保存する
 static function setEnvIDs($nameID,$val,$append = FALSE) {
 	self::setIDs(static::$EnvData,$nameID,$val,$append);
-    // $ee = &static::$EnvData;
-    // $mem_arr = explode('.',$nameID);
-    // foreach($mem_arr as $key) {
-    //     if(!isset($ee[$key])) $ee[$key] = [];
-    //     $ee = &$ee[$key];
-    // }
-	// if($append) {
-	// 	$prev = (empty($ee)) ? '':"{$ee}\n";
-	// 	$ee = "{$prev}{$val}";
-	// } else $ee = $val;
 }
 //==============================================================================
 // ドット識別子指定でENV変数を削除
@@ -204,7 +194,7 @@ static function unsetAppData($names='') {
 			$nVal = &$nVal[$nm];
 			if(!is_array($nVal)) return;
 		}
-		unset($nVal[$tag]);           	// Delete Style Parameter for AppStyle
+		unset($nVal[$tag]);           	// DDelete Enviroment
 	}
 }
 //==============================================================================
@@ -245,7 +235,7 @@ static function unsetShmData($names='') {
 			$nVal = &$nVal[$nm];
 			if(!is_array($nVal)) return;
 		}
-		unset($nVal[$tag]);           	// Delete Style Parameter for AppStyle
+		unset($nVal[$tag]);           	// Delete Enviroment
 	}
 }
 //==============================================================================
@@ -257,6 +247,32 @@ static function setSysData($names,$val) {
 // システム保存データ(SysData)から取得
 static function getSysData($names) {
 	$nVal = array_member_value(static::$EnvData, SYSDATA_NAME.".{$names}");
+	return $nVal;
+}
+//==============================================================================
+// PATH　から リソースID を生成
+static private function get_resouceID($path) {
+	$pval = explode('/',$path);
+	if($pval[1]==='res') $pval[2] = 'core';
+	$pval[1] = '^^ResFile';
+	$pval = array_map(function($v) { return str_replace('.','_',$v);},array_slice($pval,1));
+	return implode('.',$pval);
+}
+//==============================================================================
+// リソースを格納
+static function resource_SetData($path,$resource) {
+	$id = self::get_resouceID($path);
+	self::setEnvIDs($id,$resource);
+	$fullpath = "resource_files/{$path}";
+	list($target,$file) = extract_path_filename($fullpath);
+	if(!is_dir($target)) mkdir($target,0777,true);
+	file_put_contents($fullpath,$resource);
+}
+//==============================================================================
+// システムログを取得
+static function resource_GetData($path) {
+	$id = self::get_resouceID($path);
+	$nVal = array_member_value(static::$EnvData, $id);
 	return $nVal;
 }
 //==============================================================================
@@ -333,5 +349,3 @@ static function setup_Login($login=NULL) {
 }
 
 }
-
-

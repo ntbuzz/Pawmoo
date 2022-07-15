@@ -310,7 +310,7 @@ function remove_space_comment_str($content) {
 //==============================================================================
 // remove comment
 function remove_comment_str($content) {
-	$content = preg_replace('/([\r\n])+/s',"\n",                  // remove empty line
+	$content = preg_replace('/\n(?:\s*[\r\n])+/',"\n",                  // remove empty line
 			preg_replace('/\/\*[\s\S]*?\*\/|(^|[\s;]+)\/\/.*/','\1',$content));
 	return trim($content);
 }
@@ -444,12 +444,15 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
             $var = mb_substr($val,1);
             $var = trim($var,'{}');                 // triming of delimitter { }
             switch($var[0]) {
-			// cannot use in RESOURCE (AppStyle)
             case '@':	// @field-name=compare-value!TRUE-VALUE:FALSE-VALUE#limit-len
 				$p = '/(@{1,2})([^=!:#]+)(?:=([^!:#]+))?(?:!([^:#]*))?(?:\:([^#]+))?(?:#(\d+))?/';
                 preg_match($p,$var,$m);
                 $get_field_data = function($nm) use(&$recdata) {
-                    return (mb_substr($nm,0,1)==='@') ? $recdata[mb_substr($nm,1)]:$nm;
+                    if(mb_substr($nm,0,1)==='@') {
+						$fn = mb_substr($nm,1);
+						return (isset($recdata[$fn]))?$recdata[$fn]:'';
+					}
+					return $nm;
                 };
                 list($all,$raw,$fn) = $m;
 				$var = (isset($recdata[$fn])) ? $recdata[$fn] : '';     // get FIELD DATA
@@ -491,7 +494,6 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                 }
 				if(isset($class)) $val = $class->_($var,$allow);       // get Language define
                 break;
-			// cannot use in RESOURCE (AppStyle)
             case '%': if(substr($var,-1) === '%') {     // is parameter number
                     $var = trim($var,'%');
                     if(is_numeric($var)) $val = App::$Params[intval($var)];          // get value from Params[] property
@@ -509,11 +511,9 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
                     $val = $env[$var];          // SysVAR[] property
                 }
                 break;
-			// cannot use in RESOURCE (AppStyle)
             case '?': $var = mb_substr($var,1);     // Query parameter
 				$val = (isset(App::$Query[$var]))?App::$Query[$var]:'';          // Query[] property
                 break;
-			// cannot use in RESOURCE (AppStyle)
             case ':':                                   // Class Property
 				if(isset($class)) {
                    	$p = '/(:{1,2})(\w+)(?:\[([\w\.\'"]+)\])?/';
@@ -545,7 +545,6 @@ function expand_text($class,$str,$recdata,$vars=[],$match_all = false) {
 					}
                 }
                 break;
-			// cannot use in RESOURCE (AppStyle)
             case '&':       // Helper Method CALL
 				if(isset($class)) {
                    	$p = '/&(\w*)(?:\(([^\)]+)\))?/';

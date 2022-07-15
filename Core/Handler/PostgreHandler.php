@@ -7,6 +7,7 @@
 //	PostgreSQL用の抽象メソッドを実装する
 class PostgreHandler extends SQLHandler {
 	protected $LIKE_OPR = ['%'=>['LIKE','%'],'$'=>['ILIKE','%']];
+	private $updatePrimary = NULL;		// 初期設定
 //==============================================================================
 //	コンストラクタ： データベースのテーブルに接続する
 	function __construct($table,$primary,$db=NULL) {

@@ -31,6 +31,7 @@ const EXCLUSION = [
     'password'		=> 1,	// パスワードPOST
     'passwd'		=> 1,	// パスワードPOST
 	're-build-mark'	=> 1,	// リビルド済マーク
+    '^^*'			=> 1,	// 隠しID
 ];
 /*
     アプリケーションデバッグ情報
@@ -210,6 +211,15 @@ function debug_log($lvl,...$items) {
 				foreach($arr as $element) if($element!==NULL && !is_scalar($element)) return FALSE;
 				return TRUE;
 			};
+			$is_hide_key = function($str) {
+				foreach(EXCLUSION as $key => $val) {
+					if(mb_substr($key,-1)==='*') {
+						$k = mb_substr($key, 0, -1);
+						if(mb_substr($str,0,strlen($k))===$k) return $val;
+					} else if($key === $str) return $val;
+				}
+				return false;
+			};
 			if(array_values($obj) === $obj && $is_scalar_array($obj) && $indent>=0) {
 				$vals = implode(", ",array_map(function($v) {
 					if($v === NULL) return 'NULL';
@@ -219,7 +229,7 @@ function debug_log($lvl,...$items) {
 			} else {
 	            $dmp = "";
 				foreach($obj as $key => $val) {
-					if(array_key_exists($key,EXCLUSION) && EXCLUSION[$key]) continue;      // not dump element check
+					if($is_hide_key($key)) continue;
 					$dmp .= str_repeat(' ',$indent*2) . "[{$key}] = ";
 					if(gettype($val)==='object') {
 						$clsnm = get_class($val);
