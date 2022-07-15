@@ -71,7 +71,7 @@ static function InitSession($appname = 'default',$controller='',$flags = 0) {
 	if(!isset(static::$EnvData['Login'])) static::$EnvData['Login'] = [];
 	// POST variables moved App CLASS
 	if($env_unset_param) {
-		unset(static::$EnvData[SYSDATA_NAME]);           	// Delete Style Parameter for AppStyle
+		unset(static::$EnvData[SYSDATA_NAME]);           	// Delete Enviroment
 		unset(static::$SysData[SYSLOG_ID][$controller]);	// delete contoller LOG
 	}
 }
@@ -194,7 +194,7 @@ static function unsetAppData($names='') {
 			$nVal = &$nVal[$nm];
 			if(!is_array($nVal)) return;
 		}
-		unset($nVal[$tag]);           	// Delete Style Parameter for AppStyle
+		unset($nVal[$tag]);           	// DDelete Enviroment
 	}
 }
 //==============================================================================
@@ -235,7 +235,7 @@ static function unsetShmData($names='') {
 			$nVal = &$nVal[$nm];
 			if(!is_array($nVal)) return;
 		}
-		unset($nVal[$tag]);           	// Delete Style Parameter for AppStyle
+		unset($nVal[$tag]);           	// Delete Enviroment
 	}
 }
 //==============================================================================
